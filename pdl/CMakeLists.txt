@@ -34,8 +34,9 @@ set(PDL_SOURCES
 
     # BMC服务（独立封装）
     ${PDL_SRC_DIR}/pdl_bmc/pdl_bmc.c
-    ${PDL_SRC_DIR}/pdl_bmc/pdl_bmc_redfish.c
+    ${PDL_SRC_DIR}/pdl_bmc/pdl_bmc_transport.c
     ${PDL_SRC_DIR}/pdl_bmc/pdl_bmc_ipmi.c
+    ${PDL_SRC_DIR}/pdl_bmc/pdl_bmc_redfish.c
 )
 
 # 创建PDL库（类型由BUILD_SHARED_LIBS控制）
