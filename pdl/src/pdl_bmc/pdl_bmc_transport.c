@@ -1,9 +1,10 @@
 /************************************************************************
- * BMC Redfish通信实现
+ * BMC传输层实现
  *
  * 职责：
- * - 封装以太网和串口通信
- * - 实现IPMI over LAN和IPMI over Serial
+ * - 封装底层网络（TCP Socket）和串口通信
+ * - 提供统一的发送/接收接口供协议层使用
+ * - 不涉及具体协议（IPMI/Redfish）的封装和解析
  ************************************************************************/
 
 #include "pdl_bmc_internal.h"
@@ -11,40 +12,40 @@
 #include "hal_serial.h"
 
 /*
- * 网络通信上下文
+ * 网络传输上下文
  */
 typedef struct
 {
     int32_t sockfd;
     uint32_t timeout_ms;
-} bmc_redfish_context_t;
+} bmc_transport_net_context_t;
 
 /*
- * 串口通信上下文
+ * 串口传输上下文
  */
 typedef struct
 {
     hal_serial_handle_t serial_handle;
     uint32_t timeout_ms;
-} bmc_serial_context_t;
+} bmc_transport_serial_context_t;
 
 /**
- * @brief 初始化网络通信
+ * @brief 初始化网络传输
  */
-int32_t bmc_redfish_init(const char *ip_addr, uint16_t port, uint32_t timeout_ms, void **handle)
+int32_t bmc_transport_net_init(const char *ip_addr, uint16_t port, uint32_t timeout_ms, void **handle)
 {
     if (NULL == ip_addr || NULL == handle)
     {
         return OSAL_ERR_GENERIC;
     }
 
-    bmc_redfish_context_t *ctx = (bmc_redfish_context_t *)OSAL_Malloc(sizeof(bmc_redfish_context_t));
+    bmc_transport_net_context_t *ctx = (bmc_transport_net_context_t *)OSAL_Malloc(sizeof(bmc_transport_net_context_t));
     if (NULL == ctx)
     {
         return OSAL_ERR_GENERIC;
     }
 
-    OSAL_Memset(ctx, 0, sizeof(bmc_redfish_context_t));
+    OSAL_Memset(ctx, 0, sizeof(bmc_transport_net_context_t));
     ctx->timeout_ms = timeout_ms;
 
     /* 创建TCP Socket */
@@ -86,16 +87,16 @@ int32_t bmc_redfish_init(const char *ip_addr, uint16_t port, uint32_t timeout_ms
 }
 
 /**
- * @brief 反初始化网络通信
+ * @brief 反初始化网络传输
  */
-int32_t bmc_redfish_deinit(void *handle)
+int32_t bmc_transport_net_deinit(void *handle)
 {
     if (NULL == handle)
     {
         return OSAL_ERR_GENERIC;
     }
 
-    bmc_redfish_context_t *ctx = (bmc_redfish_context_t *)handle;
+    bmc_transport_net_context_t *ctx = (bmc_transport_net_context_t *)handle;
 
     OSAL_close(ctx->sockfd);
     OSAL_Free(ctx);
@@ -106,19 +107,19 @@ int32_t bmc_redfish_deinit(void *handle)
 /**
  * @brief 网络发送并接收
  */
-int32_t bmc_redfish_send_recv(void *handle,
-                       const uint8_t *request,
-                       uint32_t req_size,
-                       uint8_t *response,
-                       uint32_t resp_size,
-                       uint32_t *actual_size)
+int32_t bmc_transport_net_send_recv(void *handle,
+                                    const uint8_t *request,
+                                    uint32_t req_size,
+                                    uint8_t *response,
+                                    uint32_t resp_size,
+                                    uint32_t *actual_size)
 {
     if (NULL == handle || NULL == request)
     {
         return OSAL_ERR_GENERIC;
     }
 
-    bmc_redfish_context_t *ctx = (bmc_redfish_context_t *)handle;
+    bmc_transport_net_context_t *ctx = (bmc_transport_net_context_t *)handle;
 
     /* 发送请求 */
     osal_ssize_t sent = OSAL_send(ctx->sockfd, request, req_size, 0);
@@ -146,22 +147,22 @@ int32_t bmc_redfish_send_recv(void *handle,
 }
 
 /**
- * @brief 初始化串口通信
+ * @brief 初始化串口传输
  */
-int32_t bmc_serial_init(const char *device, uint32_t baudrate, uint32_t timeout_ms, void **handle)
+int32_t bmc_transport_serial_init(const char *device, uint32_t baudrate, uint32_t timeout_ms, void **handle)
 {
     if (NULL == device || NULL == handle)
     {
         return OSAL_ERR_GENERIC;
     }
 
-    bmc_serial_context_t *ctx = (bmc_serial_context_t *)OSAL_Malloc(sizeof(bmc_serial_context_t));
+    bmc_transport_serial_context_t *ctx = (bmc_transport_serial_context_t *)OSAL_Malloc(sizeof(bmc_transport_serial_context_t));
     if (NULL == ctx)
     {
         return OSAL_ERR_GENERIC;
     }
 
-    OSAL_Memset(ctx, 0, sizeof(bmc_serial_context_t));
+    OSAL_Memset(ctx, 0, sizeof(bmc_transport_serial_context_t));
     ctx->timeout_ms = timeout_ms;
 
     /* 打开串口 */
@@ -183,16 +184,16 @@ int32_t bmc_serial_init(const char *device, uint32_t baudrate, uint32_t timeout_
 }
 
 /**
- * @brief 反初始化串口通信
+ * @brief 反初始化串口传输
  */
-int32_t bmc_serial_deinit(void *handle)
+int32_t bmc_transport_serial_deinit(void *handle)
 {
     if (NULL == handle)
     {
         return OSAL_ERR_GENERIC;
     }
 
-    bmc_serial_context_t *ctx = (bmc_serial_context_t *)handle;
+    bmc_transport_serial_context_t *ctx = (bmc_transport_serial_context_t *)handle;
 
     HAL_Serial_Close(ctx->serial_handle);
     OSAL_Free(ctx);
@@ -203,19 +204,19 @@ int32_t bmc_serial_deinit(void *handle)
 /**
  * @brief 串口发送并接收
  */
-int32_t bmc_serial_send_recv(void *handle,
-                          const uint8_t *request,
-                          uint32_t req_size,
-                          uint8_t *response,
-                          uint32_t resp_size,
-                          uint32_t *actual_size)
+int32_t bmc_transport_serial_send_recv(void *handle,
+                                       const uint8_t *request,
+                                       uint32_t req_size,
+                                       uint8_t *response,
+                                       uint32_t resp_size,
+                                       uint32_t *actual_size)
 {
     if (NULL == handle || NULL == request)
     {
         return OSAL_ERR_GENERIC;
     }
 
-    bmc_serial_context_t *ctx = (bmc_serial_context_t *)handle;
+    bmc_transport_serial_context_t *ctx = (bmc_transport_serial_context_t *)handle;
 
     /* 发送请求 */
     if (HAL_Serial_Write(ctx->serial_handle, request, req_size, ctx->timeout_ms) != (int32_t)req_size)
