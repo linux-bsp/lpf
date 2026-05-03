@@ -61,6 +61,7 @@ target_include_directories(unit-test PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../pcl/include/internal
     ${CMAKE_CURRENT_SOURCE_DIR}/../pcl/include/peripheral
     ${CMAKE_CURRENT_SOURCE_DIR}/../pdl/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../pdl/src/pdl_bmc
 )
 
 target_compile_definitions(unit-test PRIVATE

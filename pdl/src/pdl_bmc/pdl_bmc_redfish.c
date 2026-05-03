@@ -51,8 +51,13 @@ static int32_t json_get_string(const char *json, const char *key, char *value, u
         return OSAL_ERR_GENERIC;
     }
 
-    const char *colon = OSAL_Strchr(key_pos, ':');
-    if (NULL == colon)
+    /* 查找冒号 */
+    const char *colon = key_pos;
+    while (*colon != '\0' && *colon != ':')
+    {
+        colon++;
+    }
+    if (*colon != ':')
     {
         return OSAL_ERR_GENERIC;
     }
@@ -66,8 +71,13 @@ static int32_t json_get_string(const char *json, const char *key, char *value, u
     if (*value_start == '"')
     {
         value_start++;
-        const char *value_end = OSAL_Strchr(value_start, '"');
-        if (NULL == value_end)
+        /* 查找结束引号 */
+        const char *value_end = value_start;
+        while (*value_end != '\0' && *value_end != '"')
+        {
+            value_end++;
+        }
+        if (*value_end != '"')
         {
             return OSAL_ERR_GENERIC;
         }
