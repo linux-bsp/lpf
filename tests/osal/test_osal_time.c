@@ -101,7 +101,7 @@ TEST_CASE(test_osal_nanosleep_success)
     TEST_ASSERT_TRUE(elapsed_us >= 5000 && elapsed_us <= 15000);
 }
 
-/* 测试用例: TaskDelay - OSAL任务延时 */
+/* 测试用例: msleep - OSAL毫秒延时（替代TaskDelay） */
 TEST_CASE(test_osal_task_delay_success)
 {
     uint64_t start_time, end_time, elapsed_ms;
@@ -110,8 +110,8 @@ TEST_CASE(test_osal_task_delay_success)
     start_time = get_time_in_micros();
 
     /* 延时200毫秒 */
-    int32_t ret = OSAL_TaskDelay(200);
-    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+    int32_t ret = OSAL_msleep(200);
+    TEST_ASSERT_EQUAL(0, ret);
 
     /* 获取结束时间 */
     end_time = get_time_in_micros();
@@ -224,11 +224,11 @@ TEST_CASE(test_osal_sleep_zero)
     TEST_ASSERT_EQUAL(0, ret);
 }
 
-/* 测试用例: TaskDelay - 零延时 */
+/* 测试用例: msleep - 零延时（替代TaskDelay） */
 TEST_CASE(test_osal_task_delay_zero)
 {
-    int32_t ret = OSAL_TaskDelay(0);
-    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+    int32_t ret = OSAL_msleep(0);
+    TEST_ASSERT_EQUAL(0, ret);
 }
 
 /* 测试用例: 短延时精度 */

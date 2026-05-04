@@ -20,7 +20,6 @@ add_executable(unit-test
     core/test_menu.c
 
     # OSAL tests
-    osal/test_osal_task.c
     osal/test_osal_queue.c
     osal/test_osal_mutex.c
     osal/test_osal_signal.c

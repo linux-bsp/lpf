@@ -19,10 +19,6 @@
 /* 应用版本 */
 #define APP_VERSION "1.0.0"
 
-/* 任务配置 */
-#define TASK_STACK_SIZE    (16 * 1024)  /* 16KB */
-#define TASK_PRIORITY      100
-
 /* 队列配置 */
 #define QUEUE_DEPTH        10
 #define QUEUE_MSG_SIZE     64
@@ -34,9 +30,9 @@
 /* 全局运行标志 */
 static volatile bool g_running = true;
 
-/* 任务ID */
-static osal_id_t g_worker_task_id = 0;
-static osal_id_t g_stats_task_id = 0;
+/* 线程句柄 */
+static osal_thread_t g_worker_thread = 0;
+static osal_thread_t g_stats_thread = 0;
 
 /* 消息队列ID */
 static osal_id_t g_msg_queue_id = 0;
@@ -66,7 +62,7 @@ static void signal_handler(int32_t sig)
  * - 使用队列发送消息
  * - 使用原子操作更新计数器
  */
-static void worker_task(void *arg)
+static void *worker_task(void *arg)
 {
     (void)arg;  /* 未使用的参数 */
 
@@ -75,7 +71,7 @@ static void worker_task(void *arg)
 
     LOG_INFO("Worker", "工作任务启动");
 
-    while (!OSAL_TaskShouldShutdown())
+    while (g_running)
     {
         /* 构造消息 */
         char msg[QUEUE_MSG_SIZE];
@@ -98,10 +94,11 @@ static void worker_task(void *arg)
         }
 
         /* 延时1秒 */
-        OSAL_TaskDelay(HEARTBEAT_INTERVAL_MS);
+        OSAL_msleep(HEARTBEAT_INTERVAL_MS);
     }
 
     LOG_INFO("Worker", "工作任务退出");
+    return NULL;
 }
 
 /**
@@ -111,7 +108,7 @@ static void worker_task(void *arg)
  * - 定期打印统计信息
  * - 从队列接收消息
  */
-static void stats_task(void *arg)
+static void *stats_task(void *arg)
 {
     (void)arg;  /* 未使用的参数 */
 
@@ -121,7 +118,7 @@ static void stats_task(void *arg)
 
     LOG_INFO("Stats", "统计任务启动");
 
-    while (!OSAL_TaskShouldShutdown())
+    while (g_running)
     {
         /* 从队列接收消息（超时5秒） */
         ret = OSAL_QueueGet(g_msg_queue_id, msg, sizeof(msg), &msg_size, 5000);
@@ -145,6 +142,7 @@ static void stats_task(void *arg)
     }
 
     LOG_INFO("Stats", "统计任务退出");
+    return NULL;
 }
 
 /**
@@ -191,64 +189,46 @@ int main(int32_t argc, char *argv[])
     LOG_INFO("Main", "消息队列创建成功 (深度: %d, 消息大小: %d字节)",
               QUEUE_DEPTH, QUEUE_MSG_SIZE);
 
-    /* 3. 创建工作任务 */
-    ret = OSAL_TaskCreate(&g_worker_task_id, "WorkerTask",
-                          worker_task, NULL,
-                          TASK_STACK_SIZE, TASK_PRIORITY, 0);
+    /* 3. 创建工作线程 */
+    ret = OSAL_ThreadCreate(&g_worker_thread, worker_task, NULL);
     if (OSAL_SUCCESS != ret)
     {
-        LOG_ERROR("Main", "创建工作任务失败: %d", ret);
+        LOG_ERROR("Main", "创建工作线程失败: %d", ret);
         goto cleanup;
     }
-    LOG_INFO("Main", "工作任务创建成功");
+    LOG_INFO("Main", "工作线程创建成功");
 
-    /* 4. 创建统计任务 */
-    ret = OSAL_TaskCreate(&g_stats_task_id, "StatsTask",
-                          stats_task, NULL,
-                          TASK_STACK_SIZE, TASK_PRIORITY, 0);
+    /* 4. 创建统计线程 */
+    ret = OSAL_ThreadCreate(&g_stats_thread, stats_task, NULL);
     if (OSAL_SUCCESS != ret)
     {
-        LOG_ERROR("Main", "创建统计任务失败: %d", ret);
+        LOG_ERROR("Main", "创建统计线程失败: %d", ret);
         goto cleanup;
     }
-    LOG_INFO("Main", "统计任务创建成功");
+    LOG_INFO("Main", "统计线程创建成功");
 
     OSAL_Printf("\n应用启动成功！按Ctrl+C退出。\n\n");
 
     /* 5. 主循环 - 等待退出信号 */
     while (g_running)
     {
-        OSAL_TaskDelay(1000);  /* 1秒检查一次 */
+        OSAL_msleep(1000);  /* 1秒检查一次 */
     }
 
     OSAL_Printf("\n[Main] 开始清理资源...\n");
 
 cleanup:
-    /* 6. 删除任务 */
-    if (0 != g_worker_task_id)
+    /* 6. 等待线程退出 */
+    if (0 != g_worker_thread)
     {
-        ret = OSAL_TaskDelete(g_worker_task_id);
-        if (OSAL_SUCCESS == ret)
-        {
-            LOG_INFO("Main", "工作任务已删除");
-        }
-        else
-        {
-            LOG_ERROR("Main", "删除工作任务失败: %d", ret);
-        }
+        OSAL_ThreadJoin(g_worker_thread);
+        LOG_INFO("Main", "工作线程已退出");
     }
 
-    if (0 != g_stats_task_id)
+    if (0 != g_stats_thread)
     {
-        ret = OSAL_TaskDelete(g_stats_task_id);
-        if (OSAL_SUCCESS == ret)
-        {
-            LOG_INFO("Main", "统计任务已删除");
-        }
-        else
-        {
-            LOG_ERROR("Main", "删除统计任务失败: %d", ret);
-        }
+        OSAL_ThreadJoin(g_stats_thread);
+        LOG_INFO("Main", "统计线程已退出");
     }
 
     /* 7. 删除队列 */

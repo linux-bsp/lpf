@@ -6,6 +6,7 @@
 #include "test_assert.h"
 #include "test_registry.h"
 #include "osal.h"
+#include <pthread.h>
 
 /*===========================================================================
  * 基础功能测试
@@ -165,21 +166,22 @@ typedef struct {
     uint32_t iterations;
 } atomic_thread_data_t;
 
-static void atomic_increment_thread(void *arg)
+static void* atomic_increment_thread(void *arg)
 {
     atomic_thread_data_t *data = (atomic_thread_data_t *)arg;
 
     for (uint32_t i = 0; i < data->iterations; i++) {
         OSAL_AtomicIncrement(data->counter);
     }
+
+    return NULL;
 }
 
 TEST_CASE(test_atomic_multithread_increment)
 {
     osal_atomic_uint32_t counter;
-    osal_id_t threads[THREAD_COUNT];
+    osal_thread_t threads[THREAD_COUNT];
     atomic_thread_data_t thread_data[THREAD_COUNT];
-    char task_name[32];
 
     OSAL_AtomicInit(&counter, 0);
 
@@ -188,15 +190,13 @@ TEST_CASE(test_atomic_multithread_increment)
         thread_data[i].counter = &counter;
         thread_data[i].iterations = ITERATIONS_PER_THREAD;
 
-        OSAL_Snprintf(task_name, sizeof(task_name), "atomic_test_%d", i);
-        int32_t ret = OSAL_TaskCreate(&threads[i], task_name,
-                                     atomic_increment_thread, &thread_data[i],
-                                     32 * 1024, 100, 0);
+        int32_t ret = OSAL_ThreadCreate(&threads[i],
+                                       atomic_increment_thread, &thread_data[i]);
         TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     }
 
     /* 等待所有线程完成 */
-    OSAL_TaskDelay(1000);  /* 确保所有线程完成 */
+    OSAL_msleep(1000);  /* 确保所有线程完成 */
 
     /* 验证计数器值 */
     uint32_t expected = THREAD_COUNT * ITERATIONS_PER_THREAD;
@@ -205,13 +205,13 @@ TEST_CASE(test_atomic_multithread_increment)
 
     /* 清理线程 */
     for (int i = 0; i < THREAD_COUNT; i++) {
-        OSAL_TaskDelete(threads[i]);
+        OSAL_ThreadJoin(threads[i]);
     }
 
     return;
 }
 
-static void atomic_cas_thread(void *arg)
+static void* atomic_cas_thread(void *arg)
 {
     atomic_thread_data_t *data = (atomic_thread_data_t *)arg;
 
@@ -225,14 +225,15 @@ static void atomic_cas_thread(void *arg)
             success = OSAL_AtomicCompareExchange(data->counter, old_value, new_value);
         } while (!success);
     }
+
+    return NULL;
 }
 
 TEST_CASE(test_atomic_multithread_cas)
 {
     osal_atomic_uint32_t counter;
-    osal_id_t threads[THREAD_COUNT];
+    osal_thread_t threads[THREAD_COUNT];
     atomic_thread_data_t thread_data[THREAD_COUNT];
-    char task_name[32];
 
     OSAL_AtomicInit(&counter, 0);
 
@@ -241,15 +242,13 @@ TEST_CASE(test_atomic_multithread_cas)
         thread_data[i].counter = &counter;
         thread_data[i].iterations = ITERATIONS_PER_THREAD;
 
-        OSAL_Snprintf(task_name, sizeof(task_name), "cas_test_%d", i);
-        int32_t ret = OSAL_TaskCreate(&threads[i], task_name,
-                                     atomic_cas_thread, &thread_data[i],
-                                     32 * 1024, 100, 0);
+        int32_t ret = OSAL_ThreadCreate(&threads[i],
+                                       atomic_cas_thread, &thread_data[i]);
         TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     }
 
     /* 等待所有线程完成 */
-    OSAL_TaskDelay(1000);
+    OSAL_msleep(1000);
 
     /* 验证计数器值 */
     uint32_t expected = THREAD_COUNT * ITERATIONS_PER_THREAD;
@@ -258,7 +257,7 @@ TEST_CASE(test_atomic_multithread_cas)
 
     /* 清理线程 */
     for (int i = 0; i < THREAD_COUNT; i++) {
-        OSAL_TaskDelete(threads[i]);
+        OSAL_ThreadJoin(threads[i]);
     }
 
     return;

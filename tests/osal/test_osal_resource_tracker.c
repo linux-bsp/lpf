@@ -7,45 +7,10 @@
 #include "test_registry.h"
 #include "osal.h"
 
-/* 测试用的空任务函数 */
-static void dummy_task_func(void *arg)
-{
-    (void)arg;
-    /* 空任务，立即退出 */
-}
-
-/* 测试用例1: 任务资源跟踪 */
+/* 测试用例1: 任务资源跟踪 - 已移除 osal_task 模块 */
 TEST_CASE(test_resource_task_tracking)
 {
-    osal_id_t task_id = 0;
-    osal_resource_stats_t stats_before = {0};
-    osal_resource_stats_t stats_after = {0};
-
-    /* 获取初始统计 */
-    int32_t ret = OSAL_ResourceGetStats(OSAL_RESOURCE_TYPE_TASK, &stats_before);
-    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
-
-    /* 创建任务 */
-    ret = OSAL_TaskCreate(&task_id, "TrackTask", dummy_task_func, NULL, 4096, 100, 0);
-    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
-
-    /* 获取创建后统计 */
-    ret = OSAL_ResourceGetStats(OSAL_RESOURCE_TYPE_TASK, &stats_after);
-    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
-
-    /* 验证统计增量 */
-    TEST_ASSERT_EQUAL(stats_before.total_created + 1, stats_after.total_created);
-    TEST_ASSERT_EQUAL(stats_before.current_count + 1, stats_after.current_count);
-
-    /* 删除任务 */
-    ret = OSAL_TaskDelete(task_id);
-    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
-
-    /* 获取删除后统计 */
-    osal_resource_stats_t stats_final = {0};
-    ret = OSAL_ResourceGetStats(OSAL_RESOURCE_TYPE_TASK, &stats_final);
-    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
-    TEST_ASSERT_EQUAL(stats_before.total_deleted + 1, stats_final.total_deleted);
+    TEST_SKIP_IF(true, "osal_task module has been removed");
 }
 
 /* 测试用例2: 队列资源跟踪 */
@@ -146,11 +111,9 @@ TEST_CASE(test_resource_print_report)
     OSAL_ResourceResetStats();
 
     /* 创建一些资源 */
-    osal_id_t task_id = 0;
     osal_id_t queue_id = 0;
     osal_id_t mutex_id = 0;
 
-    OSAL_TaskCreate(&task_id, "ReportTask", NULL, NULL, 4096, 100, 0);
     OSAL_QueueCreate(&queue_id, "ReportQueue", 10, sizeof(uint32_t), 0);
     OSAL_MutexCreate(&mutex_id, "ReportMutex", 0);
 
@@ -158,7 +121,6 @@ TEST_CASE(test_resource_print_report)
     OSAL_ResourcePrintReport();
 
     /* 清理 */
-    OSAL_TaskDelete(task_id);
     OSAL_QueueDelete(queue_id);
     OSAL_MutexDelete(mutex_id);
 }

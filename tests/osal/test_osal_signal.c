@@ -36,7 +36,7 @@ TEST_CASE(test_signal_register_success)
     OSAL_Kill(OSAL_Getpid(), SIGUSR1);
 
     /* 等待信号处理 */
-    OSAL_TaskDelay(100);
+    OSAL_msleep(100);
 
     TEST_ASSERT_EQUAL(1, g_signal_received);
     TEST_ASSERT_EQUAL(SIGUSR1, g_signal_number);

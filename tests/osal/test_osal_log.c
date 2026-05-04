@@ -8,6 +8,8 @@
 #include "test_registry.h"
 #include "osal.h"
 #include <unistd.h>  /* for unlink */
+#include <stdbool.h>
+#include <pthread.h>
 
 /* 测试日志文件路径 */
 #define TEST_LOG_FILE "/tmp/osal_test.log"
@@ -227,43 +229,45 @@ TEST_CASE(test_osal_printf)
  *===========================================================================*/
 
 /* 测试任务函数 */
-static void log_test_task(void *arg)
+static volatile bool g_log_test_running = true;
+
+static void* log_test_task(void *arg)
 {
     int32_t task_id = *(int32_t *)arg;
 
-    for (int32_t i = 0; i < 10 && !OSAL_TaskShouldShutdown(); i++) {
+    for (int32_t i = 0; i < 10 && g_log_test_running; i++) {
         LOG_INFO("TEST", "Task %d: Message %d", task_id, i);
-        OSAL_TaskDelay(10);
+        OSAL_msleep(10);
     }
+    return NULL;
 }
 
 /* 测试用例: 多线程日志写入 */
 TEST_CASE(test_osal_log_multithread)
 {
     int32_t ret;
-    osal_id_t task_ids[3];
+    osal_thread_t task_ids[3];
     int32_t task_args[3] = {1, 2, 3};
 
     /* 初始化日志 */
     ret = OSAL_LogInit(TEST_LOG_FILE, OS_LOG_LEVEL_INFO);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
+    g_log_test_running = true;
+
     /* 创建多个任务 */
     for (int32_t i = 0; i < 3; i++) {
-        char task_name[32];
-        OSAL_Snprintf(task_name, sizeof(task_name), "LOG_TEST_%d", i);
-        ret = OSAL_TaskCreate(&task_ids[i], task_name,
-                             log_test_task, &task_args[i],
-                             32 * 1024, 100, 0);
+        ret = OSAL_ThreadCreate(&task_ids[i],
+                               log_test_task, &task_args[i]);
         TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     }
 
     /* 等待任务完成 */
-    OSAL_TaskDelay(500);
+    OSAL_msleep(500);
 
-    /* 删除任务 */
+    /* 等待线程退出 */
     for (int32_t i = 0; i < 3; i++) {
-        OSAL_TaskDelete(task_ids[i]);
+        OSAL_ThreadJoin(task_ids[i]);
     }
 
     /* 清理 */

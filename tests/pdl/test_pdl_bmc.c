@@ -228,7 +228,7 @@ TEST_CASE(test_pdl_bmc_power_reset_success)
     ret = PDL_BMC_PowerReset(handle);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-    OSAL_TaskDelay(100);
+    OSAL_msleep(100);
 
     PDL_BMC_Deinit(handle);
 }

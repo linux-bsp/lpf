@@ -26,10 +26,10 @@ typedef struct
     uint32_t tx_count;
     uint32_t error_count;
 
-    /* 任务控制 */
-    osal_id_t rx_task_id;
-    osal_id_t heartbeat_task_id;
-    bool running;
+    /* 线程控制 */
+    osal_thread_t rx_thread;
+    osal_thread_t heartbeat_thread;
+    volatile bool running;
 
     /* 互斥锁保护 */
     osal_id_t mutex;
@@ -38,13 +38,13 @@ typedef struct
 /*
  * 心跳任务
  */
-static void heartbeat_task(void *arg)
+static void *heartbeat_task(void *arg)
 {
     satellite_service_context_t *ctx = (satellite_service_context_t *)arg;
 
     LOG_INFO("SAT", "Heartbeat task started");
 
-    while (!OSAL_TaskShouldShutdown())
+    while (ctx->running)
     {
         /* 发送心跳 */
         if (OSAL_SUCCESS == satellite_can_send_heartbeat(ctx->can_handle, STATUS_OK))
@@ -61,16 +61,17 @@ static void heartbeat_task(void *arg)
         }
 
         /* 延迟 */
-        OSAL_TaskDelay(ctx->config.heartbeat_interval_ms);
+        OSAL_msleep(ctx->config.heartbeat_interval_ms);
     }
 
     LOG_INFO("SAT", "Heartbeat task stopped");
+    return NULL;
 }
 
 /*
  * CAN接收任务
  */
-static void can_rx_task(void *arg)
+static void *can_rx_task(void *arg)
 {
     satellite_service_context_t *ctx = (satellite_service_context_t *)arg;
     satellite_can_msg_t msg;
@@ -78,7 +79,7 @@ static void can_rx_task(void *arg)
 
     LOG_INFO("SAT", "CAN RX task started");
 
-    while (!OSAL_TaskShouldShutdown())
+    while (ctx->running)
     {
         /* 接收CAN消息 */
         ret = satellite_can_recv(ctx->can_handle, &msg, ctx->config.cmd_timeout_ms);
@@ -113,6 +114,7 @@ static void can_rx_task(void *arg)
     }
 
     LOG_INFO("SAT", "CAN RX task stopped");
+    return NULL;
 }
 
 /**
@@ -156,29 +158,27 @@ int32_t PDL_Satellite_Init(const satellite_service_config_t *config,
         return ret;
     }
 
-    /* 创建CAN接收任务 */
-    ret = OSAL_TaskCreate(&ctx->rx_task_id, "SAT_RX",
-                        can_rx_task, ctx,
-                        OSAL_TASK_STACK_SIZE_MEDIUM,
-                        OSAL_TASK_PRIORITY_HIGH, 0);
+    /* 启动运行标志 */
+    ctx->running = true;
+
+    /* 创建CAN接收线程 */
+    ret = OSAL_ThreadCreate(&ctx->rx_thread, can_rx_task, ctx);
     if (OSAL_SUCCESS != ret)
     {
-        LOG_ERROR("SAT", "Failed to create RX task");
+        LOG_ERROR("SAT", "Failed to create RX thread");
         satellite_can_deinit(ctx->can_handle);
         OSAL_MutexDelete(ctx->mutex);
         OSAL_Free(ctx);
         return ret;
     }
 
-    /* 创建心跳任务 */
-    ret = OSAL_TaskCreate(&ctx->heartbeat_task_id, "SAT_HB",
-                        heartbeat_task, ctx,
-                        OSAL_TASK_STACK_SIZE_SMALL,
-                        OSAL_TASK_PRIORITY_LOW, 0);
+    /* 创建心跳线程 */
+    ret = OSAL_ThreadCreate(&ctx->heartbeat_thread, heartbeat_task, ctx);
     if (OSAL_SUCCESS != ret)
     {
-        LOG_ERROR("SAT", "Failed to create heartbeat task");
-        OSAL_TaskDelete(ctx->rx_task_id);
+        LOG_ERROR("SAT", "Failed to create heartbeat thread");
+        ctx->running = false;
+        OSAL_ThreadJoin(ctx->rx_thread);
         satellite_can_deinit(ctx->can_handle);
         OSAL_MutexDelete(ctx->mutex);
         OSAL_Free(ctx);
@@ -203,10 +203,10 @@ int32_t PDL_Satellite_Deinit(satellite_service_handle_t handle)
 
     satellite_service_context_t *ctx = (satellite_service_context_t *)handle;
 
-    /* 停止任务 */
+    /* 停止线程 */
     ctx->running = false;
-    OSAL_TaskDelete(ctx->rx_task_id);
-    OSAL_TaskDelete(ctx->heartbeat_task_id);
+    OSAL_ThreadJoin(ctx->rx_thread);
+    OSAL_ThreadJoin(ctx->heartbeat_thread);
 
     /* 关闭CAN */
     satellite_can_deinit(ctx->can_handle);

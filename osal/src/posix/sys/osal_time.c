@@ -42,19 +42,3 @@ int32_t OSAL_nanosleep(uint64_t nsec)
         return OSAL_SUCCESS;
     return OSAL_ERR_GENERIC;
 }
-
-int32_t OSAL_TaskDelay(uint32_t millisecond)
-{
-    struct timespec ts;
-    ts.tv_sec = millisecond / OSAL_MSEC_PER_SEC;
-    ts.tv_nsec = (millisecond % OSAL_MSEC_PER_SEC) * OSAL_NSEC_PER_MSEC;
-
-    /* 使用nanosleep并处理中断 */
-    while (nanosleep(&ts, &ts) == -1)
-    {
-        if (errno != EINTR)
-            return OSAL_ERR_GENERIC;
-    }
-
-    return OSAL_SUCCESS;
-}

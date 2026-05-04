@@ -23,7 +23,6 @@ target_include_directories(osal_public_api INTERFACE
 # OSAL源文件
 set(OSAL_SOURCES
     # IPC - 进程间通信
-    ${OSAL_SRC_DIR}/ipc/osal_task.c
     ${OSAL_SRC_DIR}/ipc/osal_queue.c
     ${OSAL_SRC_DIR}/ipc/osal_mutex.c
     ${OSAL_SRC_DIR}/ipc/osal_atomic.c
