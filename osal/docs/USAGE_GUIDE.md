@@ -8,6 +8,8 @@
 - [任务管理](#任务管理)
 - [消息队列](#消息队列)
 - [互斥锁](#互斥锁)
+- [信号量](#信号量)
+- [条件变量](#条件变量)
 - [信号处理](#信号处理)
 - [日志系统](#日志系统)
 - [错误处理](#错误处理)
@@ -326,6 +328,497 @@ void good_example(void)
     OSAL_MutexUnlock(mutex2);
     OSAL_MutexUnlock(mutex1);
 }
+```
+
+---
+
+## 信号量
+
+信号量用于资源计数和线程同步，适合生产者-消费者模式和资源池管理。
+
+### 生产者-消费者模式
+
+```c
+#include "osal.h"
+#include <pthread.h>
+
+#define BUFFER_SIZE 10
+
+static osal_semaphore_t *empty_sem = NULL;  /* 空槽位计数 */
+static osal_semaphore_t *full_sem = NULL;   /* 数据计数 */
+static osal_mutex_t *buffer_mutex = NULL;   /* 缓冲区保护 */
+
+static int32_t buffer[BUFFER_SIZE];
+static uint32_t in_idx = 0;
+static uint32_t out_idx = 0;
+static volatile bool running = true;
+
+/* 生产者线程 */
+static void *producer_thread(void *arg)
+{
+    uint32_t data = 0;
+    
+    while (running) {
+        /* 等待空槽位 */
+        if (OSAL_SemaphoreWait(empty_sem) != OSAL_SUCCESS) {
+            break;
+        }
+        
+        /* 获取缓冲区锁 */
+        OSAL_MutexLock(buffer_mutex);
+        
+        /* 生产数据 */
+        buffer[in_idx] = data;
+        LOG_INFO("Producer", "生产数据: %u (位置: %u)", data, in_idx);
+        in_idx = (in_idx + 1) % BUFFER_SIZE;
+        data++;
+        
+        /* 释放缓冲区锁 */
+        OSAL_MutexUnlock(buffer_mutex);
+        
+        /* 增加数据计数 */
+        OSAL_SemaphorePost(full_sem);
+        
+        OSAL_Sleep(100);  /* 模拟生产延时 */
+    }
+    
+    return NULL;
+}
+
+/* 消费者线程 */
+static void *consumer_thread(void *arg)
+{
+    while (running) {
+        /* 等待数据 */
+        if (OSAL_SemaphoreTimedWait(full_sem, 1000) != OSAL_SUCCESS) {
+            continue;  /* 超时，继续等待 */
+        }
+        
+        /* 获取缓冲区锁 */
+        OSAL_MutexLock(buffer_mutex);
+        
+        /* 消费数据 */
+        int32_t data = buffer[out_idx];
+        LOG_INFO("Consumer", "消费数据: %d (位置: %u)", data, out_idx);
+        out_idx = (out_idx + 1) % BUFFER_SIZE;
+        
+        /* 释放缓冲区锁 */
+        OSAL_MutexUnlock(buffer_mutex);
+        
+        /* 增加空槽位计数 */
+        OSAL_SemaphorePost(empty_sem);
+        
+        OSAL_Sleep(150);  /* 模拟消费延时 */
+    }
+    
+    return NULL;
+}
+
+int main(void)
+{
+    pthread_t producer, consumer;
+    
+    /* 创建信号量 */
+    OSAL_SemaphoreCreate(&empty_sem, BUFFER_SIZE);  /* 初始有 BUFFER_SIZE 个空槽位 */
+    OSAL_SemaphoreCreate(&full_sem, 0);             /* 初始无数据 */
+    OSAL_MutexCreate(&buffer_mutex);
+    
+    /* 创建线程 */
+    pthread_create(&producer, NULL, producer_thread, NULL);
+    pthread_create(&consumer, NULL, consumer_thread, NULL);
+    
+    LOG_INFO("Main", "生产者-消费者启动，按 Ctrl+C 退出");
+    
+    /* 运行 10 秒 */
+    OSAL_Sleep(10000);
+    
+    /* 停止线程 */
+    running = false;
+    pthread_join(producer, NULL);
+    pthread_join(consumer, NULL);
+    
+    /* 清理资源 */
+    OSAL_SemaphoreDelete(empty_sem);
+    OSAL_SemaphoreDelete(full_sem);
+    OSAL_MutexDelete(buffer_mutex);
+    
+    LOG_INFO("Main", "程序退出");
+    return 0;
+}
+```
+
+### 资源池管理
+
+```c
+#include "osal.h"
+
+#define MAX_CONNECTIONS 5
+
+static osal_semaphore_t *conn_sem = NULL;
+
+/* 获取连接 */
+static int32_t acquire_connection(void)
+{
+    LOG_INFO("Worker", "等待连接...");
+    
+    /* 尝试获取连接（超时 3 秒） */
+    int32_t ret = OSAL_SemaphoreTimedWait(conn_sem, 3000);
+    if (ret == OSAL_SUCCESS) {
+        LOG_INFO("Worker", "获取连接成功");
+        return 0;
+    } else if (ret == OSAL_ERR_TIMEOUT) {
+        LOG_WARN("Worker", "连接池已满，获取超时");
+        return -1;
+    } else {
+        LOG_ERROR("Worker", "获取连接失败: %d", ret);
+        return -1;
+    }
+}
+
+/* 释放连接 */
+static void release_connection(void)
+{
+    OSAL_SemaphorePost(conn_sem);
+    LOG_INFO("Worker", "释放连接");
+}
+
+/* 工作线程 */
+static void *worker_thread(void *arg)
+{
+    int32_t worker_id = *(int32_t *)arg;
+    
+    for (int i = 0; i < 3; i++) {
+        /* 获取连接 */
+        if (acquire_connection() == 0) {
+            /* 使用连接执行任务 */
+            LOG_INFO("Worker%d", "执行任务 %d", worker_id, i + 1);
+            OSAL_Sleep(1000);  /* 模拟任务执行 */
+            
+            /* 释放连接 */
+            release_connection();
+        }
+        
+        OSAL_Sleep(500);
+    }
+    
+    return NULL;
+}
+
+int main(void)
+{
+    pthread_t workers[10];
+    int32_t worker_ids[10];
+    
+    /* 创建信号量（最多 5 个并发连接） */
+    OSAL_SemaphoreCreate(&conn_sem, MAX_CONNECTIONS);
+    
+    LOG_INFO("Main", "连接池大小: %d", MAX_CONNECTIONS);
+    
+    /* 创建 10 个工作线程竞争 5 个连接 */
+    for (int i = 0; i < 10; i++) {
+        worker_ids[i] = i + 1;
+        pthread_create(&workers[i], NULL, worker_thread, &worker_ids[i]);
+    }
+    
+    /* 等待所有线程完成 */
+    for (int i = 0; i < 10; i++) {
+        pthread_join(workers[i], NULL);
+    }
+    
+    /* 清理 */
+    OSAL_SemaphoreDelete(conn_sem);
+    
+    LOG_INFO("Main", "所有任务完成");
+    return 0;
+}
+```
+
+### 非阻塞尝试
+
+```c
+/* 非阻塞尝试获取信号量 */
+int32_t ret = OSAL_SemaphoreTimedWait(sem, 0);
+if (ret == OSAL_SUCCESS) {
+    /* 获取成功，执行任务 */
+    do_work();
+    OSAL_SemaphorePost(sem);
+} else {
+    /* 资源不可用，跳过或稍后重试 */
+    LOG_DEBUG("Worker", "资源忙，跳过");
+}
+```
+
+---
+
+## 条件变量
+
+条件变量用于线程间的等待/通知机制，适合事件驱动和状态同步场景。
+
+### 任务队列
+
+```c
+#include "osal.h"
+#include <pthread.h>
+
+#define MAX_TASKS 100
+
+typedef struct {
+    void (*func)(void *);
+    void *arg;
+} task_t;
+
+static task_t task_queue[MAX_TASKS];
+static uint32_t task_count = 0;
+static osal_mutex_t *queue_mutex = NULL;
+static osal_cond_t *queue_cond = NULL;
+static volatile bool shutdown = false;
+
+/* 添加任务 */
+static void add_task(void (*func)(void *), void *arg)
+{
+    OSAL_MutexLock(queue_mutex);
+    
+    if (task_count < MAX_TASKS) {
+        task_queue[task_count].func = func;
+        task_queue[task_count].arg = arg;
+        task_count++;
+        
+        LOG_INFO("Main", "添加任务，队列长度: %u", task_count);
+        
+        /* 通知工作线程 */
+        OSAL_CondSignal(queue_cond);
+    } else {
+        LOG_WARN("Main", "任务队列已满");
+    }
+    
+    OSAL_MutexUnlock(queue_mutex);
+}
+
+/* 工作线程 */
+static void *worker_thread(void *arg)
+{
+    int32_t worker_id = *(int32_t *)arg;
+    
+    while (1) {
+        OSAL_MutexLock(queue_mutex);
+        
+        /* 等待任务（使用循环防止虚假唤醒） */
+        while (task_count == 0 && !shutdown) {
+            LOG_DEBUG("Worker%d", "等待任务...", worker_id);
+            OSAL_CondWait(queue_cond, queue_mutex);
+        }
+        
+        /* 检查是否需要退出 */
+        if (shutdown && task_count == 0) {
+            OSAL_MutexUnlock(queue_mutex);
+            break;
+        }
+        
+        /* 取出任务 */
+        task_t task = task_queue[0];
+        for (uint32_t i = 0; i < task_count - 1; i++) {
+            task_queue[i] = task_queue[i + 1];
+        }
+        task_count--;
+        
+        LOG_INFO("Worker%d", "执行任务，剩余: %u", worker_id, task_count);
+        
+        OSAL_MutexUnlock(queue_mutex);
+        
+        /* 执行任务（在锁外执行） */
+        task.func(task.arg);
+    }
+    
+    LOG_INFO("Worker%d", "线程退出", worker_id);
+    return NULL;
+}
+
+/* 示例任务函数 */
+static void example_task(void *arg)
+{
+    int32_t task_id = *(int32_t *)arg;
+    LOG_INFO("Task", "执行任务 %d", task_id);
+    OSAL_Sleep(500);  /* 模拟任务执行 */
+}
+
+int main(void)
+{
+    pthread_t workers[3];
+    int32_t worker_ids[3];
+    int32_t task_ids[10];
+    
+    /* 创建同步原语 */
+    OSAL_MutexCreate(&queue_mutex);
+    OSAL_CondCreate(&queue_cond);
+    
+    /* 创建工作线程 */
+    for (int i = 0; i < 3; i++) {
+        worker_ids[i] = i + 1;
+        pthread_create(&workers[i], NULL, worker_thread, &worker_ids[i]);
+    }
+    
+    LOG_INFO("Main", "任务队列启动，3 个工作线程");
+    
+    /* 添加任务 */
+    for (int i = 0; i < 10; i++) {
+        task_ids[i] = i + 1;
+        add_task(example_task, &task_ids[i]);
+        OSAL_Sleep(200);
+    }
+    
+    /* 等待所有任务完成 */
+    OSAL_Sleep(2000);
+    
+    /* 通知线程退出 */
+    OSAL_MutexLock(queue_mutex);
+    shutdown = true;
+    OSAL_CondBroadcast(queue_cond);  /* 唤醒所有工作线程 */
+    OSAL_MutexUnlock(queue_mutex);
+    
+    /* 等待线程退出 */
+    for (int i = 0; i < 3; i++) {
+        pthread_join(workers[i], NULL);
+    }
+    
+    /* 清理 */
+    OSAL_CondDelete(queue_cond);
+    OSAL_MutexDelete(queue_mutex);
+    
+    LOG_INFO("Main", "程序退出");
+    return 0;
+}
+```
+
+### 事件通知
+
+```c
+#include "osal.h"
+
+static osal_mutex_t *event_mutex = NULL;
+static osal_cond_t *event_cond = NULL;
+static volatile bool event_ready = false;
+static int32_t event_data = 0;
+
+/* 等待事件 */
+static void *waiter_thread(void *arg)
+{
+    int32_t thread_id = *(int32_t *)arg;
+    
+    OSAL_MutexLock(event_mutex);
+    
+    LOG_INFO("Waiter%d", "等待事件...", thread_id);
+    
+    /* 等待事件（循环检查条件） */
+    while (!event_ready) {
+        OSAL_CondWait(event_cond, event_mutex);
+    }
+    
+    LOG_INFO("Waiter%d", "收到事件，数据: %d", thread_id, event_data);
+    
+    OSAL_MutexUnlock(event_mutex);
+    
+    return NULL;
+}
+
+/* 触发事件 */
+static void trigger_event(int32_t data)
+{
+    OSAL_MutexLock(event_mutex);
+    
+    /* 设置事件数据 */
+    event_data = data;
+    event_ready = true;
+    
+    LOG_INFO("Main", "触发事件，数据: %d", data);
+    
+    /* 唤醒所有等待线程 */
+    OSAL_CondBroadcast(event_cond);
+    
+    OSAL_MutexUnlock(event_mutex);
+}
+
+int main(void)
+{
+    pthread_t waiters[5];
+    int32_t thread_ids[5];
+    
+    /* 创建同步原语 */
+    OSAL_MutexCreate(&event_mutex);
+    OSAL_CondCreate(&event_cond);
+    
+    /* 创建等待线程 */
+    for (int i = 0; i < 5; i++) {
+        thread_ids[i] = i + 1;
+        pthread_create(&waiters[i], NULL, waiter_thread, &thread_ids[i]);
+    }
+    
+    LOG_INFO("Main", "5 个线程等待事件");
+    
+    /* 等待 2 秒后触发事件 */
+    OSAL_Sleep(2000);
+    trigger_event(42);
+    
+    /* 等待所有线程完成 */
+    for (int i = 0; i < 5; i++) {
+        pthread_join(waiters[i], NULL);
+    }
+    
+    /* 清理 */
+    OSAL_CondDelete(event_cond);
+    OSAL_MutexDelete(event_mutex);
+    
+    LOG_INFO("Main", "程序退出");
+    return 0;
+}
+```
+
+### 超时等待
+
+```c
+/* 等待事件（超时 5 秒） */
+OSAL_MutexLock(mutex);
+
+while (!condition_met) {
+    int32_t ret = OSAL_CondTimedWait(cond, mutex, 5000);
+    if (ret == OSAL_ERR_TIMEOUT) {
+        LOG_WARN("Worker", "等待事件超时");
+        OSAL_MutexUnlock(mutex);
+        return -1;
+    }
+}
+
+/* 条件满足，继续处理 */
+process_event();
+
+OSAL_MutexUnlock(mutex);
+```
+
+### 条件变量最佳实践
+
+```c
+/* ✅ 正确 - 循环检查条件（防止虚假唤醒） */
+OSAL_MutexLock(mutex);
+while (!condition) {
+    OSAL_CondWait(cond, mutex);
+}
+/* 处理 */
+OSAL_MutexUnlock(mutex);
+
+/* ❌ 错误 - 不检查条件 */
+OSAL_MutexLock(mutex);
+OSAL_CondWait(cond, mutex);  /* 可能虚假唤醒 */
+/* 处理 */
+OSAL_MutexUnlock(mutex);
+
+/* ✅ 正确 - 修改状态后通知 */
+OSAL_MutexLock(mutex);
+condition = true;
+OSAL_CondSignal(cond);  /* 先修改状态，再通知 */
+OSAL_MutexUnlock(mutex);
+
+/* ❌ 错误 - 通知前未持有锁 */
+condition = true;  /* 数据竞争 */
+OSAL_CondSignal(cond);
 ```
 
 ---
