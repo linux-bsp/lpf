@@ -23,6 +23,7 @@ add_executable(unit-test
     osal/test_osal_mutex.c
     osal/test_osal_semaphore.c
     osal/test_osal_cond.c
+    osal/test_osal_stress.c
     osal/test_osal_signal.c
     osal/test_osal_atomic.c
     osal/test_osal_string.c
