@@ -48,7 +48,7 @@
 | T1.1.1 | P0 | 2h | ❌ CANCELLED |  |
 | T1.1.2 | 补充原子类型别名（osal_atomic32_t, osal_atomic64_t） | P0 | 2h | ⬜ TODO |  |
 | T1.1.3 | 补充时间类型（osal_tick_t, osal_msec_t） | P0 | 2h | ⬜ TODO |  |
-| T1.1.4 | 补充地址类型（osal_paddr_t, osal_vaddr_t） | P1 | 1h | ⬜ TODO |  |
+| T1.1.4 | P0 | 2h | ❌ CANCELLED |  |
 | T1.1.5 | 添加类型大小验证（编译时断言） | P1 | 1h | ⬜ TODO |  |
 
 **验证方法**: 编译测试 + 类型大小断言
