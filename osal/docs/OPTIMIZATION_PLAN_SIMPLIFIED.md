@@ -174,7 +174,7 @@ int32_t OSAL_read(int32_t fd, void *buf, uint32_t count) {
 
 | ID | 任务 | 优先级 | 预计工时 | 状态 | Git Commit |
 |----|------|--------|----------|------|------------|
-| T1.1 | 实现信号量接口（Create/Wait/Post/Destroy） | P0 | 6h | ⬜ TODO |  |
+| T1.1 | 实现信号量接口（Create/Wait/Post/Destroy） | P0 | 6h | ✅ DONE | 7c6b48f |
 
 **文件**: `osal/include/ipc/osal_semaphore.h`, `osal/src/posix/ipc/osal_semaphore.c`
 
