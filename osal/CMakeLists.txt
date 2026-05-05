@@ -28,6 +28,7 @@ set(OSAL_SOURCES
     # IPC - 进程间通信
     ${OSAL_SRC_DIR}/ipc/osal_mutex.c
     ${OSAL_SRC_DIR}/ipc/osal_atomic.c
+    ${OSAL_SRC_DIR}/ipc/osal_semaphore.c
 
     # SYS - 系统调用封装
     ${OSAL_SRC_DIR}/sys/osal_clock.c

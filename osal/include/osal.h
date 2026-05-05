@@ -19,6 +19,7 @@
 
 /* IPC - 进程间通信 */
 #include "ipc/osal_mutex.h"
+#include "ipc/osal_semaphore.h"
 #include "ipc/osal_atomic.h"
 
 /* SYS - 系统调用封装 */
