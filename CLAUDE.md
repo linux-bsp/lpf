@@ -360,6 +360,16 @@ sudo ip link set can0 type can bitrate 500000
 sudo ip link set can0 up
 ```
 
+### Serial Port Permissions
+```bash
+# Add user to dialout group for serial port access
+sudo usermod -a -G dialout $USER
+# Log out and log back in for changes to take effect
+
+# Or use sudo for testing
+sudo ./build/release/bin/unit-test -m test_hal_serial
+```
+
 ## Build Output Structure
 
 ```
@@ -383,10 +393,55 @@ build/
 - **Module READMEs**: Each layer has `README.md` and `docs/` directory
 - **Test Framework**: [tests/README.md](tests/README.md)
 
+## Debugging and Troubleshooting
+
+### Common Build Issues
+
+**Missing pthread library**:
+```bash
+# Error: undefined reference to `pthread_create`
+# Solution: pthread is linked automatically via find_package(Threads)
+```
+
+**Cross-compilation toolchain not found**:
+```bash
+# Install missing toolchain
+sudo apt-get install gcc-arm-linux-gnueabihf gcc-aarch64-linux-gnu gcc-riscv64-linux-gnu
+```
+
+**Test failures without hardware**:
+- CAN tests require `can0` or `vcan0` interface
+- Serial tests require `/dev/ttyS0` or `/dev/ttyUSB0`
+- Use `-i` interactive mode to skip hardware-dependent tests
+
+### Debugging Tips
+
+**Enable verbose logging**:
+```c
+OSAL_LogSetLevel(LOG_LEVEL_DEBUG);  // In your code
+```
+
+**GDB debugging**:
+```bash
+cmake --preset debug && cmake --build --preset debug
+gdb --args ./build/debug/bin/unit-test -m test_osal_task
+```
+
+**Memory leak detection**:
+```bash
+valgrind --leak-check=full ./build/debug/bin/unit-test -m test_osal_queue
+```
+
+**Check task status**:
+```bash
+# Monitor running tasks
+ps -eLf | grep unit-test
+```
+
 ## Project Stats
 
 - **Code Size**: ~22,000 lines (15,500 production + 4,500 test)
-- **Files**: 123 C/H files
+- **Files**: 133 C/H files
 - **Test Coverage**: 142+ test cases across all layers
   - OSAL: 50+ tests (10 modules)
   - HAL: 72 tests (CAN, UART, I2C, SPI)
@@ -394,7 +449,7 @@ build/
   - PDL: 15+ tests (Satellite, BMC, MCU)
 - **Layers**: 5 (OSAL/HAL/PCL/PDL/Apps)
 - **Platforms**: TI AM6254, vendor_demo (extensible)
-- **Build System**: CMake 3.10+, supports native and cross-compilation
+- **Build System**: CMake 3.19+, supports native and cross-compilation
 
 ## Important Files
 
@@ -405,6 +460,25 @@ build/
 - [osal/include/osal_types.h](osal/include/osal_types.h) - Type definitions
 - [tests/core/main.c](tests/core/main.c) - Test runner entry
 - [apps/sample_app/src/main.c](apps/sample_app/src/main.c) - Sample application
+
+## Performance Considerations
+
+### Memory Management
+- OSAL uses static allocation for task/queue/mutex tables (64 entries each)
+- Queue buffers are dynamically allocated but pre-sized at creation
+- No runtime memory allocation in critical paths (interrupt handlers, tight loops)
+
+### Real-time Considerations
+- Task priorities: 1-255 (lower number = higher priority)
+- OSAL_TaskDelay() uses nanosleep() for precise timing
+- Mutex deadlock detection threshold: 5000ms (configurable)
+- Queue operations support timeout for bounded waiting
+
+### Thread Safety
+- All OSAL APIs are thread-safe
+- HAL drivers use OSAL mutexes for protection
+- Atomic operations use C11 `_Atomic` types
+- Reference counting prevents use-after-free in queues
 
 ## Git Commit Message Convention
 
