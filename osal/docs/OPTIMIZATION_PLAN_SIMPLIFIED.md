@@ -40,7 +40,8 @@
 
 ### 同步原语
 - ✅ 互斥锁：OSAL_MutexCreate/Lock/Unlock/Delete
-- ⚠️ 缺少：信号量、条件变量（需要补充）
+- ✅ 信号量：OSAL_SemaphoreCreate/Wait/Post/TimedWait/Delete
+- ✅ 条件变量：OSAL_CondCreate/Wait/Signal/Broadcast/TimedWait/Delete
 
 ### 线程管理
 - ✅ 线程创建：OSAL_ThreadCreate
@@ -197,7 +198,7 @@ int32_t OSAL_SemDestroy(osal_sem_t *sem);
 
 | ID | 任务 | 优先级 | 预计工时 | 状态 | Git Commit |
 |----|------|--------|----------|------|------------|
-| T1.2 | 实现条件变量接口（Create/Wait/Signal/Broadcast/Destroy） | P0 | 8h | ⬜ TODO |  |
+| T1.2 | 实现条件变量接口（Create/Wait/Signal/Broadcast/Destroy） | P0 | 8h | ✅ DONE | 607d494 |
 
 **文件**: `osal/include/ipc/osal_cond.h`, `osal/src/posix/ipc/osal_cond.c`
 
@@ -265,23 +266,24 @@ int32_t OSAL_CondDestroy(osal_cond_t *cond);
 ### 总体进度
 
 ```
-总任务数: 9
-已完成: 0  (0%)
+总任务数: 10
+已完成: 3  (30%)
 进行中: 0  (0%)
-待开始: 9  (100%)
+待开始: 7  (70%)
 ```
 
 ### 按优先级统计
 
 ```
-P0 (核心基础):  2 任务 - 0 完成
+P0 (核心基础):  3 任务 - 3 完成 ✅
 P1 (可选增强):  7 任务 - 0 完成
 ```
 
 ### 按阶段统计
 
 ```
-阶段 1 (同步原语):  2 任务 - 0 完成
+阶段 0 (类型系统):  1 任务 - 1 完成 ✅
+阶段 1 (同步原语):  2 任务 - 2 完成 ✅
 阶段 2 (可选增强):  2 任务 - 0 完成
 阶段 3 (测试文档):  5 任务 - 0 完成
 ```
@@ -382,5 +384,5 @@ git commit -m "新增：实现信号量接口
 
 ---
 
-**最后更新**: 2026-05-05  
-**版本**: v2.0 (精简版)
+**最后更新**: 2026-05-05 15:45  
+**版本**: v2.1 (精简版)
