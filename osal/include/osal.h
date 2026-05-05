@@ -13,7 +13,9 @@
 #ifndef OSAL_H
 #define OSAL_H
 
+#include "osal_platform.h"
 #include "osal_types.h"
+#include "osal_error.h"
 
 /* IPC - 进程间通信 */
 #include "ipc/osal_mutex.h"

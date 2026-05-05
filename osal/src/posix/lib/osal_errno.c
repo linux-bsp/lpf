@@ -2,8 +2,7 @@
  * OSAL - errno系统调用封装实现（POSIX）
  ************************************************************************/
 
-#include "lib/osal_errno.h"
-#include "osal_types.h"
+#include <osal.h>
 #include <errno.h>
 #include <string.h>
 
@@ -28,6 +27,7 @@ const char *OSAL_StrError(int32_t errnum)
 
 /*===========================================================================
  * OSAL状态码转字符串实现
+ * 注意：多个OSAL错误码可能映射到同一个errno值，只保留第一个
  *===========================================================================*/
 
 const char *OSAL_GetStatusName(int32_t status_code)
@@ -35,43 +35,41 @@ const char *OSAL_GetStatusName(int32_t status_code)
     switch (status_code)
     {
         case OSAL_SUCCESS:                return "OSAL_SUCCESS";
-        case OSAL_ERR_GENERIC:                  return "OSAL_ERR_GENERIC";
-        case OSAL_ERR_INVALID_POINTER:        return "OSAL_ERR_INVALID_POINTER";
+
+        /* errno 映射的错误码 - 只保留每个errno值的第一个别名 */
+        case OSAL_ERR_GENERIC:            return "OSAL_ERR_GENERIC";  /* EIO=5 */
+        case OSAL_ERR_INVALID_POINTER:    return "OSAL_ERR_INVALID_POINTER";  /* EFAULT=14 */
+        case OSAL_ERR_NO_MEMORY:          return "OSAL_ERR_NO_MEMORY";  /* ENOMEM=12 */
+        case OSAL_ERR_INVALID_SIZE:       return "OSAL_ERR_INVALID_SIZE";  /* EINVAL=22 */
+        case OSAL_ERR_NAME_TOO_LONG:      return "OSAL_ERR_NAME_TOO_LONG";  /* ENAMETOOLONG=63 */
+        case OSAL_ERR_NAME_TAKEN:         return "OSAL_ERR_NAME_TAKEN";  /* EEXIST=17 */
+        case OSAL_ERR_NAME_NOT_FOUND:     return "OSAL_ERR_NAME_NOT_FOUND";  /* ENOENT=2 */
+        case OSAL_ERR_TIMEOUT:            return "OSAL_ERR_TIMEOUT";  /* ETIMEDOUT=60/110 */
+        case OSAL_ERR_NOT_IMPLEMENTED:    return "OSAL_ERR_NOT_IMPLEMENTED";  /* ENOSYS=78 */
+        case OSAL_ERR_BUSY:               return "OSAL_ERR_BUSY";  /* EBUSY=16 */
+        case OSAL_ERR_PERMISSION:         return "OSAL_ERR_PERMISSION";  /* EPERM=1 */
+        case OSAL_ERR_NOT_SUPPORTED:      return "OSAL_ERR_NOT_SUPPORTED";  /* ENOTSUP=45 */
+        case OSAL_ERR_WOULD_BLOCK:        return "OSAL_ERR_WOULD_BLOCK";  /* EWOULDBLOCK=EAGAIN=35 */
+        case OSAL_ERR_INTERRUPTED:        return "OSAL_ERR_INTERRUPTED";  /* EINTR=4 */
+        case OSAL_ERR_RESOURCE_LIMIT:     return "OSAL_ERR_RESOURCE_LIMIT";  /* EMFILE=24 */
+        /* OSAL_ERR_TIMER_UNAVAILABLE 也映射到 EAGAIN=35，与 EWOULDBLOCK 冲突，已移除 */
+
+        /* OSAL 特定错误码 (200+) */
         case OSAL_ERR_ADDRESS_MISALIGNED: return "OSAL_ERR_ADDRESS_MISALIGNED";
-        case OSAL_ERR_TIMEOUT:          return "OSAL_ERR_TIMEOUT";
-        case OSAL_ERR_INVALID_INT_NUM:        return "OSAL_ERR_INVALID_INT_NUM";
-        case OSAL_ERR_SEM_FAILURE:            return "OSAL_ERR_SEM_FAILURE";
-        case OSAL_ERR_SEM_TIMEOUT:            return "OSAL_ERR_SEM_TIMEOUT";
-        case OSAL_ERR_QUEUE_EMPTY:            return "OSAL_ERR_QUEUE_EMPTY";
-        case OSAL_ERR_QUEUE_FULL:             return "OSAL_ERR_QUEUE_FULL";
-        case OSAL_ERR_QUEUE_TIMEOUT:          return "OSAL_ERR_QUEUE_TIMEOUT";
-        case OSAL_ERR_QUEUE_INVALID_SIZE:     return "OSAL_ERR_QUEUE_INVALID_SIZE";
-        case OSAL_ERR_QUEUE_ID:         return "OSAL_ERR_QUEUE_ID";
-        case OSAL_ERR_NAME_TOO_LONG:      return "OSAL_ERR_NAME_TOO_LONG";
-        case OSAL_ERR_NO_FREE_IDS:        return "OSAL_ERR_NO_FREE_IDS";
-        case OSAL_ERR_NAME_TAKEN:         return "OSAL_ERR_NAME_TAKEN";
-        case OSAL_ERR_INVALID_ID:         return "OSAL_ERR_INVALID_ID";
-        case OSAL_ERR_NAME_NOT_FOUND:     return "OSAL_ERR_NAME_NOT_FOUND";
-        case OSAL_ERR_SEM_NOT_FULL:       return "OSAL_ERR_SEM_NOT_FULL";
+        case OSAL_ERR_INVALID_INT_NUM:    return "OSAL_ERR_INVALID_INT_NUM";
         case OSAL_ERR_INVALID_PRIORITY:   return "OSAL_ERR_INVALID_PRIORITY";
-        case OSAL_ERR_INVALID_SEM_VALUE:      return "OSAL_ERR_INVALID_SEM_VALUE";
-        case OSAL_ERR_FILE:               return "OSAL_ERR_FILE";
-        case OSAL_ERR_NOT_IMPLEMENTED:    return "OSAL_ERR_NOT_IMPLEMENTED";
-        case OSAL_ERR_TIMER_INVALID_ARGS: return "OSAL_ERR_TIMER_INVALID_ARGS";
-        case OSAL_ERR_TIMER_ID:     return "OSAL_ERR_TIMER_ID";
-        case OSAL_ERR_TIMER_UNAVAILABLE:  return "OSAL_ERR_TIMER_UNAVAILABLE";
-        case OSAL_ERR_TIMER_INTERNAL:     return "OSAL_ERR_TIMER_INTERNAL";
-        case OSAL_ERR_INVALID_SIZE:       return "OSAL_ERR_INVALID_SIZE";
-        case OSAL_ERR_NO_MEMORY:          return "OSAL_ERR_NO_MEMORY";
-        case OSAL_ERR_BUSY:               return "OSAL_ERR_BUSY";
-        case OSAL_ERR_PERMISSION:         return "OSAL_ERR_PERMISSION";
-        case OSAL_ERR_NOT_SUPPORTED:      return "OSAL_ERR_NOT_SUPPORTED";
-        case OSAL_ERR_ALREADY_EXISTS:     return "OSAL_ERR_ALREADY_EXISTS";
-        case OSAL_ERR_WOULD_BLOCK:        return "OSAL_ERR_WOULD_BLOCK";
-        case OSAL_ERR_INTERRUPTED:        return "OSAL_ERR_INTERRUPTED";
-        case OSAL_ERR_BAD_ADDRESS:        return "OSAL_ERR_BAD_ADDRESS";
         case OSAL_ERR_INVALID_STATE:      return "OSAL_ERR_INVALID_STATE";
-        case OSAL_ERR_RESOURCE_LIMIT:     return "OSAL_ERR_RESOURCE_LIMIT";
-        default:                        return "UNKNOWN_ERROR";
+        case OSAL_ERR_NO_FREE_IDS:        return "OSAL_ERR_NO_FREE_IDS";
+        case OSAL_ERR_SEM_FAILURE:        return "OSAL_ERR_SEM_FAILURE";
+        case OSAL_ERR_SEM_NOT_FULL:       return "OSAL_ERR_SEM_NOT_FULL";
+        case OSAL_ERR_INVALID_SEM_VALUE:  return "OSAL_ERR_INVALID_SEM_VALUE";
+        case OSAL_ERR_QUEUE_EMPTY:        return "OSAL_ERR_QUEUE_EMPTY";
+        case OSAL_ERR_QUEUE_FULL:         return "OSAL_ERR_QUEUE_FULL";
+        case OSAL_ERR_QUEUE_ID:           return "OSAL_ERR_QUEUE_ID";
+        case OSAL_ERR_TIMER_INVALID_ARGS: return "OSAL_ERR_TIMER_INVALID_ARGS";
+        case OSAL_ERR_TIMER_ID:           return "OSAL_ERR_TIMER_ID";
+        case OSAL_ERR_TIMER_INTERNAL:     return "OSAL_ERR_TIMER_INTERNAL";
+
+        default:                          return "UNKNOWN_ERROR";
     }
 }

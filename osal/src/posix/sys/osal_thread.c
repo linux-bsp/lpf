@@ -2,8 +2,7 @@
  * OSAL - POSIX线程封装实现
  ************************************************************************/
 
-#include "sys/osal_thread.h"
-#include "osal_types.h"
+#include <osal.h>
 #include <pthread.h>
 
 int32_t OSAL_pthread_create(osal_thread_t *thread,
