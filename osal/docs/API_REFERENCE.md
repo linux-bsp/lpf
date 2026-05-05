@@ -8,6 +8,8 @@
   - [任务管理](#任务管理)
   - [消息队列](#消息队列)
   - [互斥锁](#互斥锁)
+  - [信号量](#信号量)
+  - [条件变量](#条件变量)
   - [原子操作](#原子操作)
 - [SYS模块 - 系统调用](#sys模块---系统调用)
   - [时钟](#时钟)
@@ -426,6 +428,302 @@ int32_t OSAL_MutexGetIdByName(osal_id_t *mutex_id, const char *mutex_name);
 - `OS_SUCCESS` - 成功
 - `OS_INVALID_POINTER` - 无效指针
 - `OS_ERR_NAME_NOT_FOUND` - 未找到互斥锁
+
+---
+
+### 信号量
+
+OSAL 提供 POSIX 信号量的简化封装，支持计数信号量和超时等待。
+
+#### OSAL_SemaphoreCreate
+
+创建信号量。
+
+```c
+int32_t OSAL_SemaphoreCreate(osal_semaphore_t **sem, uint32_t initial_value);
+```
+
+**参数**：
+- `sem` - [输出] 信号量句柄指针
+- `initial_value` - 初始值（0 - INT32_MAX）
+
+**返回值**：
+- `OSAL_SUCCESS` - 成功
+- `OSAL_ERR_INVALID_POINTER` - sem 为 NULL
+- `OSAL_ERR_INVALID_SEM_VALUE` - initial_value 超出范围
+- `OSAL_ERR_GENERIC` - 系统调用失败
+
+**示例**：
+```c
+osal_semaphore_t *sem = NULL;
+int32_t ret = OSAL_SemaphoreCreate(&sem, 1);
+if (ret == OSAL_SUCCESS) {
+    /* 使用信号量 */
+    OSAL_SemaphoreDelete(sem);
+}
+```
+
+#### OSAL_SemaphoreDelete
+
+销毁信号量。
+
+```c
+int32_t OSAL_SemaphoreDelete(osal_semaphore_t *sem);
+```
+
+**参数**：
+- `sem` - 信号量句柄
+
+**返回值**：
+- `OSAL_SUCCESS` - 成功
+- `OSAL_ERR_INVALID_POINTER` - sem 为 NULL
+- `OSAL_ERR_GENERIC` - 系统调用失败
+
+#### OSAL_SemaphoreWait
+
+等待信号量（阻塞）。
+
+```c
+int32_t OSAL_SemaphoreWait(osal_semaphore_t *sem);
+```
+
+**参数**：
+- `sem` - 信号量句柄
+
+**返回值**：
+- `OSAL_SUCCESS` - 成功
+- `OSAL_ERR_INVALID_POINTER` - sem 为 NULL
+- `OSAL_ERR_GENERIC` - 系统调用失败
+
+**注意**：
+- 如果信号量值为 0，线程将阻塞直到其他线程调用 Post
+- 成功后信号量值减 1
+
+#### OSAL_SemaphoreTimedWait
+
+等待信号量（超时）。
+
+```c
+int32_t OSAL_SemaphoreTimedWait(osal_semaphore_t *sem, uint32_t timeout_ms);
+```
+
+**参数**：
+- `sem` - 信号量句柄
+- `timeout_ms` - 超时时间（毫秒），0 表示非阻塞
+
+**返回值**：
+- `OSAL_SUCCESS` - 成功
+- `OSAL_ERR_INVALID_POINTER` - sem 为 NULL
+- `OSAL_ERR_TIMEOUT` - 超时
+- `OSAL_ERR_GENERIC` - 系统调用失败
+
+**示例**：
+```c
+/* 非阻塞尝试 */
+if (OSAL_SemaphoreTimedWait(sem, 0) == OSAL_SUCCESS) {
+    /* 获取成功 */
+}
+
+/* 超时等待 */
+if (OSAL_SemaphoreTimedWait(sem, 1000) == OSAL_ERR_TIMEOUT) {
+    LOG_WARN("Worker", "等待信号量超时");
+}
+```
+
+#### OSAL_SemaphorePost
+
+释放信号量。
+
+```c
+int32_t OSAL_SemaphorePost(osal_semaphore_t *sem);
+```
+
+**参数**：
+- `sem` - 信号量句柄
+
+**返回值**：
+- `OSAL_SUCCESS` - 成功
+- `OSAL_ERR_INVALID_POINTER` - sem 为 NULL
+- `OSAL_ERR_GENERIC` - 系统调用失败
+
+**注意**：
+- 信号量值加 1
+- 如果有线程在等待，将唤醒一个线程
+
+**生产者-消费者示例**：
+```c
+/* 生产者 */
+void producer(void *arg) {
+    osal_semaphore_t *sem = (osal_semaphore_t *)arg;
+    
+    while (running) {
+        produce_data();
+        OSAL_SemaphorePost(sem);  /* 通知消费者 */
+    }
+}
+
+/* 消费者 */
+void consumer(void *arg) {
+    osal_semaphore_t *sem = (osal_semaphore_t *)arg;
+    
+    while (running) {
+        OSAL_SemaphoreWait(sem);  /* 等待数据 */
+        consume_data();
+    }
+}
+```
+
+---
+
+### 条件变量
+
+OSAL 提供 POSIX 条件变量的简化封装，用于线程间的等待/通知机制。
+
+#### OSAL_CondCreate
+
+创建条件变量。
+
+```c
+int32_t OSAL_CondCreate(osal_cond_t **cond);
+```
+
+**参数**：
+- `cond` - [输出] 条件变量句柄指针
+
+**返回值**：
+- `OSAL_SUCCESS` - 成功
+- `OSAL_ERR_INVALID_POINTER` - cond 为 NULL
+- `OSAL_ERR_GENERIC` - 系统调用失败
+
+#### OSAL_CondDelete
+
+销毁条件变量。
+
+```c
+int32_t OSAL_CondDelete(osal_cond_t *cond);
+```
+
+**参数**：
+- `cond` - 条件变量句柄
+
+**返回值**：
+- `OSAL_SUCCESS` - 成功
+- `OSAL_ERR_INVALID_POINTER` - cond 为 NULL
+- `OSAL_ERR_GENERIC` - 系统调用失败
+
+#### OSAL_CondWait
+
+等待条件变量（阻塞）。
+
+```c
+int32_t OSAL_CondWait(osal_cond_t *cond, osal_mutex_t *mutex);
+```
+
+**参数**：
+- `cond` - 条件变量句柄
+- `mutex` - 互斥锁句柄（必须已锁定）
+
+**返回值**：
+- `OSAL_SUCCESS` - 成功
+- `OSAL_ERR_INVALID_POINTER` - cond 或 mutex 为 NULL
+- `OSAL_ERR_GENERIC` - 系统调用失败
+
+**注意**：
+- 调用前必须持有 mutex
+- 函数会原子地释放 mutex 并进入等待状态
+- 被唤醒后会重新获取 mutex
+
+#### OSAL_CondTimedWait
+
+等待条件变量（超时）。
+
+```c
+int32_t OSAL_CondTimedWait(osal_cond_t *cond, osal_mutex_t *mutex, uint32_t timeout_ms);
+```
+
+**参数**：
+- `cond` - 条件变量句柄
+- `mutex` - 互斥锁句柄（必须已锁定）
+- `timeout_ms` - 超时时间（毫秒）
+
+**返回值**：
+- `OSAL_SUCCESS` - 成功
+- `OSAL_ERR_INVALID_POINTER` - cond 或 mutex 为 NULL
+- `OSAL_ERR_TIMEOUT` - 超时
+- `OSAL_ERR_GENERIC` - 系统调用失败
+
+#### OSAL_CondSignal
+
+唤醒一个等待线程。
+
+```c
+int32_t OSAL_CondSignal(osal_cond_t *cond);
+```
+
+**参数**：
+- `cond` - 条件变量句柄
+
+**返回值**：
+- `OSAL_SUCCESS` - 成功
+- `OSAL_ERR_INVALID_POINTER` - cond 为 NULL
+- `OSAL_ERR_GENERIC` - 系统调用失败
+
+**注意**：
+- 如果有多个线程在等待，只唤醒一个
+- 如果没有线程在等待，调用无效果
+
+#### OSAL_CondBroadcast
+
+唤醒所有等待线程。
+
+```c
+int32_t OSAL_CondBroadcast(osal_cond_t *cond);
+```
+
+**参数**：
+- `cond` - 条件变量句柄
+
+**返回值**：
+- `OSAL_SUCCESS` - 成功
+- `OSAL_ERR_INVALID_POINTER` - cond 为 NULL
+- `OSAL_ERR_GENERIC` - 系统调用失败
+
+**注意**：
+- 唤醒所有等待该条件变量的线程
+- 适用于多个线程等待同一条件的场景
+
+**使用示例**：
+```c
+/* 共享数据 */
+static int32_t data_ready = 0;
+static osal_mutex_t *mutex = NULL;
+static osal_cond_t *cond = NULL;
+
+/* 生产者线程 */
+void producer(void *arg) {
+    OSAL_MutexLock(mutex);
+    data_ready = 1;
+    OSAL_CondSignal(cond);  /* 通知消费者 */
+    OSAL_MutexUnlock(mutex);
+}
+
+/* 消费者线程 */
+void consumer(void *arg) {
+    OSAL_MutexLock(mutex);
+    while (!data_ready) {
+        OSAL_CondWait(cond, mutex);  /* 等待数据就绪 */
+    }
+    /* 处理数据 */
+    data_ready = 0;
+    OSAL_MutexUnlock(mutex);
+}
+```
+
+**最佳实践**：
+1. 始终在循环中检查条件（防止虚假唤醒）
+2. 条件变量必须与互斥锁配合使用
+3. 修改共享状态前必须持有互斥锁
+4. Signal 用于单个等待者，Broadcast 用于多个等待者
 
 ---
 
