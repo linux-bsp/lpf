@@ -5,11 +5,13 @@
  * - 封装errno访问
  * - 1:1映射系统调用，不引入业务逻辑
  * - 使用固定大小类型，避免平台相关类型
+ * - 提供语义化的错误码别名
  *
  * 设计原则：
  * - 提供线程安全的errno访问
  * - 返回值与系统调用保持一致
  * - 便于RTOS移植
+ * - 成功返回 0，错误返回正数（与 Linux errno 保持一致）
  ************************************************************************/
 
 #ifndef OSAL_ERRNO_H
@@ -18,7 +20,25 @@
 #include "osal_types.h"
 
 /*===========================================================================
- * 错误码常量
+ * 状态码类型
+ *===========================================================================*/
+
+/**
+ * @brief OSAL状态码类型
+ *
+ * 成功返回 OSAL_SUCCESS (0)
+ * 错误返回正数错误码
+ */
+typedef int32_t osal_status_t;
+
+/*
+ * 成功状态码
+ */
+#define OSAL_SUCCESS                    0
+
+/*===========================================================================
+ * POSIX errno 常量定义
+ * 按照 Linux errno.h 的顺序定义，提供跨平台的统一错误码
  *===========================================================================*/
 
 #define OSAL_EPERM           1   /* 操作不允许 */
@@ -156,6 +176,60 @@
 #define OSAL_EHWPOISON       133 /* 内存页硬件错误 */
 
 /*===========================================================================
+ * 语义化错误码别名
+ * 为常用的 POSIX errno 提供更清晰的语义化名称，便于代码可读性
+ *===========================================================================*/
+
+/* 通用错误 - 映射到 POSIX errno */
+#define OSAL_ERR_INVALID_POINTER        OSAL_EFAULT         /* 14: 无效指针 */
+#define OSAL_ERR_NO_MEMORY              OSAL_ENOMEM         /* 12: 内存不足 */
+#define OSAL_ERR_INVALID_SIZE           OSAL_EINVAL         /* 22: 无效参数/大小 */
+#define OSAL_ERR_INVALID_ID             OSAL_EINVAL         /* 22: 无效ID */
+#define OSAL_ERR_NAME_TOO_LONG          OSAL_ENAMETOOLONG   /* 36: 名称过长 */
+#define OSAL_ERR_NAME_TAKEN             OSAL_EEXIST         /* 17: 名称已存在 */
+#define OSAL_ERR_NAME_NOT_FOUND         OSAL_ENOENT         /* 2: 名称未找到 */
+#define OSAL_ERR_TIMEOUT                OSAL_ETIMEDOUT      /* 110: 超时 */
+#define OSAL_ERR_NOT_IMPLEMENTED        OSAL_ENOSYS         /* 38: 未实现 */
+#define OSAL_ERR_BUSY                   OSAL_EBUSY          /* 16: 资源忙 */
+#define OSAL_ERR_PERMISSION             OSAL_EPERM          /* 1: 权限不足 */
+#define OSAL_ERR_NOT_SUPPORTED          OSAL_EOPNOTSUPP     /* 95: 不支持的操作 */
+#define OSAL_ERR_ALREADY_EXISTS         OSAL_EEXIST         /* 17: 已存在 */
+#define OSAL_ERR_WOULD_BLOCK            OSAL_EWOULDBLOCK    /* 11: 操作会阻塞 */
+#define OSAL_ERR_INTERRUPTED            OSAL_EINTR          /* 4: 操作被中断 */
+#define OSAL_ERR_BAD_ADDRESS            OSAL_EFAULT         /* 14: 错误的地址 */
+#define OSAL_ERR_RESOURCE_LIMIT         OSAL_EMFILE         /* 24: 资源限制 */
+#define OSAL_ERR_GENERIC                OSAL_EIO            /* 5: 通用I/O错误 */
+
+/* OSAL 特定错误码 - 使用未被 errno 占用的值 (200+) */
+#define OSAL_ERR_ADDRESS_MISALIGNED     200             /* 地址未对齐 */
+#define OSAL_ERR_INVALID_INT_NUM        201             /* 无效中断号 */
+#define OSAL_ERR_INVALID_PRIORITY       202             /* 无效优先级 */
+#define OSAL_ERR_INVALID_STATE          203             /* 无效状态 */
+#define OSAL_ERR_NO_FREE_IDS            204             /* 无可用ID */
+
+/* 信号量相关错误码 */
+#define OSAL_ERR_SEM_FAILURE            210             /* 信号量失败 */
+#define OSAL_ERR_SEM_TIMEOUT            OSAL_ETIMEDOUT  /* 110: 信号量超时 */
+#define OSAL_ERR_SEM_NOT_FULL           211             /* 信号量未满 */
+#define OSAL_ERR_INVALID_SEM_VALUE      212             /* 无效信号量值 */
+
+/* 队列相关错误码 */
+#define OSAL_ERR_QUEUE_EMPTY            220             /* 队列为空 */
+#define OSAL_ERR_QUEUE_FULL             221             /* 队列已满 */
+#define OSAL_ERR_QUEUE_TIMEOUT          OSAL_ETIMEDOUT  /* 110: 队列超时 */
+#define OSAL_ERR_QUEUE_INVALID_SIZE     OSAL_EINVAL     /* 22: 队列大小无效 */
+#define OSAL_ERR_QUEUE_ID               222             /* 队列ID错误 */
+
+/* 文件相关错误码 */
+#define OSAL_ERR_FILE                   OSAL_EIO        /* 5: 文件错误 */
+
+/* 定时器相关错误码 */
+#define OSAL_ERR_TIMER_INVALID_ARGS     230             /* 定时器参数无效 */
+#define OSAL_ERR_TIMER_ID               231             /* 定时器ID错误 */
+#define OSAL_ERR_TIMER_UNAVAILABLE      OSAL_EAGAIN     /* 11: 定时器不可用 */
+#define OSAL_ERR_TIMER_INTERNAL         232             /* 定时器内部错误 */
+
+/*===========================================================================
  * errno访问函数
  *===========================================================================*/
 
@@ -184,9 +258,16 @@ const char *OSAL_StrError(int32_t errnum);
 
 /**
  * @brief 获取OSAL状态码对应的名称字符串
- * @param status_code OSAL状态码（OSAL_SUCCESS、OS_ERROR等）
+ * @param status_code OSAL状态码（OSAL_SUCCESS、OSAL_ERR_*等）
  * @return 状态码名称字符串
  */
 const char *OSAL_GetStatusName(int32_t status_code);
+
+/**
+ * @brief 获取OSAL状态码对应的描述字符串
+ * @param status OSAL状态码
+ * @return 状态码描述字符串
+ */
+const char *OSAL_StatusToString(osal_status_t status);
 
 #endif /* OSAL_ERRNO_H */

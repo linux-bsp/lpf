@@ -73,3 +73,48 @@ const char *OSAL_GetStatusName(int32_t status_code)
         default:                          return "UNKNOWN_ERROR";
     }
 }
+
+const char *OSAL_StatusToString(osal_status_t status)
+{
+    if (status == OSAL_SUCCESS) {
+        return "Success";
+    }
+
+    /* OSAL 特定错误码 (200+) */
+    switch (status) {
+        case OSAL_ERR_ADDRESS_MISALIGNED:
+            return "Address misaligned";
+        case OSAL_ERR_INVALID_INT_NUM:
+            return "Invalid interrupt number";
+        case OSAL_ERR_INVALID_PRIORITY:
+            return "Invalid priority";
+        case OSAL_ERR_INVALID_STATE:
+            return "Invalid state";
+        case OSAL_ERR_NO_FREE_IDS:
+            return "No free IDs available";
+        case OSAL_ERR_SEM_FAILURE:
+            return "Semaphore operation failed";
+        case OSAL_ERR_SEM_NOT_FULL:
+            return "Semaphore not full";
+        case OSAL_ERR_INVALID_SEM_VALUE:
+            return "Invalid semaphore value";
+        case OSAL_ERR_QUEUE_EMPTY:
+            return "Queue is empty";
+        case OSAL_ERR_QUEUE_FULL:
+            return "Queue is full";
+        case OSAL_ERR_QUEUE_ID:
+            return "Invalid queue ID";
+        case OSAL_ERR_TIMER_INVALID_ARGS:
+            return "Invalid timer arguments";
+        case OSAL_ERR_TIMER_ID:
+            return "Invalid timer ID";
+        case OSAL_ERR_TIMER_INTERNAL:
+            return "Timer internal error";
+        default:
+            /* 对于 errno 映射的错误码，使用系统的 strerror */
+            if (status > 0 && status < 200) {
+                return strerror(status);
+            }
+            return "Unknown error";
+    }
+}

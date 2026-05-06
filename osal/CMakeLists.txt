@@ -23,7 +23,7 @@ target_include_directories(osal_public_api INTERFACE
 # OSAL源文件
 set(OSAL_SOURCES
     # 基础设施
-    ${OSAL_SRC_DIR}/lib/osal_error.c
+    ${OSAL_SRC_DIR}/lib/osal_errno.c
 
     # IPC - 进程间通信
     ${OSAL_SRC_DIR}/ipc/osal_mutex.c
