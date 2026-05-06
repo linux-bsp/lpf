@@ -1,11 +1,9 @@
+#include "test_framework.h"
 /**
  * @file test_pdl_mcu.c
  * @brief PDL MCU外设驱动单元测试
  */
 
-#include "tests_core.h"
-#include "test_assert.h"
-#include "test_registry.h"
 #include "pdl_mcu.h"
 #include "osal.h"
 
@@ -280,7 +278,7 @@ TEST_CASE(test_pdl_mcu_firmware_update_null_path)
  * 测试模块注册
  *===========================================================================*/
 
-TEST_SUITE_BEGIN(test_pdl_mcu, "pdl_mcu", "PDL")
+TEST_MODULE_BEGIN(test_pdl_mcu, "PDL")
     // PDL MCU外设驱动测试
     /* 初始化和清理 */
     TEST_CASE_REF(test_pdl_mcu_init_can_success)
@@ -322,4 +320,4 @@ TEST_SUITE_BEGIN(test_pdl_mcu, "pdl_mcu", "PDL")
     TEST_CASE_REF(test_pdl_mcu_firmware_update_success)
     TEST_CASE_REF(test_pdl_mcu_firmware_update_null_handle)
     TEST_CASE_REF(test_pdl_mcu_firmware_update_null_path)
-TEST_SUITE_END(test_pdl_mcu, "test_pdl_mcu", "PDL")
+TEST_MODULE_END(test_pdl_mcu, "PDL")

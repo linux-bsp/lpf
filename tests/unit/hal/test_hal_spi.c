@@ -1,11 +1,9 @@
+#include "test_framework.h"
 /**
  * @file test_hal_spi.c
  * @brief HAL SPI驱动单元测试
  */
 
-#include "tests_core.h"
-#include "test_assert.h"
-#include "test_registry.h"
 #include "hal_spi.h"
 #include "osal.h"
 
@@ -329,7 +327,7 @@ TEST_CASE(test_hal_spi_set_config_change_mode)
  * 测试套件注册
  *===========================================================================*/
 
-TEST_SUITE_BEGIN(test_hal_spi, "test_hal_spi", "HAL")
+TEST_MODULE_BEGIN(test_hal_spi, "HAL")
     /* 初始化和清理 */
     TEST_CASE_REF(test_hal_spi_open_success)
     TEST_CASE_REF(test_hal_spi_open_null_config)
@@ -354,4 +352,4 @@ TEST_SUITE_BEGIN(test_hal_spi, "test_hal_spi", "HAL")
     TEST_CASE_REF(test_hal_spi_set_config_null_handle)
     TEST_CASE_REF(test_hal_spi_set_config_null_config)
     TEST_CASE_REF(test_hal_spi_set_config_change_mode)
-TEST_SUITE_END(test_hal_spi, "test_hal_spi", "HAL")
+TEST_MODULE_END(test_hal_spi, "HAL")

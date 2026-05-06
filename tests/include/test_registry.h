@@ -49,6 +49,13 @@
         libutest_register_suite(&suite_id##_suite); \
     }
 
+/* Simplified macros for common use cases */
+#define TEST_MODULE_BEGIN(module_id, layer_name) \
+    TEST_SUITE_BEGIN(module_id, #module_id, layer_name)
+
+#define TEST_MODULE_END(module_id, layer_name) \
+    TEST_SUITE_END(module_id, #module_id, layer_name)
+
 /* Suite with setup/teardown */
 #define TEST_SUITE_END_WITH_FIXTURE(suite_id, module, layer, setup, teardown) \
     }; \

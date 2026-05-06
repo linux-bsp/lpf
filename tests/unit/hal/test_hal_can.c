@@ -1,11 +1,9 @@
+#include "test_framework.h"
 /**
  * @file test_hal_can.c
  * @brief HAL CAN驱动单元测试
  */
 
-#include "tests_core.h"
-#include "test_assert.h"
-#include "test_registry.h"
 #include "hal_can.h"
 #include "osal.h"
 
@@ -252,7 +250,7 @@ TEST_CASE(test_hal_can_loopback)
     if (OSAL_SUCCESS == ret) {
         TEST_ASSERT_EQUAL(tx_frame.can_id, rx_frame.can_id);
         TEST_ASSERT_EQUAL(tx_frame.dlc, rx_frame.dlc);
-        for (int i = 0; i < tx_frame.dlc; i++) {
+        for (int32_t i = 0; i < tx_frame.dlc; i++) {
             TEST_ASSERT_EQUAL(tx_frame.data[i], rx_frame.data[i]);
         }
     }
@@ -385,7 +383,7 @@ TEST_CASE(test_hal_can_stats_accumulation)
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 发送一些帧 */
-    for (int i = 0; i < 5; i++) {
+    for (int32_t i = 0; i < 5; i++) {
         HAL_CAN_Send(handle, &frame);
     }
 
@@ -427,7 +425,7 @@ TEST_CASE(test_hal_can_different_baudrate)
  * 测试模块注册
  *===========================================================================*/
 
-TEST_SUITE_BEGIN(test_hal_can, "hal_can", "HAL")
+TEST_MODULE_BEGIN(test_hal_can, "HAL")
     // HAL CAN驱动测试
     /* 初始化和清理 */
     TEST_CASE_REF(test_hal_can_init_success)
@@ -458,4 +456,4 @@ TEST_SUITE_BEGIN(test_hal_can, "hal_can", "HAL")
 
     /* 配置参数 */
     TEST_CASE_REF(test_hal_can_different_baudrate)
-TEST_SUITE_END(test_hal_can, "test_hal_can", "HAL")
+TEST_MODULE_END(test_hal_can, "HAL")

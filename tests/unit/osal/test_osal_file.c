@@ -1,11 +1,9 @@
+#include "test_framework.h"
 /**
  * @file test_osal_file.c
  * @brief OSAL文件I/O操作单元测试
  */
 
-#include "tests_core.h"
-#include "test_assert.h"
-#include "test_registry.h"
 #include "osal.h"
 #include <unistd.h>  /* for unlink */
 
@@ -367,7 +365,7 @@ TEST_CASE(test_osal_file_close_invalid_fd)
  * 测试模块注册
  *===========================================================================*/
 
-TEST_SUITE_BEGIN(test_osal_file, "osal_file", "OSAL")
+TEST_MODULE_BEGIN(test_osal_file, "OSAL")
     // OSAL文件I/O操作测试
     /* 文件打开/关闭 */
     TEST_CASE_REF(test_osal_file_open_close_success)
@@ -392,4 +390,4 @@ TEST_SUITE_BEGIN(test_osal_file, "osal_file", "OSAL")
     TEST_CASE_REF(test_osal_file_write_empty)
     TEST_CASE_REF(test_osal_file_read_empty)
     TEST_CASE_REF(test_osal_file_close_invalid_fd)
-TEST_SUITE_END(test_osal_file, "test_osal_file", "OSAL")
+TEST_MODULE_END(test_osal_file, "OSAL")

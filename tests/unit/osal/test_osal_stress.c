@@ -1,3 +1,4 @@
+#include "test_framework.h"
 /**
  * @file test_osal_stress.c
  * @brief OSAL 多线程压力测试
@@ -5,9 +6,6 @@
  * 测试同步原语在高并发场景下的稳定性和正确性
  */
 
-#include "tests_core.h"
-#include "test_assert.h"
-#include "test_registry.h"
 #include "osal.h"
 
 /* 压力测试配置 */
@@ -299,9 +297,9 @@ TEST_CASE(test_mixed_stress)
 }
 
 /* 注册测试套件 */
-TEST_SUITE_BEGIN(osal_stress, "osal", "OSAL")
+TEST_MODULE_BEGIN(osal_stress, "OSAL")
     TEST_CASE_REF(test_mutex_stress)
     TEST_CASE_REF(test_semaphore_stress)
     TEST_CASE_REF(test_cond_stress)
     TEST_CASE_REF(test_mixed_stress)
-TEST_SUITE_END(osal_stress, "osal", "OSAL")
+TEST_MODULE_END(osal_stress, "OSAL")

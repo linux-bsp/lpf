@@ -1,11 +1,9 @@
+#include "test_framework.h"
 /**
  * @file test_osal_time.c
  * @brief OSAL时间操作单元测试
  */
 
-#include "tests_core.h"
-#include "test_assert.h"
-#include "test_registry.h"
 #include "osal.h"
 #include <sys/time.h>  /* for gettimeofday */
 
@@ -288,7 +286,7 @@ TEST_CASE(test_osal_time_get_performance)
  * 测试模块注册
  *===========================================================================*/
 
-TEST_SUITE_BEGIN(test_osal_time, "osal_time", "OSAL")
+TEST_MODULE_BEGIN(test_osal_time, "OSAL")
     // OSAL时间操作测试
     /* 延时函数 */
     TEST_CASE_REF(test_osal_msleep_success)
@@ -313,4 +311,4 @@ TEST_SUITE_BEGIN(test_osal_time, "osal_time", "OSAL")
 
     /* 性能测试 */
     TEST_CASE_REF(test_osal_time_get_performance)
-TEST_SUITE_END(test_osal_time, "test_osal_time", "OSAL")
+TEST_MODULE_END(test_osal_time, "OSAL")

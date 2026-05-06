@@ -1,3 +1,4 @@
+#include "test_framework.h"
 /**
  * @file test_osal_semaphore.c
  * @brief OSAL信号量单元测试
@@ -5,9 +6,6 @@
  * 使用新的libtest框架，测试自动注册
  */
 
-#include "tests_core.h"
-#include "test_assert.h"
-#include "test_registry.h"
 #include "osal.h"
 
 static int32_t shared_counter = 0;
@@ -185,7 +183,7 @@ TEST_CASE(test_semaphore_producer_consumer)
 }
 
 /* 注册测试套件 - 自动注册 */
-TEST_SUITE_BEGIN(osal_semaphore, "osal", "OSAL")
+TEST_MODULE_BEGIN(osal_semaphore, "OSAL")
     TEST_CASE_REF(test_semaphore_create_success)
     TEST_CASE_REF(test_semaphore_create_nullpointer)
     TEST_CASE_REF(test_semaphore_create_invalid_value)
@@ -199,4 +197,4 @@ TEST_SUITE_BEGIN(osal_semaphore, "osal", "OSAL")
     TEST_CASE_REF(test_semaphore_delete_success)
     TEST_CASE_REF(test_semaphore_delete_nullpointer)
     TEST_CASE_REF(test_semaphore_producer_consumer)
-TEST_SUITE_END(osal_semaphore, "osal", "OSAL")
+TEST_MODULE_END(osal_semaphore, "OSAL")

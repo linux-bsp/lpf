@@ -1,11 +1,9 @@
+#include "test_framework.h"
 /**
  * @file test_osal_cond.c
  * @brief OSAL条件变量单元测试
  */
 
-#include "tests_core.h"
-#include "test_assert.h"
-#include "test_registry.h"
 #include "osal.h"
 
 static int32_t shared_data = 0;
@@ -244,7 +242,7 @@ TEST_CASE(test_cond_broadcast_wakeup)
 }
 
 /* 注册测试套件 */
-TEST_SUITE_BEGIN(osal_cond, "osal", "OSAL")
+TEST_MODULE_BEGIN(osal_cond, "OSAL")
     TEST_CASE_REF(test_cond_create_success)
     TEST_CASE_REF(test_cond_create_nullpointer)
     TEST_CASE_REF(test_cond_delete_success)
@@ -255,4 +253,4 @@ TEST_SUITE_BEGIN(osal_cond, "osal", "OSAL")
     TEST_CASE_REF(test_cond_timedwait_timeout)
     TEST_CASE_REF(test_cond_signal_wakeup)
     TEST_CASE_REF(test_cond_broadcast_wakeup)
-TEST_SUITE_END(osal_cond, "osal", "OSAL")
+TEST_MODULE_END(osal_cond, "OSAL")

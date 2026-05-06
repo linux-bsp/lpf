@@ -1,3 +1,4 @@
+#include "test_framework.h"
 /**
  * @file test_signal.c
  * @brief OSAL信号处理单元测试
@@ -5,9 +6,6 @@
  * 使用新的libtest框架，测试自动注册
  */
 
-#include "tests_core.h"
-#include "test_assert.h"
-#include "test_registry.h"
 #include "osal.h"
 #include "sys/osal_process.h"
 #include "sys/osal_time.h"
@@ -154,11 +152,11 @@ TEST_CASE(test_signal_register_invalidparams)
 }
 
 /* 注册测试套件 - 自动注册 */
-TEST_SUITE_BEGIN(osal_signal, "osal", "OSAL")
+TEST_MODULE_BEGIN(osal_signal, "OSAL")
     TEST_CASE_REF(test_signal_register_success)
     TEST_CASE_REF(test_signal_ignore_success)
     TEST_CASE_REF(test_signal_block_success)
     TEST_CASE_REF(test_signal_default_success)
     TEST_CASE_REF(test_signal_register_multiple)
     TEST_CASE_REF(test_signal_register_invalidparams)
-TEST_SUITE_END(osal_signal, "osal", "OSAL")
+TEST_MODULE_END(osal_signal, "OSAL")

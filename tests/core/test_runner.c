@@ -11,6 +11,14 @@
 
 #define MAX_SUITES 128
 
+/* Unified output format macros */
+#define TEST_LOG_RUN(name)      OSAL_Printf("[ RUN      ] %s\n", name)
+#define TEST_LOG_PASS(name)     OSAL_Printf("[ OK       ] %s\n", name)
+#define TEST_LOG_FAIL(name)     OSAL_Printf("[ FAILED   ] %s\n", name)
+#define TEST_LOG_SKIP(name)     OSAL_Printf("[ SKIPPED  ] %s\n", name)
+#define TEST_LOG_SEPARATOR()    OSAL_Printf("[----------]\n")
+#define TEST_LOG_HEADER()       OSAL_Printf("[==========]\n")
+
 /* Global state for assertions */
 bool g_test_failed = false;
 const char *g_current_test = NULL;
@@ -36,7 +44,10 @@ static test_result_t run_test_case(const test_case_t *test)
     g_test_failed = false;
     g_current_test = test->name;
 
-    OSAL_Printf("[  RUN     ] %s\n", test->name);
+    TEST_LOG_RUN(test->name);
+
+    /* Record start time */
+    uint32_t start_time = OSAL_GetTickCount();
 
     /* Run setup if provided */
     if (NULL != test->setup) {
@@ -51,12 +62,24 @@ static test_result_t run_test_case(const test_case_t *test)
         test->teardown();
     }
 
+    /* Calculate execution time */
+    uint32_t end_time = OSAL_GetTickCount();
+    uint32_t elapsed = end_time - start_time;
+
     /* Check result */
     if (g_test_failed) {
-        OSAL_Printf("[  FAILED  ] %s\n\n", test->name);
+        TEST_LOG_FAIL(test->name);
+        OSAL_Printf("             (elapsed: %u ms)\n\n", elapsed);
+
+        /* Add to failed test list */
+        if (g_stats.failed_test_count < 64) {
+            g_stats.failed_tests[g_stats.failed_test_count++] = test->name;
+        }
+
         return TEST_RESULT_FAIL;
     } else {
-        OSAL_Printf("[  OK      ] %s\n\n", test->name);
+        TEST_LOG_PASS(test->name);
+        OSAL_Printf("             (elapsed: %u ms)\n\n", elapsed);
         return TEST_RESULT_PASS;
     }
 }
@@ -70,7 +93,8 @@ static int32_t run_suite(const test_suite_t *suite)
         return OSAL_ERR_GENERIC;
     }
 
-    OSAL_Printf("\n[----------] Running %u tests from %s\n", suite->case_count, suite->suite_name);
+    TEST_LOG_SEPARATOR();
+    OSAL_Printf(" Running %u tests from %s\n", suite->case_count, suite->suite_name);
 
     /* Run suite setup if provided */
     if (NULL != suite->suite_setup) {
@@ -96,7 +120,8 @@ static int32_t run_suite(const test_suite_t *suite)
         suite->suite_teardown();
     }
 
-    OSAL_Printf("[----------] %u tests from %s\n\n", suite->case_count, suite->suite_name);
+    TEST_LOG_SEPARATOR();
+    OSAL_Printf(" %u tests from %s\n\n", suite->case_count, suite->suite_name);
 
     return OSAL_SUCCESS;
 }
@@ -109,19 +134,38 @@ int32_t libutest_run_all(void)
     uint32_t suite_count = 0;
     const test_suite_t **suites = test_get_all_suites(&suite_count);
 
-    OSAL_Printf("\n[==========] Running %u test suites\n", suite_count);
+    TEST_LOG_HEADER();
+    OSAL_Printf(" Running %u test suites\n", suite_count);
 
     libutest_reset_stats();
+
+    uint32_t start_time = OSAL_GetTickCount();
 
     for (uint32_t i = 0; i < suite_count; i++) {
         run_suite(suites[i]);
     }
 
-    OSAL_Printf("\n[==========] %u tests from %u test suites ran\n", g_stats.total, suite_count);
-    OSAL_Printf("[  PASSED  ] %u tests\n", g_stats.passed);
+    uint32_t end_time = OSAL_GetTickCount();
+    g_stats.total_time_ms = end_time - start_time;
+    if (g_stats.total > 0) {
+        g_stats.avg_time_ms = g_stats.total_time_ms / g_stats.total;
+    }
+
+    TEST_LOG_HEADER();
+    OSAL_Printf(" %u tests from %u test suites ran (%u ms total)\n",
+                g_stats.total, suite_count, g_stats.total_time_ms);
+    OSAL_Printf("[ PASSED   ] %u tests\n", g_stats.passed);
 
     if (g_stats.failed > 0) {
-        OSAL_Printf("[  FAILED  ] %u tests\n", g_stats.failed);
+        OSAL_Printf("[ FAILED   ] %u tests\n", g_stats.failed);
+
+        /* Print failed test list */
+        if (g_stats.failed_test_count > 0) {
+            OSAL_Printf("\nFailed tests:\n");
+            for (uint32_t i = 0; i < g_stats.failed_test_count; i++) {
+                OSAL_Printf("  - %s\n", g_stats.failed_tests[i]);
+            }
+        }
     }
 
     if (g_stats.skipped > 0) {
@@ -148,19 +192,40 @@ int32_t libutest_run_layer(const char *layer_name)
         return OSAL_ERR_GENERIC;
     }
 
-    OSAL_Printf("\n[==========] Running %u test suites from layer %s\n", count, layer_name);
+    TEST_LOG_HEADER();
+    OSAL_Printf(" Running %u test suites from layer %s\n", count, layer_name);
 
     libutest_reset_stats();
+
+    uint32_t start_time = OSAL_GetTickCount();
 
     for (uint32_t i = 0; i < count; i++) {
         run_suite(suites[i]);
     }
 
-    OSAL_Printf("\n[==========] %u tests from %u test suites ran\n", g_stats.total, count);
-    OSAL_Printf("[  PASSED  ] %u tests\n", g_stats.passed);
+    uint32_t end_time = OSAL_GetTickCount();
+    g_stats.total_time_ms = end_time - start_time;
+    if (g_stats.total > 0) {
+        g_stats.avg_time_ms = g_stats.total_time_ms / g_stats.total;
+    }
+
+    TEST_LOG_HEADER();
+    OSAL_Printf(" %u tests from layer %s ran (%llu ms total)\n",
+                g_stats.total, layer_name, (unsigned long long)g_stats.total_time_ms);
+    OSAL_Printf("[ PASSED   ] %u tests\n", g_stats.passed);
 
     if (g_stats.failed > 0) {
-        OSAL_Printf("[  FAILED  ] %u tests\n", g_stats.failed);
+        OSAL_Printf("[ FAILED   ] %u tests\n", g_stats.failed);
+        if (g_stats.failed_test_count > 0) {
+            OSAL_Printf("\nFailed tests:\n");
+            for (uint32_t i = 0; i < g_stats.failed_test_count; i++) {
+                OSAL_Printf("  - %s\n", g_stats.failed_tests[i]);
+            }
+        }
+    }
+
+    if (g_stats.skipped > 0) {
+        OSAL_Printf("[ SKIPPED  ] %u tests\n", g_stats.skipped);
     }
 
     return (0 == g_stats.failed) ? OSAL_SUCCESS : OSAL_ERR_GENERIC;

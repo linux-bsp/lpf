@@ -1,3 +1,4 @@
+#include "test_framework.h"
 /**
  * @file test_pcl_api.c
  * @brief PCL API单元测试
@@ -10,9 +11,6 @@
  * - 配置验证
  */
 
-#include "tests_core.h"
-#include "test_assert.h"
-#include "test_registry.h"
 #include "pcl_api.h"
 #include "osal.h"
 
@@ -411,29 +409,29 @@ TEST_CASE(test_pcl_validate_null_pointer)
 
 /* ========== 测试套件注册 ========== */
 
-TEST_SUITE_BEGIN(test_pcl_init_suite, "pcl_api", "PCL")
+TEST_MODULE_BEGIN(test_pcl_init_suite, "PCL")
     TEST_CASE_REF(test_pcl_init_success)
     TEST_CASE_REF(test_pcl_cleanup)
-TEST_SUITE_END(test_pcl_init_suite, "test_pcl_api", "PCL")
+TEST_MODULE_END(test_pcl_init_suite, "PCL")
 
-TEST_SUITE_BEGIN(test_pcl_register_suite, "pcl_api", "PCL")
+TEST_MODULE_BEGIN(test_pcl_register_suite, "PCL")
     TEST_CASE_REF(test_pcl_register_success)
     TEST_CASE_REF(test_pcl_register_null_pointer)
     TEST_CASE_REF(test_pcl_register_not_initialized)
     TEST_CASE_REF(test_pcl_register_duplicate)
     TEST_CASE_REF(test_pcl_register_multiple_versions)
-TEST_SUITE_END(test_pcl_register_suite, "test_pcl_api", "PCL")
+TEST_MODULE_END(test_pcl_register_suite, "PCL")
 
-TEST_SUITE_BEGIN(test_pcl_query_suite, "pcl_api", "PCL")
+TEST_MODULE_BEGIN(test_pcl_find_suite, "PCL")
     TEST_CASE_REF(test_pcl_find_success)
     TEST_CASE_REF(test_pcl_find_without_version)
     TEST_CASE_REF(test_pcl_find_not_found)
     TEST_CASE_REF(test_pcl_find_null_parameters)
     TEST_CASE_REF(test_pcl_list_success)
     TEST_CASE_REF(test_pcl_list_null_parameters)
-TEST_SUITE_END(test_pcl_query_suite, "test_pcl_api", "PCL")
+TEST_MODULE_END(test_pcl_find_suite, "PCL")
 
-TEST_SUITE_BEGIN(test_pcl_hw_suite, "pcl_api", "PCL")
+TEST_MODULE_BEGIN(test_pcl_hw_suite, "PCL")
     TEST_CASE_REF(test_pcl_hw_find_mcu_success)
     TEST_CASE_REF(test_pcl_hw_find_mcu_not_found)
     TEST_CASE_REF(test_pcl_hw_find_mcu_null_parameters)
@@ -441,9 +439,9 @@ TEST_SUITE_BEGIN(test_pcl_hw_suite, "pcl_api", "PCL")
     TEST_CASE_REF(test_pcl_hw_get_mcu_invalid_id)
     TEST_CASE_REF(test_pcl_hw_find_bmc_success)
     TEST_CASE_REF(test_pcl_hw_find_satellite_success)
-TEST_SUITE_END(test_pcl_hw_suite, "test_pcl_api", "PCL")
+TEST_MODULE_END(test_pcl_hw_suite, "PCL")
 
-TEST_SUITE_BEGIN(test_pcl_validate_suite, "pcl_api", "PCL")
+TEST_MODULE_BEGIN(test_pcl_validate_suite, "PCL")
     TEST_CASE_REF(test_pcl_validate_success)
     TEST_CASE_REF(test_pcl_validate_null_pointer)
-TEST_SUITE_END(test_pcl_validate_suite, "test_pcl_api", "PCL")
+TEST_MODULE_END(test_pcl_validate_suite, "PCL")

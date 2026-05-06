@@ -44,6 +44,10 @@ typedef struct {
     uint32_t passed;
     uint32_t failed;
     uint32_t skipped;
+    uint64_t total_time_ms;      /* Total execution time in milliseconds */
+    uint64_t avg_time_ms;        /* Average execution time per test */
+    const char *failed_tests[64]; /* List of failed test names */
+    uint32_t failed_test_count;  /* Number of failed tests in the list */
 } test_stats_t;
 
 /* Test result codes */

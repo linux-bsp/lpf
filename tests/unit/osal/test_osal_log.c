@@ -1,15 +1,12 @@
+#include "test_framework.h"
 /**
  * @file test_osal_log.c
  * @brief OSAL日志系统单元测试
  */
 
-#include "tests_core.h"
-#include "test_assert.h"
-#include "test_registry.h"
 #include "osal.h"
 #include <unistd.h>  /* for unlink */
 #include <stdbool.h>
-#include <pthread.h>
 
 /* 测试日志文件路径 */
 #define TEST_LOG_FILE "/tmp/osal_test.log"
@@ -345,7 +342,7 @@ TEST_CASE(test_osal_log_performance)
  * 测试模块注册
  *===========================================================================*/
 
-TEST_SUITE_BEGIN(test_osal_log, "osal_log", "OSAL")
+TEST_MODULE_BEGIN(test_osal_log, "OSAL")
     // OSAL日志系统测试
     /* 日志初始化 */
     TEST_CASE_REF(test_osal_log_init_success)
@@ -376,4 +373,4 @@ TEST_SUITE_BEGIN(test_osal_log, "osal_log", "OSAL")
 
     /* 性能测试 */
     TEST_CASE_REF(test_osal_log_performance)
-TEST_SUITE_END(test_osal_log, "test_osal_log", "OSAL")
+TEST_MODULE_END(test_osal_log, "OSAL")

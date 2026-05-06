@@ -1,3 +1,4 @@
+#include "test_framework.h"
 /**
  * @file test_mutex.c
  * @brief OSAL互斥锁单元测试
@@ -5,9 +6,6 @@
  * 使用新的libtest框架，测试自动注册
  */
 
-#include "tests_core.h"
-#include "test_assert.h"
-#include "test_registry.h"
 #include "osal.h"
 
 static int32_t shared_counter = 0;
@@ -116,7 +114,7 @@ TEST_CASE(test_mutex_protect_shared_resource)
 }
 
 /* 注册测试套件 - 自动注册 */
-TEST_SUITE_BEGIN(osal_mutex, "osal", "OSAL")
+TEST_MODULE_BEGIN(osal_mutex, "OSAL")
     TEST_CASE_REF(test_mutex_create_success)
     TEST_CASE_REF(test_mutex_create_nullpointer)
     TEST_CASE_REF(test_mutex_lockunlock_success)
@@ -125,4 +123,4 @@ TEST_SUITE_BEGIN(osal_mutex, "osal", "OSAL")
     TEST_CASE_REF(test_mutex_delete_success)
     TEST_CASE_REF(test_mutex_delete_nullpointer)
     TEST_CASE_REF(test_mutex_protect_shared_resource)
-TEST_SUITE_END(osal_mutex, "osal", "OSAL")
+TEST_MODULE_END(osal_mutex, "OSAL")

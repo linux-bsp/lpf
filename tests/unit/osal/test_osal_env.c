@@ -1,13 +1,10 @@
+#include "test_framework.h"
 /**
  * @file test_osal_env.c
  * @brief OSAL环境变量操作单元测试
  */
 
-#include "tests_core.h"
-#include "test_assert.h"
-#include "test_registry.h"
 #include "osal.h"
-#include <string.h>
 
 /*===========================================================================
  * 测试用例
@@ -18,7 +15,7 @@ TEST_CASE(test_osal_getenv_existing)
     /* Get an existing environment variable */
     char *value = OSAL_getenv("PATH");
     TEST_ASSERT_NOT_NULL(value);
-    TEST_ASSERT_TRUE(strlen(value) > 0);
+    TEST_ASSERT_TRUE(OSAL_Strlen(value) > 0);
 }
 
 TEST_CASE(test_osal_getenv_nonexistent)
@@ -119,7 +116,7 @@ TEST_CASE(test_osal_env_empty_value)
  * 测试套件注册
  *===========================================================================*/
 
-TEST_SUITE_BEGIN(test_osal_env, "osal_env", "OSAL")
+TEST_MODULE_BEGIN(test_osal_env, "OSAL")
     TEST_CASE_REF(test_osal_getenv_existing)
     TEST_CASE_REF(test_osal_getenv_nonexistent)
     TEST_CASE_REF(test_osal_setenv_new_variable)
@@ -128,4 +125,4 @@ TEST_SUITE_BEGIN(test_osal_env, "osal_env", "OSAL")
     TEST_CASE_REF(test_osal_unsetenv_existing)
     TEST_CASE_REF(test_osal_unsetenv_nonexistent)
     TEST_CASE_REF(test_osal_env_empty_value)
-TEST_SUITE_END(test_osal_env, "test_osal_env", "OSAL")
+TEST_MODULE_END(test_osal_env, "OSAL")

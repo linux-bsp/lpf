@@ -2,11 +2,8 @@
  * OSAL测试 - 原子操作测试
  ************************************************************************/
 
-#include "tests_core.h"
-#include "test_assert.h"
-#include "test_registry.h"
-#include "osal.h"
-#include <pthread.h>
+#include "test_framework.h"
+#include <osal.h>
 
 /*===========================================================================
  * 基础功能测试
@@ -126,8 +123,6 @@ TEST_CASE(test_atomic_fetch_sub)
     old_value = OSAL_AtomicFetchSub(&atomic, 70);
     TEST_ASSERT_EQUAL(70, old_value);
     TEST_ASSERT_EQUAL(0, OSAL_AtomicLoad(&atomic));
-
-    return;
 }
 
 TEST_CASE(test_atomic_compare_exchange)
@@ -150,8 +145,6 @@ TEST_CASE(test_atomic_compare_exchange)
     result = OSAL_AtomicCompareExchange(&atomic, 100, 0);
     TEST_ASSERT_TRUE(result);
     TEST_ASSERT_EQUAL(0, OSAL_AtomicLoad(&atomic));
-
-    return;
 }
 
 /*===========================================================================
@@ -186,7 +179,7 @@ TEST_CASE(test_atomic_multithread_increment)
     OSAL_AtomicInit(&counter, 0);
 
     /* 创建多个线程同时自增 */
-    for (int i = 0; i < THREAD_COUNT; i++) {
+    for (int32_t i = 0; i < THREAD_COUNT; i++) {
         thread_data[i].counter = &counter;
         thread_data[i].iterations = ITERATIONS_PER_THREAD;
 
@@ -196,7 +189,7 @@ TEST_CASE(test_atomic_multithread_increment)
     }
 
     /* 等待所有线程完成 */
-    OSAL_msleep(1000);  /* 确保所有线程完成 */
+    OSAL_msleep(1000);
 
     /* 验证计数器值 */
     uint32_t expected = THREAD_COUNT * ITERATIONS_PER_THREAD;
@@ -204,11 +197,9 @@ TEST_CASE(test_atomic_multithread_increment)
     TEST_ASSERT_EQUAL(expected, actual);
 
     /* 清理线程 */
-    for (int i = 0; i < THREAD_COUNT; i++) {
+    for (int32_t i = 0; i < THREAD_COUNT; i++) {
         OSAL_ThreadJoin(threads[i]);
     }
-
-    return;
 }
 
 static void* atomic_cas_thread(void *arg)
@@ -238,7 +229,7 @@ TEST_CASE(test_atomic_multithread_cas)
     OSAL_AtomicInit(&counter, 0);
 
     /* 创建多个线程使用CAS自增 */
-    for (int i = 0; i < THREAD_COUNT; i++) {
+    for (int32_t i = 0; i < THREAD_COUNT; i++) {
         thread_data[i].counter = &counter;
         thread_data[i].iterations = ITERATIONS_PER_THREAD;
 
@@ -256,11 +247,9 @@ TEST_CASE(test_atomic_multithread_cas)
     TEST_ASSERT_EQUAL(expected, actual);
 
     /* 清理线程 */
-    for (int i = 0; i < THREAD_COUNT; i++) {
+    for (int32_t i = 0; i < THREAD_COUNT; i++) {
         OSAL_ThreadJoin(threads[i]);
     }
-
-    return;
 }
 
 /*===========================================================================
@@ -280,8 +269,6 @@ TEST_CASE(test_atomic_overflow)
     OSAL_AtomicInit(&atomic, 0);
     OSAL_AtomicDecrement(&atomic);
     TEST_ASSERT_EQUAL(0xFFFFFFFF, OSAL_AtomicLoad(&atomic));  /* 下溢到最大值 */
-
-    return;
 }
 
 TEST_CASE(test_atomic_boundary_values)
@@ -299,24 +286,22 @@ TEST_CASE(test_atomic_boundary_values)
     /* 测试中间值 */
     OSAL_AtomicInit(&atomic, 0x80000000);
     TEST_ASSERT_EQUAL(0x80000000, OSAL_AtomicLoad(&atomic));
-
-    return;
 }
 
 /*===========================================================================
  * 测试套件注册
  *===========================================================================*/
 
-TEST_SUITE_BEGIN(osal_atomic, "osal_atomic", "OSAL")
-    TEST_CASE_REF(test_atomic_init_and_load)
-    TEST_CASE_REF(test_atomic_store)
-    TEST_CASE_REF(test_atomic_increment)
-    TEST_CASE_REF(test_atomic_decrement)
-    TEST_CASE_REF(test_atomic_fetch_add)
-    TEST_CASE_REF(test_atomic_fetch_sub)
-    TEST_CASE_REF(test_atomic_compare_exchange)
-    TEST_CASE_REF(test_atomic_multithread_increment)
-    TEST_CASE_REF(test_atomic_multithread_cas)
-    TEST_CASE_REF(test_atomic_overflow)
-    TEST_CASE_REF(test_atomic_boundary_values)
-TEST_SUITE_END(osal_atomic, "test_osal_atomic", "OSAL")
+TEST_MODULE_BEGIN(test_osal_atomic, "OSAL")
+    TEST_CASE_REGISTER(test_atomic_init_and_load, "Init and load")
+    TEST_CASE_REGISTER(test_atomic_store, "Store")
+    TEST_CASE_REGISTER(test_atomic_increment, "Increment")
+    TEST_CASE_REGISTER(test_atomic_decrement, "Decrement")
+    TEST_CASE_REGISTER(test_atomic_fetch_add, "Fetch add")
+    TEST_CASE_REGISTER(test_atomic_fetch_sub, "Fetch sub")
+    TEST_CASE_REGISTER(test_atomic_compare_exchange, "Compare exchange")
+    TEST_CASE_REGISTER(test_atomic_multithread_increment, "Multithread increment")
+    TEST_CASE_REGISTER(test_atomic_multithread_cas, "Multithread CAS")
+    TEST_CASE_REGISTER(test_atomic_overflow, "Overflow")
+    TEST_CASE_REGISTER(test_atomic_boundary_values, "Boundary values")
+TEST_MODULE_END(test_osal_atomic, "OSAL")

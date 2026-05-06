@@ -1,11 +1,9 @@
+#include "test_framework.h"
 /**
  * @file test_osal_string.c
  * @brief OSAL字符串和内存操作单元测试
  */
 
-#include "tests_core.h"
-#include "test_assert.h"
-#include "test_registry.h"
 #include "osal.h"
 
 /*===========================================================================
@@ -349,7 +347,7 @@ TEST_CASE(test_osal_strtol_base)
  * 测试模块注册
  *===========================================================================*/
 
-TEST_SUITE_BEGIN(test_osal_string, "osal_string", "OSAL")
+TEST_MODULE_BEGIN(test_osal_string, "OSAL")
     // OSAL字符串和内存操作测试
     /* 内存操作 */
     TEST_CASE_REF(test_osal_memset_success)
@@ -381,4 +379,4 @@ TEST_SUITE_BEGIN(test_osal_string, "osal_string", "OSAL")
     TEST_CASE_REF(test_osal_atoi_invalid)
     TEST_CASE_REF(test_osal_atol_success)
     TEST_CASE_REF(test_osal_strtol_base)
-TEST_SUITE_END(test_osal_string, "test_osal_string", "OSAL")
+TEST_MODULE_END(test_osal_string, "OSAL")

@@ -1,13 +1,10 @@
+#include "test_framework.h"
 /**
  * @file test_osal_errno.c
  * @brief OSAL错误码操作单元测试
  */
 
-#include "tests_core.h"
-#include "test_assert.h"
-#include "test_registry.h"
 #include "osal.h"
-#include <string.h>
 
 /*===========================================================================
  * 测试用例
@@ -43,15 +40,15 @@ TEST_CASE(test_osal_strerror)
 
     msg = OSAL_StrError(OSAL_EINVAL);
     TEST_ASSERT_NOT_NULL(msg);
-    TEST_ASSERT_TRUE(strlen(msg) > 0);
+    TEST_ASSERT_TRUE(OSAL_Strlen(msg) > 0);
 
     msg = OSAL_StrError(OSAL_ENOENT);
     TEST_ASSERT_NOT_NULL(msg);
-    TEST_ASSERT_TRUE(strlen(msg) > 0);
+    TEST_ASSERT_TRUE(OSAL_Strlen(msg) > 0);
 
     msg = OSAL_StrError(OSAL_ENOMEM);
     TEST_ASSERT_NOT_NULL(msg);
-    TEST_ASSERT_TRUE(strlen(msg) > 0);
+    TEST_ASSERT_TRUE(OSAL_Strlen(msg) > 0);
 }
 
 TEST_CASE(test_osal_get_status_name)
@@ -76,9 +73,9 @@ TEST_CASE(test_osal_get_status_name)
  * 测试套件注册
  *===========================================================================*/
 
-TEST_SUITE_BEGIN(test_osal_errno, "osal_errno", "OSAL")
+TEST_MODULE_BEGIN(test_osal_errno, "OSAL")
     TEST_CASE_REF(test_osal_get_errno)
     TEST_CASE_REF(test_osal_set_errno)
     TEST_CASE_REF(test_osal_strerror)
     TEST_CASE_REF(test_osal_get_status_name)
-TEST_SUITE_END(test_osal_errno, "test_osal_errno", "OSAL")
+TEST_MODULE_END(test_osal_errno, "OSAL")

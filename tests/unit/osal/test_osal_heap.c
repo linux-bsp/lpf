@@ -1,11 +1,9 @@
+#include "test_framework.h"
 /**
  * @file test_osal_heap.c
  * @brief OSAL内存管理单元测试
  */
 
-#include "tests_core.h"
-#include "test_assert.h"
-#include "test_registry.h"
 #include "osal.h"
 
 /*===========================================================================
@@ -355,7 +353,7 @@ TEST_CASE(test_osal_malloc_performance)
  * 测试模块注册
  *===========================================================================*/
 
-TEST_SUITE_BEGIN(test_osal_heap, "osal_heap", "OSAL")
+TEST_MODULE_BEGIN(test_osal_heap, "OSAL")
     // OSAL内存管理测试
     /* 内存分配 */
     TEST_CASE_REF(test_osal_malloc_success)
@@ -387,4 +385,4 @@ TEST_SUITE_BEGIN(test_osal_heap, "osal_heap", "OSAL")
 
     /* 性能测试 */
     TEST_CASE_REF(test_osal_malloc_performance)
-TEST_SUITE_END(test_osal_heap, "test_osal_heap", "OSAL")
+TEST_MODULE_END(test_osal_heap, "OSAL")

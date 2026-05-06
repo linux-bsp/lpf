@@ -1,11 +1,9 @@
+#include "test_framework.h"
 /**
  * @file test_osal_clock.c
  * @brief OSAL Clock模块单元测试
  */
 
-#include "tests_core.h"
-#include "test_assert.h"
-#include "test_registry.h"
 #include "osal.h"
 #include "sys/osal_time.h"
 
@@ -161,7 +159,7 @@ TEST_CASE(test_osal_time_precision)
  * 测试套件注册
  *===========================================================================*/
 
-TEST_SUITE_BEGIN(test_osal_clock, "osal_clock", "OSAL")
+TEST_MODULE_BEGIN(test_osal_clock, "OSAL")
     /* OSAL_GetLocalTime 测试 */
     TEST_CASE_REF(test_osal_get_local_time_success)
     TEST_CASE_REF(test_osal_get_local_time_null_pointer)
@@ -179,4 +177,4 @@ TEST_SUITE_BEGIN(test_osal_clock, "osal_clock", "OSAL")
 
     /* 综合测试 */
     TEST_CASE_REF(test_osal_time_precision)
-TEST_SUITE_END(test_osal_clock, "test_osal_clock", "OSAL")
+TEST_MODULE_END(test_osal_clock, "OSAL")

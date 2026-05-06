@@ -1,11 +1,9 @@
+#include "test_framework.h"
 /**
  * @file test_pdl_bmc_protocol.c
  * @brief PDL BMC协议层单元测试（IPMI和Redfish）
  */
 
-#include "tests_core.h"
-#include "test_assert.h"
-#include "test_registry.h"
 #include "pdl_bmc_internal.h"
 #include "osal.h"
 
@@ -298,7 +296,7 @@ TEST_CASE(test_transport_serial_init_null_device)
  * 测试模块注册
  *===========================================================================*/
 
-TEST_SUITE_BEGIN(test_pdl_bmc_protocol, "pdl_bmc_protocol", "PDL")
+TEST_MODULE_BEGIN(test_pdl_bmc_protocol, "PDL")
     /* IPMI协议测试 */
     TEST_CASE_REF(test_ipmi_pack_request_basic)
     TEST_CASE_REF(test_ipmi_pack_request_with_data)
@@ -319,4 +317,4 @@ TEST_SUITE_BEGIN(test_pdl_bmc_protocol, "pdl_bmc_protocol", "PDL")
     TEST_CASE_REF(test_transport_net_init_invalid_ip)
     TEST_CASE_REF(test_transport_net_init_null_handle)
     TEST_CASE_REF(test_transport_serial_init_null_device)
-TEST_SUITE_END(test_pdl_bmc_protocol, "test_pdl_bmc_protocol", "PDL")
+TEST_MODULE_END(test_pdl_bmc_protocol, "PDL")

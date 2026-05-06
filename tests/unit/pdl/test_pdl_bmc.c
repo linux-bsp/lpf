@@ -1,11 +1,9 @@
+#include "test_framework.h"
 /**
  * @file test_pdl_bmc.c
  * @brief PDL BMC通信服务单元测试
  */
 
-#include "tests_core.h"
-#include "test_assert.h"
-#include "test_registry.h"
 #include "pdl_bmc.h"
 #include "osal.h"
 
@@ -639,7 +637,7 @@ TEST_CASE(test_pdl_bmc_get_stats_null_pointer)
  * 测试模块注册
  *===========================================================================*/
 
-TEST_SUITE_BEGIN(test_pdl_bmc, "pdl_bmc", "PDL")
+TEST_MODULE_BEGIN(test_pdl_bmc, "PDL")
     // PDL BMC通信服务测试
     /* 初始化和清理 */
     TEST_CASE_REF(test_pdl_bmc_init_network_success)
@@ -680,4 +678,4 @@ TEST_SUITE_BEGIN(test_pdl_bmc, "pdl_bmc", "PDL")
     TEST_CASE_REF(test_pdl_bmc_get_stats_success)
     TEST_CASE_REF(test_pdl_bmc_get_stats_null_handle)
     TEST_CASE_REF(test_pdl_bmc_get_stats_null_pointer)
-TEST_SUITE_END(test_pdl_bmc, "test_pdl_bmc", "PDL")
+TEST_MODULE_END(test_pdl_bmc, "PDL")
