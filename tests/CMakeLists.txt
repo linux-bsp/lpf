@@ -52,6 +52,7 @@ set(PDL_TEST_SOURCES
     unit/pdl/test_pdl_bmc_protocol.c
     unit/pdl/test_pdl_mcu.c
     unit/pdl/test_pdl_satellite.c
+    unit/pdl/test_pdl_watchdog.c
 )
 
 # System Tests (currently empty)
@@ -86,25 +87,6 @@ add_executable(ems-test
 
     # All test sources
     ${ALL_TEST_SOURCES}
-    osal/test_osal_heap.c
-    osal/test_osal_log.c
-
-    # HAL tests
-    hal/test_hal_can.c
-    hal/test_hal_serial.c
-    hal/test_hal_i2c.c
-    hal/test_hal_spi.c
-    hal/test_hal_watchdog.c
-
-    # PCL tests
-    pcl/test_pcl_api.c
-
-    # PDL tests
-    pdl/test_pdl_satellite.c
-    pdl/test_pdl_mcu.c
-    pdl/test_pdl_bmc.c
-    pdl/test_pdl_bmc_protocol.c
->>>>>>> 0937567 (新增：实现 HAL 层 Watchdog 驱动和喂狗应用)
 )
 
 target_include_directories(ems-test PRIVATE

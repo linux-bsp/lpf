@@ -15,7 +15,7 @@ add_executable(watchdog_app ${WATCHDOG_APP_SOURCES})
 # 链接依赖
 target_link_libraries(watchdog_app
     ems::osal
-    ems::hal
+    ems::pdl
     Threads::Threads
 )
 

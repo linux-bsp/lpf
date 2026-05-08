@@ -37,6 +37,9 @@ set(PDL_SOURCES
     ${PDL_SRC_DIR}/pdl_bmc/pdl_bmc_transport.c
     ${PDL_SRC_DIR}/pdl_bmc/pdl_bmc_ipmi.c
     ${PDL_SRC_DIR}/pdl_bmc/pdl_bmc_redfish.c
+
+    # Watchdog服务
+    ${PDL_SRC_DIR}/pdl_watchdog.c
 )
 
 # 创建PDL库（类型由BUILD_SHARED_LIBS控制）
@@ -94,4 +97,4 @@ install(EXPORT pdl-targets
     DESTINATION lib/cmake/pdl
 )
 
-message(STATUS "PDL configured (MCU + Satellite + BMC drivers)")
+message(STATUS "PDL configured (MCU + Satellite + BMC + Watchdog drivers)")
