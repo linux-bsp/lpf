@@ -15,16 +15,24 @@ External System <--CAN--> EMS Controller <--Ethernet/UART/CAN--> Device Modules
 
 ### Build
 
-**Recommended: CMake Presets**
+**Standard CMake commands**
 ```bash
 # Native build
-cmake --preset release && cmake --build --preset release
-cmake --preset debug && cmake --build --preset debug
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j$(nproc)
+
+cmake -B build -DCMAKE_BUILD_TYPE=Debug
+cmake --build build -j$(nproc)
 
 # Cross-compilation
-cmake --preset arm32 && cmake --build build/arm32
-cmake --preset arm64 && cmake --build build/arm64
-cmake --preset riscv64 && cmake --build build/riscv64
+cmake -B build -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/arm32-linux-gnueabihf.cmake
+cmake --build build -j$(nproc)
+
+cmake -B build -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/aarch64-linux-gnu.cmake
+cmake --build build -j$(nproc)
+
+cmake -B build -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/riscv64-linux-gnu.cmake
+cmake --build build -j$(nproc)
 ```
 
 **Alternative: build.sh wrapper**
@@ -33,36 +41,39 @@ cmake --preset riscv64 && cmake --build build/riscv64
 ./build.sh -d           # Debug build
 ./build.sh -c           # Clean
 ./build.sh -a arm32     # ARM32 cross-compile
+./build.sh -a arm64     # ARM64 cross-compile
+./build.sh -a riscv64   # RISC-V 64 cross-compile
 ```
 
 **Output locations**:
-- Binaries: `build/<preset>/bin/`
-- Libraries: `build/<preset>/lib/`
+- Binaries: `build/bin/`
+- Libraries: `build/lib/`
 
 ### Test
 
 ```bash
-# Run tests (adjust path based on preset used)
-./build/release/bin/ems-test -i    # Interactive menu (recommended)
-./build/release/bin/ems-test -a    # Run all tests
-./build/release/bin/ems-test -L OSAL  # Run OSAL layer tests
-./build/release/bin/ems-test -m test_osal_task  # Run specific module
+# Run tests
+./build/bin/ems-test -i    # Interactive menu (recommended)
+./build/bin/ems-test -a    # Run all tests
+./build/bin/ems-test -L OSAL  # Run OSAL layer tests
+./build/bin/ems-test -m test_osal_task  # Run specific module
 
 # Busybox-style shortcuts (via symlinks)
-./build/release/bin/osal-test -a    # Run only OSAL tests
-./build/release/bin/hal-test -a     # Run only HAL tests
+./build/bin/osal-test -a    # Run only OSAL tests
+./build/bin/hal-test -a     # Run only HAL tests
 
 # Fast iteration: rebuild single test layer
-cd build/release && make osal_tests -j$(nproc) && cd ../..
-cd build/release && make hal_tests -j$(nproc) && cd ../..
+cd build && make osal_tests -j$(nproc) && cd ..
+cd build && make hal_tests -j$(nproc) && cd ..
 ```
 
 ### Debug
 
 ```bash
-cmake --preset debug && cmake --build --preset debug
-gdb ./build/debug/bin/sample_app
-gdb --args ./build/debug/bin/ems-test -m test_osal_task
+cmake -B build -DCMAKE_BUILD_TYPE=Debug
+cmake --build build -j$(nproc)
+gdb ./build/bin/sample_app
+gdb --args ./build/bin/ems-test -m test_osal_task
 ```
 
 ## Architecture: 5-Layer Design
@@ -270,8 +281,8 @@ static void task_entry(void *arg)
 1. Create test file in `tests/unit/<layer>/` (e.g., `test_osal_timer.c`)
 2. Use `TEST_MODULE_BEGIN/END` macros
 3. Add source file to `tests/CMakeLists.txt`
-4. Build and run: `cmake --build build/debug && ./build/debug/bin/ems-test -m test_osal_timer`
-5. For fast iteration: `cd build/debug && make osal_tests -j$(nproc) && cd ../..`
+4. Build and run: `cmake --build build && ./build/bin/ems-test -m test_osal_timer`
+5. For fast iteration: `cd build && make osal_tests -j$(nproc) && cd ..`
 
 **Test template**:
 ```c
@@ -378,15 +389,8 @@ sudo ./build/release/bin/ems-test -m test_hal_serial
 
 ```
 build/
-├── release/           # Release build
-│   ├── bin/          # Executables (sample_app, ems-test)
-│   └── lib/          # Static libraries (libosal.a, libhal.a, libpdl.a, libpcl.a)
-├── debug/            # Debug build
-│   ├── bin/
-│   └── lib/
-├── arm32/            # ARM32 cross-compile
-├── arm64/            # ARM64 cross-compile
-└── riscv64/          # RISC-V 64 cross-compile
+├── bin/              # Executables (sample_app, ems-test)
+└── lib/              # Static libraries (libosal.a, libhal.a, libpdl.a, libpcl.a)
 ```
 
 ## Documentation

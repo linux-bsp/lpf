@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ============================================================================
-# EMS 构建脚本 - CMake Presets 包装器
+# EMS 构建脚本 - 经典 CMake 命令
 # ============================================================================
 
 set -e
@@ -13,8 +13,10 @@ YELLOW='\033[1;33m'
 NC='\033[0m'
 
 # 默认配置
-PRESET="release"
+BUILD_TYPE="Release"
+BUILD_DIR="build"
 CLEAN=0
+TOOLCHAIN=""
 JOBS=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
 
 # 帮助信息
@@ -22,28 +24,30 @@ show_help() {
     cat << EOF
 用法: $0 [选项]
 
-这是一个简化的包装脚本，内部调用 CMake Presets。
-推荐直接使用 CMake 命令以获得更好的体验。
-
 选项:
     -h, --help          显示此帮助信息
     -d, --debug         Debug 模式编译（默认 Release）
     -c, --clean         清理构建目录
     -a, --arch ARCH     交叉编译架构 (arm32/arm64/riscv64)
     -j, --jobs N        并行编译任务数（默认：CPU核心数）
+    -o, --output DIR    构建输出目录（默认：build）
 
 示例:
     $0                  # Release 模式编译
     $0 -d               # Debug 模式编译
     $0 -c               # 清理构建
     $0 -a arm32         # ARM32 交叉编译
+    $0 -d -o build-dbg  # Debug 模式，输出到 build-dbg
 
-推荐使用 CMake 命令:
-    cmake --preset release && cmake --build --preset release
-    cmake --preset debug && cmake --build --preset debug
-    cmake --preset arm32 && cmake --build build/arm32
+等效的 CMake 命令:
+    cmake -B build -DCMAKE_BUILD_TYPE=Release
+    cmake --build build -j\$(nproc)
 
-详细文档: docs/QUICK_BUILD.md
+交叉编译:
+    cmake -B build -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/arm32-linux-gnueabihf.cmake
+    cmake --build build
+
+详细文档: docs/BUILD_GUIDE.md
 
 EOF
 }
@@ -56,7 +60,7 @@ while [[ $# -gt 0 ]]; do
             exit 0
             ;;
         -d|--debug)
-            PRESET="debug"
+            BUILD_TYPE="Debug"
             shift
             ;;
         -c|--clean)
@@ -64,11 +68,30 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         -a|--arch)
-            PRESET="$2"
+            case $2 in
+                arm32)
+                    TOOLCHAIN="cmake/toolchains/arm32-linux-gnueabihf.cmake"
+                    ;;
+                arm64)
+                    TOOLCHAIN="cmake/toolchains/aarch64-linux-gnu.cmake"
+                    ;;
+                riscv64)
+                    TOOLCHAIN="cmake/toolchains/riscv64-linux-gnu.cmake"
+                    ;;
+                *)
+                    echo -e "${RED}错误: 不支持的架构 '$2'${NC}"
+                    echo "支持的架构: arm32, arm64, riscv64"
+                    exit 1
+                    ;;
+            esac
             shift 2
             ;;
         -j|--jobs)
             JOBS="$2"
+            shift 2
+            ;;
+        -o|--output)
+            BUILD_DIR="$2"
             shift 2
             ;;
         *)
@@ -82,34 +105,34 @@ done
 # 清理构建
 if [ $CLEAN -eq 1 ]; then
     echo -e "${YELLOW}清理构建目录...${NC}"
-    rm -rf build
+    rm -rf "$BUILD_DIR"
     echo -e "${GREEN}清理完成${NC}"
     exit 0
 fi
 
-# 验证 preset 是否存在
-VALID_PRESETS="debug release arm32 arm64 riscv64"
-if ! echo "$VALID_PRESETS" | grep -wq "$PRESET"; then
-    echo -e "${RED}错误: 无效的配置 '$PRESET'${NC}"
-    echo "可用配置: $VALID_PRESETS"
-    exit 1
+# 构建 CMake 配置命令
+CMAKE_ARGS="-B $BUILD_DIR -DCMAKE_BUILD_TYPE=$BUILD_TYPE"
+if [ -n "$TOOLCHAIN" ]; then
+    CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN"
 fi
 
 # 配置
-echo -e "${GREEN}配置构建 (preset: $PRESET)...${NC}"
-cmake --preset "$PRESET"
+echo -e "${GREEN}配置构建 (类型: $BUILD_TYPE)...${NC}"
+if [ -n "$TOOLCHAIN" ]; then
+    echo -e "工具链: ${YELLOW}$TOOLCHAIN${NC}"
+fi
+cmake $CMAKE_ARGS
 
 # 编译
 echo -e "${GREEN}开始编译 (并行任务: $JOBS)...${NC}"
-cmake --build "build/$PRESET" -j "$JOBS"
+cmake --build "$BUILD_DIR" -j "$JOBS"
 
 # 显示结果
-BUILD_DIR="build/$PRESET"
 echo ""
 echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}编译完成！${NC}"
 echo -e "${GREEN}========================================${NC}"
-echo -e "配置: ${YELLOW}$PRESET${NC}"
+echo -e "构建类型: ${YELLOW}$BUILD_TYPE${NC}"
 echo -e "输出目录: ${YELLOW}$BUILD_DIR${NC}"
 echo ""
 
