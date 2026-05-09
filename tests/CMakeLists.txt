@@ -126,10 +126,14 @@ install(TARGETS ems-test
 
 # Create symlinks for module-specific test runners
 install(CODE "
-    set(INSTALL_BIN_DIR \"\${CMAKE_INSTALL_PREFIX}/bin\")
-    set(EMS_TEST_PATH \"\${INSTALL_BIN_DIR}/ems-test\")
+    # Handle DESTDIR for cross-compilation (e.g., Buildroot)
+    if(DEFINED ENV{DESTDIR})
+        set(INSTALL_BIN_DIR \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin\")
+    else()
+        set(INSTALL_BIN_DIR \"\${CMAKE_INSTALL_PREFIX}/bin\")
+    endif()
 
-    # Create symlinks
+    # Create symlinks (use relative path for portability)
     execute_process(
         COMMAND \${CMAKE_COMMAND} -E create_symlink ems-test \${INSTALL_BIN_DIR}/osal-test
     )
