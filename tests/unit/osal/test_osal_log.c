@@ -283,7 +283,7 @@ TEST_CASE(test_osal_log_write_without_init)
      * 原因：log_internal_ex函数使用pthread_mutex_lock但没有检查初始化状态
      * TODO: 需要在OSAL日志实现中添加初始化状态检查
      */
-    TEST_SKIP_IF(true, "OSAL log implementation needs initialization check");
+    TEST_ASSERT_FALSE(true); // OSAL log implementation needs initialization check
 }
 
 /* 测试用例: 重复初始化 */
@@ -293,7 +293,7 @@ TEST_CASE(test_osal_log_init_twice)
      * 原因：OSAL_LogInit不检查是否已初始化，直接打开新文件而不关闭旧文件
      * TODO: 需要在OSAL_LogInit中添加已初始化检查，或先调用shutdown
      */
-    TEST_SKIP_IF(true, "Multiple init causes file descriptor leak");
+    TEST_ASSERT_FALSE(true); // Multiple init causes file descriptor leak
 }
 
 /* 测试用例: 重复清理 */
@@ -303,7 +303,7 @@ TEST_CASE(test_osal_log_shutdown_twice)
      * 原因：OSAL_LogShutdown只关闭文件但不清理全局状态，可能影响后续测试
      * TODO: 需要在OSAL日志实现中添加完整的状态重置逻辑
      */
-    TEST_SKIP_IF(true, "Multiple shutdown may corrupt log state for subsequent tests");
+    TEST_ASSERT_FALSE(true); // Multiple shutdown may corrupt log state for subsequent tests
 }
 
 /*===========================================================================

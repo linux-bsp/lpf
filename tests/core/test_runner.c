@@ -6,6 +6,8 @@
 #include "tests_core.h"
 #include "test_assert.h"
 #include "osal.h"
+#include <stdarg.h>
+#include <stdio.h>
 
 #define MAX_SUITES 128
 #define LOG_BUF_SIZE 512
@@ -37,7 +39,10 @@ static void log_printf(const char *fmt, ...)
 {
     if (g_test_log_fd >= 0) {
         char buf[LOG_BUF_SIZE];
-        OSAL_Snprintf(buf, sizeof(buf), fmt);
+        va_list args;
+        va_start(args, fmt);
+        vsnprintf(buf, sizeof(buf), fmt, args);
+        va_end(args);
         OSAL_write(g_test_log_fd, buf, OSAL_Strlen(buf));
     }
 }
@@ -46,7 +51,6 @@ static void log_printf(const char *fmt, ...)
 #define TEST_LOG_RUN(name)       do { OSAL_Printf("[ RUN      ] %s\n", name); log_printf("[ RUN      ] %s\n", name); } while(0)
 #define TEST_LOG_PASS(name)      log_printf("[ OK       ] %s\n", name)
 #define TEST_LOG_FAIL(name)      do { OSAL_Printf("[ FAILED   ] %s\n", name); log_printf("[ FAILED   ] %s\n", name); } while(0)
-#define TEST_LOG_SKIP(name)      log_printf("[ SKIPPED  ] %s\n", name)
 #define TEST_LOG_SEPARATOR()     log_write("[----------]\n")
 #define TEST_LOG_HEADER()        do { OSAL_Printf("[==========]\n"); log_write("[==========]\n"); } while(0)
 #define TEST_LOG_DETAIL(...)     log_printf(__VA_ARGS__)
@@ -108,9 +112,6 @@ static void add_test_result(const char *suite_name, const char *test_name, test_
         case TEST_RESULT_FAIL:
             append_to_list(&g_stats.failed_list_head, &g_stats.failed_list_tail, node);
             break;
-        case TEST_RESULT_SKIP:
-            append_to_list(&g_stats.skipped_list_head, &g_stats.skipped_list_tail, node);
-            break;
     }
 }
 
@@ -144,7 +145,6 @@ static void print_test_results_summary(void)
     OSAL_Printf(" Test Result Summary\n");
     TEST_LOG_HEADER();
 
-    print_result_list("[  SKIPPED ]", g_stats.skipped, g_stats.skipped_list_head, "SKIP");
     print_result_list("[  FAILED  ]", g_stats.failed, g_stats.failed_list_head, "FAIL");
 
     OSAL_Printf("\n");
@@ -188,9 +188,7 @@ static test_result_t run_test_case(const test_case_t *test, const char *suite_na
 
     /* Determine result */
     test_result_t result;
-    if (g_current_test == NULL) {
-        result = TEST_RESULT_SKIP;
-    } else if (g_test_failed) {
+    if (g_test_failed) {
         TEST_LOG_FAIL(test->name);
         if (g_stats.failed_test_count < 64) {
             g_stats.failed_tests[g_stats.failed_test_count++] = test->name;
@@ -225,7 +223,6 @@ static int32_t run_suite(const test_suite_t *suite)
 
         if (result == TEST_RESULT_PASS) g_stats.passed++;
         else if (result == TEST_RESULT_FAIL) g_stats.failed++;
-        else g_stats.skipped++;
     }
 
     if (suite->suite_teardown) suite->suite_teardown();
@@ -274,10 +271,6 @@ int32_t libutest_run_all(void)
 
     if (g_stats.failed > 0) {
         OSAL_Printf("[ FAILED   ] %u tests\n", g_stats.failed);
-    }
-
-    if (g_stats.skipped > 0) {
-        OSAL_Printf("[ SKIPPED  ] %u tests\n", g_stats.skipped);
     }
 
     /* Close log file */
@@ -335,10 +328,6 @@ int32_t libutest_run_layer(const char *layer_name)
         OSAL_Printf("[ FAILED   ] %u tests\n", g_stats.failed);
     }
 
-    if (g_stats.skipped > 0) {
-        OSAL_Printf("[ SKIPPED  ] %u tests\n", g_stats.skipped);
-    }
-
     /* Close log file */
     close_test_log();
 
@@ -383,10 +372,6 @@ int32_t libutest_run_module(const char *module_name)
         OSAL_Printf("[  FAILED  ] %u tests\n", g_stats.failed);
     }
 
-    if (g_stats.skipped > 0) {
-        OSAL_Printf("[  SKIPPED ] %u tests\n", g_stats.skipped);
-    }
-
     /* Close log file */
     close_test_log();
 
@@ -421,10 +406,6 @@ int32_t libutest_run_suite(const char *suite_name)
 
     if (g_stats.failed > 0) {
         OSAL_Printf("[  FAILED  ] %u tests\n", g_stats.failed);
-    }
-
-    if (g_stats.skipped > 0) {
-        OSAL_Printf("[  SKIPPED ] %u tests\n", g_stats.skipped);
     }
 
     /* Close log file */
@@ -474,8 +455,6 @@ int32_t libutest_run_test(const char *suite_name, const char *test_name)
         g_stats.passed = 1;
     } else if (result == TEST_RESULT_FAIL) {
         g_stats.failed = 1;
-    } else {
-        g_stats.skipped = 1;
     }
 
     /* Close log file */

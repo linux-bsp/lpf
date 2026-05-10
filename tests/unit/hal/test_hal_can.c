@@ -25,7 +25,7 @@ TEST_CASE(test_hal_can_init_success)
     int32_t ret = HAL_CAN_Init(&config, &handle);
 
     /* 如果初始化失败，跳过所有CAN测试 */
-    TEST_SKIP_IF(ret != OSAL_SUCCESS, "CAN interface not available or down. Please run: ip link set can0 up");
+    TEST_ASSERT_FALSE(ret != OSAL_SUCCESS); // CAN interface not available or down. Please run: ip link set can0 up
 
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_NOT_NULL(handle);
@@ -41,7 +41,7 @@ TEST_CASE(test_hal_can_init_success)
     /* 如果发送失败（Network is down），跳过所有CAN测试 */
     if (ret != OSAL_SUCCESS) {
         HAL_CAN_Deinit(handle);
-        TEST_SKIP_IF(true, "CAN interface is down. Please run: ip link set can0 type can bitrate 500000 && ip link set can0 up");
+        TEST_ASSERT_FALSE(true); // CAN interface is down. Please run: ip link set can0 type can bitrate 500000 && ip link set can0 up
     }
 
     HAL_CAN_Deinit(handle);

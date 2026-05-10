@@ -49,14 +49,14 @@ static void create_serial_config(mcu_config_t *config)
 TEST_CASE(test_pdl_mcu_init_can_success)
 {
     /* Skip: CAN device not available in test environment */
-    TEST_SKIP();
+    TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /* 测试用例: MCU驱动初始化 - 串口接口 */
 TEST_CASE(test_pdl_mcu_init_serial_success)
 {
     /* Skip: Serial device /dev/ttyS1 not available in test environment */
-    TEST_SKIP();
+    TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /* 测试用例: MCU驱动初始化 - 空配置 */
@@ -82,7 +82,7 @@ TEST_CASE(test_pdl_mcu_init_null_handle)
 TEST_CASE(test_pdl_mcu_deinit)
 {
     /* Skip: CAN device not available in test environment */
-    TEST_SKIP();
+    TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /* 测试用例: 清理空句柄 */
@@ -100,7 +100,7 @@ TEST_CASE(test_pdl_mcu_deinit_null_handle)
 TEST_CASE(test_pdl_mcu_get_version_success)
 {
     /* Skip: CAN device not available in test environment */
-    TEST_SKIP();
+    TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /* 测试用例: 获取版本信息 - 空句柄 */
@@ -116,7 +116,7 @@ TEST_CASE(test_pdl_mcu_get_version_null_handle)
 TEST_CASE(test_pdl_mcu_get_version_null_pointer)
 {
     /* Skip: CAN device not available in test environment */
-    TEST_SKIP();
+    TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /*===========================================================================
@@ -127,7 +127,7 @@ TEST_CASE(test_pdl_mcu_get_version_null_pointer)
 TEST_CASE(test_pdl_mcu_get_status_success)
 {
     /* Skip: CAN device not available in test environment */
-    TEST_SKIP();
+    TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /* 测试用例: 获取状态 - 空句柄 */
@@ -143,7 +143,7 @@ TEST_CASE(test_pdl_mcu_get_status_null_handle)
 TEST_CASE(test_pdl_mcu_get_status_null_pointer)
 {
     /* Skip: CAN device not available in test environment */
-    TEST_SKIP();
+    TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /*===========================================================================
@@ -154,7 +154,7 @@ TEST_CASE(test_pdl_mcu_get_status_null_pointer)
 TEST_CASE(test_pdl_mcu_reset_success)
 {
     /* Skip: CAN device not available in test environment */
-    TEST_SKIP();
+    TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /* 测试用例: MCU复位 - 空句柄 */
@@ -172,7 +172,7 @@ TEST_CASE(test_pdl_mcu_reset_null_handle)
 TEST_CASE(test_pdl_mcu_read_register_success)
 {
     /* Skip: CAN device not available in test environment */
-    TEST_SKIP();
+    TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /* 测试用例: 读寄存器 - 空句柄 */
@@ -188,14 +188,14 @@ TEST_CASE(test_pdl_mcu_read_register_null_handle)
 TEST_CASE(test_pdl_mcu_read_register_null_pointer)
 {
     /* Skip: CAN device not available in test environment */
-    TEST_SKIP();
+    TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /* 测试用例: 写寄存器 - 成功 */
 TEST_CASE(test_pdl_mcu_write_register_success)
 {
     /* Skip: CAN device not available in test environment */
-    TEST_SKIP();
+    TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /* 测试用例: 写寄存器 - 空句柄 */
@@ -209,7 +209,7 @@ TEST_CASE(test_pdl_mcu_write_register_null_handle)
 TEST_CASE(test_pdl_mcu_register_read_write_verify)
 {
     /* Skip: CAN device not available in test environment */
-    TEST_SKIP();
+    TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /*===========================================================================
@@ -220,7 +220,7 @@ TEST_CASE(test_pdl_mcu_register_read_write_verify)
 TEST_CASE(test_pdl_mcu_send_command_success)
 {
     /* Skip: CAN device not available in test environment */
-    TEST_SKIP();
+    TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /* 测试用例: 发送命令 - 空句柄 */
@@ -239,14 +239,14 @@ TEST_CASE(test_pdl_mcu_send_command_null_handle)
 TEST_CASE(test_pdl_mcu_send_command_null_cmd_data)
 {
     /* Skip: CAN device not available in test environment */
-    TEST_SKIP();
+    TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /* 测试用例: 发送命令 - 空响应缓冲区 */
 TEST_CASE(test_pdl_mcu_send_command_null_resp_buffer)
 {
     /* Skip: CAN device not available in test environment */
-    TEST_SKIP();
+    TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /*===========================================================================
@@ -257,7 +257,7 @@ TEST_CASE(test_pdl_mcu_send_command_null_resp_buffer)
 TEST_CASE(test_pdl_mcu_firmware_update_success)
 {
     /* Skip: CAN device not available in test environment */
-    TEST_SKIP();
+    TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /* 测试用例: 固件更新 - 空句柄 */
@@ -271,7 +271,7 @@ TEST_CASE(test_pdl_mcu_firmware_update_null_handle)
 TEST_CASE(test_pdl_mcu_firmware_update_null_path)
 {
     /* Skip: CAN device not available in test environment */
-    TEST_SKIP();
+    TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /*===========================================================================

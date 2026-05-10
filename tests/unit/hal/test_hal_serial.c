@@ -25,7 +25,7 @@ TEST_CASE(test_hal_serial_open_success)
 
     int32_t ret = HAL_Serial_Open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
-        TEST_SKIP_IF(true, "/dev/ttyS0 not available");
+        TEST_ASSERT_FALSE(true); // /dev/ttyS0 not available
     }
 
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
@@ -104,7 +104,7 @@ TEST_CASE(test_hal_serial_close)
 
     int32_t ret = HAL_Serial_Open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
-        TEST_SKIP_IF(true, "/dev/ttyS0 not available");
+        TEST_ASSERT_FALSE(true); // /dev/ttyS0 not available
     }
 
     ret = HAL_Serial_Close(handle);
@@ -137,7 +137,7 @@ TEST_CASE(test_hal_serial_write_success)
 
     int32_t ret = HAL_Serial_Open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
-        TEST_SKIP_IF(true, "/dev/ttyS0 not available");
+        TEST_ASSERT_FALSE(true); // /dev/ttyS0 not available
     }
 
     ret = HAL_Serial_Write(handle, data, sizeof(data), 1000);
@@ -169,7 +169,7 @@ TEST_CASE(test_hal_serial_write_null_buffer)
 
     int32_t ret = HAL_Serial_Open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
-        TEST_SKIP_IF(true, "/dev/ttyS0 not available");
+        TEST_ASSERT_FALSE(true); // /dev/ttyS0 not available
     }
 
     ret = HAL_Serial_Write(handle, NULL, 10, 1000);
@@ -193,7 +193,7 @@ TEST_CASE(test_hal_serial_write_zero_length)
 
     int32_t ret = HAL_Serial_Open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
-        TEST_SKIP_IF(true, "/dev/ttyS0 not available");
+        TEST_ASSERT_FALSE(true); // /dev/ttyS0 not available
     }
 
     ret = HAL_Serial_Write(handle, data, 0, 1000);
@@ -217,7 +217,7 @@ TEST_CASE(test_hal_serial_read_timeout)
 
     int32_t ret = HAL_Serial_Open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
-        TEST_SKIP_IF(true, "/dev/ttyS0 not available");
+        TEST_ASSERT_FALSE(true); // /dev/ttyS0 not available
     }
 
     ret = HAL_Serial_Read(handle, buffer, sizeof(buffer), 100);
@@ -249,7 +249,7 @@ TEST_CASE(test_hal_serial_read_null_buffer)
 
     int32_t ret = HAL_Serial_Open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
-        TEST_SKIP_IF(true, "/dev/ttyS0 not available");
+        TEST_ASSERT_FALSE(true); // /dev/ttyS0 not available
     }
 
     ret = HAL_Serial_Read(handle, NULL, 64, 100);
@@ -276,7 +276,7 @@ TEST_CASE(test_hal_serial_flush_success)
 
     int32_t ret = HAL_Serial_Open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
-        TEST_SKIP_IF(true, "/dev/ttyS0 not available");
+        TEST_ASSERT_FALSE(true); // /dev/ttyS0 not available
     }
 
     ret = HAL_Serial_Flush(handle);
@@ -319,7 +319,7 @@ TEST_CASE(test_hal_serial_set_config_success)
 
     int32_t ret = HAL_Serial_Open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
-        TEST_SKIP_IF(true, "/dev/ttyS0 not available");
+        TEST_ASSERT_FALSE(true); // /dev/ttyS0 not available
     }
 
     ret = HAL_Serial_SetConfig(handle, &new_config);
@@ -357,7 +357,7 @@ TEST_CASE(test_hal_serial_set_config_null_config)
 
     int32_t ret = HAL_Serial_Open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
-        TEST_SKIP_IF(true, "/dev/ttyS0 not available");
+        TEST_ASSERT_FALSE(true); // /dev/ttyS0 not available
     }
 
     ret = HAL_Serial_SetConfig(handle, NULL);
@@ -386,7 +386,7 @@ TEST_CASE(test_hal_serial_different_baudrate)
 
     int32_t ret = HAL_Serial_Open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
-        TEST_SKIP_IF(true, "/dev/ttyS0 not available");
+        TEST_ASSERT_FALSE(true); // /dev/ttyS0 not available
     }
 
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
@@ -407,7 +407,7 @@ TEST_CASE(test_hal_serial_different_parity)
 
     int32_t ret = HAL_Serial_Open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
-        TEST_SKIP_IF(true, "/dev/ttyS0 not available");
+        TEST_ASSERT_FALSE(true); // /dev/ttyS0 not available
     }
 
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
@@ -428,7 +428,7 @@ TEST_CASE(test_hal_serial_different_databits)
 
     int32_t ret = HAL_Serial_Open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
-        TEST_SKIP_IF(true, "/dev/ttyS0 not available");
+        TEST_ASSERT_FALSE(true); // /dev/ttyS0 not available
     }
 
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);

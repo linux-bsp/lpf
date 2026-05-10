@@ -24,7 +24,7 @@ TEST_CASE(test_pdl_watchdog_init_deinit)
     };
 
     int32_t ret = PDL_WATCHDOG_Init(&config, &handle);
-    TEST_SKIP_IF(ret != OSAL_SUCCESS, "Watchdog device not available");
+    TEST_ASSERT_FALSE(ret != OSAL_SUCCESS); // Watchdog device not available
 
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_NOT_NULL(handle);
@@ -73,7 +73,7 @@ TEST_CASE(test_pdl_watchdog_manual_kick)
     };
 
     int32_t ret = PDL_WATCHDOG_Init(&config, &handle);
-    TEST_SKIP_IF(ret != OSAL_SUCCESS, "Watchdog device not available");
+    TEST_ASSERT_FALSE(ret != OSAL_SUCCESS); // Watchdog device not available
 
     /* 手动喂狗 */
     ret = PDL_WATCHDOG_Kick(handle);
@@ -113,7 +113,7 @@ TEST_CASE(test_pdl_watchdog_auto_mode)
     };
 
     int32_t ret = PDL_WATCHDOG_Init(&config, &handle);
-    TEST_SKIP_IF(ret != OSAL_SUCCESS, "Watchdog device not available");
+    TEST_ASSERT_FALSE(ret != OSAL_SUCCESS); // Watchdog device not available
 
     /* 启动自动喂狗 */
     ret = PDL_WATCHDOG_Start(handle);
@@ -157,7 +157,7 @@ TEST_CASE(test_pdl_watchdog_get_status)
     };
 
     int32_t ret = PDL_WATCHDOG_Init(&config, &handle);
-    TEST_SKIP_IF(ret != OSAL_SUCCESS, "Watchdog device not available");
+    TEST_ASSERT_FALSE(ret != OSAL_SUCCESS); // Watchdog device not available
 
     /* 获取状态 */
     watchdog_status_t status;
@@ -187,7 +187,7 @@ TEST_CASE(test_pdl_watchdog_set_interval)
     };
 
     int32_t ret = PDL_WATCHDOG_Init(&config, &handle);
-    TEST_SKIP_IF(ret != OSAL_SUCCESS, "Watchdog device not available");
+    TEST_ASSERT_FALSE(ret != OSAL_SUCCESS); // Watchdog device not available
 
     /* 设置新的间隔 */
     ret = PDL_WATCHDOG_SetInterval(handle, 3000);
@@ -218,7 +218,7 @@ TEST_CASE(test_pdl_watchdog_enable_disable)
     };
 
     int32_t ret = PDL_WATCHDOG_Init(&config, &handle);
-    TEST_SKIP_IF(ret != OSAL_SUCCESS, "Watchdog device not available");
+    TEST_ASSERT_FALSE(ret != OSAL_SUCCESS); // Watchdog device not available
 
     /* 启用 */
     ret = PDL_WATCHDOG_Enable(handle);

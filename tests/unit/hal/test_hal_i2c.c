@@ -23,7 +23,7 @@ TEST_CASE(test_hal_i2c_open_success)
     int32_t ret = HAL_I2C_Open(&config, &handle);
 
     if (OSAL_SUCCESS != ret) {
-        TEST_SKIP_IF(true, "/dev/i2c-0 not available");
+        TEST_ASSERT_FALSE(true); // /dev/i2c-0 not available
     }
 
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
@@ -77,7 +77,7 @@ TEST_CASE(test_hal_i2c_close)
 
     int32_t ret = HAL_I2C_Open(&config, &handle);
     if (OSAL_SUCCESS != ret) {
-        TEST_SKIP_IF(true, "/dev/i2c-0 not available");
+        TEST_ASSERT_FALSE(true); // /dev/i2c-0 not available
     }
 
     ret = HAL_I2C_Close(handle);
@@ -115,7 +115,7 @@ TEST_CASE(test_hal_i2c_write_null_buffer)
 
     int32_t ret = HAL_I2C_Open(&config, &handle);
     if (OSAL_SUCCESS != ret) {
-        TEST_SKIP_IF(true, "/dev/i2c-0 not available");
+        TEST_ASSERT_FALSE(true); // /dev/i2c-0 not available
     }
 
     ret = HAL_I2C_Write(handle, 0x50, NULL, 4);
@@ -144,7 +144,7 @@ TEST_CASE(test_hal_i2c_read_null_buffer)
 
     int32_t ret = HAL_I2C_Open(&config, &handle);
     if (OSAL_SUCCESS != ret) {
-        TEST_SKIP_IF(true, "/dev/i2c-0 not available");
+        TEST_ASSERT_FALSE(true); // /dev/i2c-0 not available
     }
 
     ret = HAL_I2C_Read(handle, 0x50, NULL, 4);
@@ -177,7 +177,7 @@ TEST_CASE(test_hal_i2c_write_reg_null_buffer)
 
     int32_t ret = HAL_I2C_Open(&config, &handle);
     if (OSAL_SUCCESS != ret) {
-        TEST_SKIP_IF(true, "/dev/i2c-0 not available");
+        TEST_ASSERT_FALSE(true); // /dev/i2c-0 not available
     }
 
     ret = HAL_I2C_WriteReg(handle, 0x50, 0x00, NULL, 4);
@@ -206,7 +206,7 @@ TEST_CASE(test_hal_i2c_read_reg_null_buffer)
 
     int32_t ret = HAL_I2C_Open(&config, &handle);
     if (OSAL_SUCCESS != ret) {
-        TEST_SKIP_IF(true, "/dev/i2c-0 not available");
+        TEST_ASSERT_FALSE(true); // /dev/i2c-0 not available
     }
 
     ret = HAL_I2C_ReadReg(handle, 0x50, 0x00, NULL, 4);
@@ -245,7 +245,7 @@ TEST_CASE(test_hal_i2c_transfer_null_msgs)
 
     int32_t ret = HAL_I2C_Open(&config, &handle);
     if (OSAL_SUCCESS != ret) {
-        TEST_SKIP_IF(true, "/dev/i2c-0 not available");
+        TEST_ASSERT_FALSE(true); // /dev/i2c-0 not available
     }
 
     ret = HAL_I2C_Transfer(handle, NULL, 1);

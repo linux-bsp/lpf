@@ -23,7 +23,7 @@ TEST_CASE(test_hal_watchdog_init_deinit)
     int32_t ret = HAL_WATCHDOG_Init(&config, &handle);
 
     /* 如果设备不存在，跳过测试 */
-    TEST_SKIP_IF(ret != OSAL_SUCCESS, "Watchdog device not available");
+    TEST_ASSERT_FALSE(ret != OSAL_SUCCESS); // Watchdog device not available
 
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_NOT_NULL(handle);
@@ -71,7 +71,7 @@ TEST_CASE(test_hal_watchdog_kick)
     };
 
     int32_t ret = HAL_WATCHDOG_Init(&config, &handle);
-    TEST_SKIP_IF(ret != OSAL_SUCCESS, "Watchdog device not available");
+    TEST_ASSERT_FALSE(ret != OSAL_SUCCESS); // Watchdog device not available
 
     /* 喂狗 */
     ret = HAL_WATCHDOG_Kick(handle);
@@ -107,7 +107,7 @@ TEST_CASE(test_hal_watchdog_timeout)
     };
 
     int32_t ret = HAL_WATCHDOG_Init(&config, &handle);
-    TEST_SKIP_IF(ret != OSAL_SUCCESS, "Watchdog device not available");
+    TEST_ASSERT_FALSE(ret != OSAL_SUCCESS); // Watchdog device not available
 
     /* 获取当前超时时间 */
     uint32_t timeout = 0;
@@ -145,7 +145,7 @@ TEST_CASE(test_hal_watchdog_timeleft)
     };
 
     int32_t ret = HAL_WATCHDOG_Init(&config, &handle);
-    TEST_SKIP_IF(ret != OSAL_SUCCESS, "Watchdog device not available");
+    TEST_ASSERT_FALSE(ret != OSAL_SUCCESS); // Watchdog device not available
 
     /* 喂狗 */
     ret = HAL_WATCHDOG_Kick(handle);
@@ -180,7 +180,7 @@ TEST_CASE(test_hal_watchdog_enable_disable)
     };
 
     int32_t ret = HAL_WATCHDOG_Init(&config, &handle);
-    TEST_SKIP_IF(ret != OSAL_SUCCESS, "Watchdog device not available");
+    TEST_ASSERT_FALSE(ret != OSAL_SUCCESS); // Watchdog device not available
 
     /* 启用看门狗 */
     ret = HAL_WATCHDOG_Enable(handle);

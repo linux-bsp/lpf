@@ -26,7 +26,7 @@ TEST_CASE(test_hal_spi_open_success)
     int32_t ret = HAL_SPI_Open(&config, &handle);
 
     if (OSAL_SUCCESS != ret) {
-        TEST_SKIP_IF(true, "/dev/spidev0.0 not available");
+        TEST_ASSERT_FALSE(true); // /dev/spidev0.0 not available
     }
 
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
@@ -89,7 +89,7 @@ TEST_CASE(test_hal_spi_close)
 
     int32_t ret = HAL_SPI_Open(&config, &handle);
     if (OSAL_SUCCESS != ret) {
-        TEST_SKIP_IF(true, "/dev/spidev0.0 not available");
+        TEST_ASSERT_FALSE(true); // /dev/spidev0.0 not available
     }
 
     ret = HAL_SPI_Close(handle);
@@ -130,7 +130,7 @@ TEST_CASE(test_hal_spi_write_null_buffer)
 
     int32_t ret = HAL_SPI_Open(&config, &handle);
     if (OSAL_SUCCESS != ret) {
-        TEST_SKIP_IF(true, "/dev/spidev0.0 not available");
+        TEST_ASSERT_FALSE(true); // /dev/spidev0.0 not available
     }
 
     ret = HAL_SPI_Write(handle, NULL, 4);
@@ -162,7 +162,7 @@ TEST_CASE(test_hal_spi_read_null_buffer)
 
     int32_t ret = HAL_SPI_Open(&config, &handle);
     if (OSAL_SUCCESS != ret) {
-        TEST_SKIP_IF(true, "/dev/spidev0.0 not available");
+        TEST_ASSERT_FALSE(true); // /dev/spidev0.0 not available
     }
 
     ret = HAL_SPI_Read(handle, NULL, 4);
@@ -201,7 +201,7 @@ TEST_CASE(test_hal_spi_transfer_loopback)
 
     int32_t ret = HAL_SPI_Open(&config, &handle);
     if (OSAL_SUCCESS != ret) {
-        TEST_SKIP_IF(true, "/dev/spidev0.0 not available");
+        TEST_ASSERT_FALSE(true); // /dev/spidev0.0 not available
     }
 
     ret = HAL_SPI_Transfer(handle, tx_buffer, rx_buffer, sizeof(tx_buffer));
@@ -247,7 +247,7 @@ TEST_CASE(test_hal_spi_transfer_multi_null_transfers)
 
     int32_t ret = HAL_SPI_Open(&config, &handle);
     if (OSAL_SUCCESS != ret) {
-        TEST_SKIP_IF(true, "/dev/spidev0.0 not available");
+        TEST_ASSERT_FALSE(true); // /dev/spidev0.0 not available
     }
 
     ret = HAL_SPI_TransferMulti(handle, NULL, 1);
@@ -289,7 +289,7 @@ TEST_CASE(test_hal_spi_set_config_null_config)
 
     int32_t ret = HAL_SPI_Open(&config, &handle);
     if (OSAL_SUCCESS != ret) {
-        TEST_SKIP_IF(true, "/dev/spidev0.0 not available");
+        TEST_ASSERT_FALSE(true); // /dev/spidev0.0 not available
     }
 
     ret = HAL_SPI_SetConfig(handle, NULL);
@@ -312,7 +312,7 @@ TEST_CASE(test_hal_spi_set_config_change_mode)
 
     int32_t ret = HAL_SPI_Open(&config, &handle);
     if (OSAL_SUCCESS != ret) {
-        TEST_SKIP_IF(true, "/dev/spidev0.0 not available");
+        TEST_ASSERT_FALSE(true); // /dev/spidev0.0 not available
     }
 
     /* 更改为MODE_1 */

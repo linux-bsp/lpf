@@ -41,8 +41,7 @@ typedef struct {
 /* Test result codes */
 typedef enum {
     TEST_RESULT_PASS = 0,
-    TEST_RESULT_FAIL = 1,
-    TEST_RESULT_SKIP = 2
+    TEST_RESULT_FAIL = 1
 } test_result_t;
 
 /* Test result record (for detailed summary) */
@@ -58,7 +57,6 @@ typedef struct {
     uint32_t total;
     uint32_t passed;
     uint32_t failed;
-    uint32_t skipped;
     uint64_t total_time_ms;      /* Total execution time in milliseconds */
     uint64_t avg_time_ms;        /* Average execution time per test */
     const char *failed_tests[64]; /* List of failed test names (legacy) */
@@ -69,8 +67,6 @@ typedef struct {
     test_result_node_t *passed_list_tail;
     test_result_node_t *failed_list_head;
     test_result_node_t *failed_list_tail;
-    test_result_node_t *skipped_list_head;
-    test_result_node_t *skipped_list_tail;
 } test_stats_t;
 
 /* Core API - Test Registration */
