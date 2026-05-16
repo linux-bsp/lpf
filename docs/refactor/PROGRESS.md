@@ -34,7 +34,7 @@
 | T1.2 | OSAL CPU亲和性API | P0 | 2天 | ✅ 已完成 | 2026-05-17 | 2026-05-17 | - | 已在T1.1中实现 |
 | T1.3 | OSAL内存锁定API | P0 | 2天 | ✅ 已完成 | 2026-05-17 | 2026-05-17 | - | 已在T1.1中实现 |
 | T1.4 | OSAL共享内存API | P0 | 5天 | ✅ 已完成 | 2026-05-17 | 2026-05-17 | - | 创建/映射/销毁 |
-| T1.5 | OSAL原子操作增强 | P1 | 2天 | ⏸️ 未开始 | - | - | - | 64位原子时间戳 |
+| T1.5 | OSAL原子操作增强 | P1 | 2天 | ✅ 已完成 | 2026-05-17 | 2026-05-17 | - | 64位原子时间戳 |
 | T1.6 | HAL GPIO驱动 | P1 | 3天 | ⏸️ 未开始 | - | - | - | 输入/输出/中断 |
 | T1.7 | 单元测试补充 | P1 | 3天 | ⏸️ 未开始 | - | - | - | 覆盖率>80% |
 
@@ -118,6 +118,51 @@ int32_t OSAL_ShmUnlink(const char *name);
 
 **提交记录**:
 - 6eb1e8f: 实现OSAL共享内存API (T1.4)
+
+#### T1.5 OSAL原子操作增强（已完成）
+
+**需求**:
+- 添加64位原子操作支持
+- 用于原子时间戳等需要64位精度的场景
+- 保持与32位原子操作相同的API风格
+
+**设计**:
+```c
+// osal/include/ipc/osal_atomic.h
+typedef struct {
+    _Atomic uint64_t value;
+} osal_atomic_uint64_t;
+
+void OSAL_AtomicInit64(osal_atomic_uint64_t *atomic, uint64_t value);
+uint64_t OSAL_AtomicLoad64(const osal_atomic_uint64_t *atomic);
+void OSAL_AtomicStore64(osal_atomic_uint64_t *atomic, uint64_t value);
+uint64_t OSAL_AtomicFetchAdd64(osal_atomic_uint64_t *atomic, uint64_t value);
+uint64_t OSAL_AtomicFetchSub64(osal_atomic_uint64_t *atomic, uint64_t value);
+uint64_t OSAL_AtomicIncrement64(osal_atomic_uint64_t *atomic);
+uint64_t OSAL_AtomicDecrement64(osal_atomic_uint64_t *atomic);
+bool OSAL_AtomicCompareExchange64(osal_atomic_uint64_t *atomic, uint64_t expected, uint64_t desired);
+```
+
+**实现文件**:
+- [x] osal/include/ipc/osal_atomic.h（扩展）
+- [x] osal/src/posix/ipc/osal_atomic.c（扩展）
+- [x] tests/unit/osal/test_osal_atomic.c（扩展）
+
+**完成状态**: 
+- ✅ 新增64位原子类型osal_atomic_uint64_t
+- ✅ 实现完整的64位原子操作API（8个函数）
+- ✅ 使用C11标准的_Atomic和stdatomic.h
+- ✅ 新增7个64位原子操作单元测试，全部通过：
+  * 初始化/加载/存储
+  * 加法/减法操作
+  * 自增/自减
+  * 比较交换(CAS)
+  * 溢出边界测试
+  * 多线程时间戳测试
+- ✅ 总计18个测试用例全部通过（11个32位 + 7个64位）
+
+**提交记录**:
+- 05c3b0e: 增强OSAL原子操作，添加64位支持 (T1.5)
 
 ---
 
