@@ -7,15 +7,23 @@
 
 **核心特点**：
 
-- ✅ 满足2ms硬实时（关键路径<800μs）
+- ✅ 满足2ms硬实时（关键路径<1.23ms，含降级机制）
 
 - ✅ 航空级可靠性（进程隔离、三级故障恢复）
 
 - ✅ 单核SoC优化（实时调度SCHED_FIFO + CPU绑定）
 
-- ✅ 遥测分类处理（缓存型/实时型）
+- ✅ 遥测分类处理（缓存型/实时型+降级）
+
+- ✅ 数据新鲜度保证（FRESH/STALE/INVALID标记）
 
 - ✅ 完整日志收集（运行日志、崩溃日志、状态日志）
+
+**关键设计亮点**：
+
+- **实时型遥测降级机制**：优先实时查询（1ms超时），超时降级到缓存，保证2ms应答
+- **遥控命令缓存失效**：遥控命令执行后自动标记相关遥测缓存为STALE，等待Telemetry进程更新
+- **数据新鲜度标记**：FRESH（新鲜）/STALE（过期但可用）/INVALID（无效），卫星平台可判断数据可信度
 
 ---
 
@@ -72,9 +80,96 @@
 
 ---
 
-## 2. 架构设计
+## 2. 架构设计原则
 
-### 2.1 整体架构图
+### 2.1 严格6层架构
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      APP（应用层）                           │
+│  • 4个进程：Supervisor/Telecommand/Telemetry/Firmware/Logger│
+│  • 共享内存布局定义（应用级设计决策）                        │
+└─────────────────────────────────────────────────────────────┘
+                            ↓ 只通过公开API访问
+┌─────────────────────────────────────────────────────────────┐
+│                      ACL（应用配置层）                       │
+│  • 业务功能枚举（遥控/遥测/健康管理）                        │
+│  • 业务数据结构（遥测缓存、状态快照）                        │
+│  • 设备映射配置（O(1)查找表）                               │
+└─────────────────────────────────────────────────────────────┘
+                            ↓ 只通过公开API访问
+┌─────────────────────────────────────────────────────────────┐
+│                      PDL（外设驱动层）                       │
+│  • 统一外设接口（Satellite/BMC/MCU）                        │
+│  • 协议实现（Redfish/IPMI/CAN协议）                         │
+│  • 双通道冗余、自动切换                                      │
+└─────────────────────────────────────────────────────────────┘
+                            ↓ 只通过公开API访问
+┌─────────────────────────────────────────────────────────────┐
+│                      PCL（外设配置层）                       │
+│  • 硬件配置数据（设备树风格）                                │
+│  • 平台配置（vendor/chip/product）                          │
+│  • 纯数据结构，无业务逻辑                                    │
+└─────────────────────────────────────────────────────────────┘
+                            ↓ 只通过公开API访问
+┌─────────────────────────────────────────────────────────────┐
+│                      HAL（硬件抽象层）                       │
+│  • 硬件驱动接口（CAN/UART/I2C/SPI/GPIO）                    │
+│  • 平台实现（Linux/RTOS）                                   │
+│  • 使用OSAL系统调用封装                                      │
+└─────────────────────────────────────────────────────────────┘
+                            ↓ 只通过公开API访问
+┌─────────────────────────────────────────────────────────────┐
+│                      OSAL（操作系统抽象层）                  │
+│  • 系统调用封装（进程/线程/IPC/文件/网络）                   │
+│  • 通用IPC机制（日志缓冲区、心跳表）                         │
+│  • 平台实现（POSIX/FreeRTOS/VxWorks）                       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 2.2 完全解耦原则
+
+**核心规则**：
+1. ✅ **单向依赖**：每层只能访问**下层**的公开API，不能访问上层或同层
+2. ✅ **接口隔离**：每层只暴露必要的公开接口，内部实现完全隐藏
+3. ✅ **无跨层依赖**：严禁跨层直接访问（如APP直接调用HAL）
+4. ✅ **无common/**：所有代码都有明确归属，不存在"公共组件"
+
+**数据结构归属原则**：
+- **通用IPC机制** → OSAL层（日志环形缓冲区、心跳表）
+- **业务数据结构** → ACL层（遥测缓存、状态快照）
+- **应用级设计** → APP层（共享内存布局）
+
+**示例**：
+```c
+// ✅ 正确：APP层通过ACL层访问遥测缓存
+#include "acl_telemetry_cache.h"
+acl_telemetry_data_t data;
+ACL_TelemetryCacheRead(TM_SERVER_CPU_TEMP, &data);
+
+// ❌ 错误：APP层直接访问PDL层（跨层依赖）
+#include "pdl_bmc.h"  // 禁止！
+PDL_BMC_ReadSensors(...);
+
+// ✅ 正确：ACL层通过PDL层访问外设
+#include "pdl_bmc.h"
+PDL_BMC_ReadSensors(...);
+```
+
+### 2.3 职责清晰原则
+
+| 层 | 职责 | 禁止事项 |
+|---|------|---------|
+| **APP** | 业务流程、进程管理、共享内存布局 | 不能包含硬件操作、协议实现 |
+| **ACL** | 业务配置、设备映射、业务数据结构 | 不能包含硬件操作、系统调用 |
+| **PDL** | 外设驱动、协议实现、通道管理 | 不能包含硬件寄存器操作、系统调用 |
+| **PCL** | 硬件配置数据 | 不能包含业务逻辑、函数实现 |
+| **HAL** | 硬件驱动接口 | 不能包含业务逻辑、直接系统调用 |
+| **OSAL** | 系统调用封装、通用IPC机制 | 不能包含业务逻辑、硬件操作 |
+
+---
+
+## 3. 整体架构图
 
 ```text
 ╔═══════════════════════════════════════════════════════════════════════════════════════╗
@@ -128,7 +223,7 @@
         ┌─────────────────────────────────▼─────────────────────────────────────┐
         │                    ACL (应用配置层) - O(1)查找                         │
         ├────────────────────────────────────────────────────────────────────────┤
-        │ 业务功能枚举 → (设备类型, 逻辑索引, 数据类型)                          │
+        │ 业务功能枚举 → (设备类型, 逻辑索引, 数据类型, 超时配置)                │
         │                                                                        │
         │ 【遥控功能映射】                                                        │
         │ TC_POWER_ON        → (BMC, 0)                                         │
@@ -136,11 +231,15 @@
         │ TC_RESET_MCU       → (MCU, 0)                                         │
         │ TC_WATCHDOG_ENABLE → (MCU, 2)                                         │
         │                                                                        │
-        │ 【遥测功能映射】(带数据类型)                                            │
-        │ TM_CPU_TEMP        → (BMC, 0, CACHED)    ← 缓存型 (<200μs)           │
-        │ TM_POWER_STATUS    → (BMC, 0, REALTIME)  ← 实时型 (<800μs)           │
-        │ TM_BOARD_TEMP      → (MCU, 0, CACHED)                                │
-        │ TM_MCU_STATUS      → (MCU, 0, REALTIME)                              │
+        │ 【遥测功能映射】(带数据类型和超时配置)                                  │
+        │ TM_CPU_TEMP        → (BMC, 0, CACHED,   0)      ← 缓存型 (<200μs)    │
+        │ TM_POWER_STATUS    → (BMC, 0, REALTIME, 1000μs) ← 实时型+降级        │
+        │ TM_BOARD_TEMP      → (MCU, 0, CACHED,   0)                           │
+        │ TM_MCU_STATUS      → (MCU, 0, REALTIME, 800μs)  ← 实时型+降级        │
+        │                                                                        │
+        │ 【遥控命令失效映射】                                                    │
+        │ TC_POWER_ON/OFF    → 失效 TM_POWER_STATUS (标记为STALE)              │
+        │ TC_MCU_RESET       → 失效 TM_MCU_STATUS, TM_MCU_TEMP (标记为STALE)   │
         └────────────────────────────────────────────────────────────────────────┘
                                           │
         ┌─────────────────────────────────▼─────────────────────────────────────┐
@@ -189,7 +288,8 @@
 【关键设计说明】
 ┌────────────────────────────────────────────────────────────────────────────┐
 │ ✅ 2ms实时路径: Telecommand进程内零IPC，实时调度SCHED_FIFO priority=99    │
-│ ✅ 遥测分类: 缓存型(<200μs) + 实时型(<800μs)，双缓冲无锁读写               │
+│ ✅ 遥测分类: 缓存型(<200μs) + 实时型(优先实时查询<800μs，超时降级<1.2ms)  │
+│ ✅ 数据新鲜度: FRESH/STALE/INVALID标记，遥控命令自动失效相关缓存          │
 │ ✅ 故障恢复: 三级恢复机制 (线程级 → 进程级 → 系统级)                      │
 │ ✅ 进程隔离: MMU硬件保护，独立地址空间，抗辐射SEU                          │
 │ ✅ 单核优化: CPU绑定CPU0，内存锁定mlockall，预分配内存                    │
@@ -371,10 +471,18 @@ void* can_rx_thread_func(void* arg)
 			  telemetry_data_t *data = get_cached_tm(cfg->tm_id);
 			  send_telemetry_response(cfg->tm_id, data);  // <100μs
 		  } else {
-			  // 实时型：查询PDL（<500μs）
+			  // 实时型：优先实时查询，超时降级到缓存
 			  telemetry_data_t data;
-			  query_realtime_tm(cfg, &data);  // <500μs
-			  send_telemetry_response(cfg->tm_id, &data);  // <100μs
+			  tm_freshness_t freshness;
+			  int32_t ret = handle_realtime_telemetry(cfg, &data, &freshness);
+			  
+			  if (ret == OSAL_SUCCESS) {
+				  // 在应答中携带新鲜度标记
+				  send_telemetry_response_with_freshness(cfg->tm_id, &data, freshness);
+			  } else {
+				  // 缓存也无效，返回错误
+				  send_response(STATUS_ERROR, OSAL_ERR_NOT_AVAILABLE);
+			  }
 		  }
 	  }
 
@@ -444,6 +552,7 @@ typedef struct {
   float current;
   uint32_t fan_speed;
   uint64_t timestamp_ns;
+  tm_freshness_t freshness;  // 新增：新鲜度标记
   bool valid;
 } telemetry_data_t;
 
@@ -451,6 +560,16 @@ typedef struct {
   telemetry_data_t buffer[2];
   _Atomic uint32_t read_index;   // 0或1
 } telemetry_cache_t;
+
+// 全局遥测缓存（所有遥测项，包括实时型）
+typedef struct {
+  telemetry_data_t data;
+  uint64_t timestamp_ns;
+  tm_freshness_t freshness;   // FRESH / STALE / INVALID
+  bool valid;
+} telemetry_cache_entry_t;
+
+static telemetry_cache_entry_t g_tm_cache[TM_FUNC_MAX];
 
 // 写入（telemetry进程）
 void update_telemetry_cache(telemetry_cache_t *cache, const telemetry_data_t *data)
@@ -468,6 +587,53 @@ void get_cached_telemetry(telemetry_cache_t *cache, telemetry_data_t *data)
 {
   uint32_t read_idx = atomic_load(&cache->read_index);
   *data = cache->buffer[read_idx];  // 无锁读取
+}
+```
+
+**Telemetry进程的采集策略（包括实时型遥测的缓存）**：
+
+```c
+void* cache_collector_thread(void* arg)
+{
+  while (1) {
+	  uint64_t now = get_monotonic_ns();
+	  
+	  // 遍历所有遥测项（包括实时型）
+	  for (uint32_t i = 0; i < TM_FUNC_MAX; i++) {
+		  const acl_tm_config_t *cfg = &g_acl_table.tm_table[i];
+		  telemetry_cache_entry_t *cache = &g_tm_cache[i];
+		  
+		  // 根据数据类型决定采集周期
+		  uint32_t max_age_ms;
+		  if (cfg->data_type == TM_TYPE_REALTIME) {
+			  max_age_ms = 500;   // 实时型：500ms采集一次（作为降级备份）
+		  } else {
+			  max_age_ms = 1000;  // 缓存型：1秒采集一次
+		  }
+		  
+		  uint64_t age_ms = (now - cache->timestamp_ns) / 1000000;
+		  if (age_ms >= max_age_ms) {
+			  // 采集数据
+			  telemetry_data_t data;
+			  int32_t ret = collect_telemetry(cfg, &data);
+			  
+			  if (ret == OSAL_SUCCESS) {
+				  cache->data = data;
+				  cache->timestamp_ns = now;
+				  
+				  // 如果之前是STALE，现在恢复为FRESH
+				  if (cache->freshness == TM_STALE) {
+					  cache->freshness = TM_FRESH;
+					  LOG_INFO("TM", "缓存已更新为FRESH: %d", i);
+				  }
+				  
+				  cache->valid = true;
+			  }
+		  }
+	  }
+	  
+	  OSAL_TaskDelay(100);  // 100ms周期检查
+  }
 }
 ```
 
@@ -781,9 +947,9 @@ Supervisor restarted telemetry process at 2026-05-16 10:23:51.000000
 
 ---
 
-## 3. ACL层设计（业务配置层）
+## 4. ACL层设计（业务配置层）
 
-### 3.1 PMC业务功能枚举
+### 4.1 PMC业务功能枚举
 ``` C
 /************************************************
 * acl/include/pmc_acl_types.h
@@ -795,8 +961,17 @@ Supervisor restarted telemetry process at 2026-05-16 10:23:51.000000
 */
 typedef enum {
   TM_TYPE_CACHED = 0,    // 缓存型：后台采集，从共享内存读取
-  TM_TYPE_REALTIME = 1   // 实时型：收到命令后实时查询
+  TM_TYPE_REALTIME = 1   // 实时型：优先实时查询，超时降级到缓存
 } tm_data_type_t;
+
+/**
+* @brief 遥测数据新鲜度标记
+*/
+typedef enum {
+  TM_FRESH = 0,      // 新鲜数据：采集时间在有效期内
+  TM_STALE = 1,      // 过期数据：受遥控命令影响，等待更新
+  TM_INVALID = 2     // 无效数据：从未采集过
+} tm_freshness_t;
 
 /**
 * @brief PMC遥控功能枚举
@@ -921,7 +1096,8 @@ typedef struct {
   pmc_tm_function_t function;
   acl_device_type_t device_type;
   uint32_t logic_index;
-  tm_data_type_t data_type;  // 新增：缓存型/实时型
+  tm_data_type_t data_type;      // 缓存型/实时型
+  uint32_t realtime_timeout_us;  // 实时查询超时（微秒），仅实时型有效
   bool enabled;
 } acl_tm_config_t;
 
@@ -965,28 +1141,28 @@ static const acl_tc_config_t g_pmc_tc_configs[] = {
 
 static const acl_tm_config_t g_pmc_tm_configs[] = {
   /* 服务器遥测（缓存型） → BMC */
-  { TM_SERVER_CPU_TEMP,      ACL_DEVICE_BMC, 0, TM_TYPE_CACHED,   true },
-  { TM_SERVER_BOARD_TEMP,    ACL_DEVICE_BMC, 0, TM_TYPE_CACHED,   true },
-  { TM_SERVER_FAN_SPEED,     ACL_DEVICE_BMC, 0, TM_TYPE_CACHED,   true },
-  { TM_SERVER_VOLTAGE_12V,   ACL_DEVICE_MCU, 1, TM_TYPE_CACHED,   true },
-  { TM_SERVER_VOLTAGE_5V,    ACL_DEVICE_MCU, 1, TM_TYPE_CACHED,   true },
-  { TM_SERVER_CURRENT,       ACL_DEVICE_MCU, 1, TM_TYPE_CACHED,   true },
+  { TM_SERVER_CPU_TEMP,      ACL_DEVICE_BMC, 0, TM_TYPE_CACHED,   0,    true },
+  { TM_SERVER_BOARD_TEMP,    ACL_DEVICE_BMC, 0, TM_TYPE_CACHED,   0,    true },
+  { TM_SERVER_FAN_SPEED,     ACL_DEVICE_BMC, 0, TM_TYPE_CACHED,   0,    true },
+  { TM_SERVER_VOLTAGE_12V,   ACL_DEVICE_MCU, 1, TM_TYPE_CACHED,   0,    true },
+  { TM_SERVER_VOLTAGE_5V,    ACL_DEVICE_MCU, 1, TM_TYPE_CACHED,   0,    true },
+  { TM_SERVER_CURRENT,       ACL_DEVICE_MCU, 1, TM_TYPE_CACHED,   0,    true },
 
-  /* 服务器遥测（实时型） → BMC */
-  { TM_SERVER_POWER_STATUS,  ACL_DEVICE_BMC, 0, TM_TYPE_REALTIME, true },
+  /* 服务器遥测（实时型） → BMC，1ms超时 */
+  { TM_SERVER_POWER_STATUS,  ACL_DEVICE_BMC, 0, TM_TYPE_REALTIME, 1000, true },
 
-  /* MCU遥测 */
-  { TM_MCU_STATUS,           ACL_DEVICE_MCU, 0, TM_TYPE_REALTIME, true },
-  { TM_MCU_TEMP,             ACL_DEVICE_MCU, 0, TM_TYPE_CACHED,   true },
-  { TM_MCU_VOLTAGE,          ACL_DEVICE_MCU, 0, TM_TYPE_CACHED,   true },
+  /* MCU遥测（实时型） → MCU，800μs超时 */
+  { TM_MCU_STATUS,           ACL_DEVICE_MCU, 0, TM_TYPE_REALTIME, 800,  true },
+  { TM_MCU_TEMP,             ACL_DEVICE_MCU, 0, TM_TYPE_CACHED,   0,    true },
+  { TM_MCU_VOLTAGE,          ACL_DEVICE_MCU, 0, TM_TYPE_CACHED,   0,    true },
 
-  /* FPGA遥测 */
-  { TM_FPGA_STATUS,          ACL_DEVICE_FPGA, 0, TM_TYPE_REALTIME, true },
-  { TM_FPGA_TEMP,            ACL_DEVICE_FPGA, 0, TM_TYPE_CACHED,   true },
+  /* FPGA遥测（实时型） → FPGA，1ms超时 */
+  { TM_FPGA_STATUS,          ACL_DEVICE_FPGA, 0, TM_TYPE_REALTIME, 1000, true },
+  { TM_FPGA_TEMP,            ACL_DEVICE_FPGA, 0, TM_TYPE_CACHED,   0,    true },
 
   /* 系统遥测 */
-  { TM_SYSTEM_UPTIME,        ACL_DEVICE_MCU, 0, TM_TYPE_CACHED,   true },
-  { TM_WATCHDOG_STATUS,      ACL_DEVICE_MCU, 2, TM_TYPE_REALTIME, true },
+  { TM_SYSTEM_UPTIME,        ACL_DEVICE_MCU, 0, TM_TYPE_CACHED,   0,    true },
+  { TM_WATCHDOG_STATUS,      ACL_DEVICE_MCU, 2, TM_TYPE_REALTIME, 800,  true },
 };
 
 /**
@@ -1103,11 +1279,203 @@ int32_t handle_telemetry(pmc_tm_function_t tm_type, telemetry_data_t *data)
 	  // 缓存型：从共享内存读取（<10μs）
 	  get_cached_telemetry(tm_type, data);
   } else {
-	  // 实时型：查询PDL（<500μs）
-	  query_realtime_telemetry(cfg, data);
+	  // 实时型：优先实时查询，超时降级到缓存
+	  tm_freshness_t freshness;
+	  int32_t ret = handle_realtime_telemetry(cfg, data, &freshness);
+	  
+	  if (ret != OSAL_SUCCESS) {
+		  LOG_ERROR("TM", "实时遥测失败且缓存无效: %d", tm_type);
+		  return ret;
+	  }
+	  
+	  // 在应答中携带新鲜度标记
+	  data->freshness = freshness;
   }
 
   return OSAL_SUCCESS;
+}
+
+/**
+* @brief 处理实时型遥测（优先实时查询 + 缓存降级）
+*/
+int32_t handle_realtime_telemetry(const acl_tm_config_t *cfg, 
+                                   telemetry_data_t *out_data,
+                                   tm_freshness_t *out_freshness)
+{
+  telemetry_cache_entry_t *cache = &g_tm_cache[cfg->function];
+  
+  // 1. 尝试实时查询（带超时）
+  int32_t ret = query_realtime_tm_with_timeout(cfg, out_data, cfg->realtime_timeout_us);
+  
+  if (ret == OSAL_SUCCESS) {
+	  // 实时查询成功
+	  *out_freshness = TM_FRESH;
+	  
+	  // 更新缓存
+	  cache->data = *out_data;
+	  cache->timestamp_ns = get_monotonic_ns();
+	  cache->freshness = TM_FRESH;
+	  
+	  return OSAL_SUCCESS;
+  }
+  
+  // 2. 实时查询失败，降级到缓存
+  if (cache->valid) {
+	  LOG_WARN("TM", "实时查询超时，使用缓存数据（%s）", 
+			   cache->freshness == TM_FRESH ? "FRESH" : "STALE");
+	  
+	  *out_data = cache->data;
+	  *out_freshness = cache->freshness;  // 可能是STALE
+	  
+	  return OSAL_SUCCESS;
+  }
+  
+  // 3. 缓存也无效（从未采集过）
+  LOG_ERROR("TM", "实时查询失败且缓存无效");
+  *out_freshness = TM_INVALID;
+  return OSAL_ERR_NOT_AVAILABLE;
+}
+```
+
+### 3.5 遥控命令对遥测缓存的影响映射
+
+为了保证实时型遥测数据的准确性，需要在遥控命令执行后标记相关遥测缓存为STALE（过期），等待Telemetry进程重新采集。
+
+```c
+/************************************************
+* acl/config/pmc_v1/pmc_acl_invalidation.c
+* 遥控命令对遥测数据的影响映射
+************************************************/
+
+/**
+* @brief 遥控命令失效映射
+*/
+typedef struct {
+  pmc_tc_function_t tc_function;
+  pmc_tm_function_t affected_tm[8];  // 受影响的遥测项（最多8个）
+  uint32_t affected_count;
+} tc_tm_invalidation_map_t;
+
+static const tc_tm_invalidation_map_t g_invalidation_map[] = {
+  // 电源控制命令 → 影响电源状态遥测
+  {
+	  .tc_function = TC_SERVER_POWER_ON,
+	  .affected_tm = { TM_SERVER_POWER_STATUS },
+	  .affected_count = 1
+  },
+  {
+	  .tc_function = TC_SERVER_POWER_OFF,
+	  .affected_tm = { TM_SERVER_POWER_STATUS },
+	  .affected_count = 1
+  },
+  {
+	  .tc_function = TC_SERVER_POWER_RESET,
+	  .affected_tm = { TM_SERVER_POWER_STATUS, TM_SERVER_CPU_TEMP },
+	  .affected_count = 2
+  },
+  
+  // MCU复位 → 影响MCU状态遥测
+  {
+	  .tc_function = TC_MCU_RESET,
+	  .affected_tm = { TM_MCU_STATUS, TM_MCU_TEMP, TM_MCU_VOLTAGE },
+	  .affected_count = 3
+  },
+  
+  // FPGA复位 → 影响FPGA状态遥测
+  {
+	  .tc_function = TC_FPGA_RESET,
+	  .affected_tm = { TM_FPGA_STATUS, TM_FPGA_CONFIG_STATUS },
+	  .affected_count = 2
+  },
+  
+  // 看门狗控制 → 影响看门狗状态遥测
+  {
+	  .tc_function = TC_WATCHDOG_ENABLE,
+	  .affected_tm = { TM_WATCHDOG_STATUS },
+	  .affected_count = 1
+  },
+  {
+	  .tc_function = TC_WATCHDOG_DISABLE,
+	  .affected_tm = { TM_WATCHDOG_STATUS },
+	  .affected_count = 1
+  },
+};
+
+/**
+* @brief 遥控命令执行后，自动失效相关遥测缓存
+*/
+void ACL_InvalidateAffectedTelemetry(pmc_tc_function_t tc_function)
+{
+  for (uint32_t i = 0; i < ARRAY_SIZE(g_invalidation_map); i++) {
+	  const tc_tm_invalidation_map_t *map = &g_invalidation_map[i];
+	  
+	  if (map->tc_function == tc_function) {
+		  for (uint32_t j = 0; j < map->affected_count; j++) {
+			  pmc_tm_function_t tm_func = map->affected_tm[j];
+			  g_tm_cache[tm_func].freshness = TM_STALE;
+			  
+			  LOG_DEBUG("ACL", "遥测缓存标记为STALE: %d", tm_func);
+		  }
+		  break;
+	  }
+  }
+}
+```
+
+### 3.6 Telecommand进程中的遥控命令处理（完整版）
+
+```c
+/************************************************
+* telecommand进程中的命令处理（包含缓存失效）
+************************************************/
+
+// 处理遥控命令
+int32_t handle_telecommand(pmc_tc_function_t cmd_type, uint32_t param)
+{
+  // 1. 通过ACL查询设备映射（O(1)）
+  const acl_tc_config_t *cfg = ACL_GetTcConfig(&g_acl_table, cmd_type);
+  if (cfg == NULL || !cfg->enabled) {
+	  LOG_ERROR("TC", "命令未配置: %d", cmd_type);
+	  return OSAL_ERR_NOT_FOUND;
+  }
+
+  // 2. 根据设备类型调用PDL接口
+  int32_t ret;
+  switch (cfg->device_type) {
+	  case ACL_DEVICE_BMC:
+		  if (cmd_type == TC_SERVER_POWER_ON) {
+			  ret = PDL_BMC_PowerOn(cfg->logic_index);
+		  } else if (cmd_type == TC_SERVER_POWER_OFF) {
+			  ret = PDL_BMC_PowerOff(cfg->logic_index);
+		  } else if (cmd_type == TC_SERVER_POWER_RESET) {
+			  ret = PDL_BMC_PowerReset(cfg->logic_index);
+		  }
+		  break;
+
+	  case ACL_DEVICE_MCU:
+		  if (cmd_type == TC_MCU_RESET) {
+			  ret = PDL_MCU_Reset(cfg->logic_index);
+		  } else if (cmd_type == TC_WATCHDOG_ENABLE) {
+			  ret = PDL_MCU_SendCommand(cfg->logic_index, MCU_CMD_WDT_ENABLE, 0);
+		  }
+		  break;
+
+	  case ACL_DEVICE_FPGA:
+		  if (cmd_type == TC_FPGA_RESET) {
+			  ret = PDL_FPGA_Reset(cfg->logic_index);
+		  }
+		  break;
+
+	  default:
+		  ret = OSAL_ERR_NOT_SUPPORTED;
+  }
+  
+  // 3. 遥控命令执行成功后，失效相关遥测缓存
+  if (ret == OSAL_SUCCESS) {
+	  ACL_InvalidateAffectedTelemetry(cmd_type);
+  }
+
+  return ret;
 }
 ```
 
@@ -1309,23 +1677,35 @@ __builtin_prefetch(&g_acl_table, 0, 3);  // 预取ACL查找表
 | 遥控命令（本地GPIO） | <100μs | ✅ | 直接寄存器操作 |
 | 遥控命令（CAN→MCU） | <500μs | ✅ | CAN帧发送+应答 |
 | 缓存型遥测（CPU温度） | <200μs | ✅ | 共享内存读取 |
-| 实时型遥测（BMC状态） | <800μs | ✅ | BMC缓存查询 |
+| 实时型遥测（BMC状态，正常） | <800μs | ✅ | 实时查询成功 |
+| 实时型遥测（BMC超时，降级） | <1.2ms | ✅ | 实时查询超时（1ms）→ 降级到缓存 |
 | 实时型遥测（MCU状态） | <600μs | ✅ | CAN查询 |
 | 快遥（1秒周期） | <200μs | ✅ | 缓存型为主 |
 | 慢遥（2秒周期） | <200μs | ✅ | 缓存型为主 |
 
 
-关键路径延迟分解（最坏情况：实时型遥测）：
+关键路径延迟分解（最坏情况：实时型遥测 + BMC超时）：
 
 | 步骤 | 操作 | 延迟 | 说明 |
 |------|------|------|------|
 | 1 | CAN中断触发 → Telecommand进程唤醒 | <10μs | 内核调度 |
 | 2 | 命令解析 | <50μs | 协议解析 |
 | 3 | ACL查询 | <10μs | O(1)直接索引 |
-| 4 | PDL接口调用（实时型遥测） | <500μs | BMC/MCU查询 |
-| 5 | 应答打包 | <50μs | 数据封装 |
-| 6 | CAN发送 | <100μs | CAN帧发送 |
-| **总延迟** | | **<800μs** | **远小于2ms要求** |
+| 4 | PDL接口调用（实时查询，带超时） | <1000μs | BMC查询超时 |
+| 5 | 降级到缓存读取 | <10μs | 共享内存读取 |
+| 6 | 应答打包 | <50μs | 数据封装 |
+| 7 | CAN发送 | <100μs | CAN帧发送 |
+| **总延迟** | | **<1.23ms** | **满足2ms要求** |
+
+**遥测数据新鲜度保证**：
+
+| 场景 | 处理流程 | 数据新鲜度 | 延迟 |
+|------|---------|-----------|------|
+| 缓存型遥测（正常） | 从缓存读取 | 最多延迟1秒 | <200μs |
+| 实时型遥测（正常） | 实时查询成功 | 实时数据 | <800μs |
+| 实时型遥测（BMC超时） | 降级到缓存（FRESH） | 最多延迟500ms | <1.2ms |
+| 实时型遥测（遥控后） | 降级到缓存（STALE） | 过期数据，等待更新 | <1.2ms |
+| 实时型遥测（从未采集） | 返回错误（INVALID） | 无数据 | <1.2ms |
 
 ### 6.2 CPU占用估算（单核）
 
@@ -1389,7 +1769,7 @@ __builtin_prefetch(&g_acl_table, 0, 3);  // 预取ACL查找表
 
 | 维度 | v3.0单进程 | v3.1多进程 | PMC方案（推荐） |
 |------|-----------|-----------|----------------|
-| 2ms实时性 | ✅ 优秀（<100μs） | ⚠️ 可能超时（IPC延迟） | ✅ 优秀（<800μs） |
+| 2ms实时性 | ✅ 优秀（<100μs） | ⚠️ 可能超时（IPC延迟） | ✅ 优秀（<1.23ms，含降级） |
 | 单核适配 | ✅ 完美 | ❌ 多进程竞争CPU | ✅ 实时调度优化 |
 | 故障隔离 | ❌ 弱（线程崩溃影响全局） | ✅ 强（进程级隔离） | ✅ 强（关键路径隔离） |
 | 抗辐射 | ❌ 差（共享内存SEU） | ✅ 优（独立地址空间） | ✅ 优（进程隔离+ECC） |
@@ -1397,23 +1777,28 @@ __builtin_prefetch(&g_acl_table, 0, 3);  // 预取ACL查找表
 | 调试复杂度 | ✅ 简单（单进程GDB） | ❌ 复杂（多进程调试） | ⚖️ 中等（4进程） |
 | 航天适用 | ❌ 不符合标准 | ✅ 符合NASA/ESA标准 | ✅ 符合标准 |
 | 日志收集 | ⚠️ 需手动实现 | ⚠️ 需手动实现 | ✅ 独立Logger进程 |
-| 遥测分类 | ❌ 无 | ❌ 无 | ✅ 缓存型/实时型 |
+| 遥测分类 | ❌ 无 | ❌ 无 | ✅ 缓存型/实时型+降级 |
+| 数据新鲜度 | ❌ 无保证 | ❌ 无保证 | ✅ FRESH/STALE/INVALID标记 |
 | 降级运行 | ❌ 不支持 | ✅ 支持 | ✅ 支持（3级降级） |
 
 
 PMC方案的核心优势：
 
-1. ✅ 满足2ms硬实时：关键路径零IPC，实时调度优化
+1. ✅ 满足2ms硬实时：关键路径零IPC，实时调度优化，实时型遥测支持降级（<1.23ms）
 
 2. ✅ 航空级可靠性：进程隔离、抗辐射、三级故障恢复
 
 3. ✅ 单核优化：SCHED_FIFO实时调度 + CPU绑定 + 内存锁定
 
-4. ✅ 业务解耦：ACL层支持遥测分类（缓存型/实时型）
+4. ✅ 业务解耦：ACL层支持遥测分类（缓存型/实时型），遥控命令自动失效相关遥测缓存
 
-5. ✅ 完整日志：独立Logger进程，收集运行日志、崩溃日志、状态日志
+5. ✅ 数据新鲜度保证：FRESH/STALE/INVALID标记，卫星平台可判断数据可信度
 
-6. ✅ 扩展性强：支持新协议、新外设、新平台
+6. ✅ 容错性强：实时型遥测支持降级（实时查询超时 → 缓存），保证2ms应答
+
+7. ✅ 完整日志：独立Logger进程，收集运行日志、崩溃日志、状态日志
+
+8. ✅ 扩展性强：支持新协议、新外设、新平台
 
 ---
 
@@ -1926,12 +2311,16 @@ EMS/
 │   │   │   ├── osal_process_mgmt.h         # 进程管理接口（fork/exec/wait/kill）
 │   │   │   └── osal_sched.h                # 实时调度接口（SCHED_FIFO/CPU亲和性/内存锁定）
 │   │   └── ipc/
-│   │       └── osal_shm.h                  # 共享内存接口（shm_open/mmap/双缓冲）
+│   │       ├── osal_shm.h                  # 共享内存接口（shm_open/mmap）
+│   │       ├── osal_log_ring_buffer.h      # 日志环形缓冲区（通用IPC机制，4096条目）
+│   │       └── osal_heartbeat_table.h      # 心跳表（通用IPC机制，原子时间戳）
 │   └── src/
 │       └── posix/
 │           ├── osal_process_mgmt.c         # 进程管理实现
 │           ├── osal_sched.c                # 实时调度实现
-│           └── osal_shm.c                  # 共享内存实现
+│           ├── osal_shm.c                  # 共享内存实现
+│           ├── osal_log_ring_buffer.c      # 日志环形缓冲区实现
+│           └── osal_heartbeat_table.c      # 心跳表实现
 │
 ├── hal/                                     # 硬件抽象层（现有）
 │   ├── include/
@@ -2005,16 +2394,22 @@ EMS/
 ├── acl/                                     # 应用配置层（新增）
 │   ├── include/
 │   │   ├── pmc_acl_types.h                 # PMC业务功能枚举（遥控/遥测/健康管理）
-│   │   └── acl_config.h                    # ACL配置结构（设备映射+数据类型）
+│   │   ├── acl_config.h                    # ACL配置结构（设备映射+数据类型）
+│   │   ├── acl_telemetry_cache.h           # 遥测缓冲区结构（业务数据，双缓冲无锁读写）
+│   │   └── acl_status_snapshot.h           # 状态快照结构（业务数据，服务器+外设状态）
 │   ├── src/
-│   │   └── acl_core.c                      # ACL核心实现（O(1)查找表）
+│   │   ├── acl_core.c                      # ACL核心实现（O(1)查找表）
+│   │   ├── acl_telemetry_cache.c           # 遥测缓存管理实现
+│   │   └── acl_status_snapshot.c           # 状态快照管理实现
 │   └── config/
 │       └── pmc_v1/
-│           └── pmc_acl_config.c            # PMC v1.0配置（BMC/MCU/FPGA映射）
+│           ├── pmc_acl_config.c            # PMC v1.0配置（BMC/MCU/FPGA映射）
+│           └── pmc_acl_invalidation.c      # 遥控命令失效映射
 │
-├── app/                                     # 应用层（新增）
+├── apps/                                     # 应用层（新增）
 │   ├── supervisor/
-│   │   └── supervisor.c                    # Supervisor进程（<300行，心跳检测+进程重启）
+│   │   ├── supervisor.c                    # Supervisor进程（<1000行，心跳检测+进程重启）
+│   │   └── pmc_shm_layout.h                # PMC共享内存布局定义（应用级设计决策）
 │   │
 │   ├── telecommand/
 │   │   ├── telecommand.c                   # Telecommand进程主程序（实时调度SCHED_FIFO 99）
@@ -2040,13 +2435,6 @@ EMS/
 │       ├── crash_analyzer.c                # 崩溃分析线程（coredump+backtrace）
 │       └── log_rotator.c                   # 日志轮转线程（按大小/时间轮转）
 │
-├── common/                                  # 公共定义
-│   └── include/
-│       ├── shm_layout.h                    # 共享内存布局定义（总体结构）
-│       ├── telemetry_cache.h               # 遥测缓冲区结构（双缓冲，无锁读写）
-│       ├── log_ring_buffer.h               # 日志环形缓冲区（4096条目，原子操作）
-│       ├── heartbeat_table.h               # 心跳表结构（原子时间戳，5秒周期）
-│       └── status_snapshot.h               # 状态快照结构（服务器+外设状态）
 │
 └── tests/                                   # 测试目录
     ├── unit/                                # 单元测试
@@ -2075,16 +2463,20 @@ EMS/
 
 ### 12.2 关键文件说明
 
-#### OSAL层扩展（3个头文件 + 3个实现文件）
+#### OSAL层扩展（5个头文件 + 5个实现文件）
 
 | 文件 | 行数估算 | 说明 |
 |------|---------|------|
 | `osal_process_mgmt.h` | ~150行 | 进程管理接口：fork/exec/wait/kill/getpid |
 | `osal_sched.h` | ~100行 | 实时调度接口：SCHED_FIFO/CPU亲和性/内存锁定 |
-| `osal_shm.h` | ~120行 | 共享内存接口：shm_open/mmap/双缓冲管理 |
+| `osal_shm.h` | ~120行 | 共享内存接口：shm_open/mmap/munmap |
+| `osal_log_ring_buffer.h` | ~150行 | 日志环形缓冲区接口（通用IPC机制） |
+| `osal_heartbeat_table.h` | ~100行 | 心跳表接口（通用IPC机制） |
 | `osal_process_mgmt.c` | ~300行 | 进程管理实现（POSIX封装） |
 | `osal_sched.c` | ~200行 | 实时调度实现（sched_setscheduler/mlockall） |
 | `osal_shm.c` | ~250行 | 共享内存实现（mmap/原子操作） |
+| `osal_log_ring_buffer.c` | ~200行 | 日志环形缓冲区实现（无锁读写） |
+| `osal_heartbeat_table.c` | ~150行 | 心跳表实现（原子操作） |
 
 #### HAL层（现有，5个头文件 + 5个实现文件）
 
@@ -2133,20 +2525,26 @@ EMS/
 | `pdl_satellite_can.c` | ~400行 | Satellite CAN通信模块 |
 | `pdl_watchdog.c` | ~300行 | 看门狗驱动实现 |
 
-#### ACL层（新增，2个头文件 + 2个实现文件）
+#### ACL层（新增，4个头文件 + 4个实现文件 + 配置文件）
 
 | 文件 | 行数估算 | 说明 |
 |------|---------|------|
 | `pmc_acl_types.h` | ~200行 | PMC业务功能枚举（遥控/遥测/健康管理） |
 | `acl_config.h` | ~150行 | ACL配置结构（设备映射+数据类型） |
+| `acl_telemetry_cache.h` | ~200行 | 遥测缓冲区结构（业务数据，双缓冲无锁读写） |
+| `acl_status_snapshot.h` | ~150行 | 状态快照结构（业务数据，服务器+外设状态） |
 | `acl_core.c` | ~300行 | ACL核心实现（O(1)查找表初始化） |
+| `acl_telemetry_cache.c` | ~250行 | 遥测缓存管理实现 |
+| `acl_status_snapshot.c` | ~200行 | 状态快照管理实现 |
 | `pmc_acl_config.c` | ~500行 | PMC v1.0配置（BMC/MCU/FPGA映射表） |
+| `pmc_acl_invalidation.c` | ~200行 | 遥控命令失效映射 |
 
-#### 应用层（新增，4个进程 + 15个线程文件）
+#### 应用层（新增，4个进程 + 15个线程文件 + 共享内存布局）
 
 | 进程/线程 | 文件 | 行数估算 | 说明 |
 |----------|------|---------|------|
-| **Supervisor** | `supervisor.c` | ~300行 | 最小化监控进程，心跳检测+进程重启 |
+| **Supervisor** | `supervisor.c` | ~800行 | 监控进程，心跳检测+进程重启+故障恢复 |
+| | `pmc_shm_layout.h` | ~150行 | PMC共享内存布局定义（应用级设计决策） |
 | **Telecommand** | `telecommand.c` | ~400行 | 实时进程主程序，SCHED_FIFO 99 |
 | | `can_rx_thread.c` | ~500行 | CAN接收线程，2ms应答关键路径 |
 | | `tc_exec_thread.c` | ~400行 | 遥控执行线程，异步执行避免阻塞 |
@@ -2164,24 +2562,18 @@ EMS/
 | | `crash_analyzer.c` | ~450行 | 崩溃分析线程，coredump+backtrace |
 | | `log_rotator.c` | ~250行 | 日志轮转线程，按大小/时间轮转 |
 
-#### 共享内存定义（5个头文件）
-
-| 文件 | 行数估算 | 说明 |
-|------|---------|------|
-| `shm_layout.h` | ~150行 | 共享内存总体布局（遥测+日志+心跳+快照） |
-| `telemetry_cache.h` | ~200行 | 遥测缓冲区结构（双缓冲，无锁读写） |
-| `log_ring_buffer.h` | ~180行 | 日志环形缓冲区（4096条目，原子操作） |
-| `heartbeat_table.h` | ~100行 | 心跳表结构（原子时间戳，5秒周期） |
-| `status_snapshot.h` | ~250行 | 状态快照结构（服务器+外设状态） |
-
-#### 测试文件（13个测试文件）
+#### 测试文件（15个测试文件）
 
 | 文件 | 行数估算 | 说明 |
 |------|---------|------|
 | `test_acl_lookup.c` | ~300行 | ACL查找测试，验证O(1)性能 |
 | `test_osal_process.c` | ~400行 | 进程管理测试，fork/exec/wait |
-| `test_osal_shm.c` | ~450行 | 共享内存测试，双缓冲/原子操作 |
+| `test_osal_shm.c` | ~450行 | 共享内存测试，mmap/munmap |
 | `test_osal_sched.c` | ~350行 | 实时调度测试，SCHED_FIFO/优先级 |
+| `test_osal_log_ring_buffer.c` | ~350行 | 日志环形缓冲区测试，无锁读写 |
+| `test_osal_heartbeat_table.c` | ~300行 | 心跳表测试，原子操作 |
+| `test_acl_telemetry_cache.c` | ~400行 | 遥测缓存测试，FRESH/STALE/INVALID |
+| `test_acl_status_snapshot.c` | ~300行 | 状态快照测试，JSON序列化 |
 | `test_pdl_mcu.c` | ~400行 | MCU驱动测试，CAN/串口通信 |
 | `test_pdl_bmc.c` | ~500行 | BMC驱动测试，Redfish/IPMI |
 | `test_pdl_satellite.c` | ~350行 | Satellite驱动测试，遥控遥测 |
@@ -2196,17 +2588,25 @@ EMS/
 
 | 模块 | 文件数 | 总行数估算 | 说明 |
 |------|-------|-----------|------|
-| OSAL层扩展 | 6 | ~1,120行 | 进程管理+实时调度+共享内存（新增） |
-| HAL层 | 10 | ~1,570行 | GPIO/UART/I2C/SPI/CAN抽象（现有） |
-| PCL层 | 13+ | ~2,550行+ | 外设配置+平台配置（现有，需扩展） |
-| PDL层 | 17 | ~6,400行 | MCU/BMC/Satellite驱动（现有） |
-| ACL层 | 4 | ~1,150行 | 业务功能映射+O(1)查找（新增） |
-| 应用层 | 19 | ~6,750行 | 4个进程+15个线程（新增） |
-| 共享内存定义 | 5 | ~880行 | 遥测+日志+心跳+快照（新增） |
-| 测试代码 | 13 | ~5,350行 | 单元+集成+压力测试（新增） |
-| **新增代码** | **47** | **~15,250行** | 本次架构优化新增代码 |
+| **OSAL层扩展** | 10 | ~2,020行 | 进程管理+实时调度+共享内存+日志缓冲区+心跳表（新增） |
+| **HAL层** | 10 | ~1,570行 | GPIO/UART/I2C/SPI/CAN抽象（现有） |
+| **PCL层** | 13+ | ~2,550行+ | 外设配置+平台配置（现有，需扩展） |
+| **PDL层** | 17 | ~6,400行 | MCU/BMC/Satellite驱动（现有） |
+| **ACL层** | 9 | ~2,000行 | 业务功能映射+遥测缓存+状态快照（新增） |
+| **应用层** | 18 | ~6,900行 | 4个进程+15个线程+共享内存布局（新增） |
+| **测试代码** | 15 | ~5,650行 | 单元+集成+压力测试（新增） |
+| **新增代码** | **52** | **~16,570行** | 本次架构优化新增代码 |
 | **现有代码** | **40** | **~10,520行** | 现有OSAL/HAL/PCL/PDL层 |
-| **总计** | **87** | **~25,770行** | 完整PMC系统代码量 |
+| **总计** | **92** | **~27,090行** | 完整PMC系统代码量 |
+
+**架构特点**：
+- ✅ **严格6层架构**：APP → ACL → PDL → PCL → HAL → OSAL
+- ✅ **完全解耦**：每层只通过公开API访问下层，无跨层依赖
+- ✅ **无common/**：所有代码都有明确归属（OSAL/ACL/APP）
+- ✅ **职责清晰**：
+  - OSAL：通用IPC机制（日志缓冲区、心跳表）
+  - ACL：业务数据结构（遥测缓存、状态快照）
+  - APP：应用级设计决策（共享内存布局）
 
 ---
 
