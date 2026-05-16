@@ -2,8 +2,7 @@
 
 ## 摘要
 
-针对PMC（Payload Management Controller）的航天级可靠性和2ms硬实时需求，推荐采用**轻量级多进程架构**：关键进程实时调度 +
-非关键进程后台运行。该方案在满足2ms应答要求的同时，提供进程级故障隔离和抗辐射能力。
+​		针对PMC（Payload Management Controller）的航天级可靠性和硬实时需求，推荐采用**轻量级多进程架构**：关键进程实时调度 + 非关键进程后台运行。该方案在满足高实时性应答要求的同时，提供进程级故障隔离和抗辐射能力。
 
 **核心特点**：
 
@@ -19,7 +18,7 @@
 
 - ✅ 完整日志收集（运行日志、崩溃日志、状态日志）
 
-- ✅ 严格6层架构（APP/ACL/PDL/PCL/HAL/OSAL完全解耦）
+- ✅ 严格6层架构完全解耦（APP / ACL / PDL / PCL / HAL / OSAL）
 
 - ✅ PDL独立外设设计（每种外设独立API，无统一抽象接口）
 
@@ -79,7 +78,7 @@
 5. **遥测周期**：
  - 快遥：1秒周期
  - 慢遥：2秒周期
- - 可能同时收到快遥和慢遥
+ - 可能同时或先后收到快遥和慢遥
 
 6. **硬件平台**：单核SoC
 
@@ -91,57 +90,56 @@
 
 #### 2.1.1 架构分层
 
-```
+```tex
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                          OSAL运行环境                                        │
-│  • 屏蔽硬件平台差异（Linux/RTOS、32位/64位、系统调用封装）                   │
-│  • 提供统一接口（进程/线程/IPC/内存/时间/文件/网络）                         │
-│  • 平台实现（POSIX/FreeRTOS/VxWorks）                                       │
+│  • 屏蔽硬件平台差异（Linux/RTOS、32位/64位、系统调用封装）                       │
+│  • 提供统一接口（进程/线程/IPC/内存/时间/文件/网络）                             │
+│  • 平台实现（POSIX/FreeRTOS/VxWorks）                                         │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│                     所有模块运行在OSAL之上                                   │
+│                     所有模块运行在OSAL之上                                     │
 │                                                                              │
-│  ┌──────────────────────────────────┐    ┌──────────────────────────────┐  │
-│  │         APP（应用层）             │    │      ACL（应用配置层）       │  │
-│  │  • 4个进程：Supervisor/          │◄───┤  • 业务功能枚举              │  │
-│  │    Telecommand/Telemetry/        │读取│  • 业务数据结构              │  │
-│  │    Firmware/Logger               │配置│  • 设备映射配置（O(1)查找） │  │
-│  │  • 共享内存布局定义               │    │                              │  │
-│  └────────────┬─────────────────────┘    └──────────────────────────────┘  │
-│               │ 直接调用PDL API                                              │
+│  ┌──────────────────────────────────┐      ┌──────────────────────────────┐  │
+│  │         APP（应用层）             │      │      ACL（应用配置层）         │  │
+│  │  • 4个进程：Supervisor/           │ ◄─── │   • 业务功能枚举               │  │
+│  │    Telecommand/Telemetry/        │ 读取 │   • 业务数据结构               │  │
+│  │    Firmware/Logger               │ 配置 │   • 设备映射配置（O(1)查找）    │  │
+│  │  • 共享内存布局定义                │      │                              │  │
+│  └────────────┬─────────────────────┘      └──────────────────────────────┘  │
+│               │ 直接调用PDL API                                               │
 │               ↓                                                              │
-│  ┌──────────────────────────────────┐    ┌──────────────────────────────┐  │
-│  │         PDL（外设驱动层）         │    │      PCL（外设配置层）       │  │
-│  │  • 独立外设服务（Satellite/      │◄───┤  • 硬件配置数据              │  │
-│  │    BMC/MCU各自独立设计）         │读取│  • 平台配置（vendor/chip/   │  │
-│  │  • 协议实现（Redfish/IPMI/CAN）  │配置│    product）                 │  │
-│  │  • 双通道冗余、自动切换           │    │  • 纯数据结构，无业务逻辑    │  │
-│  └────────────┬─────────────────────┘    └──────────────────────────────┘  │
-│               │ 直接调用HAL API                                              │
+│  ┌──────────────────────────────────┐    ┌──────────────────────────────┐    │
+│  │         PDL（外设驱动层）         │    │      PCL（外设配置层）         │    │
+│  │  • 独立外设服务（Satellite/      │◄───┤  • 硬件配置数据                 │    │
+│  │    BMC/MCU各自独立设计）         │读取│  • 平台配置（vendor/chip/       │    │
+│  │  • 协议实现（Redfish/IPMI/CAN）  │配置│    product）                   │    │
+│  │  • 双通道冗余、自动切换           │    │  • 纯数据结构，无业务逻辑        │    │
+│  └────────────┬─────────────────────┘    └──────────────────────────────┘    │
+│               │ 直接调用HAL API                                               │
 │               ↓                                                              │
-│  ┌──────────────────────────────────┐                                       │
-│  │         HAL（硬件抽象层）         │                                       │
-│  │  • 硬件驱动接口（CAN/UART/I2C/   │                                       │
-│  │    SPI/GPIO/Watchdog）           │                                       │
-│  │  • 平台实现（Linux/RTOS）        │                                       │
-│  └──────────────────────────────────┘                                       │
+│  ┌──────────────────────────────────┐                                        │
+│  │         HAL（硬件抽象层）          │                                        │
+│  │  • 硬件驱动接口（CAN/UART/I2C/     │                                        │
+│  │    SPI/GPIO/Watchdog）            │                                        │
+│  │  • 平台实现（Linux/RTOS）          │                                        │
+│  └──────────────────────────────────┘                                        │
 │                                                                              │
-│  【关键原则】                                                                │
-│  • 所有模块都调用OSAL接口，不直接访问标准库或系统调用                        │
-│  • ACL/PCL是配置层，与APP/PDL属于横向关系，不是纵向依赖                     │
-│  • APP读取ACL配置后直接调用PDL，不经过ACL                                   │
-│  • PDL读取PCL配置后直接调用HAL，不经过PCL                                   │
+│  【关键原则】                                                                 │
+│  • 所有模块都调用OSAL接口，不直接访问标准库或系统调用，确保高度可移植性             │
+│  • APP读取ACL配置后直接调用PDL，不经过ACL                                       │
+│  • PDL读取PCL配置后直接调用HAL，不经过PCL                                      │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 #### 2.1.2 完全解耦原则
 
 **核心规则**：
-1. ✅ **OSAL运行环境**：所有模块运行在OSAL之上，只调用OSAL接口，不直接访问标准库或系统调用
+1. ✅ **OSAL运行环境**：所有模块运行在OSAL之上，只调用OSAL接口，不直接访问标准库或系统调用，确保高度可移植性
 2. ✅ **纵向依赖**：APP → PDL → HAL（每层直接调用下层API）
 3. ✅ **横向配置**：APP读取ACL配置，PDL读取PCL配置（配置层不参与调用链）
 4. ✅ **接口隔离**：每层只暴露必要的公开接口，内部实现完全隐藏
 5. ✅ **无跨层依赖**：严禁跨层直接访问（如APP直接调用HAL）
-6. ✅ **无common/**：所有代码都有明确归属，不存在"公共组件"
+6. ✅ **无common**：所有代码都有明确归属，不存在"公共组件"
 
 **数据结构归属原则**：
 - **通用IPC机制** → OSAL层（日志环形缓冲区、心跳表）
@@ -181,11 +179,11 @@ malloc(...);          // 禁止！应该调用osal_malloc()
 | **ACL** | 业务配置、设备映射、业务数据结构 | 不能包含业务逻辑、不参与调用链 |
 | **PDL** | 独立外设服务、协议实现、通道管理 | 不能包含硬件寄存器操作、不设计统一外设接口 |
 | **PCL** | 硬件配置数据 | 不能包含业务逻辑、函数实现、不参与调用链 |
-| **HAL** | 硬件驱动接口 | 不能包含业务逻辑 |
+| **HAL** | 硬件驱动接口，调用OS驱动或自写驱动 | 不能包含业务逻辑 |
 | **OSAL** | 系统调用封装、通用IPC机制 | 不能包含业务逻辑、硬件操作 |
 
 **架构关系说明**：
-- ✅ **纵向依赖**：APP → PDL → HAL → OSAL（每层直接调用下层API）
+- ✅ **纵向依赖**：APP → PDL → HAL->OS_Drivers/Reg_Operations（每层直接调用下层API）
 - ✅ **横向配置**：APP读取ACL配置，PDL读取PCL配置（配置层是数据源，不参与调用链）
 - ✅ **OSAL基础**：所有模块都运行在OSAL之上，只调用OSAL接口，不直接访问系统调用
 
@@ -331,8 +329,8 @@ EMS/
 │   │   └── acl_status_snapshot.c           # 状态快照管理实现
 │   └── config/
 │       └── pmc_v1/
-│           ├── pmc_acl_config.c            # PMC v1.0配置（BMC/MCU/FPGA映射）
-│           └── pmc_acl_invalidation.c      # 遥控命令失效映射
+│           ├── acl_pmc_v1.c                # PMC v1.0配置（命名规范：acl_{project}_{product}_{version}.c）
+│           └── acl_pmc_v1_invalidation.c   # 遥控命令失效映射
 │
 ├── apps/                                     # 应用层（新增）
 │   ├── supervisor/
@@ -461,11 +459,11 @@ EMS/
 | `acl_config.h`           | ~150行   | ACL配置结构（设备映射+数据类型）           |
 | `acl_telemetry_cache.h`  | ~200行   | 遥测缓冲区结构（业务数据，双缓冲无锁读写） |
 | `acl_status_snapshot.h`  | ~150行   | 状态快照结构（业务数据，服务器+外设状态）  |
-| `acl_core.c`             | ~300行   | ACL核心实现（O(1)查找表初始化）            |
-| `acl_telemetry_cache.c`  | ~250行   | 遥测缓存管理实现                           |
-| `acl_status_snapshot.c`  | ~200行   | 状态快照管理实现                           |
-| `pmc_acl_config.c`       | ~500行   | PMC v1.0配置（BMC/MCU/FPGA映射表）         |
-| `pmc_acl_invalidation.c` | ~200行   | 遥控命令失效映射                           |
+| `acl_core.c`                 | ~300行   | ACL核心实现（O(1)查找表初始化）            |
+| `acl_telemetry_cache.c`      | ~250行   | 遥测缓存管理实现                           |
+| `acl_status_snapshot.c`      | ~200行   | 状态快照管理实现                           |
+| `acl_pmc_v1.c`               | ~500行   | PMC v1.0配置（BMC/MCU/FPGA映射表）         |
+| `acl_pmc_v1_invalidation.c`  | ~200行   | 遥控命令失效映射                           |
 
 - 应用层（新增，4个进程 + 15个线程文件 + 共享内存布局）
 
@@ -1807,7 +1805,12 @@ typedef struct {
 
 ``` C
 /************************************************
-* acl/config/pmc_v1/pmc_acl_config.c
+/************************************************
+* acl/config/pmc_v1/acl_pmc_v1.c
+* PMC v1.0应用配置
+* 命名规范：acl_{project}_{product}_{version}.c
+* 说明：ACL配置关注业务功能，不关注硬件平台
+************************************************/
 * PMC v1.0配置（BMC通过Redfish，MCU通过CAN）
 ************************************************/
 
@@ -2037,7 +2040,10 @@ int32_t handle_realtime_telemetry(const acl_tm_config_t *cfg,
 
 ```c
 /************************************************
-* acl/config/pmc_v1/pmc_acl_invalidation.c
+/************************************************
+* acl/config/pmc_v1/acl_pmc_v1_invalidation.c
+* PMC v1.0遥控命令失效映射
+************************************************/
 * 遥控命令对遥测数据的影响映射
 ************************************************/
 
@@ -2175,16 +2181,422 @@ int32_t handle_telecommand(pmc_tc_function_t cmd_type, uint32_t param)
 
 ---
 
-## 6. PDL 设计（业务配置层）
+## 6. PDL 设计（外设驱动层）
 
-## 7. PCL 设计（业务配置层）
+### 6.1 设计原则
+
+**PDL（Peripheral Driver Layer）是外设驱动层，负责封装各类外设的通信协议和业务逻辑。**
+
+#### 6.1.1 独立外设服务设计
+
+**核心理念**：每种外设（Satellite/BMC/MCU）完全独立设计，各自暴露专属API，不强行抽象成统一接口。
+
+**为什么不设计统一外设接口？**
+
+```c
+// ❌ 错误设计：统一外设接口（最小公分母陷阱）
+typedef struct {
+    int32_t (*init)(void *config);
+    int32_t (*read)(void *handle, void *data);
+    int32_t (*write)(void *handle, void *data);
+    int32_t (*control)(void *handle, uint32_t cmd, void *arg);
+} peripheral_ops_t;
+
+// 问题：
+// 1. BMC需要双通道切换，但Satellite不需要
+// 2. MCU需要固件升级，但BMC不需要
+// 3. Satellite需要心跳机制，但MCU不需要
+// 4. 所有特殊功能都要塞进control()，变成万能接口
+```
+
+**✅ 正确设计：独立外设服务**
+
+```c
+// Satellite服务（卫星平台通信）
+int32_t PDL_Satellite_Init(const satellite_service_config_t *config, satellite_service_handle_t *handle);
+int32_t PDL_Satellite_SendResponse(satellite_service_handle_t handle, uint32_t seq_num, can_status_t status, uint32_t result);
+int32_t PDL_Satellite_SendHeartbeat(satellite_service_handle_t handle, can_status_t status);
+
+// BMC服务（载荷服务器管理）
+int32_t PDL_BMC_Init(const bmc_config_t *config, bmc_handle_t *handle);
+int32_t PDL_BMC_PowerOn(bmc_handle_t handle);
+int32_t PDL_BMC_ReadSensors(bmc_handle_t handle, bmc_sensor_type_t type, bmc_sensor_reading_t *readings, uint32_t max_count, uint32_t *actual_count);
+int32_t PDL_BMC_SwitchChannel(bmc_handle_t handle, bmc_channel_t channel);
+
+// MCU服务（微控制器通信）
+int32_t PDL_MCU_Init(const mcu_config_t *config, mcu_handle_t *handle);
+int32_t PDL_MCU_GetVersion(mcu_handle_t handle, mcu_version_t *version);
+int32_t PDL_MCU_FirmwareUpdate(mcu_handle_t handle, const char *firmware_path, void (*progress_callback)(uint32_t percent));
+```
+
+**优势**：
+- ✅ 每个API完全贴合外设特性，无冗余参数
+- ✅ 类型安全，编译期检查
+- ✅ 代码清晰，无需运行时类型判断
+- ✅ 易于扩展，新增外设不影响现有代码
+
+#### 6.1.2 ACL层配置映射
+
+**APP层通过ACL配置表指定具体外设类型和索引**：
+
+```c
+// ACL配置：遥测项映射到具体外设
+typedef struct {
+    acl_device_type_t device_type;  // 外设类型（SATELLITE/BMC/MCU）
+    uint32_t          device_index; // 外设索引（第几个BMC/MCU）
+    uint32_t          logic_index;  // 逻辑索引（PDL层句柄索引）
+} acl_tm_device_mapping_t;
+
+// APP层根据配置调用对应PDL接口
+acl_tm_device_mapping_t *cfg = ACL_GetTelemetryMapping(TM_CPU_TEMP);
+switch (cfg->device_type) {
+    case ACL_DEVICE_BMC:
+        PDL_BMC_ReadSensors(cfg->logic_index, BMC_SENSOR_TEMP, &data, 1, &count);
+        break;
+    case ACL_DEVICE_MCU:
+        PDL_MCU_GetStatus(cfg->logic_index, &status);
+        break;
+}
+```
+
+#### 6.1.3 协议封装与通道管理
+
+**PDL层职责**：
+- ✅ 封装通信协议（Redfish/IPMI/CAN协议）
+- ✅ 管理通信通道（主备通道、自动切换）
+- ✅ 实现重试机制和超时处理
+- ✅ 提供统计信息和健康检查
+
+**PDL层禁止**：
+- ❌ 直接操作硬件寄存器（应调用HAL层）
+- ❌ 包含业务逻辑（业务逻辑在APP层）
+- ❌ 设计统一外设抽象接口
+
+---
+
+### 6.2 Satellite服务设计
+
+**功能**：封装卫星平台通信协议，处理遥控命令接收和遥测响应发送。
+
+#### 6.2.1 接口设计
+
+```c
+/* 卫星平台服务句柄 */
+typedef void* satellite_service_handle_t;
+
+/* 卫星平台服务配置 */
+typedef struct {
+    const char *can_device;           /* CAN设备名 */
+    uint32_t    can_bitrate;          /* CAN波特率 */
+    uint32_t    heartbeat_interval_ms;/* 心跳间隔(ms) */
+    uint32_t    cmd_timeout_ms;       /* 命令超时(ms) */
+} satellite_service_config_t;
+
+/* 命令回调函数类型 */
+typedef void (*satellite_cmd_callback_t)(uint8_t cmd_type, uint32_t param, void *user_data);
+
+/* 初始化卫星平台服务 */
+int32_t PDL_Satellite_Init(const satellite_service_config_t *config, satellite_service_handle_t *handle);
+
+/* 注册命令回调函数 */
+int32_t PDL_Satellite_RegisterCallback(satellite_service_handle_t handle, satellite_cmd_callback_t callback, void *user_data);
+
+/* 发送响应到卫星平台 */
+int32_t PDL_Satellite_SendResponse(satellite_service_handle_t handle, uint32_t seq_num, can_status_t status, uint32_t result);
+
+/* 发送心跳到卫星平台 */
+int32_t PDL_Satellite_SendHeartbeat(satellite_service_handle_t handle, can_status_t status);
+
+/* 获取服务统计信息 */
+int32_t PDL_Satellite_GetStats(satellite_service_handle_t handle, uint32_t *rx_count, uint32_t *tx_count, uint32_t *error_count);
+```
+
+#### 6.2.2 设计特点
+
+- **CAN协议封装**：封装CAN帧格式、序列号管理、CRC校验
+- **命令接收**：后台线程接收CAN命令，通过回调通知APP层
+- **心跳机制**：周期性发送心跳帧，维持与卫星平台的连接
+- **统计信息**：记录收发计数、错误计数，用于健康监控
+
+---
+
+### 6.3 BMC服务设计
+
+**功能**：与带BMC的载荷服务器通信，支持IPMI/Redfish协议，实现电源控制、状态查询、传感器读取。
+
+#### 6.3.1 接口设计
+
+```c
+/* BMC服务句柄 */
+typedef void* bmc_handle_t;
+
+/* 通信通道类型 */
+typedef enum {
+    BMC_CHANNEL_NETWORK = 0,  /* 网络通道（IPMI over LAN/Redfish） */
+    BMC_CHANNEL_SERIAL  = 1   /* 串口通道（IPMI over Serial） */
+} bmc_channel_t;
+
+/* BMC协议类型 */
+typedef enum {
+    BMC_PROTOCOL_IPMI    = 0, /* IPMI协议 */
+    BMC_PROTOCOL_REDFISH = 1  /* Redfish协议 */
+} bmc_protocol_t;
+
+/* BMC配置 */
+typedef struct {
+    /* 网络配置 */
+    struct {
+        bool        enabled;      /* 是否启用 */
+        const char *ip_addr;      /* IP地址 */
+        uint16_t    port;         /* 端口（默认623） */
+        const char *username;     /* 用户名 */
+        const char *password;     /* 密码 */
+        uint32_t    timeout_ms;   /* 超时时间 */
+    } network;
+
+    /* 串口配置 */
+    struct {
+        bool        enabled;      /* 是否启用 */
+        const char *device;       /* 串口设备 */
+        uint32_t    baudrate;     /* 波特率 */
+        uint32_t    timeout_ms;   /* 超时时间 */
+    } serial;
+
+    /* 服务配置 */
+    bmc_channel_t primary_channel;      /* 主通道 */
+    bool          auto_switch;          /* 自动切换通道 */
+    uint32_t      retry_count;          /* 重试次数 */
+    uint32_t      health_check_interval;/* 健康检查间隔(ms) */
+} bmc_config_t;
+
+/* 初始化BMC服务 */
+int32_t PDL_BMC_Init(const bmc_config_t *config, bmc_handle_t *handle);
+
+/* 电源控制 */
+int32_t PDL_BMC_PowerOn(bmc_handle_t handle);
+int32_t PDL_BMC_PowerOff(bmc_handle_t handle);
+int32_t PDL_BMC_PowerReset(bmc_handle_t handle);
+int32_t PDL_BMC_GetPowerState(bmc_handle_t handle, bmc_power_state_t *state);
+
+/* 传感器读取 */
+int32_t PDL_BMC_ReadSensors(bmc_handle_t handle, bmc_sensor_type_t type, bmc_sensor_reading_t *readings, uint32_t max_count, uint32_t *actual_count);
+
+/* 通道管理 */
+int32_t PDL_BMC_SwitchChannel(bmc_handle_t handle, bmc_channel_t channel);
+bmc_channel_t PDL_BMC_GetChannel(bmc_handle_t handle);
+bool PDL_BMC_IsConnected(bmc_handle_t handle);
+
+/* 统计信息 */
+int32_t PDL_BMC_GetStats(bmc_handle_t handle, uint32_t *cmd_count, uint32_t *success_count, uint32_t *fail_count, uint32_t *switch_count);
+```
+
+#### 6.3.2 设计特点
+
+- **双通道冗余**：主通道（网络）+ 备份通道（串口），自动故障切换
+- **协议支持**：IPMI（成熟稳定）+ Redfish（现代化RESTful API）
+- **自动切换**：主通道连续失败达到阈值后自动切换到备份通道
+- **健康检查**：后台线程周期性检查连接状态，记录通道切换次数
+
+---
+
+### 6.4 MCU服务设计
+
+**功能**：与MCU通信，支持CAN/串口/I2C/SPI多种接口，实现状态查询、寄存器读写、固件升级。
+
+#### 6.4.1 接口设计
+
+```c
+/* MCU服务句柄 */
+typedef void* mcu_handle_t;
+
+/* MCU通信接口类型 */
+typedef enum {
+    MCU_INTERFACE_CAN    = 0, /* CAN总线 */
+    MCU_INTERFACE_SERIAL = 1, /* 串口 */
+    MCU_INTERFACE_I2C    = 2, /* I2C（预留） */
+    MCU_INTERFACE_SPI    = 3  /* SPI（预留） */
+} mcu_interface_t;
+
+/* MCU配置 */
+typedef struct {
+    char              name[64];       /* MCU名称 */
+    mcu_interface_t   interface;      /* 通信接口 */
+
+    /* CAN配置 */
+    struct {
+        const char *device;           /* CAN设备（如can0） */
+        uint32_t    bitrate;          /* 波特率 */
+        uint32_t    tx_id;            /* 发送CAN ID */
+        uint32_t    rx_id;            /* 接收CAN ID */
+    } can;
+
+    /* 串口配置 */
+    struct {
+        const char *device;           /* 串口设备（如/dev/ttyS1） */
+        uint32_t    baudrate;         /* 波特率 */
+        uint8_t     data_bits;        /* 数据位（5-8） */
+        uint8_t     stop_bits;        /* 停止位（1-2） */
+        int8_t      parity;           /* 校验位（'N'/'E'/'O'） */
+    } serial;
+
+    /* 通用配置 */
+    uint32_t cmd_timeout_ms;          /* 命令超时（ms） */
+    uint32_t retry_count;             /* 重试次数 */
+    bool     enable_crc;              /* 启用CRC校验 */
+} mcu_config_t;
+
+/* 初始化MCU驱动 */
+int32_t PDL_MCU_Init(const mcu_config_t *config, mcu_handle_t *handle);
+
+/* 版本和状态查询 */
+int32_t PDL_MCU_GetVersion(mcu_handle_t handle, mcu_version_t *version);
+int32_t PDL_MCU_GetStatus(mcu_handle_t handle, mcu_status_t *status);
+
+/* 控制操作 */
+int32_t PDL_MCU_Reset(mcu_handle_t handle);
+int32_t PDL_MCU_ReadRegister(mcu_handle_t handle, uint8_t reg_addr, uint8_t *value);
+int32_t PDL_MCU_WriteRegister(mcu_handle_t handle, uint8_t reg_addr, uint8_t value);
+
+/* 自定义命令 */
+int32_t PDL_MCU_SendCommand(mcu_handle_t handle, uint8_t cmd_code, const uint8_t *data, uint32_t data_len, uint8_t *response, uint32_t resp_size, uint32_t *actual_size);
+
+/* 固件升级 */
+int32_t PDL_MCU_FirmwareUpdate(mcu_handle_t handle, const char *firmware_path, void (*progress_callback)(uint32_t percent));
+```
+
+#### 6.4.2 设计特点
+
+- **多接口支持**：CAN/串口/I2C/SPI，由配置决定使用哪种
+- **协议封装**：封装MCU通信协议（帧格式、CRC校验、应答机制）
+- **寄存器访问**：提供寄存器读写接口，用于低级控制
+- **固件升级**：支持MCU固件在线升级，带进度回调
+
+---
+
+### 6.5 PDL层实现要点
+
+#### 6.5.1 句柄管理
+
+```c
+/* 内部句柄结构（对外不透明） */
+typedef struct {
+    bool              in_use;
+    mcu_config_t      config;
+    hal_can_handle_t  can_handle;    /* HAL层CAN句柄 */
+    hal_serial_handle_t serial_handle; /* HAL层串口句柄 */
+    uint32_t          tx_count;
+    uint32_t          rx_count;
+    uint32_t          error_count;
+} mcu_context_t;
+
+static mcu_context_t mcu_contexts[MAX_MCU_COUNT];
+
+/* 初始化时分配句柄 */
+int32_t PDL_MCU_Init(const mcu_config_t *config, mcu_handle_t *handle) {
+    /* 1. 查找空闲句柄 */
+    mcu_context_t *ctx = find_free_context();
+    
+    /* 2. 根据接口类型初始化HAL层 */
+    if (config->interface == MCU_INTERFACE_CAN) {
+        hal_can_config_t can_cfg = {
+            .interface = config->can.device,
+            .baudrate = config->can.bitrate,
+            .rx_timeout = config->cmd_timeout_ms,
+            .tx_timeout = config->cmd_timeout_ms
+        };
+        HAL_CAN_Init(&can_cfg, &ctx->can_handle);
+    }
+    
+    /* 3. 返回句柄 */
+    *handle = (mcu_handle_t)ctx;
+    return OSAL_SUCCESS;
+}
+```
+
+#### 6.5.2 协议封装
+
+```c
+/* MCU命令帧格式（CAN接口） */
+typedef struct {
+    uint8_t  cmd_code;      /* 命令码 */
+    uint8_t  seq_num;       /* 序列号 */
+    uint8_t  data_len;      /* 数据长度 */
+    uint8_t  data[5];       /* 数据（CAN最多8字节，减去头部3字节） */
+    uint8_t  crc;           /* CRC校验（可选） */
+} mcu_can_frame_t;
+
+/* 发送命令并等待响应 */
+static int32_t mcu_send_command_internal(mcu_context_t *ctx, uint8_t cmd_code, const uint8_t *data, uint32_t data_len, uint8_t *response, uint32_t *resp_len) {
+    /* 1. 构造命令帧 */
+    mcu_can_frame_t cmd_frame;
+    cmd_frame.cmd_code = cmd_code;
+    cmd_frame.seq_num = ctx->seq_num++;
+    cmd_frame.data_len = data_len;
+    OSAL_Memcpy(cmd_frame.data, data, data_len);
+    if (ctx->config.enable_crc) {
+        cmd_frame.crc = calculate_crc(&cmd_frame, sizeof(cmd_frame) - 1);
+    }
+    
+    /* 2. 发送CAN帧 */
+    can_frame_t can_frame;
+    can_frame.can_id = ctx->config.can.tx_id;
+    can_frame.can_dlc = sizeof(mcu_can_frame_t);
+    OSAL_Memcpy(can_frame.data, &cmd_frame, sizeof(mcu_can_frame_t));
+    HAL_CAN_Send(ctx->can_handle, &can_frame);
+    
+    /* 3. 接收响应帧 */
+    HAL_CAN_Recv(ctx->can_handle, &can_frame, ctx->config.cmd_timeout_ms);
+    
+    /* 4. 解析响应 */
+    mcu_can_frame_t *resp_frame = (mcu_can_frame_t *)can_frame.data;
+    if (resp_frame->seq_num != cmd_frame.seq_num) {
+        return OSAL_ERR_GENERIC; /* 序列号不匹配 */
+    }
+    OSAL_Memcpy(response, resp_frame->data, resp_frame->data_len);
+    *resp_len = resp_frame->data_len;
+    
+    return OSAL_SUCCESS;
+}
+```
+
+#### 6.5.3 重试机制
+
+```c
+/* 带重试的命令发送 */
+int32_t PDL_MCU_SendCommand(mcu_handle_t handle, uint8_t cmd_code, const uint8_t *data, uint32_t data_len, uint8_t *response, uint32_t resp_size, uint32_t *actual_size) {
+    mcu_context_t *ctx = (mcu_context_t *)handle;
+    int32_t ret;
+    
+    for (uint32_t i = 0; i <= ctx->config.retry_count; i++) {
+        ret = mcu_send_command_internal(ctx, cmd_code, data, data_len, response, actual_size);
+        if (ret == OSAL_SUCCESS) {
+            ctx->tx_count++;
+            ctx->rx_count++;
+            return OSAL_SUCCESS;
+        }
+        
+        /* 重试前延迟 */
+        if (i < ctx->config.retry_count) {
+            OSAL_TaskDelay(10);
+        }
+    }
+    
+    ctx->error_count++;
+    return ret;
+}
+```
+
+---
+
+## 7. PCL 设计（外设配置层）
 
 ### 7.1 PCL硬件配置示例
 
 ```C
 /************************************************
-* pcl/platform/ti/am625/pmc_v1/hardware_config.c
+* pcl/platform/ti/am625/pmc_v1/pcl_ti_am625_pmc_v1.c
 * PMC v1.0硬件配置
+* 命名规范：pcl_{platform}_{chip}_{project}_{version}.c
 ************************************************/
 
 // 卫星平台接口（CAN）
@@ -2296,13 +2708,912 @@ static const pcl_board_config_t pmc_v1_board = {
 };
 ```
 
+### 7.2 PCL设计原则
 
+**PCL（Peripheral Configuration Library）是外设配置层，提供纯数据结构的硬件配置。**
 
+#### 7.2.1 核心理念
 
+- ✅ **纯数据结构**：只包含配置数据，不包含任何函数实现或业务逻辑
+- ✅ **平台组织**：按`vendor/chip/product`三级目录组织配置文件
+- ✅ **类型安全**：使用强类型结构体，编译期检查
+- ✅ **硬件抽象**：配置描述硬件连接关系，不涉及业务逻辑
 
-## 8. HAL 设计（业务配置层）
+#### 7.2.2 配置层次
 
+```
+pcl/
+├── include/
+│   ├── api/pcl_api.h              # PCL公开API
+│   ├── peripheral/                 # 外设配置类型定义
+│   │   ├── pcl_satellite.h        # 卫星平台配置类型
+│   │   ├── pcl_bmc.h              # BMC配置类型
+│   │   ├── pcl_mcu.h              # MCU配置类型
+│   │   └── pcl_hardware_interface.h # 硬件接口配置（CAN/UART/I2C/SPI）
+│   └── internal/                   # PCL内部头文件
+│       ├── pcl_board.h            # 板级配置结构
+│       └── pcl_common.h           # 公共定义
+└── platform/                       # 平台配置实现
+    ├── ti/am625/pmc_v1/           # TI AM625 PMC v1.0产品
+    │   └── pcl_ti_am625_pmc_v1.c  # 硬件配置数据（命名规范：pcl_{platform}_{chip}_{project}_{version}.c）
+    └── vendor_demo/demo_board/    # 演示平台
+        └── pcl_vendor_demo_demo_board_v1.c
+```
 
+#### 7.2.3 配置数据流
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  PCL配置数据流                                               │
+│                                                              │
+│  1. 编译时：选择平台配置                                     │
+│     CMake: -DPCL_PLATFORM=ti/am625/pmc_v1                   │
+│                                                              │
+│  2. 初始化：PCL_Init()加载配置                               │
+│     pcl/platform/ti/am625/pmc_v1/pcl_ti_am625_pmc_v1.c       │
+│                                                              │
+│  3. PDL层读取：PDL_XXX_Init()从PCL获取配置                  │
+│     const pcl_mcu_cfg_t *cfg = PCL_GetMCUConfig(0);         │
+│     PDL_MCU_Init(cfg, &handle);                             │
+│                                                              │
+│  4. PDL层调用HAL：根据配置初始化HAL层                        │
+│     if (cfg->interface_type == PCL_HW_INTERFACE_CAN) {      │
+│         HAL_CAN_Init(&cfg->interface_cfg.can, &can_handle); │
+│     }                                                        │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### 7.3 硬件接口配置
+
+**PCL提供统一的硬件接口配置类型，支持CAN/UART/I2C/SPI/GPIO等。**
+
+#### 7.3.1 硬件接口类型枚举
+
+```c
+/* 硬件接口类型 */
+typedef enum {
+    PCL_HW_INTERFACE_NONE = 0,
+    PCL_HW_INTERFACE_CAN,        /* CAN总线 */
+    PCL_HW_INTERFACE_UART,       /* 串口 */
+    PCL_HW_INTERFACE_I2C,        /* I2C总线 */
+    PCL_HW_INTERFACE_SPI,        /* SPI总线 */
+    PCL_HW_INTERFACE_SPACEWIRE,  /* SpaceWire（航天专用） */
+    PCL_HW_INTERFACE_1553B,      /* MIL-STD-1553B（航天专用） */
+    PCL_HW_INTERFACE_ETHERNET,   /* 以太网 */
+    PCL_HW_INTERFACE_MAX
+} pcl_hw_interface_type_t;
+```
+
+#### 7.3.2 CAN接口配置
+
+```c
+/* CAN接口配置 */
+typedef struct {
+    const char *device;          /* CAN设备名（如"can0"） */
+    uint32_t    bitrate;         /* 波特率（如500000） */
+    uint32_t    tx_id;           /* 发送CAN ID */
+    uint32_t    rx_id;           /* 接收CAN ID */
+    bool        loopback;        /* 回环模式（测试用） */
+    bool        listen_only;     /* 只听模式（监控用） */
+} pcl_can_cfg_t;
+```
+
+#### 7.3.3 UART接口配置
+
+```c
+/* UART接口配置 */
+typedef struct {
+    const char *device;          /* 串口设备（如"/dev/ttyS0"） */
+    uint32_t    baudrate;        /* 波特率 */
+    uint8_t     data_bits;       /* 数据位（5-8） */
+    uint8_t     stop_bits;       /* 停止位（1-2） */
+    int8_t      parity;          /* 校验位（'N'/'E'/'O'） */
+    uint8_t     flow_control;    /* 流控（0=无，1=硬件，2=软件） */
+} pcl_uart_cfg_t;
+```
+
+#### 7.3.4 I2C接口配置
+
+```c
+/* I2C接口配置 */
+typedef struct {
+    uint8_t  bus;                /* I2C总线号 */
+    uint16_t addr;               /* 从设备地址（7位或10位） */
+    uint32_t speed;              /* 速率（Hz，如100000=100kHz） */
+} pcl_i2c_cfg_t;
+```
+
+#### 7.3.5 SPI接口配置
+
+```c
+/* SPI接口配置 */
+typedef struct {
+    const char *device;          /* SPI设备（如"/dev/spidev0.0"） */
+    uint8_t     mode;            /* SPI模式（0-3） */
+    uint8_t     bits_per_word;   /* 每字位数（通常为8） */
+    uint32_t    max_speed_hz;    /* 最大速率（Hz） */
+} pcl_spi_cfg_t;
+```
+
+#### 7.3.6 GPIO配置
+
+```c
+/* GPIO配置 */
+typedef struct {
+    uint32_t gpio_num;           /* GPIO编号 */
+    uint8_t  direction;          /* 方向（0=输入，1=输出） */
+    uint8_t  active_level;       /* 有效电平（0=低，1=高） */
+} pcl_gpio_config_t;
+```
+
+---
+
+### 7.4 外设配置结构
+
+#### 7.4.1 卫星平台配置
+
+```c
+/* 卫星平台配置 */
+typedef struct {
+    /* 外设基本信息 */
+    const char *name;                    /* 卫星平台名称（如"satellite_bus"） */
+    const char *description;             /* 描述信息 */
+    bool        enabled;                 /* 是否启用 */
+
+    /* 硬件通信接口配置（使用联合体） */
+    pcl_hw_interface_type_t interface_type;
+    union {
+        pcl_spacewire_cfg_t spacewire;   /* SpaceWire接口 */
+        pcl_1553b_cfg_t     mil1553b;    /* 1553B接口 */
+        pcl_can_cfg_t       can;         /* CAN接口 */
+        pcl_uart_cfg_t      uart;        /* 串口接口 */
+    } interface_cfg;
+
+    /* 卫星平台特定配置 */
+    uint32_t cmd_timeout_ms;             /* 命令超时（ms） */
+    uint32_t retry_count;                /* 重试次数 */
+    bool     enable_telemetry;           /* 启用遥测 */
+
+    /* GPIO控制（可选） */
+    pcl_gpio_config_t *power_gpio;       /* 电源控制GPIO */
+    pcl_gpio_config_t *reset_gpio;       /* 复位GPIO */
+} pcl_satellite_cfg_t;
+```
+
+#### 7.4.2 BMC配置
+
+```c
+/* BMC外设配置 */
+typedef struct {
+    /* 外设基本信息 */
+    const char *name;                    /* BMC名称（如"payload_bmc"） */
+    const char *description;             /* 描述信息 */
+    bool        enabled;                 /* 是否启用 */
+
+    /* 主通道配置 */
+    struct {
+        bool               enabled;      /* 是否启用 */
+        pcl_bmc_protocol_t protocol;     /* 协议类型（IPMI/Redfish） */
+        union {
+            pcl_bmc_ipmi_lan_cfg_t  ipmi_lan;   /* IPMI over LAN */
+            pcl_bmc_redfish_cfg_t   redfish;    /* Redfish */
+        } cfg;
+    } primary_channel;
+
+    /* 备份通道配置（通常是IPMI over Serial） */
+    struct {
+        bool               enabled;      /* 是否启用 */
+        pcl_bmc_protocol_t protocol;     /* 协议类型 */
+        pcl_bmc_ipmi_serial_cfg_t cfg;   /* IPMI over Serial */
+    } backup_channel;
+
+    /* BMC特定配置 */
+    uint32_t cmd_timeout_ms;             /* 命令超时（ms） */
+    uint32_t retry_count;                /* 重试次数 */
+    bool     auto_switch;                /* 自动切换通道 */
+    uint32_t failover_threshold;         /* 故障切换阈值（连续失败次数） */
+    uint32_t health_check_interval;      /* 健康检查间隔（ms） */
+
+    /* GPIO控制（可选） */
+    pcl_gpio_config_t *power_gpio;       /* 电源控制GPIO */
+    pcl_gpio_config_t *reset_gpio;       /* 复位GPIO */
+} pcl_bmc_cfg_t;
+```
+
+#### 7.4.3 MCU配置
+
+```c
+/* MCU外设配置 */
+typedef struct {
+    /* 外设基本信息 */
+    const char *name;                    /* MCU名称（如"stm32_mcu"） */
+    const char *description;             /* 描述信息 */
+    bool        enabled;                 /* 是否启用 */
+
+    /* 硬件通信接口配置（使用联合体） */
+    pcl_hw_interface_type_t interface_type;
+    union {
+        pcl_can_cfg_t  can;              /* CAN接口 */
+        pcl_uart_cfg_t uart;             /* 串口接口 */
+        pcl_i2c_cfg_t  i2c;              /* I2C接口 */
+        pcl_spi_cfg_t  spi;              /* SPI接口 */
+    } interface_cfg;
+
+    /* MCU特定配置 */
+    uint32_t cmd_timeout_ms;             /* 命令超时（ms） */
+    uint32_t retry_count;                /* 重试次数 */
+    bool     enable_crc;                 /* 启用CRC校验 */
+
+    /* GPIO控制（可选） */
+    pcl_gpio_config_t *reset_gpio;       /* 复位GPIO */
+    pcl_gpio_config_t *irq_gpio;         /* 中断GPIO */
+} pcl_mcu_cfg_t;
+```
+
+---
+
+### 7.5 板级配置
+
+**板级配置将所有外设配置组织在一起，形成完整的硬件配置描述。**
+
+```c
+/* 板级配置 */
+typedef struct {
+    const char *platform;                /* 平台标识（如"ti/am625"） */
+    const char *product;                 /* 产品标识（如"pmc_v1"） */
+    const char *version;                 /* 版本号（如"1.0.0"） */
+
+    /* 外设配置数组（以NULL结尾） */
+    const pcl_satellite_cfg_t **satellites;  /* 卫星平台配置数组 */
+    const pcl_bmc_cfg_t       **bmcs;        /* BMC配置数组 */
+    const pcl_mcu_cfg_t       **mcus;        /* MCU配置数组 */
+    const pcl_sensor_cfg_t    **sensors;     /* 传感器配置数组 */
+    const pcl_storage_cfg_t   **storages;    /* 存储配置数组 */
+} pcl_board_config_t;
+```
+
+---
+
+### 7.6 PCL API设计
+
+**PCL提供简洁的API供PDL层查询配置。**
+
+```c
+/* 初始化PCL（加载平台配置） */
+int32_t PCL_Init(const char *platform_name);
+
+/* 获取板级配置 */
+const pcl_board_config_t *PCL_GetBoardConfig(void);
+
+/* 获取外设配置（按索引） */
+const pcl_satellite_cfg_t *PCL_GetSatelliteConfig(uint32_t index);
+const pcl_bmc_cfg_t       *PCL_GetBMCConfig(uint32_t index);
+const pcl_mcu_cfg_t       *PCL_GetMCUConfig(uint32_t index);
+
+/* 获取外设配置（按名称） */
+const pcl_satellite_cfg_t *PCL_FindSatelliteByName(const char *name);
+const pcl_bmc_cfg_t       *PCL_FindBMCByName(const char *name);
+const pcl_mcu_cfg_t       *PCL_FindMCUByName(const char *name);
+
+/* 获取外设数量 */
+uint32_t PCL_GetSatelliteCount(void);
+uint32_t PCL_GetBMCCount(void);
+uint32_t PCL_GetMCUCount(void);
+```
+
+---
+
+### 7.7 平台配置示例
+
+**完整的PMC v1.0平台配置示例（已在7.1节展示）**：
+
+- **卫星平台**：1个CAN接口（can0，500kbps，ID 0x200/0x100）
+- **BMC**：1个双通道配置（主通道Redfish网络，备份通道IPMI串口）
+- **MCU**：3个MCU（电源控制CAN、电源监控I2C、看门狗CAN）
+
+**配置特点**：
+- ✅ 类型安全：编译期检查配置正确性
+- ✅ 灵活性：支持多种硬件接口组合
+- ✅ 可扩展：新增外设只需添加配置项
+- ✅ 平台隔离：不同平台配置完全独立
+
+---
+
+## 8. HAL 设计（硬件抽象层）
+
+### 8.1 设计原则
+
+**HAL（Hardware Abstraction Layer）是硬件抽象层，提供统一的硬件驱动接口，屏蔽不同平台的硬件差异。**
+
+#### 8.1.1 核心理念
+
+- ✅ **硬件抽象**：封装硬件寄存器操作，提供统一的驱动接口
+- ✅ **平台隔离**：Linux/RTOS平台实现分离，上层代码无需修改
+- ✅ **句柄管理**：使用不透明句柄，隐藏内部实现细节
+- ✅ **OSAL依赖**：所有系统调用必须通过OSAL封装，不直接调用系统API
+
+#### 8.1.2 HAL层职责
+
+**HAL层负责**：
+- ✅ 硬件设备初始化和配置
+- ✅ 数据收发接口（阻塞/非阻塞/超时）
+- ✅ 错误处理和统计信息
+- ✅ 平台特定实现（Linux/RTOS）
+
+**HAL层禁止**：
+- ❌ 包含业务逻辑（业务逻辑在PDL层）
+- ❌ 直接调用系统API（必须通过OSAL）
+- ❌ 跨平台代码混合（平台实现必须分离）
+
+#### 8.1.3 HAL层架构
+
+```
+hal/
+├── include/                        # HAL公开接口
+│   ├── hal_can.h                  # CAN驱动接口
+│   ├── hal_serial.h               # 串口驱动接口
+│   ├── hal_i2c.h                  # I2C驱动接口
+│   ├── hal_spi.h                  # SPI驱动接口
+│   ├── hal_watchdog.h             # 看门狗接口
+│   └── config/                    # 配置类型定义
+│       ├── can_types.h            # CAN类型定义
+│       ├── i2c_types.h            # I2C类型定义
+│       └── spi_types.h            # SPI类型定义
+└── src/
+    ├── linux/                     # Linux平台实现
+    │   ├── hal_can_linux.c
+    │   ├── hal_serial_linux.c
+    │   ├── hal_i2c_linux.c
+    │   └── hal_spi_linux.c
+    └── rtos/                      # RTOS平台实现（预留）
+        └── ...
+```
+
+---
+
+### 8.2 CAN驱动设计
+
+**功能**：提供统一的CAN总线访问接口，支持标准帧和扩展帧。
+
+#### 8.2.1 接口设计
+
+```c
+/* CAN句柄（不透明） */
+typedef void* hal_can_handle_t;
+
+/* CAN配置 */
+typedef struct {
+    const char *interface;       /* CAN接口名（如"can0"） */
+    uint32_t    baudrate;        /* 波特率（如500000） */
+    uint32_t    rx_timeout;      /* 接收超时（ms） */
+    uint32_t    tx_timeout;      /* 发送超时（ms） */
+} hal_can_config_t;
+
+/* CAN帧结构（标准定义） */
+typedef struct {
+    uint32_t can_id;             /* CAN ID（11位或29位） */
+    uint8_t  can_dlc;            /* 数据长度（0-8） */
+    uint8_t  data[8];            /* 数据 */
+    uint8_t  flags;              /* 标志（扩展帧/远程帧） */
+} can_frame_t;
+
+/* 初始化CAN驱动 */
+int32_t HAL_CAN_Init(const hal_can_config_t *config, hal_can_handle_t *handle);
+
+/* 关闭CAN驱动 */
+int32_t HAL_CAN_Deinit(hal_can_handle_t handle);
+
+/* 发送CAN帧 */
+int32_t HAL_CAN_Send(hal_can_handle_t handle, const can_frame_t *frame);
+
+/* 接收CAN帧 */
+int32_t HAL_CAN_Recv(hal_can_handle_t handle, can_frame_t *frame, int32_t timeout);
+
+/* 设置CAN过滤器 */
+int32_t HAL_CAN_SetFilter(hal_can_handle_t handle, uint32_t filter_id, uint32_t filter_mask);
+
+/* 获取CAN统计信息 */
+int32_t HAL_CAN_GetStats(hal_can_handle_t handle, uint32_t *tx_count, uint32_t *rx_count, uint32_t *err_count);
+
+/* 设置错误回调 */
+int32_t HAL_CAN_SetErrorCallback(hal_can_handle_t handle, void (*callback)(hal_can_handle_t handle, int32_t error_code));
+
+/* 设置错误恢复阈值 */
+int32_t HAL_CAN_SetErrorThreshold(hal_can_handle_t handle, uint32_t threshold);
+```
+
+#### 8.2.2 Linux平台实现要点
+
+```c
+/* 内部句柄结构 */
+typedef struct {
+    int32_t  sockfd;             /* SocketCAN文件描述符 */
+    char     interface[16];      /* 接口名 */
+    uint32_t baudrate;
+    uint32_t rx_timeout;
+    uint32_t tx_timeout;
+    uint32_t tx_count;
+    uint32_t rx_count;
+    uint32_t err_count;
+    void (*error_callback)(hal_can_handle_t, int32_t);
+} hal_can_context_t;
+
+/* 初始化实现（Linux SocketCAN） */
+int32_t HAL_CAN_Init(const hal_can_config_t *config, hal_can_handle_t *handle) {
+    hal_can_context_t *ctx = OSAL_Malloc(sizeof(hal_can_context_t));
+    
+    /* 1. 创建SocketCAN套接字（使用OSAL封装） */
+    ctx->sockfd = OSAL_socket(PF_CAN, SOCK_RAW, CAN_RAW);
+    
+    /* 2. 绑定到CAN接口 */
+    struct sockaddr_can addr;
+    addr.can_family = AF_CAN;
+    addr.can_ifindex = if_nametoindex(config->interface);
+    OSAL_bind(ctx->sockfd, (struct sockaddr *)&addr, sizeof(addr));
+    
+    /* 3. 设置超时 */
+    struct timeval tv;
+    tv.tv_sec = config->rx_timeout / 1000;
+    tv.tv_usec = (config->rx_timeout % 1000) * 1000;
+    OSAL_setsockopt(ctx->sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+    
+    *handle = (hal_can_handle_t)ctx;
+    return OSAL_SUCCESS;
+}
+
+/* 发送实现 */
+int32_t HAL_CAN_Send(hal_can_handle_t handle, const can_frame_t *frame) {
+    hal_can_context_t *ctx = (hal_can_context_t *)handle;
+    
+    /* 构造Linux CAN帧 */
+    struct can_frame linux_frame;
+    linux_frame.can_id = frame->can_id;
+    linux_frame.can_dlc = frame->can_dlc;
+    OSAL_Memcpy(linux_frame.data, frame->data, frame->can_dlc);
+    
+    /* 发送（使用OSAL封装） */
+    int32_t ret = OSAL_write(ctx->sockfd, &linux_frame, sizeof(linux_frame));
+    if (ret == sizeof(linux_frame)) {
+        ctx->tx_count++;
+        return OSAL_SUCCESS;
+    }
+    
+    ctx->err_count++;
+    return OSAL_ERR_GENERIC;
+}
+
+/* 接收实现 */
+int32_t HAL_CAN_Recv(hal_can_handle_t handle, can_frame_t *frame, int32_t timeout) {
+    hal_can_context_t *ctx = (hal_can_context_t *)handle;
+    
+    /* 设置超时（如果指定） */
+    if (timeout >= 0) {
+        struct timeval tv;
+        tv.tv_sec = timeout / 1000;
+        tv.tv_usec = (timeout % 1000) * 1000;
+        OSAL_setsockopt(ctx->sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+    }
+    
+    /* 接收（使用OSAL封装） */
+    struct can_frame linux_frame;
+    int32_t ret = OSAL_read(ctx->sockfd, &linux_frame, sizeof(linux_frame));
+    if (ret == sizeof(linux_frame)) {
+        frame->can_id = linux_frame.can_id;
+        frame->can_dlc = linux_frame.can_dlc;
+        OSAL_Memcpy(frame->data, linux_frame.data, linux_frame.can_dlc);
+        ctx->rx_count++;
+        return OSAL_SUCCESS;
+    }
+    
+    if (ret == OSAL_ERR_TIMEOUT) {
+        return OSAL_ERR_TIMEOUT;
+    }
+    
+    ctx->err_count++;
+    return OSAL_ERR_GENERIC;
+}
+```
+
+---
+
+### 8.3 串口驱动设计
+
+**功能**：提供统一的串口访问接口，支持多种波特率和配置。
+
+#### 8.3.1 接口设计
+
+```c
+/* 串口句柄（不透明） */
+typedef void* hal_serial_handle_t;
+
+/* 串口配置 */
+typedef struct {
+    uint32_t baud_rate;          /* 波特率 */
+    uint8_t  data_bits;          /* 数据位（5/6/7/8） */
+    uint8_t  stop_bits;          /* 停止位（1/2） */
+    uint8_t  parity;             /* 校验位（NONE/ODD/EVEN） */
+    uint8_t  flow_control;       /* 流控（NONE/HW/SW） */
+} hal_serial_config_t;
+
+/* 打开串口设备 */
+int32_t HAL_Serial_Open(const char *device, const hal_serial_config_t *config, hal_serial_handle_t *handle);
+
+/* 关闭串口设备 */
+int32_t HAL_Serial_Close(hal_serial_handle_t handle);
+
+/* 写入数据 */
+int32_t HAL_Serial_Write(hal_serial_handle_t handle, const void *buffer, uint32_t size, int32_t timeout);
+
+/* 读取数据 */
+int32_t HAL_Serial_Read(hal_serial_handle_t handle, void *buffer, uint32_t size, int32_t timeout);
+
+/* 刷新缓冲区 */
+int32_t HAL_Serial_Flush(hal_serial_handle_t handle);
+
+/* 设置串口配置 */
+int32_t HAL_Serial_SetConfig(hal_serial_handle_t handle, const hal_serial_config_t *config);
+```
+
+#### 8.3.2 Linux平台实现要点
+
+```c
+/* 内部句柄结构 */
+typedef struct {
+    int32_t fd;                  /* 文件描述符 */
+    char    device[64];          /* 设备路径 */
+    hal_serial_config_t config;  /* 当前配置 */
+} hal_serial_context_t;
+
+/* 打开串口实现 */
+int32_t HAL_Serial_Open(const char *device, const hal_serial_config_t *config, hal_serial_handle_t *handle) {
+    hal_serial_context_t *ctx = OSAL_Malloc(sizeof(hal_serial_context_t));
+    
+    /* 1. 打开设备（使用OSAL封装） */
+    ctx->fd = OSAL_open(device, O_RDWR | O_NOCTTY | O_NDELAY);
+    if (ctx->fd < 0) {
+        OSAL_Free(ctx);
+        return OSAL_ERR_GENERIC;
+    }
+    
+    /* 2. 配置串口参数 */
+    struct termios options;
+    OSAL_tcgetattr(ctx->fd, &options);
+    
+    /* 设置波特率 */
+    speed_t baud = B115200;  /* 根据config->baud_rate映射 */
+    cfsetispeed(&options, baud);
+    cfsetospeed(&options, baud);
+    
+    /* 设置数据位 */
+    options.c_cflag &= ~CSIZE;
+    switch (config->data_bits) {
+        case 5: options.c_cflag |= CS5; break;
+        case 6: options.c_cflag |= CS6; break;
+        case 7: options.c_cflag |= CS7; break;
+        case 8: options.c_cflag |= CS8; break;
+    }
+    
+    /* 设置校验位 */
+    if (config->parity == HAL_SERIAL_PARITY_NONE) {
+        options.c_cflag &= ~PARENB;
+    } else if (config->parity == HAL_SERIAL_PARITY_ODD) {
+        options.c_cflag |= PARENB | PARODD;
+    } else if (config->parity == HAL_SERIAL_PARITY_EVEN) {
+        options.c_cflag |= PARENB;
+        options.c_cflag &= ~PARODD;
+    }
+    
+    /* 设置停止位 */
+    if (config->stop_bits == 2) {
+        options.c_cflag |= CSTOPB;
+    } else {
+        options.c_cflag &= ~CSTOPB;
+    }
+    
+    /* 应用配置 */
+    OSAL_tcsetattr(ctx->fd, TCSANOW, &options);
+    
+    OSAL_Memcpy(&ctx->config, config, sizeof(hal_serial_config_t));
+    *handle = (hal_serial_handle_t)ctx;
+    return OSAL_SUCCESS;
+}
+```
+
+---
+
+### 8.4 I2C驱动设计
+
+**功能**：提供统一的I2C总线访问接口，支持标准速率和快速速率。
+
+#### 8.4.1 接口设计
+
+```c
+/* I2C句柄（不透明） */
+typedef void* hal_i2c_handle_t;
+
+/* I2C配置 */
+typedef struct {
+    const char *device;          /* I2C设备（如"/dev/i2c-0"） */
+    uint32_t    timeout;         /* 传输超时（ms） */
+} hal_i2c_config_t;
+
+/* I2C消息结构 */
+typedef struct {
+    uint16_t addr;               /* 从设备地址（7位） */
+    uint16_t flags;              /* 标志（读/写） */
+    uint16_t len;                /* 数据长度 */
+    uint8_t *buf;                /* 数据缓冲区 */
+} i2c_msg_t;
+
+/* 打开I2C设备 */
+int32_t HAL_I2C_Open(const hal_i2c_config_t *config, hal_i2c_handle_t *handle);
+
+/* 关闭I2C设备 */
+int32_t HAL_I2C_Close(hal_i2c_handle_t handle);
+
+/* 写入数据到I2C从设备 */
+int32_t HAL_I2C_Write(hal_i2c_handle_t handle, uint16_t slave_addr, const uint8_t *buffer, uint32_t size);
+
+/* 从I2C从设备读取数据 */
+int32_t HAL_I2C_Read(hal_i2c_handle_t handle, uint16_t slave_addr, uint8_t *buffer, uint32_t size);
+
+/* 写寄存器操作 */
+int32_t HAL_I2C_WriteReg(hal_i2c_handle_t handle, uint16_t slave_addr, uint8_t reg_addr, const uint8_t *buffer, uint32_t size);
+
+/* 读寄存器操作 */
+int32_t HAL_I2C_ReadReg(hal_i2c_handle_t handle, uint16_t slave_addr, uint8_t reg_addr, uint8_t *buffer, uint32_t size);
+
+/* 执行I2C传输（支持组合传输） */
+int32_t HAL_I2C_Transfer(hal_i2c_handle_t handle, i2c_msg_t *msgs, uint32_t num);
+```
+
+#### 8.4.2 设计特点
+
+- **寄存器访问**：提供专用的寄存器读写接口，简化常见操作
+- **组合传输**：支持I2C组合传输（先写后读），避免总线释放
+- **超时保护**：所有操作支持超时，防止总线挂死
+
+---
+
+### 8.5 SPI驱动设计
+
+**功能**：提供统一的SPI总线访问接口，支持全双工传输。
+
+#### 8.5.1 接口设计
+
+```c
+/* SPI句柄（不透明） */
+typedef void* hal_spi_handle_t;
+
+/* SPI配置 */
+typedef struct {
+    const char *device;          /* SPI设备（如"/dev/spidev0.0"） */
+    uint8_t     mode;            /* SPI模式（0-3） */
+    uint8_t     bits_per_word;   /* 每字位数（通常为8） */
+    uint32_t    max_speed_hz;    /* 最大速率（Hz） */
+    uint32_t    timeout;         /* 传输超时（ms） */
+} hal_spi_config_t;
+
+/* SPI传输结构 */
+typedef struct {
+    const uint8_t *tx_buf;       /* 发送缓冲区 */
+    uint8_t       *rx_buf;       /* 接收缓冲区 */
+    uint32_t       len;          /* 传输长度 */
+    uint32_t       speed_hz;     /* 传输速率 */
+    uint16_t       delay_usecs;  /* 传输后延迟（us） */
+    uint8_t        bits_per_word;/* 每字位数 */
+    uint8_t        cs_change;    /* 片选变化标志 */
+} spi_transfer_t;
+
+/* 打开SPI设备 */
+int32_t HAL_SPI_Open(const hal_spi_config_t *config, hal_spi_handle_t *handle);
+
+/* 关闭SPI设备 */
+int32_t HAL_SPI_Close(hal_spi_handle_t handle);
+
+/* SPI写操作 */
+int32_t HAL_SPI_Write(hal_spi_handle_t handle, const uint8_t *buffer, uint32_t size);
+
+/* SPI读操作 */
+int32_t HAL_SPI_Read(hal_spi_handle_t handle, uint8_t *buffer, uint32_t size);
+
+/* SPI全双工传输 */
+int32_t HAL_SPI_Transfer(hal_spi_handle_t handle, const uint8_t *tx_buffer, uint8_t *rx_buffer, uint32_t size);
+
+/* SPI批量传输（支持多段传输） */
+int32_t HAL_SPI_TransferMulti(hal_spi_handle_t handle, spi_transfer_t *transfers, uint32_t num);
+
+/* 设置SPI配置 */
+int32_t HAL_SPI_SetConfig(hal_spi_handle_t handle, const hal_spi_config_t *config);
+```
+
+#### 8.5.2 设计特点
+
+- **全双工支持**：同时发送和接收数据
+- **批量传输**：支持多段传输，减少片选切换开销
+- **灵活配置**：支持运行时修改速率、模式等参数
+
+---
+
+### 8.6 看门狗驱动设计
+
+**功能**：提供统一的看门狗接口，用于系统复位保护。
+
+#### 8.6.1 接口设计
+
+```c
+/* 看门狗句柄（不透明） */
+typedef void* hal_watchdog_handle_t;
+
+/* 看门狗配置 */
+typedef struct {
+    const char *device;          /* 看门狗设备（如"/dev/watchdog"） */
+    uint32_t    timeout_sec;     /* 超时时间（秒） */
+    bool        enable_on_open;  /* 打开时自动启用 */
+} hal_watchdog_config_t;
+
+/* 打开看门狗设备 */
+int32_t HAL_Watchdog_Open(const hal_watchdog_config_t *config, hal_watchdog_handle_t *handle);
+
+/* 关闭看门狗设备 */
+int32_t HAL_Watchdog_Close(hal_watchdog_handle_t handle);
+
+/* 喂狗 */
+int32_t HAL_Watchdog_Kick(hal_watchdog_handle_t handle);
+
+/* 启用看门狗 */
+int32_t HAL_Watchdog_Enable(hal_watchdog_handle_t handle);
+
+/* 禁用看门狗 */
+int32_t HAL_Watchdog_Disable(hal_watchdog_handle_t handle);
+
+/* 设置超时时间 */
+int32_t HAL_Watchdog_SetTimeout(hal_watchdog_handle_t handle, uint32_t timeout_sec);
+
+/* 获取剩余时间 */
+int32_t HAL_Watchdog_GetTimeLeft(hal_watchdog_handle_t handle, uint32_t *time_left_sec);
+```
+
+---
+
+### 8.7 HAL层设计要点
+
+#### 8.7.1 句柄管理模式
+
+**所有HAL驱动使用统一的句柄管理模式**：
+
+```c
+/* 1. 不透明句柄类型 */
+typedef void* hal_xxx_handle_t;
+
+/* 2. 内部上下文结构（对外不可见） */
+typedef struct {
+    /* 硬件相关字段 */
+    int32_t fd;
+    /* 配置字段 */
+    hal_xxx_config_t config;
+    /* 统计字段 */
+    uint32_t tx_count;
+    uint32_t rx_count;
+    uint32_t err_count;
+} hal_xxx_context_t;
+
+/* 3. 初始化时分配上下文 */
+int32_t HAL_XXX_Init(const hal_xxx_config_t *config, hal_xxx_handle_t *handle) {
+    hal_xxx_context_t *ctx = OSAL_Malloc(sizeof(hal_xxx_context_t));
+    /* 初始化硬件 */
+    *handle = (hal_xxx_handle_t)ctx;
+    return OSAL_SUCCESS;
+}
+
+/* 4. 操作时转换句柄 */
+int32_t HAL_XXX_Operation(hal_xxx_handle_t handle, ...) {
+    hal_xxx_context_t *ctx = (hal_xxx_context_t *)handle;
+    /* 使用ctx访问内部字段 */
+}
+
+/* 5. 反初始化时释放上下文 */
+int32_t HAL_XXX_Deinit(hal_xxx_handle_t handle) {
+    hal_xxx_context_t *ctx = (hal_xxx_context_t *)handle;
+    /* 关闭硬件 */
+    OSAL_Free(ctx);
+    return OSAL_SUCCESS;
+}
+```
+
+#### 8.7.2 错误处理
+
+**统一的错误码和错误处理机制**：
+
+```c
+/* 错误码（来自OSAL层） */
+#define OSAL_SUCCESS        0
+#define OSAL_ERR_GENERIC   -1
+#define OSAL_ERR_TIMEOUT   -2
+#define OSAL_ERR_INVALID_POINTER -3
+#define OSAL_ERR_NOT_SUPPORTED -4
+
+/* 所有HAL接口返回int32_t状态码 */
+int32_t HAL_XXX_Operation(...) {
+    if (/* 参数检查失败 */) {
+        return OSAL_ERR_INVALID_POINTER;
+    }
+    
+    if (/* 操作超时 */) {
+        return OSAL_ERR_TIMEOUT;
+    }
+    
+    if (/* 操作失败 */) {
+        return OSAL_ERR_GENERIC;
+    }
+    
+    return OSAL_SUCCESS;
+}
+```
+
+#### 8.7.3 平台隔离
+
+**Linux和RTOS平台实现完全分离**：
+
+```
+hal/src/
+├── linux/                   # Linux平台实现
+│   ├── hal_can_linux.c     # 使用SocketCAN
+│   ├── hal_serial_linux.c  # 使用termios
+│   ├── hal_i2c_linux.c     # 使用i2c-dev
+│   └── hal_spi_linux.c     # 使用spidev
+└── rtos/                    # RTOS平台实现（预留）
+    ├── hal_can_rtos.c      # 使用RTOS CAN驱动
+    ├── hal_serial_rtos.c   # 使用RTOS串口驱动
+    ├── hal_i2c_rtos.c      # 使用RTOS I2C驱动
+    └── hal_spi_rtos.c      # 使用RTOS SPI驱动
+```
+
+**编译时选择平台实现**：
+
+```cmake
+# CMakeLists.txt
+if(PLATFORM STREQUAL "linux")
+    target_sources(hal PRIVATE
+        src/linux/hal_can_linux.c
+        src/linux/hal_serial_linux.c
+        src/linux/hal_i2c_linux.c
+        src/linux/hal_spi_linux.c
+    )
+elseif(PLATFORM STREQUAL "rtos")
+    target_sources(hal PRIVATE
+        src/rtos/hal_can_rtos.c
+        src/rtos/hal_serial_rtos.c
+        src/rtos/hal_i2c_rtos.c
+        src/rtos/hal_spi_rtos.c
+    )
+endif()
+```
+
+#### 8.7.4 OSAL依赖
+
+**HAL层所有系统调用必须通过OSAL封装**：
+
+```c
+/* ❌ 错误：直接调用系统API */
+int fd = open("/dev/can0", O_RDWR);
+write(fd, buffer, size);
+close(fd);
+
+/* ✅ 正确：使用OSAL封装 */
+int32_t fd = OSAL_open("/dev/can0", O_RDWR);
+OSAL_write(fd, buffer, size);
+OSAL_close(fd);
+```
+
+**优势**：
+- ✅ 平台无关：OSAL层处理平台差异
+- ✅ 类型安全：使用OSAL固定大小类型（int32_t而非int）
+- ✅ 错误统一：OSAL统一错误码和错误处理
+
+---
 
 ## 9. 性能分析
 
