@@ -10,7 +10,7 @@
 
 | 阶段 | 状态 | 完成度 | 开始时间 | 完成时间 | 备注 |
 |------|------|--------|----------|----------|------|
-| 阶段1：基础设施完善 | 🔄 进行中 | 0% | 2026-05-17 | - | OSAL层增强 |
+| 阶段1：基础设施完善 | 🔄 进行中 | 43% | 2026-05-17 | - | OSAL层增强 |
 | 阶段2：ACL层实现 | ⏸️ 未开始 | 0% | - | - | 业务配置层 |
 | 阶段3：PDL层功能补全 | ⏸️ 未开始 | 0% | - | - | Redfish/IPMI |
 | 阶段4：APP层核心进程 | ⏸️ 未开始 | 0% | - | - | 5个核心进程 |
@@ -24,15 +24,15 @@
 
 **目标**: 补齐OSAL层缺失功能，为上层提供完整的运行环境  
 **状态**: 🔄 进行中  
-**完成度**: 0/7 任务
+**完成度**: 3/7 任务
 
 ### 任务清单
 
 | 任务ID | 任务描述 | 优先级 | 工作量 | 状态 | 开始时间 | 完成时间 | 负责人 | 备注 |
 |--------|---------|--------|--------|------|----------|----------|--------|------|
-| T1.1 | OSAL实时调度API | P0 | 3天 | 🔄 进行中 | 2026-05-17 | - | - | SCHED_FIFO/RR |
-| T1.2 | OSAL CPU亲和性API | P0 | 2天 | ⏸️ 未开始 | - | - | - | 线程绑定CPU |
-| T1.3 | OSAL内存锁定API | P0 | 2天 | ⏸️ 未开始 | - | - | - | mlockall |
+| T1.1 | OSAL实时调度API | P0 | 3天 | ✅ 已完成 | 2026-05-17 | 2026-05-17 | - | SCHED_FIFO/RR |
+| T1.2 | OSAL CPU亲和性API | P0 | 2天 | ✅ 已完成 | 2026-05-17 | 2026-05-17 | - | 已在T1.1中实现 |
+| T1.3 | OSAL内存锁定API | P0 | 2天 | ✅ 已完成 | 2026-05-17 | 2026-05-17 | - | 已在T1.1中实现 |
 | T1.4 | OSAL共享内存API | P0 | 5天 | ⏸️ 未开始 | - | - | - | 创建/映射/销毁 |
 | T1.5 | OSAL原子操作增强 | P1 | 2天 | ⏸️ 未开始 | - | - | - | 64位原子时间戳 |
 | T1.6 | HAL GPIO驱动 | P1 | 3天 | ⏸️ 未开始 | - | - | - | 输入/输出/中断 |
@@ -40,29 +40,44 @@
 
 ### 详细进度
 
-#### T1.1 OSAL实时调度API（进行中）
+#### T1.1 OSAL实时调度API（已完成）
 
 **需求**:
 - 支持SCHED_FIFO（先进先出实时调度）
 - 支持SCHED_RR（轮转实时调度）
 - 支持设置线程优先级（1-99）
 - 支持查询当前调度策略和优先级
+- 支持CPU亲和性设置（T1.2）
+- 支持内存锁定（T1.3）
 
 **设计**:
 ```c
-// osal/include/osal_sched.h
-int32 OSAL_SchedSetPolicy(osal_id_t thread_id, int32 policy, int32 priority);
-int32 OSAL_SchedGetPolicy(osal_id_t thread_id, int32 *policy, int32 *priority);
-int32 OSAL_SchedSetPriority(osal_id_t thread_id, int32 priority);
-int32 OSAL_SchedGetPriority(osal_id_t thread_id, int32 *priority);
+// osal/include/sys/osal_sched.h
+int32_t OSAL_SchedSetPolicy(osal_thread_t thread, int32_t policy, int32_t priority);
+int32_t OSAL_SchedGetPolicy(osal_thread_t thread, int32_t *policy, int32_t *priority);
+int32_t OSAL_SchedSetAffinity(osal_thread_t thread, int32_t cpu_id);
+int32_t OSAL_SchedGetAffinity(osal_thread_t thread, int32_t *cpu_id);
+int32_t OSAL_SchedGetCPUCount(void);
+int32_t OSAL_MemLock(bool lock_all);
+int32_t OSAL_MemUnlock(void);
 ```
 
 **实现文件**:
-- [ ] osal/include/osal_sched.h
-- [ ] osal/src/posix/osal_sched.c
-- [ ] tests/unit/osal/test_osal_sched.c
+- [x] osal/include/sys/osal_sched.h
+- [x] osal/src/posix/sys/osal_sched.c
+- [x] tests/unit/osal/test_osal_sched.c
 
-**当前状态**: 准备开始实现
+**完成状态**: 
+- ✅ 实现了完整的实时调度API（SCHED_FIFO/RR/OTHER）
+- ✅ 实现了CPU亲和性API（Linux支持，macOS返回NOT_IMPLEMENTED）
+- ✅ 实现了内存锁定API（mlockall/munlockall）
+- ✅ 实现了跨平台兼容（Linux/macOS条件编译）
+- ✅ 完成了13个单元测试用例（9个通过，4个平台限制跳过）
+- ✅ 修复了macOS平台的编译和运行问题
+
+**提交记录**:
+- cf8a4bb: 实现OSAL实时调度API及单元测试
+- 3196929: 修复完善OSAL调度模块的macOS平台兼容性
 
 ---
 
