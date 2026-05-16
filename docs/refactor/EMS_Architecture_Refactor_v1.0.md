@@ -324,6 +324,8 @@ telecommand_process (SCHED_FIFO, priority=99)
   └── 更新共享内存缓存（供can_rx_thread快速读取）
 
 2ms应答路径优化：
+
+``` C 
 // CAN接收线程（关键路径）
 void* can_rx_thread_func(void* arg)
 {
@@ -370,6 +372,7 @@ void* can_rx_thread_func(void* arg)
 	  }
   }
 }
+```
 
 #### 2.2.3 Telemetry进程（后台遥测采集）
 
@@ -415,6 +418,7 @@ telemetry_process (SCHED_OTHER, priority=0, nice=10)
   └── 写入共享内存（供logger进程归档）
 
 双缓冲设计（无锁）：
+``` C 
 typedef struct {
   float cpu_temp;
   float board_temp;
@@ -448,6 +452,7 @@ void get_cached_telemetry(telemetry_cache_t *cache, telemetry_data_t *data)
   uint32_t read_idx = atomic_load(&cache->read_index);
   *data = cache->buffer[read_idx];  // 无锁读取
 }
+```
 
 #### 2.2.4 Firmware进程（固件升级管理）
 
@@ -485,6 +490,7 @@ firmware_process (SCHED_BATCH, nice=19)
   └── 分区切换（原子操作）
 
 主备分区机制：
+``` C
 typedef struct {
   uint32_t magic;           // 魔数：0xDEADBEEF
   uint32_t version;         // 固件版本
@@ -516,6 +522,7 @@ if (current_partition == B && boot_count > 0) {
   partition_B.boot_success = 1;
   partition_B.boot_count = 0;
 }
+```
 
 #### 2.2.5 Logger进程（日志收集）
 
@@ -606,6 +613,7 @@ logger_process (SCHED_OTHER, priority=0, nice=10)
 	  └── 保留最近24小时日志（不可删除）
 
 共享内存日志环形缓冲区：
+``` C
 #define LOG_RING_BUFFER_SIZE (1024 * 1024)  // 1MB
 
 typedef struct {
@@ -655,19 +663,21 @@ bool LOG_Read(log_entry_t *entry)
   atomic_store(&g_log_buffer->read_index, read_idx + 1);
   return true;
 }
+```
 
 日志格式示例：
 
 # 运行日志（/var/log/pmc/telecommand.log）
-
+``` text
 2026-05-16 10:23:45.123456 [INFO] [TC] CAN命令接收: cmd=0x01, param=0x00
 2026-05-16 10:23:45.123789 [INFO] [TC] ACL查询: TC_POWER_ON -> BMC[0]
 2026-05-16 10:23:45.124012 [INFO] [TC] 应答发送: status=OK, latency=556us
 2026-05-16 10:23:46.234567 [ERROR] [TC] BMC通信超时: ip=192.168.1.100, timeout=500ms
 2026-05-16 10:23:46.234890 [WARN] [TC] 切换到备份通道: IPMI over Serial
+```
 
 # 状态日志（/var/log/pmc/status.log，JSON格式）
-
+``` json
 {
 "timestamp": "2026-05-16T10:23:50.000Z",
 "server": {
@@ -719,9 +729,10 @@ bool LOG_Read(log_entry_t *entry)
   }
 }
 }
+```
 
 # 崩溃日志（/var/log/pmc/crash/crash_20260516_102350.log）
-
+``` text
 === Process Crash Report ===
 Time: 2026-05-16 10:23:50.123456
 Process: telemetry
@@ -745,13 +756,13 @@ Coredump saved to: /var/log/pmc/crash/core.1234
 
 === Recovery Action ===
 Supervisor restarted telemetry process at 2026-05-16 10:23:51.000000
+```
 
----
 
 ## 3. ACL层设计（业务配置层）
 
 ### 3.1 PMC业务功能枚举
-
+``` C
 /************************************************
 * acl/include/pmc_acl_types.h
 * PMC业务功能枚举定义
@@ -854,9 +865,10 @@ typedef enum {
 
   HM_FUNC_MAX
 } pmc_hm_function_t;
+```
 
 ### 3.2 ACL配置结构
-
+``` C
 /************************************************
 * acl/include/acl_config.h
 * ACL配置结构定义
@@ -898,9 +910,11 @@ typedef struct {
   acl_tc_config_t tc_table[TC_FUNC_MAX];
   acl_tm_config_t tm_table[TM_FUNC_MAX];
 } acl_lookup_table_t;
+```
 
 ### 3.3 ACL配置示例
 
+``` C
 /************************************************
 * acl/config/pmc_v1/pmc_acl_config.c
 * PMC v1.0配置（BMC通过Redfish，MCU通过CAN）
@@ -994,9 +1008,10 @@ const acl_tm_config_t* ACL_GetTmConfig(const acl_lookup_table_t *table, pmc_tm_f
   }
   return &table->tm_table[function];
 }
+```
 
 ### 3.4 ACL使用示例
-
+``` C
 /************************************************
 * telecommand进程中的命令处理
 ************************************************/
@@ -1072,8 +1087,7 @@ int32_t handle_telemetry(pmc_tm_function_t tm_type, telemetry_data_t *data)
 
   return OSAL_SUCCESS;
 }
-
----
+```
 
 ## 4. 可靠性设计
 
@@ -1093,7 +1107,7 @@ int32_t handle_telemetry(pmc_tm_function_t tm_type, telemetry_data_t *data)
 ├── 超时时间：10秒
 └── 复位后从主分区启动
 
-4.2 进程隔离效果
+### 4.2 进程隔离效果
 
 场景1：Telemetry进程崩溃
 
@@ -1142,9 +1156,10 @@ int32_t handle_telemetry(pmc_tm_function_t tm_type, telemetry_data_t *data)
  - 如果升级未完成 → 保持当前分区
  - 如果升级已完成 → 下次启动从备份分区启动
 
-4.3 辐射容错
+### 4.3 辐射容错
 
 单粒子翻转（SEU）防护：
+``` C
 // 1. 进程级隔离
 //    SEU翻转只影响单个进程地址空间
 //    其他进程不受影响
@@ -1179,8 +1194,9 @@ void verify_critical_data(protected_data_t *data)
 // 2. 电源监控芯片
 //    监控异常电流（SEL特征）
 //    检测到异常 → 触发电源复位
+```
 
-4.4 降级运行模式
+### 4.4 降级运行模式
 
 正常模式（所有功能可用）
 ├── Telecommand进程：运行
@@ -1212,10 +1228,10 @@ void verify_critical_data(protected_data_t *data)
 
 ---
 
-5. 单核SoC优化策略
+## 5. 单核SoC优化策略
 
-5.1 CPU调度优化
-
+### 5.1 CPU调度优化
+``` C
 // 1. Telecommand进程：实时调度，最高优先级
 struct sched_param param;
 param.sched_priority = 99;
@@ -1240,6 +1256,7 @@ cpu_set_t cpuset;
 CPU_ZERO(&cpuset);
 CPU_SET(0, &cpuset);
 sched_setaffinity(0, sizeof(cpuset), &cpuset);
+```
 
 调度效果：
 CPU时间片分配（单核）：
@@ -1257,8 +1274,8 @@ CPU时间片分配（单核）：
 ├── 快遥/慢遥到达 → Telecommand立即抢占CPU → 2ms内应答
 └── 后台采集 → Telemetry在空闲时运行，不影响实时性
 
-5.2 中断优化
-
+### 5.2 中断优化
+``` shell
 # 1. CAN中断线程化（Linux PREEMPT_RT内核）
 
 chrt -f 98 $(pgrep irq/.*can)
@@ -1270,9 +1287,10 @@ echo 0 > /proc/irq/XX/smp_affinity  # 禁用非关键中断
 # 3. 中断亲和性绑定到CPU0
 
 echo 1 > /proc/irq/YY/smp_affinity  # CAN中断绑定到CPU0
+```
 
-5.3 内存优化
-
+### 5.3 内存优化
+``` C
 // 1. 预分配所有内存（避免运行时分配）
 static telemetry_cache_t g_tm_cache;
 static cmd_queue_t g_cmd_queue[256];
@@ -1294,8 +1312,8 @@ int shm_fd = shm_open("/pmc_shm", O_CREAT | O_RDWR, 0666);
 ftruncate(shm_fd, 2 * 1024 * 1024);  // 2MB
 void *shm = mmap(NULL, 2 * 1024 * 1024, PROT_READ | PROT_WRITE,
 			   MAP_SHARED | MAP_HUGETLB, shm_fd, 0);
-
-5.4 缓存优化
+```
+### 5.4 缓存优化
 
 // 1. 数据结构对齐（避免false sharing）
 typedef struct {
@@ -1322,9 +1340,9 @@ __builtin_prefetch(&g_acl_table, 0, 3);  // 预取ACL查找表
 
 ---
 
-6. 性能分析
+## 6. 性能分析
 
-6.1 延迟分析
+### 6.1 延迟分析
 
 ┌───────────────────────┬────────┬─────────────┬────────────────┐
 │         操作          │  延迟  │ 是否满足2ms │      说明      │
@@ -1359,7 +1377,7 @@ CAN发送
 ↓ (<100μs，CAN帧发送)
 总延迟：<800μs（远小于2ms）
 
-6.2 CPU占用估算（单核）
+### 6.2 CPU占用估算（单核）
 
 Telecommand进程：
 ├── 空闲时：<5%（心跳、监控）
@@ -1381,7 +1399,7 @@ Firmware进程：
 
 总计：<60%（正常工作负载）
 
-6.3 内存占用估算
+### 6.3 内存占用估算
 
 共享内存：
 ├── 遥测缓冲区（双缓冲）：2 * 64KB = 128KB
@@ -1400,7 +1418,7 @@ Firmware进程：
 
 总内存占用：~42.5MB（单核SoC完全可接受）
 
-6.4 Flash占用估算
+### 6.4 Flash占用估算
 
 程序代码：
 ├── OSAL层：~500KB
@@ -1429,7 +1447,7 @@ Firmware进程：
 
 ---
 
-7. 与v3.0/v3.1方案对比
+## 7. 与v3.0/v3.1方案对比
 
 ┌────────────┬───────────────────────────┬────────────────────────┬───────────────────────┐
 │    维度    │        v3.0单进程         │       v3.1多进程       │    PMC方案（推荐）    │
@@ -1471,10 +1489,10 @@ PMC方案的核心优势：
 
 ---
 
-8. OSAL层扩展需求
+## 8. OSAL层扩展需求
 
-8.1 新增进程管理接口
-
+### 8.1 新增进程管理接口
+``` C
 /************************************************
 * osal/include/sys/osal_process_mgmt.h
 * 进程管理接口（新增）
@@ -1502,9 +1520,10 @@ int32_t OSAL_ProcessKill(osal_pid_t pid, int32_t signal);
 * @brief 检查进程是否存在
 */
 bool OSAL_ProcessExists(osal_pid_t pid);
+```
 
-8.2 新增共享内存接口
-
+### 8.2 新增共享内存接口
+``` C
 /************************************************
 * osal/include/ipc/osal_shm.h
 * 共享内存接口（新增）
@@ -1545,9 +1564,11 @@ int32_t OSAL_ShmClose(osal_shm_t shm);
 * @brief 删除共享内存
 */
 int32_t OSAL_ShmUnlink(const char *name);
+```
 
-8.3 新增实时调度接口
+### 8.3 新增实时调度接口
 
+``` C
 /************************************************
 * osal/include/sys/osal_sched.h
 * 实时调度接口（新增）
@@ -1588,12 +1609,11 @@ int32_t OSAL_MemLockAll(void);
 * @brief 解锁内存
 */
 int32_t OSAL_MemUnlockAll(void);
+```
 
----
+## 9. 实施计划
 
-9. 实施计划
-
-9.1 分阶段实施（14周）
+### 9.1 分阶段实施（14周）
 
 阶段1：OSAL扩展（2周）
 
@@ -1691,7 +1711,7 @@ int32_t OSAL_MemUnlockAll(void);
 
 - 性能分析（CPU占用、内存占用、延迟分布）
 
-9.2 关键里程碑
+### 9.2 关键里程碑
 
 ┌───────────┬─────────────────┬────────────────────────────────────┐
 │   周次    │     里程碑      │               交付物               │
@@ -1713,7 +1733,7 @@ int32_t OSAL_MemUnlockAll(void);
 │ Week 14   │ 集成测试完成    │ 测试报告、性能分析报告             │
 └───────────┴─────────────────┴────────────────────────────────────┘
 
-9.3 关键风险与缓解措施
+### 9.3 关键风险与缓解措施
 
 ┌──────────────────┬──────┬──────┬───────────────────────────────────────────────────┐
 │       风险       │ 影响 │ 概率 │                     缓解措施                      │
@@ -1731,9 +1751,9 @@ int32_t OSAL_MemUnlockAll(void);
 
 ---
 
-10. 验证计划
+## 10. 验证计划
 
-10.1 功能验证
+### 10.1 功能验证
 
 遥控功能：
 
@@ -1779,10 +1799,10 @@ int32_t OSAL_MemUnlockAll(void);
 
 - 日志轮转
 
-10.2 性能验证
+### 10.2 性能验证
 
 实时性测试：
-
+``` shell
 # 1. 遥控命令延迟测试
 
 ./test_telecommand_latency
@@ -1806,9 +1826,10 @@ int32_t OSAL_MemUnlockAll(void);
 # CAN命令发送 → CAN应答接收
 
 # 预期：<2ms（100%）
+```
 
 压力测试：
-
+``` shell
 # 1. 高频遥控测试（每秒100条命令）
 
 ./test_high_frequency_telecommand
@@ -1826,11 +1847,12 @@ int32_t OSAL_MemUnlockAll(void);
 ./test_long_term_stability
 
 # 预期：无崩溃，无内存泄漏
+```
 
 10.3 可靠性验证
 
 故障注入测试：
-
+``` shell
 # 1. 进程崩溃测试
 
 kill -SEGV <telemetry_pid>
@@ -1868,12 +1890,12 @@ kill -KILL <telemetry_pid>
 kill -KILL <telecommand_pid>
 
 # 预期：遥控遥测中断，Supervisor重启后恢复
-
+```
 ---
 
-11. 总结
+## 11. 总结
 
-11.1 方案核心特点
+### 11.1 方案核心特点
 
 1. ✅ 满足2ms硬实时
 
@@ -1927,7 +1949,7 @@ kill -KILL <telecommand_pid>
 
 - 日志轮转（压缩、归档、自动清理）
 
-11.2 与v3.0/v3.1的差异
+### 11.2 与v3.0/v3.1的差异
 
 相比v3.0单进程：
 
@@ -1951,7 +1973,7 @@ kill -KILL <telecommand_pid>
 
 - ⚖️ .进程数更多（4进程 vs 3进程）
 ️
-11.3 适用场景
+### 11.3 适用场景
 
 PMC方案最适合：
 
@@ -1975,9 +1997,9 @@ PMC方案最适合：
 
 ---
 
-12. 关键文件清单
+## 12. 关键文件清单
 
-12.1 OSAL层新增文件
+###12.1 OSAL层新增文件
 
 osal/include/sys/osal_process_mgmt.h    # 进程管理接口
 
@@ -1991,7 +2013,7 @@ osal/src/posix/osal_shm.c               # 共享内存实现
 
 osal/src/posix/osal_sched.c             # 实时调度实现
 
-12.2 ACL层文件
+### 12.2 ACL层文件
 
 acl/include/pmc_acl_types.h             # PMC业务功能枚举
 
@@ -2001,7 +2023,7 @@ acl/src/acl_core.c                      # ACL核心实现
 
 acl/config/pmc_v1/pmc_acl_config.c      # PMC v1.0配置
 
-12.3 进程文件
+### 12.3 进程文件
 
 processes/supervisor/supervisor.c       # Supervisor进程
 
@@ -2037,7 +2059,7 @@ processes/logger/crash_analyzer.c       # 崩溃分析线程
 
 processes/logger/log_rotator.c          # 日志轮转线程
 
-12.4 共享内存定义
+### 12.4 共享内存定义
 
 common/include/shm_layout.h             # 共享内存布局定义
 
@@ -2049,7 +2071,7 @@ common/include/heartbeat_table.h        # 心跳表结构
 
 common/include/status_snapshot.h        # 状态快照结构
 
-12.5 测试文件
+### 12.5 测试文件
 
 tests/unit/acl/test_acl_lookup.c        # ACL查找测试
 
@@ -2071,10 +2093,10 @@ tests/stress/test_long_term.c           # 长期稳定性测试
 
 ---
 
-13. 配置文件示例
+## 13. 配置文件示例
 
-13.1 PCL硬件配置
-
+### 13.1 PCL硬件配置
+```C
 /************************************************
 * pcl/platform/ti/am625/pmc_v1/hardware_config.c
 * PMC v1.0硬件配置
@@ -2187,9 +2209,10 @@ static const pcl_board_config_t pmc_v1_board = {
 	  NULL
   }
 };
+```
 
-13.2 ACL业务配置
-
+### 13.2 ACL业务配置
+```C
 /************************************************
 * acl/config/pmc_v1/pmc_acl_config.c
 * PMC v1.0业务功能映射
@@ -2248,9 +2271,10 @@ static const acl_tm_config_t g_pmc_tm_configs[] = {
   { TM_WATCHDOG_STATUS,      ACL_DEVICE_MCU, 2, TM_TYPE_REALTIME, true },
   { TM_ERROR_COUNT,          ACL_DEVICE_MCU, 0, TM_TYPE_CACHED,   true },
 };
+```
 
-13.3 系统配置文件
-
+### 13.3 系统配置文件
+```ini
 # /etc/pmc/pmc.conf
 
 # PMC系统配置文件
@@ -2300,67 +2324,67 @@ max_log_size_mb = 10
 max_archive_days = 7
 crash_log_dir = /var/log/pmc/crash
 
----
+```
 
-14. 启动流程
+## 14. 启动流程
 
-14.1 系统启动序列
+### 14.1 系统启动序列
 
 1. Bootloader启动
  ├── 检查启动标志
- ├── 选择启动分区（A或B）
- └── 加载Linux内核
+  ├── 选择启动分区（A或B）
+  └── 加载Linux内核
 
 2. Linux内核启动
  ├── 初始化硬件
- ├── 挂载根文件系统
- └── 启动init进程
+  ├── 挂载根文件系统
+  └── 启动init进程
 
 3. Init进程启动PMC
  ├── 加载配置文件（/etc/pmc/pmc.conf）
- ├── 创建共享内存（/dev/shm/pmc_shm）
- ├── 启动Supervisor进程
- └── Supervisor启动子进程
+  ├── 创建共享内存（/dev/shm/pmc_shm）
+  ├── 启动Supervisor进程
+  └── Supervisor启动子进程
 
 4. Supervisor启动子进程
  ├── 启动Telecommand进程（最高优先级）
- ├── 启动Telemetry进程
- ├── 启动Logger进程
- ├── 启动Firmware进程
- └── 开始心跳监控
+  ├── 启动Telemetry进程
+  ├── 启动Logger进程
+  ├── 启动Firmware进程
+  └── 开始心跳监控
 
 5. 各进程初始化
  ├── Telecommand进程：
- │   ├── 加载ACL配置
- │   ├── 初始化PDL服务（Satellite/BMC/MCU）
- │   ├── 设置实时调度（SCHED_FIFO, priority=99）
- │   ├── 绑定CPU0
- │   ├── 锁定内存
- │   └── 启动CAN接收线程
- │
- ├── Telemetry进程：
- │   ├── 加载ACL配置
- │   ├── 初始化PDL服务
- │   ├── 映射共享内存（遥测缓冲区）
- │   └── 启动采集线程
- │
- ├── Logger进程：
- │   ├── 映射共享内存（日志环形缓冲区）
- │   ├── 创建日志目录
- │   └── 启动日志收集线程
- │
- └── Firmware进程：
+  │   ├── 加载ACL配置
+  │   ├── 初始化PDL服务（Satellite/BMC/MCU）
+  │   ├── 设置实时调度（SCHED_FIFO, priority=99）
+  │   ├── 绑定CPU0
+  │   ├── 锁定内存
+  │   └── 启动CAN接收线程
+  │
+  ├── Telemetry进程：
+  │   ├── 加载ACL配置
+  │   ├── 初始化PDL服务
+  │   ├── 映射共享内存（遥测缓冲区）
+  │   └── 启动采集线程
+  │
+  ├── Logger进程：
+  │   ├── 映射共享内存（日志环形缓冲区）
+  │   ├── 创建日志目录
+  │   └── 启动日志收集线程
+  │
+  └── Firmware进程：
 	 ├── 检查启动分区
 	 ├── 标记启动成功
 	 └── 进入空闲状态
 
 6. 系统就绪
  ├── 向卫星平台发送心跳
- ├── 开始接收遥控遥测命令
- └── 后台采集遥测数据
+  ├── 开始接收遥控遥测命令
+  └── 后台采集遥测数据
 
-14.2 启动脚本
-
+### 14.2 启动脚本
+``` shell
 #!/bin/bash
 
 # /etc/init.d/pmc
@@ -2489,15 +2513,15 @@ case "$1" in
 esac
 
 exit 0
-
+```
 ---
 
-15. 调试与故障排查
+## 15. 调试与故障排查
 
-15.1 调试工具
+### 15.1 调试工具
 
 实时性分析：
-
+```shell
 # 1. 查看进程调度策略
 
 chrt -p <pid>
@@ -2517,9 +2541,10 @@ cat /proc/interrupts
 # 5. 跟踪系统调用（strace）
 
 strace -p <pid> -T -tt
+```
 
 性能分析：
-
+``` shell
 # 1. CPU占用（top）
 
 top -H -p <pid>
@@ -2562,8 +2587,9 @@ ls -lh /var/log/pmc/crash/
 # 5. 分析状态日志（JSON）
 
 jq '.server.power_state' /var/log/pmc/status.log
+```
 
-15.2 常见问题排查
+### 15.2 常见问题排查
 
 问题1：2ms应答超时
 症状：遥控遥测命令应答时间>2ms
@@ -2609,7 +2635,7 @@ jq '.server.power_state' /var/log/pmc/status.log
 
 2. 分析coredump
  gdb /usr/bin/pmc_telemetry /var/log/pmc/crash/core.1234
- (gdb) bt
+  (gdb) bt
  # 查看调用栈
 
 3. 检查内存泄漏
@@ -2661,9 +2687,9 @@ kill -HUP $(pgrep pmc_logger)
 
 ---
 
-16. 附录
+## 16. 附录
 
-16.1 术语表
+### 16.1 术语表
 
 ┌────────────┬────────────────────────────────────┬──────────────────┐
 │    术语    │                全称                │       说明       │
@@ -2697,7 +2723,7 @@ kill -HUP $(pgrep pmc_logger)
 │ PREEMPT_RT │ Real-Time Preemption               │ 实时抢占         │
 └────────────┴────────────────────────────────────┴──────────────────┘
 
-16.2 参考文档
+### 16.2 参考文档
 
 1. EMS架构文档
 
@@ -2729,7 +2755,7 @@ kill -HUP $(pgrep pmc_logger)
 
 - DO-178C (航空软件标准)
 
-16.3 联系方式
+### 16.3 联系方式
 
 技术支持：
 
@@ -2809,7 +2835,7 @@ kill -HUP $(pgrep pmc_logger)
 审核：待审核
 
 ---
-这就是完整的PMC架构优化方案。方案涵盖了：
+方案涵盖了：
 
 1. ✅ **2ms硬实时**：关键路径优化、实时调度
 
@@ -2825,4 +2851,3 @@ kill -HUP $(pgrep pmc_logger)
 
 7. ✅ **验证方案**：功能、性能、可靠性测试
 
-您可以将这个方案保存为Markdown文件，然后根据实际情况进行调整和实施。
