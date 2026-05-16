@@ -1,8 +1,8 @@
 # 容错与恢复机制
 
-## 15. 调试与故障排查
+## 1. 调试与故障排查
 
-### 15.1 调试工具
+### 1.1 调试工具
 
 实时性分析：
 ```shell
@@ -73,7 +73,7 @@ ls -lh /var/log/pmc/crash/
 jq '.server.power_state' /var/log/pmc/status.log
 ```
 
-### 15.2 常见问题排查
+### 1.2 常见问题排查
 
 问题1：2ms应答超时
 症状：遥控遥测命令应答时间>2ms
@@ -203,9 +203,9 @@ kill -HUP $(pgrep pmc_logger)
 
 ---
 
-## 16. 附录
+## 2. 附录
 
-### 16.1 术语表
+### 2.1 术语表
 
 | 术语 | 全称 | 说明 |
 |------|------|------|
@@ -226,7 +226,7 @@ kill -HUP $(pgrep pmc_logger)
 | SCHED_FIFO | First-In-First-Out Scheduling | 先进先出调度 |
 | PREEMPT_RT | Real-Time Preemption | 实时抢占 |
 
-### 16.2 参考文档
+### 2.2 参考文档
 
 1. EMS架构文档
 
@@ -257,7 +257,7 @@ kill -HUP $(pgrep pmc_logger)
 
 - DO-178C (航空软件标准)
 
-### 16.3 联系方式
+### 2.3 联系方式
 
 技术支持：
 

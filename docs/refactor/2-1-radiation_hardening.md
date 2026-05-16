@@ -1,10 +1,10 @@
 # 抗辐射设计
 
-## 7. 抗辐射设计
+## 1. 抗辐射设计
 
-### 7.1 空间辐射效应
+### 1.1 空间辐射效应
 
-#### 7.1.1 辐射类型
+#### 1.1.1 辐射类型
 ```
 太空辐射环境：
 ├─ 单粒子效应（SEE）
@@ -18,7 +18,7 @@
     └─ 晶格结构破坏
 ```
 
-#### 7.1.2 AM6254抗辐射能力评估
+#### 1.1.2 AM6254抗辐射能力评估
 ```
 AM6254（商用级芯片）：
 ├─ 无抗辐射加固
@@ -28,9 +28,9 @@ AM6254（商用级芯片）：
 └─ 建议配合外部抗辐射器件（电源管理、时钟）
 ```
 
-### 7.2 ECC内存保护
+### 1.2 ECC内存保护
 
-#### 7.2.1 硬件ECC配置
+#### 1.2.1 硬件ECC配置
 ```c
 // A53侧DDR4 ECC配置
 void configure_ddr_ecc(void) {
@@ -84,7 +84,7 @@ void ddr_ecc_error_handler(void *arg) {
 }
 ```
 
-#### 7.2.2 内存Scrubbing（后台扫描）
+#### 1.2.2 内存Scrubbing（后台扫描）
 ```c
 // 内存Scrubbing任务（A53侧）
 void memory_scrubbing_task(void *arg) {
@@ -127,9 +127,9 @@ void tcm_scrubbing_task(void *arg) {
 }
 ```
 
-### 7.3 关键数据三模冗余（TMR）
+### 1.3 关键数据三模冗余（TMR）
 
-#### 7.3.1 TMR数据结构
+#### 1.3.1 TMR数据结构
 ```c
 // 三模冗余数据结构
 typedef struct {
@@ -210,7 +210,7 @@ uint32_t tmr_read(tmr_uint32_t *tmr) {
 }
 ```
 
-#### 7.3.2 关键数据TMR保护
+#### 1.3.2 关键数据TMR保护
 ```c
 // R5F侧关键数据（需要TMR保护）
 typedef struct {
@@ -236,9 +236,9 @@ void can_rx_task(void *arg) {
 }
 ```
 
-### 7.4 配置寄存器Scrubbing
+### 1.4 配置寄存器Scrubbing
 
-#### 7.4.1 关键寄存器定期刷新
+#### 1.4.1 关键寄存器定期刷新
 ```c
 // R5F侧配置寄存器Scrubbing
 typedef struct {
@@ -289,9 +289,9 @@ void register_scrubbing_task(void *arg) {
 }
 ```
 
-### 7.5 SEU检测和统计
+### 1.5 SEU检测和统计
 
-#### 7.5.1 SEU统计数据结构
+#### 1.5.1 SEU统计数据结构
 ```c
 typedef struct {
     uint64_t ecc_single_bit_errors;   // ECC单比特错误
@@ -320,7 +320,7 @@ void report_seu_event(const char *type, uint64_t addr) {
 }
 ```
 
-#### 7.5.2 SEU统计上报
+#### 1.5.2 SEU统计上报
 ```c
 // 定期上报SEU统计（通过遥测）
 void telemetry_seu_statistics(void) {
@@ -337,9 +337,9 @@ void telemetry_seu_statistics(void) {
 }
 ```
 
-### 7.6 抗辐射设计总结
+### 1.6 抗辐射设计总结
 
-#### 7.6.1 防护措施汇总
+#### 1.6.1 防护措施汇总
 | 防护措施 | 覆盖范围 | 检测能力 | 纠正能力 | 开销 |
 |---------|---------|---------|---------|------|
 | DDR ECC | A53 DDR | 单/双比特 | 单比特自动纠正 | <5% |
@@ -349,7 +349,7 @@ void telemetry_seu_statistics(void) {
 | 寄存器Scrubbing | 关键寄存器 | 读回对比 | 立即刷新 | <1% |
 | CRC校验 | 通信数据 | 数据损坏 | 重传 | <5% |
 
-#### 7.6.2 预期SEU率和MTBF
+#### 1.6.2 预期SEU率和MTBF
 ```
 LEO轨道（400km）预期SEU率：
 ├─ DDR（512MB）：~5次/天（ECC自动纠正）
@@ -363,7 +363,7 @@ LEO轨道（400km）预期SEU率：
 └─ 系统级故障：>10年（假设其他硬件可靠性）
 ```
 
-#### 7.6.3 建议的硬件改进
+#### 1.6.3 建议的硬件改进
 ```
 如果预算允许，建议：
 ├─ 使用抗辐射加固DDR（如Microchip/Microsemi）

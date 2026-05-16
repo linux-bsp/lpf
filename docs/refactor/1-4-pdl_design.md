@@ -1,12 +1,12 @@
 # PDL层详细设计
 
-## 6. PDL 设计（外设驱动层）
+## 1. PDL 设计（外设驱动层）
 
-### 6.1 设计原则
+### 1.1 设计原则
 
 **PDL（Peripheral Driver Layer）是外设驱动层，负责封装各类外设的通信协议和业务逻辑。**
 
-#### 6.1.1 独立外设服务设计
+#### 1.1.1 独立外设服务设计
 
 **核心理念**：每种外设（Satellite/BMC/MCU）完全独立设计，各自暴露专属API，不强行抽象成统一接口。
 
@@ -54,7 +54,7 @@ int32_t PDL_MCU_FirmwareUpdate(mcu_handle_t handle, const char *firmware_path, v
 - ✅ 代码清晰，无需运行时类型判断
 - ✅ 易于扩展，新增外设不影响现有代码
 
-#### 6.1.2 ACL层配置映射
+#### 1.1.2 ACL层配置映射
 
 **APP层通过ACL配置表指定具体外设类型和索引**：
 
@@ -78,7 +78,7 @@ switch (cfg->device_type) {
 }
 ```
 
-#### 6.1.3 协议封装与通道管理
+#### 1.1.3 协议封装与通道管理
 
 **PDL层职责**：
 - ✅ 封装通信协议（Redfish/IPMI/CAN协议）
@@ -93,11 +93,11 @@ switch (cfg->device_type) {
 
 ---
 
-### 6.2 Satellite服务设计
+### 1.2 Satellite服务设计
 
 **功能**：封装卫星平台通信协议，处理遥控命令接收和遥测响应发送。
 
-#### 6.2.1 接口设计
+#### 1.2.1 接口设计
 
 ```c
 /* 卫星平台服务句柄 */
@@ -130,7 +130,7 @@ int32_t PDL_Satellite_SendHeartbeat(satellite_service_handle_t handle, can_statu
 int32_t PDL_Satellite_GetStats(satellite_service_handle_t handle, uint32_t *rx_count, uint32_t *tx_count, uint32_t *error_count);
 ```
 
-#### 6.2.2 设计特点
+#### 1.2.2 设计特点
 
 - **CAN协议封装**：封装CAN帧格式、序列号管理、CRC校验
 - **命令接收**：后台线程接收CAN命令，通过回调通知APP层
@@ -139,11 +139,11 @@ int32_t PDL_Satellite_GetStats(satellite_service_handle_t handle, uint32_t *rx_c
 
 ---
 
-### 6.3 BMC服务设计
+### 1.3 BMC服务设计
 
 **功能**：与带BMC的载荷服务器通信，支持IPMI/Redfish协议，实现电源控制、状态查询、传感器读取。
 
-#### 6.3.1 接口设计
+#### 1.3.1 接口设计
 
 ```c
 /* BMC服务句柄 */
@@ -209,7 +209,7 @@ bool PDL_BMC_IsConnected(bmc_handle_t handle);
 int32_t PDL_BMC_GetStats(bmc_handle_t handle, uint32_t *cmd_count, uint32_t *success_count, uint32_t *fail_count, uint32_t *switch_count);
 ```
 
-#### 6.3.2 设计特点
+#### 1.3.2 设计特点
 
 - **双通道冗余**：主通道（网络）+ 备份通道（串口），自动故障切换
 - **协议支持**：IPMI（成熟稳定）+ Redfish（现代化RESTful API）
@@ -218,11 +218,11 @@ int32_t PDL_BMC_GetStats(bmc_handle_t handle, uint32_t *cmd_count, uint32_t *suc
 
 ---
 
-### 6.4 MCU服务设计
+### 1.4 MCU服务设计
 
 **功能**：与MCU通信，支持CAN/串口/I2C/SPI多种接口，实现状态查询、寄存器读写、固件升级。
 
-#### 6.4.1 接口设计
+#### 1.4.1 接口设计
 
 ```c
 /* MCU服务句柄 */
@@ -283,7 +283,7 @@ int32_t PDL_MCU_SendCommand(mcu_handle_t handle, uint8_t cmd_code, const uint8_t
 int32_t PDL_MCU_FirmwareUpdate(mcu_handle_t handle, const char *firmware_path, void (*progress_callback)(uint32_t percent));
 ```
 
-#### 6.4.2 设计特点
+#### 1.4.2 设计特点
 
 - **多接口支持**：CAN/串口/I2C/SPI，由配置决定使用哪种
 - **协议封装**：封装MCU通信协议（帧格式、CRC校验、应答机制）
@@ -292,9 +292,9 @@ int32_t PDL_MCU_FirmwareUpdate(mcu_handle_t handle, const char *firmware_path, v
 
 ---
 
-### 6.5 PDL层实现要点
+### 1.5 PDL层实现要点
 
-#### 6.5.1 句柄管理
+#### 1.5.1 句柄管理
 
 ```c
 /* 内部句柄结构（对外不透明） */
@@ -332,7 +332,7 @@ int32_t PDL_MCU_Init(const mcu_config_t *config, mcu_handle_t *handle) {
 }
 ```
 
-#### 6.5.2 协议封装
+#### 1.5.2 协议封装
 
 ```c
 /* MCU命令帧格式（CAN接口） */
@@ -378,7 +378,7 @@ static int32_t mcu_send_command_internal(mcu_context_t *ctx, uint8_t cmd_code, c
 }
 ```
 
-#### 6.5.3 重试机制
+#### 1.5.3 重试机制
 
 ```c
 /* 带重试的命令发送 */

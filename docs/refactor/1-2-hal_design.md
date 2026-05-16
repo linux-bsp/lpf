@@ -1,19 +1,19 @@
 # HAL层详细设计
 
-## 4. HAL 设计（硬件抽象层）
+## 1. HAL 设计（硬件抽象层）
 
-### 4.1 设计原则
+### 1.1 设计原则
 
 **HAL（Hardware Abstraction Layer）是硬件抽象层，提供统一的硬件驱动接口，屏蔽不同平台的硬件差异。**
 
-#### 4.1.1 核心理念
+#### 1.1.1 核心理念
 
 - ✅ **硬件抽象**：封装硬件寄存器操作，提供统一的驱动接口
 - ✅ **平台隔离**：Linux/RTOS平台实现分离，上层代码无需修改
 - ✅ **句柄管理**：使用不透明句柄，隐藏内部实现细节
 - ✅ **OSAL依赖**：所有系统调用必须通过OSAL封装，不直接调用系统API
 
-#### 4.1.2 HAL层职责
+#### 1.1.2 HAL层职责
 
 **HAL层负责**：
 - ✅ 硬件设备初始化和配置
@@ -26,7 +26,7 @@
 - ❌ 直接调用系统API（必须通过OSAL）
 - ❌ 跨平台代码混合（平台实现必须分离）
 
-#### 4.1.3 HAL层架构
+#### 1.1.3 HAL层架构
 
 ```
 hal/
@@ -52,11 +52,11 @@ hal/
 
 ---
 
-### 4.2 CAN驱动设计
+### 1.2 CAN驱动设计
 
 **功能**：提供统一的CAN总线访问接口，支持标准帧和扩展帧。
 
-#### 4.2.1 接口设计
+#### 1.2.1 接口设计
 
 ```c
 /* CAN句柄（不透明） */
@@ -103,7 +103,7 @@ int32_t HAL_CAN_SetErrorCallback(hal_can_handle_t handle, void (*callback)(hal_c
 int32_t HAL_CAN_SetErrorThreshold(hal_can_handle_t handle, uint32_t threshold);
 ```
 
-#### 4.2.2 Linux平台实现要点
+#### 1.2.2 Linux平台实现要点
 
 ```c
 /* 内部句柄结构 */
@@ -197,11 +197,11 @@ int32_t HAL_CAN_Recv(hal_can_handle_t handle, can_frame_t *frame, int32_t timeou
 
 ---
 
-### 4.3 串口驱动设计
+### 1.3 串口驱动设计
 
 **功能**：提供统一的串口访问接口，支持多种波特率和配置。
 
-#### 4.3.1 接口设计
+#### 1.3.1 接口设计
 
 ```c
 /* 串口句柄（不透明） */
@@ -235,7 +235,7 @@ int32_t HAL_Serial_Flush(hal_serial_handle_t handle);
 int32_t HAL_Serial_SetConfig(hal_serial_handle_t handle, const hal_serial_config_t *config);
 ```
 
-#### 4.3.2 Linux平台实现要点
+#### 1.3.2 Linux平台实现要点
 
 ```c
 /* 内部句柄结构 */
@@ -302,11 +302,11 @@ int32_t HAL_Serial_Open(const char *device, const hal_serial_config_t *config, h
 
 ---
 
-### 4.4 I2C驱动设计
+### 1.4 I2C驱动设计
 
 **功能**：提供统一的I2C总线访问接口，支持标准速率和快速速率。
 
-#### 4.4.1 接口设计
+#### 1.4.1 接口设计
 
 ```c
 /* I2C句柄（不透明） */
@@ -348,7 +348,7 @@ int32_t HAL_I2C_ReadReg(hal_i2c_handle_t handle, uint16_t slave_addr, uint8_t re
 int32_t HAL_I2C_Transfer(hal_i2c_handle_t handle, i2c_msg_t *msgs, uint32_t num);
 ```
 
-#### 4.4.2 设计特点
+#### 1.4.2 设计特点
 
 - **寄存器访问**：提供专用的寄存器读写接口，简化常见操作
 - **组合传输**：支持I2C组合传输（先写后读），避免总线释放
@@ -356,11 +356,11 @@ int32_t HAL_I2C_Transfer(hal_i2c_handle_t handle, i2c_msg_t *msgs, uint32_t num)
 
 ---
 
-### 4.5 SPI驱动设计
+### 1.5 SPI驱动设计
 
 **功能**：提供统一的SPI总线访问接口，支持全双工传输。
 
-#### 4.5.1 接口设计
+#### 1.5.1 接口设计
 
 ```c
 /* SPI句柄（不透明） */
@@ -408,7 +408,7 @@ int32_t HAL_SPI_TransferMulti(hal_spi_handle_t handle, spi_transfer_t *transfers
 int32_t HAL_SPI_SetConfig(hal_spi_handle_t handle, const hal_spi_config_t *config);
 ```
 
-#### 4.5.2 设计特点
+#### 1.5.2 设计特点
 
 - **全双工支持**：同时发送和接收数据
 - **批量传输**：支持多段传输，减少片选切换开销
@@ -416,11 +416,11 @@ int32_t HAL_SPI_SetConfig(hal_spi_handle_t handle, const hal_spi_config_t *confi
 
 ---
 
-### 4.6 看门狗驱动设计
+### 1.6 看门狗驱动设计
 
 **功能**：提供统一的看门狗接口，用于系统复位保护。
 
-#### 4.6.1 接口设计
+#### 1.6.1 接口设计
 
 ```c
 /* 看门狗句柄（不透明） */
@@ -457,9 +457,9 @@ int32_t HAL_Watchdog_GetTimeLeft(hal_watchdog_handle_t handle, uint32_t *time_le
 
 ---
 
-### 4.7 HAL层设计要点
+### 1.7 HAL层设计要点
 
-#### 4.7.1 句柄管理模式
+#### 1.7.1 句柄管理模式
 
 **所有HAL驱动使用统一的句柄管理模式**：
 
@@ -502,7 +502,7 @@ int32_t HAL_XXX_Deinit(hal_xxx_handle_t handle) {
 }
 ```
 
-#### 4.7.2 错误处理
+#### 1.7.2 错误处理
 
 **统一的错误码和错误处理机制**：
 
@@ -532,7 +532,7 @@ int32_t HAL_XXX_Operation(...) {
 }
 ```
 
-#### 4.7.3 平台隔离
+#### 1.7.3 平台隔离
 
 **Linux和RTOS平台实现完全分离**：
 
@@ -571,7 +571,7 @@ elseif(PLATFORM STREQUAL "rtos")
 endif()
 ```
 
-#### 4.7.4 OSAL依赖
+#### 1.7.4 OSAL依赖
 
 **HAL层所有系统调用必须通过OSAL封装**：
 
