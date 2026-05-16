@@ -41,6 +41,7 @@ set(HAL_TEST_SOURCES
     unit/hal/test_hal_i2c.c
     unit/hal/test_hal_spi.c
     unit/hal/test_hal_watchdog.c
+    unit/hal/test_hal_gpio.c
 )
 
 # PCL Unit Tests
