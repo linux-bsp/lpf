@@ -40,6 +40,11 @@ endif()
 # 基础编译标志
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Werror -D_POSIX_C_SOURCE=200809L")
 
+# macOS平台特定定义
+if(APPLE)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_DARWIN_C_SOURCE")
+endif()
+
 # 设置默认构建类型为 Release（Buildroot 通常会覆盖此设置）
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type (Debug/Release)" FORCE)
