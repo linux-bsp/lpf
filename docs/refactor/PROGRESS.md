@@ -33,7 +33,7 @@
 | T1.1 | OSAL实时调度API | P0 | 3天 | ✅ 已完成 | 2026-05-17 | 2026-05-17 | - | SCHED_FIFO/RR |
 | T1.2 | OSAL CPU亲和性API | P0 | 2天 | ✅ 已完成 | 2026-05-17 | 2026-05-17 | - | 已在T1.1中实现 |
 | T1.3 | OSAL内存锁定API | P0 | 2天 | ✅ 已完成 | 2026-05-17 | 2026-05-17 | - | 已在T1.1中实现 |
-| T1.4 | OSAL共享内存API | P0 | 5天 | ⏸️ 未开始 | - | - | - | 创建/映射/销毁 |
+| T1.4 | OSAL共享内存API | P0 | 5天 | ✅ 已完成 | 2026-05-17 | 2026-05-17 | - | 创建/映射/销毁 |
 | T1.5 | OSAL原子操作增强 | P1 | 2天 | ⏸️ 未开始 | - | - | - | 64位原子时间戳 |
 | T1.6 | HAL GPIO驱动 | P1 | 3天 | ⏸️ 未开始 | - | - | - | 输入/输出/中断 |
 | T1.7 | 单元测试补充 | P1 | 3天 | ⏸️ 未开始 | - | - | - | 覆盖率>80% |
@@ -78,6 +78,46 @@ int32_t OSAL_MemUnlock(void);
 **提交记录**:
 - cf8a4bb: 实现OSAL实时调度API及单元测试
 - 3196929: 修复完善OSAL调度模块的macOS平台兼容性
+
+#### T1.4 OSAL共享内存API（已完成）
+
+**需求**:
+- 支持POSIX共享内存（shm_open/shm_unlink）
+- 支持内存映射（mmap/munmap）
+- 支持创建、独占、读写、只读等多种模式
+- 支持多进程共享内存访问
+
+**设计**:
+```c
+// osal/include/ipc/osal_shm.h
+int32_t OSAL_ShmCreate(const char *name, size_t size, int32_t flags, osal_shm_t *shm);
+int32_t OSAL_ShmOpen(const char *name, int32_t flags, osal_shm_t *shm);
+int32_t OSAL_ShmMap(osal_shm_t *shm, size_t offset, size_t length, int32_t flags, void **addr);
+int32_t OSAL_ShmUnmap(void *addr, size_t length);
+int32_t OSAL_ShmClose(osal_shm_t *shm);
+int32_t OSAL_ShmUnlink(const char *name);
+```
+
+**实现文件**:
+- [x] osal/include/ipc/osal_shm.h
+- [x] osal/src/posix/ipc/osal_shm.c
+- [x] tests/unit/osal/test_osal_shm.c
+
+**完成状态**: 
+- ✅ 实现了完整的共享内存API（创建/打开/映射/关闭/删除）
+- ✅ 支持多种标志位（CREATE/EXCL/RDWR/RDONLY）
+- ✅ 实现了Linux平台的完整功能
+- ✅ 完成了7个单元测试用例，全部通过：
+  * 基本创建和删除
+  * 独占创建模式
+  * 内存映射和解映射
+  * 多进程共享（fork验证）
+  * 只读映射
+  * 部分映射
+  * 参数验证
+
+**提交记录**:
+- 6eb1e8f: 实现OSAL共享内存API (T1.4)
 
 ---
 
