@@ -274,10 +274,11 @@ int32_t OSAL_MemLock(bool lock_all)
 
     if (ret != 0) {
         if (errno == EPERM) {
-            return OSAL_ERR_NO_PERMISSION;
+            return OSAL_ERR_PERMISSION;
         } else if (errno == ENOMEM) {
             return OSAL_ERR_NO_MEMORY;
         }
+        /* 其他错误返回通用错误 */
         return OSAL_ERR_GENERIC;
     }
 
