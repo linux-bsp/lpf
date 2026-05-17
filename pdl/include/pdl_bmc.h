@@ -56,6 +56,7 @@ typedef struct
     uint32_t uptime_sec;
     float cpu_temp;
     float inlet_temp;
+    uint64_t timestamp_us;  /* 数据采集时间戳（微秒） */
 } bmc_status_t;
 
 /*
@@ -109,6 +110,7 @@ typedef struct
     float value;
     char unit[16];
     bool valid;
+    uint64_t timestamp_us;  /* 数据采集时间戳（微秒） */
 } bmc_sensor_reading_t;
 
 /**

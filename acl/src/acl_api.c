@@ -187,6 +187,13 @@ int32_t ACL_ValidateConfig(void)
             continue;
         }
 
+        /* 检查枚举值是否匹配索引 */
+        if (cfg->function != i) {
+            LOG_ERROR("ACL", "TC[%u]: 枚举值不匹配 (expected=%u, actual=%u)",
+                     i, i, cfg->function);
+            error_count++;
+        }
+
         /* 检查设备类型 */
         if (cfg->device_type >= ACL_DEVICE_MAX) {
             LOG_ERROR("ACL", "TC[%u]: 无效的设备类型 %d", i, cfg->device_type);
@@ -207,6 +214,13 @@ int32_t ACL_ValidateConfig(void)
             continue;
         }
 
+        /* 检查枚举值是否匹配索引 */
+        if (cfg->function != i) {
+            LOG_ERROR("ACL", "TM[%u]: 枚举值不匹配 (expected=%u, actual=%u)",
+                     i, i, cfg->function);
+            error_count++;
+        }
+
         /* 检查设备类型 */
         if (cfg->device_type >= ACL_DEVICE_MAX) {
             LOG_ERROR("ACL", "TM[%u]: 无效的设备类型 %d", i, cfg->device_type);
@@ -224,9 +238,25 @@ int32_t ACL_ValidateConfig(void)
             if (cfg->realtime_timeout_us == 0) {
                 LOG_ERROR("ACL", "TM[%u]: 实时型遥测未配置超时", i);
                 error_count++;
-            } else if (cfg->realtime_timeout_us > 10000) {
-                LOG_WARN("ACL", "TM[%u]: 实时型遥测超时过长 %uμs",
-                         i, cfg->realtime_timeout_us);
+            } else if (cfg->realtime_timeout_us > cfg->validity_ms * 1000) {
+                LOG_WARN("ACL", "TM[%u]: 实时超时(%uμs) > 有效期(%ums)",
+                         i, cfg->realtime_timeout_us, cfg->validity_ms);
+            }
+        }
+
+        /* 检查缓存型遥测的配置 */
+        if (cfg->data_type == TM_TYPE_CACHED) {
+            if (cfg->validity_ms == 0) {
+                LOG_ERROR("ACL", "TM[%u]: 缓存型遥测未配置有效期", i);
+                error_count++;
+            }
+            if (cfg->update_period_ms == 0) {
+                LOG_ERROR("ACL", "TM[%u]: 缓存型遥测未配置更新周期", i);
+                error_count++;
+            }
+            if (cfg->update_period_ms > cfg->validity_ms) {
+                LOG_WARN("ACL", "TM[%u]: 更新周期(%ums) > 有效期(%ums)",
+                         i, cfg->update_period_ms, cfg->validity_ms);
             }
         }
     }
@@ -234,6 +264,13 @@ int32_t ACL_ValidateConfig(void)
     /* 3. 验证失效映射表 */
     for (uint32_t i = 0; i < g_invalidation_map_count; i++) {
         const tc_tm_invalidation_map_t *map = &g_invalidation_map[i];
+
+        /* 检查遥控功能枚举范围 */
+        if (map->tc_function >= TC_FUNC_MAX) {
+            LOG_ERROR("ACL", "失效映射[%u]: 遥控功能枚举越界 %d", i, map->tc_function);
+            error_count++;
+            continue;
+        }
 
         /* 检查遥控功能是否使能 */
         if (!ACL_IsTcEnabled(map->tc_function)) {

@@ -55,6 +55,7 @@ typedef struct
     uint32_t kick_count;            /* 喂狗次数 */
     uint32_t kick_interval_ms;      /* 喂狗间隔（毫秒） */
     watchdog_mode_t mode;           /* 工作模式 */
+    uint64_t last_kick_time_us;     /* 上次喂狗时间戳（微秒） */
 } watchdog_status_t;
 
 /**

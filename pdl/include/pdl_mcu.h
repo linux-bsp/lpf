@@ -86,6 +86,7 @@ typedef struct
     uint8_t error_code;                 /* 错误码 */
     float temperature;                /* 温度 */
     uint16_t voltage_mv;                /* 电压（mV） */
+    uint64_t timestamp_us;              /* 数据采集时间戳（微秒） */
 } mcu_status_t;
 
 /**

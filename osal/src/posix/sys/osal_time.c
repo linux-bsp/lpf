@@ -42,3 +42,35 @@ int32_t OSAL_nanosleep(uint64_t nsec)
         return OSAL_SUCCESS;
     return OSAL_ERR_GENERIC;
 }
+
+int64_t OSAL_GetMonotonicTime(void)
+{
+    struct timespec ts;
+    if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0)
+        return -1;
+
+    return (int64_t)ts.tv_sec * OSAL_USEC_PER_SEC + ts.tv_nsec / OSAL_NSEC_PER_USEC;
+}
+
+int64_t OSAL_GetBootTime(void)
+{
+#ifdef CLOCK_BOOTTIME
+    struct timespec ts;
+    if (clock_gettime(CLOCK_BOOTTIME, &ts) != 0)
+        return -1;
+
+    return (int64_t)ts.tv_sec * OSAL_USEC_PER_SEC + ts.tv_nsec / OSAL_NSEC_PER_USEC;
+#else
+    /* macOS不支持CLOCK_BOOTTIME，降级到CLOCK_MONOTONIC */
+    return OSAL_GetMonotonicTime();
+#endif
+}
+
+int64_t OSAL_GetHighResTime(void)
+{
+    struct timespec ts;
+    if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0)
+        return -1;
+
+    return (int64_t)ts.tv_sec * OSAL_NSEC_PER_SEC + ts.tv_nsec;
+}

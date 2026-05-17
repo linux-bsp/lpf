@@ -18,6 +18,7 @@ typedef struct
     osal_thread_t kick_thread;
     volatile bool running;
     osal_atomic_uint32_t kick_count;
+    osal_atomic_uint64_t last_kick_time;  /* 上次喂狗时间戳（微秒） */
 } watchdog_context_t;
 
 /**
@@ -36,6 +37,7 @@ static void *watchdog_kick_thread(void *arg)
         if (ret == OSAL_SUCCESS)
         {
             OSAL_AtomicFetchAdd(&ctx->kick_count, 1);
+            OSAL_AtomicStore64(&ctx->last_kick_time, OSAL_GetMonotonicTime());
             LOG_DEBUG("PDL_WDT", "[%s] Kicked (count=%u)",
                      ctx->name, OSAL_AtomicLoad(&ctx->kick_count));
         }
@@ -78,6 +80,7 @@ int32_t PDL_WATCHDOG_Init(const watchdog_config_t *config, watchdog_handle_t *ha
     ctx->enabled = false;
     ctx->running = false;
     OSAL_AtomicInit(&ctx->kick_count, 0);
+    OSAL_AtomicInit64(&ctx->last_kick_time, 0);
 
     /* 初始化HAL层 */
     hal_watchdog_config_t hal_config = {
@@ -216,6 +219,7 @@ int32_t PDL_WATCHDOG_Kick(watchdog_handle_t handle)
     if (ret == OSAL_SUCCESS)
     {
         OSAL_AtomicFetchAdd(&ctx->kick_count, 1);
+        OSAL_AtomicStore64(&ctx->last_kick_time, OSAL_GetMonotonicTime());
     }
 
     return ret;
@@ -240,6 +244,7 @@ int32_t PDL_WATCHDOG_GetStatus(watchdog_handle_t handle, watchdog_status_t *stat
     status->kick_interval_ms = ctx->kick_interval_ms;
     status->mode = ctx->mode;
     status->kick_count = OSAL_AtomicLoad(&ctx->kick_count);
+    status->last_kick_time_us = OSAL_AtomicLoad64(&ctx->last_kick_time);
 
     /* 获取HAL层超时时间 */
     uint32_t timeout = 0;

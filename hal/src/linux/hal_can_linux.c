@@ -516,3 +516,39 @@ int32_t HAL_CAN_SetErrorThreshold(hal_can_handle_t handle, uint32_t threshold)
 
     return OSAL_SUCCESS;
 }
+
+/**
+ * @brief 获取CAN错误信息
+ */
+int32_t HAL_CAN_GetErrorInfo(hal_can_handle_t handle, hal_can_error_info_t *info)
+{
+    hal_can_context_t *impl = (hal_can_context_t *)handle;
+
+    if (NULL == impl || NULL == info)
+        return OSAL_ERR_INVALID_POINTER;
+
+    if (!impl->initialized)
+        return OSAL_ERR_INVALID_ID;
+
+    /* Linux SocketCAN不直接暴露CAN控制器的错误计数器
+     * 这里返回驱动层统计的错误计数作为近似值 */
+    OSAL_Memset(info, 0, sizeof(hal_can_error_info_t));
+
+    /* 使用驱动层错误计数作为近似 */
+    uint32_t err_count = atomic_load(&impl->err_count);
+    info->tx_error_count = err_count / 2;  /* 假设发送和接收错误各占一半 */
+    info->rx_error_count = err_count / 2;
+
+    /* 根据错误计数推断状态 */
+    if (err_count == 0) {
+        info->state = CAN_ERROR_ACTIVE;
+    } else if (err_count < 128) {
+        info->state = CAN_ERROR_ACTIVE;
+    } else if (err_count < 256) {
+        info->state = CAN_ERROR_PASSIVE;
+    } else {
+        info->state = CAN_BUS_OFF;
+    }
+
+    return OSAL_SUCCESS;
+}

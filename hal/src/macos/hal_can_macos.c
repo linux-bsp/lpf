@@ -65,3 +65,30 @@ int32_t HAL_CAN_GetStats(hal_can_handle_t handle,
 
     return OSAL_SUCCESS;
 }
+
+int32_t HAL_CAN_SetErrorCallback(hal_can_handle_t handle,
+                                  void (*callback)(hal_can_handle_t handle, int32_t error_code))
+{
+    (void)handle;
+    (void)callback;
+    return OSAL_ERR_NOT_IMPLEMENTED;
+}
+
+int32_t HAL_CAN_SetErrorThreshold(hal_can_handle_t handle, uint32_t threshold)
+{
+    (void)handle;
+    (void)threshold;
+    return OSAL_ERR_NOT_IMPLEMENTED;
+}
+
+int32_t HAL_CAN_GetErrorInfo(hal_can_handle_t handle, hal_can_error_info_t *info)
+{
+    (void)handle;
+
+    if (info != NULL) {
+        OSAL_Memset(info, 0, sizeof(hal_can_error_info_t));
+        info->state = CAN_ERROR_ACTIVE;
+    }
+
+    return OSAL_ERR_NOT_IMPLEMENTED;
+}
