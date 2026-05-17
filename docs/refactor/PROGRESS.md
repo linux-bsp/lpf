@@ -338,10 +338,92 @@ int32_t HAL_GPIO_DisableInterrupt(uint32_t gpio_num);
 
 | 任务ID | 任务描述 | 状态 | 备注 |
 |--------|---------|------|------|
-| T4.1 | 验证PCL配置结构与PDL需求匹配 | 🔄 进行中 | 检查配置字段完整性 |
-| T4.2 | 验证PCL API与PDL使用方式匹配 | ⏸️ 未开始 | 检查查询接口 |
-| T4.3 | 补充缺失的配置字段（如有） | ⏸️ 未开始 | 根据PDL需求补充 |
-| T4.4 | 更新平台配置示例 | ⏸️ 未开始 | 确保示例完整 |
+| T4.1 | 验证PCL配置结构与PDL需求匹配 | ✅ 已完成 | 发现不匹配问题 |
+| T4.2 | 调整PCL BMC配置结构 | ⏸️ 未开始 | 需要重构 |
+| T4.3 | 调整PCL MCU配置结构 | ⏸️ 未开始 | 需要验证 |
+| T4.4 | 调整PCL Satellite配置结构 | ⏸️ 未开始 | 需要验证 |
+| T4.5 | 更新平台配置示例 | ⏸️ 未开始 | 确保示例完整 |
+
+### T4.1 验证结果
+
+**PCL vs PDL 配置结构对比**：
+
+#### BMC配置不匹配问题
+
+**PCL当前结构**：
+```c
+typedef struct {
+    const char *name;
+    const char *description;
+    bool enabled;
+    
+    struct {
+        pcl_bmc_protocol_t protocol;
+        union {
+            pcl_bmc_ipmi_lan_cfg_t ipmi_lan;
+            pcl_bmc_redfish_cfg_t redfish;
+        } cfg;
+    } primary_channel;
+    
+    struct {
+        pcl_bmc_protocol_t protocol;
+        pcl_bmc_ipmi_serial_cfg_t cfg;
+    } backup_channel;
+    
+    uint32_t cmd_timeout_ms;
+    uint32_t retry_count;
+    uint32_t failover_threshold;
+} pcl_bmc_cfg_t;
+```
+
+**PDL期望结构**：
+```c
+typedef struct {
+    struct {
+        bool enabled;
+        const char *ip_addr;
+        uint16_t port;
+        const char *username;
+        const char *password;
+        uint32_t timeout_ms;
+    } network;
+    
+    struct {
+        bool enabled;
+        const char *device;
+        uint32_t baudrate;
+        uint32_t timeout_ms;
+    } serial;
+    
+    bmc_channel_t primary_channel;  // 枚举：NETWORK/SERIAL
+    bool auto_switch;
+    uint32_t retry_count;
+    uint32_t health_check_interval;
+} bmc_config_t;
+```
+
+**不匹配点**：
+1. ❌ PCL使用嵌套的 `primary_channel/backup_channel` 结构，PDL使用平铺的 `network/serial` 结构
+2. ❌ PCL缺少 `auto_switch` 字段
+3. ❌ PCL缺少 `health_check_interval` 字段
+4. ❌ PCL的 `enabled` 在顶层，PDL的 `enabled` 在每个通道内
+5. ❌ PCL支持协议选择（IPMI/Redfish），但PDL配置中没有协议选择字段
+
+**结论**：PCL的BMC配置结构需要重构，以匹配PDL的实际需求。
+
+#### 下一步行动
+
+需要重构PCL层的配置结构，使其与PDL层完全匹配。有两个选择：
+
+**方案A：修改PCL配置结构以匹配PDL**
+- 优点：PDL层无需修改，保持稳定
+- 缺点：PCL配置结构需要大改，现有配置文件需要更新
+
+**方案B：修改PDL配置结构以匹配PCL**
+- 优点：PCL配置结构更清晰，支持协议选择
+- 缺点：PDL层需要修改，可能影响现有代码
+
+**建议**：采用方案A，修改PCL配置结构以匹配PDL，因为PDL层已经有完整的实现和测试。
 
 ---
 
