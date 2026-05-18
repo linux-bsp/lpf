@@ -9,8 +9,6 @@
 #include "acl_telemetry_cache.h"
 #include "acl_config.h"
 #include "osal.h"
-#include <string.h>
-#include <time.h>
 
 /* 全局遥测缓存表 */
 static telemetry_cache_entry_t g_tm_cache[TM_FUNC_MAX];
@@ -24,9 +22,7 @@ static osal_mutex_t *g_cache_mutex = NULL;
  */
 static uint64_t get_monotonic_us(void)
 {
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (uint64_t)ts.tv_sec * 1000000 + ts.tv_nsec / 1000;
+    return OSAL_GetMonotonicTime();
 }
 
 /**
@@ -60,7 +56,7 @@ int32_t ACL_TelemetryCache_Init(void)
     }
 
     /* 初始化缓存表 */
-    memset(g_tm_cache, 0, sizeof(g_tm_cache));
+    OSAL_Memset(g_tm_cache, 0, sizeof(g_tm_cache));
 
     for (uint32_t i = 0; i < TM_FUNC_MAX; i++) {
         g_tm_cache[i].tm_id = i;
@@ -100,7 +96,7 @@ int32_t ACL_TelemetryCache_Write(uint32_t tm_id, const uint8_t *data, uint32_t d
     telemetry_cache_entry_t *entry = &g_tm_cache[tm_id];
 
     /* 复制数据 */
-    memcpy(entry->data, data, data_len);
+    OSAL_Memcpy(entry->data, data, data_len);
     entry->data_len = data_len;
 
     /* 更新元数据 */
@@ -152,7 +148,7 @@ int32_t ACL_TelemetryCache_Read(uint32_t tm_id, telemetry_response_t *response)
 
     /* 封装应答 */
     response->tm_id = tm_id;
-    memcpy(response->data, entry->data, entry->data_len);
+    OSAL_Memcpy(response->data, entry->data, entry->data_len);
     response->data_len = entry->data_len;
     response->timestamp_us = entry->timestamp_us;
     response->age_ms = age_ms;
