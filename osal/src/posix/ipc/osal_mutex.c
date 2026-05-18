@@ -15,14 +15,21 @@ struct osal_mutex_s
 
 int32_t OSAL_MutexCreate(osal_mutex_t **mutex)
 {
-    /* 使用默认属性：NORMAL + PRIO_INHERIT */
-    osal_mutex_attr_t default_attr = {
-        .type = OSAL_MUTEX_NORMAL,
-        .protocol = OSAL_MUTEX_PRIO_INHERIT,
-        .prio_ceiling = 0
-    };
+    if (NULL == mutex)
+        return OSAL_ERR_INVALID_POINTER;
 
-    return OSAL_MutexCreateEx(mutex, &default_attr);
+    osal_mutex_t *new_mutex = (osal_mutex_t *)malloc(sizeof(osal_mutex_t));
+    if (NULL == new_mutex)
+        return OSAL_ERR_NO_MEMORY;
+
+    if (0 != pthread_mutex_init(&new_mutex->mutex, NULL))
+    {
+        free(new_mutex);
+        return OSAL_ERR_GENERIC;
+    }
+
+    *mutex = new_mutex;
+    return OSAL_SUCCESS;
 }
 
 int32_t OSAL_MutexCreateEx(osal_mutex_t **mutex, const osal_mutex_attr_t *attr)
@@ -37,45 +44,11 @@ int32_t OSAL_MutexCreateEx(osal_mutex_t **mutex, const osal_mutex_attr_t *attr)
     pthread_mutexattr_t pthread_attr;
     pthread_mutexattr_init(&pthread_attr);
 
-    /* 设置互斥锁类型 */
-    if (attr != NULL)
+    if (attr != NULL && attr->type == OSAL_MUTEX_RECURSIVE)
     {
-        int type = PTHREAD_MUTEX_NORMAL;
-        switch (attr->type)
-        {
-            case OSAL_MUTEX_NORMAL:
-                type = PTHREAD_MUTEX_NORMAL;
-                break;
-            case OSAL_MUTEX_RECURSIVE:
-                type = PTHREAD_MUTEX_RECURSIVE;
-                break;
-            case OSAL_MUTEX_ERRORCHECK:
-                type = PTHREAD_MUTEX_ERRORCHECK;
-                break;
-        }
-        pthread_mutexattr_settype(&pthread_attr, type);
-
-        /* 设置优先级协议 */
-#ifdef _POSIX_THREAD_PRIO_INHERIT
-        int protocol = PTHREAD_PRIO_NONE;
-        switch (attr->protocol)
-        {
-            case OSAL_MUTEX_PRIO_NONE:
-                protocol = PTHREAD_PRIO_NONE;
-                break;
-            case OSAL_MUTEX_PRIO_INHERIT:
-                protocol = PTHREAD_PRIO_INHERIT;
-                break;
-            case OSAL_MUTEX_PRIO_PROTECT:
-                protocol = PTHREAD_PRIO_PROTECT;
-                pthread_mutexattr_setprioceiling(&pthread_attr, attr->prio_ceiling);
-                break;
-        }
-        pthread_mutexattr_setprotocol(&pthread_attr, protocol);
-#endif
+        pthread_mutexattr_settype(&pthread_attr, PTHREAD_MUTEX_RECURSIVE);
     }
 
-    /* 初始化互斥锁 */
     int ret = pthread_mutex_init(&new_mutex->mutex, &pthread_attr);
     pthread_mutexattr_destroy(&pthread_attr);
 
@@ -142,27 +115,20 @@ int32_t OSAL_MutexTimedLock(osal_mutex_t *mutex, uint32_t timeout_ms)
         return OSAL_ERR_INVALID_POINTER;
 
     struct timespec ts;
-
-    /* 获取当前时间 */
     if (0 != clock_gettime(CLOCK_REALTIME, &ts))
         return OSAL_ERR_GENERIC;
 
-    /* 计算超时时间点 */
     ts.tv_sec += timeout_ms / 1000;
     ts.tv_nsec += (timeout_ms % 1000) * 1000000;
-
-    /* 处理纳秒溢出 */
     if (ts.tv_nsec >= 1000000000)
     {
         ts.tv_sec++;
         ts.tv_nsec -= 1000000000;
     }
 
-    /* 带超时的加锁 */
     int ret = pthread_mutex_timedlock(&mutex->mutex, &ts);
     if (0 == ret)
         return OSAL_SUCCESS;
-
     if (ETIMEDOUT == ret)
         return OSAL_ERR_TIMEOUT;
 

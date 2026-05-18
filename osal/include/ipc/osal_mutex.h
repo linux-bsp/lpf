@@ -25,34 +25,23 @@ typedef struct osal_mutex_s osal_mutex_t;
  */
 typedef enum {
     OSAL_MUTEX_NORMAL = 0,      /* 普通互斥锁 */
-    OSAL_MUTEX_RECURSIVE = 1,   /* 递归锁（可重入） */
-    OSAL_MUTEX_ERRORCHECK = 2   /* 错误检查锁 */
+    OSAL_MUTEX_RECURSIVE = 1    /* 递归锁（可重入） */
 } osal_mutex_type_t;
-
-/**
- * @brief 互斥锁优先级协议
- */
-typedef enum {
-    OSAL_MUTEX_PRIO_NONE = 0,     /* 无优先级协议 */
-    OSAL_MUTEX_PRIO_INHERIT = 1,  /* 优先级继承（防止优先级反转） */
-    OSAL_MUTEX_PRIO_PROTECT = 2   /* 优先级天花板 */
-} osal_mutex_protocol_t;
 
 /**
  * @brief 互斥锁属性
  */
 typedef struct {
-    osal_mutex_type_t type;           /* 互斥锁类型 */
-    osal_mutex_protocol_t protocol;   /* 优先级协议 */
-    int32_t prio_ceiling;             /* 优先级天花板值（仅PRIO_PROTECT时使用） */
+    osal_mutex_type_t type;     /* 互斥锁类型 */
 } osal_mutex_attr_t;
 
 /**
- * @brief 创建互斥锁（默认属性：NORMAL + PRIO_INHERIT）
+ * @brief 创建互斥锁（默认属性：普通互斥锁）
  *
  * @param[out] mutex 互斥锁句柄指针
  * @return OSAL_SUCCESS 成功
  * @return OSAL_ERR_INVALID_POINTER mutex 为 NULL
+ * @return OSAL_ERR_NO_MEMORY 内存不足
  * @return OSAL_ERR_GENERIC 系统调用失败
  */
 int32_t OSAL_MutexCreate(osal_mutex_t **mutex);
@@ -61,12 +50,11 @@ int32_t OSAL_MutexCreate(osal_mutex_t **mutex);
  * @brief 创建互斥锁（自定义属性）
  *
  * @param[out] mutex 互斥锁句柄指针
- * @param[in] attr 互斥锁属性
+ * @param[in] attr 互斥锁属性（仅支持NORMAL/RECURSIVE类型）
  * @return OSAL_SUCCESS 成功
  * @return OSAL_ERR_INVALID_POINTER mutex 为 NULL
+ * @return OSAL_ERR_NO_MEMORY 内存不足
  * @return OSAL_ERR_GENERIC 系统调用失败
- *
- * @note 使用优先级继承可以防止优先级反转问题
  */
 int32_t OSAL_MutexCreateEx(osal_mutex_t **mutex, const osal_mutex_attr_t *attr);
 
