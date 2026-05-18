@@ -131,4 +131,15 @@ int32_t OSAL_fcntl(int32_t fd, int32_t cmd, int32_t arg);
  */
 int32_t OSAL_ioctl(int32_t fd, uint32_t request, void *argp);
 
+/*===========================================================================
+ * 文件系统操作
+ *===========================================================================*/
+
+/**
+ * @brief 删除文件
+ * @param pathname 文件路径
+ * @return 0成功，-1失败
+ */
+int32_t OSAL_unlink(const char *pathname);
+
 #endif /* OSAL_FILE_H */

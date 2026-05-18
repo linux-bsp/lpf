@@ -118,6 +118,11 @@ int32_t OSAL_Snprintf(char *str, uint32_t size, const char *format, ...)
     return ret;
 }
 
+int32_t OSAL_Vsnprintf(char *str, uint32_t size, const char *format, va_list args)
+{
+    return vsnprintf(str, (size_t)size, format, args);
+}
+
 int32_t OSAL_Sscanf(const char *str, const char *format, ...)
 {
     va_list args;

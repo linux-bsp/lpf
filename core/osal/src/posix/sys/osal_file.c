@@ -195,3 +195,13 @@ int32_t OSAL_ioctl(int32_t fd, uint32_t request, void *argp)
     int32_t result = ioctl(fd, (unsigned long)request, argp);
     return result;
 }
+
+/*===========================================================================
+ * 文件系统操作
+ *===========================================================================*/
+
+int32_t OSAL_unlink(const char *pathname)
+{
+    int32_t result = unlink(pathname);
+    return result;
+}

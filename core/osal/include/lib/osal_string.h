@@ -16,6 +16,7 @@
 #define OSAL_STRING_H
 
 #include "osal_types.h"
+#include <stdarg.h>
 
 /*
  * 内存操作
@@ -44,6 +45,7 @@ uint32_t OSAL_Strcspn(const char *str, const char *reject);
  */
 int32_t OSAL_Sprintf(char *str, const char *format, ...);
 int32_t OSAL_Snprintf(char *str, uint32_t size, const char *format, ...);
+int32_t OSAL_Vsnprintf(char *str, uint32_t size, const char *format, va_list args);
 int32_t OSAL_Sscanf(const char *str, const char *format, ...);
 
 /*
