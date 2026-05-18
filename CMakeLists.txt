@@ -85,7 +85,7 @@ find_package(Threads REQUIRED)
 # ============================================================================
 # 模块化构建
 # ============================================================================
-# 依赖层次：OSAL → HAL → XConfig → PDL → Apps
+# 依赖层次：OSAL → HAL → PCL → PDL → ACL → Projects
 #
 # 每个模块提供两个库：
 # 1. <module>_public_api - 接口库（仅头文件），供上层使用
@@ -96,35 +96,32 @@ find_package(Threads REQUIRED)
 # - PRIVATE依赖下层的实现库（运行时链接）
 
 # 1. OSAL层（操作系统抽象层）
-add_subdirectory(osal)
+add_subdirectory(core/osal)
 
 # 为后续模块创建命名空间别名
 add_library(ems::osal_public_api ALIAS osal_public_api)
 add_library(ems::osal ALIAS osal)
 
-# 1.5 Test Library（测试库 - 仅在启用测试时构建）
-# 现在由统一的tests/CMakeLists.txt管理
-
 # 2. HAL层（硬件抽象层）
-add_subdirectory(hal)
+add_subdirectory(core/hal)
 add_library(ems::hal_public_api ALIAS hal_public_api)
 add_library(ems::hal ALIAS hal)
 
-# 3. XConfig层（硬件配置库）
-add_subdirectory(pcl)
+# 3. PCL层（外设配置层）
+add_subdirectory(core/pcl)
 add_library(ems::pcl_public_api ALIAS pcl_public_api)
 add_library(ems::pcl ALIAS pcl)
 
 # 4. PDL层（外设驱动层）
-add_subdirectory(pdl)
+add_subdirectory(core/pdl)
 add_library(ems::pdl_public_api ALIAS pdl_public_api)
 add_library(ems::pdl ALIAS pdl)
 
-# 4.5. ACL层（业务配置层）
-add_subdirectory(acl)
+# 5. ACL层（应用配置层）
+add_subdirectory(core/acl)
 add_library(ems::acl ALIAS acl)
 
-# 5. 项目层（Projects）
+# 6. 项目层（Projects）
 set(PROJECT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/projects/${PROJECT_NAME})
 if(NOT EXISTS ${PROJECT_DIR}/CMakeLists.txt)
     message(FATAL_ERROR "Project '${PROJECT_NAME}' not found at ${PROJECT_DIR}")
