@@ -179,8 +179,10 @@ const pcl_mcu_cfg_t* PCL_HW_GetMCU(const pcl_platform_config_t *platform,
         return NULL;
     }
 
-    if (platform->mcu_arr[id] != NULL) {
-        return platform->mcu_arr[id];
+    for (uint32_t i = 0; platform->mcu_arr[i] != NULL; i++) {
+        if (i == id) {
+            return platform->mcu_arr[i];
+        }
     }
 
     return NULL;
@@ -209,8 +211,10 @@ const pcl_bmc_cfg_t* PCL_HW_GetBMC(const pcl_platform_config_t *platform,
         return NULL;
     }
 
-    if (platform->bmc_arr[id] != NULL) {
-        return platform->bmc_arr[id];
+    for (uint32_t i = 0; platform->bmc_arr[i] != NULL; i++) {
+        if (i == id) {
+            return platform->bmc_arr[i];
+        }
     }
 
     return NULL;
@@ -239,8 +243,10 @@ const pcl_fpga_cfg_t* PCL_HW_GetFPGA(const pcl_platform_config_t *platform,
         return NULL;
     }
 
-    if (platform->fpga_arr[id] != NULL) {
-        return platform->fpga_arr[id];
+    for (uint32_t i = 0; platform->fpga_arr[i] != NULL; i++) {
+        if (i == id) {
+            return platform->fpga_arr[i];
+        }
     }
 
     return NULL;
@@ -269,8 +275,10 @@ const pcl_switch_cfg_t* PCL_HW_GetSwitch(const pcl_platform_config_t *platform,
         return NULL;
     }
 
-    if (platform->switch_arr[id] != NULL) {
-        return platform->switch_arr[id];
+    for (uint32_t i = 0; platform->switch_arr[i] != NULL; i++) {
+        if (i == id) {
+            return platform->switch_arr[i];
+        }
     }
 
     return NULL;

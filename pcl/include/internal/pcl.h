@@ -23,7 +23,7 @@
 #include "pcl_common.h"
 #include "pcl_board.h"
 
-/* 硬件外设头文件（只包含纯硬件外设） */
+/* 硬件外设头文件 */
 #include "../peripheral/pcl_hardware_interface.h"
 #include "../peripheral/pcl_mcu.h"
 #include "../peripheral/pcl_bmc.h"
