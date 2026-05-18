@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**EMS** (Embedded Middleware System) is a general-purpose embedded middleware framework providing hardware abstraction and peripheral management for embedded controllers. It uses a strict 5-layer architecture designed for cross-platform portability (Linux/RTOS).
+**EMS** (Embedded Middleware System) is a general-purpose embedded middleware framework providing hardware abstraction and peripheral management for embedded controllers. It uses a 3-layer call chain (Apps→PDL→HAL) running on OSAL runtime environment, with 2 configuration libraries (ACL/PCL), designed for cross-platform portability (Linux/RTOS).
 
 **Typical Application**:
 ```
@@ -56,7 +56,7 @@ cmake --build build -j$(nproc)
 ./build/bin/ems-test -i    # Interactive menu (recommended)
 ./build/bin/ems-test -a    # Run all tests
 ./build/bin/ems-test -L OSAL  # Run OSAL layer tests
-./build/bin/ems-test -m test_osal_task  # Run specific module
+./build/bin/ems-test -m test_osal_task  # Run specific module (without .c extension)
 
 # Busybox-style shortcuts (via symlinks)
 ./build/bin/osal-test -a    # Run only OSAL tests
@@ -76,44 +76,98 @@ gdb ./build/bin/sample_app
 gdb --args ./build/bin/ems-test -m test_osal_task
 ```
 
-## Architecture: 5-Layer Design
+## Architecture Design
 
-**Critical Dependency Chain**:
 ```
-Apps → PDL → HAL → OSAL → Linux System Calls
-         ↓
-        PCL (configuration data)
+┌─────────────────────────────────────────────────────────────────┐
+│                      OSAL Runtime Environment                    │
+│  • Shields platform differences (Linux, 32/64-bit, syscalls)    │
+│  • Provides unified interfaces (thread/IPC/memory/time/file/net) │
+│  • Platform implementation (POSIX)                               │
+│  • ALL layers use OSAL interfaces (no direct syscalls/stdlib)   │
+└─────────────────────────────────────────────────────────────────┘
+         ↑                    ↑                    ↑
+         │ Use OSAL          │ Use OSAL           │ Use OSAL
+         │                    │                    │
+  ┌──────┴──────┐      ┌─────┴──────┐      ┌─────┴──────┐
+  │    Apps     │─────>│    PDL     │─────>│    HAL     │
+  │             │      │            │      │            │
+  │  Business   │      │ Peripheral │      │  Hardware  │
+  │   Logic     │      │   Driver   │      │   Driver   │
+  └──────┬──────┘      └─────┬──────┘      └────────────┘
+         │                    │
+         │ Read Config        │ Read Config
+         ↓                    ↓
+  ┌─────────────┐      ┌─────────────┐
+  │     ACL     │      │     PCL     │
+  │  (Config)   │      │  (Config)   │
+  │  Business   │      │  Hardware   │
+  │   Mapping   │      │   Config    │
+  └─────────────┘      └─────────────┘
 ```
 
-### Layer Responsibilities
+**Call Chain** (3 layers):
+```
+Apps → PDL → HAL
+```
 
-**OSAL** (Operating System Abstraction Layer)
+**OSAL Runtime Environment**:
+```
+All layers (Apps/PDL/HAL) use OSAL interfaces
+OSAL → Linux System Calls
+```
+
+**Configuration Libraries** (not in call chain):
+```
+ACL - Read by Apps layer (business function to device mapping)
+PCL - Read by PDL layer (hardware configuration)
+```
+
+**CRITICAL RULE**: All layers (Apps/PDL/HAL) MUST use OSAL wrappers. Only OSAL can call system APIs and standard library.
+
+### Component Responsibilities
+
+**OSAL** (Operating System Abstraction Layer) - **Runtime Environment for All Layers**
 - **Only layer allowed to include system headers** (`<unistd.h>`, `<pthread.h>`, `<stdlib.h>`)
-- Wraps ALL system calls and standard library functions
-- Provides: task management, queues, mutexes, logging, file I/O, networking, time services
+- **Only layer allowed to call system APIs and standard library functions**
+- Wraps ALL system calls and standard library for upper layers
+- Provides: task management, queues, mutexes, logging, file I/O, networking, time services, memory operations (`OSAL_Memcpy`, `OSAL_Strlen`), string operations
 - Platform-specific code in `osal/src/posix/` (future: `freertos/`, `vxworks/`)
+- **All other layers (Apps/PDL/HAL) MUST use OSAL wrappers**
 
 **HAL** (Hardware Abstraction Layer)
 - **Only layer allowed to include hardware-specific headers** (`<linux/can.h>`, `<net/if.h>`)
-- **Must use OSAL wrappers for all system calls** (never direct `socket()`, `open()`, etc.)
-- Provides: CAN, UART, I2C, SPI drivers
+- **MUST use OSAL wrappers for ALL operations** (never direct `socket()`, `open()`, `memcpy()`, `strlen()`, etc.)
+- Provides: CAN, UART, I2C, SPI, GPIO, Watchdog drivers
 - Platform-specific code in `hal/src/linux/` (future: `ti_am62/`, `nxp_imx8/`)
-
-**PCL** (Peripheral Configuration Library)
-- Device-tree-like hardware configuration (pure data structures)
-- **Must be completely platform-independent**
-- Configuration organized by peripheral: `platform/<vendor>/<chip>/<product>/`
-- Only PDL layer accesses PCL
 
 **PDL** (Peripheral Driver Layer)
 - Unified management of satellite/BMC/MCU peripherals
 - **Must be completely platform-independent**
+- **MUST use OSAL wrappers for ALL operations**
+- Reads hardware configuration from PCL
 - Provides application-facing peripheral interfaces
 - Only Apps and Tests layers can access PDL APIs
 
+**ACL** (Application Configuration Layer) - **Configuration Library**
+- **Not in call chain, read by Apps layer**
+- Maps business functions (e.g., "server power on") to device types and indexes
+- **O(1) lookup performance** using enum-indexed arrays
+- Configuration files in `acl/config/<product>/`
+- Pure data structures, no business logic
+
+**PCL** (Peripheral Configuration Library) - **Configuration Library**
+- **Not in call chain, read by PDL layer**
+- Device-tree-like hardware configuration (pure data structures)
+- **Must be completely platform-independent**
+- Configuration organized by peripheral: `platform/<vendor>/<chip>/<product>/`
+- Pure data structures, no business logic
+
 **Apps** (Application Layer)
 - **Must be completely platform-independent**
-- Currently contains only sample_app (reference implementation)
+- **MUST use OSAL wrappers for ALL operations**
+- Reads business configuration from ACL
+- Currently contains sample_app (reference implementation) and watchdog_app (watchdog demonstration)
 
 ## Critical Rules
 
@@ -250,19 +304,39 @@ static void task_entry(void *arg)
 
 **Critical**: Never use `while(1)` - tasks must check `OSAL_TaskShouldShutdown()` for graceful shutdown.
 
+## Buildroot Integration
+
+EMS supports Buildroot integration for embedded Linux systems:
+
+```bash
+# 1. Copy configuration files to Buildroot
+cp -r docs/buildroot/* <buildroot>/package/ems/
+
+# 2. Enable EMS in menuconfig
+make menuconfig
+# Navigate to: Target packages -> Libraries -> ems
+
+# 3. Build
+make ems
+```
+
+Detailed integration guide: [docs/buildroot/README.md](docs/buildroot/README.md)
+
 ## Development Workflows
 
 ### Adding New OSAL Interface
-1. Add interface declaration in `osal/include/`
-2. Implement POSIX version in `osal/src/posix/`
-3. Add unit tests in `tests/osal/`
-4. Update `osal/README.md`
+1. Add interface declaration in `osal/include/` (e.g., `osal_timer.h`)
+2. Implement POSIX version in `osal/src/posix/` (e.g., `osal_timer.c`)
+3. Add unit tests in `tests/unit/osal/` (e.g., `test_osal_timer.c`)
+4. Update `osal/CMakeLists.txt` to include new source file
+5. Update `osal/README.md` if adding major functionality
 
 ### Adding New HAL Driver
-1. Add driver interface in `hal/include/`
-2. Add driver config in `hal/include/config/`
-3. Implement Linux version in `hal/src/linux/` (using OSAL wrappers)
-4. Add unit tests in `tests/hal/`
+1. Add driver interface in `hal/include/` (e.g., `hal_gpio.h`)
+2. Add driver config in `hal/include/config/` (e.g., `hal_gpio_config.h`)
+3. Implement Linux version in `hal/src/linux/` (using OSAL wrappers, e.g., `hal_gpio.c`)
+4. Add unit tests in `tests/unit/hal/` (e.g., `test_hal_gpio.c`)
+5. Update `hal/CMakeLists.txt` to include new driver source
 
 ### Adding New PDL Service
 1. Add service interface in `pdl/include/` (e.g., `pdl_satellite.h`)
@@ -279,10 +353,11 @@ static void task_entry(void *arg)
 
 ### Adding New Test
 1. Create test file in `tests/unit/<layer>/` (e.g., `test_osal_timer.c`)
-2. Use `TEST_MODULE_BEGIN/END` macros
-3. Add source file to `tests/CMakeLists.txt`
+2. Use `TEST_MODULE_BEGIN/END` and `TEST_CASE` macros
+3. Add source file to `tests/CMakeLists.txt` in the appropriate section
 4. Build and run: `cmake --build build && ./build/bin/ems-test -m test_osal_timer`
 5. For fast iteration: `cd build && make osal_tests -j$(nproc) && cd ..`
+6. Test module name should match filename without `.c` extension
 
 **Test template**:
 ```c
@@ -341,10 +416,15 @@ TEST_MODULE_END()
 # Install toolchains on Ubuntu/Debian:
 sudo apt-get install gcc-arm-linux-gnueabihf gcc-aarch64-linux-gnu gcc-riscv64-linux-gnu
 
-# Cross-compile
-cmake --preset arm32 && cmake --build build/arm32
-cmake --preset arm64 && cmake --build build/arm64
-cmake --preset riscv64 && cmake --build build/riscv64
+# Cross-compile using toolchain files
+cmake -B build -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/arm32-linux-gnueabihf.cmake
+cmake --build build -j$(nproc)
+
+cmake -B build -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/aarch64-linux-gnu.cmake
+cmake --build build -j$(nproc)
+
+cmake -B build -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/riscv64-linux-gnu.cmake
+cmake --build build -j$(nproc)
 ```
 
 **Architecture-Specific Compiler Flags**:
@@ -353,8 +433,10 @@ cmake --preset riscv64 && cmake --build build/riscv64
 - RISC-V 64: `-march=rv64imafdc -mabi=lp64d`
 
 ### Hardware-Related Test Failures
-- CAN tests require `can0` device
-- Serial tests require `/dev/ttyS0`
+- CAN tests require `can0` or `vcan0` device
+- Serial tests require `/dev/ttyS0` or `/dev/ttyUSB0`
+- GPIO tests require `/sys/class/gpio` access
+- Watchdog tests require `/dev/watchdog` device
 - These failures are expected without hardware
 - Use `-i` interactive mode to skip hardware-dependent tests
 
@@ -389,7 +471,7 @@ sudo ./build/release/bin/ems-test -m test_hal_serial
 
 ```
 build/
-├── bin/              # Executables (sample_app, ems-test)
+├── bin/              # Executables (sample_app, watchdog_app, ems-test, osal-test, hal-test, etc.)
 └── lib/              # Static libraries (libosal.a, libhal.a, libpdl.a, libpcl.a)
 ```
 
@@ -448,26 +530,28 @@ ps -eLf | grep ems-test
 
 ## Project Stats
 
-- **Code Size**: ~22,000 lines (15,500 production + 4,500 test)
-- **Files**: 133 C/H files
-- **Test Coverage**: 142+ test cases across all layers
-  - OSAL: 50+ tests (10 modules)
-  - HAL: 72 tests (CAN, UART, I2C, SPI)
-  - PCL: 5+ tests
-  - PDL: 15+ tests (Satellite, BMC, MCU)
-- **Layers**: 5 (OSAL/HAL/PCL/PDL/Apps)
+- **Code Size**: ~23,000 lines (13,000 production + 10,000 test)
+- **Files**: 151 C/H files
+- **Test Coverage**: 406 test cases across all layers
+  - OSAL: 200 tests (19 modules)
+  - HAL: 89 tests (6 modules: CAN, UART, I2C, SPI, GPIO, Watchdog)
+  - PCL: 22 tests
+  - PDL: 95 tests (Satellite, BMC, MCU, Watchdog)
+  - ACL: Configuration validation and statistics
+- **Architecture**: 3-layer call chain (Apps→PDL→HAL) + OSAL runtime + 2 config libraries (ACL/PCL)
 - **Platforms**: TI AM6254, vendor_demo (extensible)
-- **Build System**: CMake 3.19+, supports native and cross-compilation
+- **Build System**: CMake 3.16+, supports native and cross-compilation
 
 ## Important Files
 
 - [CMakeLists.txt](CMakeLists.txt) - Main build config
-- [CMakePresets.json](CMakePresets.json) - CMake presets for different targets
 - [build.sh](build.sh) - Build script wrapper
+- [cmake/toolchains/](cmake/toolchains/) - Cross-compilation toolchain files
 - [osal/include/osal.h](osal/include/osal.h) - OSAL main header
 - [osal/include/osal_types.h](osal/include/osal_types.h) - Type definitions
 - [tests/core/main.c](tests/core/main.c) - Test runner entry
 - [apps/sample_app/src/main.c](apps/sample_app/src/main.c) - Sample application
+- [apps/watchdog_app/src/main.c](apps/watchdog_app/src/main.c) - Watchdog application
 
 ## Performance Considerations
 

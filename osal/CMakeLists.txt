@@ -30,6 +30,7 @@ set(OSAL_SOURCES
     ${OSAL_SRC_DIR}/ipc/osal_atomic.c
     ${OSAL_SRC_DIR}/ipc/osal_semaphore.c
     ${OSAL_SRC_DIR}/ipc/osal_cond.c
+    ${OSAL_SRC_DIR}/ipc/osal_shm.c
 
     # SYS - 系统调用封装
     ${OSAL_SRC_DIR}/sys/osal_clock.c
@@ -40,6 +41,7 @@ set(OSAL_SOURCES
     ${OSAL_SRC_DIR}/sys/osal_time.c
     ${OSAL_SRC_DIR}/sys/osal_process.c
     ${OSAL_SRC_DIR}/sys/osal_thread.c
+    ${OSAL_SRC_DIR}/sys/osal_sched.c
 
     # NET - 网络相关
     ${OSAL_SRC_DIR}/net/osal_socket.c

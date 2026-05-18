@@ -30,6 +30,10 @@ set(OSAL_TEST_SOURCES
     unit/osal/test_osal_cond.c
     unit/osal/test_osal_signal.c
     unit/osal/test_osal_stress.c
+    unit/osal/test_osal_sched.c
+    unit/osal/test_osal_shm.c
+    unit/osal/test_osal_thread.c
+    unit/osal/test_osal_process.c
 )
 
 # HAL Unit Tests
@@ -39,6 +43,7 @@ set(HAL_TEST_SOURCES
     unit/hal/test_hal_i2c.c
     unit/hal/test_hal_spi.c
     unit/hal/test_hal_watchdog.c
+    unit/hal/test_hal_gpio.c
 )
 
 # PCL Unit Tests
@@ -55,14 +60,35 @@ set(PDL_TEST_SOURCES
     unit/pdl/test_pdl_watchdog.c
 )
 
-# System Tests (currently empty)
-set(SYSTEM_TEST_SOURCES
-    # Add system test files here when available
+# Performance Tests
+set(PERFORMANCE_TEST_SOURCES
+    performance/test_perf_core.c
+    performance/osal/test_perf_osal.c
+    performance/hal/test_perf_hal.c
+    performance/pcl/test_perf_pcl.c
+    performance/acl/test_perf_acl.c
+    performance/pdl/test_perf_pdl.c
 )
 
-# Stress Tests (currently empty)
+# Stress Tests
 set(STRESS_TEST_SOURCES
-    # Add stress test files here when available
+    stress/test_stress_core.c
+    stress/osal/test_stress_osal.c
+    stress/hal/test_stress_hal.c
+    stress/pcl/test_stress_pcl.c
+    stress/acl/test_stress_acl.c
+    stress/pdl/test_stress_pdl.c
+)
+
+# System Tests
+set(SYSTEM_TEST_SOURCES
+    system/test_system_core.c
+    system/integration/test_system_integration.c
+    system/osal/test_system_osal.c
+    system/hal/test_system_hal.c
+    system/pcl/test_system_pcl.c
+    system/acl/test_system_acl.c
+    system/pdl/test_system_pdl.c
 )
 
 # Combine all test sources
@@ -71,8 +97,9 @@ set(ALL_TEST_SOURCES
     ${HAL_TEST_SOURCES}
     ${PCL_TEST_SOURCES}
     ${PDL_TEST_SOURCES}
-    ${SYSTEM_TEST_SOURCES}
+    ${PERFORMANCE_TEST_SOURCES}
     ${STRESS_TEST_SOURCES}
+    ${SYSTEM_TEST_SOURCES}
 )
 
 # ============================================================================
@@ -97,6 +124,7 @@ target_include_directories(ems-test PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../pcl/include/api
     ${CMAKE_CURRENT_SOURCE_DIR}/../pcl/include/internal
     ${CMAKE_CURRENT_SOURCE_DIR}/../pcl/include/peripheral
+    ${CMAKE_CURRENT_SOURCE_DIR}/../acl/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../pdl/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../pdl/src/pdl_bmc
 )
@@ -106,8 +134,10 @@ target_link_libraries(ems-test
     ems::osal
     ems::hal
     ems::pcl
+    ems::acl
     ems::pdl
     Threads::Threads
+    m  # 数学库（性能测试需要sqrt等函数）
 )
 
 # macOS 不需要 librt

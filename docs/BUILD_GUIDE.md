@@ -196,10 +196,19 @@ docs/buildroot/README.md
 ### 模块依赖层次
 
 ```
-Apps → PDL → HAL → OSAL
-         ↓
-        PCL
+OSAL (运行环境，所有层使用)
+  ↑       ↑       ↑
+  │       │       │
+Apps → PDL → HAL
+  ↓       ↓
+ ACL     PCL
+(配置)  (配置)
 ```
+
+**说明**：
+- 调用链：Apps → PDL → HAL
+- 运行环境：所有层使用OSAL接口
+- 配置库：ACL被Apps读取，PCL被PDL读取
 
 ### 接口库设计
 

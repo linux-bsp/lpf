@@ -77,42 +77,4 @@ int32_t HAL_CAN_Recv(hal_can_handle_t handle, can_frame_t *frame, int32_t timeou
  */
 int32_t HAL_CAN_SetFilter(hal_can_handle_t handle, uint32_t filter_id, uint32_t filter_mask);
 
-/**
- * @brief 获取CAN统计信息
- *
- * @param[in] handle CAN句柄
- * @param[out] tx_count 发送计数
- * @param[out] rx_count 接收计数
- * @param[out] err_count 错误计数
- *
- * @return OSAL_SUCCESS 成功
- */
-int32_t HAL_CAN_GetStats(hal_can_handle_t handle,
-                       uint32_t *tx_count,
-                       uint32_t *rx_count,
-                       uint32_t *err_count);
-
-/**
- * @brief 设置CAN错误回调函数
- *
- * @param[in] handle CAN句柄
- * @param[in] callback 错误回调函数
- *
- * @return OSAL_SUCCESS 成功
- * @return OSAL_ERR_INVALID_POINTER 参数无效
- */
-int32_t HAL_CAN_SetErrorCallback(hal_can_handle_t handle,
-                                  void (*callback)(hal_can_handle_t handle, int32_t error_code));
-
-/**
- * @brief 设置CAN错误恢复阈值
- *
- * @param[in] handle CAN句柄
- * @param[in] threshold 连续错误次数阈值
- *
- * @return OSAL_SUCCESS 成功
- * @return OSAL_ERR_INVALID_POINTER 参数无效
- */
-int32_t HAL_CAN_SetErrorThreshold(hal_can_handle_t handle, uint32_t threshold);
-
 #endif /* HAL_CAN_H */
