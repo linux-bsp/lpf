@@ -96,106 +96,218 @@ OSAL（Operating System Abstraction Layer，操作系统抽象层）是EMS架构
 - 32位系统：指针4字节，`long`类型4字节
 - 64位系统：指针8字节，`long`类型8字节（LP64模型）
 
-###  3.2 OSAL 扩展需求
+### 1.2 OSAL 多进程支持（新增）
 
-#### 1.2.1 新增进程管理接口
+为支持多进程架构（如PMC产品），OSAL层需要提供进程管理、共享内存和进程间同步接口。
 
-``` C
+#### 1.2.1 进程管理接口
+
+```c
 /************************************************
-* osal/include/sys/osal_process_mgmt.h
-* 进程管理接口（新增）
-************************************************/
+ * osal/include/sys/osal_process.h
+ * 进程管理接口（支持多进程架构）
+ ************************************************/
 
 /**
-* @brief 创建子进程
-*/
-int32_t OSAL_ProcessCreate(const char *name,
-						 const char *path,
-						 char *const argv[],
-						 osal_pid_t *pid);
+ * @brief 创建子进程
+ *
+ * @param[out] proc_id  进程ID
+ * @param[in]  path     可执行文件路径
+ * @param[in]  argv     参数列表（NULL结尾）
+ * @param[in]  envp     环境变量（NULL结尾，NULL表示继承父进程）
+ *
+ * @return OSAL_SUCCESS 成功
+ * @return OSAL_ERR_INVALID_PARAM 参数无效
+ * @return OSAL_ERR_NO_FREE_IDS 无法创建进程
+ */
+int32 OSAL_ProcessCreate(osal_id_t *proc_id, const char *path,
+                         char *const argv[], char *const envp[]);
 
 /**
-* @brief 等待子进程退出
-*/
-int32_t OSAL_ProcessWait(osal_pid_t pid, int32_t *status);
+ * @brief 等待子进程退出
+ *
+ * @param[in]  proc_id     进程ID
+ * @param[out] status      退出状态码（可选，NULL表示不关心）
+ * @param[in]  timeout_ms  超时时间（0表示不等待，-1表示永久等待）
+ *
+ * @return OSAL_SUCCESS 成功
+ * @return OSAL_ERR_TIMEOUT 超时
+ * @return OSAL_ERR_INVALID_PARAM 参数无效
+ */
+int32 OSAL_ProcessWait(osal_id_t proc_id, int32 *status, int32 timeout_ms);
 
 /**
-* @brief 杀死进程
-*/
-int32_t OSAL_ProcessKill(osal_pid_t pid, int32_t signal);
+ * @brief 发送信号给进程
+ *
+ * @param[in] proc_id  进程ID
+ * @param[in] signal   信号编号（SIGTERM/SIGKILL等）
+ *
+ * @return OSAL_SUCCESS 成功
+ * @return OSAL_ERR_INVALID_PARAM 参数无效
+ */
+int32 OSAL_ProcessKill(osal_id_t proc_id, int32 signal);
 
 /**
-* @brief 检查进程是否存在
-*/
-bool OSAL_ProcessExists(osal_pid_t pid);
+ * @brief 检查进程是否存在
+ *
+ * @param[in] proc_id  进程ID
+ *
+ * @return true 进程存在
+ * @return false 进程不存在
+ */
+bool OSAL_ProcessExists(osal_id_t proc_id);
+
+/**
+ * @brief 获取当前进程ID
+ *
+ * @return 进程ID
+ */
+osal_id_t OSAL_ProcessGetId(void);
+
+/**
+ * @brief 获取父进程ID
+ *
+ * @return 父进程ID
+ */
+osal_id_t OSAL_ProcessGetParentId(void);
 ```
 
-#### 1.2.2 新增共享内存接口
+#### 1.2.2 共享内存接口
 
-``` C
+```c
 /************************************************
-* osal/include/ipc/osal_shm.h
-* 共享内存接口（新增）
-************************************************/
-
-typedef void* osal_shm_t;
+ * osal/include/ipc/osal_shm.h
+ * 共享内存接口（支持进程间通信）
+ ************************************************/
 
 /**
-* @brief 创建共享内存
-*/
-int32_t OSAL_ShmCreate(const char *name,
-					 osal_size_t size,
-					 osal_shm_t *shm);
+ * @brief 创建共享内存
+ *
+ * @param[out] shm_id  共享内存ID
+ * @param[in]  name    共享内存名称（全局唯一）
+ * @param[in]  size    大小（字节）
+ *
+ * @return OSAL_SUCCESS 成功
+ * @return OSAL_ERR_INVALID_PARAM 参数无效
+ * @return OSAL_ERR_NO_FREE_IDS 无法创建共享内存
+ */
+int32 OSAL_ShmCreate(osal_id_t *shm_id, const char *name, uint32 size);
 
 /**
-* @brief 打开共享内存
-*/
-int32_t OSAL_ShmOpen(const char *name,
-				   osal_size_t size,
-				   osal_shm_t *shm);
+ * @brief 打开已存在的共享内存
+ *
+ * @param[out] shm_id  共享内存ID
+ * @param[in]  name    共享内存名称
+ *
+ * @return OSAL_SUCCESS 成功
+ * @return OSAL_ERR_INVALID_PARAM 参数无效
+ * @return OSAL_ERR_INVALID_ID 共享内存不存在
+ */
+int32 OSAL_ShmOpen(osal_id_t *shm_id, const char *name);
 
 /**
-* @brief 映射共享内存
-*/
-void* OSAL_ShmMap(osal_shm_t shm, osal_size_t size);
+ * @brief 映射共享内存到进程地址空间
+ *
+ * @param[in]  shm_id  共享内存ID
+ * @param[out] addr    映射后的地址
+ * @param[in]  size    映射大小
+ *
+ * @return OSAL_SUCCESS 成功
+ * @return OSAL_ERR_INVALID_PARAM 参数无效
+ */
+int32 OSAL_ShmMap(osal_id_t shm_id, void **addr, uint32 size);
 
 /**
-* @brief 取消映射
-*/
-int32_t OSAL_ShmUnmap(void *addr, osal_size_t size);
+ * @brief 取消映射共享内存
+ *
+ * @param[in] addr  映射地址
+ * @param[in] size  映射大小
+ *
+ * @return OSAL_SUCCESS 成功
+ * @return OSAL_ERR_INVALID_PARAM 参数无效
+ */
+int32 OSAL_ShmUnmap(void *addr, uint32 size);
 
 /**
-* @brief 关闭共享内存
-*/
-int32_t OSAL_ShmClose(osal_shm_t shm);
+ * @brief 关闭共享内存
+ *
+ * @param[in] shm_id  共享内存ID
+ *
+ * @return OSAL_SUCCESS 成功
+ */
+int32 OSAL_ShmClose(osal_id_t shm_id);
 
 /**
-* @brief 删除共享内存
-*/
-int32_t OSAL_ShmUnlink(const char *name);
+ * @brief 删除共享内存
+ *
+ * @param[in] name  共享内存名称
+ *
+ * @return OSAL_SUCCESS 成功
+ * @return OSAL_ERR_INVALID_PARAM 参数无效
+ */
+int32 OSAL_ShmUnlink(const char *name);
 ```
 
-#### 1.2.3 新增实时调度接口
+#### 1.2.3 进程间互斥锁接口
 
-``` C
+```c
 /************************************************
-* osal/include/sys/osal_sched.h
-* 实时调度接口（新增）
-************************************************/
-
-typedef enum {
-  OSAL_SCHED_OTHER = 0,   // 普通调度
-  OSAL_SCHED_FIFO = 1,    // 实时FIFO调度
-  OSAL_SCHED_RR = 2,      // 实时轮转调度
-  OSAL_SCHED_BATCH = 3    // 批处理调度
-} osal_sched_policy_t;
+ * osal/include/ipc/osal_mutex.h（扩展）
+ * 进程间互斥锁接口
+ ************************************************/
 
 /**
-* @brief 设置调度策略
-*/
-int32_t OSAL_SchedSetScheduler(osal_pid_t pid,
-							 osal_sched_policy_t policy,
-							 int32_t priority);
+ * @brief 创建互斥锁
+ *
+ * @param[out] mutex_id  互斥锁ID
+ * @param[in]  name      互斥锁名称
+ * @param[in]  shared    是否进程间共享
+ *
+ * @return OSAL_SUCCESS 成功
+ * @return OSAL_ERR_INVALID_PARAM 参数无效
+ * @return OSAL_ERR_NO_FREE_IDS 无法创建互斥锁
+ *
+ * @note 如果shared=true，创建进程间互斥锁（需要放在共享内存中）
+ *       如果shared=false，创建线程间互斥锁（进程内使用）
+ */
+int32 OSAL_MutexCreate(osal_id_t *mutex_id, const char *name, bool shared);
+
+/**
+ * @brief 带超时的加锁
+ *
+ * @param[in] mutex_id    互斥锁ID
+ * @param[in] timeout_ms  超时时间（毫秒，0表示立即返回，-1表示永久等待）
+ *
+ * @return OSAL_SUCCESS 成功
+ * @return OSAL_ERR_TIMEOUT 超时
+ * @return OSAL_ERR_INVALID_PARAM 参数无效
+ *
+ * @note 用于避免死锁，建议所有进程间互斥锁都使用带超时的加锁
+ */
+int32 OSAL_MutexLockTimeout(osal_id_t mutex_id, uint32 timeout_ms);
+
+/**
+ * @brief 初始化共享内存中的互斥锁
+ *
+ * @param[in] mutex_ptr  互斥锁指针（指向共享内存）
+ * @param[in] shared     是否进程间共享
+ *
+ * @return OSAL_SUCCESS 成功
+ * @return OSAL_ERR_INVALID_PARAM 参数无效
+ *
+ * @note 用于在共享内存中初始化互斥锁，供多进程使用
+ */
+int32 OSAL_MutexInitShared(void *mutex_ptr, bool shared);
+
+/**
+ * @brief 销毁共享内存中的互斥锁
+ *
+ * @param[in] mutex_ptr  互斥锁指针（指向共享内存）
+ *
+ * @return OSAL_SUCCESS 成功
+ */
+int32 OSAL_MutexDestroyShared(void *mutex_ptr);
+```
 
 /**
 * @brief 获取调度策略

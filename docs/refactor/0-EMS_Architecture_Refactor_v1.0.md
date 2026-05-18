@@ -1,8 +1,12 @@
-# PMC架构设计方案
+# PMC产品架构设计方案（基于EMS框架）
 
 ## 摘要
 
-​		针对PMC（Payload Management Controller）的航天级可靠性和实时需求，采用**纯A53四核架构**：充分利用Linux生态和多核能力，通过实时调度和CPU隔离实现确定性响应。该方案通过统一缓存模型和进程隔离，在满足<2ms实时应答的同时，提供完整的故障隔离和可靠性保证。
+本文档描述基于**EMS（Embedded Middleware System）通用框架**开发的**PMC（Payload Management Controller）产品**架构设计。PMC是一个航天级载荷管理控制器，采用**纯A53四核架构**：充分利用Linux生态和多核能力，通过实时调度和CPU隔离实现确定性响应。该方案通过统一缓存模型和进程隔离，在满足<2ms实时应答的同时，提供完整的故障隔离和可靠性保证。
+
+**架构关系**：
+- **EMS框架**：提供通用的OSAL/HAL/PCL/PDL层，不包含PMC特定业务
+- **PMC产品**：基于EMS框架，在APP层实现遥控遥测业务，在ACL层定义业务配置
 
 **核心特点**：
 
@@ -173,17 +177,17 @@
 5. ✅ **无跨层依赖**：严禁跨层直接访问（如APP直接调用HAL）
 6. ✅ **无common**：所有代码都有明确归属，不存在"公共组件"
 
-**数据结构归属原则**：
-- **通用IPC机制** → OSAL层（日志环形缓冲区、心跳表）
-- **业务数据结构** → ACL层（遥测缓存、状态快照）
-- **应用级设计** → APP层（共享内存布局）
+**数据结构归属原则（重要修正）**：
+- **通用IPC机制** → OSAL层（进程管理、共享内存接口、进程间互斥锁）
+- **业务配置数据** → ACL层（静态配置表、只读查询接口）
+- **业务运行时数据** → APP层（遥测缓存、状态快照、共享内存布局）
 
 **示例**：
 ```c
 // ✅ 正确：APP层读取ACL配置，然后直接调用PDL
 #include "acl_telemetry_config.h"
 #include "pdl_bmc.h"
-acl_tm_config_t *cfg = ACL_GetTelemetryConfig(TM_CPU_TEMP);
+const acl_tm_config_t *cfg = ACL_GetTelemetryConfig(TM_CPU_TEMP);
 if (cfg->device_type == PDL_DEVICE_TYPE_BMC) {
     PDL_BMC_ReadSensors(cfg->device_index, &data);
 }
@@ -193,10 +197,13 @@ if (cfg->device_type == PDL_DEVICE_TYPE_BMC) {
 HAL_CAN_Send(...);
 
 // ✅ 正确：所有模块都调用OSAL接口
-#include "osal_thread.h"
-#include "osal_mutex.h"
-osal_thread_create(&thread, thread_func, NULL);
-osal_mutex_lock(&mutex);
+#include "osal.h"
+OSAL_TaskCreate(&task_id, "task", task_func, NULL);
+OSAL_MutexLock(&mutex);
+
+// ❌ 错误：直接调用系统调用或标准库
+pthread_create(...);  // 禁止！应该调用OSAL_TaskCreate()
+malloc(...);          // 禁止！应该调用OSAL_Malloc()
 
 // ❌ 错误：直接调用系统调用或标准库
 pthread_create(...);  // 禁止！应该调用osal_thread_create()
@@ -207,52 +214,60 @@ malloc(...);          // 禁止！应该调用osal_malloc()
 
 | 层 | 职责 | 禁止事项 |
 |---|------|---------|
-| **APP** | 业务流程、进程管理、共享内存布局 | 不能直接调用HAL、不能直接访问系统调用 |
-| **ACL** | 业务配置、设备映射、业务数据结构 | 不能包含业务逻辑、不参与调用链 |
-| **PDL** | 独立外设服务、协议实现、通道管理 | 不能包含硬件寄存器操作、不设计统一外设接口 |
-| **PCL** | 硬件配置数据 | 不能包含业务逻辑、函数实现、不参与调用链 |
+| **APP** | 业务流程、进程/线程管理、运行时数据结构、共享内存管理 | 不能直接调用HAL、不能直接访问系统调用 |
+| **ACL** | 业务配置数据（静态表）、只读查询接口 | 不能包含业务逻辑、不能包含运行时数据、不参与调用链 |
+| **PDL** | 通用外设服务、协议实现、通道管理 | 不能包含硬件寄存器操作、不能包含特定业务逻辑 |
+| **PCL** | 硬件配置数据（静态表） | 不能包含业务逻辑、函数实现、不参与调用链 |
 | **HAL** | 硬件驱动接口，调用OS驱动或自写驱动 | 不能包含业务逻辑 |
-| **OSAL** | 系统调用封装、通用IPC机制 | 不能包含业务逻辑、硬件操作 |
+| **OSAL** | 系统调用封装、进程/线程管理、共享内存接口、进程间同步 | 不能包含业务逻辑、硬件操作 |
 
 **架构关系说明**：
-- ✅ **纵向依赖**：APP → PDL → HAL->OS_Drivers/Reg_Operations（每层直接调用下层API）
+- ✅ **纵向依赖**：APP → PDL → HAL → OS_Drivers/Reg_Operations（每层直接调用下层API）
 - ✅ **横向配置**：APP读取ACL配置，PDL读取PCL配置（配置层是数据源，不参与调用链）
 - ✅ **OSAL基础**：所有模块都运行在OSAL之上，只调用OSAL接口，不直接访问系统调用
 
-**PDL层设计原则**：
-- ✅ **独立外设服务**：每种外设（Satellite/BMC/MCU）完全独立设计，各自暴露专属API
-- ✅ **无统一抽象**：不强行抽象成统一的"设备"接口，避免最小公分母或最大公约数陷阱
-- ✅ **ACL层配置**：通过ACL层配置表指定具体外设类型和索引（device_type + device_index）
-- ✅ **接口贴合特性**：每种外设的API完全贴合其功能特性，无冗余参数和类型判断
+**ACL层设计原则（重要修正）**：
+- ✅ **纯配置数据**：只包含静态配置表（编译时确定或运行时加载）
+- ✅ **只读查询接口**：提供查询接口，不提供写入接口
+- ❌ **不包含运行时数据**：不包含缓存、状态快照等运行时数据结构
+- ❌ **不包含业务逻辑**：不包含业务处理函数、状态机等
+- ❌ **不管理系统资源**：不创建共享内存、不管理进程/线程
 
-**示例**：
+**ACL层示例**：
 ```c
-// ✅ PDL层：每种外设独立设计
-// pdl_bmc.h
-int PDL_BMC_ReadSensors(uint32_t bmc_index, bmc_sensor_data_t *data);
-int PDL_BMC_PowerControl(uint32_t bmc_index, bmc_power_cmd_t cmd);
+/* ✅ 正确：ACL层只包含配置数据和查询接口 */
 
-// pdl_mcu.h
-int PDL_MCU_SendCommand(uint32_t mcu_index, mcu_cmd_t cmd, uint32_t param);
-int PDL_MCU_GetWatchdogStatus(uint32_t mcu_index, mcu_wdt_status_t *status);
-
-// pdl_satellite.h
-int PDL_Satellite_SendTelecommand(uint32_t sat_index, can_frame_t *frame);
-
-// ✅ ACL层：配置表指定具体外设
+// acl/include/acl_telemetry_config.h
 typedef struct {
-    tm_id_t tm_id;
-    pdl_device_type_t device_type;  // BMC/MCU/SATELLITE
-    uint32_t device_index;
-    // ...
+    pmc_tm_function_t tm_id;        // 遥测ID
+    pdl_device_type_t device_type;  // 设备类型（BMC/MCU/Satellite）
+    uint32 device_index;            // 设备索引
+    uint32 validity_ms;             // 有效期（毫秒）
+    uint32 update_period_ms;        // 更新周期（毫秒）
+    bool enabled;                   // 是否启用
 } acl_tm_config_t;
 
-// 配置示例
-{
-    .tm_id = TM_CPU_TEMP,
-    .device_type = PDL_DEVICE_TYPE_BMC,
-    .device_index = 0
-}
+// 静态配置表（编译时确定）
+extern const acl_tm_config_t g_pmc_tm_configs[];
+extern const uint32 g_pmc_tm_config_count;
+
+// 只读查询接口
+const acl_tm_config_t* ACL_GetTelemetryConfig(pmc_tm_function_t tm_id);
+
+/* ❌ 错误：ACL层不应该包含这些 */
+
+// 运行时数据结构
+typedef struct {
+    pthread_rwlock_t rwlock;
+    uint8 data[1024];
+    uint64 timestamp_us;
+} acl_tm_cache_t;  // 禁止！应该在APP层
+
+// 写入接口
+int32 ACL_TelemetryCache_Write(...);  // 禁止！ACL层只读
+
+// 共享内存管理
+int32 ACL_ShmCreate(...);  // 禁止！应该在OSAL层或APP层
 ```
 
 ---
