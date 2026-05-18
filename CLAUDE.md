@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**EMS** (Embedded Middleware System) is a general-purpose embedded middleware framework providing hardware abstraction and peripheral management for embedded controllers. It uses a strict 5-layer architecture designed for cross-platform portability (Linux/RTOS).
+**EMS** (Embedded Middleware System) is a general-purpose embedded middleware framework providing hardware abstraction and peripheral management for embedded controllers. It uses a 3-layer call chain (Apps→PDL→HAL) running on OSAL runtime environment, with 2 configuration libraries (ACL/PCL), designed for cross-platform portability (Linux/RTOS).
 
 **Typical Application**:
 ```
@@ -76,43 +76,97 @@ gdb ./build/bin/sample_app
 gdb --args ./build/bin/ems-test -m test_osal_task
 ```
 
-## Architecture: 5-Layer Design
+## Architecture Design
 
-**Critical Dependency Chain**:
 ```
-Apps → PDL → HAL → OSAL → Linux System Calls
-         ↓
-        PCL (configuration data)
+┌─────────────────────────────────────────────────────────────────┐
+│                      OSAL Runtime Environment                    │
+│  • Shields platform differences (Linux, 32/64-bit, syscalls)    │
+│  • Provides unified interfaces (thread/IPC/memory/time/file/net) │
+│  • Platform implementation (POSIX)                               │
+│  • ALL layers use OSAL interfaces (no direct syscalls/stdlib)   │
+└─────────────────────────────────────────────────────────────────┘
+         ↑                    ↑                    ↑
+         │ Use OSAL          │ Use OSAL           │ Use OSAL
+         │                    │                    │
+  ┌──────┴──────┐      ┌─────┴──────┐      ┌─────┴──────┐
+  │    Apps     │─────>│    PDL     │─────>│    HAL     │
+  │             │      │            │      │            │
+  │  Business   │      │ Peripheral │      │  Hardware  │
+  │   Logic     │      │   Driver   │      │   Driver   │
+  └──────┬──────┘      └─────┬──────┘      └────────────┘
+         │                    │
+         │ Read Config        │ Read Config
+         ↓                    ↓
+  ┌─────────────┐      ┌─────────────┐
+  │     ACL     │      │     PCL     │
+  │  (Config)   │      │  (Config)   │
+  │  Business   │      │  Hardware   │
+  │   Mapping   │      │   Config    │
+  └─────────────┘      └─────────────┘
 ```
 
-### Layer Responsibilities
+**Call Chain** (3 layers):
+```
+Apps → PDL → HAL
+```
 
-**OSAL** (Operating System Abstraction Layer)
+**OSAL Runtime Environment**:
+```
+All layers (Apps/PDL/HAL) use OSAL interfaces
+OSAL → Linux System Calls
+```
+
+**Configuration Libraries** (not in call chain):
+```
+ACL - Read by Apps layer (business function to device mapping)
+PCL - Read by PDL layer (hardware configuration)
+```
+
+**CRITICAL RULE**: All layers (Apps/PDL/HAL) MUST use OSAL wrappers. Only OSAL can call system APIs and standard library.
+
+### Component Responsibilities
+
+**OSAL** (Operating System Abstraction Layer) - **Runtime Environment for All Layers**
 - **Only layer allowed to include system headers** (`<unistd.h>`, `<pthread.h>`, `<stdlib.h>`)
-- Wraps ALL system calls and standard library functions
-- Provides: task management, queues, mutexes, logging, file I/O, networking, time services
+- **Only layer allowed to call system APIs and standard library functions**
+- Wraps ALL system calls and standard library for upper layers
+- Provides: task management, queues, mutexes, logging, file I/O, networking, time services, memory operations (`OSAL_Memcpy`, `OSAL_Strlen`), string operations
 - Platform-specific code in `osal/src/posix/` (future: `freertos/`, `vxworks/`)
+- **All other layers (Apps/PDL/HAL) MUST use OSAL wrappers**
 
 **HAL** (Hardware Abstraction Layer)
 - **Only layer allowed to include hardware-specific headers** (`<linux/can.h>`, `<net/if.h>`)
-- **Must use OSAL wrappers for all system calls** (never direct `socket()`, `open()`, etc.)
+- **MUST use OSAL wrappers for ALL operations** (never direct `socket()`, `open()`, `memcpy()`, `strlen()`, etc.)
 - Provides: CAN, UART, I2C, SPI, GPIO, Watchdog drivers
 - Platform-specific code in `hal/src/linux/` (future: `ti_am62/`, `nxp_imx8/`)
-
-**PCL** (Peripheral Configuration Library)
-- Device-tree-like hardware configuration (pure data structures)
-- **Must be completely platform-independent**
-- Configuration organized by peripheral: `platform/<vendor>/<chip>/<product>/`
-- Only PDL layer accesses PCL
 
 **PDL** (Peripheral Driver Layer)
 - Unified management of satellite/BMC/MCU peripherals
 - **Must be completely platform-independent**
+- **MUST use OSAL wrappers for ALL operations**
+- Reads hardware configuration from PCL
 - Provides application-facing peripheral interfaces
 - Only Apps and Tests layers can access PDL APIs
 
+**ACL** (Application Configuration Layer) - **Configuration Library**
+- **Not in call chain, read by Apps layer**
+- Maps business functions (e.g., "server power on") to device types and indexes
+- **O(1) lookup performance** using enum-indexed arrays
+- Configuration files in `acl/config/<product>/`
+- Pure data structures, no business logic
+
+**PCL** (Peripheral Configuration Library) - **Configuration Library**
+- **Not in call chain, read by PDL layer**
+- Device-tree-like hardware configuration (pure data structures)
+- **Must be completely platform-independent**
+- Configuration organized by peripheral: `platform/<vendor>/<chip>/<product>/`
+- Pure data structures, no business logic
+
 **Apps** (Application Layer)
 - **Must be completely platform-independent**
+- **MUST use OSAL wrappers for ALL operations**
+- Reads business configuration from ACL
 - Currently contains sample_app (reference implementation) and watchdog_app (watchdog demonstration)
 
 ## Critical Rules
@@ -483,7 +537,8 @@ ps -eLf | grep ems-test
   - HAL: 89 tests (6 modules: CAN, UART, I2C, SPI, GPIO, Watchdog)
   - PCL: 22 tests
   - PDL: 95 tests (Satellite, BMC, MCU, Watchdog)
-- **Layers**: 5 (OSAL/HAL/PCL/PDL/Apps)
+  - ACL: Configuration validation and statistics
+- **Architecture**: 3-layer call chain (Apps→PDL→HAL) + OSAL runtime + 2 config libraries (ACL/PCL)
 - **Platforms**: TI AM6254, vendor_demo (extensible)
 - **Build System**: CMake 3.16+, supports native and cross-compilation
 
