@@ -1087,6 +1087,54 @@ void Protocol_Converter_GetStats(uint32 *cmd_count, uint32 *success_count,
 }
 ```
 
+#### 2.5.3 外设固件升级服务 (firmware_update)
+
+**功能定位**：接收载荷服务器通过以太网传输的外设固件，升级MCU/FPGA等外设
+
+**架构设计**：
+
+**按需启动服务**：
+```
+载荷服务器 --[TCP/IP]--> pmc_fwupdate进程 --[PDL接口]--> 外设(MCU/FPGA)
+```
+
+**关键特性**：
+- **按需启动**：由Supervisor进程按需启动，升级完成后自动退出
+- **进程隔离**：独立进程，升级失败不影响关键功能（遥控遥测）
+- **可靠传输**：TCP协议 + 分块传输（64KB/块）+ ACK确认
+- **完整性校验**：MD5校验（传输前后）+ CRC32校验（升级前）
+- **进度反馈**：实时上报升级进度到载荷服务器
+
+**通信协议**：
+```c
+// 协议帧格式
+typedef struct {
+    uint32_t magic;        // 魔数：0xAA55AA55
+    uint8_t  cmd;          // 命令类型（START/DATA/END/ACK/NACK）
+    uint8_t  target;       // 目标外设（MCU/FPGA/CPLD）
+    uint16_t seq;          // 序列号
+    uint32_t length;       // 数据长度
+    uint32_t reserved;     // 保留字段
+} fw_protocol_header_t;
+```
+
+**传输流程**：
+1. 载荷服务器发送开始命令（包含文件名、大小、MD5、目标外设）
+2. AM625创建临时文件，返回ACK
+3. 分块传输数据（每块最大64KB），每块ACK确认
+4. 传输完成后校验MD5
+5. 调用PDL接口升级外设（`PDL_MCU_FirmwareUpdate` / `PDL_FPGA_FirmwareUpdate`）
+6. 实时上报升级进度
+7. 返回升级结果，清理临时文件
+
+**存储路径**：
+- 临时目录：`/tmp/firmware/`
+- 文件命名：`{target}_fw_v{version}.bin`
+
+**超时机制**：
+- 传输超时：60秒无数据则中止
+- 空闲超时：10分钟无活动则自动退出进程
+
 ## 3. 模块化配置设计
 
 ### 3.1 配置下沉原则

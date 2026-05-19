@@ -1,4 +1,4 @@
-# APP层详细设计（5进程架构）
+# APP层详细设计（6进程架构）
 
 ## 1. 需求分析
 
@@ -100,13 +100,13 @@
 - ❌ 调度开销大
 - ❌ 管理复杂
 
-**推荐：5个进程**
+**推荐：5个常驻进程 + 1个按需进程**
 
 ---
 
 ## 3. 进程架构设计
 
-### 3.1 5进程架构（推荐方案）
+### 3.1 6进程架构（推荐方案）
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -249,6 +249,38 @@
 │  │  ✅ Logger崩溃不影响关键功能                                │ │
 │  │  ✅ 可以独立重启                                            │ │
 │  └───────────────────────────────────────────────────────────┘ │
+│                                                                 │
+│  进程6: FirmwareUpdate (pmc_fwupdate)                           │
+│  ┌───────────────────────────────────────────────────────────┐ │
+│  │ CPU绑定: 不绑定                                             │ │
+│  │ 调度策略: SCHED_OTHER                                       │ │
+│  │ 生命周期: 按需启动                                          │ │
+│  ├───────────────────────────────────────────────────────────┤ │
+│  │ 职责：                                                      │ │
+│  │  【固件接收】通过以太网接收外设固件                          │ │
+│  │   • 监听TCP端口（默认8888）                                 │ │
+│  │   • 接收固件文件（分块传输，64KB/块）                       │ │
+│  │   • 存储到临时目录（/tmp/firmware/）                        │ │
+│  │   • 校验完整性（MD5/CRC32）                                 │ │
+│  │                                                            │ │
+│  │  【外设升级】调用PDL接口升级外设                             │ │
+│  │   • MCU固件升级（PDL_MCU_FirmwareUpdate）                   │ │
+│  │   • FPGA固件升级（PDL_FPGA_FirmwareUpdate）                 │ │
+│  │   • CPLD固件升级（PDL_CPLD_FirmwareUpdate）                 │ │
+│  │   • 实时上报升级进度                                        │ │
+│  │                                                            │ │
+│  │  【资源清理】升级完成后清理临时文件                          │ │
+│  │   • 删除临时固件文件                                        │ │
+│  │   • 关闭网络连接                                            │ │
+│  │   • 进程自动退出                                            │ │
+│  ├───────────────────────────────────────────────────────────┤ │
+│  │ 为什么独立：                                                │ │
+│  │  ✅ 高风险操作（升级失败可能导致外设不可用）                 │ │
+│  │  ✅ 低频操作（按需启动，不占用常驻资源）                     │ │
+│  │  ✅ 耗时操作（分钟级，不影响关键功能）                       │ │
+│  │  ✅ 进程隔离（崩溃不影响遥控遥测）                           │ │
+│  │  ✅ 自动退出（升级完成或超时后退出）                         │ │
+│  └───────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -264,6 +296,7 @@
 | **Health** | ❌ 不绑定 | SCHED_OTHER | 4 | ~8MB | 心跳管理、外设监测、喂狗 | 非实时 | 🔴 严重（停止喂狗→复位） |
 | **Supervisor** | ❌ 不绑定 | SCHED_OTHER | 1 | ~6MB | 进程监控、自动重启 | 非实时 | 🟡 中等（无法自动重启） |
 | **Logger** | ❌ 不绑定 | SCHED_OTHER | 1 | ~6MB | 日志收集、持久化 | 非实时 | 🟢 轻微（丢失日志） |
+| **FirmwareUpdate** | ❌ 不绑定 | SCHED_OTHER | 1 | ~8MB | 固件接收、外设升级 | 非实时 | 🟢 轻微（升级失败） |
 
 ---
 
@@ -443,13 +476,13 @@
 
 ## 7. 最终推荐
 
-### 7.1 推荐方案：方案A（5进程架构）
+### 7.1 推荐方案：方案A（6进程架构）
 
 **理由**：
 
 1. **✅ 平衡性最好**
-   - 进程数适中（5个）
-   - 内存开销可接受（~38MB）
+   - 进程数适中（5个常驻 + 1个按需）
+   - 内存开销可接受（~38MB常驻 + ~8MB按需）
    - 故障隔离好
    - 管理复杂度适中
 
@@ -459,6 +492,7 @@
    - Health: 硬件健康
    - Supervisor: 软件健康
    - Logger: 日志
+   - FirmwareUpdate: 固件升级（按需）
 
 3. **✅ 实时性保证**
    - Communication独占CPU0，SCHED_FIFO
@@ -762,7 +796,7 @@ systemctl status pmc-supervisor
    - 实测延迟：平均85μs
 
 2. **✅ 航天级可靠性**
-   - 5进程隔离，硬件级MMU保护
+   - 6进程隔离（5个常驻 + 1个按需），硬件级MMU保护
    - 三级故障恢复（进程级 → 系统级）
    - Health崩溃 → 停止喂狗 → 系统复位
 
@@ -772,9 +806,10 @@ systemctl status pmc-supervisor
    - Health: 硬件健康
    - Supervisor: 软件健康
    - Logger: 日志
+   - FirmwareUpdate: 固件升级（按需）
 
 4. **✅ 资源优化**
-   - 内存开销：~38MB
+   - 内存开销：~38MB（常驻进程）
    - CPU负载：<43%
    - 平衡性好
 
@@ -795,6 +830,491 @@ systemctl status pmc-supervisor
 - ❌ 地面测试系统（可用简化版）
 - ❌ 资源极度受限（<128MB内存）
 - ❌ 无实时性要求
+
+---
+
+## 12. 外设固件升级进程详细设计
+
+### 12.1 业务场景
+
+**数据流向**：
+```
+外设固件 → 载荷服务器硬盘 → 以太网 → AM625 → 外设（MCU/FPGA/CPLD）
+```
+
+**典型场景**：
+1. 地面测试阶段：通过载荷服务器上传新版本外设固件
+2. 在轨升级：载荷服务器接收地面注入的固件，转发给AM625升级外设
+3. 故障恢复：外设固件损坏，重新烧录固件
+
+### 12.2 进程架构
+
+**进程名称**：`pmc_fwupdate`
+
+**生命周期**：按需启动，升级完成后自动退出
+
+**启动方式**：
+1. **手动启动**：Supervisor接收遥控命令后启动
+2. **自动启动**：载荷服务器主动连接TCP端口触发启动
+
+**退出条件**：
+1. 升级成功完成
+2. 升级失败（校验错误、升级超时）
+3. 空闲超时（10分钟无活动）
+4. 接收到退出信号（SIGTERM）
+
+### 12.3 通信协议设计
+
+#### 12.3.1 协议帧格式
+
+```c
+// 协议头部（16字节）
+typedef struct {
+    uint32_t magic;        // 魔数：0xAA55AA55（固定值）
+    uint8_t  cmd;          // 命令类型
+    uint8_t  target;       // 目标外设
+    uint16_t seq;          // 序列号（0-65535循环）
+    uint32_t length;       // 数据长度（字节）
+    uint32_t reserved;     // 保留字段（未来扩展）
+} __attribute__((packed)) fw_protocol_header_t;
+
+// 完整协议帧
+// [Header: 16字节] + [Payload: N字节] + [CRC32: 4字节]
+```
+
+#### 12.3.2 命令类型
+
+```c
+// 命令码定义
+#define FW_CMD_START      0x01  // 开始传输
+#define FW_CMD_DATA       0x02  // 数据块传输
+#define FW_CMD_END        0x03  // 传输完成
+#define FW_CMD_ABORT      0x04  // 中止传输
+#define FW_CMD_ACK        0x10  // 应答（成功）
+#define FW_CMD_NACK       0x11  // 应答（失败）
+#define FW_CMD_PROGRESS   0x12  // 升级进度通知
+#define FW_CMD_QUERY      0x20  // 查询状态
+
+// 目标外设
+#define FW_TARGET_MCU     0x01  // MCU
+#define FW_TARGET_FPGA    0x02  // FPGA
+#define FW_TARGET_CPLD    0x03  // CPLD
+```
+
+#### 12.3.3 START命令数据格式
+
+```c
+// FW_CMD_START的Payload格式
+typedef struct {
+    char     filename[64];    // 文件名（如"mcu_fw_v1.2.3.bin"）
+    uint32_t filesize;        // 文件大小（字节）
+    uint8_t  md5[16];         // MD5校验值
+    uint32_t block_size;      // 数据块大小（建议64KB）
+    uint32_t timeout_sec;     // 超时时间（秒）
+} __attribute__((packed)) fw_start_payload_t;
+```
+
+#### 12.3.4 PROGRESS命令数据格式
+
+```c
+// FW_CMD_PROGRESS的Payload格式
+typedef struct {
+    uint8_t  percentage;      // 升级进度（0-100）
+    uint8_t  status;          // 状态码
+    char     message[128];    // 状态描述
+} __attribute__((packed)) fw_progress_payload_t;
+
+// 状态码
+#define FW_STATUS_RECEIVING   0x01  // 正在接收
+#define FW_STATUS_VERIFYING   0x02  // 正在校验
+#define FW_STATUS_UPGRADING   0x03  // 正在升级
+#define FW_STATUS_SUCCESS     0x10  // 升级成功
+#define FW_STATUS_FAILED      0x11  // 升级失败
+```
+
+### 12.4 传输流程
+
+#### 12.4.1 完整流程图
+
+```text
+载荷服务器                           AM625 (pmc_fwupdate)
+    |                                      |
+    |--[FW_CMD_START]-------------------->|
+    |  • filename: "mcu_fw_v1.2.3.bin"    |
+    |  • filesize: 524288 (512KB)         |
+    |  • md5: 0x1234...                   |
+    |  • block_size: 65536 (64KB)         |
+    |                                      | 1. 检查磁盘空间
+    |                                      | 2. 创建临时文件
+    |                                      | 3. 初始化接收状态
+    |<-[FW_CMD_ACK]------------------------|
+    |                                      |
+    |--[FW_CMD_DATA, seq=0]-------------->|
+    |  [64KB数据块0]                       | 写入文件
+    |<-[FW_CMD_ACK, seq=0]-----------------|
+    |                                      |
+    |--[FW_CMD_DATA, seq=1]-------------->|
+    |  [64KB数据块1]                       | 写入文件
+    |<-[FW_CMD_ACK, seq=1]-----------------|
+    |                                      |
+    |        ... (重复传输) ...            |
+    |                                      |
+    |--[FW_CMD_DATA, seq=7]-------------->|
+    |  [最后一块，可能<64KB]               | 写入文件
+    |<-[FW_CMD_ACK, seq=7]-----------------|
+    |                                      |
+    |--[FW_CMD_END]---------------------->|
+    |                                      | 1. 关闭文件
+    |                                      | 2. 校验MD5
+    |<-[FW_CMD_PROGRESS]-------------------|
+    |  (进度: 0%, 状态: VERIFYING)         |
+    |                                      |
+    |                                      | 3. 调用PDL升级外设
+    |<-[FW_CMD_PROGRESS]-------------------|
+    |  (进度: 10%, 状态: UPGRADING)        |
+    |<-[FW_CMD_PROGRESS]-------------------|
+    |  (进度: 50%, 状态: UPGRADING)        |
+    |<-[FW_CMD_PROGRESS]-------------------|
+    |  (进度: 100%, 状态: SUCCESS)         |
+    |                                      |
+    |<-[FW_CMD_ACK]------------------------|
+    |  (升级成功)                          | 4. 清理临时文件
+    |                                      | 5. 退出进程
+```
+
+#### 12.4.2 错误处理流程
+
+```text
+载荷服务器                           AM625 (pmc_fwupdate)
+    |                                      |
+    |--[FW_CMD_DATA, seq=5]-------------->|
+    |  [64KB数据块5]                       | CRC32校验失败
+    |<-[FW_CMD_NACK, seq=5]----------------|
+    |  (错误码: CRC_ERROR)                 |
+    |                                      |
+    |--[FW_CMD_DATA, seq=5]-------------->| 重传
+    |  [64KB数据块5]                       | 校验成功
+    |<-[FW_CMD_ACK, seq=5]-----------------|
+    |                                      |
+    |        ... (继续传输) ...            |
+    |                                      |
+    |--[FW_CMD_END]---------------------->|
+    |                                      | MD5校验失败
+    |<-[FW_CMD_NACK]----------------------|
+    |  (错误码: MD5_MISMATCH)              | 删除临时文件
+    |                                      | 退出进程
+```
+
+### 12.5 状态机设计
+
+```c
+// 固件升级状态机
+typedef enum {
+    FW_STATE_IDLE = 0,          // 空闲状态（等待连接）
+    FW_STATE_RECEIVING,         // 接收固件中
+    FW_STATE_VERIFYING,         // 校验固件中
+    FW_STATE_UPGRADING,         // 升级外设中
+    FW_STATE_SUCCESS,           // 升级成功
+    FW_STATE_FAILED,            // 升级失败
+    FW_STATE_ABORTED            // 用户中止
+} fw_state_t;
+
+// 状态转换
+// IDLE → RECEIVING (收到START命令)
+// RECEIVING → VERIFYING (收到END命令)
+// VERIFYING → UPGRADING (MD5校验成功)
+// UPGRADING → SUCCESS (升级成功)
+// UPGRADING → FAILED (升级失败)
+// 任意状态 → ABORTED (收到ABORT命令)
+```
+
+### 12.6 核心数据结构
+
+```c
+// 固件升级上下文
+typedef struct {
+    // 网络连接
+    int32_t listen_fd;          // 监听socket
+    int32_t client_fd;          // 客户端socket
+    
+    // 固件信息
+    char filename[64];          // 文件名
+    uint32_t filesize;          // 文件大小
+    uint8_t md5_expected[16];   // 期望的MD5
+    uint8_t md5_actual[16];     // 实际的MD5
+    uint8_t target;             // 目标外设
+    
+    // 传输状态
+    fw_state_t state;           // 当前状态
+    uint32_t bytes_received;    // 已接收字节数
+    uint32_t blocks_received;   // 已接收块数
+    uint16_t last_seq;          // 最后序列号
+    
+    // 文件操作
+    int32_t file_fd;            // 临时文件描述符
+    char temp_path[256];        // 临时文件路径
+    
+    // 超时控制
+    uint64_t last_activity_us;  // 最后活动时间
+    uint32_t timeout_sec;       // 超时时间
+    
+    // 统计信息
+    uint32_t retry_count;       // 重试次数
+    uint32_t error_count;       // 错误次数
+    uint64_t start_time_us;     // 开始时间
+    uint64_t end_time_us;       // 结束时间
+} fw_update_context_t;
+```
+
+### 12.7 关键函数设计
+
+#### 12.7.1 主循环
+
+```c
+int32_t fw_update_main_loop(void) {
+    fw_update_context_t ctx;
+    
+    // 1. 初始化
+    fw_update_init(&ctx);
+    
+    // 2. 创建监听socket
+    ctx.listen_fd = create_tcp_server(FW_UPDATE_PORT);
+    
+    // 3. 主循环
+    while (running) {
+        // 等待客户端连接（超时10分钟）
+        ctx.client_fd = accept_with_timeout(ctx.listen_fd, 600000);
+        if (ctx.client_fd < 0) {
+            LOG_INFO("FW_UPDATE", "空闲超时，退出进程");
+            break;
+        }
+        
+        // 处理一次固件升级
+        int32_t ret = fw_update_process(&ctx);
+        
+        // 关闭客户端连接
+        close(ctx.client_fd);
+        
+        // 升级完成后退出
+        if (ret == OSAL_SUCCESS) {
+            LOG_INFO("FW_UPDATE", "升级成功，退出进程");
+            break;
+        }
+    }
+    
+    // 4. 清理资源
+    fw_update_cleanup(&ctx);
+    
+    return OSAL_SUCCESS;
+}
+```
+
+#### 12.7.2 固件升级处理
+
+```c
+int32_t fw_update_process(fw_update_context_t *ctx) {
+    int32_t ret;
+    
+    // 1. 接收START命令
+    ret = fw_receive_start_command(ctx);
+    if (ret != OSAL_SUCCESS) {
+        return ret;
+    }
+    
+    // 2. 接收固件数据
+    ret = fw_receive_firmware_data(ctx);
+    if (ret != OSAL_SUCCESS) {
+        fw_cleanup_temp_file(ctx);
+        return ret;
+    }
+    
+    // 3. 校验MD5
+    ret = fw_verify_md5(ctx);
+    if (ret != OSAL_SUCCESS) {
+        fw_cleanup_temp_file(ctx);
+        return ret;
+    }
+    
+    // 4. 升级外设
+    ret = fw_upgrade_device(ctx);
+    if (ret != OSAL_SUCCESS) {
+        fw_cleanup_temp_file(ctx);
+        return ret;
+    }
+    
+    // 5. 清理临时文件
+    fw_cleanup_temp_file(ctx);
+    
+    return OSAL_SUCCESS;
+}
+```
+
+#### 12.7.3 外设升级
+
+```c
+int32_t fw_upgrade_device(fw_update_context_t *ctx) {
+    int32_t ret;
+    
+    // 根据目标外设调用对应的PDL接口
+    switch (ctx->target) {
+        case FW_TARGET_MCU:
+            ret = PDL_MCU_FirmwareUpdate(
+                ctx->temp_path,
+                fw_progress_callback,
+                ctx
+            );
+            break;
+            
+        case FW_TARGET_FPGA:
+            ret = PDL_FPGA_FirmwareUpdate(
+                ctx->temp_path,
+                fw_progress_callback,
+                ctx
+            );
+            break;
+            
+        case FW_TARGET_CPLD:
+            ret = PDL_CPLD_FirmwareUpdate(
+                ctx->temp_path,
+                fw_progress_callback,
+                ctx
+            );
+            break;
+            
+        default:
+            LOG_ERROR("FW_UPDATE", "未知的目标外设: %d", ctx->target);
+            return OSAL_ERROR;
+    }
+    
+    return ret;
+}
+
+// 进度回调函数
+void fw_progress_callback(uint8_t percentage, void *user_data) {
+    fw_update_context_t *ctx = (fw_update_context_t *)user_data;
+    
+    // 发送进度通知到载荷服务器
+    fw_send_progress(ctx->client_fd, percentage, FW_STATUS_UPGRADING);
+    
+    LOG_INFO("FW_UPDATE", "升级进度: %d%%", percentage);
+}
+```
+
+### 12.8 存储管理
+
+**临时目录**：`/tmp/firmware/`
+
+**文件命名规则**：
+```
+{target}_{timestamp}.bin
+
+示例：
+mcu_1684483200.bin      # MCU固件，时间戳1684483200
+fpga_1684483300.bit     # FPGA固件，时间戳1684483300
+```
+
+**磁盘空间检查**：
+```c
+int32_t fw_check_disk_space(uint32_t required_bytes) {
+    struct statvfs stat;
+    
+    if (statvfs("/tmp", &stat) != 0) {
+        return OSAL_ERROR;
+    }
+    
+    uint64_t available = stat.f_bavail * stat.f_bsize;
+    
+    // 需要额外20%空间作为缓冲
+    if (available < required_bytes * 1.2) {
+        LOG_ERROR("FW_UPDATE", "磁盘空间不足: 需要%u字节，可用%llu字节",
+                  required_bytes, available);
+        return OSAL_ERROR;
+    }
+    
+    return OSAL_SUCCESS;
+}
+```
+
+### 12.9 安全性设计
+
+**1. 权限控制**：
+- 临时文件权限：0600（仅owner可读写）
+- 进程运行用户：root（需要访问硬件设备）
+
+**2. 完整性校验**：
+- 传输层：每块CRC32校验
+- 文件层：整体MD5校验
+- 升级前：再次CRC32校验
+
+**3. 防止攻击**：
+- 限制文件大小：最大10MB
+- 限制文件名长度：最大64字节
+- 限制连接数：同时只允许1个客户端
+- 超时保护：传输超时60秒，空闲超时10分钟
+
+**4. 回滚机制**（可选）：
+- 升级前备份旧固件
+- 升级失败后自动回滚
+- 保留最近3个版本
+
+### 12.10 性能指标
+
+**传输速度**：
+- 以太网带宽：100Mbps
+- 实际传输速度：~8MB/s（考虑协议开销）
+- 512KB固件传输时间：~0.06秒
+
+**升级时间**：
+- MCU固件升级：~30秒（取决于MCU bootloader）
+- FPGA固件升级：~2分钟（取决于FPGA配置速度）
+- CPLD固件升级：~10秒
+
+**资源占用**：
+- 内存：~8MB（包括接收缓冲区）
+- CPU：<5%（传输时）、<20%（升级时）
+- 磁盘：临时文件大小（最大10MB）
+
+### 12.11 测试策略
+
+**单元测试**：
+```c
+// 测试协议解析
+void test_protocol_parse(void) {
+    fw_protocol_header_t header;
+    uint8_t buffer[16] = {0xAA, 0x55, 0xAA, 0x55, 0x01, 0x01, 0x00, 0x00, ...};
+    
+    parse_protocol_header(buffer, &header);
+    
+    assert(header.magic == 0xAA55AA55);
+    assert(header.cmd == FW_CMD_START);
+    assert(header.target == FW_TARGET_MCU);
+}
+
+// 测试MD5校验
+void test_md5_verify(void) {
+    const char *test_file = "/tmp/test_fw.bin";
+    uint8_t expected_md5[16] = {0x12, 0x34, ...};
+    
+    int32_t ret = fw_verify_file_md5(test_file, expected_md5);
+    
+    assert(ret == OSAL_SUCCESS);
+}
+```
+
+**集成测试**：
+```bash
+# 模拟载荷服务器发送固件
+python3 fw_sender.py --host 192.168.1.100 --port 8888 \
+                     --file mcu_fw_v1.2.3.bin --target mcu
+
+# 检查升级结果
+ssh root@192.168.1.100 "cat /var/log/pmc_fwupdate.log"
+```
+
+**压力测试**：
+- 连续升级100次，检查成功率
+- 传输中断测试（断网、进程崩溃）
+- 并发连接测试（多个客户端同时连接）
 
 ---
 
