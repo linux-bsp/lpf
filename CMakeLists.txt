@@ -7,36 +7,109 @@ set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
 # ============================================================================
-# 产品线和项目选择
+# Kconfig 集成
 # ============================================================================
-set(PRODUCT "pmc" CACHE STRING "Product line to build")
-set_property(CACHE PRODUCT PROPERTY STRINGS
-    "pmc"
-    "samples"
-)
+# 检查 Kconfig 配置是否存在
+set(KCONFIG_HEADER "${CMAKE_SOURCE_DIR}/include/generated/autoconf.h")
+if(NOT EXISTS ${KCONFIG_HEADER})
+    message(WARNING "Kconfig not configured. Run 'make menuconfig' or 'make defconfig' first.")
+    message(WARNING "Using default CMake configuration...")
+endif()
 
-# 根据产品线设置可用的项目列表
-if(PRODUCT STREQUAL "pmc")
-    set(PRODUCT_PROJECT "h200_am625" CACHE STRING "Project to build")
-    set_property(CACHE PRODUCT_PROJECT PROPERTY STRINGS
-        "h200_am625"
+# 包含生成的配置目录
+include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/include/generated)
+
+# Kconfig 辅助函数：检查选项是否设置
+function(kconfig_is_set option result_var)
+    if(EXISTS ${KCONFIG_HEADER})
+        file(STRINGS ${KCONFIG_HEADER} CONFIG_LINES)
+        if("${CONFIG_LINES}" MATCHES "#define ${option}")
+            set(${result_var} TRUE PARENT_SCOPE)
+        else()
+            set(${result_var} FALSE PARENT_SCOPE)
+        endif()
+    else()
+        set(${result_var} FALSE PARENT_SCOPE)
+    endif()
+endfunction()
+
+# Kconfig 辅助函数：获取选项值
+function(kconfig_get_value option result_var)
+    if(EXISTS ${KCONFIG_HEADER})
+        file(STRINGS ${KCONFIG_HEADER} CONFIG_LINES)
+        foreach(line ${CONFIG_LINES})
+            if("${line}" MATCHES "#define ${option} (.+)")
+                set(${result_var} ${CMAKE_MATCH_1} PARENT_SCOPE)
+                return()
+            endif()
+        endforeach()
+    endif()
+    set(${result_var} "" PARENT_SCOPE)
+endfunction()
+
+# ============================================================================
+# 产品线和项目选择（优先使用 Kconfig，回退到 CMake 选项）
+# ============================================================================
+# 从 Kconfig 读取产品配置
+kconfig_is_set(CONFIG_PRODUCT_PMC KCONFIG_PMC)
+kconfig_is_set(CONFIG_PRODUCT_SAMPLES KCONFIG_SAMPLES)
+kconfig_is_set(CONFIG_PROJECT_H200_AM625 KCONFIG_H200)
+
+if(KCONFIG_PMC)
+    set(PRODUCT "pmc")
+    if(KCONFIG_H200)
+        set(PRODUCT_PROJECT "h200_am625")
+    endif()
+elseif(KCONFIG_SAMPLES)
+    set(PRODUCT "samples")
+    set(PRODUCT_PROJECT "project_demo")
+else()
+    # 回退到 CMake 选项（兼容旧构建方式）
+    set(PRODUCT "pmc" CACHE STRING "Product line to build")
+    set_property(CACHE PRODUCT PROPERTY STRINGS
+        "pmc"
+        "samples"
     )
-elseif(PRODUCT STREQUAL "samples")
-    set(PRODUCT_PROJECT "project_demo" CACHE STRING "Project to build")
-    set_property(CACHE PRODUCT_PROJECT PROPERTY STRINGS
-        "project_demo"
-    )
+
+    # 根据产品线设置可用的项目列表
+    if(PRODUCT STREQUAL "pmc")
+        set(PRODUCT_PROJECT "h200_am625" CACHE STRING "Project to build")
+        set_property(CACHE PRODUCT_PROJECT PROPERTY STRINGS
+            "h200_am625"
+        )
+    elseif(PRODUCT STREQUAL "samples")
+        set(PRODUCT_PROJECT "project_demo" CACHE STRING "Project to build")
+        set_property(CACHE PRODUCT_PROJECT PROPERTY STRINGS
+            "project_demo"
+        )
+    endif()
 endif()
 
 message(STATUS "Selected product: ${PRODUCT}")
 message(STATUS "Selected project: ${PRODUCT_PROJECT}")
 
 # ============================================================================
-# 构建选项
+# 构建选项（优先使用 Kconfig，回退到 CMake 选项）
 # ============================================================================
-option(BUILD_TESTING "Build unit tests" ON)
-option(BUILD_SHARED_LIBS "Build shared libraries instead of static" ON)
-option(INSTALL_HEADERS "Install header files" ON)
+# 从 Kconfig 读取构建选项
+kconfig_is_set(CONFIG_BUILD_TESTING KCONFIG_BUILD_TESTING)
+kconfig_is_set(CONFIG_BUILD_SHARED_LIBS KCONFIG_BUILD_SHARED)
+kconfig_is_set(CONFIG_INSTALL_HEADERS KCONFIG_INSTALL_HEADERS)
+
+if(EXISTS ${KCONFIG_HEADER})
+    # 使用 Kconfig 配置
+    set(BUILD_TESTING ${KCONFIG_BUILD_TESTING})
+    set(BUILD_SHARED_LIBS ${KCONFIG_BUILD_SHARED})
+    set(INSTALL_HEADERS ${KCONFIG_INSTALL_HEADERS})
+    message(STATUS "Using Kconfig build options")
+else()
+    # 回退到 CMake 选项
+    option(BUILD_TESTING "Build unit tests" ON)
+    option(BUILD_SHARED_LIBS "Build shared libraries instead of static" ON)
+    option(INSTALL_HEADERS "Install header files" ON)
+    message(STATUS "Using CMake build options (Kconfig not found)")
+endif()
 
 # ============================================================================
 # 安装路径配置（Buildroot 兼容）
@@ -58,7 +131,7 @@ endif()
 # - DESTDIR: 安装时的目标根目录（make install DESTDIR=/staging）
 
 # ============================================================================
-# 编译选项
+# 编译选项（优先使用 Kconfig，回退到默认值）
 # ============================================================================
 # 基础编译标志
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Werror -D_POSIX_C_SOURCE=200809L")
@@ -68,20 +141,55 @@ if(APPLE)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_DARWIN_C_SOURCE")
 endif()
 
-# 设置默认构建类型为 Release（Buildroot 通常会覆盖此设置）
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type (Debug/Release)" FORCE)
-endif()
+# 从 Kconfig 读取构建类型和优化级别
+kconfig_is_set(CONFIG_BUILD_TYPE_DEBUG KCONFIG_DEBUG)
+kconfig_is_set(CONFIG_OPT_O0 KCONFIG_OPT_O0)
+kconfig_is_set(CONFIG_OPT_O2 KCONFIG_OPT_O2)
+kconfig_is_set(CONFIG_OPT_O3 KCONFIG_OPT_O3)
+kconfig_is_set(CONFIG_OPT_OS KCONFIG_OPT_OS)
 
-# 构建类型特定的标志（如果 Buildroot 未设置 CMAKE_C_FLAGS_RELEASE）
-if(NOT CMAKE_C_FLAGS_DEBUG)
-    set(CMAKE_C_FLAGS_DEBUG "-g -O0")
-endif()
-if(NOT CMAKE_C_FLAGS_RELEASE)
-    set(CMAKE_C_FLAGS_RELEASE "-O2")
+if(EXISTS ${KCONFIG_HEADER})
+    # 使用 Kconfig 配置
+    if(KCONFIG_DEBUG)
+        set(CMAKE_BUILD_TYPE Debug)
+        message(STATUS "Build type: Debug (from Kconfig)")
+    else()
+        set(CMAKE_BUILD_TYPE Release)
+        message(STATUS "Build type: Release (from Kconfig)")
+    endif()
+
+    # 设置优化级别
+    if(KCONFIG_OPT_O0)
+        set(CMAKE_C_FLAGS_RELEASE "-O0")
+        set(CMAKE_C_FLAGS_DEBUG "-g -O0")
+    elseif(KCONFIG_OPT_O2)
+        set(CMAKE_C_FLAGS_RELEASE "-O2")
+        set(CMAKE_C_FLAGS_DEBUG "-g -O0")
+    elseif(KCONFIG_OPT_O3)
+        set(CMAKE_C_FLAGS_RELEASE "-O3")
+        set(CMAKE_C_FLAGS_DEBUG "-g -O0")
+    elseif(KCONFIG_OPT_OS)
+        set(CMAKE_C_FLAGS_RELEASE "-Os")
+        set(CMAKE_C_FLAGS_DEBUG "-g -O0")
+    endif()
+else()
+    # 回退到默认值
+    if(NOT CMAKE_BUILD_TYPE)
+        set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type (Debug/Release)" FORCE)
+    endif()
+
+    # 构建类型特定的标志（如果 Buildroot 未设置 CMAKE_C_FLAGS_RELEASE）
+    if(NOT CMAKE_C_FLAGS_DEBUG)
+        set(CMAKE_C_FLAGS_DEBUG "-g -O0")
+    endif()
+    if(NOT CMAKE_C_FLAGS_RELEASE)
+        set(CMAKE_C_FLAGS_RELEASE "-O2")
+    endif()
 endif()
 
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "C flags (Release): ${CMAKE_C_FLAGS_RELEASE}")
+message(STATUS "C flags (Debug): ${CMAKE_C_FLAGS_DEBUG}")
 
 # ============================================================================
 # 输出目录配置

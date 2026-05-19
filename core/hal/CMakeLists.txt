@@ -17,10 +17,13 @@ target_include_directories(hal_public_api INTERFACE
 )
 
 # ============================================================================
-# 2. 实现库 (hal) - 包含平台相关驱动
+# 2. 实现库 (hal) - 包含平台相关驱动（支持 Kconfig 条件编译）
 # ============================================================================
 
-# HAL源文件（根据平台选择）
+# 检查 Kconfig 配置
+set(KCONFIG_HEADER "${CMAKE_SOURCE_DIR}/include/generated/autoconf.h")
+
+# HAL源文件（根据平台和 Kconfig 选择）
 if(APPLE)
     # macOS平台：使用打桩实现（仅用于编译）
     set(HAL_SOURCES
@@ -34,14 +37,77 @@ if(APPLE)
     message(STATUS "HAL: Using macOS stub implementation (compile-only)")
 else()
     # Linux/其他平台：使用真实硬件实现
-    set(HAL_SOURCES
-        ${HAL_SRC_DIR}/linux/hal_can_linux.c
-        ${HAL_SRC_DIR}/linux/hal_serial_linux.c
-        ${HAL_SRC_DIR}/linux/hal_i2c_linux.c
-        ${HAL_SRC_DIR}/linux/hal_spi_linux.c
-        ${HAL_SRC_DIR}/linux/hal_watchdog_linux.c
-        ${HAL_SRC_DIR}/linux/hal_gpio_linux.c
-    )
+    set(HAL_SOURCES "")
+
+    if(EXISTS ${KCONFIG_HEADER})
+        # 使用 Kconfig 条件编译（使用根 CMakeLists.txt 中定义的函数）
+        kconfig_is_set(CONFIG_HAL_CAN HAL_CAN_ENABLED)
+        kconfig_is_set(CONFIG_HAL_UART HAL_UART_ENABLED)
+        kconfig_is_set(CONFIG_HAL_I2C HAL_I2C_ENABLED)
+        kconfig_is_set(CONFIG_HAL_SPI HAL_SPI_ENABLED)
+        kconfig_is_set(CONFIG_HAL_GPIO HAL_GPIO_ENABLED)
+        kconfig_is_set(CONFIG_HAL_WATCHDOG HAL_WATCHDOG_ENABLED)
+
+        # CAN 驱动
+        if(HAL_CAN_ENABLED)
+            list(APPEND HAL_SOURCES ${HAL_SRC_DIR}/linux/hal_can_linux.c)
+            message(STATUS "HAL: CAN driver enabled (Kconfig)")
+        endif()
+
+        # UART 驱动
+        if(HAL_UART_ENABLED)
+            list(APPEND HAL_SOURCES ${HAL_SRC_DIR}/linux/hal_serial_linux.c)
+            message(STATUS "HAL: UART driver enabled (Kconfig)")
+        endif()
+
+        # I2C 驱动
+        if(HAL_I2C_ENABLED)
+            list(APPEND HAL_SOURCES ${HAL_SRC_DIR}/linux/hal_i2c_linux.c)
+            message(STATUS "HAL: I2C driver enabled (Kconfig)")
+        endif()
+
+        # SPI 驱动
+        if(HAL_SPI_ENABLED)
+            list(APPEND HAL_SOURCES ${HAL_SRC_DIR}/linux/hal_spi_linux.c)
+            message(STATUS "HAL: SPI driver enabled (Kconfig)")
+        endif()
+
+        # GPIO 驱动
+        if(HAL_GPIO_ENABLED)
+            list(APPEND HAL_SOURCES ${HAL_SRC_DIR}/linux/hal_gpio_linux.c)
+            message(STATUS "HAL: GPIO driver enabled (Kconfig)")
+        endif()
+
+        # Watchdog 驱动
+        if(HAL_WATCHDOG_ENABLED)
+            list(APPEND HAL_SOURCES ${HAL_SRC_DIR}/linux/hal_watchdog_linux.c)
+            message(STATUS "HAL: Watchdog driver enabled (Kconfig)")
+        endif()
+
+        if(NOT HAL_SOURCES)
+            message(WARNING "HAL: No drivers enabled in Kconfig, building all drivers")
+            set(HAL_SOURCES
+                ${HAL_SRC_DIR}/linux/hal_can_linux.c
+                ${HAL_SRC_DIR}/linux/hal_serial_linux.c
+                ${HAL_SRC_DIR}/linux/hal_i2c_linux.c
+                ${HAL_SRC_DIR}/linux/hal_spi_linux.c
+                ${HAL_SRC_DIR}/linux/hal_watchdog_linux.c
+                ${HAL_SRC_DIR}/linux/hal_gpio_linux.c
+            )
+        endif()
+    else()
+        # 回退：构建所有驱动
+        message(WARNING "HAL: Kconfig not found, building all drivers")
+        set(HAL_SOURCES
+            ${HAL_SRC_DIR}/linux/hal_can_linux.c
+            ${HAL_SRC_DIR}/linux/hal_serial_linux.c
+            ${HAL_SRC_DIR}/linux/hal_i2c_linux.c
+            ${HAL_SRC_DIR}/linux/hal_spi_linux.c
+            ${HAL_SRC_DIR}/linux/hal_watchdog_linux.c
+            ${HAL_SRC_DIR}/linux/hal_gpio_linux.c
+        )
+    endif()
+
     message(STATUS "HAL: Using Linux hardware implementation")
 endif()
 

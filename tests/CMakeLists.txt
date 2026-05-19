@@ -10,6 +10,11 @@ endif()
 message(STATUS "Tests configured (unified test framework)")
 
 # ============================================================================
+# Kconfig Integration for Tests
+# ============================================================================
+set(KCONFIG_HEADER "${CMAKE_SOURCE_DIR}/include/generated/autoconf.h")
+
+# ============================================================================
 # Collect Test Sources - Explicitly Listed for Better Control
 # ============================================================================
 
@@ -36,15 +41,71 @@ set(OSAL_TEST_SOURCES
     unit/osal/test_osal_process.c
 )
 
-# HAL Unit Tests
-set(HAL_TEST_SOURCES
-    unit/hal/test_hal_can.c
-    unit/hal/test_hal_serial.c
-    unit/hal/test_hal_i2c.c
-    unit/hal/test_hal_spi.c
-    unit/hal/test_hal_watchdog.c
-    unit/hal/test_hal_gpio.c
-)
+# HAL Unit Tests (conditional based on Kconfig)
+set(HAL_TEST_SOURCES "")
+
+if(EXISTS ${KCONFIG_HEADER})
+    file(STRINGS ${KCONFIG_HEADER} CONFIG_LINES)
+
+    # CAN tests
+    if("${CONFIG_LINES}" MATCHES "CONFIG_HAL_CAN")
+        list(APPEND HAL_TEST_SOURCES unit/hal/test_hal_can.c)
+        message(STATUS "Tests: HAL CAN tests enabled")
+    endif()
+
+    # UART tests
+    if("${CONFIG_LINES}" MATCHES "CONFIG_HAL_UART")
+        list(APPEND HAL_TEST_SOURCES unit/hal/test_hal_serial.c)
+        message(STATUS "Tests: HAL UART tests enabled")
+    endif()
+
+    # I2C tests
+    if("${CONFIG_LINES}" MATCHES "CONFIG_HAL_I2C")
+        list(APPEND HAL_TEST_SOURCES unit/hal/test_hal_i2c.c)
+        message(STATUS "Tests: HAL I2C tests enabled")
+    endif()
+
+    # SPI tests
+    if("${CONFIG_LINES}" MATCHES "CONFIG_HAL_SPI")
+        list(APPEND HAL_TEST_SOURCES unit/hal/test_hal_spi.c)
+        message(STATUS "Tests: HAL SPI tests enabled")
+    endif()
+
+    # GPIO tests
+    if("${CONFIG_LINES}" MATCHES "CONFIG_HAL_GPIO")
+        list(APPEND HAL_TEST_SOURCES unit/hal/test_hal_gpio.c)
+        message(STATUS "Tests: HAL GPIO tests enabled")
+    endif()
+
+    # Watchdog tests
+    if("${CONFIG_LINES}" MATCHES "CONFIG_HAL_WATCHDOG")
+        list(APPEND HAL_TEST_SOURCES unit/hal/test_hal_watchdog.c)
+        message(STATUS "Tests: HAL Watchdog tests enabled")
+    endif()
+
+    if(NOT HAL_TEST_SOURCES)
+        message(WARNING "Tests: No HAL tests enabled, building all HAL tests")
+        set(HAL_TEST_SOURCES
+            unit/hal/test_hal_can.c
+            unit/hal/test_hal_serial.c
+            unit/hal/test_hal_i2c.c
+            unit/hal/test_hal_spi.c
+            unit/hal/test_hal_watchdog.c
+            unit/hal/test_hal_gpio.c
+        )
+    endif()
+else()
+    # Fallback: build all HAL tests
+    message(WARNING "Tests: Kconfig not found, building all HAL tests")
+    set(HAL_TEST_SOURCES
+        unit/hal/test_hal_can.c
+        unit/hal/test_hal_serial.c
+        unit/hal/test_hal_i2c.c
+        unit/hal/test_hal_spi.c
+        unit/hal/test_hal_watchdog.c
+        unit/hal/test_hal_gpio.c
+    )
+endif()
 
 # PCL Unit Tests
 set(PCL_TEST_SOURCES
