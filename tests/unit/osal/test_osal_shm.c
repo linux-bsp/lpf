@@ -240,7 +240,7 @@ TEST_CASE(test_osal_shm_partial_map) {
     osal_shm_t shm;
     void *addr;
     int32_t ret;
-    size_t partial_size = 1024;
+    osal_size_t partial_size = 1024;
 
     /* 清理 */
     OSAL_ShmUnlink(TEST_SHM_NAME);

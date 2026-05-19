@@ -10,7 +10,7 @@
  *===========================================================================*/
 
 /* 中断回调计数器 */
-static volatile int interrupt_count = 0;
+static volatile int32_t interrupt_count = 0;
 static volatile hal_gpio_level_t last_level = HAL_GPIO_LEVEL_LOW;
 
 static void test_gpio_isr_callback(uint32_t gpio_num, hal_gpio_level_t level, void *user_data)
@@ -19,7 +19,7 @@ static void test_gpio_isr_callback(uint32_t gpio_num, hal_gpio_level_t level, vo
     interrupt_count++;
     last_level = level;
     if (user_data) {
-        *(int *)user_data = interrupt_count;
+        *(int32_t *)user_data = interrupt_count;
     }
 }
 

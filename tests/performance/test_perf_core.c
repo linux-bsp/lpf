@@ -28,7 +28,7 @@ static double simple_sqrt(double x) {
     double guess = x / 2.0;
     double epsilon = 0.00001;
 
-    for (int i = 0; i < 50; i++) {
+    for (int32_t i = 0; i < 50; i++) {
         double next_guess = (guess + x / guess) / 2.0;
         if ((next_guess - guess) < epsilon && (next_guess - guess) > -epsilon) {
             break;

@@ -175,7 +175,7 @@ SYSTEM_TEST_CASE(concurrent_scenario) {
     /* 检查点2：创建多个并发线程 */
     concurrent_thread_data_t thread_data = { mutex, &counter };
 
-    int all_created = 1;
+    int32_t all_created = 1;
     for (uint32_t i = 0; i < num_threads; i++) {
         ret = OSAL_ThreadCreate(&threads[i], concurrent_thread_func, &thread_data);
         if (ret != 0) {
