@@ -1,0 +1,28 @@
+# OSAL (Operating System Abstraction Layer) Configuration
+
+config OSAL_MAX_TASKS
+	int "Maximum number of tasks"
+	default 64
+	range 1 256
+	help
+	  Maximum number of concurrent tasks supported by OSAL.
+
+config OSAL_MAX_QUEUES
+	int "Maximum number of queues"
+	default 32
+	range 1 128
+	help
+	  Maximum number of message queues.
+
+config OSAL_MAX_MUTEXES
+	int "Maximum number of mutexes"
+	default 32
+	range 1 128
+	help
+	  Maximum number of mutex locks.
+
+config OSAL_DEBUG_LOGGING
+	bool "Enable debug logging"
+	default n
+	help
+	  Enable verbose debug logging in OSAL layer.

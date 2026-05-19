@@ -1,0 +1,13 @@
+# Sample Applications Configuration
+
+config BUILD_SAMPLE_APP
+	bool "Build sample application"
+	default y
+	help
+	  Build the basic sample application demonstrating EMS usage.
+
+config BUILD_WATCHDOG_APP
+	bool "Build watchdog application"
+	default y
+	help
+	  Build the watchdog demonstration application.

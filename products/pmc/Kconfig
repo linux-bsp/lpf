@@ -1,0 +1,48 @@
+# PMC (Power Management Controller) Product Configuration
+
+choice
+	prompt "PMC Project"
+	default PROJECT_H200_AM625
+	help
+	  Select the PMC project variant.
+
+config PROJECT_H200_AM625
+	bool "H200 AM625 Project"
+	help
+	  H200 project based on TI AM625 SoC.
+
+endchoice
+
+menu "PMC Applications"
+
+config BUILD_PMC_SUPERVISOR
+	bool "Build PMC Supervisor"
+	default y
+	help
+	  Build the PMC supervisor application.
+
+config BUILD_PMC_COLLECTOR
+	bool "Build PMC Collector"
+	default y
+	help
+	  Build the PMC data collector application.
+
+config BUILD_PMC_COMM
+	bool "Build PMC Communication"
+	default y
+	help
+	  Build the PMC communication application.
+
+config BUILD_PMC_HEALTH
+	bool "Build PMC Health Monitor"
+	default y
+	help
+	  Build the PMC health monitoring application.
+
+config BUILD_PMC_LOGGER
+	bool "Build PMC Logger"
+	default y
+	help
+	  Build the PMC logging application.
+
+endmenu

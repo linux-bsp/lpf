@@ -1,0 +1,113 @@
+# HAL (Hardware Abstraction Layer) Configuration
+
+menu "HAL Driver Selection"
+
+config HAL_CAN
+	bool "CAN bus driver"
+	default y
+	help
+	  Enable Controller Area Network (CAN) bus driver.
+	  Supports SocketCAN interface on Linux.
+
+config HAL_CAN_DEVICE
+	string "Default CAN device"
+	depends on HAL_CAN
+	default "can0"
+	help
+	  Default CAN device name (e.g., can0, vcan0).
+
+config HAL_UART
+	bool "UART driver"
+	default y
+	help
+	  Enable Universal Asynchronous Receiver-Transmitter (UART) driver.
+
+config HAL_UART_DEVICE
+	string "Default UART device"
+	depends on HAL_UART
+	default "/dev/ttyS0"
+	help
+	  Default UART device path (e.g., /dev/ttyS0, /dev/ttyUSB0).
+
+config HAL_UART_BAUDRATE
+	int "Default UART baudrate"
+	depends on HAL_UART
+	default 115200
+	range 9600 921600
+	help
+	  Default UART communication speed in bits per second.
+	  Common values: 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600
+
+config HAL_UART_DATABITS
+	int "UART data bits"
+	depends on HAL_UART
+	default 8
+	range 5 8
+	help
+	  Number of data bits per character (5-8).
+
+choice
+	prompt "UART parity"
+	depends on HAL_UART
+	default HAL_UART_PARITY_NONE
+
+config HAL_UART_PARITY_NONE
+	bool "None"
+
+config HAL_UART_PARITY_ODD
+	bool "Odd"
+
+config HAL_UART_PARITY_EVEN
+	bool "Even"
+
+endchoice
+
+config HAL_UART_STOPBITS
+	int "UART stop bits"
+	depends on HAL_UART
+	default 1
+	range 1 2
+	help
+	  Number of stop bits (1 or 2).
+
+config HAL_I2C
+	bool "I2C bus driver"
+	default n
+	help
+	  Enable Inter-Integrated Circuit (I2C) bus driver.
+
+config HAL_SPI
+	bool "SPI bus driver"
+	default n
+	help
+	  Enable Serial Peripheral Interface (SPI) driver.
+
+config HAL_GPIO
+	bool "GPIO driver"
+	default y
+	help
+	  Enable General Purpose Input/Output (GPIO) driver.
+	  Uses sysfs interface on Linux.
+
+config HAL_WATCHDOG
+	bool "Watchdog driver"
+	default y
+	help
+	  Enable hardware watchdog timer driver.
+
+config HAL_WATCHDOG_DEVICE
+	string "Watchdog device"
+	depends on HAL_WATCHDOG
+	default "/dev/watchdog"
+	help
+	  Watchdog device path.
+
+config HAL_WATCHDOG_TIMEOUT
+	int "Default watchdog timeout (seconds)"
+	depends on HAL_WATCHDOG
+	default 30
+	range 1 3600
+	help
+	  Default watchdog timeout in seconds.
+
+endmenu

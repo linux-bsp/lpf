@@ -1,0 +1,19 @@
+# PDL (Peripheral Driver Layer) Configuration
+
+config PDL_SATELLITE_SUPPORT
+	bool "Satellite peripheral support"
+	default y
+	help
+	  Enable satellite peripheral management.
+
+config PDL_BMC_SUPPORT
+	bool "BMC peripheral support"
+	default y
+	help
+	  Enable BMC (Baseboard Management Controller) peripheral support.
+
+config PDL_MCU_SUPPORT
+	bool "MCU peripheral support"
+	default y
+	help
+	  Enable MCU peripheral support.

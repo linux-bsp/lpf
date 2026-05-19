@@ -1,0 +1,37 @@
+# PCL (Peripheral Configuration Library) Configuration
+
+choice
+	prompt "Platform selection"
+	default PCL_PLATFORM_TI_AM625
+	help
+	  Select the target hardware platform.
+
+config PCL_PLATFORM_TI_AM625
+	bool "TI AM625 (Sitara ARM Cortex-A53)"
+	help
+	  Texas Instruments AM625 SoC platform.
+
+config PCL_PLATFORM_VENDOR_DEMO
+	bool "Vendor Demo Platform"
+	help
+	  Generic vendor demo platform for testing.
+
+endchoice
+
+if PCL_PLATFORM_TI_AM625
+
+choice
+	prompt "Product variant"
+	default PCL_PRODUCT_H200_100P
+	help
+	  Select the product variant for TI AM625 platform.
+
+config PCL_PRODUCT_H200_100P
+	bool "H200-100P (100W Power Module)"
+
+config PCL_PRODUCT_H200_200P
+	bool "H200-200P (200W Power Module)"
+
+endchoice
+
+endif
