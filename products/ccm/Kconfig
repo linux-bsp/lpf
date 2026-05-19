@@ -1,0 +1,48 @@
+# CCM (Communication Controller Management) Product Configuration
+
+choice
+	prompt "CCM Project"
+	default PROJECT_H200_AM625
+	help
+	  Select the CCM project variant.
+
+config PROJECT_H200_AM625
+	bool "H200 AM625 Project"
+	help
+	  H200 project based on TI AM625 SoC.
+
+endchoice
+
+menu "CCM Applications"
+
+config BUILD_CCM_SUPERVISOR
+	bool "Build CCM Supervisor"
+	default y
+	help
+	  Build the CCM supervisor application.
+
+config BUILD_CCM_COLLECTOR
+	bool "Build CCM Collector"
+	default y
+	help
+	  Build the CCM data collector application.
+
+config BUILD_CCM_COMM
+	bool "Build CCM Communication"
+	default y
+	help
+	  Build the CCM communication application.
+
+config BUILD_CCM_HEALTH
+	bool "Build CCM Health Monitor"
+	default y
+	help
+	  Build the CCM health monitoring application.
+
+config BUILD_CCM_LOGGER
+	bool "Build CCM Logger"
+	default y
+	help
+	  Build the CCM logging application.
+
+endmenu

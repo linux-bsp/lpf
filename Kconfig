@@ -151,14 +151,14 @@ endmenu
 
 choice
 	prompt "Product line"
-	default PRODUCT_PMC
+	default PRODUCT_CCM
 	help
 	  Select the target product line.
 
-config PRODUCT_PMC
-	bool "PMC (Power Management Controller)"
+config PRODUCT_CCM
+	bool "CCM (Communication Controller Management)"
 	help
-	  Build for PMC product line (satellite power management).
+	  Build for CCM product line (communication controller management).
 
 config PRODUCT_SAMPLES
 	bool "Sample applications"
@@ -168,10 +168,10 @@ config PRODUCT_SAMPLES
 endchoice
 
 menu "Product Configuration"
-depends on PRODUCT_PMC || PRODUCT_SAMPLES
+depends on PRODUCT_CCM || PRODUCT_SAMPLES
 
-if PRODUCT_PMC
-source "products/pmc/Kconfig"
+if PRODUCT_CCM
+source "products/ccm/Kconfig"
 endif
 
 if PRODUCT_SAMPLES
