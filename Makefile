@@ -1,143 +1,184 @@
-# EMS Kconfig Wrapper Makefile
-# This Makefile handles Kconfig operations only.
-# Actual building is done by CMake (via build.sh or direct cmake commands).
+# ============================================================================
+# EMS 顶层 Makefile - Linux 内核风格
+# ============================================================================
 
-# Kconfig configuration
-KCONFIG_CONFIG := .config
+# 输出目录处理（支持 O= 和 OUTPUT= 两种形式）
+ifeq ($(origin O), command line)
+  OUTPUT_DIR := $(O)
+endif
+ifeq ($(origin OUTPUT), command line)
+  OUTPUT_DIR := $(OUTPUT)
+endif
+
+# 默认输出到 build/
+OUTPUT_DIR ?= $(CURDIR)/build
+
+# 转换为绝对路径
+override OUTPUT_DIR := $(abspath $(OUTPUT_DIR))
+
+# 导出给子 Makefile
+export OUTPUT_DIR
+export srctree := $(CURDIR)
+export objtree := $(OUTPUT_DIR)
+
+# ============================================================================
+# Kconfig 配置
+# ============================================================================
+# 配置文件路径（支持输出目录重定向）
+KCONFIG_CONFIG := $(OUTPUT_DIR)/.config
+CONFIG_DIR := $(OUTPUT_DIR)/include/config
+GENERATED_DIR := $(OUTPUT_DIR)/include/generated
+AUTOCONF_H := $(GENERATED_DIR)/autoconf.h
+
 export KCONFIG_CONFIG
+export GENERATED_DIR
 
+# Kconfig 工具
 CONF := scripts/kconfig/conf
 MCONF := scripts/kconfig/mconf
 
-# Directories
-INCLUDE_DIR := include
-CONFIG_DIR := $(INCLUDE_DIR)/config
-GENERATED_DIR := $(INCLUDE_DIR)/generated
+# ============================================================================
+# 主要目标
+# ============================================================================
+.PHONY: all core products clean distclean mrproper install install-all headers_install help
+
+# 默认目标
+all: core products
+
+# 核心模块（按依赖顺序）
+core: $(AUTOCONF_H)
+	@echo "Building core modules..."
+	@$(MAKE) -f $(srctree)/core/Makefile
+
+# 产品模块（依赖所有核心模块）
+products: core
+	@echo "Building product modules..."
+	@$(MAKE) -f $(srctree)/products/Makefile
 
 # ============================================================================
-# Kconfig Targets
+# Kconfig 配置目标
 # ============================================================================
-
-.PHONY: menuconfig config defconfig savedefconfig oldconfig silentoldconfig syncconfig
+.PHONY: menuconfig config defconfig savedefconfig oldconfig syncconfig
 
 menuconfig: $(MCONF)
 	@mkdir -p $(CONFIG_DIR) $(GENERATED_DIR)
 	@echo "Starting menuconfig..."
-	@$< Kconfig
+	@KCONFIG_CONFIG=$(KCONFIG_CONFIG) $< Kconfig
 	@$(MAKE) syncconfig
 
 config: $(CONF)
 	@mkdir -p $(CONFIG_DIR) $(GENERATED_DIR)
-	@$< --oldaskconfig Kconfig
+	@KCONFIG_CONFIG=$(KCONFIG_CONFIG) $< --oldaskconfig Kconfig
 	@$(MAKE) syncconfig
 
 defconfig: $(CONF)
 	@mkdir -p $(CONFIG_DIR) $(GENERATED_DIR)
 	@echo "Loading default configuration..."
-	@$< --defconfig=defconfig Kconfig
+	@KCONFIG_CONFIG=$(KCONFIG_CONFIG) $< --defconfig=defconfig Kconfig
 	@$(MAKE) syncconfig
 
 %_defconfig: configs/%_defconfig $(CONF)
 	@mkdir -p $(CONFIG_DIR) $(GENERATED_DIR)
 	@echo "Loading configuration: $*"
-	@$(CONF) --defconfig=$< Kconfig
+	@KCONFIG_CONFIG=$(KCONFIG_CONFIG) $(CONF) --defconfig=$< Kconfig
 	@$(MAKE) syncconfig
 
 savedefconfig: $(CONF)
 	@echo "Saving minimal configuration to defconfig..."
-	@$< --savedefconfig=defconfig Kconfig
+	@KCONFIG_CONFIG=$(KCONFIG_CONFIG) $< --savedefconfig=defconfig Kconfig
 	@echo "Configuration saved."
 
 oldconfig: $(CONF)
 	@mkdir -p $(CONFIG_DIR) $(GENERATED_DIR)
-	@$< --oldconfig Kconfig
+	@KCONFIG_CONFIG=$(KCONFIG_CONFIG) $< --oldconfig Kconfig
 	@$(MAKE) syncconfig
-
-silentoldconfig: syncconfig
 
 syncconfig: $(CONF)
 	@mkdir -p $(CONFIG_DIR) $(GENERATED_DIR)
-	@$< --syncconfig Kconfig
+	@KCONFIG_CONFIG=$(KCONFIG_CONFIG) \
+		KCONFIG_AUTOHEADER=$(AUTOCONF_H) \
+		KCONFIG_AUTOCONFIG=$(CONFIG_DIR)/auto.conf \
+		$< --syncconfig Kconfig
 	@echo "Configuration synchronized."
 
 # ============================================================================
-# Build Kconfig Tools
+# 构建 Kconfig 工具
 # ============================================================================
-
 $(CONF) $(MCONF):
 	@echo "Building kconfig tools..."
 	@$(MAKE) -C scripts/kconfig $(notdir $@)
 
 # ============================================================================
-# CMake Integration Targets
+# 清理目标
 # ============================================================================
+clean:
+	@echo "Cleaning build artifacts..."
+	@rm -rf $(OUTPUT_DIR)/core $(OUTPUT_DIR)/products
+	@rm -rf $(OUTPUT_DIR)/lib $(OUTPUT_DIR)/bin
+	@echo "Clean complete."
 
-.PHONY: cmake-configure cmake-build build rebuild
-
-cmake-configure: syncconfig
-	@echo "Configuring CMake with Kconfig settings..."
-	@if [ ! -f .config ]; then \
-		echo "Error: No .config found. Run 'make menuconfig' or 'make defconfig' first."; \
-		exit 1; \
-	fi
-	@./build.sh
-
-cmake-build: cmake-configure
-	@echo "Building with CMake..."
-	@cmake --build build -j$$(nproc)
-
-build: cmake-build
-
-rebuild: distclean defconfig build
-
-# ============================================================================
-# Clean Targets
-# ============================================================================
-
-.PHONY: clean-config distclean
-
-clean-config:
-	@echo "Cleaning Kconfig artifacts..."
-	@rm -f .config .config.old
+distclean: clean
+	@echo "Cleaning configuration..."
+	@rm -f $(KCONFIG_CONFIG) $(KCONFIG_CONFIG).old
 	@rm -rf $(CONFIG_DIR) $(GENERATED_DIR)
+	@echo "Distclean complete."
 
-distclean: clean-config
+mrproper: distclean
 	@echo "Cleaning kconfig tools..."
 	@$(MAKE) -C scripts/kconfig clean
+	@echo "Mrproper complete."
 
 # ============================================================================
-# Help
+# 安装目标
 # ============================================================================
+install:
+	@$(MAKE) -f $(srctree)/scripts/install.mk install
 
-.PHONY: help
+headers_install:
+	@$(MAKE) -f $(srctree)/scripts/install.mk headers_install
 
+install-all:
+	@$(MAKE) -f $(srctree)/scripts/install.mk install-all
+
+# ============================================================================
+# 帮助信息
+# ============================================================================
 help:
-	@echo "EMS Kconfig Configuration System"
+	@echo "EMS Build System - Linux Kernel Style"
+	@echo ""
+	@echo "Usage: make [O=<output_dir>] [target]"
 	@echo ""
 	@echo "Configuration targets:"
 	@echo "  menuconfig       - Interactive configuration (ncurses)"
+	@echo "  config           - Text-based configuration"
 	@echo "  defconfig        - Load default configuration"
 	@echo "  <name>_defconfig - Load preset from configs/<name>_defconfig"
 	@echo "  savedefconfig    - Save minimal config to defconfig"
-	@echo "  oldconfig        - Update config with new options"
 	@echo "  syncconfig       - Synchronize and generate headers"
 	@echo ""
-	@echo "Build targets (Kconfig + CMake):"
-	@echo "  build            - Configure and build with CMake"
-	@echo "  cmake-configure  - Run CMake configuration"
-	@echo "  cmake-build      - Build with CMake"
-	@echo "  rebuild          - Clean config, load defaults, and build"
+	@echo "Build targets:"
+	@echo "  all              - Build all modules (default)"
+	@echo "  core             - Build core modules only"
+	@echo "  products         - Build product modules"
+	@echo ""
+	@echo "Install targets:"
+	@echo "  install          - Install libraries and binaries"
+	@echo "  headers_install  - Install header files (kernel style)"
+	@echo "  install-all      - Install everything (libs + bins + headers)"
 	@echo ""
 	@echo "Clean targets:"
-	@echo "  clean-config     - Remove .config and generated headers"
-	@echo "  distclean        - Remove config and kconfig tools"
+	@echo "  clean            - Remove build artifacts"
+	@echo "  distclean        - Remove build and config"
+	@echo "  mrproper         - Full clean including tools"
 	@echo ""
-	@echo "Typical workflow:"
-	@echo "  1. make menuconfig      # Configure features"
-	@echo "  2. make build           # Build with CMake"
-	@echo "  or"
-	@echo "  1. make defconfig       # Use defaults"
-	@echo "  2. ./build.sh           # Build directly"
+	@echo "Examples:"
+	@echo "  make menuconfig"
+	@echo "  make -j$$(nproc)"
+	@echo "  make O=/tmp/build defconfig"
+	@echo "  make O=/tmp/build -j8"
+	@echo "  make install INSTALL_PREFIX=/opt/ems"
+	@echo "  make headers_install INSTALL_PREFIX=/opt/ems"
+	@echo "  make install-all DESTDIR=/staging INSTALL_PREFIX=/usr"
 	@echo ""
 	@echo "Available presets:"
 	@ls -1 configs/*_defconfig 2>/dev/null | sed 's|configs/||' | sed 's|^|  |' || echo "  (none)"
