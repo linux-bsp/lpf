@@ -145,3 +145,54 @@ osal_id_t OSAL_ProcessGetParentId(void)
 {
     return (osal_id_t)getppid();
 }
+
+int32_t OSAL_Fork(osal_id_t *child_pid)
+{
+    if (child_pid == NULL) {
+        return OSAL_ERR_INVALID_POINTER;
+    }
+
+    pid_t pid = fork();
+
+    if (pid < 0) {
+        /* fork失败 */
+        return OSAL_ERR_NO_FREE_IDS;
+    }
+
+    /* 父进程中pid > 0，子进程中pid == 0 */
+    *child_pid = (osal_id_t)pid;
+    return OSAL_SUCCESS;
+}
+
+int32_t OSAL_Waitpid(osal_id_t pid, int32_t *status, int32_t options)
+{
+    int wait_status;
+    int posix_options = 0;
+
+    /* 转换选项 */
+    if (options & OSAL_WNOHANG) {
+        posix_options |= WNOHANG;
+    }
+
+    pid_t result = waitpid((pid_t)pid, &wait_status, posix_options);
+
+    if (result > 0) {
+        /* 子进程退出 */
+        if (status != NULL) {
+            *status = WIFEXITED(wait_status) ? WEXITSTATUS(wait_status) : -1;
+        }
+        return (int32_t)result;
+    }
+
+    if (result == 0) {
+        /* 非阻塞模式下子进程未退出 */
+        return 0;
+    }
+
+    /* result < 0: 错误 */
+    if (errno == ECHILD) {
+        return OSAL_ERR_INVALID_ID;
+    }
+
+    return OSAL_ERR_GENERIC;
+}

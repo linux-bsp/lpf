@@ -7,11 +7,7 @@
 #include "lib/osal_errno.h"
 #include "sys/osal_process.h"
 
-/* 测试多进程场景需要使用fork，这是POSIX特定的测试 */
-#ifdef __linux__
-#include <unistd.h>
-#include <sys/wait.h>
-#endif
+/* 测试多进程场景需要使用fork，使用OSAL封装接口 */
 
 #define TEST_SHM_NAME   "/ems_test_shm"
 #define TEST_SHM_SIZE   4096
@@ -125,7 +121,7 @@ TEST_CASE(test_osal_shm_multiprocess) {
     osal_shm_t shm;
     void *addr;
     int32_t ret;
-    pid_t pid;
+    osal_id_t pid;
 
     /* 清理 */
     OSAL_ShmUnlink(TEST_SHM_NAME);
@@ -145,7 +141,9 @@ TEST_CASE(test_osal_shm_multiprocess) {
     data->counter = 0;
 
     /* Fork子进程 */
-    pid = fork();
+    ret = OSAL_Fork(&pid);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
     if (pid == 0) {
         /* 子进程：打开已存在的共享内存 */
         osal_shm_t child_shm;
@@ -153,12 +151,12 @@ TEST_CASE(test_osal_shm_multiprocess) {
 
         ret = OSAL_ShmCreate(TEST_SHM_NAME, TEST_SHM_SIZE, OSAL_SHM_RDWR, &child_shm);
         if (ret != OSAL_SUCCESS) {
-            _exit(1);
+            OSAL_Exit(1);
         }
 
         ret = OSAL_ShmMap(child_shm, 0, 0, OSAL_SHM_RDWR, &child_addr);
         if (ret != OSAL_SUCCESS) {
-            _exit(2);
+            OSAL_Exit(2);
         }
 
         /* 修改共享数据 */
@@ -172,19 +170,18 @@ TEST_CASE(test_osal_shm_multiprocess) {
         /* 清理并退出 */
         OSAL_ShmUnmap(child_addr, TEST_SHM_SIZE);
         OSAL_ShmClose(child_shm);
-        _exit(0);
-    } else if (pid > 0) {
+        OSAL_Exit(0);
+    } else {
         /* 父进程：等待子进程完成 */
-        int status;
-        waitpid(pid, &status, 0);
-        TEST_ASSERT_EQUAL((int32_t)0, (int32_t)WEXITSTATUS(status));
+        int32_t status;
+        int32_t wait_ret = OSAL_Waitpid(pid, &status, 0);
+        TEST_ASSERT(wait_ret > 0);
+        TEST_ASSERT_EQUAL(0, status);
 
         /* 验证子进程的修改 */
         TEST_ASSERT_EQUAL((int32_t)0xABCDEF00, data->magic);
         TEST_ASSERT_EQUAL(999, data->counter);
         TEST_ASSERT_STRING_EQUAL("Modified by child", data->message);
-    } else {
-        TEST_ASSERT(0); /* Fork failed */
     }
 
     /* 清理 */

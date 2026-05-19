@@ -92,4 +92,34 @@ osal_id_t OSAL_ProcessGetId(void);
  */
 osal_id_t OSAL_ProcessGetParentId(void);
 
+/**
+ * @brief 创建子进程（fork）
+ *
+ * @param[out] child_pid  子进程ID（父进程中返回子进程ID，子进程中返回0）
+ *
+ * @return OSAL_SUCCESS 成功（父进程和子进程都返回此值）
+ * @return OSAL_ERR_INVALID_POINTER 参数无效
+ * @return OSAL_ERR_NO_FREE_IDS fork失败
+ *
+ * @note 父进程中 *child_pid > 0，子进程中 *child_pid == 0
+ */
+int32_t OSAL_Fork(osal_id_t *child_pid);
+
+/**
+ * @brief 等待指定子进程退出
+ *
+ * @param[in]  pid     子进程ID（-1表示等待任意子进程）
+ * @param[out] status  退出状态（可选，NULL表示不关心）
+ * @param[in]  options 等待选项（0=阻塞等待，WNOHANG=非阻塞）
+ *
+ * @return 成功返回退出的子进程ID
+ * @return 0 非阻塞模式下子进程未退出
+ * @return OSAL_ERR_INVALID_ID 无子进程
+ * @return OSAL_ERR_GENERIC 系统调用失败
+ */
+int32_t OSAL_Waitpid(osal_id_t pid, int32_t *status, int32_t options);
+
+/* 等待选项 */
+#define OSAL_WNOHANG  1  /* 非阻塞等待 */
+
 #endif /* OSAL_PROCESS_H */
