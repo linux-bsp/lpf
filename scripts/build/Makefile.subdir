@@ -28,7 +28,7 @@ ifdef subdir-y-collected
         srctree=$(srctree) \
         objtree=$(objtree) \
         scriptdir=$(scriptdir) \
-        print-objs)))
+        print-objs 2>/dev/null)))
   obj-y-collected += $(subdir-objs)
 endif
 

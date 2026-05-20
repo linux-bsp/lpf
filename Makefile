@@ -53,6 +53,11 @@ MCONF := scripts/kconfig/mconf
 
 # 默认目标
 all: core products
+	@echo ""
+	@echo "=========================================="
+	@echo "  EMS	build success"
+	@echo "=========================================="
+	@echo ""
 
 # 核心模块（按依赖顺序）
 core: $(AUTOCONF_H)

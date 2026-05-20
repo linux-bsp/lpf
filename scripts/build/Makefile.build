@@ -43,7 +43,7 @@ ifdef subdir-y
         srctree=$(srctree) \
         objtree=$(objtree) \
         scriptdir=$(scriptdir) \
-        print-objs)))
+        print-objs 2>/dev/null)))
   # 过滤掉 make 的诊断消息（Entering/Leaving directory 等）
   subdir-objs := $(filter %.o %.a %.so,$(subdir-objs))
   obj-y += $(subdir-objs)
