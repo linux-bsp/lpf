@@ -5,7 +5,7 @@
 # 模块列表（按依赖顺序）
 MODULES := osal hal pcl pdl acl
 
-.PHONY: all $(MODULES)
+.PHONY: all $(MODULES) headers_install_all
 
 all: $(MODULES)
 
@@ -22,3 +22,16 @@ hal: osal
 pcl: hal
 pdl: pcl
 acl: pdl
+
+# ============================================================================
+# 头文件导出 - 将所有模块的头文件导出到顶层 include/
+# ============================================================================
+headers_install_all:
+	@echo "Exporting core module headers to $(srctree)/include/..."
+	@for module in $(MODULES); do \
+		$(MAKE) -C $(srctree)/core/$$module \
+			srctree=$(srctree) \
+			objtree=$(objtree) \
+			headers_install || exit 1; \
+	done
+	@echo "All core headers exported successfully"
