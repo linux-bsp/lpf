@@ -19,78 +19,105 @@ config HAL_CAN
 	  Enable Controller Area Network (CAN) bus driver.
 	  Supports SocketCAN interface on Linux.
 
-config HAL_CAN_DEVICE
-	string "Default CAN device"
-	depends on HAL_CAN
-	default "can0"
+if HAL_CAN
+
+config HAL_CAN_FILTER
+	bool "CAN filter support"
+	default y
 	help
-	  Default CAN device name (e.g., can0, vcan0).
+	  Enable CAN message filtering capability.
+	  Allows filtering CAN frames by ID.
+
+config HAL_CAN_ERROR_HANDLING
+	bool "CAN error handling"
+	default y
+	help
+	  Enable CAN bus error detection and handling.
+	  Reports bus-off, error-warning, and error-passive states.
+
+config HAL_CAN_LOOPBACK
+	bool "CAN loopback mode"
+	default n
+	help
+	  Enable CAN loopback mode for testing.
+	  Useful for development and debugging without physical CAN bus.
+
+endif # HAL_CAN
 
 config HAL_UART
 	bool "UART driver"
 	default y
 	help
 	  Enable Universal Asynchronous Receiver-Transmitter (UART) driver.
+	  Provides serial communication interface.
 
-config HAL_UART_DEVICE
-	string "Default UART device"
-	depends on HAL_UART
-	default "/dev/ttyS0"
+if HAL_UART
+
+config HAL_UART_FLOW_CONTROL
+	bool "UART hardware flow control"
+	default n
 	help
-	  Default UART device path (e.g., /dev/ttyS0, /dev/ttyUSB0).
+	  Enable RTS/CTS hardware flow control.
+	  Useful for high-speed serial communication.
 
-config HAL_UART_BAUDRATE
-	int "Default UART baudrate"
-	depends on HAL_UART
-	default 115200
-	range 9600 921600
+config HAL_UART_RS485
+	bool "RS485 mode support"
+	default n
 	help
-	  Default UART communication speed in bits per second.
-	  Common values: 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600
+	  Enable RS485 half-duplex mode support.
+	  Automatically controls DE/RE signals.
 
-config HAL_UART_DATABITS
-	int "UART data bits"
-	depends on HAL_UART
-	default 8
-	range 5 8
-	help
-	  Number of data bits per character (5-8).
-
-choice
-	prompt "UART parity"
-	depends on HAL_UART
-	default HAL_UART_PARITY_NONE
-
-config HAL_UART_PARITY_NONE
-	bool "None"
-
-config HAL_UART_PARITY_ODD
-	bool "Odd"
-
-config HAL_UART_PARITY_EVEN
-	bool "Even"
-
-endchoice
-
-config HAL_UART_STOPBITS
-	int "UART stop bits"
-	depends on HAL_UART
-	default 1
-	range 1 2
-	help
-	  Number of stop bits (1 or 2).
+endif # HAL_UART
 
 config HAL_I2C
 	bool "I2C bus driver"
 	default n
 	help
 	  Enable Inter-Integrated Circuit (I2C) bus driver.
+	  Supports master mode operation.
+
+if HAL_I2C
+
+config HAL_I2C_SLAVE
+	bool "I2C slave mode"
+	default n
+	help
+	  Enable I2C slave mode support.
+	  Allows device to act as I2C slave.
+
+config HAL_I2C_10BIT_ADDR
+	bool "I2C 10-bit addressing"
+	default n
+	help
+	  Enable 10-bit I2C addressing mode.
+	  Standard mode uses 7-bit addressing.
+
+endif # HAL_I2C
 
 config HAL_SPI
 	bool "SPI bus driver"
 	default n
 	help
 	  Enable Serial Peripheral Interface (SPI) driver.
+	  Supports master mode operation.
+
+if HAL_SPI
+
+config HAL_SPI_DMA
+	bool "SPI DMA support"
+	default n
+	help
+	  Enable DMA (Direct Memory Access) for SPI transfers.
+	  Improves performance for large data transfers.
+
+config HAL_SPI_SLAVE
+	bool "SPI slave mode"
+	default n
+	help
+	  Enable SPI slave mode support.
+	  Allows device to act as SPI slave.
+
+endif # HAL_SPI
 
 config HAL_GPIO
 	bool "GPIO driver"
@@ -99,26 +126,66 @@ config HAL_GPIO
 	  Enable General Purpose Input/Output (GPIO) driver.
 	  Uses sysfs interface on Linux.
 
+if HAL_GPIO
+
+config HAL_GPIO_INTERRUPT
+	bool "GPIO interrupt support"
+	default y
+	help
+	  Enable GPIO interrupt/edge detection.
+	  Supports rising, falling, and both edges.
+
+config HAL_GPIO_DEBOUNCE
+	bool "GPIO debounce support"
+	default n
+	help
+	  Enable software debounce for GPIO inputs.
+	  Filters out noise and glitches.
+
+endif # HAL_GPIO
+
 config HAL_WATCHDOG
 	bool "Watchdog driver"
 	default y
 	help
 	  Enable hardware watchdog timer driver.
+	  Provides system reset on software hang.
 
-config HAL_WATCHDOG_DEVICE
-	string "Watchdog device"
-	depends on HAL_WATCHDOG
-	default "/dev/watchdog"
-	help
-	  Watchdog device path.
+if HAL_WATCHDOG
 
-config HAL_WATCHDOG_TIMEOUT
-	int "Default watchdog timeout (seconds)"
-	depends on HAL_WATCHDOG
-	default 30
-	range 1 3600
+config HAL_WATCHDOG_PRETIMEOUT
+	bool "Watchdog pretimeout support"
+	default n
 	help
-	  Default watchdog timeout in seconds.
+	  Enable watchdog pretimeout notification.
+	  Triggers interrupt before actual timeout.
+
+endif # HAL_WATCHDOG
+
+endmenu
+
+menu "HAL Advanced Features"
+
+config HAL_DEBUG
+	bool "HAL debug logging"
+	default n
+	help
+	  Enable verbose debug logging in HAL layer.
+	  Useful for driver development and troubleshooting.
+
+config HAL_STATISTICS
+	bool "HAL statistics collection"
+	default n
+	help
+	  Enable HAL driver statistics collection.
+	  Tracks transfer counts, errors, and performance metrics.
+
+config HAL_POWER_MANAGEMENT
+	bool "HAL power management"
+	default n
+	help
+	  Enable power management support in HAL drivers.
+	  Allows drivers to enter low-power states.
 
 endmenu
 
