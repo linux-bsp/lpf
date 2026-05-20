@@ -1,0 +1,151 @@
+# ============================================================================
+# 通用编译规则库 (Makefile.rules)
+# ============================================================================
+# 提供所有构建类型共用的编译规则和辅助函数
+# 被 Makefile.lib、Makefile.app、Makefile.ko、Makefile.dll 等包含
+# ============================================================================
+
+# ============================================================================
+# 详细程度控制（V=参数支持）
+# ============================================================================
+ifeq ("$(origin V)", "command line")
+  KBUILD_VERBOSE = $(V)
+endif
+ifndef KBUILD_VERBOSE
+  KBUILD_VERBOSE = 0
+endif
+
+ifeq ($(KBUILD_VERBOSE),1)
+  quiet =
+  Q =
+else
+  quiet = quiet_
+  Q = @
+endif
+
+export quiet Q KBUILD_VERBOSE
+
+# ============================================================================
+# 编译器设置
+# ============================================================================
+CC ?= $(CROSS_COMPILE)gcc
+CXX ?= $(CROSS_COMPILE)g++
+AR ?= $(CROSS_COMPILE)ar
+LD ?= $(CROSS_COMPILE)ld
+STRIP ?= $(CROSS_COMPILE)strip
+
+# ============================================================================
+# 通用编译标志
+# ============================================================================
+CFLAGS := -Wall -Wextra
+CFLAGS += -I$(srctree)/include
+CFLAGS += -I$(objtree)/include/generated
+
+# 依赖跟踪：自动生成.d文件跟踪头文件依赖
+CFLAGS += -MMD -MP
+
+# 根据 Kconfig 构建类型设置优化级别
+ifeq ($(CONFIG_BUILD_TYPE_DEBUG),y)
+  CFLAGS += -g -O0 -DDEBUG
+else
+  CFLAGS += -O2 -DNDEBUG
+endif
+
+# 架构相关标志
+ifeq ($(CONFIG_ARCH_ARM32),y)
+  CFLAGS += -march=armv7-a -mfpu=neon -mfloat-abi=hard
+endif
+
+# 读取 Kconfig 配置
+AUTOCONF_H := $(objtree)/include/generated/autoconf.h
+ifneq ($(wildcard $(AUTOCONF_H)),)
+  KCONFIG_AVAILABLE := y
+else
+  KCONFIG_AVAILABLE := n
+endif
+
+# ============================================================================
+# 辅助函数
+# ============================================================================
+
+# 检查 Kconfig 配置是否启用
+# 用法: $(call kconfig_is_set,CONFIG_XXX)
+define kconfig_is_set
+$(shell grep -q "^\#define $(1) 1" $(AUTOCONF_H) 2>/dev/null && echo y || echo n)
+endef
+
+# 获取 Kconfig 配置值
+# 用法: $(call kconfig_get_value,CONFIG_XXX)
+define kconfig_get_value
+$(shell grep "^\#define $(1)" $(AUTOCONF_H) 2>/dev/null | awk '{print $$3}' | tr -d '"')
+endef
+
+# ============================================================================
+# 编译命令定义（静默输出支持）
+# ============================================================================
+
+# 静默编译C文件（库 - 共享库 PIC）
+quiet_cmd_cc_o_c_shared = CC [PIC] $@
+      cmd_cc_o_c_shared = $(CC) $(CFLAGS) $(CFLAGS_SHARED) -c -o $@ $<
+
+# 静默编译C文件（库 - 静态库）
+quiet_cmd_cc_o_c_static = CC      $@
+      cmd_cc_o_c_static = $(CC) $(CFLAGS) $(CFLAGS_STATIC) -c -o $@ $<
+
+# 静默编译C文件（应用程序）
+quiet_cmd_cc_o_c_app = CC      $@
+      cmd_cc_o_c_app = $(CC) $(CFLAGS) $(CFLAGS_APP) -c -o $@ $<
+
+# 静默编译C++文件（共享库 PIC）
+quiet_cmd_cxx_o_cpp_shared = CXX [PIC] $@
+      cmd_cxx_o_cpp_shared = $(CXX) $(CXXFLAGS) $(CXXFLAGS_SHARED) -c -o $@ $<
+
+# 静默编译C++文件（静态库）
+quiet_cmd_cxx_o_cpp_static = CXX     $@
+      cmd_cxx_o_cpp_static = $(CXX) $(CXXFLAGS) $(CXXFLAGS_STATIC) -c -o $@ $<
+
+# 静默编译C++文件（应用程序）
+quiet_cmd_cxx_o_cpp_app = CXX     $@
+      cmd_cxx_o_cpp_app = $(CXX) $(CXXFLAGS) $(CXXFLAGS_APP) -c -o $@ $<
+
+# 静默链接共享库
+quiet_cmd_ld_so = LD      $@
+      cmd_ld_so = $(CC) -shared -o $@ $^ $(LDFLAGS) $(LDLIBS)
+
+# 静默创建静态库
+quiet_cmd_ar_a = AR      $@
+      cmd_ar_a = rm -f $@; $(AR) rcs $@ $^
+
+# 静默链接可执行文件
+quiet_cmd_ld_exe = LD      $@
+      cmd_ld_exe = $(CC) -o $@ $^ $(LDFLAGS) $(LDLIBS)
+
+# 静默 strip 可执行文件
+quiet_cmd_strip = STRIP   $@
+      cmd_strip = $(STRIP) $@
+
+# Windows DLL 链接
+quiet_cmd_ld_dll = LD [DLL] $@
+      cmd_ld_dll = $(CC) -shared -o $@ $^ $(LDFLAGS) $(LDLIBS) -Wl,--out-implib,$(patsubst %.dll,%.lib,$@)
+
+# 执行命令的宏
+cmd = @$(if $($(quiet)cmd_$(1)),echo '  $($(quiet)cmd_$(1))' &&) $(cmd_$(1))
+
+# ============================================================================
+# 安装路径
+# ============================================================================
+INSTALL_PREFIX ?= /usr/local
+INSTALL_HDR_PATH ?= $(INSTALL_PREFIX)/include
+INSTALL_LIB_PATH ?= $(INSTALL_PREFIX)/lib
+INSTALL_BIN_PATH ?= $(INSTALL_PREFIX)/bin
+INSTALL_KO_PATH ?= $(INSTALL_PREFIX)/lib/modules/$(shell uname -r)/extra
+
+# DESTDIR 支持（用于打包）
+ifdef DESTDIR
+  INSTALL_HDR_PATH := $(DESTDIR)$(INSTALL_HDR_PATH)
+  INSTALL_LIB_PATH := $(DESTDIR)$(INSTALL_LIB_PATH)
+  INSTALL_BIN_PATH := $(DESTDIR)$(INSTALL_BIN_PATH)
+  INSTALL_KO_PATH := $(DESTDIR)$(INSTALL_KO_PATH)
+endif
+
+export INSTALL_PREFIX INSTALL_HDR_PATH INSTALL_LIB_PATH INSTALL_BIN_PATH INSTALL_KO_PATH

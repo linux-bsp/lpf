@@ -1,0 +1,162 @@
+# ============================================================================
+# 通用构建框架 - 参考 Linux 内核和 Buildroot package infrastructure
+# ============================================================================
+#
+# 使用方法：
+# 1. 在子模块 Makefile 中定义以下变量：
+#    - MODULE_NAME: 模块名称（必需）
+#    - MODULE_TYPE: 模块类型 (shared_lib/static_lib/executable)
+#    - SRCS: 源文件列表（相对于 SRC_DIR）
+#    - EXPORT_HEADERS: 需要导出的头文件列表（相对于 INC_DIR）
+#    - CFLAGS_MODULE: 模块特定的编译标志
+#    - LDLIBS: 链接库
+#
+# 2. 包含此文件：include $(srctree)/scripts/Makefile.build
+#
+# 示例：
+#   MODULE_NAME := osal
+#   MODULE_TYPE := shared_lib
+#   SRCS := lib/osal_errno.c ipc/osal_mutex.c
+#   EXPORT_HEADERS := osal.h osal_types.h
+#   include $(srctree)/scripts/Makefile.build
+# ============================================================================
+
+# 包含通用规则库
+include $(srctree)/scripts/Makefile.lib
+
+# ============================================================================
+# 默认值和路径设置
+# ============================================================================
+
+# 模块类型默认为共享库
+MODULE_TYPE ?= shared_lib
+
+# 源文件目录（默认为当前模块的 src/）
+SRC_DIR ?= $(srctree)/core/$(MODULE_NAME)/src
+
+# 头文件目录（默认为当前模块的 include/）
+INC_DIR ?= $(srctree)/core/$(MODULE_NAME)/include
+
+# 构建输出目录
+BUILD_DIR ?= $(objtree)/core/$(MODULE_NAME)
+
+# 库输出目录
+LIB_DIR := $(objtree)/lib
+
+# 可执行文件输出目录
+BIN_DIR := $(objtree)/bin
+
+# 顶层 include 目录（用于导出头文件）
+EXPORT_INC_DIR := $(srctree)/include/$(MODULE_NAME)
+
+# ============================================================================
+# 目标文件名生成
+# ============================================================================
+
+ifeq ($(MODULE_TYPE),shared_lib)
+  TARGET_NAME := lib$(MODULE_NAME).so
+  TARGET_DIR := $(LIB_DIR)
+  BUILD_CMD := ld_so
+else ifeq ($(MODULE_TYPE),static_lib)
+  TARGET_NAME := lib$(MODULE_NAME).a
+  TARGET_DIR := $(LIB_DIR)
+  BUILD_CMD := ar_a
+else ifeq ($(MODULE_TYPE),executable)
+  TARGET_NAME := $(MODULE_NAME)
+  TARGET_DIR := $(BIN_DIR)
+  BUILD_CMD := ld_exe
+else
+  $(error Unknown MODULE_TYPE: $(MODULE_TYPE))
+endif
+
+TARGET := $(TARGET_DIR)/$(TARGET_NAME)
+
+# ============================================================================
+# 源文件和目标文件处理
+# ============================================================================
+
+# 支持条件编译：根据 Kconfig 配置动态添加源文件
+# 使用方法：
+#   SRCS-$(CONFIG_HAL_CAN) += hal_can.c
+#   SRCS-$(CONFIG_HAL_UART) += hal_serial.c
+# 然后调用：SRCS := $(call filter-srcs,$(SRCS-y))
+
+# 过滤条件编译的源文件
+define filter-srcs
+$(foreach src,$(1),$(if $(findstring y,$(src)),$(patsubst %-y,%,$(src)),))
+endef
+
+# 将源文件转换为目标文件路径
+# 支持多种源文件路径格式：
+# 1. 相对于 SRC_DIR 的路径: lib/osal_errno.c -> $(BUILD_DIR)/lib/osal_errno.o
+# 2. 绝对路径: $(SRC_DIR)/posix/lib/osal_errno.c -> $(BUILD_DIR)/posix/lib/osal_errno.o
+OBJS := $(patsubst %.c,$(BUILD_DIR)/%.o,$(SRCS))
+
+# 如果 SRCS 是相对路径，添加 SRC_DIR 前缀
+SRCS_FULL := $(addprefix $(SRC_DIR)/,$(SRCS))
+
+# ============================================================================
+# 编译标志
+# ============================================================================
+
+# 添加模块头文件路径
+CFLAGS_MODULE += -I$(INC_DIR)
+
+# 添加顶层 include 路径（用于跨模块引用）
+CFLAGS_MODULE += -I$(srctree)/include
+
+# ============================================================================
+# 构建目标
+# ============================================================================
+
+.PHONY: all clean install headers_install
+
+all: $(TARGET)
+
+# 链接目标
+$(TARGET): $(OBJS) | $(TARGET_DIR)
+	$(call cmd,$(BUILD_CMD))
+
+# 编译规则 - 支持多级子目录
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+	@mkdir -p $(dir $@)
+	$(call cmd,cc_o_c)
+
+# 创建输出目录
+$(TARGET_DIR):
+	@mkdir -p $@
+
+# ============================================================================
+# 头文件导出
+# ============================================================================
+
+# 导出头文件到顶层 include 目录
+headers_install:
+ifdef EXPORT_HEADERS
+	@echo "  INSTALL $(MODULE_NAME) headers"
+	@mkdir -p $(EXPORT_INC_DIR)
+	@for header in $(EXPORT_HEADERS); do \
+		src="$(INC_DIR)/$$header"; \
+		dst="$(EXPORT_INC_DIR)/$$header"; \
+		mkdir -p $$(dirname $$dst); \
+		cp -f $$src $$dst; \
+	done
+else
+	@echo "  SKIP    $(MODULE_NAME) (no headers to export)"
+endif
+
+# ============================================================================
+# 清理
+# ============================================================================
+
+clean:
+	@echo "  CLEAN   $(MODULE_NAME)"
+	@rm -rf $(BUILD_DIR)
+	@rm -f $(TARGET)
+
+# ============================================================================
+# 依赖跟踪
+# ============================================================================
+
+# 包含自动生成的依赖文件（.d 文件）
+-include $(OBJS:.o=.d)
