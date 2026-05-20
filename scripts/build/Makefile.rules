@@ -10,6 +10,9 @@
 # ============================================================================
 -include $(objtree)/include/config/auto.conf
 
+# 从 Kconfig 配置中提取交叉编译器前缀
+CROSS_COMPILE ?= $(CONFIG_CROSS_COMPILE)
+
 # ============================================================================
 # 详细程度控制（V=参数支持）
 # ============================================================================
@@ -33,11 +36,11 @@ export quiet Q KBUILD_VERBOSE
 # ============================================================================
 # 编译器设置
 # ============================================================================
-CC ?= $(CROSS_COMPILE)gcc
-CXX ?= $(CROSS_COMPILE)g++
-AR ?= $(CROSS_COMPILE)ar
-LD ?= $(CROSS_COMPILE)ld
-STRIP ?= $(CROSS_COMPILE)strip
+CC := $(CROSS_COMPILE)gcc
+CXX := $(CROSS_COMPILE)g++
+AR := $(CROSS_COMPILE)ar
+LD := $(CROSS_COMPILE)ld
+STRIP := $(CROSS_COMPILE)strip
 
 # ============================================================================
 # 通用编译标志
