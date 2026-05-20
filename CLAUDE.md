@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Important Rules
+
+**DO NOT generate summary documents** - Never create summary files like `BUILD_FRAMEWORK_SUMMARY.md`, `QUICK_REFERENCE.md`, or similar documentation files unless explicitly requested by the user. Focus on code implementation and necessary technical documentation only.
+
 ## Project Overview
 
 **EMS** (Embedded Middleware System) is a general-purpose embedded middleware framework providing hardware abstraction and peripheral management for embedded controllers. It uses a 3-layer call chain (Apps→PDL→HAL) running on OSAL runtime environment, with 2 configuration libraries (ACL/PCL), designed for cross-platform portability (Linux/RTOS).
