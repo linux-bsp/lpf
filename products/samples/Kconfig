@@ -1,13 +1,41 @@
+# ============================================================================
 # Sample Applications Configuration
+# ============================================================================
+
+menuconfig PRODUCT_SAMPLES
+	bool "Sample Applications"
+	default n
+	help
+	  Build sample/demo applications for learning and testing.
+
+	  These applications demonstrate how to use EMS framework
+	  APIs (OSAL, HAL, PDL, PCL, ACL) in real applications.
+
+	  If unsure, say N for production builds.
+
+if PRODUCT_SAMPLES
 
 config BUILD_SAMPLE_APP
-	bool "Build sample application"
+	bool "Basic Sample Application"
 	default y
 	help
 	  Build the basic sample application demonstrating EMS usage.
 
+	  This application shows:
+	  - OSAL task creation and IPC
+	  - HAL driver usage (CAN, UART, GPIO)
+	  - PDL peripheral management
+	  - ACL configuration lookup
+
 config BUILD_WATCHDOG_APP
-	bool "Build watchdog application"
+	bool "Watchdog Application"
 	default y
 	help
 	  Build the watchdog demonstration application.
+
+	  This application demonstrates:
+	  - Hardware watchdog usage
+	  - Watchdog feeding strategies
+	  - Timeout handling
+
+endif # PRODUCT_SAMPLES

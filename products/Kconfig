@@ -1,0 +1,16 @@
+# ============================================================================
+# Products Configuration
+# ============================================================================
+# This file organizes all product configurations in a hierarchical menu
+# structure, similar to Linux kernel's drivers/ subsystem.
+# ============================================================================
+
+menu "Products"
+
+# Source individual product Kconfig files
+# Each product defines its own menuconfig entry for a collapsible submenu
+
+source "products/ccm/Kconfig"
+source "products/samples/Kconfig"
+
+endmenu

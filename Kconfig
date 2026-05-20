@@ -146,39 +146,10 @@ source "core/acl/Kconfig"
 endmenu
 
 # ============================================================================
-# Product Selection
+# Products Configuration
 # ============================================================================
 
-choice
-	prompt "Product line"
-	default PRODUCT_CCM
-	help
-	  Select the target product line.
-
-config PRODUCT_CCM
-	bool "CCM (Communication Controller Management)"
-	help
-	  Build for CCM product line (communication controller management).
-
-config PRODUCT_SAMPLES
-	bool "Sample applications"
-	help
-	  Build sample/demo applications only.
-
-endchoice
-
-menu "Product Configuration"
-depends on PRODUCT_CCM || PRODUCT_SAMPLES
-
-if PRODUCT_CCM
-source "products/ccm/Kconfig"
-endif
-
-if PRODUCT_SAMPLES
-source "products/samples/Kconfig"
-endif
-
-endmenu
+source "products/Kconfig"
 
 # ============================================================================
 # Test Configuration
