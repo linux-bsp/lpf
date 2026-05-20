@@ -135,7 +135,7 @@ CLEAN_FILES :=
 CLEAN_DIRS := lib bin
 
 # mrproper 清理文件列表（类似内核的 MRPROPER_FILES）
-MRPROPER_FILES := .config .config.old defconfig
+MRPROPER_FILES := .config .config.old
 MRPROPER_DIRS := include/config include/generated
 
 # distclean 清理文件列表
