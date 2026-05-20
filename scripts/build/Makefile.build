@@ -73,9 +73,8 @@ obj-s-expanded := $(obj-s)
 obj-s-expanded += $(foreach cfg,$(filter CONFIG_%,$(.VARIABLES)),\
   $(if $(filter y,$($(cfg))),$(obj-s-$(cfg))))
 
-# 根据 LIBRARY_BUILD_TYPE 配置决定是否构建静态库
-LIBRARY_TYPE := $(subst ",,$(CONFIG_LIBRARY_BUILD_TYPE))
-ifneq ($(filter static both,$(LIBRARY_TYPE)),)
+# 根据配置决定是否构建静态库
+ifeq ($(CONFIG_LIBRARY_BUILD_TYPE_STATIC),y)
   $(foreach target,$(obj-s-expanded),\
     $(eval $(target)-type := static)\
     $(eval TARGETS += $(target)))
@@ -86,8 +85,8 @@ obj-d-expanded := $(obj-d)
 obj-d-expanded += $(foreach cfg,$(filter CONFIG_%,$(.VARIABLES)),\
   $(if $(filter y,$($(cfg))),$(obj-d-$(cfg))))
 
-# 根据 LIBRARY_BUILD_TYPE 配置决定是否构建动态库
-ifneq ($(filter shared both,$(LIBRARY_TYPE)),)
+# 根据配置决定是否构建动态库
+ifeq ($(CONFIG_LIBRARY_BUILD_TYPE_DYNAMIC),y)
   $(foreach target,$(obj-d-expanded),\
     $(eval $(target)-type := dynamic)\
     $(eval TARGETS += $(target)))
@@ -133,13 +132,43 @@ endef
 $(foreach target,$(obj-d-expanded),\
   $(eval $(call DYNAMIC_LIB_template,$($(target)-target-path),$(addprefix $(OBJ_OUTPUT_BASE)/,$(if $($(target)-objs),$($(target)-objs),$(obj-y))))))
 
-# 可执行文件规则（简化：去掉 ifneq 检查和 strip 调用）
-define EXECUTABLE_template
-$(1): $(2)
+# 可执行文件规则
+# 优先级：如果启用动态库则使用动态库链接，否则使用静态库链接
+ifeq ($(CONFIG_LIBRARY_BUILD_TYPE_DYNAMIC),y)
+  # 动态库模式：直接使用 -l 参数
+  define EXECUTABLE_template
+  $(1): $(2)
 	@mkdir -p $$(dir $$@)
 	@echo "  LD      $$@"
 	@$$(CC) $$(CFLAGS) $$(LDFLAGS) -o $$@ $$^ $$(LDLIBS)
-endef
+  endef
+else ifeq ($(CONFIG_LIBRARY_BUILD_TYPE_STATIC),y)
+  # 静态库模式：转换项目库为 .a 文件
+  define EXECUTABLE_template
+  # 转换 LDLIBS
+  $(1)-LDLIBS := $$(LDLIBS)
+  $(1)-LDLIBS := $$(patsubst -losal,$$(objtree)/lib/libosal.a,$$($(1)-LDLIBS))
+  $(1)-LDLIBS := $$(patsubst -lhal,$$(objtree)/lib/libhal.a,$$($(1)-LDLIBS))
+  $(1)-LDLIBS := $$(patsubst -lpcl,$$(objtree)/lib/libpcl.a,$$($(1)-LDLIBS))
+  $(1)-LDLIBS := $$(patsubst -lpdl,$$(objtree)/lib/libpdl.a,$$($(1)-LDLIBS))
+  $(1)-LDLIBS := $$(patsubst -lacl,$$(objtree)/lib/libacl.a,$$($(1)-LDLIBS))
+  $(1)-LDLIBS := $$(patsubst -lccm,$$(objtree)/lib/libccm.a,$$($(1)-LDLIBS))
+  $(1)-LDLIBS := $$(patsubst -lh200_am625,$$(objtree)/lib/libh200_am625.a,$$($(1)-LDLIBS))
+
+  $(1): $(2)
+	@mkdir -p $$(dir $$@)
+	@echo "  LD      $$@"
+	@$$(CC) $$(CFLAGS) $$(LDFLAGS) -o $$@ $$^ $$($(1)-LDLIBS)
+  endef
+else
+  # 未配置任何库类型，使用默认动态库链接
+  define EXECUTABLE_template
+  $(1): $(2)
+	@mkdir -p $$(dir $$@)
+	@echo "  LD      $$@"
+	@$$(CC) $$(CFLAGS) $$(LDFLAGS) -o $$@ $$^ $$(LDLIBS)
+  endef
+endif
 
 $(foreach target,$(obj-e-expanded),\
   $(eval $(call EXECUTABLE_template,$($(target)-target-path),$(addprefix $(OBJ_OUTPUT_BASE)/,$(if $($(target)-objs),$($(target)-objs),$(obj-y))))))

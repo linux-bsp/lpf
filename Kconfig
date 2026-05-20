@@ -48,42 +48,26 @@ config OPT_OS
 
 endchoice
 
-choice
-	prompt "Library build type"
-	default LIBRARY_BUILD_TYPE_SHARED
-	help
-	  Select the library build type.
-
 config LIBRARY_BUILD_TYPE_STATIC
-	bool "Static libraries (.a)"
+	bool "Build static libraries (.a)"
+	default n
 	help
-	  Build static libraries only.
+	  Build static libraries.
 	  Static libraries are linked into executables at compile time.
 
 	  Best for embedded systems with limited resources.
 
-config LIBRARY_BUILD_TYPE_SHARED
-	bool "Shared libraries (.so)"
+config LIBRARY_BUILD_TYPE_DYNAMIC
+	bool "Build dynamic libraries (.so)"
+	default y
 	help
-	  Build shared libraries only.
+	  Build dynamic/shared libraries.
 	  Shared libraries are loaded at runtime, reducing executable size
 	  and allowing library updates without recompiling applications.
 
 	  Best for systems with multiple applications sharing libraries.
 
-config LIBRARY_BUILD_TYPE_BOTH
-	bool "Both static and shared"
-	help
-	  Build both static (.a) and shared (.so) libraries.
-	  Provides maximum flexibility for application linking.
-
-endchoice
-
-config LIBRARY_BUILD_TYPE
-	string
-	default "static" if LIBRARY_BUILD_TYPE_STATIC
-	default "shared" if LIBRARY_BUILD_TYPE_SHARED
-	default "both" if LIBRARY_BUILD_TYPE_BOTH
+comment "Note: You can enable both to build both static and dynamic libraries"
 
 config INSTALL_HEADERS
 	bool "Install development headers"
