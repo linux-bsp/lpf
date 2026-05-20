@@ -11,13 +11,33 @@
 -include $(objtree)/include/config/auto.conf
 
 # ============================================================================
-# 交叉编译器前缀设置
+# 架构和交叉编译器设置
 # ============================================================================
 # 优先级：环境变量 > 命令行参数 > Kconfig 配置
 # 这样在 Buildroot 等构建系统中可以通过环境变量覆盖
+
+# ARCH: 目标架构 (x86_64, arm, arm64, riscv64)
+ifeq ($(origin ARCH), undefined)
+  # 从 Kconfig 配置推导 ARCH
+  ifeq ($(CONFIG_ARCH_X86_64),y)
+    ARCH := x86_64
+  else ifeq ($(CONFIG_ARCH_ARM32),y)
+    ARCH := arm
+  else ifeq ($(CONFIG_ARCH_ARM64),y)
+    ARCH := arm64
+  else ifeq ($(CONFIG_ARCH_RISCV64),y)
+    ARCH := riscv64
+  else
+    ARCH := x86_64
+  endif
+endif
+
+# CROSS_COMPILE: 交叉编译器前缀
 ifeq ($(origin CROSS_COMPILE), undefined)
   CROSS_COMPILE := $(CONFIG_CROSS_COMPILE)
 endif
+
+export ARCH CROSS_COMPILE
 
 # ============================================================================
 # obj-$(CONFIG_XXX) 自动展开机制（参考 Linux 内核）
@@ -97,8 +117,12 @@ else
 endif
 
 # 架构相关标志
-ifeq ($(CONFIG_ARCH_ARM32),y)
+ifeq ($(ARCH),arm)
   CFLAGS += -march=armv7-a -mfpu=neon -mfloat-abi=hard
+else ifeq ($(ARCH),arm64)
+  CFLAGS += -march=armv8-a
+else ifeq ($(ARCH),riscv64)
+  CFLAGS += -march=rv64imafdc -mabi=lp64d
 endif
 
 # 读取 Kconfig 配置
