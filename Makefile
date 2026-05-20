@@ -129,26 +129,65 @@ $(CONF) $(MCONF):
 # ============================================================================
 # 清理目标
 # ============================================================================
+
+# 清理文件列表（类似内核的 CLEAN_FILES）
+CLEAN_FILES :=
+CLEAN_DIRS := lib bin
+
+# mrproper 清理文件列表（类似内核的 MRPROPER_FILES）
+MRPROPER_FILES := .config .config.old defconfig
+MRPROPER_DIRS := include/config include/generated
+
+# distclean 清理文件列表
+DISTCLEAN_FILES := tags TAGS cscope* GPATH GRTAGS GSYMS GTAGS
+
+# 清理构建产物
+.PHONY: clean
 clean:
 	@echo "Cleaning build artifacts..."
+	@# 清理核心模块的构建产物
+	@$(MAKE) -f $(srctree)/core/Makefile clean 2>/dev/null || true
+	@# 清理产品模块的构建产物
+	@$(MAKE) -f $(srctree)/products/Makefile clean 2>/dev/null || true
+	@# 清理输出目录
 	@if [ "$(OUTPUT_DIR)" != "$(CURDIR)" ]; then \
+		echo "  CLEAN   $(OUTPUT_DIR)"; \
+		rm -rf $(addprefix $(OUTPUT_DIR)/,$(CLEAN_DIRS)); \
 		rm -rf $(OUTPUT_DIR)/core $(OUTPUT_DIR)/products; \
-		rm -rf $(OUTPUT_DIR)/lib $(OUTPUT_DIR)/bin; \
 	else \
-		find core products -type f \( -name '*.o' -o -name '*.so' -o -name '*.a' \) -delete 2>/dev/null || true; \
-		rm -rf lib bin; \
+		echo "  CLEAN   $(CLEAN_DIRS)"; \
+		rm -rf $(CLEAN_DIRS); \
+		find core products -type d -name '.tmp_*' -exec rm -rf {} + 2>/dev/null || true; \
+		find core products -type f \( -name '*.o' -o -name '*.d' -o -name '*.cmd' \) -delete 2>/dev/null || true; \
 	fi
+	@rm -f $(CLEAN_FILES)
 	@echo "Clean complete."
 
+# 清理配置文件
+.PHONY: distclean
 distclean: clean
-	@echo "Cleaning configuration..."
-	@rm -f $(KCONFIG_CONFIG) $(KCONFIG_CONFIG).old
-	@rm -rf $(CONFIG_DIR) $(GENERATED_DIR)
+	@echo "Cleaning configuration files..."
+	@if [ "$(OUTPUT_DIR)" != "$(CURDIR)" ]; then \
+		echo "  CLEAN   $(OUTPUT_DIR)/.config"; \
+		rm -f $(addprefix $(OUTPUT_DIR)/,$(MRPROPER_FILES)); \
+		rm -rf $(addprefix $(OUTPUT_DIR)/,$(MRPROPER_DIRS)); \
+	else \
+		echo "  CLEAN   .config"; \
+		rm -f $(MRPROPER_FILES); \
+		rm -rf $(MRPROPER_DIRS); \
+	fi
 	@echo "Distclean complete."
 
+# 完全清理（包括 kconfig 工具）
+.PHONY: mrproper
 mrproper: distclean
 	@echo "Cleaning kconfig tools..."
-	@$(MAKE) -C scripts/kconfig clean
+	@$(MAKE) -C scripts/kconfig clean 2>/dev/null || true
+	@# 清理编辑器临时文件和标签文件
+	@find . \( -name '*~' -o -name '*.swp' -o -name '*.swo' -o -name '.*.swp' \
+		-o -name '*.orig' -o -name '*.rej' -o -name '*.bak' \
+		-o -name '#*#' -o -name '*%' \) -type f -delete 2>/dev/null || true
+	@rm -f $(DISTCLEAN_FILES)
 	@echo "Mrproper complete."
 
 # ============================================================================
