@@ -48,13 +48,6 @@ config OPT_OS
 
 endchoice
 
-config BUILD_TESTING
-	bool "Build unit tests"
-	default y
-	help
-	  Build the test suite (ems-test, osal-test, hal-test, etc.).
-	  Requires test framework to be available.
-
 config BUILD_SHARED_LIBS
 	bool "Build shared libraries"
 	default n
@@ -122,6 +115,14 @@ source "products/Kconfig"
 # ============================================================================
 
 menu "Test Configuration"
-depends on BUILD_TESTING
+
+config BUILD_TESTING
+	bool "Build unit tests"
+	default y
+	help
+	  Build the test suite (ems-test, osal-test, hal-test, etc.).
+	  Requires test framework to be available.
+
 source "tests/Kconfig"
+
 endmenu
