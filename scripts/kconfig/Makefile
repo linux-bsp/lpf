@@ -12,6 +12,13 @@ NCURSES_LIBS := $(shell pkg-config --libs ncurses 2>/dev/null || echo -lncurses)
 HOSTCFLAGS := -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer
 HOSTCFLAGS += -I. -I../include -DCURSES_LOC="<ncurses.h>"
 
+# Quiet mode (like Linux kernel)
+ifeq ($(V),1)
+  Q =
+else
+  Q = @
+endif
+
 # Targets
 .PHONY: all conf mconf clean
 
@@ -21,37 +28,43 @@ all: conf mconf
 conf-objs := conf.o confdata.o expr.o lexer.lex.o menu.o parser.tab.o \
              preprocess.o symbol.o util.o
 conf: $(conf-objs)
-	$(HOSTCC) -o $@ $^
+	$(Q)echo "  HOSTLD  $@"
+	$(Q)$(HOSTCC) -o $@ $^
 
 # mconf - menuconfig (ncurses interface)
 mconf-objs := mconf.o mnconf-common.o confdata.o expr.o lexer.lex.o menu.o parser.tab.o \
               preprocess.o symbol.o util.o lxdialog/checklist.o lxdialog/inputbox.o \
               lxdialog/menubox.o lxdialog/textbox.o lxdialog/util.o lxdialog/yesno.o
 mconf: $(mconf-objs)
-	$(HOSTCC) -o $@ $^ $(NCURSES_LIBS)
+	$(Q)echo "  HOSTLD  $@"
+	$(Q)$(HOSTCC) -o $@ $^ $(NCURSES_LIBS)
 
 # Parser generation (must be done first)
 parser.tab.c parser.tab.h: parser.y
-	bison -d -o parser.tab.c -t -l $<
+	$(Q)echo "  YACC    $@"
+	$(Q)bison -d -o parser.tab.c -t -l $<
 
 lexer.lex.c: lexer.l parser.tab.h
-	flex -o $@ -L $<
+	$(Q)echo "  LEX     $@"
+	$(Q)flex -o $@ -L $<
 
 # Compilation rules
 %.o: %.c
-	$(HOSTCC) $(HOSTCFLAGS) -c -o $@ $<
+	$(Q)echo "  HOSTCC  $@"
+	$(Q)$(HOSTCC) $(HOSTCFLAGS) -c -o $@ $<
 
 lxdialog/%.o: lxdialog/%.c
-	$(HOSTCC) $(HOSTCFLAGS) $(NCURSES_CFLAGS) -c -o $@ $<
+	$(Q)echo "  HOSTCC  $@"
+	$(Q)$(HOSTCC) $(HOSTCFLAGS) $(NCURSES_CFLAGS) -c -o $@ $<
 
 # lexer.lex.o depends on parser.tab.h
 lexer.lex.o: lexer.lex.c parser.tab.h
 
 # Clean
 clean:
-	rm -f conf mconf nconf gconf qconf *.o lxdialog/*.o
-	rm -f parser.tab.c parser.tab.h lexer.lex.c
-	rm -f .*.cmd *.cmd
+	$(Q)rm -f conf mconf nconf gconf qconf *.o lxdialog/*.o
+	$(Q)rm -f parser.tab.c parser.tab.h lexer.lex.c
+	$(Q)rm -f .*.cmd *.cmd
 
 .PHONY: help
 help:

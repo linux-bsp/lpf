@@ -11,7 +11,6 @@ all: $(MODULES)
 
 # 递归构建每个模块
 $(MODULES):
-	@echo "Building core/$@..."
 	@$(MAKE) -C $(srctree)/core/$@ \
 		BUILD_DIR=$(objtree)/core/$@ \
 		srctree=$(srctree) \
@@ -28,7 +27,6 @@ acl: pdl
 # 头文件导出 - 将所有模块的头文件导出到顶层 include/
 # ============================================================================
 headers_install_all:
-	@echo "Exporting core module headers to $(srctree)/include/..."
 	@for module in $(MODULES); do \
 		$(MAKE) -C $(srctree)/core/$$module \
 			srctree=$(srctree) \
@@ -36,4 +34,3 @@ headers_install_all:
 			scriptdir=$(scriptdir) \
 			headers_install || exit 1; \
 	done
-	@echo "All core headers exported successfully"
