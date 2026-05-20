@@ -1,21 +1,28 @@
 # ============================================================================
-# HAL 模块构建 - 使用通用库构建框架（支持条件编译）
+# HAL 模块构建 - Kbuild 风格
 # ============================================================================
 
-# 库配置
-LIB_NAME := hal
-# LIB_TYPE := static  # 取消注释可覆盖全局配置
+# 静态库
+obj-s := libhal.a
 
-# 源文件目录（Linux 实现）
-SRC_DIR := $(srctree)/core/$(LIB_NAME)/src/linux
+# 动态库
+obj-d := libhal.so
 
-# 条件编译：根据 Kconfig 配置选择源文件
-SRCS-$(CONFIG_HAL_CAN) += hal_can_linux.c
-SRCS-$(CONFIG_HAL_UART) += hal_serial_linux.c
-SRCS-$(CONFIG_HAL_I2C) += hal_i2c_linux.c
-SRCS-$(CONFIG_HAL_SPI) += hal_spi_linux.c
-SRCS-$(CONFIG_HAL_GPIO) += hal_gpio_linux.c
-SRCS-$(CONFIG_HAL_WATCHDOG) += hal_watchdog_linux.c
+# 子目录递归
+subdir-y += src/
+
+# 从子目录收集对象文件
+libhal.a-objs := $(obj-y)
+libhal.so-objs := $(obj-y)
+
+# 编译标志
+CFLAGS_LIB := -I$(srctree)/core/hal/include
+CFLAGS_LIB += -I$(srctree)/core/hal/include/config
+CFLAGS_LIB += -I$(srctree)/core/osal/include
+CFLAGS_LIB += -I$(srctree)/include
+
+# 链接库
+LDLIBS := -L$(objtree)/lib -losal
 
 # 导出的头文件
 EXPORT_HEADERS := \
@@ -32,8 +39,5 @@ EXPORT_HEADERS := \
 	config/hal_gpio_config.h \
 	config/hal_watchdog_config.h
 
-# 模块依赖（链接 OSAL）
-LDLIBS := -L$(objtree)/lib -losal
-
-# 包含通用库构建框架
-include $(scriptdir)/build/Makefile.lib
+# 包含统一构建框架
+include $(scriptdir)/build/Makefile.build

@@ -18,10 +18,12 @@ ifeq ($(srctree),$(objtree))
   # 默认：源码目录
   OBJ_OUTPUT_BASE := $(CURDIR)
   BIN_OUTPUT_DIR := $(CURDIR)
+  LIB_OUTPUT_DIR := $(objtree)/lib
 else
   # O= 参数：objtree 对应子目录
   OBJ_OUTPUT_BASE := $(objtree)/$(MODULE_REL_PATH)
   BIN_OUTPUT_DIR := $(objtree)/$(MODULE_REL_PATH)
+  LIB_OUTPUT_DIR := $(objtree)/lib
 endif
 
 # ============================================================================
@@ -47,6 +49,8 @@ ifdef subdir-y-all
         objtree=$(objtree) \
         scriptdir=$(scriptdir) \
         print-objs)))
+  # 过滤掉 make 的诊断消息（Entering/Leaving directory 等）
+  subdir-objs := $(filter %.o %.a %.so,$(subdir-objs))
   obj-y-all += $(subdir-objs)
 endif
 
@@ -94,41 +98,54 @@ $(foreach target,$(obj-m-all),\
 
 # 为每个目标生成构建规则（直接使用 eval，不用 define）
 $(foreach target,$(TARGETS),\
-  $(eval $(target)-target-path := $(BIN_OUTPUT_DIR)/$(target))\
+  $(eval $(target)-target-path := $(if $(filter %.a %.so,$(target)),$(LIB_OUTPUT_DIR)/$(target),$(BIN_OUTPUT_DIR)/$(target)))\
   $(eval all: $($(target)-target-path)))
 
 # 静态库规则
-define STATIC_LIB_RULE
+define STATIC_LIB_template
 $(1): $(2)
 	@mkdir -p $$(dir $$@)
 	@echo "  AR      $$@"
 	@$$(AR) rcs $$@ $$^
 endef
 
+ifneq ($(strip $(obj-s-all)),)
 $(foreach target,$(obj-s-all),\
-  $(eval $(call STATIC_LIB_RULE,$($(target)-target-path),$(addprefix $(OBJ_OUTPUT_BASE)/,$(if $($(target)-objs),$($(target)-objs),$(obj-y-all))))))
+  $(eval $(call STATIC_LIB_template,$($(target)-target-path),$(strip $(addprefix $(OBJ_OUTPUT_BASE)/,$(if $($(target)-objs),$($(target)-objs),$(obj-y-all)))))))
+endif
 
 # 动态库规则
-define DYNAMIC_LIB_RULE
+define DYNAMIC_LIB_template
 $(1): $(2)
 	@mkdir -p $$(dir $$@)
 	@echo "  LD      $$@"
 	@$$(CC) -shared $$(CFLAGS) $$(LDFLAGS) -o $$@ $$^ $$(LDLIBS)
 endef
 
+ifneq ($(strip $(obj-d-all)),)
 $(foreach target,$(obj-d-all),\
-  $(eval $(call DYNAMIC_LIB_RULE,$($(target)-target-path),$(addprefix $(OBJ_OUTPUT_BASE)/,$(if $($(target)-objs),$($(target)-objs),$(obj-y-all))))))
+  $(eval $(call DYNAMIC_LIB_template,$($(target)-target-path),$(strip $(addprefix $(OBJ_OUTPUT_BASE)/,$(if $($(target)-objs),$($(target)-objs),$(obj-y-all)))))))
+endif
 
 # 可执行文件规则
-define EXECUTABLE_RULE
+define EXECUTABLE_template
 $(1): $(2)
 	@mkdir -p $$(dir $$@)
 	@echo "  LD      $$@"
 	@$$(CC) $$(CFLAGS) $$(LDFLAGS) -o $$@ $$^ $$(LDLIBS)
 endef
 
+ifneq ($(strip $(obj-e-all)),)
 $(foreach target,$(obj-e-all),\
-  $(eval $(call EXECUTABLE_RULE,$($(target)-target-path),$(addprefix $(OBJ_OUTPUT_BASE)/,$(if $($(target)-objs),$($(target)-objs),$(obj-y-all))))))
+  $(eval $(call EXECUTABLE_template,$($(target)-target-path),$(strip $(addprefix $(OBJ_OUTPUT_BASE)/,$(if $($(target)-objs),$($(target)-objs),$(obj-y-all)))))))
+endif
+
+# ============================================================================
+# 编译标志
+# ============================================================================
+
+# 模块特定的编译标志（CFLAGS_LIB 用于库，CFLAGS_APP 用于应用）
+CFLAGS_EXTRA += $(CFLAGS_LIB) $(CFLAGS_APP)
 
 # ============================================================================
 # 编译规则（.c → .o）

@@ -13,6 +13,10 @@ include $(scriptdir)/build/Makefile.rules
 obj-y-all := $(obj-y)
 obj-y-all += $(foreach cfg,$(filter CONFIG_%,$(.VARIABLES)),$(obj-$(cfg)))
 
+# 收集子目录列表
+subdir-y-all := $(subdir-y)
+subdir-y-all += $(foreach cfg,$(filter CONFIG_%,$(.VARIABLES)),$(subdir-$(cfg)))
+
 # 从子目录收集 obj-y（递归）
 ifdef subdir-y-all
   # 递归进入子目录，收集带路径前缀的 obj-y

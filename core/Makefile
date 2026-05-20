@@ -15,7 +15,8 @@ $(MODULES):
 	@$(MAKE) -C $(srctree)/core/$@ \
 		BUILD_DIR=$(objtree)/core/$@ \
 		srctree=$(srctree) \
-		objtree=$(objtree)
+		objtree=$(objtree) \
+		scriptdir=$(scriptdir)
 
 # 依赖关系（确保编译顺序）
 hal: osal
@@ -32,6 +33,7 @@ headers_install_all:
 		$(MAKE) -C $(srctree)/core/$$module \
 			srctree=$(srctree) \
 			objtree=$(objtree) \
+			scriptdir=$(scriptdir) \
 			headers_install || exit 1; \
 	done
 	@echo "All core headers exported successfully"

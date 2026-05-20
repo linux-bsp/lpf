@@ -1,36 +1,29 @@
 # ============================================================================
-# PCL 模块构建 - 使用通用库构建框架
+# PCL 模块构建 - Kbuild 风格
 # ============================================================================
 
-# 库配置
-LIB_NAME := pcl
-# LIB_TYPE := static  # 取消注释可覆盖全局配置
+# 静态库
+obj-s := libpcl.a
 
-# 源文件目录
-SRC_DIR := $(srctree)/core/$(LIB_NAME)/src
+# 动态库
+obj-d := libpcl.so
 
-# 源文件列表
-SRCS := \
-	pcl_api.c \
-	pcl_register.c
+# 子目录递归
+subdir-y += src/
 
-# 导出的头文件
-EXPORT_HEADERS := \
-	pcl.h \
-	pcl_types.h
-
-# 头文件目录
-INC_DIR := $(srctree)/core/$(LIB_NAME)/include
+# 从子目录收集对象文件
+libpcl.a-objs := $(obj-y)
+libpcl.so-objs := $(obj-y)
 
 # 编译标志
-CFLAGS_LIB := -I$(INC_DIR)
-CFLAGS_LIB += -I$(INC_DIR)/api
+CFLAGS_LIB := -I$(srctree)/core/pcl/include
+CFLAGS_LIB += -I$(srctree)/core/pcl/include/api
 CFLAGS_LIB += -I$(srctree)/core/hal/include
 CFLAGS_LIB += -I$(srctree)/core/osal/include
 CFLAGS_LIB += -I$(srctree)/include
 
 # 链接库
-LDLIBS := -lhal -losal
+LDLIBS := -L$(objtree)/lib -lhal -losal
 
-# 包含通用库构建框架
-include $(scriptdir)/build/Makefile.lib
+# 包含统一构建框架
+include $(scriptdir)/build/Makefile.build
