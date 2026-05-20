@@ -2,7 +2,6 @@
 
 menuconfig ACL
 	bool "ACL (Application Configuration Layer)"
-	depends on OSAL && PDL
 	default y
 	help
 	  Application Configuration Layer provides business function to device mapping.

@@ -2,7 +2,6 @@
 
 menuconfig PDL
 	bool "PDL (Peripheral Driver Layer)"
-	depends on OSAL && HAL && PCL
 	default y
 	help
 	  Peripheral Driver Layer provides unified peripheral management.
@@ -12,32 +11,60 @@ menuconfig PDL
 
 if PDL
 
-config PDL_SATELLITE_SUPPORT
+menuconfig PDL_SATELLITE_SUPPORT
 	bool "Satellite peripheral support"
-	depends on HAL_CAN
+	depends on HAL_CAN && OSAL_NETWORK
 	default y
 	help
 	  Enable satellite peripheral management via CAN bus.
 
-config PDL_BMC_SUPPORT
+	  Satellites are remote sensor/actuator modules connected
+	  via CAN bus, providing distributed I/O capabilities.
+
+	  Requires: HAL_CAN, OSAL_NETWORK
+
+	  If unsure, say Y.
+
+menuconfig PDL_BMC_SUPPORT
 	bool "BMC peripheral support"
-	depends on HAL_UART
+	depends on HAL_UART && OSAL_NETWORK
 	default y
 	help
 	  Enable BMC (Baseboard Management Controller) peripheral support via UART/Ethernet.
 
-config PDL_MCU_SUPPORT
+	  BMC provides server management functions including power control,
+	  sensor monitoring, and remote console access.
+
+	  Requires: HAL_UART, OSAL_NETWORK
+
+	  If unsure, say Y.
+
+menuconfig PDL_MCU_SUPPORT
 	bool "MCU peripheral support"
-	depends on HAL_CAN || HAL_UART
+	depends on (HAL_CAN || HAL_UART) && OSAL_NETWORK
 	default y
 	help
 	  Enable MCU peripheral support via CAN or UART.
 
-config PDL_WATCHDOG_SUPPORT
+	  MCU peripherals are microcontroller-based modules providing
+	  specialized control and monitoring functions.
+
+	  Requires: HAL_CAN or HAL_UART, OSAL_NETWORK
+
+	  If unsure, say Y.
+
+menuconfig PDL_WATCHDOG_SUPPORT
 	bool "Watchdog peripheral support"
 	default y
-	depends on HAL_WATCHDOG
+	depends on HAL_WATCHDOG && OSAL_TIME
 	help
 	  Enable watchdog peripheral support.
+
+	  Provides hardware watchdog management for system reliability,
+	  including automatic reset on software hang.
+
+	  Requires: HAL_WATCHDOG, OSAL_TIME
+
+	  If unsure, say Y.
 
 endif # PDL

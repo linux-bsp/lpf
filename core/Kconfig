@@ -1,11 +1,6 @@
+# SPDX-License-Identifier: GPL-2.0
 # ============================================================================
 # Core Modules Configuration
-# ============================================================================
-# This file organizes all core middleware modules in a hierarchical menu
-# structure, similar to Linux kernel's core subsystems.
-#
-# Each module uses 'menuconfig' to create a collapsible submenu that can be
-# enabled/disabled from the outer level, following Linux kernel conventions.
 # ============================================================================
 
 menu "Core Modules"

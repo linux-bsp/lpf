@@ -2,7 +2,6 @@
 
 menuconfig HAL
 	bool "HAL (Hardware Abstraction Layer)"
-	depends on OSAL
 	default y
 	help
 	  Hardware Abstraction Layer provides unified hardware driver interfaces.
@@ -14,12 +13,14 @@ if HAL
 
 menu "HAL Driver Selection"
 
-config HAL_CAN
+menuconfig HAL_CAN
 	bool "CAN bus driver"
 	default y
 	help
 	  Enable Controller Area Network (CAN) bus driver.
 	  Supports SocketCAN interface on Linux.
+
+	  If unsure, say Y.
 
 if HAL_CAN
 
@@ -46,12 +47,14 @@ config HAL_CAN_LOOPBACK
 
 endif # HAL_CAN
 
-config HAL_UART
+menuconfig HAL_UART
 	bool "UART driver"
 	default y
 	help
 	  Enable Universal Asynchronous Receiver-Transmitter (UART) driver.
 	  Provides serial communication interface.
+
+	  If unsure, say Y.
 
 if HAL_UART
 
@@ -71,12 +74,14 @@ config HAL_UART_RS485
 
 endif # HAL_UART
 
-config HAL_I2C
+menuconfig HAL_I2C
 	bool "I2C bus driver"
 	default n
 	help
 	  Enable Inter-Integrated Circuit (I2C) bus driver.
 	  Supports master mode operation.
+
+	  If unsure, say N.
 
 if HAL_I2C
 
@@ -96,12 +101,14 @@ config HAL_I2C_10BIT_ADDR
 
 endif # HAL_I2C
 
-config HAL_SPI
+menuconfig HAL_SPI
 	bool "SPI bus driver"
 	default n
 	help
 	  Enable Serial Peripheral Interface (SPI) driver.
 	  Supports master mode operation.
+
+	  If unsure, say N.
 
 if HAL_SPI
 
@@ -121,12 +128,14 @@ config HAL_SPI_SLAVE
 
 endif # HAL_SPI
 
-config HAL_GPIO
+menuconfig HAL_GPIO
 	bool "GPIO driver"
 	default y
 	help
 	  Enable General Purpose Input/Output (GPIO) driver.
 	  Uses sysfs interface on Linux.
+
+	  If unsure, say Y.
 
 if HAL_GPIO
 
@@ -146,12 +155,14 @@ config HAL_GPIO_DEBOUNCE
 
 endif # HAL_GPIO
 
-config HAL_WATCHDOG
+menuconfig HAL_WATCHDOG
 	bool "Watchdog driver"
 	default y
 	help
 	  Enable hardware watchdog timer driver.
 	  Provides system reset on software hang.
+
+	  If unsure, say Y.
 
 if HAL_WATCHDOG
 

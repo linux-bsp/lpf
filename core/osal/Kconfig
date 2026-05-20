@@ -1,15 +1,74 @@
 # OSAL (Operating System Abstraction Layer) Configuration
 
-menuconfig OSAL
-	bool "OSAL (Operating System Abstraction Layer)"
+menu "OSAL (Operating System Abstraction Layer)"
+
+config OSAL
+	bool
 	default y
 	help
 	  Operating System Abstraction Layer provides unified OS interfaces.
 	  OSAL is the foundation layer required by all other modules.
 
-	  If unsure, say Y.
+	  This option is always enabled.
 
 if OSAL
+
+menu "OSAL Features"
+
+config OSAL_FILE
+	bool "File I/O support"
+	default y
+	help
+	  Enable file I/O operations (open, read, write, close, etc.).
+
+	  If unsure, say Y.
+
+config OSAL_NETWORK
+	bool "Network support"
+	default y
+	help
+	  Enable network socket operations (socket, bind, connect, etc.).
+	  Required for network communication.
+
+	  If unsure, say Y.
+
+config OSAL_IPC
+	bool "Inter-Process Communication"
+	default y
+	help
+	  Enable IPC mechanisms (mutex, semaphore, shared memory, etc.).
+	  Required for multi-threaded applications.
+
+	  If unsure, say Y.
+
+config OSAL_THREAD
+	bool "Thread support"
+	default y
+	help
+	  Enable thread management (create, join, detach, etc.).
+	  Required for multi-threaded applications.
+
+	  If unsure, say Y.
+
+config OSAL_TIME
+	bool "Time and clock support"
+	default y
+	help
+	  Enable time operations (sleep, clock, timer, etc.).
+
+	  If unsure, say Y.
+
+config OSAL_SIGNAL
+	bool "Signal handling"
+	default y
+	help
+	  Enable signal handling operations.
+
+	  If unsure, say Y.
+
+endmenu
+
+menu "OSAL Configuration"
 
 config OSAL_MAX_TASKS
 	int "Maximum number of tasks"
@@ -67,4 +126,8 @@ config OSAL_LIB_TYPE_BOTH
 
 endchoice
 
+endmenu
+
 endif # OSAL
+
+endmenu
