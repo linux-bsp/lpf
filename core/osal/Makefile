@@ -1,38 +1,35 @@
 # ============================================================================
-# OSAL 模块构建 - 使用通用库构建框架
+# OSAL 模块构建 - Linux 内核风格
 # ============================================================================
 
-# 库配置
+# 库名称
 LIB_NAME := osal
-# LIB_TYPE := static  # 取消注释可覆盖全局配置
 
-# 源文件目录（POSIX 实现）
-SRC_DIR := $(srctree)/core/$(LIB_NAME)/src/posix
+# 静态库
+obj-s := libosal.a
 
-# 源文件列表（相对于 SRC_DIR）
-SRCS := \
-	lib/osal_errno.c \
-	lib/osal_heap.c \
-	lib/osal_string.c \
-	lib/osal_stdio.c \
-	ipc/osal_mutex.c \
-	ipc/osal_atomic.c \
-	ipc/osal_semaphore.c \
-	ipc/osal_cond.c \
-	ipc/osal_shm.c \
-	sys/osal_clock.c \
-	sys/osal_signal.c \
-	sys/osal_file.c \
-	sys/osal_select.c \
-	sys/osal_env.c \
-	sys/osal_time.c \
-	sys/osal_process.c \
-	sys/osal_thread.c \
-	sys/osal_sched.c \
-	net/osal_socket.c \
-	net/osal_termios.c \
-	util/osal_version.c \
-	util/osal_log.c
+# 动态库
+obj-d := libosal.so
+
+# 子目录递归（从 src/posix/ 下的子目录收集源文件）
+subdir-y += src/posix/lib/
+subdir-y += src/posix/ipc/
+subdir-y += src/posix/sys/
+subdir-y += src/posix/net/
+subdir-y += src/posix/util/
+
+# 从子目录收集对象文件
+libosal.a-objs := $(obj-y)
+libosal.so-objs := $(obj-y)
+
+# 编译标志
+CFLAGS_EXTRA := -I$(srctree)/core/$(LIB_NAME)/include
+
+# 链接库
+LDLIBS := -lpthread
+ifeq ($(shell uname -s),Linux)
+  LDLIBS += -lrt
+endif
 
 # 导出的头文件（相对于 INC_DIR，会被复制到顶层 include/osal/）
 EXPORT_HEADERS := \
@@ -62,11 +59,5 @@ EXPORT_HEADERS := \
 	util/osal_log.h \
 	util/osal_version.h
 
-# 链接库
-LDLIBS := -lpthread
-ifeq ($(shell uname -s),Linux)
-  LDLIBS += -lrt
-endif
-
-# 包含通用库构建框架
-include $(scriptdir)/build/Makefile.lib
+# 包含统一构建框架
+include $(scriptdir)/build/Makefile.build

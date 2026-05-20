@@ -1,0 +1,34 @@
+# ============================================================================
+# 子目录递归辅助框架
+# 用于从子目录收集 obj-y 定义
+# ============================================================================
+
+# 包含通用规则（获取 CONFIG_ 变量）
+include $(scriptdir)/build/Makefile.rules
+
+# 包含当前目录的 Makefile（如果存在）
+-include Makefile
+
+# 收集当前目录的 obj-y
+obj-y-all := $(obj-y)
+obj-y-all += $(foreach cfg,$(filter CONFIG_%,$(.VARIABLES)),$(obj-$(cfg)))
+
+# 从子目录收集 obj-y（递归）
+ifdef subdir-y-all
+  # 递归进入子目录，收集带路径前缀的 obj-y
+  subdir-objs := $(foreach dir,$(subdir-y-all),\
+    $(addprefix $(dir),\
+      $(shell $(MAKE) -C $(dir) \
+        -f $(scriptdir)/build/Makefile.subdir \
+        --no-print-directory \
+        srctree=$(srctree) \
+        objtree=$(objtree) \
+        scriptdir=$(scriptdir) \
+        print-objs)))
+  obj-y-all += $(subdir-objs)
+endif
+
+# 打印目标：只输出当前目录的 obj-y（不带路径前缀）
+.PHONY: print-objs
+print-objs:
+	@echo $(obj-y-all)

@@ -37,7 +37,7 @@ STRIP ?= $(CROSS_COMPILE)strip
 # ============================================================================
 # 通用编译标志
 # ============================================================================
-CFLAGS := -Wall -Wextra
+CFLAGS := -Wall -Wextra -fPIC
 CFLAGS += -I$(srctree)/include
 CFLAGS += -I$(objtree)/include/generated
 
