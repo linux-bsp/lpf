@@ -336,8 +336,22 @@ EMS uses Linux kernel-style Kconfig for build configuration:
 **Configuration workflow**:
 1. Run `make menuconfig` to configure build options interactively
 2. Configuration is saved to `.config` file
-3. Build system generates `include/generated/autoconf.h` with C macros
-4. Code uses `#ifdef CONFIG_*` to conditionally compile features
+3. Run `make syncconfig` to synchronize configuration
+4. Build system generates `include/config/auto.conf` (Makefile variables) and `include/generated/autoconf.h` (C macros)
+5. Code uses `#ifdef CONFIG_*` to conditionally compile features
+6. Makefiles use `obj-$(CONFIG_*)` for conditional compilation
+
+**Conditional compilation in Makefiles**:
+```makefile
+# Recommended: Use obj-$(CONFIG_XXX) syntax (Linux kernel style)
+obj-$(CONFIG_OSAL_NETWORK) += osal_socket.o
+obj-$(CONFIG_HAL_CAN) += hal_can_linux.o
+
+# Not recommended: Manual ifeq checks
+ifeq ($(CONFIG_FEATURE),y)
+  obj-y += feature.o
+endif
+```
 
 **Module dependencies** (enforced by Kconfig):
 ```
@@ -354,6 +368,7 @@ ACL (depends on OSAL, PDL)
 
 **Key configuration options**:
 - Core modules: OSAL, HAL, PDL, PCL, ACL (with dependency checking)
+- OSAL features: File I/O, Network, IPC, Thread, Time, Signal (conditional compilation)
 - HAL drivers: CAN, UART, I2C, SPI, GPIO, Watchdog (conditional compilation)
 - PDL services: Satellite, BMC, MCU, Watchdog (conditional compilation)
 - Product selection: CCM (Communication Controller Management), samples
@@ -364,6 +379,8 @@ ACL (depends on OSAL, PDL)
 - `defconfig` - Minimal default configuration
 - `configs/*_defconfig` - Preset configurations for specific products
 - `Kconfig` - Configuration menu definitions (hierarchical)
+- `include/config/auto.conf` - Generated Makefile variables
+- `include/generated/autoconf.h` - Generated C macros
 
 ## Header File Structure
 
@@ -440,11 +457,22 @@ Detailed integration guide: [docs/buildroot/README.md](docs/buildroot/README.md)
 ### Adding New OSAL Interface
 1. Add interface declaration in `core/osal/include/` (e.g., `osal_timer.h`)
 2. Implement POSIX version in `core/osal/src/posix/` (e.g., `osal_timer.c`)
-3. Add to `SRCS` in `core/osal/Makefile`
-4. Add to `EXPORT_HEADERS` in `core/osal/Makefile` if it's a public API
-5. Run `make -C core/osal headers_install` to export headers
-6. Add unit tests in `tests/unit/osal/` (e.g., `test_osal_timer.c`)
-7. Update `core/osal/README.md` if adding major functionality
+3. If it's a conditional feature, add Kconfig option in `core/osal/Kconfig`:
+   ```kconfig
+   config OSAL_TIMER
+       bool "Timer support"
+       default y
+   ```
+4. Add to appropriate subdirectory Makefile with conditional compilation:
+   ```makefile
+   # core/osal/src/posix/sys/Makefile
+   obj-$(CONFIG_OSAL_TIMER) += osal_timer.o
+   ```
+5. Add to `EXPORT_HEADERS` in `core/osal/Makefile` if it's a public API
+6. Run `make syncconfig` to update configuration
+7. Run `make -C core/osal headers_install` to export headers
+8. Add unit tests in `tests/unit/osal/` (e.g., `test_osal_timer.c`)
+9. Update `core/osal/README.md` if adding major functionality
 
 ### Adding New HAL Driver
 1. Add driver interface in `core/hal/include/` (e.g., `hal_gpio.h`)
@@ -457,12 +485,15 @@ Detailed integration guide: [docs/buildroot/README.md](docs/buildroot/README.md)
        default y
    ```
 4. Implement Linux version in `core/hal/src/linux/` (using OSAL wrappers)
-5. Add conditional compilation in `core/hal/Makefile`:
+5. Add conditional compilation in `core/hal/src/linux/Makefile`:
    ```makefile
-   SRCS-$(CONFIG_HAL_GPIO) += hal_gpio_linux.c
+   # Use obj-$(CONFIG_XXX) syntax (recommended)
+   obj-$(CONFIG_HAL_GPIO) += hal_gpio_linux.o
    ```
 6. Add to `EXPORT_HEADERS` in `core/hal/Makefile`
 7. Add unit tests in `tests/unit/hal/`
+8. Run `make syncconfig` to update configuration
+9. Verify conditional compilation: disable the driver in menuconfig and check it's not compiled
 
 ### Adding New PDL Service
 1. Add service interface in `core/pdl/include/` (e.g., `pdl_satellite.h`)
