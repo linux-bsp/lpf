@@ -14,6 +14,37 @@
 CROSS_COMPILE ?= $(CONFIG_CROSS_COMPILE)
 
 # ============================================================================
+# obj-$(CONFIG_XXX) 自动展开机制（参考 Linux 内核）
+# ============================================================================
+# 自动展开 obj-$(CONFIG_XXX) 为 obj-y 或空
+# 例如：obj-$(CONFIG_OSAL_FILE) += osal_file.o
+#       如果 CONFIG_OSAL_FILE=y，则展开为 obj-y += osal_file.o
+
+# 收集所有 CONFIG_ 变量
+config-vars := $(filter CONFIG_%,$(.VARIABLES))
+
+# 自动展开 obj-$(CONFIG_XXX)
+__obj-y := $(obj-y)
+$(foreach cfg,$(config-vars),\
+  $(if $(filter y,$($(cfg))),\
+    $(eval __obj-y += $(obj-$(cfg)))))
+obj-y := $(sort $(__obj-y))
+
+# 自动展开 lib-$(CONFIG_XXX)
+__lib-y := $(lib-y)
+$(foreach cfg,$(config-vars),\
+  $(if $(filter y,$($(cfg))),\
+    $(eval __lib-y += $(lib-$(cfg)))))
+lib-y := $(sort $(__lib-y))
+
+# 自动展开 subdir-$(CONFIG_XXX)
+__subdir-y := $(subdir-y)
+$(foreach cfg,$(config-vars),\
+  $(if $(filter y,$($(cfg))),\
+    $(eval __subdir-y += $(subdir-$(cfg)))))
+subdir-y := $(sort $(__subdir-y))
+
+# ============================================================================
 # 详细程度控制（V=参数支持）
 # ============================================================================
 ifeq ("$(origin V)", "command line")

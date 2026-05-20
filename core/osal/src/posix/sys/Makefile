@@ -1,10 +1,10 @@
-# OSAL sys 模块源文件
+# OSAL 系统模块源文件（条件编译）
 obj-y += osal_clock.o
-obj-y += osal_signal.o
-obj-y += osal_file.o
+obj-$(CONFIG_OSAL_SIGNAL) += osal_signal.o
+obj-$(CONFIG_OSAL_FILE) += osal_file.o
 obj-y += osal_select.o
 obj-y += osal_env.o
-obj-y += osal_time.o
+obj-$(CONFIG_OSAL_TIME) += osal_time.o
 obj-y += osal_process.o
-obj-y += osal_thread.o
+obj-$(CONFIG_OSAL_THREAD) += osal_thread.o
 obj-y += osal_sched.o
