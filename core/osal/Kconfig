@@ -1,5 +1,14 @@
 # OSAL (Operating System Abstraction Layer) Configuration
 
+config OSAL
+	bool "OSAL (Operating System Abstraction Layer)"
+	default y
+	help
+	  Operating System Abstraction Layer provides unified OS interfaces.
+	  OSAL is the foundation layer required by all other modules.
+
+if OSAL
+
 config OSAL_MAX_TASKS
 	int "Maximum number of tasks"
 	default 64
@@ -26,3 +35,5 @@ config OSAL_DEBUG_LOGGING
 	default n
 	help
 	  Enable verbose debug logging in OSAL layer.
+
+endif # OSAL

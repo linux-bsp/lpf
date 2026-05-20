@@ -1,5 +1,15 @@
 # HAL (Hardware Abstraction Layer) Configuration
 
+config HAL
+	bool "HAL (Hardware Abstraction Layer)"
+	depends on OSAL
+	default y
+	help
+	  Hardware Abstraction Layer provides unified hardware driver interfaces.
+	  HAL depends on OSAL for system calls and platform abstraction.
+
+if HAL
+
 menu "HAL Driver Selection"
 
 config HAL_CAN
@@ -111,3 +121,5 @@ config HAL_WATCHDOG_TIMEOUT
 	  Default watchdog timeout in seconds.
 
 endmenu
+
+endif # HAL

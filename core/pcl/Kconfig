@@ -1,5 +1,15 @@
 # PCL (Peripheral Configuration Library) Configuration
 
+config PCL
+	bool "PCL (Peripheral Configuration Library)"
+	depends on OSAL && HAL
+	default y
+	help
+	  Peripheral Configuration Library provides device-tree-like hardware
+	  configuration. PCL depends on OSAL and HAL.
+
+if PCL
+
 choice
 	prompt "Platform selection"
 	default PCL_PLATFORM_TI_AM625
@@ -35,3 +45,5 @@ config PCL_PRODUCT_H200_200P
 endchoice
 
 endif
+
+endif # PCL

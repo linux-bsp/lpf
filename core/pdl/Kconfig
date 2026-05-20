@@ -1,22 +1,35 @@
 # PDL (Peripheral Driver Layer) Configuration
 
-config PDL_SATELLITE_SUPPORT
-	bool "Satellite peripheral support"
+config PDL
+	bool "PDL (Peripheral Driver Layer)"
+	depends on OSAL && HAL && PCL
 	default y
 	help
-	  Enable satellite peripheral management.
+	  Peripheral Driver Layer provides unified peripheral management.
+	  PDL depends on OSAL, HAL, and PCL.
+
+if PDL
+
+config PDL_SATELLITE_SUPPORT
+	bool "Satellite peripheral support"
+	depends on HAL_CAN
+	default y
+	help
+	  Enable satellite peripheral management via CAN bus.
 
 config PDL_BMC_SUPPORT
 	bool "BMC peripheral support"
+	depends on HAL_UART
 	default y
 	help
-	  Enable BMC (Baseboard Management Controller) peripheral support.
+	  Enable BMC (Baseboard Management Controller) peripheral support via UART/Ethernet.
 
 config PDL_MCU_SUPPORT
 	bool "MCU peripheral support"
+	depends on HAL_CAN || HAL_UART
 	default y
 	help
-	  Enable MCU peripheral support.
+	  Enable MCU peripheral support via CAN or UART.
 
 config PDL_WATCHDOG_SUPPORT
 	bool "Watchdog peripheral support"
@@ -24,3 +37,5 @@ config PDL_WATCHDOG_SUPPORT
 	depends on HAL_WATCHDOG
 	help
 	  Enable watchdog peripheral support.
+
+endif # PDL
