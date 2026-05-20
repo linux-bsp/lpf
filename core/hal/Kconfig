@@ -1,12 +1,14 @@
 # HAL (Hardware Abstraction Layer) Configuration
 
-config HAL
+menuconfig HAL
 	bool "HAL (Hardware Abstraction Layer)"
 	depends on OSAL
 	default y
 	help
 	  Hardware Abstraction Layer provides unified hardware driver interfaces.
 	  HAL depends on OSAL for system calls and platform abstraction.
+
+	  If unsure, say Y.
 
 if HAL
 

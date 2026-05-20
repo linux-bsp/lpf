@@ -1,12 +1,14 @@
 # ACL (Application Configuration Layer) Configuration
 
-config ACL
+menuconfig ACL
 	bool "ACL (Application Configuration Layer)"
 	depends on OSAL && PDL
 	default y
 	help
 	  Application Configuration Layer provides business function to device mapping.
 	  ACL depends on OSAL and PDL.
+
+	  If unsure, say Y.
 
 if ACL
 

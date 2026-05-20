@@ -1,11 +1,13 @@
 # OSAL (Operating System Abstraction Layer) Configuration
 
-config OSAL
+menuconfig OSAL
 	bool "OSAL (Operating System Abstraction Layer)"
 	default y
 	help
 	  Operating System Abstraction Layer provides unified OS interfaces.
 	  OSAL is the foundation layer required by all other modules.
+
+	  If unsure, say Y.
 
 if OSAL
 

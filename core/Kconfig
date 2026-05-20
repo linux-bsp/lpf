@@ -3,48 +3,17 @@
 # ============================================================================
 # This file organizes all core middleware modules in a hierarchical menu
 # structure, similar to Linux kernel's core subsystems.
+#
+# Each module uses 'menuconfig' to create a collapsible submenu that can be
+# enabled/disabled from the outer level, following Linux kernel conventions.
 # ============================================================================
 
 menu "Core Modules"
 
-# ============================================================================
-# OSAL Configuration
-# ============================================================================
-
-menu "OSAL (Operating System Abstraction Layer)"
 source "core/osal/Kconfig"
-endmenu
-
-# ============================================================================
-# HAL Configuration
-# ============================================================================
-
-menu "HAL (Hardware Abstraction Layer)"
 source "core/hal/Kconfig"
-endmenu
-
-# ============================================================================
-# PCL Configuration
-# ============================================================================
-
-menu "PCL (Peripheral Configuration Library)"
 source "core/pcl/Kconfig"
-endmenu
-
-# ============================================================================
-# PDL Configuration
-# ============================================================================
-
-menu "PDL (Peripheral Driver Layer)"
 source "core/pdl/Kconfig"
-endmenu
-
-# ============================================================================
-# ACL Configuration
-# ============================================================================
-
-menu "ACL (Application Configuration Layer)"
 source "core/acl/Kconfig"
-endmenu
 
 endmenu

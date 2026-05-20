@@ -1,12 +1,14 @@
 # PCL (Peripheral Configuration Library) Configuration
 
-config PCL
+menuconfig PCL
 	bool "PCL (Peripheral Configuration Library)"
 	depends on OSAL && HAL
 	default y
 	help
 	  Peripheral Configuration Library provides device-tree-like hardware
 	  configuration. PCL depends on OSAL and HAL.
+
+	  If unsure, say Y.
 
 if PCL
 

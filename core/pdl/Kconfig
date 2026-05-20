@@ -1,12 +1,14 @@
 # PDL (Peripheral Driver Layer) Configuration
 
-config PDL
+menuconfig PDL
 	bool "PDL (Peripheral Driver Layer)"
 	depends on OSAL && HAL && PCL
 	default y
 	help
 	  Peripheral Driver Layer provides unified peripheral management.
 	  PDL depends on OSAL, HAL, and PCL.
+
+	  If unsure, say Y.
 
 if PDL
 
