@@ -250,7 +250,7 @@ export RCS_TAR_IGNORE := --exclude SCCS --exclude BitKeeper --exclude .svn \
 # =============================================================================
 BIN_DIR := $(objtree)/bin
 LIB_DIR := $(objtree)/lib
-KO_DIR  := $(objtree)/ko
+KO_DIR  := $(objtree)/lib/modules
 
 export BIN_DIR LIB_DIR KO_DIR
 
@@ -538,7 +538,7 @@ $(version_h): $(srctree)/Makefile FORCE
 # 清理目标
 # =============================================================================
 
-CLEAN_DIRS  += $(BIN_DIR) $(LIB_DIR) $(KO_DIR)
+CLEAN_DIRS  += $(BIN_DIR) $(LIB_DIR)
 CLEAN_FILES +=
 
 # 清理 staging 头文件（保留源码中的 ems_config.h）
