@@ -70,9 +70,6 @@ endif
 
 include scripts/Makefile.lib
 
-# 将子目录声明为 PHONY 目标，这样依赖关系才能生效
-.PHONY: $(subdir-ym)
-
 # 主机程序支持
 ifdef host-progs
 ifneq ($(hostprogs-y),$(host-progs))
@@ -440,12 +437,19 @@ targets += $(multi-used-y)
 # =============================================================================
 
 PHONY += $(subdir-ym)
-$(subdir-ym):
-	$(Q)$(MAKE) $(build)=$(patsubst %/,%,$(obj))/$@
 
-# 包含 Kbuild 文件中定义的子目录依赖关系
-# 这些依赖关系确保子目录按正确顺序构建
--include $(kbuild-file).deps
+# 为每个子目录生成单独的规则，这样 Makefile 中定义的依赖关系才能生效
+# 例如 core/Makefile 中的 hal/: osal/ 会作为 hal 目标的依赖
+define subdir-rule
+$(1):
+	$(Q)$(MAKE) $(build)=$(patsubst %/,%,$(obj))/$(1)
+endef
+
+$(foreach dir,$(subdir-ym),$(eval $(call subdir-rule,$(dir))))
+
+# 注意：子目录之间的依赖关系应该在各自的 Makefile 中定义
+# 例如在 core/Makefile 中：hal/: osal/
+# 这些依赖规则会在 include $(kbuild-file) 时被包含，并在此处生效
 
 # =============================================================================
 # FORCE 目标

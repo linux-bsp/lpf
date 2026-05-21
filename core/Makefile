@@ -18,7 +18,8 @@ obj-$(CONFIG_PDL)  += pdl/
 obj-$(CONFIG_ACL)  += acl/
 
 # 模块依赖关系（确保正确的构建顺序）
-hal/: osal/
-pcl/: hal/ osal/
-pdl/: pcl/ hal/ osal/
-acl/: pdl/ pcl/ hal/ osal/
+# 注意：目标名不带斜杠，因为 Makefile.lib 会去掉 obj-y 中的斜杠
+hal: osal
+pcl: hal osal
+pdl: pcl hal osal
+acl: pdl pcl hal osal
