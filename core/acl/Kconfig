@@ -1,0 +1,33 @@
+# ACL (Application Configuration Layer) Configuration
+
+menuconfig ACL
+	bool "ACL (Application Configuration Layer)"
+	default y
+	help
+	  Application Configuration Layer provides business function to device mapping.
+	  ACL depends on OSAL and PDL.
+
+	  If unsure, say Y.
+
+if ACL
+
+config ACL_MAX_DEVICES
+	int "Maximum number of devices"
+	default 64
+	range 1 256
+	help
+	  Maximum number of devices that can be configured in ACL.
+
+menu "ACL Build Configuration"
+
+config ACL_BUILD_STATIC
+	bool "Build static library (.a)"
+	default y
+
+config ACL_BUILD_SHARED
+	bool "Build shared library (.so)"
+	default y
+
+endmenu
+
+endif # ACL

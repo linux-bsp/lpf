@@ -1,598 +1,496 @@
-# CLAUDE.md
+# EMS 项目指南 - Claude AI 助手
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+本文档为 AI 助手提供 EMS 项目的完整上下文，帮助理解项目架构、构建系统和开发规范。
 
-## Project Overview
+## 项目概述
 
-**EMS** (Embedded Middleware System) is a general-purpose embedded middleware framework providing hardware abstraction and peripheral management for embedded controllers. It uses a 3-layer call chain (Apps→PDL→HAL) running on OSAL runtime environment, with 2 configuration libraries (ACL/PCL), designed for cross-platform portability (Linux/RTOS).
+EMS (Embedded Management System) 是一个采用 Linux Kbuild 构建框架的嵌入式软件项目。
 
-**Typical Application**:
+### 核心特点
+
+- **构建系统**: Linux 内核风格的 Kbuild 框架
+- **配置管理**: Kconfig 配置系统（menuconfig）
+- **架构模式**: Core/Products 分层架构
+- **编程语言**: C 语言（ISO C90 标准）
+- **目标平台**: Linux 嵌入式系统（主要是 TI AM62x）
+
+## 项目架构
+
+### 目录结构
+
 ```
-External System <--CAN--> EMS Controller <--Ethernet/UART/CAN--> Device Modules
+EMS/
+├── core/                   # 核心模块（可复用组件）
+│   ├── acl/               # 访问控制层
+│   ├── hal/               # 硬件抽象层（CAN、UART、I2C、SPI、GPIO 等）
+│   ├── osal/              # 操作系统抽象层（线程、互斥锁、信号量等）
+│   ├── pcl/               # 协议控制层
+│   └── pdl/               # 协议数据层
+├── products/              # 产品应用（特定产品的实现）
+│   └── ccm/              # CCM 产品
+│       ├── apps/         # 应用程序（collector、logger、health、supervisor、comm）
+│       └── libs/         # 产品库（libccm）
+├── configs/               # Kconfig 配置文件（defconfig）
+├── scripts/               # 构建脚本
+│   ├── Makefile.build    # 核心构建规则（应用、库、模块）
+│   ├── Makefile.clean    # 清理规则
+│   ├── Makefile.lib      # 库函数
+│   └── kconfig/          # Kconfig 配置工具
+├── include/               # Staging 头文件目录（构建时自动生成）
+├── bin/                   # 可执行文件输出目录
+├── lib/                   # 库文件输出目录
+│   └── modules/          # 内核模块输出目录
+└── docs/                  # 项目文档
 ```
 
-## Quick Commands
+### 模块依赖关系
 
-### Build
+```
+products/ccm/apps/*  →  products/ccm/libs/libccm  →  core/osal
+                                                   →  core/hal
+                                                   →  core/acl
+                                                   →  core/pcl
+                                                   →  core/pdl
+```
 
-**Standard CMake commands**
+**重要规则**:
+- Products 依赖 Core，但 Core 不能依赖 Products
+- 应用程序必须在库构建完成后才能构建
+- 在顶层 Makefile 中通过 `products/: core/` 声明依赖
+
+## 构建系统详解
+
+### Kbuild 框架核心概念
+
+#### 1. 声明式 Makefile
+
+使用声明式变量而非命令式规则：
+
+```makefile
+# ✅ 正确：声明式
+app-y := ccm_collector
+lib-y := osal
+so-y := libccm
+obj-m := driver
+
+# ❌ 错误：不要写命令式规则
+ccm_collector: main.o
+	$(CC) -o $@ $^
+```
+
+#### 2. 复合对象
+
+使用 `xxx-objs` 定义多文件目标：
+
+```makefile
+app-y := myapp
+myapp-objs := main.o config.o logger.o utils.o
+
+lib-y := mylib
+mylib-objs := api.o internal.o platform.o
+```
+
+#### 3. 条件编译
+
+使用 Kconfig 变量控制编译：
+
+```makefile
+# 条件编译源文件
+obj-$(CONFIG_OSAL_NETWORK) += osal_socket.o
+obj-$(CONFIG_HAL_CAN) += hal_can_linux.o
+
+# 条件编译子目录
+subdir-$(CONFIG_CCM_APPS) += apps/
+
+# 条件编译库
+lib-$(CONFIG_BUILD_SHARED) := mylib
+```
+
+#### 4. Staging 头文件机制
+
+**核心特性**: 库的头文件自动安装到 `$(objtree)/include/`，应用程序无需知道库的源码路径。
+
+**库 Makefile**:
+```makefile
+lib-y := osal
+osal-objs := osal_thread.o osal_mutex.o
+
+# 声明需要导出的头文件（相对于 $(src)/include/）
+header-y := osal.h osal_types.h
+header-y += ipc/osal_mutex.h ipc/osal_semaphore.h
+header-y += sys/osal_thread.h
+
+ccflags-y += -I$(src)/include
+```
+
+**头文件目录结构**:
+```
+core/osal/
+├── include/           # 头文件源码目录
+│   ├── osal.h
+│   ├── osal_types.h
+│   ├── ipc/
+│   │   ├── osal_mutex.h
+│   │   └── osal_semaphore.h
+│   └── sys/
+│       └── osal_thread.h
+├── src/
+└── Makefile
+```
+
+**应用程序 Makefile**:
+```makefile
+app-y := myapp
+myapp-objs := main.o
+
+# 只需包含 staging 目录，自动获得所有库头文件
+ccflags-y += -I$(objtree)/include
+ccflags-y += -I$(src)/include
+```
+
+**实现位置**: `scripts/Makefile.build:471-503`
+
+#### 5. 智能库名处理
+
+自动检测库名前缀，避免重复：
+
+```makefile
+lib-y += osal        # → libosal.a
+lib-y += libosal.a   # → libosal.a（不会变成 liblibosal.a）
+
+so-y += ccm          # → libccm.so
+so-y += libccm.so    # → libccm.so
+```
+
+**实现位置**: `scripts/Makefile.build:276-278, 329-331`
+
+### 构建流程
+
+```
+1. 配置阶段
+   make menuconfig / make xxx_defconfig
+   ↓
+   生成 .config 和 include/config/auto.conf
+
+2. 准备阶段
+   创建输出目录（bin/、lib/、lib/modules/）
+   ↓
+   构建 kconfig 工具
+
+3. 构建阶段
+   递归进入子目录（core/、products/）
+   ↓
+   编译源文件 (.c → .o)
+   ↓
+   链接库文件 (.o → .a / .so)
+   ↓
+   安装头文件到 staging 目录
+   ↓
+   链接应用程序 (.o → bin/)
+
+4. 安装阶段
+   复制文件到 bin/、lib/、lib/modules/
+```
+
+### 关键文件说明
+
+#### Makefile (顶层)
+
+- 定义全局变量（CC、CFLAGS、输出目录等）
+- 实现配置目标（menuconfig、defconfig 等）
+- 定义清理目标（clean、mrproper、distclean）
+- 控制递归构建流程
+
+**重要变量**:
+```makefile
+srctree := .                    # 源码根目录
+objtree := .                    # 输出根目录（支持 O=dir）
+BIN_DIR := $(objtree)/bin       # 可执行文件目录
+LIB_DIR := $(objtree)/lib       # 库文件目录
+MODULES_DIR := $(objtree)/lib/modules  # 内核模块目录
+
+core-y := core                  # 核心模块目录
+products-y := products          # 产品模块目录
+```
+
+#### scripts/Makefile.build
+
+核心构建规则文件，处理：
+- 应用程序构建（app-y）
+- 静态库构建（lib-y）
+- 动态库构建（so-y）
+- 内核模块构建（obj-m）
+- 头文件安装（header-y）
+- 依赖跟踪（.cmd 文件）
+
+**关键规则**:
+- 第 276-278 行：静态库安装（智能前缀处理）
+- 第 329-331 行：动态库安装（智能前缀处理）
+- 第 471-503 行：Staging 头文件自动安装
+
+#### scripts/Makefile.clean
+
+清理规则文件，支持：
+- 递归清理子目录
+- 清理编译产物（.o、.a、.so、.cmd）
+- 清理 kconfig 工具（hostprogs、targets）
+- 清理 staging 头文件
+
+**清理变量**:
+```makefile
+clean-files := file1 file2      # 需要清理的文件
+clean-dirs := dir1 dir2         # 需要清理的目录
+hostprogs := conf mconf         # 主机程序（自动清理）
+targets := parser.tab.c         # 生成的目标文件（自动清理）
+subdir- := kconfig              # 需要递归清理的子目录
+```
+
+#### scripts/kconfig/Makefile
+
+Kconfig 工具构建规则：
+- 构建 conf（命令行配置工具）
+- 构建 mconf（menuconfig 图形界面）
+- 生成词法/语法分析器（lexer.lex.c、parser.tab.c）
+
+### 常用构建命令
+
 ```bash
-# Native build
-cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build -j$(nproc)
+# 配置
+make menuconfig                        # 图形化配置
+make ccm_h200_am625_debug_defconfig   # 加载预定义配置
+make savedefconfig                     # 保存最小化配置
+make PRODUCT=ccm_h200_am625_debug     # 使用 PRODUCT 变量
 
-cmake -B build -DCMAKE_BUILD_TYPE=Debug
-cmake --build build -j$(nproc)
+# 编译
+make                                   # 编译所有目标
+make -j$(nproc)                       # 并行编译
+make V=1                              # 详细输出
+make core                             # 只编译 core
+make products                         # 只编译 products
 
-# Cross-compilation
-cmake -B build -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/arm32-linux-gnueabihf.cmake
-cmake --build build -j$(nproc)
+# 清理
+make clean                            # 清理编译产物
+make mrproper                         # 深度清理（包括配置）
+make distclean                        # 完全清理
 
-cmake -B build -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/aarch64-linux-gnu.cmake
-cmake --build build -j$(nproc)
-
-cmake -B build -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/riscv64-linux-gnu.cmake
-cmake --build build -j$(nproc)
+# 调试
+make -n                               # 显示命令但不执行
+make --debug=v                        # 调试 Makefile
 ```
 
-**Alternative: build.sh wrapper**
-```bash
-./build.sh              # Release build
-./build.sh -d           # Debug build
-./build.sh -c           # Clean
-./build.sh -a arm32     # ARM32 cross-compile
-./build.sh -a arm64     # ARM64 cross-compile
-./build.sh -a riscv64   # RISC-V 64 cross-compile
-```
+## 编码规范
 
-**Output locations**:
-- Binaries: `build/bin/`
-- Libraries: `build/lib/`
+### C 语言规范
 
-### Test
+- **标准**: ISO C90（不使用 C99/C11 特性）
+- **风格**: Linux 内核编码风格
+- **缩进**: Tab（8 空格宽度）
+- **命名**: 小写加下划线（snake_case）
 
-```bash
-# Run tests
-./build/bin/ems-test -i    # Interactive menu (recommended)
-./build/bin/ems-test -a    # Run all tests
-./build/bin/ems-test -L OSAL  # Run OSAL layer tests
-./build/bin/ems-test -m test_osal_task  # Run specific module (without .c extension)
+### 常见问题
 
-# Busybox-style shortcuts (via symlinks)
-./build/bin/osal-test -a    # Run only OSAL tests
-./build/bin/hal-test -a     # Run only HAL tests
-
-# Fast iteration: rebuild single test layer
-cd build && make osal_tests -j$(nproc) && cd ..
-cd build && make hal_tests -j$(nproc) && cd ..
-```
-
-### Debug
-
-```bash
-cmake -B build -DCMAKE_BUILD_TYPE=Debug
-cmake --build build -j$(nproc)
-gdb ./build/bin/sample_app
-gdb --args ./build/bin/ems-test -m test_osal_task
-```
-
-## Architecture Design
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                      OSAL Runtime Environment                    │
-│  • Shields platform differences (Linux, 32/64-bit, syscalls)    │
-│  • Provides unified interfaces (thread/IPC/memory/time/file/net) │
-│  • Platform implementation (POSIX)                               │
-│  • ALL layers use OSAL interfaces (no direct syscalls/stdlib)   │
-└─────────────────────────────────────────────────────────────────┘
-         ↑                    ↑                    ↑
-         │ Use OSAL          │ Use OSAL           │ Use OSAL
-         │                    │                    │
-  ┌──────┴──────┐      ┌─────┴──────┐      ┌─────┴──────┐
-  │    Apps     │─────>│    PDL     │─────>│    HAL     │
-  │             │      │            │      │            │
-  │  Business   │      │ Peripheral │      │  Hardware  │
-  │   Logic     │      │   Driver   │      │   Driver   │
-  └──────┬──────┘      └─────┬──────┘      └────────────┘
-         │                    │
-         │ Read Config        │ Read Config
-         ↓                    ↓
-  ┌─────────────┐      ┌─────────────┐
-  │     ACL     │      │     PCL     │
-  │  (Config)   │      │  (Config)   │
-  │  Business   │      │  Hardware   │
-  │   Mapping   │      │   Config    │
-  └─────────────┘      └─────────────┘
-```
-
-**Call Chain** (3 layers):
-```
-Apps → PDL → HAL
-```
-
-**OSAL Runtime Environment**:
-```
-All layers (Apps/PDL/HAL) use OSAL interfaces
-OSAL → Linux System Calls
-```
-
-**Configuration Libraries** (not in call chain):
-```
-ACL - Read by Apps layer (business function to device mapping)
-PCL - Read by PDL layer (hardware configuration)
-```
-
-**CRITICAL RULE**: All layers (Apps/PDL/HAL) MUST use OSAL wrappers. Only OSAL can call system APIs and standard library.
-
-### Component Responsibilities
-
-**OSAL** (Operating System Abstraction Layer) - **Runtime Environment for All Layers**
-- **Only layer allowed to include system headers** (`<unistd.h>`, `<pthread.h>`, `<stdlib.h>`)
-- **Only layer allowed to call system APIs and standard library functions**
-- Wraps ALL system calls and standard library for upper layers
-- Provides: task management, queues, mutexes, logging, file I/O, networking, time services, memory operations (`OSAL_Memcpy`, `OSAL_Strlen`), string operations
-- Platform-specific code in `core/osal/src/posix/` (future: `freertos/`, `vxworks/`)
-- **All other layers (Apps/PDL/HAL) MUST use OSAL wrappers**
-
-**HAL** (Hardware Abstraction Layer)
-- **Only layer allowed to include hardware-specific headers** (`<linux/can.h>`, `<net/if.h>`)
-- **MUST use OSAL wrappers for ALL operations** (never direct `socket()`, `open()`, `memcpy()`, `strlen()`, etc.)
-- Provides: CAN, UART, I2C, SPI, GPIO, Watchdog drivers
-- Platform-specific code in `core/hal/src/linux/` (future: `ti_am62/`, `nxp_imx8/`)
-
-**PDL** (Peripheral Driver Layer)
-- Unified management of satellite/BMC/MCU peripherals
-- **Must be completely platform-independent**
-- **MUST use OSAL wrappers for ALL operations**
-- Reads hardware configuration from PCL
-- Provides application-facing peripheral interfaces
-- Only Apps and Tests layers can access PDL APIs
-
-**ACL** (Application Configuration Layer) - **Configuration Library**
-- **Not in call chain, read by Apps layer**
-- Maps business functions (e.g., "server power on") to device types and indexes
-- **O(1) lookup performance** using enum-indexed arrays
-- Configuration files in `core/acl/config/<product>/`
-- Pure data structures, no business logic
-
-**PCL** (Peripheral Configuration Library) - **Configuration Library**
-- **Not in call chain, read by PDL layer**
-- Device-tree-like hardware configuration (pure data structures)
-- **Must be completely platform-independent**
-- Configuration organized by peripheral: `core/pcl/platform/<vendor>/<chip>/<product>/`
-- Pure data structures, no business logic
-
-**Apps** (Application Layer)
-- **Must be completely platform-independent**
-- **MUST use OSAL wrappers for ALL operations**
-- Reads business configuration from ACL
-- Currently contains sample_app (reference implementation) and watchdog_app (watchdog demonstration)
-
-## Critical Rules
-
-### Platform Independence (MOST IMPORTANT)
-
-**System Call Encapsulation**:
-- ❌ **FORBIDDEN** in HAL/PCL/PDL/Apps/Tests: Direct use of `socket()`, `bind()`, `open()`, `close()`, `memcpy()`, `strlen()`, `printf()`, etc.
-- ✅ **REQUIRED**: Use OSAL wrappers: `OSAL_socket()`, `OSAL_open()`, `OSAL_Memcpy()`, `OSAL_Strlen()`, `LOG_INFO()`, etc.
-
-**Header File Rules**:
-- ✅ OSAL layer: Can include system headers (`<unistd.h>`, `<sys/socket.h>`, `<pthread.h>`, `<stdlib.h>`)
-- ✅ HAL layer: Can include hardware headers, but must use OSAL system call wrappers
-- ❌ PCL/PDL/Apps/Tests: **Strictly forbidden** to include any system headers
-
-**Example**:
-```c
-/* ❌ WRONG: HAL layer using direct system calls */
-int sockfd = socket(PF_CAN, SOCK_RAW, CAN_RAW);  // FORBIDDEN
-bind(sockfd, ...);  // FORBIDDEN
-
-/* ✅ CORRECT: HAL layer using OSAL wrappers */
-int32 sockfd = OSAL_socket(PF_CAN, SOCK_RAW, CAN_RAW);  // CORRECT
-OSAL_bind(sockfd, ...);  // CORRECT
-```
-
-### Data Types (from core/osal/include/osal_types.h)
-
-**CRITICAL: This project strictly prohibits using C native data types. You MUST use OSAL-wrapped types.**
+#### ❌ 混合声明和代码
 
 ```c
-/* String type - ALLOWED */
-char                           // For strings and text data ONLY
+// 错误：C90 不允许
+void func(void) {
+    int a = 1;
+    printf("%d\n", a);
+    int b = 2;  // ❌ 声明必须在代码块开头
+}
 
-/* Fixed-size integers */
-int8, int16, int32, int64       // Signed integers
-uint8, uint16, uint32, uint64   // Unsigned integers
-
-/* Boolean */
-bool                            // true/false
-
-/* Platform-dependent size types */
-osal_size_t                     // Unsigned size (uint32 on 32-bit, uint64 on 64-bit)
-osal_ssize_t                    // Signed size (int32 on 32-bit, int64 on 64-bit)
-
-/* OSAL types */
-osal_id_t                       // Object ID (uint32)
-```
-
-**Prohibited Native Types**:
-```c
-/* ❌ NEVER USE THESE */
-int                 // Use int32 or int16
-unsigned int        // Use uint32 or uint16
-short               // Use int16
-unsigned short      // Use uint16
-long                // Use int32 or int64
-unsigned long       // Use uint32 or uint64
-long long           // Use int64
-unsigned long long  // Use uint64
-size_t              // Use osal_size_t
-ssize_t             // Use osal_ssize_t
-```
-
-**Exceptions** (only in these cases):
-1. **OSAL layer internal implementation** - when wrapping system calls
-2. **Third-party library interaction** - when calling external library APIs
-3. **Must document the reason in comments**
-
-### Naming Conventions
-
-**Public APIs** (exported to upper layers):
-```c
-OSAL_TaskCreate()           // OSAL layer
-HAL_CANInit()               // HAL layer
-PCL_Init()                  // PCL layer
-PDL_SatelliteInit()         // PDL layer
-```
-
-**Internal functions** (static, module-private):
-```c
-static int32 osal_task_find_by_id(osal_id_t id);
-static void hal_can_set_filter(int fd, uint32 filter_id);
-static int32 pcl_find_config(const char *name);
-```
-
-**Test cases** (all lowercase with underscores):
-```c
-TEST_CASE(test_osal_task_create_success)
-TEST_CASE(test_hal_can_init_null_handle)
-TEST_CASE(test_pcl_api_register_success)
-```
-
-### Error Handling
-
-- All functions return `int32` status codes
-- Success: `OS_SUCCESS` (0)
-- Failure: `OS_ERROR` (-1) or specific error code
-- **All return values must be checked**
-
-```c
-int32 ret = OSAL_TaskCreate(&task_id, "task", entry, NULL);
-if (ret != OS_SUCCESS) {
-    LOG_ERROR("MODULE", "Task creation failed");
-    return OS_ERROR;
+// 正确
+void func(void) {
+    int a = 1;
+    int b = 2;
+    printf("%d\n", a);
 }
 ```
 
-### Logging
+#### ❌ 使用 C99 特性
 
-**Use OSAL logging interfaces** (never `printf`/`fprintf`):
 ```c
-LOG_INFO("MODULE", "message");      // Recommended
-LOG_ERROR("MODULE", "error: %d", errno);
-OSAL_Printf("simple output\n");     // Only when necessary
+// 错误：for 循环中声明变量
+for (int i = 0; i < 10; i++) { }  // ❌
+
+// 正确
+int i;
+for (i = 0; i < 10; i++) { }
 ```
 
-### Task Programming
+### Makefile 规范
 
-**Standard task template**:
-```c
-static void task_entry(void *arg)
-{
-    osal_id_t task_id = OSAL_TaskGetId();
-    
-    while (!OSAL_TaskShouldShutdown())  // Check shutdown flag
-    {
-        do_work();
-        OSAL_TaskDelay(100);
-    }
-    
-    cleanup();  // Clean up resources before exit
-}
+```makefile
+# 1. 使用 Tab 缩进（不是空格）
+# 2. 变量赋值使用 := 或 +=
+# 3. 条件编译使用 obj-$(CONFIG_XXX)
+# 4. 头文件路径使用 ccflags-y
+# 5. 链接选项使用 ldflags-y
+
+# 示例
+app-y := myapp
+myapp-objs := main.o utils.o
+
+ccflags-y += -I$(objtree)/include
+ccflags-y += -I$(src)/include
+ccflags-$(CONFIG_DEBUG) += -DDEBUG
+
+ldflags-y += -lpthread
 ```
 
-**Critical**: Never use `while(1)` - tasks must check `OSAL_TaskShouldShutdown()` for graceful shutdown.
+## 常见开发任务
 
-## Buildroot Integration
+### 添加新的应用程序
 
-EMS supports Buildroot integration for embedded Linux systems:
+1. 创建目录：`products/ccm/apps/myapp/`
+2. 创建 Makefile：
+```makefile
+app-y := myapp
+myapp-objs := main.o module1.o module2.o
+
+ccflags-y += -I$(objtree)/include
+ccflags-y += -I$(src)/include
+```
+3. 在父目录 Makefile 添加：`subdir-y += myapp`
+4. 编译测试：`make products`
+
+### 添加新的库
+
+1. 创建目录：`core/mylib/`
+2. 创建头文件目录：`core/mylib/include/`
+3. 创建 Makefile：
+```makefile
+lib-y := mylib
+mylib-objs := api.o internal.o
+
+# 导出头文件
+header-y := mylib.h mylib_types.h
+header-y += subdir/mylib_api.h
+
+ccflags-y += -I$(src)/include
+```
+4. 在父目录 Makefile 添加：`subdir-y += mylib`
+5. 编译测试：`make core`
+
+### 添加 Kconfig 选项
+
+1. 编辑相应的 Kconfig 文件（如 `core/osal/Kconfig`）
+2. 添加配置项：
+```kconfig
+config OSAL_NEW_FEATURE
+    bool "Enable new OSAL feature"
+    default y
+    help
+      This enables the new OSAL feature.
+```
+3. 在 Makefile 中使用：
+```makefile
+obj-$(CONFIG_OSAL_NEW_FEATURE) += new_feature.o
+```
+4. 运行 `make menuconfig` 验证
+
+### 调试构建问题
 
 ```bash
-# 1. Copy configuration files to Buildroot
-cp -r docs/buildroot/* <buildroot>/package/ems/
+# 1. 查看详细构建过程
+make V=1
 
-# 2. Enable EMS in menuconfig
-make menuconfig
-# Navigate to: Target packages -> Libraries -> ems
+# 2. 查看 Make 变量
+make -p | grep "^app-y"
 
-# 3. Build
-make ems
+# 3. 检查依赖文件
+cat core/osal/.osal_thread.o.cmd
+
+# 4. 清理后重新构建
+make mrproper
+make ccm_h200_am625_debug_defconfig
+make -j$(nproc)
+
+# 5. 检查配置
+cat .config | grep CONFIG_OSAL
 ```
 
-Detailed integration guide: [docs/buildroot/README.md](docs/buildroot/README.md)
+## 重要注意事项
 
-## Development Workflows
+### 构建系统
 
-### Adding New OSAL Interface
-1. Add interface declaration in `core/osal/include/` (e.g., `osal_timer.h`)
-2. Implement POSIX version in `core/osal/src/posix/` (e.g., `osal_timer.c`)
-3. Add unit tests in `tests/unit/osal/` (e.g., `test_osal_timer.c`)
-4. Update `core/osal/CMakeLists.txt` to include new source file
-5. Update `core/osal/README.md` if adding major functionality
+1. **不要修改 scripts/ 下的核心文件**，除非你完全理解 Kbuild 机制
+2. **始终使用声明式语法**，不要在子目录 Makefile 中写命令式规则
+3. **头文件必须放在 include/ 子目录**，并通过 header-y 声明
+4. **应用程序只能使用 staging 头文件**，不要硬编码源码路径
+5. **库名可以带或不带 lib 前缀**，构建系统会自动处理
 
-### Adding New HAL Driver
-1. Add driver interface in `core/hal/include/` (e.g., `hal_gpio.h`)
-2. Add driver config in `core/hal/include/config/` (e.g., `hal_gpio_config.h`)
-3. Implement Linux version in `core/hal/src/linux/` (using OSAL wrappers, e.g., `hal_gpio.c`)
-4. Add unit tests in `tests/unit/hal/` (e.g., `test_hal_gpio.c`)
-5. Update `core/hal/CMakeLists.txt` to include new driver source
+### 依赖关系
 
-### Adding New PDL Service
-1. Add service interface in `core/pdl/include/` (e.g., `pdl_satellite.h`)
-2. Implement service in `core/pdl/src/` (using HAL and PCL APIs)
-3. Add unit tests in `tests/pdl/`
-4. Update `core/pdl/README.md`
+1. **Products 必须依赖 Core**，在顶层 Makefile 中声明 `products/: core/`
+2. **应用程序必须在库之后构建**，通过目录顺序控制
+3. **不要创建循环依赖**，Core 模块之间也要注意依赖顺序
 
-### Adding New Platform Configuration
-1. Create platform directory: `core/pcl/platform/<vendor>/<chip>/<product>/`
-2. Add hardware config file (defines peripheral interfaces)
-3. Add application config file (maps apps to peripherals)
-4. Register platform in PCL initialization
-5. Add platform-specific tests if needed
+### 清理机制
 
-### Adding New Test
-1. Create test file in `tests/unit/<layer>/` (e.g., `test_osal_timer.c`)
-2. Use `TEST_MODULE_BEGIN/END` and `TEST_CASE` macros
-3. Add source file to `tests/CMakeLists.txt` in the appropriate section
-4. Build and run: `cmake --build build && ./build/bin/ems-test -m test_osal_timer`
-5. For fast iteration: `cd build && make osal_tests -j$(nproc) && cd ..`
-6. Test module name should match filename without `.c` extension
+1. **make clean**: 清理编译产物，保留配置
+2. **make mrproper**: 深度清理，删除配置和 kconfig 工具
+3. **make distclean**: 完全清理，包括编辑器备份文件
 
-**Test template**:
-```c
-#include "tests_core.h"
-#include <osal.h>
+### Git 工作流
 
-TEST_CASE(test_osal_timer_create_success)
-{
-    osal_id_t timer_id;
-    int32 ret = OSAL_TimerCreate(&timer_id, "test_timer", NULL, NULL);
-    TEST_ASSERT_EQUAL(OS_SUCCESS, ret);
-    OSAL_TimerDelete(timer_id);
-}
+1. **当前分支**: `feature/kconfig-integration`
+2. **主分支**: `master`
+3. **提交前检查**: 确保 `make mrproper && make ccm_h200_am625_debug_defconfig && make -j$(nproc)` 成功
 
-TEST_MODULE_BEGIN(test_osal_timer, "Timer Tests")
-    TEST_CASE_REGISTER(test_osal_timer_create_success, "Timer creation")
-TEST_MODULE_END()
-```
+## 最近的改进
 
-## Key Design Patterns
+### 2026-05-21 改进记录
 
-### OSAL User-Space Library Design
-- No explicit initialization required (static initialization)
-- No idle loop (OS-scheduled)
-- Graceful shutdown via `OSAL_TaskShouldShutdown()`
-- Thread-safe with deadlock detection
+1. **Staging 头文件机制** (High Priority)
+   - 自动安装库头文件到 `$(objtree)/include/`
+   - 简化应用程序 Makefile（减少 35 行硬编码路径）
+   - 支持外部构建和 Buildroot/Yocto 集成
 
-### PCL Configuration Architecture
-- Two-layer config: Hardware config (defines peripheral interfaces) + App config (defines app-to-peripheral mapping)
-- Peripheral-centric (like Linux device tree)
-- Multi-platform support: `platform/<vendor>/<chip>/<product>/`
-- Selection via environment variable / compile option / default
+2. **库名前缀智能处理** (Medium Priority)
+   - 避免 `lib-y += libosal.a` 变成 `liblibosal.a`
+   - 自动检测并保持正确的库名
 
-### PDL Peripheral Framework
-- Unified peripheral interface (`peripheral_device.h`)
-- Adapter pattern for legacy interfaces (100% backward compatible)
-- Multi-channel redundancy with automatic failover
-- Heartbeat mechanism for health monitoring
+3. **PRODUCT 变量支持** (Low Priority)
+   - `make PRODUCT=ccm` 自动加载配置
+   - 简化 CI/CD 流程
 
-## Common Issues
+4. **Kconfig 清理机制优化**
+   - 参考 Linux 内核实现
+   - 支持 hostprogs、targets、subdir- 变量
+   - 正确清理 kconfig 工具和生成文件
 
-### Compilation Warnings
-- Project uses `-Werror` - all warnings are errors
-- Must fix all warnings to compile
-- C Standard: C99/C11 with `-D_POSIX_C_SOURCE=200809L`
+5. **目录结构标准化**
+   - 内核模块从 `ko/` 移到 `lib/modules/`
+   - 符合 Linux 标准目录布局
 
-### Multi-Architecture Support
-- **Supported Architectures**: x86_64, ARM32 (ARMv7-A), ARM64 (ARMv8-A), RISC-V 64
-- **Type System**: Uses fixed-size types (`uint32`, `int64`) for portability
-- **Endianness**: Automatic detection with `OSAL_HTONS/HTONL` macros for byte order conversion
-- **Atomic Operations**: Uses C11 `_Atomic` with fixed-size types (`_Atomic uint32`)
-- **Pointer Casting**: Uses `uintptr_t` for safe pointer-to-integer conversions
+6. **清理输出格式修复**
+   - 修复双斜杠问题（`core//acl` → `core/acl`）
+   - 消除重复目标定义警告
 
-### Cross-Compilation
-```bash
-# Install toolchains on Ubuntu/Debian:
-sudo apt-get install gcc-arm-linux-gnueabihf gcc-aarch64-linux-gnu gcc-riscv64-linux-gnu
+详见 `IMPROVEMENTS.md`。
 
-# Cross-compile using toolchain files
-cmake -B build -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/arm32-linux-gnueabihf.cmake
-cmake --build build -j$(nproc)
+## 参考文档
 
-cmake -B build -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/aarch64-linux-gnu.cmake
-cmake --build build -j$(nproc)
+- [构建系统详解](docs/BUILD_SYSTEM.md)
+- [构建指南](docs/BUILD_GUIDE.md)
+- [架构设计](docs/ARCHITECTURE.md)
+- [Kconfig 集成](docs/KCONFIG_INTEGRATION_SUMMARY.md)
+- [Makefile 框架](docs/MAKEFILE_FRAMEWORK.md)
 
-cmake -B build -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/riscv64-linux-gnu.cmake
-cmake --build build -j$(nproc)
-```
+## 故障排除快速参考
 
-**Architecture-Specific Compiler Flags**:
-- ARM32: `-march=armv7-a -mfpu=neon-vfpv4 -mfloat-abi=hard`
-- ARM64: `-march=armv8-a`
-- RISC-V 64: `-march=rv64imafdc -mabi=lp64d`
+| 问题 | 解决方案 |
+|------|---------|
+| 找不到头文件 | 检查 header-y 声明和 ccflags-y 设置 |
+| 库名重复前缀 | 已修复，可以使用任意格式 |
+| 清理不完全 | 使用 `make mrproper` |
+| 配置不生效 | 重新运行 `make menuconfig` 并保存 |
+| 并行构建失败 | 检查依赖关系声明 |
+| 双斜杠路径 | 已修复，确保使用最新代码 |
 
-### Hardware-Related Test Failures
-- CAN tests require `can0` or `vcan0` device
-- Serial tests require `/dev/ttyS0` or `/dev/ttyUSB0`
-- GPIO tests require `/sys/class/gpio` access
-- Watchdog tests require `/dev/watchdog` device
-- These failures are expected without hardware
-- Use `-i` interactive mode to skip hardware-dependent tests
+---
 
-### CAN Interface Setup
-```bash
-# Check if CAN modules are loaded
-lsmod | grep can
-
-# Load CAN modules
-sudo modprobe can can_raw vcan
-
-# Setup virtual CAN (for testing without hardware)
-sudo ip link add dev vcan0 type vcan
-sudo ip link set vcan0 up
-
-# Setup real CAN interface
-sudo ip link set can0 type can bitrate 500000
-sudo ip link set can0 up
-```
-
-### Serial Port Permissions
-```bash
-# Add user to dialout group for serial port access
-sudo usermod -a -G dialout $USER
-# Log out and log back in for changes to take effect
-
-# Or use sudo for testing
-sudo ./build/release/bin/ems-test -m test_hal_serial
-```
-
-## Build Output Structure
-
-```
-build/
-├── bin/              # Executables (sample_app, watchdog_app, ems-test, osal-test, hal-test, etc.)
-└── lib/              # Static libraries (libosal.a, libhal.a, libpdl.a, libpcl.a)
-```
-
-## Documentation
-
-- **Architecture**: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-- **Coding Standards**: [docs/CODING_STANDARDS.md](docs/CODING_STANDARDS.md)
-- **Quick Build Guide**: [docs/QUICK_BUILD.md](docs/QUICK_BUILD.md)
-- **Module READMEs**: Each layer has `README.md` and `docs/` directory
-- **Test Framework**: [tests/README.md](tests/README.md)
-
-## Debugging and Troubleshooting
-
-### Common Build Issues
-
-**Missing pthread library**:
-```bash
-# Error: undefined reference to `pthread_create`
-# Solution: pthread is linked automatically via find_package(Threads)
-```
-
-**Cross-compilation toolchain not found**:
-```bash
-# Install missing toolchain
-sudo apt-get install gcc-arm-linux-gnueabihf gcc-aarch64-linux-gnu gcc-riscv64-linux-gnu
-```
-
-**Test failures without hardware**:
-- CAN tests require `can0` or `vcan0` interface
-- Serial tests require `/dev/ttyS0` or `/dev/ttyUSB0`
-- Use `-i` interactive mode to skip hardware-dependent tests
-
-### Debugging Tips
-
-**Enable verbose logging**:
-```c
-OSAL_LogSetLevel(LOG_LEVEL_DEBUG);  // In your code
-```
-
-**GDB debugging**:
-```bash
-cmake --preset debug && cmake --build --preset debug
-gdb --args ./build/debug/bin/ems-test -m test_osal_task
-```
-
-**Memory leak detection**:
-```bash
-valgrind --leak-check=full ./build/debug/bin/ems-test -m test_osal_queue
-```
-
-**Check task status**:
-```bash
-# Monitor running tasks
-ps -eLf | grep ems-test
-```
-
-## Project Stats
-
-- **Code Size**: ~23,000 lines (13,000 production + 10,000 test)
-- **Files**: 151 C/H files
-- **Test Coverage**: 406 test cases across all layers
-  - OSAL: 200 tests (19 modules)
-  - HAL: 89 tests (6 modules: CAN, UART, I2C, SPI, GPIO, Watchdog)
-  - PCL: 22 tests
-  - PDL: 95 tests (Satellite, BMC, MCU, Watchdog)
-  - ACL: Configuration validation and statistics
-- **Architecture**: 3-layer call chain (Apps→PDL→HAL) + OSAL runtime + 2 config libraries (ACL/PCL)
-- **Platforms**: TI AM6254, vendor_demo (extensible)
-- **Build System**: CMake 3.16+, supports native and cross-compilation
-
-## Important Files
-
-- [CMakeLists.txt](CMakeLists.txt) - Main build config
-- [build.sh](build.sh) - Build script wrapper
-- [cmake/toolchains/](cmake/toolchains/) - Cross-compilation toolchain files
-- [core/osal/include/osal.h](core/osal/include/osal.h) - OSAL main header
-- [core/osal/include/osal_types.h](core/osal/include/osal_types.h) - Type definitions
-- [tests/core/main.c](tests/core/main.c) - Test runner entry
-- [apps/sample_app/src/main.c](apps/sample_app/src/main.c) - Sample application
-- [apps/watchdog_app/src/main.c](apps/watchdog_app/src/main.c) - Watchdog application
-
-## Performance Considerations
-
-### Memory Management
-- OSAL uses static allocation for task/queue/mutex tables (64 entries each)
-- Queue buffers are dynamically allocated but pre-sized at creation
-- No runtime memory allocation in critical paths (interrupt handlers, tight loops)
-
-### Real-time Considerations
-- Task priorities: 1-255 (lower number = higher priority)
-- OSAL_TaskDelay() uses nanosleep() for precise timing
-- Mutex deadlock detection threshold: 5000ms (configurable)
-- Queue operations support timeout for bounded waiting
-
-### Thread Safety
-- All OSAL APIs are thread-safe
-- HAL drivers use OSAL mutexes for protection
-- Atomic operations use C11 `_Atomic` types
-- Reference counting prevents use-after-free in queues
-
-## Git Commit Message Convention
-
-This project uses Chinese commit message format:
-
-```
-<类型>：<描述>
-
-类型 (Types):
-- 重构 (refactor): Code restructuring without changing functionality
-- 文档 (docs): Documentation changes
-- 修复 (fix): Bug fixes
-- 新增 (feat): New features
-- 测试 (test): Adding or updating tests
-- 构建 (build): Build system changes
-- 优化 (optimize): Performance or code quality improvements
-```
-
-**Examples**:
-```
-重构：移除 osal_task 模块，简化为基础线程接口
-文档：完成 Buildroot 集成文件的 BSP→EMS 重命名
-修复：替换不存在的OSAL_Strchr函数并修复测试编译
-新增：实现Redfish协议支持
-```
+**最后更新**: 2026-05-21
+**维护者**: wanguo
+**分支**: feature/kconfig-integration

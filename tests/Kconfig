@@ -1,0 +1,36 @@
+# Test Configuration
+
+config TEST_OSAL
+	bool "Build OSAL tests"
+	depends on BUILD_TESTING
+	default y
+	help
+	  Build OSAL layer unit tests.
+
+config TEST_HAL
+	bool "Build HAL tests"
+	depends on BUILD_TESTING
+	default y
+	help
+	  Build HAL layer unit tests.
+
+config TEST_PCL
+	bool "Build PCL tests"
+	depends on BUILD_TESTING
+	default y
+	help
+	  Build PCL layer unit tests.
+
+config TEST_PDL
+	bool "Build PDL tests"
+	depends on BUILD_TESTING
+	default y
+	help
+	  Build PDL layer unit tests.
+
+config TEST_ACL
+	bool "Build ACL tests"
+	depends on BUILD_TESTING
+	default y
+	help
+	  Build ACL layer unit tests.

@@ -1,0 +1,118 @@
+# OSAL (Operating System Abstraction Layer) Configuration
+
+menu "OSAL (Operating System Abstraction Layer)"
+
+config OSAL
+	bool
+	default y
+	help
+	  Operating System Abstraction Layer provides unified OS interfaces.
+	  OSAL is the foundation layer required by all other modules.
+
+	  This option is always enabled.
+
+if OSAL
+
+menu "OSAL Features"
+
+config OSAL_FILE
+	bool "File I/O support"
+	default y
+	help
+	  Enable file I/O operations (open, read, write, close, etc.).
+
+	  If unsure, say Y.
+
+config OSAL_NETWORK
+	bool "Network support"
+	default y
+	help
+	  Enable network socket operations (socket, bind, connect, etc.).
+	  Required for network communication.
+
+	  If unsure, say Y.
+
+config OSAL_IPC
+	bool "Inter-Process Communication"
+	default y
+	help
+	  Enable IPC mechanisms (mutex, semaphore, shared memory, etc.).
+	  Required for multi-threaded applications.
+
+	  If unsure, say Y.
+
+config OSAL_THREAD
+	bool "Thread support"
+	default y
+	help
+	  Enable thread management (create, join, detach, etc.).
+	  Required for multi-threaded applications.
+
+	  If unsure, say Y.
+
+config OSAL_TIME
+	bool "Time and clock support"
+	default y
+	help
+	  Enable time operations (sleep, clock, timer, etc.).
+
+	  If unsure, say Y.
+
+config OSAL_SIGNAL
+	bool "Signal handling"
+	default y
+	help
+	  Enable signal handling operations.
+
+	  If unsure, say Y.
+
+endmenu
+
+menu "OSAL Configuration"
+
+config OSAL_MAX_TASKS
+	int "Maximum number of tasks"
+	default 64
+	range 1 256
+	help
+	  Maximum number of concurrent tasks supported by OSAL.
+
+config OSAL_MAX_QUEUES
+	int "Maximum number of queues"
+	default 32
+	range 1 128
+	help
+	  Maximum number of message queues.
+
+config OSAL_MAX_MUTEXES
+	int "Maximum number of mutexes"
+	default 32
+	range 1 128
+	help
+	  Maximum number of mutex locks.
+
+config OSAL_DEBUG_LOGGING
+	bool "Enable debug logging"
+	default n
+	help
+	  Enable verbose debug logging in OSAL layer.
+
+config OSAL_BUILD_STATIC
+	bool "Build static library (.a)"
+	default y
+	help
+	  Build OSAL as a static library (libosal.a).
+
+config OSAL_BUILD_SHARED
+	bool "Build shared library (.so)"
+	default y
+	help
+	  Build OSAL as a shared library (libosal.so).
+
+comment "Tip: Enable both if different apps need different link types"
+
+endmenu
+
+endif # OSAL
+
+endmenu

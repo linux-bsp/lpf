@@ -1,0 +1,65 @@
+#!/bin/sh
+# ============================================================================
+# fixdep - 修复依赖文件，添加 CONFIG_ 依赖跟踪（纯 shell 实现）
+# ============================================================================
+# 功能：
+# 1. 解析 .d 依赖文件
+# 2. 扫描源文件和头文件中的 CONFIG_ 引用
+# 3. 生成包含 CONFIG 依赖的 .cmd 文件
+# ============================================================================
+
+if [ $# -lt 4 ]; then
+    echo "Usage: $0 <depfile> <target> <cmd> <autoconf.h>" >&2
+    exit 1
+fi
+
+depfile="$1"
+target="$2"
+cmd="$3"
+autoconf_h="$4"
+
+# 生成 .cmd 文件路径
+target_dir=$(dirname "$target")
+target_name=$(basename "$target")
+cmdfile="$target_dir/.$target_name.cmd"
+
+# 提取源文件（.c 文件）
+srcfile="${target%.o}.c"
+
+# 提取 CONFIG_ 依赖
+config_deps=""
+if [ -f "$srcfile" ]; then
+    # 从源文件中提取 CONFIG_ 引用
+    config_deps=$(grep -oh '\bCONFIG_[A-Z0-9_]*\b' "$srcfile" 2>/dev/null | sort -u)
+fi
+
+# 从依赖的头文件中提取 CONFIG_ 引用
+if [ -f "$depfile" ]; then
+    header_files=$(sed 's/.*://; s/\\//g' "$depfile" | tr ' ' '\n' | grep '\.h$')
+    for hfile in $header_files; do
+        if [ -f "$hfile" ]; then
+            grep -oh '\bCONFIG_[A-Z0-9_]*\b' "$hfile" 2>/dev/null
+        fi
+    done | sort -u | while read cfg; do
+        echo "$cfg"
+    done >> /tmp/fixdep_configs_$$
+    if [ -f /tmp/fixdep_configs_$$ ]; then
+        config_deps="$config_deps
+$(cat /tmp/fixdep_configs_$$)"
+        rm -f /tmp/fixdep_configs_$$
+    fi
+fi
+
+# 生成 .cmd 文件
+{
+    echo "cmd_$target := $cmd"
+    echo ""
+
+    # 添加 autoconf.h 依赖
+    if [ -n "$config_deps" ]; then
+        echo "# CONFIG dependencies"
+        echo "$target: $autoconf_h"
+    fi
+} > "$cmdfile"
+
+exit 0

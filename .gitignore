@@ -7,6 +7,9 @@
 *.obj
 *.elf
 
+# 但不忽略构建框架文件
+!scripts/build/*.ko
+
 # Linker output
 *.ilk
 *.map
@@ -22,11 +25,18 @@
 *.la
 *.lo
 
+# 但不忽略构建框架文件
+!scripts/build/*.lib
+!scripts/Makefile.lib
+
 # Shared objects (inc. Windows DLLs)
 *.dll
 *.so
 *.so.*
 *.dylib
+
+# 但不忽略构建框架文件
+!scripts/build/*.dll
 
 # Executables
 *.exe
@@ -35,6 +45,9 @@
 *.i*86
 *.x86_64
 *.hex
+
+# 但不忽略构建框架文件
+!scripts/build/*.app
 
 # Debug files
 *.dSYM/
@@ -59,7 +72,63 @@ dkms.conf
 
 # 构建输出目录（参考buildroot设计）
 output/
-build/
+/build/
 target/
+/bin/
+/lib/
+
+# 但不忽略构建脚本目录
+!scripts/build/
+
+# Products 目录中的可执行文件
+products/**/apps/*/ccm_*
+!products/**/apps/*/*.c
+!products/**/apps/*/*.h
+!products/**/apps/*/Makefile
 
 *.DS_Store
+
+# Kconfig generated files
+.config
+.config.old
+include/config/
+include/generated/
+scripts/kconfig/include/
+
+# Kconfig tools (built binaries)
+scripts/kconfig/conf
+scripts/kconfig/mconf
+scripts/kconfig/nconf
+scripts/kconfig/*.o
+scripts/kconfig/lxdialog/*.o
+scripts/kconfig/parser.tab.c
+scripts/kconfig/parser.tab.h
+scripts/kconfig/lexer.lex.c
+scripts/kconfig/.*.cmd
+scripts/kconfig/*.cmd
+
+# 编辑器备份文件
+*~
+*.swp
+*.swo
+.*.swp
+*.orig
+*.rej
+*.bak
+\#*\#
+*%
+
+# Tags文件
+tags
+TAGS
+cscope*
+GPATH
+GRTAGS
+GSYMS
+GTAGS
+
+# IDE文件
+.vscode/
+.idea/
+*.code-workspace
+staging/

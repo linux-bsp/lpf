@@ -17,11 +17,13 @@
 uint16_t mcu_protocol_calc_crc16(const uint8_t *data, uint32_t len)
 {
     uint16_t crc = 0xFFFF;
+    uint32_t i;
+    int32_t j;
 
-    for (uint32_t i = 0; i < len; i++)
+    for (i = 0; i < len; i++)
     {
         crc ^= data[i];
-        for (int32_t j = 0; j < 8; j++)
+        for (j = 0; j < 8; j++)
         {
             if (crc & 0x0001)
             {

@@ -1,0 +1,52 @@
+# =============================================================================
+# Makefile.clean - 清理规则
+# =============================================================================
+
+src := $(obj)
+
+PHONY := __clean
+__clean:
+
+include scripts/Kbuild.include
+
+kbuild-dir := $(if $(filter /%,$(src)),$(src),$(srctree)/$(src))
+kbuild-file := $(if $(wildcard $(kbuild-dir)/Kbuild),$(kbuild-dir)/Kbuild,$(kbuild-dir)/Makefile)
+-include $(kbuild-file)
+
+# 子目录（参考内核 Makefile.clean）
+subdir-ymn := $(sort $(subdir-y) $(subdir-m) $(subdir-) \
+		$(patsubst %/,%, $(filter %/, $(obj-y) $(obj-m) $(obj-))))
+
+# 添加子目录路径前缀
+subdir-ymn := $(addprefix $(obj)/,$(subdir-ymn))
+
+# 清理文件（参考内核 Makefile.clean）
+__clean-files := \
+	$(clean-files) $(hostprogs) $(targets) \
+	$(lib-y) $(so-y) $(app-y) \
+	$(extra-y) $(extra-m) $(extra-) \
+	$(always-y) $(always-m) $(always-)
+
+# 使用 wildcard 展开文件列表（避免通配符问题）
+__clean-files := $(wildcard $(addprefix $(obj)/, $(__clean-files)))
+
+# 清理目录
+__clean-dirs := $(clean-dirs)
+
+quiet_cmd_clean = CLEAN   $(obj)
+      cmd_clean = printf '$(obj)/%s ' $(patsubst $(obj)/%,%,$(__clean-files)) | xargs -r rm -rf; \
+                  if [ -n "$(__clean-dirs)" ]; then rm -rf $(addprefix $(obj)/,$(__clean-dirs)); fi
+
+__clean: $(subdir-ymn)
+ifneq ($(strip $(__clean-files)),)
+	$(call cmd,clean)
+endif
+	@:
+
+PHONY += $(subdir-ymn)
+$(subdir-ymn):
+	+$(Q)$(MAKE) $(clean)=$@
+
+clean := -f $(srctree)/scripts/Makefile.clean obj
+
+.PHONY: $(PHONY)
