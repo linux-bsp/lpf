@@ -34,7 +34,7 @@ ccm-cflags-y := -fPIC
 # -----------------------------------------------------------------------------
 # 动态库链接标志
 ccm-ldflags := -shared -Wl$(comma)-soname$(comma)libccm.so.1
-ccm-ldflags += -L$(objtree)/lib -losal
+ccm-ldflags += -L$(LIB_DIR) -losal
 
 # -----------------------------------------------------------------------------
 # 5. 头文件导出
