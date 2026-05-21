@@ -490,11 +490,17 @@ ems: $(ems-dirs) FORCE
 
 # 下降到子目录构建
 PHONY += $(ems-dirs)
+ifeq ($(dot-config),1)
+$(ems-dirs): prepare scripts include/config/auto.conf
+	+$(Q)$(MAKE) $(build)=$@
+else
 $(ems-dirs): prepare scripts
 	+$(Q)$(MAKE) $(build)=$@
+endif
 
 # products 依赖 core（必须先构建 core 的库）
-products/: core/
+# 使用 order-only prerequisite 确保 core 完全完成后才开始 products
+products: | core
 
 # =============================================================================
 # 准备工作
@@ -543,7 +549,8 @@ CLEAN_FILES +=
 
 # 清理 staging 头文件（保留源码中的 ems_config.h）
 # 注意：include/ 目录本身不删除，只删除安装的头文件和子目录
-CLEAN_DIRS  += include/ipc include/lib include/net include/sys include/util include/config
+# include/config/ 目录由 mrproper 清理，因为它包含配置文件（auto.conf）
+CLEAN_DIRS  += include/ipc include/lib include/net include/sys include/util
 
 MRPROPER_DIRS  += include/config include/generated .tmp_objdiff
 MRPROPER_FILES += .config .config.old .version .old_version \
