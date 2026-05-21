@@ -6,6 +6,7 @@ int32_t PMC_TM_Cache_Init(pmc_tm_cache_t **cache)
 {
     osal_shm_t shm;
     int32_t ret;
+    uint32_t i;
 
     /* 创建或打开共享内存 */
     ret = OSAL_ShmCreate(PMC_SHM_TELEMETRY_CACHE, PMC_SHM_TM_CACHE_SIZE,
@@ -25,7 +26,6 @@ int32_t PMC_TM_Cache_Init(pmc_tm_cache_t **cache)
 
     /* 初始化缓存条目 */
     (*cache)->entry_count = PMC_TM_MAX_COUNT;
-    uint32_t i;
     for (i = 0; i < PMC_TM_MAX_COUNT; i++) {
         pmc_tm_cache_entry_t *entry = &(*cache)->entries[i];
         entry->tm_id = i;
@@ -65,14 +65,17 @@ static pmc_tm_freshness_t calculate_freshness(uint64_t timestamp_us, uint32_t va
 int32_t PMC_TM_Cache_Write(pmc_tm_cache_t *cache, uint32_t tm_id,
                           const uint8_t *data, uint32_t size, uint32_t validity_ms)
 {
+    pmc_tm_cache_entry_t *entry;
+    int32_t ret;
+
     if (!cache || !data || tm_id >= PMC_TM_MAX_COUNT || size > PMC_TM_MAX_DATA_SIZE) {
         return OSAL_ERR_INVALID_POINTER;
     }
 
-    pmc_tm_cache_entry_t *entry = &cache->entries[tm_id];
+    entry = &cache->entries[tm_id];
 
     /* 写锁 */
-    int32_t ret = OSAL_MutexLock(entry->rwlock);
+    ret = OSAL_MutexLock(entry->rwlock);
     if (ret != OSAL_SUCCESS) {
         return ret;
     }
@@ -94,14 +97,17 @@ int32_t PMC_TM_Cache_Write(pmc_tm_cache_t *cache, uint32_t tm_id,
 int32_t PMC_TM_Cache_Read(pmc_tm_cache_t *cache, uint32_t tm_id,
                          uint8_t *data, uint32_t *size, pmc_tm_freshness_t *freshness)
 {
+    pmc_tm_cache_entry_t *entry;
+    int32_t ret;
+
     if (!cache || !data || !size || tm_id >= PMC_TM_MAX_COUNT) {
         return OSAL_ERR_INVALID_POINTER;
     }
 
-    pmc_tm_cache_entry_t *entry = &cache->entries[tm_id];
+    entry = &cache->entries[tm_id];
 
     /* 读锁 */
-    int32_t ret = OSAL_MutexLock(entry->rwlock);
+    ret = OSAL_MutexLock(entry->rwlock);
     if (ret != OSAL_SUCCESS) {
         return ret;
     }
@@ -181,11 +187,13 @@ int32_t PMC_Status_Init(pmc_system_status_t **status)
 /* 写入系统状态 */
 int32_t PMC_Status_Write(pmc_system_status_t *status, const pmc_system_status_t *new_status)
 {
+    int32_t ret;
+
     if (!status || !new_status) {
         return OSAL_ERR_INVALID_POINTER;
     }
 
-    int32_t ret = OSAL_MutexLock(status->mutex);
+    ret = OSAL_MutexLock(status->mutex);
     if (ret != OSAL_SUCCESS) {
         return ret;
     }
@@ -206,11 +214,13 @@ int32_t PMC_Status_Write(pmc_system_status_t *status, const pmc_system_status_t 
 /* 读取系统状态 */
 int32_t PMC_Status_Read(pmc_system_status_t *status, pmc_system_status_t *out_status)
 {
+    int32_t ret;
+
     if (!status || !out_status) {
         return OSAL_ERR_INVALID_POINTER;
     }
 
-    int32_t ret = OSAL_MutexLock(status->mutex);
+    ret = OSAL_MutexLock(status->mutex);
     if (ret != OSAL_SUCCESS) {
         return ret;
     }
@@ -241,6 +251,7 @@ int32_t PMC_Heartbeat_Init(pmc_process_heartbeat_t **heartbeat)
 {
     osal_shm_t shm;
     int32_t ret;
+    uint32_t i;
 
     /* 创建或打开共享内存 */
     ret = OSAL_ShmCreate(PMC_SHM_PROCESS_HEARTBEAT, PMC_SHM_HEARTBEAT_SIZE,
@@ -259,7 +270,6 @@ int32_t PMC_Heartbeat_Init(pmc_process_heartbeat_t **heartbeat)
     }
 
     /* 初始化心跳 */
-    uint32_t i;
     for (i = 0; i < PMC_PROCESS_MAX; i++) {
         (*heartbeat)->heartbeat_us[i] = 0;
     }
@@ -283,13 +293,17 @@ int32_t PMC_Heartbeat_Update(pmc_process_heartbeat_t *heartbeat, pmc_process_id_
 int32_t PMC_Heartbeat_Check(pmc_process_heartbeat_t *heartbeat, pmc_process_id_t process_id,
                            uint32_t timeout_ms, bool *alive)
 {
+    uint64_t now_us;
+    uint64_t last_hb;
+    uint64_t age_ms;
+
     if (!heartbeat || !alive || process_id >= PMC_PROCESS_MAX) {
         return OSAL_ERR_INVALID_POINTER;
     }
 
-    uint64_t now_us = OSAL_GetMonotonicTime();
-    uint64_t last_hb = heartbeat->heartbeat_us[process_id];
-    uint64_t age_ms = (now_us - last_hb) / 1000;
+    now_us = OSAL_GetMonotonicTime();
+    last_hb = heartbeat->heartbeat_us[process_id];
+    age_ms = (now_us - last_hb) / 1000;
 
     *alive = (age_ms < timeout_ms);
     return OSAL_SUCCESS;
@@ -336,12 +350,15 @@ int32_t PMC_Log_Init(pmc_log_ringbuffer_t **log_ring)
 /* 写入日志 */
 int32_t PMC_Log_Write(pmc_log_ringbuffer_t *log_ring, const char *log_entry)
 {
+    uint32_t write_idx;
+    uint32_t next_idx;
+
     if (!log_ring || !log_entry) {
         return OSAL_ERR_INVALID_POINTER;
     }
 
-    uint32_t write_idx = log_ring->write_index;
-    uint32_t next_idx = (write_idx + 1) % PMC_LOG_ENTRY_COUNT;
+    write_idx = log_ring->write_index;
+    next_idx = (write_idx + 1) % PMC_LOG_ENTRY_COUNT;
 
     /* 检查是否满 */
     if (next_idx == log_ring->read_index) {
@@ -361,11 +378,13 @@ int32_t PMC_Log_Write(pmc_log_ringbuffer_t *log_ring, const char *log_entry)
 /* 读取日志 */
 int32_t PMC_Log_Read(pmc_log_ringbuffer_t *log_ring, char *log_entry, uint32_t size)
 {
+    uint32_t read_idx;
+
     if (!log_ring || !log_entry || size < PMC_LOG_ENTRY_SIZE) {
         return OSAL_ERR_INVALID_POINTER;
     }
 
-    uint32_t read_idx = log_ring->read_index;
+    read_idx = log_ring->read_index;
 
     /* 检查是否空 */
     if (read_idx == log_ring->write_index) {

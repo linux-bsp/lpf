@@ -63,16 +63,18 @@ static int32_t stop_process(process_info_t *proc)
     OSAL_ProcessKill(proc->pid, SIGTERM);
 
     /* 等待进程退出（最多5秒） */
-    int32_t i;
-    for (i = 0; i < 50; i++) {
-        int32_t status;
-        int32_t ret = OSAL_ProcessWait(proc->pid, &status, 0);
-        if (ret == OSAL_SUCCESS) {
-            LOG_INFO("SUPERVISOR", "进程已退出: %s", proc->name);
-            proc->pid = 0;
-            return OSAL_SUCCESS;
+    {
+        int32_t i;
+        for (i = 0; i < 50; i++) {
+            int32_t status;
+            int32_t ret = OSAL_ProcessWait(proc->pid, &status, 0);
+            if (ret == OSAL_SUCCESS) {
+                LOG_INFO("SUPERVISOR", "进程已退出: %s", proc->name);
+                proc->pid = 0;
+                return OSAL_SUCCESS;
+            }
+            OSAL_msleep(100);
         }
-        OSAL_msleep(100);
     }
 
     /* 强制杀死 */
@@ -87,6 +89,8 @@ static int32_t stop_process(process_info_t *proc)
 /* 重启进程 */
 static int32_t restart_process(process_info_t *proc)
 {
+    int32_t ret;
+
     LOG_WARN("SUPERVISOR", "重启进程: %s (重启次数=%u)", proc->name, proc->restart_count);
 
     /* 停止进程 */
@@ -96,7 +100,7 @@ static int32_t restart_process(process_info_t *proc)
     OSAL_msleep(1000);
 
     /* 启动进程 */
-    int32_t ret = start_process(proc);
+    ret = start_process(proc);
     if (ret == OSAL_SUCCESS) {
         proc->restart_count++;
     }
@@ -110,14 +114,15 @@ static void check_process_heartbeat(void)
     uint32_t i;
     for (i = 0; i < PROCESS_COUNT; i++) {
         process_info_t *proc = &g_processes[i];
+        bool alive;
+        int32_t ret;
 
         if (proc->pid <= 0) {
             continue;
         }
 
         /* 检查心跳 */
-        bool alive;
-        int32_t ret = PMC_Heartbeat_Check(g_heartbeat, proc->id, 2000, &alive);
+        ret = PMC_Heartbeat_Check(g_heartbeat, proc->id, 2000, &alive);
         if (ret == OSAL_SUCCESS && !alive) {
             LOG_ERROR("SUPERVISOR", "进程心跳超时: %s", proc->name);
             restart_process(proc);

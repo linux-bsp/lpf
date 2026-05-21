@@ -32,6 +32,8 @@ static void *satellite_heartbeat_thread(void *arg)
     LOG_INFO("HEALTH", "卫星心跳线程启动");
 
     while (g_running) {
+        pmc_system_status_t status;
+
         /* 更新进程心跳 */
         PMC_Heartbeat_Update(g_heartbeat, PMC_PROCESS_HEALTH);
 
@@ -39,7 +41,6 @@ static void *satellite_heartbeat_thread(void *arg)
         LOG_DEBUG("HEALTH", "发送卫星心跳: seq=%u", sequence);
 
         /* TODO: 监测外设状态 */
-        pmc_system_status_t status;
         if (PMC_Status_Read(g_status, &status) == OSAL_SUCCESS) {
             if (!status.server_online) {
                 LOG_WARN("HEALTH", "服务器离线");
