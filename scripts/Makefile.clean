@@ -29,7 +29,7 @@ __clean: $(subdir-ym)
 
 PHONY += $(subdir-ym)
 $(subdir-ym):
-	$(Q)$(MAKE) $(clean)=$@
+	+$(Q)$(MAKE) $(clean)=$@
 
 clean := -f $(srctree)/scripts/Makefile.clean obj
 

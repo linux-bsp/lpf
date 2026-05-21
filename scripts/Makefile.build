@@ -443,7 +443,7 @@ PHONY += $(subdir-ym)
 define subdir-rule
 $(1):
 	@echo "  DESCEND $(obj)/$(1)"
-	$(Q)$(MAKE) $(build)=$(patsubst %/,%,$(obj))/$(1)
+	+$(Q)$(MAKE) $(build)=$(patsubst %/,%,$(obj))/$(1)
 endef
 
 $(foreach dir,$(subdir-ym),$(eval $(call subdir-rule,$(dir))))

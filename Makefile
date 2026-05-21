@@ -252,7 +252,7 @@ export BIN_DIR LIB_DIR KO_DIR
 # =============================================================================
 PHONY += scripts_basic
 scripts_basic:
-	$(Q)$(MAKE) $(build)=scripts/basic
+	+$(Q)$(MAKE) $(build)=scripts/basic
 
 scripts/basic/%: scripts_basic ;
 
@@ -323,11 +323,11 @@ export KBUILD_DEFCONFIG KBUILD_KCONFIG
 
 # Configuration targets - directly invoke scripts/kconfig/Makefile
 config: scripts_basic outputmakefile FORCE
-	$(Q)$(MAKE) -C $(srctree)/scripts/kconfig $@ \
+	+$(Q)$(MAKE) -C $(srctree)/scripts/kconfig $@ \
 		srctree=$(CURDIR) objtree=$(CURDIR)
 
 %config: scripts_basic outputmakefile FORCE
-	$(Q)$(MAKE) -C $(srctree)/scripts/kconfig $@ \
+	+$(Q)$(MAKE) -C $(srctree)/scripts/kconfig $@ \
 		srctree=$(CURDIR) objtree=$(CURDIR)
 
 else
@@ -338,7 +338,7 @@ else
 # 构建脚本
 PHONY += scripts
 scripts: scripts_basic
-	$(Q)$(MAKE) $(build)=$(@)
+	+$(Q)$(MAKE) $(build)=$(@)
 
 # 配置相关逻辑（清理时跳过）
 ifeq ($(filter clean mrproper distclean,$(MAKECMDGOALS)),)
@@ -354,9 +354,9 @@ $(KCONFIG_CONFIG) include/config/auto.conf.cmd: ;
 
 # 如果 .config 比 auto.conf 新，需要重新运行 syncconfig
 include/config/auto.conf: $(KCONFIG_CONFIG) include/config/auto.conf.cmd
-	$(Q)$(MAKE) -C $(srctree)/scripts/kconfig olddefconfig \
+	+$(Q)$(MAKE) -C $(srctree)/scripts/kconfig olddefconfig \
 		srctree=$(CURDIR) objtree=$(objtree)
-	$(Q)$(MAKE) -C $(srctree)/scripts/kconfig syncconfig \
+	+$(Q)$(MAKE) -C $(srctree)/scripts/kconfig syncconfig \
 		srctree=$(CURDIR) objtree=$(objtree)
 
 else
@@ -484,7 +484,7 @@ ems: $(ems-dirs) FORCE
 # 下降到子目录构建
 PHONY += $(ems-dirs)
 $(ems-dirs): prepare scripts
-	$(Q)$(MAKE) $(build)=$@
+	+$(Q)$(MAKE) $(build)=$@
 
 # products 依赖 core（必须先构建 core 的库）
 products/: core/
@@ -513,7 +513,7 @@ prepare1: prepare2 $(version_h) include/config/auto.conf
 archprepare:
 
 prepare0: prepare1 scripts_basic
-	$(Q)$(MAKE) $(build)=.
+	+$(Q)$(MAKE) $(build)=.
 
 prepare: prepare0
 
@@ -545,7 +545,7 @@ clean-dirs      := $(addprefix _clean_, . $(ems-dirs))
 
 PHONY += $(clean-dirs) clean archclean
 $(clean-dirs):
-	$(Q)$(MAKE) $(clean)=$(patsubst _clean_%,%,$@)
+	+$(Q)$(MAKE) $(clean)=$(patsubst _clean_%,%,$@)
 
 clean: $(clean-dirs)
 	$(call cmd,rmdirs)
@@ -565,7 +565,7 @@ mrproper-dirs      := $(addprefix _mrproper_, scripts)
 
 PHONY += $(mrproper-dirs) mrproper
 $(mrproper-dirs):
-	$(Q)$(MAKE) $(clean)=$(patsubst _mrproper_%,%,$@)
+	+$(Q)$(MAKE) $(clean)=$(patsubst _mrproper_%,%,$@)
 
 mrproper: clean $(mrproper-dirs)
 	$(call cmd,rmdirs)
@@ -618,10 +618,10 @@ help:
 # 单独构建 core 或 products
 PHONY += core products
 core: prepare scripts
-	$(Q)$(MAKE) $(build)=core
+	+$(Q)$(MAKE) $(build)=core
 
 products: prepare scripts
-	$(Q)$(MAKE) $(build)=products
+	+$(Q)$(MAKE) $(build)=products
 
 endif #ifeq ($(config-targets),1)
 endif #ifeq ($(mixed-targets),1)
@@ -640,20 +640,20 @@ target-dir = $(dir $@)
 
 # 支持构建任意子目录（例如 make products/ccm）
 %/: prepare scripts FORCE
-	$(Q)$(MAKE) $(build)=$(patsubst %/,%,$@)
+	+$(Q)$(MAKE) $(build)=$(patsubst %/,%,$@)
 
 %.s: %.c prepare scripts FORCE
-	$(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
+	+$(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
 %.i: %.c prepare scripts FORCE
-	$(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
+	+$(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
 %.o: %.c prepare scripts FORCE
-	$(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
+	+$(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
 %.lst: %.c prepare scripts FORCE
-	$(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
+	+$(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
 %.s: %.S prepare scripts FORCE
-	$(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
+	+$(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
 %.o: %.S prepare scripts FORCE
-	$(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
+	+$(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
 
 # =============================================================================
 # 辅助命令
