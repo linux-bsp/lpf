@@ -48,7 +48,7 @@ CFLAGS_hal_can_linux.o := -DHAL_CAN_VERSION=\"1.0\"
 # -----------------------------------------------------------------------------
 # 动态库链接标志
 hal-ldflags := $(if $(CONFIG_HAL_BUILD_SHARED),-shared -Wl$(comma)-soname$(comma)libhal.so.1)
-hal-ldflags += -L$(objtree)/lib -losal
+hal-ldflags += -L$(LIB_DIR) -losal
 
 # -----------------------------------------------------------------------------
 # 5. 头文件导出

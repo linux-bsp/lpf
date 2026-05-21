@@ -61,7 +61,7 @@ ccflags-$(CONFIG_PDL_MCU_SUPPORT) += -DPDL_MCU_ENABLED
 # -----------------------------------------------------------------------------
 # 动态库链接标志
 pdl-ldflags := $(if $(CONFIG_PDL_BUILD_SHARED),-shared -Wl$(comma)-soname$(comma)libpdl.so.1)
-pdl-ldflags += -L$(objtree)/lib -lpcl -lhal -losal
+pdl-ldflags += -L$(LIB_DIR) -lpcl -lhal -losal
 
 # -----------------------------------------------------------------------------
 # 5. 头文件导出

@@ -18,13 +18,13 @@ ccm_comm-objs := \
 # 3. 编译标志
 # -----------------------------------------------------------------------------
 ccflags-y += -I$(src)/include
-ccflags-y += -I$(objtree)/include
+ccflags-y += -I$(INCLUDE_DIR)
 ccflags-y += -I$(srctree)/products/ccm/libs/libccm/include
 
 # -----------------------------------------------------------------------------
 # 4. 链接标志
 # -----------------------------------------------------------------------------
-ccm_comm-ldflags := -L$(objtree)/lib
+ccm_comm-ldflags := -L$(LIB_DIR)
 ccm_comm-ldflags += -Wl,-rpath,$$ORIGIN/../lib
 ccm_comm-ldflags += -lh200_am625 -lccm
 ccm_comm-ldflags += -lacl -lpdl -lpcl -lhal -losal

@@ -18,13 +18,13 @@ ccm_health-objs := \
 # 3. 编译标志
 # -----------------------------------------------------------------------------
 ccflags-y += -I$(src)/include
-ccflags-y += -I$(objtree)/include
+ccflags-y += -I$(INCLUDE_DIR)
 ccflags-y += -I$(srctree)/products/ccm/libs/libccm/include
 
 # -----------------------------------------------------------------------------
 # 4. 链接标志
 # -----------------------------------------------------------------------------
-ccm_health-ldflags := -L$(objtree)/lib
+ccm_health-ldflags := -L$(LIB_DIR)
 ccm_health-ldflags += -Wl,-rpath,$$ORIGIN/../lib
 ccm_health-ldflags += -lh200_am625 -lccm
 ccm_health-ldflags += -lacl -lpdl -lpcl -lhal -losal

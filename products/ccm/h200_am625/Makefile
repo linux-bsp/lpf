@@ -27,4 +27,4 @@ ccflags-y += -I$(srctree)/core/acl/include
 ccflags-y += -I$(srctree)/include
 
 # 链接库
-LDLIBS := -L$(objtree)/lib -lacl -lpdl -lpcl -lhal -losal
+LDLIBS := -L$(LIB_DIR) -lacl -lpdl -lpcl -lhal -losal

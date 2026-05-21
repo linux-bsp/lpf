@@ -131,3 +131,4 @@ GTAGS
 .vscode/
 .idea/
 *.code-workspace
+staging/

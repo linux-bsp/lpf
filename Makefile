@@ -210,7 +210,7 @@ AFLAGS_KERNEL	=
 # 头文件包含路径（兼容 O= 选项）
 EMSINCLUDE    := \
 		$(if $(KBUILD_SRC), -I$(srctree)/include) \
-		-Iinclude -include include/generated/autoconf.h
+		-I$(STAGING_DIR)/include -include include/generated/autoconf.h
 
 KBUILD_CPPFLAGS := -D__EMS__
 
@@ -248,11 +248,16 @@ export RCS_TAR_IGNORE := --exclude SCCS --exclude BitKeeper --exclude .svn \
 # =============================================================================
 # 输出目录配置
 # =============================================================================
-BIN_DIR := $(objtree)/bin
-LIB_DIR := $(objtree)/lib
-KO_DIR  := $(objtree)/lib/modules
+# Staging 目录（所有构建产物的统一输出目录）
+STAGING_DIR := $(objtree)/staging
 
-export BIN_DIR LIB_DIR KO_DIR
+# 输出子目录（在 staging 下）
+BIN_DIR     := $(STAGING_DIR)/bin
+LIB_DIR     := $(STAGING_DIR)/lib
+KO_DIR      := $(STAGING_DIR)/lib/modules
+INCLUDE_DIR := $(STAGING_DIR)/include
+
+export STAGING_DIR BIN_DIR LIB_DIR KO_DIR INCLUDE_DIR
 
 # =============================================================================
 # 基础工具构建
@@ -481,7 +486,7 @@ products-y	:= products
 ems-dirs	:= $(core-y) $(products-y)
 
 # 创建输出目录
-$(shell mkdir -p $(BIN_DIR) $(LIB_DIR) $(KO_DIR))
+$(shell mkdir -p $(STAGING_DIR) $(BIN_DIR) $(LIB_DIR) $(KO_DIR) $(INCLUDE_DIR))
 
 # EMS 主目标（不链接，只构建所有模块）
 PHONY += ems
@@ -544,13 +549,9 @@ $(version_h): $(srctree)/Makefile FORCE
 # 清理目标
 # =============================================================================
 
-CLEAN_DIRS  += $(BIN_DIR) $(LIB_DIR)
+# 清理 staging 目录
+CLEAN_DIRS  += $(STAGING_DIR)
 CLEAN_FILES +=
-
-# 清理 staging 头文件（保留源码中的 ems_config.h）
-# 注意：include/ 目录本身不删除，只删除安装的头文件和子目录
-# include/config/ 目录由 mrproper 清理，因为它包含配置文件（auto.conf）
-CLEAN_DIRS  += include/ipc include/lib include/net include/sys include/util
 
 MRPROPER_DIRS  += include/config include/generated .tmp_objdiff
 MRPROPER_FILES += .config .config.old .version .old_version \
@@ -575,7 +576,6 @@ clean: $(clean-dirs)
 		-o -name '*.so' -o -name '*.so.*' \
 		-o -name '*.a' \
 		-o -name '*.gcno' \) -type f -print | xargs rm -f
-	@find include -maxdepth 1 -type f ! -name 'ems_config.h' -exec rm -f {} \;
 
 # mrproper - 删除所有生成文件，包括 .config
 mrproper: rm-dirs  := $(wildcard $(MRPROPER_DIRS))

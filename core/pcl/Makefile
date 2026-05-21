@@ -41,7 +41,7 @@ ccflags-$(CONFIG_DEBUG_PCL) += -DDEBUG_PCL
 # -----------------------------------------------------------------------------
 # 动态库链接标志
 pcl-ldflags := $(if $(CONFIG_PCL_BUILD_SHARED),-shared -Wl$(comma)-soname$(comma)libpcl.so.1)
-pcl-ldflags += -L$(objtree)/lib -lhal -losal
+pcl-ldflags += -L$(LIB_DIR) -lhal -losal
 
 # -----------------------------------------------------------------------------
 # 5. 头文件导出

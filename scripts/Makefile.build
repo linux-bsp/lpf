@@ -475,7 +475,7 @@ $(foreach dir,$(subdir-ym),$(eval $(call subdir-rule,$(dir))))
 #   header-y := osal.h osal_types.h
 #   header-y += ipc/osal_mutex.h
 #
-# 头文件会从 $(src)/include/ 复制到 $(objtree)/include/
+# 头文件会从 $(src)/include/ 复制到 $(INCLUDE_DIR)/
 
 ifneq ($(strip $(header-y)),)
 
@@ -485,9 +485,9 @@ PHONY += __install_headers
 # 为每个头文件定义安装规则
 define install-header-rule
 __install_hdr_$(subst /,_,$(1)): FORCE
-	@mkdir -p $$(dir $(objtree)/include/$(1))
+	@mkdir -p $$(dir $(INCLUDE_DIR)/$(1))
 	@if [ -f $(src)/include/$(1) ]; then \
-		cp -f $(src)/include/$(1) $(objtree)/include/$(1); \
+		cp -f $(src)/include/$(1) $(INCLUDE_DIR)/$(1); \
 		echo "  INSTALL include/$(1)"; \
 	fi
 endef
