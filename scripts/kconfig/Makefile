@@ -105,16 +105,27 @@ lxdialog/%.o: lxdialog/%.c
 # lexer.lex.o depends on parser.tab.h
 lexer.lex.o: lexer.lex.c parser.tab.h
 
-# Clean
+endif # obj 检查
+endif # MAKECMDGOALS 检查
+
+# 清理变量 - 供 Makefile.clean 使用（参考内核方式）
+hostprogs := conf mconf
+targets := parser.tab.c parser.tab.h lexer.lex.c
+clean-files := .config .config.old
+clean-files += conf.o confdata.o expr.o lexer.lex.o menu.o parser.tab.o
+clean-files += preprocess.o symbol.o util.o mconf.o mnconf-common.o
+clean-files += lxdialog/checklist.o lxdialog/inputbox.o lxdialog/menubox.o
+clean-files += lxdialog/textbox.o lxdialog/util.o lxdialog/yesno.o
+clean-dirs := include
+
+# Clean - 用于直接调用 make -C scripts/kconfig clean
+.PHONY: clean
 clean:
 	$(Q)rm -f conf mconf nconf gconf qconf *.o lxdialog/*.o
 	$(Q)rm -f parser.tab.c parser.tab.h lexer.lex.c
 	$(Q)rm -f .*.cmd *.cmd
 	$(Q)rm -f .config .config.old
 	$(Q)rm -rf include/
-
-endif # obj 检查
-endif # MAKECMDGOALS 检查
 
 .PHONY: help
 help:
