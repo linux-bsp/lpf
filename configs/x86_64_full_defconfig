@@ -1,15 +1,17 @@
 #
-# EMS Default Configuration
-# Optimized for x86_64 platform with all features enabled
+# EMS x86_64 Full Configuration
+# All features enabled for development and testing on x86_64 platform
 #
 
 # ============================================================================
 # Build Options
 # ============================================================================
+CONFIG_BUILD_TYPE_DEBUG=y
 CONFIG_OPT_O2=y
 CONFIG_LIBRARY_BUILD_TYPE_STATIC=y
 CONFIG_LIBRARY_BUILD_TYPE_DYNAMIC=y
 CONFIG_INSTALL_HEADERS=y
+CONFIG_BUILD_TESTING=y
 
 # ============================================================================
 # Architecture
@@ -30,12 +32,16 @@ CONFIG_OSAL_NETWORK=y
 CONFIG_OSAL_IPC=y
 CONFIG_OSAL_THREAD=y
 
-# OSAL Resource Limits
-CONFIG_OSAL_MAX_TASKS=128
-CONFIG_OSAL_MAX_QUEUES=64
-CONFIG_OSAL_MAX_MUTEXES=64
-CONFIG_OSAL_MAX_SEMAPHORES=64
-CONFIG_OSAL_MAX_TIMERS=32
+# OSAL Resource Limits (Generous for x86_64)
+CONFIG_OSAL_MAX_TASKS=256
+CONFIG_OSAL_MAX_QUEUES=128
+CONFIG_OSAL_MAX_MUTEXES=128
+CONFIG_OSAL_MAX_SEMAPHORES=128
+CONFIG_OSAL_MAX_TIMERS=64
+
+# OSAL Debug
+CONFIG_OSAL_DEBUG_LOGGING=y
+CONFIG_DEBUG_OSAL=y
 
 # ============================================================================
 # HAL (Hardware Abstraction Layer)
@@ -66,12 +72,16 @@ CONFIG_HAL_WATCHDOG=y
 CONFIG_HAL_WATCHDOG_DEVICE="/dev/watchdog"
 CONFIG_HAL_WATCHDOG_TIMEOUT=30
 
+# HAL Debug
+CONFIG_DEBUG_HAL=y
+
 # ============================================================================
 # PCL (Protocol Control Layer)
 # ============================================================================
 CONFIG_PCL=y
 CONFIG_PCL_BUILD_STATIC=y
 CONFIG_PCL_BUILD_SHARED=y
+CONFIG_DEBUG_PCL=y
 
 # ============================================================================
 # PDL (Protocol Data Layer)
@@ -95,6 +105,9 @@ CONFIG_PDL_BMC_MAX_SESSIONS=8
 
 CONFIG_PDL_WATCHDOG_SUPPORT=y
 
+# PDL Debug
+CONFIG_DEBUG_PDL=y
+
 # ============================================================================
 # ACL (Application Control Layer)
 # ============================================================================
@@ -104,13 +117,18 @@ CONFIG_ACL_BUILD_SHARED=y
 
 # ACL Features
 CONFIG_ACL_TELEMETRY_CACHE=y
-CONFIG_ACL_CACHE_SIZE=512
+CONFIG_ACL_CACHE_SIZE=1024
 CONFIG_ACL_CACHE_TIMEOUT=60
+
+# ACL Debug
+CONFIG_DEBUG_ACL=y
 
 # ============================================================================
 # Products
 # ============================================================================
 CONFIG_PRODUCT_CCM=y
+
+# CCM Project Selection
 CONFIG_PROJECT_H200_AM625=y
 
 # CCM Libraries
@@ -121,7 +139,7 @@ CONFIG_LIBCCM_BUILD_SHARED=y
 # CCM Applications (All enabled)
 CONFIG_BUILD_CCM_SUPERVISOR=y
 CONFIG_CCM_SUPERVISOR_PORT=8001
-CONFIG_CCM_SUPERVISOR_LOG_LEVEL=2
+CONFIG_CCM_SUPERVISOR_LOG_LEVEL=3
 
 CONFIG_BUILD_CCM_COLLECTOR=y
 CONFIG_CCM_COLLECTOR_INTERVAL=1000
@@ -142,4 +160,14 @@ CONFIG_CCM_LOGGER_ROTATE_COUNT=5
 # ============================================================================
 # Debugging Options
 # ============================================================================
-CONFIG_LOG_LEVEL=2
+CONFIG_DEBUG_SYMBOLS=y
+CONFIG_DEBUG_INFO=y
+CONFIG_VERBOSE_LOGGING=y
+CONFIG_LOG_LEVEL=4
+
+# ============================================================================
+# Testing
+# ============================================================================
+CONFIG_BUILD_TESTS=y
+CONFIG_UNIT_TESTS=y
+CONFIG_INTEGRATION_TESTS=y

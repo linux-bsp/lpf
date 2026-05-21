@@ -1,12 +1,12 @@
 #
-# EMS Default Configuration
-# Optimized for x86_64 platform with all features enabled
+# EMS x86_64 Release Configuration
+# Optimized for production deployment on x86_64 platform
 #
 
 # ============================================================================
 # Build Options
 # ============================================================================
-CONFIG_OPT_O2=y
+CONFIG_OPT_O3=y
 CONFIG_LIBRARY_BUILD_TYPE_STATIC=y
 CONFIG_LIBRARY_BUILD_TYPE_DYNAMIC=y
 CONFIG_INSTALL_HEADERS=y
@@ -24,7 +24,7 @@ CONFIG_OSAL=y
 CONFIG_OSAL_BUILD_STATIC=y
 CONFIG_OSAL_BUILD_SHARED=y
 
-# OSAL Features (All enabled)
+# OSAL Features
 CONFIG_OSAL_FILE=y
 CONFIG_OSAL_NETWORK=y
 CONFIG_OSAL_IPC=y
@@ -44,7 +44,7 @@ CONFIG_HAL=y
 CONFIG_HAL_BUILD_STATIC=y
 CONFIG_HAL_BUILD_SHARED=y
 
-# HAL Drivers (All enabled)
+# HAL Drivers
 CONFIG_HAL_CAN=y
 CONFIG_HAL_CAN_DEVICE="can0"
 CONFIG_HAL_CAN_BITRATE=500000
@@ -80,7 +80,7 @@ CONFIG_PDL=y
 CONFIG_PDL_BUILD_STATIC=y
 CONFIG_PDL_BUILD_SHARED=y
 
-# PDL Modules (All enabled)
+# PDL Modules
 CONFIG_PDL_MCU_ENABLE=y
 CONFIG_PDL_MCU_PROTOCOL_VERSION=2
 CONFIG_PDL_MCU_MAX_DEVICES=16
@@ -118,7 +118,7 @@ CONFIG_BUILD_LIBCCM=y
 CONFIG_LIBCCM_BUILD_STATIC=y
 CONFIG_LIBCCM_BUILD_SHARED=y
 
-# CCM Applications (All enabled)
+# CCM Applications
 CONFIG_BUILD_CCM_SUPERVISOR=y
 CONFIG_CCM_SUPERVISOR_PORT=8001
 CONFIG_CCM_SUPERVISOR_LOG_LEVEL=2
@@ -140,6 +140,6 @@ CONFIG_CCM_LOGGER_MAX_SIZE=10485760
 CONFIG_CCM_LOGGER_ROTATE_COUNT=5
 
 # ============================================================================
-# Debugging Options
+# Debugging Options (Minimal for release)
 # ============================================================================
 CONFIG_LOG_LEVEL=2
