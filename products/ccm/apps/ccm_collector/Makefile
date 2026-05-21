@@ -18,14 +18,8 @@ ccm_collector-objs := \
 # 3. 编译标志
 # -----------------------------------------------------------------------------
 ccflags-y += -I$(src)/include
-ccflags-y += -I$(srctree)/core/osal/include
-ccflags-y += -I$(srctree)/core/hal/include
-ccflags-y += -I$(srctree)/core/pcl/include
-ccflags-y += -I$(srctree)/core/pcl/include/api
-ccflags-y += -I$(srctree)/core/pdl/include
-ccflags-y += -I$(srctree)/core/acl/include
+ccflags-y += -I$(objtree)/include
 ccflags-y += -I$(srctree)/products/ccm/libs/libccm/include
-ccflags-y += -I$(srctree)/include
 
 # -----------------------------------------------------------------------------
 # 4. 链接标志

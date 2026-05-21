@@ -149,6 +149,13 @@ CROSS_COMPILE	?= $(CONFIG_CROSS_COMPILE:"%"=%)
 
 # Kconfig 配置文件
 KCONFIG_CONFIG	?= .config
+
+# PRODUCT 变量支持：允许 make PRODUCT=ccm 快捷构建
+ifdef PRODUCT
+  KCONFIG_CONFIG := configs/$(PRODUCT)_defconfig
+  $(info Using product configuration: $(KCONFIG_CONFIG))
+endif
+
 export KCONFIG_CONFIG
 
 # Shell 配置
@@ -612,6 +619,7 @@ help:
 	@echo  '  make O=dir [targets] Locate all output files in "dir", including .config'
 	@echo  '  make C=1   [targets] Check all c source with $$CHECK (sparse by default)'
 	@echo  '  make C=2   [targets] Force check of all c source with $$CHECK'
+	@echo  '  make PRODUCT=<name> [targets] Build specific product (e.g., PRODUCT=ccm)'
 	@echo  ''
 	@echo  'Execute "make" or "make all" to build all targets marked with [*] '
 

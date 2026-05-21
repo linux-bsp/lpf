@@ -262,6 +262,9 @@ endif # builtin-target
 # 或者简写（自动添加 .a 后缀）:
 #   lib-y += osal
 #   osal-objs := osal.o timer.o task.o
+#
+# 头文件导出:
+#   header-y := osal.h osal_types.h
 
 ifdef lib-target
 
@@ -270,13 +273,18 @@ define get-lib-objs
 $(addprefix $(obj)/,$($(1:.a=)-objs) $($(1)-objs))
 endef
 
+# 获取库的最终安装名称（避免重复添加 lib 前缀）
+define get-lib-install-name
+$(if $(filter lib%,$(notdir $(1))),$(notdir $(1)),lib$(notdir $(1)))
+endef
+
 # 为每个静态库定义规则
 define build-lib-rule
 $(1): $$(call get-lib-objs,$(notdir $(1))) FORCE
 	$$(call if_changed,link_l_target)
 	@mkdir -p $(LIB_DIR)
-	@cp -f $(1) $(LIB_DIR)/lib$(notdir $(1))
-	@echo "  INSTALL $(LIB_DIR)/lib$(notdir $(1))"
+	@cp -f $(1) $(LIB_DIR)/$$(call get-lib-install-name,$(1))
+	@echo "  INSTALL $(LIB_DIR)/$$(call get-lib-install-name,$(1))"
 
 targets += $(1)
 endef
@@ -302,6 +310,9 @@ endif # lib-target
 #   hal-objs := hal.o device.o
 #   hal-cflags-y := -fPIC
 #   hal-ldflags := -shared
+#
+# 头文件导出:
+#   header-y := hal.h hal_types.h
 
 ifdef so-target
 
@@ -315,6 +326,11 @@ define get-so-ldflags
 $($(1:.so=)-ldflags) $($(1)-ldflags)
 endef
 
+# 获取动态库的最终安装名称（避免重复添加 lib 前缀）
+define get-so-install-name
+$(if $(filter lib%,$(notdir $(1))),$(notdir $(1)),lib$(notdir $(1)))
+endef
+
 # 为每个动态库定义规则
 define build-so-rule
 # 动态库的对象文件需要 -fPIC
@@ -323,8 +339,8 @@ $(call get-so-objs,$(notdir $(1))): ccflags-y += -fPIC
 $(1): $$(call get-so-objs,$(notdir $(1))) FORCE
 	$$(call if_changed,link_so_target,$(notdir $(1)))
 	@mkdir -p $(LIB_DIR)
-	@cp -f $(1) $(LIB_DIR)/lib$(notdir $(1))
-	@echo "  INSTALL $(LIB_DIR)/lib$(notdir $(1))"
+	@cp -f $(1) $(LIB_DIR)/$$(call get-so-install-name,$(1))
+	@echo "  INSTALL $(LIB_DIR)/$$(call get-so-install-name,$(1))"
 
 targets += $(1)
 endef
@@ -451,6 +467,42 @@ $(foreach dir,$(subdir-ym),$(eval $(call subdir-rule,$(dir))))
 # 注意：子目录之间的依赖关系应该在各自的 Makefile 中定义
 # 例如在 core/Makefile 中：hal/: osal/
 # 这些依赖规则会在 include $(kbuild-file) 时被包含，并在此处生效
+
+# =============================================================================
+# 头文件安装到 Staging 目录
+# =============================================================================
+# 语法:
+#   header-y := osal.h osal_types.h
+#   header-y += ipc/osal_mutex.h
+#
+# 头文件会从 $(src)/include/ 复制到 $(objtree)/include/
+
+ifneq ($(strip $(header-y)),)
+
+# 头文件安装目标
+PHONY += __install_headers
+
+# 为每个头文件定义安装规则
+define install-header-rule
+__install_hdr_$(subst /,_,$(1)): FORCE
+	@mkdir -p $$(dir $(objtree)/include/$(1))
+	@if [ -f $(src)/include/$(1) ]; then \
+		cp -f $(src)/include/$(1) $(objtree)/include/$(1); \
+		echo "  INSTALL include/$(1)"; \
+	fi
+endef
+
+$(foreach hdr,$(header-y),$(eval $(call install-header-rule,$(hdr))))
+
+# 主安装目标依赖所有头文件安装
+__install_headers: $(addprefix __install_hdr_,$(subst /,_,$(header-y)))
+
+# 在构建库或动态库后自动安装头文件
+ifneq ($(lib-target)$(so-target),)
+$(lib-target) $(so-target): __install_headers
+endif
+
+endif # header-y
 
 # =============================================================================
 # FORCE 目标
