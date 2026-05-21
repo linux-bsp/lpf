@@ -20,9 +20,41 @@ else
 endif
 
 # Targets
-.PHONY: all conf mconf clean
+.PHONY: all conf mconf clean defconfig menuconfig oldconfig syncconfig savedefconfig olddefconfig
 
 all: conf mconf
+
+# Configuration targets
+# These targets invoke the kconfig tools to process configuration
+
+# Kconfig file location (passed from top-level Makefile)
+Kconfig ?= Kconfig
+srctree ?= .
+objtree ?= .
+
+defconfig: conf
+	$(Q)./conf --defconfig=$(srctree)/configs/defconfig $(srctree)/$(Kconfig)
+
+%_defconfig: conf
+	$(Q)./conf --defconfig=$(srctree)/configs/$@ $(srctree)/$(Kconfig)
+
+menuconfig: mconf
+	$(Q)./mconf $(srctree)/$(Kconfig)
+
+config: conf
+	$(Q)./conf --oldaskconfig $(srctree)/$(Kconfig)
+
+oldconfig: conf
+	$(Q)./conf --oldconfig $(srctree)/$(Kconfig)
+
+syncconfig: conf
+	$(Q)./conf --syncconfig $(srctree)/$(Kconfig)
+
+olddefconfig: conf
+	$(Q)./conf --olddefconfig $(srctree)/$(Kconfig)
+
+savedefconfig: conf
+	$(Q)./conf --savedefconfig=$(srctree)/defconfig $(srctree)/$(Kconfig)
 
 # conf - command-line configuration tool
 conf-objs := conf.o confdata.o expr.o lexer.lex.o menu.o parser.tab.o \

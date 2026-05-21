@@ -321,11 +321,14 @@ ifeq ($(config-targets),1)
 -include arch/$(ARCH)/Makefile
 export KBUILD_DEFCONFIG KBUILD_KCONFIG
 
+# Configuration targets - directly invoke scripts/kconfig/Makefile
 config: scripts_basic outputmakefile FORCE
-	$(Q)$(MAKE) $(build)=scripts/kconfig $@
+	$(Q)$(MAKE) -C $(srctree)/scripts/kconfig $@ \
+		srctree=$(CURDIR) objtree=$(objtree)
 
 %config: scripts_basic outputmakefile FORCE
-	$(Q)$(MAKE) $(build)=scripts/kconfig $@
+	$(Q)$(MAKE) -C $(srctree)/scripts/kconfig $@ \
+		srctree=$(CURDIR) objtree=$(objtree)
 
 else
 # =============================================================================
@@ -334,7 +337,7 @@ else
 
 # 构建脚本
 PHONY += scripts
-scripts: scripts_basic include/config/auto.conf include/config/tristate.conf
+scripts: scripts_basic include/config/auto.conf
 	$(Q)$(MAKE) $(build)=$(@)
 
 ifeq ($(dot-config),1)
@@ -347,10 +350,12 @@ ifeq ($(dot-config),1)
 # 避免隐式规则
 $(KCONFIG_CONFIG) include/config/auto.conf.cmd: ;
 
-# 如果 .config 比 auto.conf 新，需要重新运行 oldconfig
-## 注释掉以便在没有 Kconfig 工具时也能构建
-## include/config/%.conf: $(KCONFIG_CONFIG) include/config/auto.conf.cmd
-#	$(Q)$(MAKE) -f $(srctree)/Makefile silentoldconfig
+# 如果 .config 比 auto.conf 新，需要重新运行 syncconfig
+include/config/auto.conf: $(KCONFIG_CONFIG) include/config/auto.conf.cmd
+	$(Q)$(MAKE) -C $(srctree)/scripts/kconfig olddefconfig \
+		srctree=$(CURDIR) objtree=$(objtree)
+	$(Q)$(MAKE) -C $(srctree)/scripts/kconfig syncconfig \
+		srctree=$(CURDIR) objtree=$(objtree)
 
 else
 # 虚拟目标
