@@ -210,6 +210,10 @@ NOSTDINC_FLAGS  =
 CFLAGS_KERNEL	=
 AFLAGS_KERNEL	=
 
+# Staging 目录（必须在 EMSINCLUDE 之前定义）
+STAGING_DIR := $(objtree)/staging
+INCLUDE_DIR := $(STAGING_DIR)/include
+
 # 头文件包含路径（兼容 O= 选项）
 EMSINCLUDE    := \
 		$(if $(KBUILD_SRC), -I$(srctree)/include) \
@@ -251,14 +255,10 @@ export RCS_TAR_IGNORE := --exclude SCCS --exclude BitKeeper --exclude .svn \
 # =============================================================================
 # 输出目录配置
 # =============================================================================
-# Staging 目录（所有构建产物的统一输出目录）
-STAGING_DIR := $(objtree)/staging
-
 # 输出子目录（在 staging 下）
 BIN_DIR     := $(STAGING_DIR)/bin
 LIB_DIR     := $(STAGING_DIR)/lib
 KO_DIR      := $(STAGING_DIR)/lib/modules
-INCLUDE_DIR := $(STAGING_DIR)/include
 
 export STAGING_DIR BIN_DIR LIB_DIR KO_DIR INCLUDE_DIR
 

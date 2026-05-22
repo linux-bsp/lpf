@@ -48,7 +48,8 @@ hal-objs += $(if $(CONFIG_HAL_WATCHDOG),src/$(HAL_PLATFORM_DIR)/hal_watchdog_lin
 # 通用编译标志
 ccflags-y += -I$(src)/include
 ccflags-y += -I$(src)/include/config
-ccflags-y += -I$(srctree)/core/osal/include
+# 注意：OSAL 头文件通过 staging 目录引用（顶层 Makefile 已全局导出）
+# 注意：Kconfig 生成的配置文件在 $(srctree)/include
 ccflags-y += -I$(srctree)/include
 
 # 动态库需要 -fPIC
@@ -77,6 +78,7 @@ header-y := \
 	hal_spi.h \
 	hal_gpio.h \
 	hal_watchdog.h \
+	config/can_types.h \
 	config/hal_can_config.h \
 	config/hal_serial_config.h \
 	config/hal_i2c_config.h \

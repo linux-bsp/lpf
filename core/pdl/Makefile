@@ -40,9 +40,8 @@ pdl-objs += $(if $(CONFIG_PDL_MCU_SUPPORT),src/pdl_mcu/pdl_mcu_serial.o)
 # -----------------------------------------------------------------------------
 # 通用编译标志
 ccflags-y += -I$(src)/include
-ccflags-y += -I$(srctree)/core/pcl/include
-ccflags-y += -I$(srctree)/core/hal/include
-ccflags-y += -I$(srctree)/core/osal/include
+# 注意：PCL/HAL/OSAL 头文件通过 staging 目录引用（顶层 Makefile 已全局导出）
+# 注意：Kconfig 生成的配置文件在 $(srctree)/include
 ccflags-y += -I$(srctree)/include
 
 # 动态库需要 -fPIC

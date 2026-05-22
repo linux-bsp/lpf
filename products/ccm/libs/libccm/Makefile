@@ -22,8 +22,8 @@ ccm-objs := \
 # 3. 编译标志
 # -----------------------------------------------------------------------------
 ccflags-y += -I$(src)/include
-ccflags-y += -I$(srctree)/core/osal/include
-ccflags-y += -I$(srctree)/core/hal/include
+# 注意：OSAL/HAL 头文件通过 staging 目录引用（顶层 Makefile 已全局导出）
+# 注意：Kconfig 生成的配置文件在 $(srctree)/include
 ccflags-y += -I$(srctree)/include
 
 # 动态库需要 -fPIC
@@ -39,7 +39,7 @@ ccm-ldflags += -L$(LIB_DIR) -losal
 # -----------------------------------------------------------------------------
 # 5. 头文件导出
 # -----------------------------------------------------------------------------
-header-y := ccm_common.h ccm_utils.h
+header-y := ccm_common.h ccm_utils.h libccm_ipc.h libccm_protocol.h
 
 # -----------------------------------------------------------------------------
 # 6. 清理规则
