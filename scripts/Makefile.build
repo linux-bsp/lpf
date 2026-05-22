@@ -52,6 +52,7 @@ subdir-ccflags-y :=
 -include include/config/auto.conf
 
 include scripts/Kbuild.include
+include scripts/Makefile.compiler
 
 # 保存 CFLAGS 用于检查是否被修改
 save-cflags := $(CFLAGS)
