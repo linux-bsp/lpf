@@ -28,32 +28,35 @@ md5sum .staging/bin/* .staging/lib/*.a > /tmp/ems-before-md5.txt
 
 ---
 
-## Phase 2: 创建 Makefile.compiler ⏳
+## Phase 2: 创建 Makefile.compiler ✅
 
 ### 文件创建
-- [ ] `scripts/Makefile.compiler` (~100 行)
-- [ ] `scripts/gcc-version.sh`
-- [ ] `scripts/ld-version.sh`
+- [x] `scripts/Makefile.compiler` (193 行)
+- [x] `scripts/gcc-version.sh`
+- [x] `scripts/ld-version.sh`
 
 ### 功能实现
-- [ ] 编译器类型检测 (`cc-name`)
-- [ ] 编译器版本检测 (`cc-version`, `cc-fullversion`)
-- [ ] 链接器版本检测 (`ld-version`)
-- [ ] 编译器选项测试 (`cc-option`, `cc-option-yn`)
-- [ ] 链接器选项测试 (`ld-option`)
-- [ ] AR 选项测试 (`ar-option`)
-- [ ] LLVM 工具链支持
+- [x] 编译器类型检测 (`cc-name`)
+- [x] 编译器版本检测 (`cc-version`, `cc-fullversion`)
+- [x] 链接器版本检测 (`ld-version`)
+- [x] 编译器选项测试 (`cc-option`, `cc-option-yn`)
+- [x] 链接器选项测试 (`ld-option`)
+- [x] AR 选项测试 (`ar-option`)
+- [x] LLVM 工具链支持
 
 ### 集成
-- [ ] 从 `Kbuild.include` 移除重复函数
-- [ ] 在 `Makefile.build` 中包含 `Makefile.compiler`
-- [ ] 更新顶层 Makefile（如需要）
+- [x] 从 `Kbuild.include` 移除重复函数
+- [x] 在 `Makefile.build` 中包含 `Makefile.compiler`
+- [x] 更新顶层 Makefile（如需要）
 
 ### 测试
-- [ ] 基本编译测试: `make core/osal/`
-- [ ] LLVM 测试: `make LLVM=1 core/osal/`
+- [x] 基本编译测试: `make core/osal/`
+- [x] LLVM 测试: `make LLVM=1 core/osal/`
 - [ ] 交叉编译测试: `make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- core/osal/`
-- [ ] 编译器选项测试: 验证 `cc-option` 工作正常
+- [x] 编译器选项测试: 验证 `cc-option` 工作正常
+
+**完成日期**: 2026-05-22
+**提交**: 已提交
 
 ---
 
