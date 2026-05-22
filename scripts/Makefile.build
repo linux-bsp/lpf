@@ -1,23 +1,14 @@
+# SPDX-License-Identifier: GPL-2.0
 # =============================================================================
-# EMS 统一构建框架 - 核心构建文件
+# EMS 构建系统 - 核心构建规则
 # =============================================================================
-# 支持四种目标类型:
-#   app-y    - 可执行程序
-#   so-y     - 动态库 (.so)
-#   lib-y    - 静态库 (.a)
-#   obj-m    - 内核模块 (.ko) [预留]
+# 此文件处理核心编译规则（.c → .o, .S → .o）和递归构建
 #
-# 用法示例:
-#   app-y += myapp
-#   myapp-objs := main.o utils.o
-#   myapp-ldflags := -lm
-#
-#   so-y += libhal
-#   libhal-objs := hal.o device.o
-#   libhal-cflags-y := -fPIC
-#
-#   lib-y += libosal
-#   libosal-objs := osal.o timer.o
+# 专用构建模块（自动包含）:
+#   - scripts/Makefile.compiler  - 编译器检测
+#   - scripts/Makefile.lib.build - 静态库/动态库构建
+#   - scripts/Makefile.app.build - 应用程序构建
+#   - scripts/Makefile.mod.build - 内核模块构建
 # =============================================================================
 
 src := $(obj)
@@ -94,7 +85,7 @@ $(warning kbuild: Makefile.build is included improperly)
 endif
 
 # =============================================================================
-# 处理目标类型
+# 处理目标类型和变量设置
 # =============================================================================
 
 # 静态库目标
@@ -118,30 +109,32 @@ mod-target := $(addprefix $(obj)/,$(obj-m))
 endif
 
 # built-in.o 目标（用于递归构建）
-# 只有当 obj-y 中有实际的 .o 文件（不是 built-in.o）时才生成
 real-obj-y := $(filter-out %/built-in.o, $(obj-y))
 ifneq ($(strip $(real-obj-y)),)
 builtin-target := $(obj)/built-in.o
 endif
 
-# 包含库构建规则（必须在 lib-target 等变量设置之后）
+# =============================================================================
+# 包含专用构建模块（必须在目标变量设置之后）
+# =============================================================================
+
 include scripts/Makefile.lib.build
-
-# 包含应用程序构建规则（必须在 app-target 变量设置之后）
 include scripts/Makefile.app.build
-
-# 包含内核模块构建规则（必须在 mod-target 变量设置之后）
 include scripts/Makefile.mod.build
 
+# =============================================================================
 # 主构建目标
+# =============================================================================
+
 __build: $(if $(KBUILD_BUILTIN),$(builtin-target)) \
          $(lib-target) $(so-target) $(app-target) $(mod-target) \
          $(subdir-ym) $(always)
 	@:
 
 # =============================================================================
-# 稀疏检查支持
+# 稀疏检查支持（可选）
 # =============================================================================
+
 ifneq ($(KBUILD_CHECKSRC),0)
   ifeq ($(KBUILD_CHECKSRC),2)
     quiet_cmd_force_checksrc = CHECK   $<
@@ -263,50 +256,14 @@ targets += $(builtin-target)
 endif # builtin-target
 
 # =============================================================================
-# 构建静态库 (.a)
+# 库、应用、模块构建规则
 # =============================================================================
-# 注意: 静态库构建规则已移至 scripts/Makefile.lib.build
-# 此处保留注释以便参考
+# 注意: 以下构建规则已拆分到专用模块:
+#   - 静态库/动态库: scripts/Makefile.lib.build
+#   - 应用程序: scripts/Makefile.app.build
+#   - 内核模块: scripts/Makefile.mod.build
 #
-# 语法:
-#   lib-y += libosal.a
-#   libosal.a-objs := osal.o timer.o task.o
-#
-# 或者简写:
-#   lib-y += osal
-#   osal-objs := osal.o timer.o task.o
-
-# =============================================================================
-# 构建动态库 (.so)
-# =============================================================================
-# 注意: 动态库构建规则已移至 scripts/Makefile.lib.build
-# 此处保留注释以便参考
-#
-# 语法:
-#   so-y += libhal.so
-#   libhal.so-objs := hal.o device.o
-#   libhal.so-ldflags := -shared
-
-# =============================================================================
-# 构建可执行程序
-# =============================================================================
-# 注意: 应用程序构建规则已移至 scripts/Makefile.app.build
-# 此处保留注释以便参考
-#
-# 语法:
-#   app-y += myapp
-#   myapp-objs := main.o utils.o
-#   myapp-ldflags := -lm -lpthread
-
-# =============================================================================
-# 构建内核模块 (.ko) - 预留
-# =============================================================================
-# 注意: 内核模块构建规则已移至 scripts/Makefile.mod.build
-# 此处保留注释以便参考
-#
-# 语法:
-#   obj-m += mydrv.o
-#   mydrv-objs := mydrv_main.o mydrv_ops.o
+# 这些模块在变量设置后自动包含（见第 130-136 行）
 
 # =============================================================================
 # 链接复合对象
