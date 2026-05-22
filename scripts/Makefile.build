@@ -130,6 +130,9 @@ include scripts/Makefile.lib.build
 # 包含应用程序构建规则（必须在 app-target 变量设置之后）
 include scripts/Makefile.app.build
 
+# 包含内核模块构建规则（必须在 mod-target 变量设置之后）
+include scripts/Makefile.mod.build
+
 # 主构建目标
 __build: $(if $(KBUILD_BUILTIN),$(builtin-target)) \
          $(lib-target) $(so-target) $(app-target) $(mod-target) \
@@ -298,34 +301,12 @@ endif # builtin-target
 # =============================================================================
 # 构建内核模块 (.ko) - 预留
 # =============================================================================
+# 注意: 内核模块构建规则已移至 scripts/Makefile.mod.build
+# 此处保留注释以便参考
+#
 # 语法:
 #   obj-m += mydrv.o
 #   mydrv-objs := mydrv_main.o mydrv_ops.o
-
-ifdef mod-target
-
-# 为每个模块提取对象文件列表
-define get-mod-objs
-$(addprefix $(obj)/,$($(1:.ko=.o)-objs) $($(1:.o=)-objs))
-endef
-
-# 为每个模块定义规则
-define build-mod-rule
-$(1): $$(call get-mod-objs,$(notdir $(1))) FORCE
-	$$(call if_changed,link_mod_target)
-	@mkdir -p $(KO_DIR)
-	@cp -f $(1) $(KO_DIR)/
-	@echo "  INSTALL $(KO_DIR)/$(notdir $(1))"
-
-targets += $(1)
-endef
-
-quiet_cmd_link_mod_target = LD [M]  $@
-cmd_link_mod_target = $(LD) $(ld_flags) -r -o $@ $(filter %.o,$^)
-
-$(foreach mod,$(mod-target),$(eval $(call build-mod-rule,$(mod))))
-
-endif # mod-target
 
 # =============================================================================
 # 链接复合对象
