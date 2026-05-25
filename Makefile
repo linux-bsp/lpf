@@ -53,7 +53,32 @@ endif
 # Products 模块
 # =============================================================================
 
-# 暂时为空，阶段 3 会添加
+# libccm
+include products/ccm/libs/libccm/module.mk
+
+# libh200_am625
+include products/ccm/h200_am625/module.mk
+
+# Applications
+ifeq ($(CONFIG_BUILD_CCM_COLLECTOR),y)
+    include products/ccm/apps/ccm_collector/module.mk
+endif
+
+ifeq ($(CONFIG_BUILD_CCM_HEALTH),y)
+    include products/ccm/apps/ccm_health/module.mk
+endif
+
+ifeq ($(CONFIG_BUILD_CCM_LOGGER),y)
+    include products/ccm/apps/ccm_logger/module.mk
+endif
+
+ifeq ($(CONFIG_BUILD_CCM_SUPERVISOR),y)
+    include products/ccm/apps/ccm_supervisor/module.mk
+endif
+
+ifeq ($(CONFIG_BUILD_CCM_COMM),y)
+    include products/ccm/apps/ccm_comm/module.mk
+endif
 
 # =============================================================================
 # 主目标
