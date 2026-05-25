@@ -76,8 +76,6 @@ clean:
 	@rm -rf $(BUILD_DIR)
 	@echo "  CLEAN   $(STAGING_DIR)"
 	@rm -rf $(STAGING_DIR)
-	@echo "  CLEAN   include/generated"
-	@rm -rf include/generated
 
 # -----------------------------------------------------------------------------
 # 帮助信息

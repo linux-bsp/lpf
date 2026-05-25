@@ -35,8 +35,8 @@ osal_SRCS += \
 	core/osal/src/$(OSAL_OS_DIR)/ipc/osal_cond.c \
 	core/osal/src/$(OSAL_OS_DIR)/ipc/osal_mutex.c \
 	core/osal/src/$(OSAL_OS_DIR)/ipc/osal_semaphore.c \
-	core/osal/src/$(OSAL_OS_DIR)/ipc/osal_shm.c
-	# core/osal/src/$(OSAL_OS_DIR)/ipc/osal_shm_cache.c  # 暂时禁用，编译错误
+	core/osal/src/$(OSAL_OS_DIR)/ipc/osal_shm.c \
+	core/osal/src/$(OSAL_OS_DIR)/ipc/osal_shm_cache.c
 endif
 
 # 文件和系统支持
@@ -73,6 +73,7 @@ osal_OBJS := $(call srcs_to_objs,$(osal_SRCS))
 # 4. 编译标志
 # -----------------------------------------------------------------------------
 osal_CFLAGS := \
+	-Icore/osal/include \
 	-Iinclude/osal \
 	-Iinclude/osal/ipc \
 	-Iinclude/osal/lib \

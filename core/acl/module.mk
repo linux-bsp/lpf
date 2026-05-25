@@ -7,13 +7,17 @@
 # -----------------------------------------------------------------------------
 acl_SRCS := \
 	core/acl/src/acl_api.c \
+	core/acl/src/acl_api_v2.c \
 	core/acl/src/acl_telemetry_cache.c
-	# core/acl/src/acl_api_v2.c  # 暂时禁用，编译错误：OSAL_ERR_INVALID_PARAM 未定义
+
+# 注意：acl_api_v2.c 提供 V2 版本的 API（函数名带 _V2 后缀）
+# 可以与 acl_api.c 共存，用于测试或对比不同实现
 
 # -----------------------------------------------------------------------------
 # 2. 编译标志
 # -----------------------------------------------------------------------------
 acl_CFLAGS := \
+	-Icore/acl/include \
 	-Iinclude/acl \
 	-Iinclude/pdl \
 	-Iinclude/pcl \

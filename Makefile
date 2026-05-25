@@ -110,3 +110,23 @@ scripts/kconfig/conf scripts/kconfig/mconf:
 
 VERSION := 1.0.0
 export VERSION
+
+# =============================================================================
+# 清理目标（扩展 scripts/rules.mk 中的基础清理）
+# =============================================================================
+
+.PHONY: mrproper
+mrproper: clean
+	@echo "  CLEAN   configuration"
+	@rm -f .config .config.old
+	@echo "  CLEAN   include/config include/generated"
+	@rm -rf include/config/ include/generated/
+	@$(MAKE) -C scripts/kconfig clean
+
+.PHONY: distclean
+distclean: mrproper
+	@echo "  CLEAN   editor backup and patch files"
+	@find . \( -name '*.orig' -o -name '*.rej' -o -name '*~' \
+		-o -name '*.bak' -o -name '#*#' -o -name '.*.orig' \
+		-o -name '.*.rej' -o -name '*.swp' -o -name '*.swo' \
+		-o -name '*%' -o -name 'core' \) -type f -print | xargs rm -f 2>/dev/null || true
