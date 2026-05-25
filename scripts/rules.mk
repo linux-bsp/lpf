@@ -41,9 +41,6 @@ $(1): $(2)
 	@echo "  LD      $$@"
 	@mkdir -p $$(dir $$@)
 	@$$(CC) -shared -o $$@ $$^ $(3)
-	@echo "  INSTALL $$@"
-	@mkdir -p $(STAGING_DIR)/lib
-	@cp $$@ $(STAGING_DIR)/lib/
 endef
 
 # -----------------------------------------------------------------------------
@@ -55,9 +52,6 @@ $(1): $(2)
 	@mkdir -p $$(dir $$@)
 	@rm -f $$@
 	@ar rcs $$@ $$^
-	@echo "  INSTALL $$@"
-	@mkdir -p $(STAGING_DIR)/lib
-	@cp $$@ $(STAGING_DIR)/lib/
 endef
 
 # -----------------------------------------------------------------------------

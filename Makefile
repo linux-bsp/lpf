@@ -9,10 +9,18 @@
 
 # 包含 Kconfig 生成的配置
 -include .config
+-include include/config/auto.conf
 
 # 包含辅助函数和规则
 include scripts/functions.mk
 include scripts/rules.mk
+
+# =============================================================================
+# 配置依赖（自动生成 autoconf.h）
+# =============================================================================
+
+include/config/auto.conf: .config scripts/kconfig/conf
+	@$(MAKE) -C scripts/kconfig syncconfig srctree=$(CURDIR)
 
 # 全局目标列表
 ALL_TARGETS :=
@@ -21,10 +29,25 @@ ALL_TARGETS :=
 # Core 模块（根据 Kconfig 配置包含）
 # =============================================================================
 
-# 暂时为空，阶段 2 会添加
-# ifeq ($(CONFIG_OSAL),y)
-#     include core/osal/module.mk
-# endif
+ifeq ($(CONFIG_OSAL),y)
+    include core/osal/module.mk
+endif
+
+ifeq ($(CONFIG_HAL),y)
+    include core/hal/module.mk
+endif
+
+ifeq ($(CONFIG_PCL),y)
+    include core/pcl/module.mk
+endif
+
+ifeq ($(CONFIG_PDL),y)
+    include core/pdl/module.mk
+endif
+
+ifeq ($(CONFIG_ACL),y)
+    include core/acl/module.mk
+endif
 
 # =============================================================================
 # Products 模块
@@ -37,7 +60,7 @@ ALL_TARGETS :=
 # =============================================================================
 
 .PHONY: all
-all: $(ALL_TARGETS)
+all: include/config/auto.conf $(ALL_TARGETS)
 	@echo "  BUILD   EMS $(VERSION)"
 
 # =============================================================================
