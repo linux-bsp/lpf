@@ -64,27 +64,30 @@ perf_test_LDFLAGS := \
 	-ltestcore
 
 # 根据启用的核心模块链接对应的库
-ifeq ($(CONFIG_OSAL),y)
-perf_test_LDFLAGS += -losal
-endif
+# 注意：链接顺序很重要，依赖库要放在被依赖库之后
+# 依赖关系：ACL -> PDL -> PCL -> HAL -> OSAL
 
-ifeq ($(CONFIG_HAL),y)
-perf_test_LDFLAGS += -lhal
-endif
-
-ifeq ($(CONFIG_PCL),y)
-perf_test_LDFLAGS += -lpcl
+ifeq ($(CONFIG_ACL),y)
+perf_test_LDFLAGS += -lacl
 endif
 
 ifeq ($(CONFIG_PDL),y)
 perf_test_LDFLAGS += -lpdl
 endif
 
-ifeq ($(CONFIG_ACL),y)
-perf_test_LDFLAGS += -lacl
+ifeq ($(CONFIG_PCL),y)
+perf_test_LDFLAGS += -lpcl
 endif
 
-perf_test_LDFLAGS += -Wl,--as-needed -lpthread -lrt
+ifeq ($(CONFIG_HAL),y)
+perf_test_LDFLAGS += -lhal
+endif
+
+ifeq ($(CONFIG_OSAL),y)
+perf_test_LDFLAGS += -losal
+endif
+
+perf_test_LDFLAGS += -lpthread -lrt
 
 # -----------------------------------------------------------------------------
 # 5. 定义目标
