@@ -1,14 +1,15 @@
 #
-# x86_64 CI/CD Configuration
+# EMS x86_64 Test Configuration
 # Target: x86_64 Linux
-# Purpose: Continuous Integration and automated testing
+# Purpose: Testing with all test suites enabled
 # Optimization: -O2 for realistic performance testing
-# Libraries: Both static and shared for comprehensive CI coverage
+# Libraries: Both static and shared for comprehensive testing
 #
 
 # ============================================================================
 # Build Options
 # ============================================================================
+CONFIG_BUILD_TYPE_DEBUG=y
 CONFIG_OPT_O2=y
 CONFIG_LIBRARY_BUILD_TYPE_STATIC=y
 CONFIG_LIBRARY_BUILD_TYPE_DYNAMIC=y
@@ -28,7 +29,7 @@ CONFIG_OSAL=y
 CONFIG_OSAL_BUILD_STATIC=y
 CONFIG_OSAL_BUILD_SHARED=y
 
-# OSAL Features (All enabled for CI testing)
+# OSAL Features (All enabled)
 CONFIG_OSAL_FILE=y
 CONFIG_OSAL_NETWORK=y
 CONFIG_OSAL_IPC=y
@@ -36,12 +37,12 @@ CONFIG_OSAL_THREAD=y
 CONFIG_OSAL_TIME=y
 CONFIG_OSAL_SIGNAL=y
 
-# OSAL Resource Limits (Standard)
-CONFIG_OSAL_MAX_TASKS=128
-CONFIG_OSAL_MAX_QUEUES=64
-CONFIG_OSAL_MAX_MUTEXES=64
+# OSAL Resource Limits (Generous for x86_64)
+CONFIG_OSAL_MAX_TASKS=256
+CONFIG_OSAL_MAX_QUEUES=128
+CONFIG_OSAL_MAX_MUTEXES=128
 
-# OSAL Debug (for CI diagnostics)
+# OSAL Debug
 CONFIG_OSAL_DEBUG_LOGGING=y
 
 # ============================================================================
@@ -52,11 +53,12 @@ CONFIG_HAL_BUILD_STATIC=y
 CONFIG_HAL_BUILD_SHARED=y
 CONFIG_PLATFORM_GENERIC_LINUX=y
 
-# HAL Advanced Features (for CI testing)
+# HAL Advanced Features (All enabled)
 CONFIG_HAL_DEBUG=y
 CONFIG_HAL_STATISTICS=y
+CONFIG_HAL_POWER_MANAGEMENT=y
 
-# HAL Drivers (All enabled with loopback for CI)
+# HAL Drivers (All enabled with advanced features)
 CONFIG_HAL_CAN=y
 CONFIG_HAL_CAN_FILTER=y
 CONFIG_HAL_CAN_ERROR_HANDLING=y
@@ -64,15 +66,22 @@ CONFIG_HAL_CAN_LOOPBACK=y
 
 CONFIG_HAL_UART=y
 CONFIG_HAL_UART_FLOW_CONTROL=y
+CONFIG_HAL_UART_RS485=y
 
 CONFIG_HAL_I2C=y
+CONFIG_HAL_I2C_SLAVE=y
+CONFIG_HAL_I2C_10BIT_ADDR=y
 
 CONFIG_HAL_SPI=y
+CONFIG_HAL_SPI_DMA=y
+CONFIG_HAL_SPI_SLAVE=y
 
 CONFIG_HAL_GPIO=y
 CONFIG_HAL_GPIO_INTERRUPT=y
+CONFIG_HAL_GPIO_DEBOUNCE=y
 
 CONFIG_HAL_WATCHDOG=y
+CONFIG_HAL_WATCHDOG_PRETIMEOUT=y
 
 # ============================================================================
 # PCL (Protocol Control Layer)
@@ -101,7 +110,7 @@ CONFIG_ACL_BUILD_SHARED=y
 CONFIG_PRODUCT_CCM=y
 CONFIG_PROJECT_H200_AM625=y
 
-# CCM Applications (All enabled for CI)
+# CCM Applications (All enabled)
 CONFIG_BUILD_CCM_SUPERVISOR=y
 CONFIG_BUILD_CCM_COLLECTOR=y
 CONFIG_BUILD_CCM_COMM=y

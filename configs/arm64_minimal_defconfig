@@ -1,17 +1,16 @@
 #
-# ARM64 Raspberry Pi Configuration
-# Target: Raspberry Pi 4/5 (ARM Cortex-A72/A76)
-# Purpose: Raspberry Pi platform for prototyping and development
-# Optimization: -O2 for balanced performance
-# Libraries: Shared libraries
+# EMS ARM64 Minimal Configuration
+# Target: ARM64 (AArch64) Linux - TI AM625 / CCM H200
+# Purpose: Minimal footprint for resource-constrained systems
+# Optimization: -Os for smallest binary size
+# Libraries: Static libraries only
 #
 
 # ============================================================================
 # Build Options
 # ============================================================================
-CONFIG_OPT_O2=y
-CONFIG_LIBRARY_BUILD_TYPE_DYNAMIC=y
-CONFIG_INSTALL_HEADERS=y
+CONFIG_OPT_OS=y
+CONFIG_LIBRARY_BUILD_TYPE_STATIC=y
 
 # ============================================================================
 # Target Platform
@@ -24,43 +23,28 @@ CONFIG_CROSS_COMPILE="aarch64-linux-gnu-"
 # OSAL (Operating System Abstraction Layer)
 # ============================================================================
 CONFIG_OSAL=y
-CONFIG_OSAL_BUILD_SHARED=y
+CONFIG_OSAL_BUILD_STATIC=y
 
-# OSAL Features
+# OSAL Features (Minimal - only essential)
 CONFIG_OSAL_FILE=y
-CONFIG_OSAL_NETWORK=y
 CONFIG_OSAL_IPC=y
 CONFIG_OSAL_THREAD=y
 CONFIG_OSAL_TIME=y
-CONFIG_OSAL_SIGNAL=y
 
-# OSAL Resource Limits (Generous for RPi)
-CONFIG_OSAL_MAX_TASKS=128
-CONFIG_OSAL_MAX_QUEUES=64
-CONFIG_OSAL_MAX_MUTEXES=64
+# OSAL Resource Limits (Minimal)
+CONFIG_OSAL_MAX_TASKS=32
+CONFIG_OSAL_MAX_QUEUES=16
+CONFIG_OSAL_MAX_MUTEXES=16
 
 # ============================================================================
 # HAL (Hardware Abstraction Layer)
 # ============================================================================
 CONFIG_HAL=y
-CONFIG_HAL_BUILD_SHARED=y
-CONFIG_PLATFORM_RASPBERRY_PI=y
+CONFIG_HAL_BUILD_STATIC=y
+CONFIG_PLATFORM_GENERIC_LINUX=y
 
-# HAL Drivers (Raspberry Pi specific)
-CONFIG_HAL_CAN=y
-CONFIG_HAL_CAN_FILTER=y
-CONFIG_HAL_CAN_ERROR_HANDLING=y
-
+# HAL Drivers (Essential only)
 CONFIG_HAL_UART=y
-
-CONFIG_HAL_I2C=y
-
-CONFIG_HAL_SPI=y
-CONFIG_HAL_SPI_DMA=y
-
-CONFIG_HAL_GPIO=y
-CONFIG_HAL_GPIO_INTERRUPT=y
-CONFIG_HAL_GPIO_DEBOUNCE=y
 
 CONFIG_HAL_WATCHDOG=y
 
@@ -68,19 +52,19 @@ CONFIG_HAL_WATCHDOG=y
 # PCL (Protocol Control Layer)
 # ============================================================================
 CONFIG_PCL=y
-CONFIG_PCL_BUILD_SHARED=y
+CONFIG_PCL_BUILD_STATIC=y
 
 # ============================================================================
 # PDL (Protocol Data Layer)
 # ============================================================================
 CONFIG_PDL=y
-CONFIG_PDL_BUILD_SHARED=y
+CONFIG_PDL_BUILD_STATIC=y
 
 # ============================================================================
 # ACL (Application Control Layer)
 # ============================================================================
 CONFIG_ACL=y
-CONFIG_ACL_BUILD_SHARED=y
+CONFIG_ACL_BUILD_STATIC=y
 
 # ============================================================================
 # Products - CCM
@@ -88,9 +72,6 @@ CONFIG_ACL_BUILD_SHARED=y
 CONFIG_PRODUCT_CCM=y
 CONFIG_PROJECT_H200_AM625=y
 
-# CCM Applications (All enabled)
+# CCM Applications (Essential only)
 CONFIG_BUILD_CCM_SUPERVISOR=y
-CONFIG_BUILD_CCM_COLLECTOR=y
-CONFIG_BUILD_CCM_COMM=y
-CONFIG_BUILD_CCM_HEALTH=y
 CONFIG_BUILD_CCM_LOGGER=y
