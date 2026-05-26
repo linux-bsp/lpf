@@ -25,8 +25,10 @@ HOSTCFLAGS += -I. -I../include -DCURSES_LOC="<ncurses.h>"
 # Quiet mode (like Linux kernel)
 ifeq ($(V),1)
   Q =
+  MAKEFLAGS += --no-print-directory
 else
   Q = @
+  MAKEFLAGS += --no-print-directory -s
 endif
 
 # Targets
@@ -73,7 +75,7 @@ savedefconfig: conf
 conf-objs := conf.o confdata.o expr.o lexer.lex.o menu.o parser.tab.o \
              preprocess.o symbol.o util.o
 conf: $(conf-objs)
-	$(Q)echo "  HOSTLD  $@"
+	@echo "  HOSTLD  $@"
 	$(Q)$(HOSTCC) -o $@ $^
 
 # mconf - menuconfig (ncurses interface)
@@ -81,25 +83,27 @@ mconf-objs := mconf.o mnconf-common.o confdata.o expr.o lexer.lex.o menu.o parse
               preprocess.o symbol.o util.o lxdialog/checklist.o lxdialog/inputbox.o \
               lxdialog/menubox.o lxdialog/textbox.o lxdialog/util.o lxdialog/yesno.o
 mconf: $(mconf-objs)
-	$(Q)echo "  HOSTLD  $@"
+	@echo "  HOSTLD  $@"
 	$(Q)$(HOSTCC) -o $@ $^ $(NCURSES_LIBS)
 
 # Parser generation (must be done first)
-parser.tab.c parser.tab.h: parser.y
-	$(Q)echo "  YACC    $@"
+# Note: bison generates both .c and .h files in one invocation
+# Use grouped targets (&:) to avoid running the rule twice in parallel builds
+parser.tab.c parser.tab.h &: parser.y
+	@echo "  YACC    parser.tab.c parser.tab.h"
 	$(Q)bison -d -o parser.tab.c -t -l $<
 
 lexer.lex.c: lexer.l parser.tab.h
-	$(Q)echo "  LEX     $@"
+	@echo "  LEX     $@"
 	$(Q)flex -o $@ -L $<
 
 # Compilation rules
 %.o: %.c
-	$(Q)echo "  HOSTCC  $@"
+	$(if $(filter-out 1,$(V)),,@echo "  HOSTCC  $@")
 	$(Q)$(HOSTCC) $(HOSTCFLAGS) -c -o $@ $<
 
 lxdialog/%.o: lxdialog/%.c
-	$(Q)echo "  HOSTCC  $@"
+	$(if $(filter-out 1,$(V)),,@echo "  HOSTCC  $@")
 	$(Q)$(HOSTCC) $(HOSTCFLAGS) $(NCURSES_CFLAGS) -c -o $@ $<
 
 # lexer.lex.o depends on parser.tab.h

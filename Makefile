@@ -7,9 +7,29 @@
 # 默认目标
 .DEFAULT_GOAL := all
 
+# 清理目标不需要加载配置
+no-dot-config-targets := clean mrproper distclean help
+config-targets := menuconfig defconfig olddefconfig syncconfig savedefconfig
+config-targets += $(patsubst %,%_defconfig,$(notdir $(basename $(wildcard configs/*_defconfig))))
+
+# 检查是否需要加载配置
+ifneq ($(filter $(no-dot-config-targets),$(MAKECMDGOALS)),)
+    dot-config := 0
+else ifneq ($(filter $(config-targets),$(MAKECMDGOALS)),)
+    ifneq ($(filter-out $(config-targets),$(MAKECMDGOALS)),)
+        mixed-targets := 1
+    else
+        dot-config := 0
+    endif
+else
+    dot-config := 1
+endif
+
 # 包含 Kconfig 生成的配置
+ifeq ($(dot-config),1)
 -include .config
 -include include/config/auto.conf
+endif
 
 # 包含辅助函数和规则
 include scripts/functions.mk
@@ -146,14 +166,14 @@ olddefconfig: scripts/kconfig/conf
 	@echo >&2 '***   make <board>_defconfig   - Load board-specific configuration'
 	@echo >&2 '***'
 	@echo >&2 '*** Available defconfig files:'
-	@echo >&2 '***   make ccm_h200_am625_debug_defconfig'
-	@echo >&2 '***   make x86_64_full_defconfig'
-	@echo >&2 '***   make x86_64_minimal_defconfig'
+	@for f in configs/*_defconfig; do \
+		echo >&2 "***   make $$(basename $$f)"; \
+	done
 	@echo >&2 '***'
 	@false
 
 scripts/kconfig/conf scripts/kconfig/mconf:
-	@$(MAKE) -C scripts/kconfig
+	@$(MAKE) -C scripts/kconfig $(if $(filter-out 0,$(MAKELEVEL)),-j1,-j$(shell nproc))
 
 # =============================================================================
 # 版本信息
