@@ -11,43 +11,42 @@ menuconfig OSAL
 
 if OSAL
 
+# =============================================================================
+# Platform Configuration (OS and Architecture)
+# =============================================================================
+
+menu "Platform Configuration"
+
 choice
 	prompt "Target operating system"
 	default OS_LINUX
 	help
 	  Select the target operating system type.
-	  This affects OSAL (OS Abstraction Layer) implementation.
 
 config OS_LINUX
 	bool "Linux"
 	help
-	  Target Linux operating system.
-	  Supports POSIX APIs, threads, sockets, etc.
+	  Target Linux operating system (POSIX).
 
 config OS_WINDOWS
 	bool "Windows"
 	help
-	  Target Windows operating system.
-	  Uses Win32 APIs for threading, synchronization, etc.
+	  Target Windows operating system (Win32).
 
 config OS_RTOS
 	bool "RTOS (Real-Time OS)"
 	help
-	  Target real-time operating system (FreeRTOS, RT-Thread, etc.).
-	  Provides deterministic scheduling and minimal footprint.
+	  Target real-time operating system.
 
 config OS_MACOS
 	bool "macOS"
 	help
-	  Target macOS operating system.
-	  Supports POSIX APIs with macOS-specific extensions.
+	  Target macOS operating system (POSIX).
 
 config OS_BARE
 	bool "Bare Metal"
 	help
 	  No operating system (bare metal).
-	  Direct hardware access without OS abstraction.
-	  Requires custom startup code and hardware drivers.
 
 endchoice
 
@@ -58,15 +57,10 @@ config OS
 	default "rtos" if OS_RTOS
 	default "macos" if OS_MACOS
 	default "bare" if OS_BARE
-	help
-	  Operating system name used by the build system.
-	  This value can be overridden by the OS environment variable.
 
 choice
 	prompt "Target architecture"
 	default ARCH_X86_64
-	help
-	  Select the target CPU architecture.
 
 config ARCH_X86_64
 	bool "x86_64 (64-bit Intel/AMD)"
@@ -88,172 +82,144 @@ config ARCH
 	default "arm" if ARCH_ARM32
 	default "arm64" if ARCH_ARM64
 	default "riscv" if ARCH_RISCV64
-	help
-	  Architecture name used by the build system.
-	  This value can be overridden by the ARCH environment variable.
 
-menu "OSAL Platform Configuration"
-
+# Auto-detect OS implementation
 config OSAL_OS_POSIX
 	bool
 	default y if OS_LINUX || OS_MACOS
-	help
-	  Use POSIX implementation for OSAL.
-	  Automatically selected for Linux and macOS.
 
 config OSAL_OS_WIN32
 	bool
 	default y if OS_WINDOWS
-	help
-	  Use Win32 implementation for OSAL.
-	  Automatically selected for Windows.
 
 config OSAL_OS_RTOS
 	bool
 	default y if OS_RTOS
-	help
-	  Use RTOS implementation for OSAL.
-	  Automatically selected for RTOS.
 
 config OSAL_OS_BARE
 	bool
 	default y if OS_BARE
-	help
-	  Use bare metal implementation for OSAL.
-	  Automatically selected for bare metal.
 
+# Auto-detect architecture
 config OSAL_ARCH_32BIT
 	bool
 	default y if ARCH_ARM32
-	help
-	  32-bit architecture support.
 
 config OSAL_ARCH_64BIT
 	bool
 	default y if ARCH_X86_64 || ARCH_ARM64 || ARCH_RISCV64
-	help
-	  64-bit architecture support.
-
-config OSAL_ARCH_NAME
-	string
-	default ARCH
-	help
-	  Architecture name from platform configuration.
-
-config OSAL_OS_NAME
-	string
-	default OS
-	help
-	  Operating system name from platform configuration.
 
 endmenu
 
-menu "OSAL Build Configuration"
+# =============================================================================
+# Build Configuration
+# =============================================================================
+
+menu "Build Configuration"
 
 config OSAL_BUILD_STATIC
-	bool "Build static library (.a)"
-	default n
+	bool "Build static library"
+	default y
 	help
-	  Build OSAL as a static library (libosal.a).
+	  Build libosal.a static library.
 
 config OSAL_BUILD_SHARED
-	bool "Build shared library (.so)"
-	default n
-	depends on !OSAL_OS_BARE
+	bool "Build shared library"
+	default y
 	help
-	  Build OSAL as a shared library (libosal.so).
-	  Not available in bare metal mode.
-
-comment "Tip: Enable both if different apps need different link types"
+	  Build libosal.so shared library.
 
 endmenu
 
-menu "OSAL Configuration"
+# =============================================================================
+# Feature Configuration (Fine-grained per-file control)
+# =============================================================================
+
+menu "Feature Configuration"
+
+menuconfig OSAL_IPC
+	bool "IPC (Inter-Process Communication)"
+	default y
+	help
+	  Enable IPC support (mutex, semaphore, shared memory, etc).
+
+source "core/osal/Kconfig.ipc"
+
+menuconfig OSAL_FILE
+	bool "File and System Operations"
+	default y
+	help
+	  Enable file I/O and system operations.
+
+source "core/osal/Kconfig.file"
+
+menuconfig OSAL_THREAD
+	bool "Thread Support"
+	default y
+	help
+	  Enable thread operations.
+
+source "core/osal/Kconfig.thread"
+
+menuconfig OSAL_NETWORK
+	bool "Network Support"
+	default y
+	help
+	  Enable network operations (socket, termios).
+
+source "core/osal/Kconfig.network"
+
+menuconfig OSAL_SIGNAL
+	bool "Signal Support"
+	default y
+	help
+	  Enable signal handling.
+
+source "core/osal/Kconfig.signal"
+
+endmenu
+
+# =============================================================================
+# Resource Limits
+# =============================================================================
+
+menu "Resource Limits"
 
 config OSAL_MAX_TASKS
 	int "Maximum number of tasks"
-	default 64
-	range 1 256
+	default 256
+	range 1 1024
 	help
-	  Maximum number of concurrent tasks supported by OSAL.
+	  Maximum number of concurrent tasks/threads.
 
 config OSAL_MAX_QUEUES
 	int "Maximum number of queues"
-	default 32
-	range 1 128
+	default 128
+	range 1 512
 	help
 	  Maximum number of message queues.
 
 config OSAL_MAX_MUTEXES
 	int "Maximum number of mutexes"
-	default 32
-	range 1 128
+	default 128
+	range 1 512
 	help
-	  Maximum number of mutex locks.
+	  Maximum number of mutexes.
+
+endmenu
+
+# =============================================================================
+# Debug Options
+# =============================================================================
+
+menu "Debug Options"
 
 config OSAL_DEBUG_LOGGING
 	bool "Enable debug logging"
 	default n
 	help
-	  Enable verbose debug logging in OSAL layer.
+	  Enable verbose debug logging in OSAL.
 
 endmenu
-
-menuconfig OSAL_FILE
-	bool "File I/O support"
-	default n
-	depends on !OSAL_OS_BARE
-	help
-	  Enable file I/O operations (open, read, write, close, etc.).
-	  Not available in bare metal mode.
-
-	  If unsure, say Y.
-
-menuconfig OSAL_NETWORK
-	bool "Network support"
-	default n
-	depends on OSAL_OS_POSIX || OSAL_OS_WIN32
-	help
-	  Enable network socket operations (socket, bind, connect, etc.).
-	  Required for network communication.
-	  Only available on POSIX and Windows platforms.
-
-	  If unsure, say Y.
-
-menuconfig OSAL_IPC
-	bool "Inter-Process Communication"
-	default n
-	help
-	  Enable IPC mechanisms (mutex, semaphore, shared memory, etc.).
-	  Required for multi-threaded applications.
-
-	  If unsure, say Y.
-
-menuconfig OSAL_THREAD
-	bool "Thread support"
-	default n
-	help
-	  Enable thread management (create, join, detach, etc.).
-	  Required for multi-threaded applications.
-
-	  If unsure, say Y.
-
-menuconfig OSAL_TIME
-	bool "Time and clock support"
-	default n
-	help
-	  Enable time operations (sleep, clock, timer, etc.).
-
-	  If unsure, say Y.
-
-menuconfig OSAL_SIGNAL
-	bool "Signal handling"
-	default n
-	depends on OSAL_OS_POSIX
-	help
-	  Enable signal handling operations.
-	  Only available on POSIX platforms.
-
-	  If unsure, say Y.
 
 endif # OSAL
