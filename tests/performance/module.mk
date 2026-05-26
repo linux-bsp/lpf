@@ -108,22 +108,23 @@ $(perf_test_OBJS): CFLAGS += $(perf_test_CFLAGS)
 # 7. 定义构建规则
 # -----------------------------------------------------------------------------
 ifeq ($(CONFIG_TEST_PERFORMANCE),y)
-# 声明依赖关系：测试程序依赖 testcore 和启用的核心模块库
-$(perf_test_TARGET): $(perf_test_OBJS) $(testcore_TARGET)
-ifeq ($(CONFIG_OSAL),y)
-$(perf_test_TARGET): $(osal_TARGET)
-endif
-ifeq ($(CONFIG_HAL),y)
-$(perf_test_TARGET): $(hal_TARGET)
-endif
-ifeq ($(CONFIG_PCL),y)
-$(perf_test_TARGET): $(pcl_TARGET)
+# 声明依赖关系：测试程序依赖 testcore 和启用的核心模块共享库
+# 注意：必须依赖 .so 文件而不是变量，确保共享库完全构建完成后才链接
+$(perf_test_TARGET): $(perf_test_OBJS) $(STAGING_DIR)/lib/libtestcore.so
+ifeq ($(CONFIG_ACL),y)
+$(perf_test_TARGET): $(STAGING_DIR)/lib/libacl.so
 endif
 ifeq ($(CONFIG_PDL),y)
-$(perf_test_TARGET): $(pdl_TARGET)
+$(perf_test_TARGET): $(STAGING_DIR)/lib/libpdl.so
 endif
-ifeq ($(CONFIG_ACL),y)
-$(perf_test_TARGET): $(acl_TARGET)
+ifeq ($(CONFIG_PCL),y)
+$(perf_test_TARGET): $(STAGING_DIR)/lib/libpcl.so
+endif
+ifeq ($(CONFIG_HAL),y)
+$(perf_test_TARGET): $(STAGING_DIR)/lib/libhal.so
+endif
+ifeq ($(CONFIG_OSAL),y)
+$(perf_test_TARGET): $(STAGING_DIR)/lib/libosal.so
 endif
 
 $(perf_test_TARGET):
