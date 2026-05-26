@@ -36,11 +36,18 @@ $(BUILD_DIR)/%.o: %.c
 # 规则 2：.o → .so（动态库）
 # -----------------------------------------------------------------------------
 # 使用模式：$(call build_shared_lib,target,objs,ldflags)
+# 自动创建 SONAME 符号链接（如果 ldflags 包含 -soname）
 define build_shared_lib
 $(1): $(2)
 	@echo "  LD      $$@"
 	@mkdir -p $$(dir $$@)
 	@$$(CC) -shared -o $$@ $$^ $(3)
+	@if echo "$(3)" | grep -q "soname,"; then \
+		soname=$$$$(echo "$(3)" | sed -n 's/.*-soname,\([^ ]*\).*/\1/p'); \
+		if [ -n "$$$$soname" ] && [ "$$$$soname" != "$$$$(basename $$@)" ]; then \
+			ln -sf $$$$(basename $$@) $$$$(dirname $$@)/$$$$soname; \
+		fi; \
+	fi
 endef
 
 # -----------------------------------------------------------------------------
