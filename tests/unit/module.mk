@@ -88,8 +88,11 @@ ifeq ($(CONFIG_TEST_PDL),y)
 unit_test_LDFLAGS += -lpdl -lpcl -lhal -losal
 endif
 
+# ACL 测试需要 ACL 模块已启用
+ifneq ($(CONFIG_ACL),)
 ifeq ($(CONFIG_TEST_ACL),y)
 unit_test_LDFLAGS += -lacl -lpdl -lpcl -lhal -losal
+endif
 endif
 
 unit_test_LDFLAGS += -Wl,--as-needed -lpthread -lrt
