@@ -187,7 +187,9 @@ TEST_CASE(test_osal_log_rotation_basic)
     OSAL_LogSetMaxFiles(3);
 
     /* 写入大量日志，触发轮转 */
-    for (int32_t i = 0; i < 100; i++) {
+    int32_t i;
+
+    for (i = 0; i < 100; i++) {
         LOG_INFO("TEST", "Log message %d: This is a test message to trigger rotation", i);
     }
 
@@ -231,7 +233,10 @@ static void* log_test_task(void *arg)
 {
     int32_t task_id = *(int32_t *)arg;
 
-    for (int32_t i = 0; i < 10 && g_log_test_running; i++) {
+    int32_t i;
+
+
+    for (i = 0; i < 10 && g_log_test_running; i++) {
         LOG_INFO("TEST", "Task %d: Message %d", task_id, i);
         OSAL_msleep(10);
     }
@@ -252,7 +257,9 @@ TEST_CASE(test_osal_log_multithread)
     g_log_test_running = true;
 
     /* 创建多个任务 */
-    for (int32_t i = 0; i < 3; i++) {
+    int32_t i;
+
+    for (i = 0; i < 3; i++) {
         ret = OSAL_ThreadCreate(&task_ids[i],
                                log_test_task, &task_args[i]);
         TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
@@ -262,7 +269,8 @@ TEST_CASE(test_osal_log_multithread)
     OSAL_msleep(500);
 
     /* 等待线程退出 */
-    for (int32_t i = 0; i < 3; i++) {
+
+    for (i = 0; i < 3; i++) {
         OSAL_ThreadJoin(task_ids[i]);
     }
 
@@ -324,7 +332,9 @@ TEST_CASE(test_osal_log_performance)
 
     // 测试写入性能
     start_time = OSAL_GetTickCount();
-    for (int32_t i = 0; i < iterations; i++) {
+    int32_t i;
+
+    for (i = 0; i < iterations; i++) {
         LOG_INFO("TEST", "Performance test message %d", i);
     }
     end_time = OSAL_GetTickCount();

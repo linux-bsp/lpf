@@ -28,7 +28,10 @@ static double simple_sqrt(double x) {
     double guess = x / 2.0;
     double epsilon = 0.00001;
 
-    for (int32_t i = 0; i < 50; i++) {
+    int32_t i;
+
+
+    for (i = 0; i < 50; i++) {
         double next_guess = (guess + x / guess) / 2.0;
         if ((next_guess - guess) < epsilon && (next_guess - guess) > -epsilon) {
             break;
@@ -43,8 +46,12 @@ static double simple_sqrt(double x) {
  * 简单的冒泡排序（用于百分位数计算）
  */
 static void simple_sort(double *arr, uint32_t count) {
-    for (uint32_t i = 0; i < count - 1; i++) {
-        for (uint32_t j = 0; j < count - i - 1; j++) {
+    uint32_t i;
+
+    for (i = 0; i < count - 1; i++) {
+        uint32_t j;
+
+        for (j = 0; j < count - i - 1; j++) {
             if (arr[j] > arr[j + 1]) {
                 double temp = arr[j];
                 arr[j] = arr[j + 1];
@@ -148,7 +155,10 @@ int32_t perf_calculate_stats(perf_context_t *ctx, perf_stats_t *stats) {
     stats->max = ctx->samples[0];
     stats->sum = 0.0;
 
-    for (uint32_t i = 0; i < ctx->sample_count; i++) {
+    uint32_t i;
+
+
+    for (i = 0; i < ctx->sample_count; i++) {
         double value = ctx->samples[i];
         stats->sum += value;
         if (value < stats->min) stats->min = value;
@@ -159,7 +169,9 @@ int32_t perf_calculate_stats(perf_context_t *ctx, perf_stats_t *stats) {
 
     /* 计算方差和标准差 */
     double variance_sum = 0.0;
-    for (uint32_t i = 0; i < ctx->sample_count; i++) {
+    uint32_t i;
+
+    for (i = 0; i < ctx->sample_count; i++) {
         double diff = ctx->samples[i] - stats->mean;
         variance_sum += diff * diff;
     }

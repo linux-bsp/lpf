@@ -183,7 +183,9 @@ void system_test_print_report(system_test_context_t *ctx) {
 
     if (ctx->checkpoint_count > 0) {
         OSAL_Printf("Checkpoint Details:\n");
-        for (uint32_t i = 0; i < ctx->checkpoint_count; i++) {
+        uint32_t i;
+
+        for (i = 0; i < ctx->checkpoint_count; i++) {
             checkpoint_record_t *cp = &ctx->checkpoints[i];
             const char *status = cp->passed ? "+" : "X";
             OSAL_Printf("  [%s] %s\n", status, cp->name);

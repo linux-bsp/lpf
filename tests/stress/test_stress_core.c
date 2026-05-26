@@ -169,7 +169,9 @@ int32_t stress_run(stress_context_t *ctx,
     }
 
     /* 启动工作线程 */
-    for (uint32_t i = 0; i < ctx->config.thread_count; i++) {
+    uint32_t i;
+
+    for (i = 0; i < ctx->config.thread_count; i++) {
         args[i].ctx = ctx;
         args[i].worker = worker;
         args[i].user_data = user_data;
@@ -181,7 +183,9 @@ int32_t stress_run(stress_context_t *ctx,
         if (OSAL_ThreadCreate(&threads[i], worker_thread_func, &args[i]) != 0) {
             /* 创建失败，停止已启动的线程 */
             ctx->should_stop = true;
-            for (uint32_t j = 0; j < i; j++) {
+            uint32_t j;
+
+            for (j = 0; j < i; j++) {
                 OSAL_ThreadJoin(threads[j]);
             }
             OSAL_Free(threads);
@@ -207,7 +211,9 @@ int32_t stress_run(stress_context_t *ctx,
     }
 
     /* 等待所有线程结束 */
-    for (uint32_t i = 0; i < ctx->config.thread_count; i++) {
+    uint32_t i;
+
+    for (i = 0; i < ctx->config.thread_count; i++) {
         OSAL_ThreadJoin(threads[i]);
     }
 

@@ -78,7 +78,8 @@ TEST_CASE(test_hal_watchdog_kick)
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 多次喂狗 */
-    for (uint32_t i = 0; i < 5; i++)
+    uint32_t i;
+    for (i = 0; i < 5; i++)
     {
         ret = HAL_WATCHDOG_Kick(handle);
         TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);

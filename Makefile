@@ -81,6 +81,35 @@ ifeq ($(CONFIG_BUILD_CCM_COMM),y)
 endif
 
 # =============================================================================
+# Tests 模块
+# =============================================================================
+
+# 测试框架核心库（必须最先构建）
+ifeq ($(CONFIG_BUILD_TESTING),y)
+    include tests/core/module.mk
+endif
+
+# 单元测试
+ifeq ($(CONFIG_TEST_UNIT),y)
+    include tests/unit/module.mk
+endif
+
+# 性能测试
+ifeq ($(CONFIG_TEST_PERFORMANCE),y)
+    include tests/performance/module.mk
+endif
+
+# 压力测试
+ifeq ($(CONFIG_TEST_STRESS),y)
+    include tests/stress/module.mk
+endif
+
+# 系统测试
+ifeq ($(CONFIG_TEST_SYSTEM),y)
+    include tests/system/module.mk
+endif
+
+# =============================================================================
 # 主目标
 # =============================================================================
 

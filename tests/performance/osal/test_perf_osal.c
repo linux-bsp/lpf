@@ -33,7 +33,9 @@ TEST_CASE(test_perf_mutex_lock_unlock) {
     TEST_ASSERT_NOT_NULL(ctx);
 
     /* 性能测试 */
-    for (uint32_t i = 0; i < iterations; i++) {
+    uint32_t i;
+
+    for (i = 0; i < iterations; i++) {
         perf_begin(ctx);
         OSAL_MutexLock(mutex);
         OSAL_MutexUnlock(mutex);
@@ -69,7 +71,9 @@ TEST_CASE(test_perf_atomic_operations) {
     TEST_ASSERT_NOT_NULL(ctx);
 
     /* 性能测试 */
-    for (uint32_t i = 0; i < iterations; i++) {
+    uint32_t i;
+
+    for (i = 0; i < iterations; i++) {
         perf_begin(ctx);
         OSAL_AtomicIncrement(&counter);
         perf_end(ctx);
@@ -98,7 +102,9 @@ TEST_CASE(test_perf_time_get) {
     TEST_ASSERT_NOT_NULL(ctx);
 
     /* 性能测试 */
-    for (uint32_t i = 0; i < iterations; i++) {
+    uint32_t i;
+
+    for (i = 0; i < iterations; i++) {
         perf_begin(ctx);
         OSAL_GetMonotonicTime();
         perf_end(ctx);

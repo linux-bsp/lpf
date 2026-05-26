@@ -220,7 +220,9 @@ TEST_CASE(test_cond_broadcast_wakeup)
     osal_thread_t producer, consumers[3];
 
     /* 创建3个消费者线程 */
-    for (int32_t i = 0; i < 3; i++) {
+    int32_t i;
+
+    for (i = 0; i < 3; i++) {
         OSAL_pthread_create(&consumers[i], NULL, multi_consumer_thread, args);
     }
 
@@ -229,7 +231,8 @@ TEST_CASE(test_cond_broadcast_wakeup)
 
     /* 等待所有线程完成 */
     OSAL_pthread_join(producer, NULL);
-    for (int32_t i = 0; i < 3; i++) {
+
+    for (i = 0; i < 3; i++) {
         OSAL_pthread_join(consumers[i], NULL);
     }
 

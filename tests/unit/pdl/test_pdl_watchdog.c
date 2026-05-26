@@ -80,7 +80,8 @@ TEST_CASE(test_pdl_watchdog_manual_kick)
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 多次喂狗 */
-    for (uint32_t i = 0; i < 5; i++)
+    uint32_t i;
+    for (i = 0; i < 5; i++)
     {
         ret = PDL_WATCHDOG_Kick(handle);
         TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);

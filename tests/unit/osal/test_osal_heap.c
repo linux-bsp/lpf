@@ -214,13 +214,16 @@ TEST_CASE(test_osal_malloc_free_multiple)
     void *ptrs[100];
 
     /* 分配多块内存 */
-    for (int32_t i = 0; i < iterations; i++) {
+    int32_t i;
+
+    for (i = 0; i < iterations; i++) {
         ptrs[i] = OSAL_Malloc(64);
         TEST_ASSERT_NOT_NULL(ptrs[i]);
     }
 
     /* 释放所有内存 */
-    for (int32_t i = 0; i < iterations; i++) {
+
+    for (i = 0; i < iterations; i++) {
         OSAL_Free(ptrs[i]);
     }
 }
@@ -280,12 +283,15 @@ TEST_CASE(test_osal_malloc_write_verify)
     TEST_ASSERT_NOT_NULL(ptr);
 
     /* 写入数据 */
-    for (osal_size_t i = 0; i < size; i++) {
+    osal_size_t i;
+
+    for (i = 0; i < size; i++) {
         ptr[i] = (uint8_t)(i & 0xFF);
     }
 
     /* 验证数据 */
-    for (osal_size_t i = 0; i < size; i++) {
+
+    for (i = 0; i < size; i++) {
         TEST_ASSERT_EQUAL((uint8_t)(i & 0xFF), ptr[i]);
     }
 
@@ -329,13 +335,16 @@ TEST_CASE(test_osal_malloc_performance)
 
     /* 测试分配性能 */
     start_time = OSAL_GetTickCount();
-    for (int32_t i = 0; i < iterations; i++) {
+    int32_t i;
+
+    for (i = 0; i < iterations; i++) {
         ptrs[i] = OSAL_Malloc(64);
     }
     end_time = OSAL_GetTickCount();
 
     /* 验证所有分配成功 */
-    for (int32_t i = 0; i < iterations; i++) {
+
+    for (i = 0; i < iterations; i++) {
         TEST_ASSERT_NOT_NULL(ptrs[i]);
     }
 
@@ -344,7 +353,8 @@ TEST_CASE(test_osal_malloc_performance)
     TEST_ASSERT_TRUE(elapsed < (uint64_t)iterations);
 
     /* 释放所有内存 */
-    for (int32_t i = 0; i < iterations; i++) {
+
+    for (i = 0; i < iterations; i++) {
         OSAL_Free(ptrs[i]);
     }
 }

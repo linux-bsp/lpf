@@ -52,7 +52,10 @@ const test_suite_t* test_find_suite(const char *name)
         return NULL;
     }
 
-    for (uint32_t i = 0; i < g_suite_count; i++) {
+    uint32_t i;
+
+
+    for (i = 0; i < g_suite_count; i++) {
         if (0 == OSAL_Strcmp(g_registered_suites[i]->suite_name, name)) {
             return g_registered_suites[i];
         }
@@ -70,7 +73,9 @@ uint32_t test_get_suites_by_layer(const char *layer_name, const test_suite_t **s
     }
 
     uint32_t count = 0;
-    for (uint32_t i = 0; i < g_suite_count && count < max_suites; i++) {
+    uint32_t i;
+
+    for (i = 0; i < g_suite_count && count < max_suites; i++) {
         if (0 == OSAL_Strcmp(g_registered_suites[i]->layer_name, layer_name)) {
             suites[count++] = g_registered_suites[i];
         }
@@ -88,7 +93,9 @@ uint32_t test_get_suites_by_module(const char *module_name, const test_suite_t *
     }
 
     uint32_t count = 0;
-    for (uint32_t i = 0; i < g_suite_count && count < max_suites; i++) {
+    uint32_t i;
+
+    for (i = 0; i < g_suite_count && count < max_suites; i++) {
         if (0 == OSAL_Strcmp(g_registered_suites[i]->module_name, module_name)) {
             suites[count++] = g_registered_suites[i];
         }
@@ -106,12 +113,16 @@ uint32_t test_get_layers(const char **layers, uint32_t max_layers)
     }
 
     uint32_t count = 0;
-    for (uint32_t i = 0; i < g_suite_count && count < max_layers; i++) {
+    uint32_t i;
+
+    for (i = 0; i < g_suite_count && count < max_layers; i++) {
         const char *layer = g_registered_suites[i]->layer_name;
 
         /* Check if already in list */
         bool found = false;
-        for (uint32_t j = 0; j < count; j++) {
+        uint32_t j;
+
+        for (j = 0; j < count; j++) {
             if (0 == OSAL_Strcmp(layers[j], layer)) {
                 found = true;
                 break;
@@ -135,12 +146,16 @@ uint32_t test_get_modules(const char **modules, uint32_t max_modules)
     }
 
     uint32_t count = 0;
-    for (uint32_t i = 0; i < g_suite_count && count < max_modules; i++) {
+    uint32_t i;
+
+    for (i = 0; i < g_suite_count && count < max_modules; i++) {
         const char *module = g_registered_suites[i]->module_name;
 
         /* Check if already in list */
         bool found = false;
-        for (uint32_t j = 0; j < count; j++) {
+        uint32_t j;
+
+        for (j = 0; j < count; j++) {
             if (0 == OSAL_Strcmp(modules[j], module)) {
                 found = true;
                 break;

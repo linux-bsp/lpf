@@ -105,12 +105,14 @@ static void add_test_result(const char *suite_name, const char *test_name, test_
 
 static void print_result_list(const char *header, uint32_t count, test_result_node_t *head, const char *tag)
 {
+    const char *current_suite = NULL;
+    test_result_node_t *node;
+
     if (count == 0) return;
 
     OSAL_Printf("\n%s %u tests\n", header, count);
 
-    const char *current_suite = NULL;
-    for (test_result_node_t *node = head; NULL != node; node = node->next) {
+    for (node = head; NULL != node; node = node->next) {
         if (NULL == current_suite || OSAL_Strcmp(current_suite, node->suite_name) != 0) {
             if (current_suite) OSAL_Printf("\n");
             OSAL_Printf("  [%s]\n", node->suite_name);
@@ -189,6 +191,9 @@ static test_result_t run_test_case(const test_case_t *test, const char *suite_na
 
 static int32_t run_suite(const test_suite_t *suite)
 {
+    uint32_t i;
+    test_result_t result;
+
     if (NULL == suite) return OSAL_ERR_GENERIC;
 
     LOG_SEP();
@@ -196,8 +201,8 @@ static int32_t run_suite(const test_suite_t *suite)
 
     if (suite->suite_setup) suite->suite_setup();
 
-    for (uint32_t i = 0; i < suite->case_count; i++) {
-        test_result_t result = run_test_case(&suite->cases[i], suite->suite_name);
+    for (i = 0; i < suite->case_count; i++) {
+        result = run_test_case(&suite->cases[i], suite->suite_name);
         g_stats.total++;
         if (result == TEST_RESULT_PASS) {
             g_stats.passed++;
@@ -216,12 +221,15 @@ static int32_t run_suite(const test_suite_t *suite)
 
 static void run_suites_and_report(const test_suite_t **suites, uint32_t count, const char *scope_desc)
 {
+    uint32_t start_time;
+    uint32_t i;
+
     open_test_log();
     libutest_reset_stats();
 
-    uint32_t start_time = OSAL_GetTickCount();
+    start_time = OSAL_GetTickCount();
 
-    for (uint32_t i = 0; i < count; i++) {
+    for (i = 0; i < count; i++) {
         run_suite(suites[i]);
     }
 
@@ -340,7 +348,9 @@ int32_t libutest_run_test(const char *suite_name, const char *test_name)
     }
 
     const test_case_t *test = NULL;
-    for (uint32_t i = 0; i < suite->case_count; i++) {
+    uint32_t i;
+
+    for (i = 0; i < suite->case_count; i++) {
         if (0 == OSAL_Strcmp(suite->cases[i].name, test_name)) {
             test = &suite->cases[i];
             break;

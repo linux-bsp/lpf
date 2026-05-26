@@ -182,7 +182,9 @@ TEST_CASE(test_osal_time_monotonic)
     OSAL_GetLocalTime(&prev_time);
 
     /* 连续获取10次时间，验证单调递增 */
-    for (int32_t i = 0; i < 10; i++) {
+    int32_t i;
+
+    for (i = 0; i < 10; i++) {
         OSAL_usleep(1000);  /* 1毫秒 */
         OSAL_GetLocalTime(&curr_time);
 
@@ -272,7 +274,9 @@ TEST_CASE(test_osal_time_get_performance)
 
     /* 测试GetLocalTime性能 */
     start_time = get_time_in_micros();
-    for (int32_t i = 0; i < iterations; i++) {
+    int32_t i;
+
+    for (i = 0; i < iterations; i++) {
         OSAL_GetLocalTime(&time_struct);
     }
     end_time = get_time_in_micros();

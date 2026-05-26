@@ -251,7 +251,9 @@ TEST_CASE(test_hal_can_loopback)
     if (OSAL_SUCCESS == ret) {
         TEST_ASSERT_EQUAL(tx_frame.can_id, rx_frame.can_id);
         TEST_ASSERT_EQUAL(tx_frame.dlc, rx_frame.dlc);
-        for (int32_t i = 0; i < tx_frame.dlc; i++) {
+        int32_t i;
+
+        for (i = 0; i < tx_frame.dlc; i++) {
             TEST_ASSERT_EQUAL(tx_frame.data[i], rx_frame.data[i]);
         }
     }

@@ -137,7 +137,10 @@ static void* producer_thread(void *arg)
 {
     osal_semaphore_t *sem = (osal_semaphore_t *)arg;
 
-    for (int32_t i = 0; i < 10; i++) {
+    int32_t i;
+
+
+    for (i = 0; i < 10; i++) {
         OSAL_msleep(10);
         shared_counter++;
         OSAL_SemaphorePost(sem);
@@ -151,7 +154,10 @@ static void* consumer_thread(void *arg)
 {
     osal_semaphore_t *sem = (osal_semaphore_t *)arg;
 
-    for (int32_t i = 0; i < 10; i++) {
+    int32_t i;
+
+
+    for (i = 0; i < 10; i++) {
         OSAL_SemaphoreWait(sem);
         shared_counter--;
     }

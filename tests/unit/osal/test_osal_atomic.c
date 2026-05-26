@@ -163,7 +163,10 @@ static void* atomic_increment_thread(void *arg)
 {
     atomic_thread_data_t *data = (atomic_thread_data_t *)arg;
 
-    for (uint32_t i = 0; i < data->iterations; i++) {
+    uint32_t i;
+
+
+    for (i = 0; i < data->iterations; i++) {
         OSAL_AtomicIncrement(data->counter);
     }
 
@@ -179,7 +182,9 @@ TEST_CASE(test_atomic_multithread_increment)
     OSAL_AtomicInit(&counter, 0);
 
     /* 创建多个线程同时自增 */
-    for (int32_t i = 0; i < THREAD_COUNT; i++) {
+    int32_t i;
+
+    for (i = 0; i < THREAD_COUNT; i++) {
         thread_data[i].counter = &counter;
         thread_data[i].iterations = ITERATIONS_PER_THREAD;
 
@@ -197,7 +202,8 @@ TEST_CASE(test_atomic_multithread_increment)
     TEST_ASSERT_EQUAL(expected, actual);
 
     /* 清理线程 */
-    for (int32_t i = 0; i < THREAD_COUNT; i++) {
+
+    for (i = 0; i < THREAD_COUNT; i++) {
         OSAL_ThreadJoin(threads[i]);
     }
 }
@@ -206,7 +212,10 @@ static void* atomic_cas_thread(void *arg)
 {
     atomic_thread_data_t *data = (atomic_thread_data_t *)arg;
 
-    for (uint32_t i = 0; i < data->iterations; i++) {
+    uint32_t i;
+
+
+    for (i = 0; i < data->iterations; i++) {
         uint32_t old_value, new_value;
         bool success;
 
@@ -229,7 +238,9 @@ TEST_CASE(test_atomic_multithread_cas)
     OSAL_AtomicInit(&counter, 0);
 
     /* 创建多个线程使用CAS自增 */
-    for (int32_t i = 0; i < THREAD_COUNT; i++) {
+    int32_t i;
+
+    for (i = 0; i < THREAD_COUNT; i++) {
         thread_data[i].counter = &counter;
         thread_data[i].iterations = ITERATIONS_PER_THREAD;
 
@@ -247,7 +258,8 @@ TEST_CASE(test_atomic_multithread_cas)
     TEST_ASSERT_EQUAL(expected, actual);
 
     /* 清理线程 */
-    for (int32_t i = 0; i < THREAD_COUNT; i++) {
+
+    for (i = 0; i < THREAD_COUNT; i++) {
         OSAL_ThreadJoin(threads[i]);
     }
 }
@@ -397,7 +409,10 @@ static void* atomic64_increment_thread(void *arg)
 {
     atomic64_thread_data_t *data = (atomic64_thread_data_t *)arg;
 
-    for (uint32_t i = 0; i < data->iterations; i++) {
+    uint32_t i;
+
+
+    for (i = 0; i < data->iterations; i++) {
         OSAL_AtomicIncrement64(data->timestamp);
     }
 
@@ -413,7 +428,9 @@ TEST_CASE(test_atomic64_multithread_timestamp)
     OSAL_AtomicInit64(&timestamp, 0);
 
     /* 创建多个线程同时更新时间戳 */
-    for (int32_t i = 0; i < THREAD_COUNT; i++) {
+    int32_t i;
+
+    for (i = 0; i < THREAD_COUNT; i++) {
         thread_data[i].timestamp = &timestamp;
         thread_data[i].iterations = ITERATIONS_PER_THREAD;
 
@@ -431,7 +448,8 @@ TEST_CASE(test_atomic64_multithread_timestamp)
     TEST_ASSERT_EQUAL(expected, actual);
 
     /* 清理线程 */
-    for (int32_t i = 0; i < THREAD_COUNT; i++) {
+
+    for (i = 0; i < THREAD_COUNT; i++) {
         OSAL_ThreadJoin(threads[i]);
     }
 }

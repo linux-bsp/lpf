@@ -146,7 +146,10 @@ typedef struct {
 static void* concurrent_thread_func(void *arg) {
     concurrent_thread_data_t *data = (concurrent_thread_data_t*)arg;
 
-    for (uint32_t i = 0; i < 1000; i++) {
+    uint32_t i;
+
+
+    for (i = 0; i < 1000; i++) {
         OSAL_MutexLock(data->mutex);
         OSAL_AtomicIncrement(data->counter);
         OSAL_MutexUnlock(data->mutex);
@@ -176,7 +179,9 @@ SYSTEM_TEST_CASE(concurrent_scenario) {
     concurrent_thread_data_t thread_data = { mutex, &counter };
 
     int32_t all_created = 1;
-    for (uint32_t i = 0; i < num_threads; i++) {
+    uint32_t i;
+
+    for (i = 0; i < num_threads; i++) {
         ret = OSAL_ThreadCreate(&threads[i], concurrent_thread_func, &thread_data);
         if (ret != 0) {
             all_created = 0;
@@ -186,7 +191,9 @@ SYSTEM_TEST_CASE(concurrent_scenario) {
     SYSTEM_CHECKPOINT(NULL, "All threads created", all_created);
 
     /* 检查点3：等待所有线程完成 */
-    for (uint32_t i = 0; i < num_threads; i++) {
+    uint32_t i;
+
+    for (i = 0; i < num_threads; i++) {
         OSAL_ThreadJoin(threads[i]);
     }
     SYSTEM_CHECKPOINT(NULL, "All threads completed", 1);

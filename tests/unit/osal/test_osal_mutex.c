@@ -81,7 +81,10 @@ static void* increment_thread(void *arg)
 {
     osal_mutex_t *mutex = (osal_mutex_t *)arg;
 
-    for (int32_t i = 0; i < 1000; i++) {
+    int32_t i;
+
+
+    for (i = 0; i < 1000; i++) {
         OSAL_MutexLock(mutex);
         shared_counter++;
         OSAL_MutexUnlock(mutex);
