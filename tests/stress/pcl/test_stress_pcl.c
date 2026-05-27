@@ -5,7 +5,7 @@
 
 #include "test_framework.h"
 #include "test_stress.h"
-#include "pcl.h"
+#include "pcl/pcl.h"
 
 /**
  * 测试配置查询并发压力

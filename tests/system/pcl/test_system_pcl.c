@@ -5,7 +5,7 @@
 
 #include "test_framework.h"
 #include "test_system.h"
-#include "pcl.h"
+#include "pcl/pcl.h"
 
 /**
  * 测试配置系统端到端加载
