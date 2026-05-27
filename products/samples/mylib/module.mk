@@ -121,7 +121,6 @@ endif
 
 # 安装头文件到 staging 目录
 ifneq ($(mylib_HEADERS),)
-$(mylib_SO_TARGET) $(mylib_A_TARGET): | install_mylib_headers
 
 .PHONY: install_mylib_headers
 install_mylib_headers:
