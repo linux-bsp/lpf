@@ -142,8 +142,13 @@ endif
 .PHONY: install_all_headers
 install_all_headers: $(HEADER_TARGETS)
 
+# 让所有目标文件依赖头文件安装（确保并行编译时头文件先安装）
+# 收集所有 .o 文件
+ALL_OBJS := $(filter %.o,$(foreach v,$(.VARIABLES),$(if $(filter %_OBJS,$v),$($v))))
+$(ALL_OBJS): | install_all_headers
+
 .PHONY: all
-all: include/config/auto.conf install_all_headers $(ALL_TARGETS)
+all: include/config/auto.conf $(ALL_TARGETS)
 	@echo "  BUILD   EMS $(VERSION)"
 
 # =============================================================================
