@@ -10,7 +10,7 @@
 #ifndef HAL_GPIO_H
 #define HAL_GPIO_H
 
-#include "osal.h"
+#include "osal/osal.h"
 
 /*===========================================================================
  * GPIO方向定义

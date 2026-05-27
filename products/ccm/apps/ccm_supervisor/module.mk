@@ -8,9 +8,9 @@ ccm_supervisor_SRCS := \
 
 ccm_supervisor_CFLAGS := \
 	-Iproducts/ccm/apps/ccm_supervisor/include \
-	-Iinclude/libccm \
-	-Iinclude/acl \
-	-Iinclude/osal
+	 \
+	-Iinclude \
+	
 
 ccm_supervisor_LDFLAGS := \
 	-L$(STAGING_DIR)/lib \

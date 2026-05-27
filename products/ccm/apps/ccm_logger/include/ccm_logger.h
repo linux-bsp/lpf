@@ -1,7 +1,7 @@
 #ifndef PMC_LOGGER_H
 #define PMC_LOGGER_H
 
-#include "osal.h"
+#include "osal/osal.h"
 
 /* Logger进程初始化 */
 int32_t PMC_Logger_Init(void);

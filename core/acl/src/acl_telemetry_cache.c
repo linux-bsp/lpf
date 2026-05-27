@@ -6,9 +6,9 @@
  *       Telemetry进程写入（后台更新）
  */
 
-#include "acl_telemetry_cache.h"
-#include "acl_config.h"
-#include "osal.h"
+#include "acl/acl_telemetry_cache.h"
+#include "acl/acl_config.h"
+#include "osal/osal.h"
 
 /* 全局遥测缓存表 */
 static telemetry_cache_entry_t g_tm_cache[TM_FUNC_MAX];

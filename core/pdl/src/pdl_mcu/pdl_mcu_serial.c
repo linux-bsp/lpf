@@ -8,9 +8,9 @@
  ************************************************************************/
 
 #include "pdl_mcu_internal.h"
-#include "pdl_mcu.h"
-#include "hal_serial.h"
-#include "osal.h"
+#include "pdl/pdl_mcu.h"
+#include "hal/hal_serial.h"
+#include "osal/osal.h"
 
 /*
  * 串口协议帧格式：

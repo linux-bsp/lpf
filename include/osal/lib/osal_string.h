@@ -15,8 +15,8 @@
 #ifndef OSAL_STRING_H
 #define OSAL_STRING_H
 
-#include "osal_platform.h"
-#include "osal_types.h"
+#include "osal/osal_platform.h"
+#include "osal/osal_types.h"
 #include <stdarg.h>
 
 /*

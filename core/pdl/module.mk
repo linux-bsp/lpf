@@ -12,11 +12,7 @@ include core/pdl/src/module.mk
 # 2. 编译标志
 # -----------------------------------------------------------------------------
 pdl_CFLAGS := \
-	-Iinclude/pdl \
-	-Iinclude/pcl \
-	-Iinclude/pcl/api \
-	-Iinclude/hal \
-	-Iinclude/osal
+	-Iinclude
 
 # -----------------------------------------------------------------------------
 # 3. 链接标志

@@ -14,7 +14,7 @@
 #ifndef PCL_BMC_H
 #define PCL_BMC_H
 
-#include "pcl_common.h"
+#include "pcl/pcl_common.h"
 
 /*===========================================================================
  * BMC通道类型枚举（匹配PDL层）

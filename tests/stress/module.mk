@@ -49,11 +49,11 @@ stress_test_OBJS := $(call srcs_to_objs,$(stress_test_SRCS))
 # -----------------------------------------------------------------------------
 stress_test_CFLAGS := \
 	-Itests/include \
-	-Iinclude/osal \
-	-Iinclude/hal \
-	-Iinclude/pcl \
-	-Iinclude/pdl \
-	-Iinclude/acl
+	-Iinclude \
+	 \
+	 \
+	 \
+	
 
 # -----------------------------------------------------------------------------
 # 4. 链接标志

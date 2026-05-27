@@ -49,11 +49,11 @@ perf_test_OBJS := $(call srcs_to_objs,$(perf_test_SRCS))
 # -----------------------------------------------------------------------------
 perf_test_CFLAGS := \
 	-Itests/include \
-	-Iinclude/osal \
-	-Iinclude/hal \
-	-Iinclude/pcl \
-	-Iinclude/pdl \
-	-Iinclude/acl
+	-Iinclude \
+	 \
+	 \
+	 \
+	
 
 # -----------------------------------------------------------------------------
 # 4. 链接标志

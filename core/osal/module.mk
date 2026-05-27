@@ -28,12 +28,7 @@ include core/osal/src/$(OSAL_OS_DIR)/module.mk
 # 3. 编译标志
 # -----------------------------------------------------------------------------
 osal_CFLAGS := \
-	-Iinclude/osal \
-	-Iinclude/osal/ipc \
-	-Iinclude/osal/lib \
-	-Iinclude/osal/net \
-	-Iinclude/osal/sys \
-	-Iinclude/osal/util
+	-Iinclude
 
 # 平台相关宏定义
 ifeq ($(CONFIG_OSAL_OS_POSIX),y)
@@ -77,12 +72,14 @@ endif
 # -----------------------------------------------------------------------------
 osal_HEADERS := \
 	osal.h \
+	osal_platform.h \
 	osal_types.h \
 	ipc/osal_atomic.h \
 	ipc/osal_cond.h \
 	ipc/osal_mutex.h \
 	ipc/osal_semaphore.h \
 	ipc/osal_shm.h \
+	ipc/osal_shm_cache.h \
 	lib/osal_errno.h \
 	lib/osal_heap.h \
 	lib/osal_stdio.h \

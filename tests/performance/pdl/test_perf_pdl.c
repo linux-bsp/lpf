@@ -5,10 +5,10 @@
 
 #include "test_framework.h"
 #include "test_performance.h"
-#include "pdl_bmc.h"
-#include "pdl_mcu.h"
-#include "pdl_satellite.h"
-#include "pdl_watchdog.h"
+#include "pdl/pdl_bmc.h"
+#include "pdl/pdl_mcu.h"
+#include "pdl/pdl_satellite.h"
+#include "pdl/pdl_watchdog.h"
 
 /**
  * 测试BMC传感器读取性能

@@ -9,7 +9,7 @@
 #ifndef PCL_FPGA_H
 #define PCL_FPGA_H
 
-#include "pcl_hardware_interface.h"
+#include "pcl/pcl_hardware_interface.h"
 
 /**
  * @brief FPGA外设配置

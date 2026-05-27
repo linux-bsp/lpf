@@ -58,10 +58,10 @@ unit_test_OBJS := $(call srcs_to_objs,$(unit_test_SRCS))
 # -----------------------------------------------------------------------------
 unit_test_CFLAGS := \
 	-Itests/include \
-	-Iinclude/osal \
-	-Iinclude/hal \
-	-Iinclude/pcl \
-	-Iinclude/pdl
+	-Iinclude \
+	 \
+	 \
+	
 
 # -----------------------------------------------------------------------------
 # 4. 链接标志

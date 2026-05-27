@@ -14,9 +14,9 @@ ccm_collector_SRCS := \
 # -----------------------------------------------------------------------------
 ccm_collector_CFLAGS := \
 	-Iproducts/ccm/apps/ccm_collector/include \
-	-Iinclude/libccm \
-	-Iinclude/acl \
-	-Iinclude/osal
+	 \
+	-Iinclude \
+	
 
 # -----------------------------------------------------------------------------
 # 3. 链接标志

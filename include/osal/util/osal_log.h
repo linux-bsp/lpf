@@ -13,7 +13,7 @@
 #ifndef OSAPI_LOG_H
 #define OSAPI_LOG_H
 
-#include "osal_types.h"
+#include "osal/osal_types.h"
 
 /*
  * 日志级别

@@ -7,8 +7,8 @@
 #ifndef HAL_CAN_H
 #define HAL_CAN_H
 
-#include "osal_types.h"
-#include "config/can_types.h"
+#include "osal/osal_types.h"
+#include "hal/config/can_types.h"
 
 typedef void* hal_can_handle_t;
 

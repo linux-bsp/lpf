@@ -5,8 +5,8 @@
 #ifndef OSAPI_SIGNAL_H
 #define OSAPI_SIGNAL_H
 
-#include "osal_platform.h"
-#include "osal_types.h"
+#include "osal/osal_platform.h"
+#include "osal/osal_types.h"
 
 /*
  * 信号类型

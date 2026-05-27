@@ -7,8 +7,8 @@
 #ifndef ACL_API_H
 #define ACL_API_H
 
-#include "osal_types.h"
-#include "acl_types.h"
+#include "osal/osal_types.h"
+#include "acl/acl_types.h"
 
 /**
  * @brief ACL配置统计信息

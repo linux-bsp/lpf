@@ -12,9 +12,9 @@
  * 可以与 acl_api.c 共存，用于测试或对比不同实现。
  */
 
-#include "acl_api_v2.h"
-#include "acl_config.h"
-#include "osal.h"
+#include "acl/acl_api_v2.h"
+#include "acl/acl_config.h"
+#include "osal/osal.h"
 
 /* 配置初始化标志 */
 static bool g_acl_initialized = false;

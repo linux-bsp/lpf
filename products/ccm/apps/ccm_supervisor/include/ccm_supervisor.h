@@ -1,7 +1,7 @@
 #ifndef PMC_SUPERVISOR_H
 #define PMC_SUPERVISOR_H
 
-#include "osal.h"
+#include "osal/osal.h"
 
 /* Supervisor进程初始化 */
 int32_t PMC_Supervisor_Init(void);

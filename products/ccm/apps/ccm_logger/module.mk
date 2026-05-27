@@ -8,9 +8,9 @@ ccm_logger_SRCS := \
 
 ccm_logger_CFLAGS := \
 	-Iproducts/ccm/apps/ccm_logger/include \
-	-Iinclude/libccm \
-	-Iinclude/acl \
-	-Iinclude/osal
+	 \
+	-Iinclude \
+	
 
 ccm_logger_LDFLAGS := \
 	-L$(STAGING_DIR)/lib \

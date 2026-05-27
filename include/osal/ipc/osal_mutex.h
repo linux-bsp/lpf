@@ -7,7 +7,7 @@
 #ifndef OSAL_MUTEX_H
 #define OSAL_MUTEX_H
 
-#include "osal_types.h"
+#include "osal/osal_types.h"
 
 #ifdef __cplusplus
 extern "C" {

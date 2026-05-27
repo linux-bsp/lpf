@@ -5,8 +5,8 @@
 #include "tests_core.h"
 #include "test_assert.h"
 #include "test_registry.h"
-#include "pdl_watchdog.h"
-#include "osal.h"
+#include "pdl/pdl_watchdog.h"
+#include "osal/osal.h"
 
 /**
  * @brief 测试：初始化和反初始化

@@ -7,8 +7,8 @@
 #ifndef PMC_ACL_TYPES_H
 #define PMC_ACL_TYPES_H
 
-#include "acl_tc.h"
-#include "acl_tm.h"
+#include "acl/acl_tc.h"
+#include "acl/acl_tm.h"
 
 /* 遥控命令别名 - 映射到通用 ACL 定义 */
 #define TC_SERVER_POWER_ON          TC_POWER_ON

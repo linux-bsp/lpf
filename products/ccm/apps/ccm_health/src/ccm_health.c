@@ -1,6 +1,6 @@
 #include "ccm_health.h"
-#include "libccm_ipc.h"
-#include "sys/osal_signal.h"
+#include "libccm/libccm_ipc.h"
+#include "osal/sys/osal_signal.h"
 
 /* 全局变量 */
 static pmc_process_heartbeat_t *g_heartbeat = NULL;

@@ -5,7 +5,7 @@
  *       ACL配置关注业务功能，不关注硬件平台
  */
 
-#include "acl_config.h"
+#include "acl/acl_config.h"
 #include "pmc_acl_types.h"
 
 /**

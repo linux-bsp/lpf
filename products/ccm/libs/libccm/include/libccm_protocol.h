@@ -1,8 +1,8 @@
 #ifndef LIBPMC_PROTOCOL_H
 #define LIBPMC_PROTOCOL_H
 
-#include "osal.h"
-#include "libccm_ipc.h"
+#include "osal/osal.h"
+#include "libccm/libccm_ipc.h"
 
 /* CAN帧ID定义 */
 #define PMC_CAN_ID_TC_CMD          0x100  /* 遥控命令 */

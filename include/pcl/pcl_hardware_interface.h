@@ -14,8 +14,8 @@
 #ifndef PCL_HARDWARE_INTERFACE_H
 #define PCL_HARDWARE_INTERFACE_H
 
-#include "osal_types.h"
-#include "hal_serial.h"  /* 串口校验位常量定义 */
+#include "osal/osal_types.h"
+#include "hal/hal_serial.h"  /* 串口校验位常量定义 */
 
 /*===========================================================================
  * 硬件接口类型枚举

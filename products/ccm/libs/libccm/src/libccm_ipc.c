@@ -1,5 +1,5 @@
-#include "libccm_ipc.h"
-#include "util/osal_log.h"
+#include "libccm/libccm_ipc.h"
+#include "osal/util/osal_log.h"
 
 /* 遥测缓存初始化 */
 int32_t PMC_TM_Cache_Init(pmc_tm_cache_t **cache)

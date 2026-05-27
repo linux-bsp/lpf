@@ -3,9 +3,9 @@
  ************************************************************************/
 
 #include "test_framework.h"
-#include "ipc/osal_shm.h"
-#include "lib/osal_errno.h"
-#include "sys/osal_process.h"
+#include "osal/ipc/osal_shm.h"
+#include "osal/lib/osal_errno.h"
+#include "osal/sys/osal_process.h"
 
 /* 测试多进程场景需要使用fork，使用OSAL封装接口 */
 

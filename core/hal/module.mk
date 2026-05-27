@@ -25,8 +25,7 @@ include core/hal/src/$(HAL_PLATFORM_DIR)/module.mk
 # 3. 编译标志
 # -----------------------------------------------------------------------------
 hal_CFLAGS := \
-	-Iinclude/hal \
-	-Iinclude/osal
+	-Iinclude
 
 # 平台相关宏定义
 ifeq ($(CONFIG_PLATFORM_GENERIC_LINUX),y)

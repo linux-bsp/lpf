@@ -7,8 +7,8 @@
 #ifndef HAL_SPI_H
 #define HAL_SPI_H
 
-#include "osal_types.h"
-#include "config/spi_types.h"
+#include "osal/osal_types.h"
+#include "hal/config/spi_types.h"
 
 typedef void* hal_spi_handle_t;
 

@@ -1,7 +1,7 @@
 #include "ccm_comm.h"
-#include "libccm_ipc.h"
-#include "libccm_protocol.h"
-#include "sys/osal_signal.h"
+#include "libccm/libccm_ipc.h"
+#include "libccm/libccm_protocol.h"
+#include "osal/sys/osal_signal.h"
 
 /* 全局变量 */
 static pmc_tm_cache_t *g_tm_cache = NULL;

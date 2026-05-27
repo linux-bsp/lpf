@@ -13,7 +13,7 @@
 #ifndef PCL_COMMON_H
 #define PCL_COMMON_H
 
-#include "osal_types.h"
+#include "osal/osal_types.h"
 
 /*===========================================================================
  * GPIO配置

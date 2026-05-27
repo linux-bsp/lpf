@@ -4,8 +4,8 @@
  * 使用Linux sysfs GPIO接口实现
  ************************************************************************/
 
-#include "hal_gpio.h"
-#include "osal.h"
+#include "hal/hal_gpio.h"
+#include "osal/osal.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

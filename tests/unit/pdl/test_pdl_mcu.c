@@ -4,9 +4,9 @@
  * @brief PDL MCU外设驱动单元测试
  */
 
-#include "pdl_mcu.h"
-#include "pcl_hardware_interface.h"
-#include "osal.h"
+#include "pdl/pdl_mcu.h"
+#include "pcl/pcl_hardware_interface.h"
+#include "osal/osal.h"
 
 /*===========================================================================
  * 辅助函数：创建测试配置

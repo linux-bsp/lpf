@@ -8,21 +8,21 @@
  *
  * 使用方式：
  *   PCL内部源文件：#include "pcl.h"
- *   PDL层（对外）：  #include "pcl_api.h"
+ *   PDL层（对外）：  #include "pcl/pcl_api.h"
  ************************************************************************/
 
 #ifndef PCL_H
 #define PCL_H
 
 /* 公共头文件 */
-#include "pcl_common.h"
-#include "pcl_board.h"
+#include "pcl/pcl_common.h"
+#include "pcl/pcl_board.h"
 
 /* 硬件外设头文件 */
-#include "pcl_hardware_interface.h"
-#include "pcl_mcu.h"
-#include "pcl_bmc.h"
-#include "pcl_fpga.h"
-#include "pcl_switch.h"
+#include "pcl/pcl_hardware_interface.h"
+#include "pcl/pcl_mcu.h"
+#include "pcl/pcl_bmc.h"
+#include "pcl/pcl_fpga.h"
+#include "pcl/pcl_switch.h"
 
 #endif /* PCL_H */

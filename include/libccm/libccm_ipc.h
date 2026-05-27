@@ -1,10 +1,10 @@
 #ifndef LIBPMC_IPC_H
 #define LIBPMC_IPC_H
 
-#include "osal.h"
-#include "ipc/osal_shm.h"
-#include "ipc/osal_mutex.h"
-#include "sys/osal_time.h"
+#include "osal/osal.h"
+#include "osal/ipc/osal_shm.h"
+#include "osal/ipc/osal_mutex.h"
+#include "osal/sys/osal_time.h"
 
 /* 共享内存名称定义 */
 #define PMC_SHM_TELEMETRY_CACHE    "/pmc_tm_cache"

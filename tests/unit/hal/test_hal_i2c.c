@@ -4,8 +4,8 @@
  * @brief HAL I2C驱动单元测试
  */
 
-#include "hal_i2c.h"
-#include "osal.h"
+#include "hal/hal_i2c.h"
+#include "osal/osal.h"
 
 /*===========================================================================
  * 初始化和清理测试

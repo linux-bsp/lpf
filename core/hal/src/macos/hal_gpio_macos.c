@@ -7,8 +7,8 @@
  * - 实际硬件访问需要在 Linux 平台上运行
  ************************************************************************/
 
-#include "hal_gpio.h"
-#include "osal.h"
+#include "hal/hal_gpio.h"
+#include "osal/osal.h"
 
 int32_t HAL_GPIO_Init(uint32_t gpio_num, const hal_gpio_config_t *config)
 {

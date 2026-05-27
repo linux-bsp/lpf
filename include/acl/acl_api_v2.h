@@ -14,10 +14,10 @@
 #ifndef ACL_API_H
 #define ACL_API_H
 
-#include "osal_types.h"
-#include "acl_types.h"
-#include "acl_tc.h"
-#include "acl_tm.h"
+#include "osal/osal_types.h"
+#include "acl/acl_types.h"
+#include "acl/acl_tc.h"
+#include "acl/acl_tm.h"
 
 /**
  * @brief 初始化ACL配置系统

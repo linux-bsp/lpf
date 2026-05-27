@@ -13,7 +13,7 @@
 #ifndef LIBUTEST_H
 #define LIBUTEST_H
 
-#include "osal_types.h"
+#include "osal/osal_types.h"
 
 /* Test function signatures */
 typedef void (*test_func_t)(void);

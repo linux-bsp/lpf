@@ -5,14 +5,14 @@
 
 #include "test_framework.h"
 #include "test_system.h"
-#include "osal.h"
-#include "hal_can.h"
-#include "hal_serial.h"
-#include "hal_gpio.h"
-#include "pdl_bmc.h"
-#include "pdl_mcu.h"
-#include "pdl_satellite.h"
-#include "pdl_watchdog.h"
+#include "osal/osal.h"
+#include "hal/hal_can.h"
+#include "hal/hal_serial.h"
+#include "hal/hal_gpio.h"
+#include "pdl/pdl_bmc.h"
+#include "pdl/pdl_mcu.h"
+#include "pdl/pdl_satellite.h"
+#include "pdl/pdl_watchdog.h"
 
 /**
  * 环境初始化：OSAL + HAL + PDL

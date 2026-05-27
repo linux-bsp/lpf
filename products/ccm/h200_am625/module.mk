@@ -20,12 +20,7 @@ libh200_am625_CFLAGS := \
 	-Iproducts/ccm/h200_am625/include \
 	-Iproducts/ccm/h200_am625/acl \
 	-Iproducts/ccm/h200_am625/acl/H200_100P \
-	-Iinclude/acl \
-	-Iinclude/pdl \
-	-Iinclude/pcl \
-	-Iinclude/pcl/api \
-	-Iinclude/hal \
-	-Iinclude/osal
+	-Iinclude
 
 # -----------------------------------------------------------------------------
 # 3. 链接标志

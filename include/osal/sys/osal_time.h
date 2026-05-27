@@ -15,8 +15,8 @@
 #ifndef OSAL_TIME_H
 #define OSAL_TIME_H
 
-#include "osal_platform.h"
-#include "osal_types.h"
+#include "osal/osal_platform.h"
+#include "osal/osal_types.h"
 
 /*===========================================================================
  * 时间转换常量

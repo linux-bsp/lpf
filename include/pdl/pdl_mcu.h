@@ -15,7 +15,7 @@
 #ifndef PDL_MCU_H
 #define PDL_MCU_H
 
-#include "osal_types.h"
+#include "osal/osal_types.h"
 
 /*
  * MCU服务句柄

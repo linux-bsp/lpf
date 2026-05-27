@@ -4,8 +4,8 @@
  * 基于POSIX termios实现
  ************************************************************************/
 
-#include "hal_serial.h"
-#include "osal.h"
+#include "hal/hal_serial.h"
+#include "osal/osal.h"
 #include <termios.h>  /* 系统波特率常量 B9600 等 */
 #include <pthread.h>
 

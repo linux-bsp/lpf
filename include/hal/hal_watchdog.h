@@ -7,7 +7,7 @@
 #ifndef HAL_WATCHDOG_H
 #define HAL_WATCHDOG_H
 
-#include "osal_types.h"
+#include "osal/osal_types.h"
 
 typedef void* hal_watchdog_handle_t;
 

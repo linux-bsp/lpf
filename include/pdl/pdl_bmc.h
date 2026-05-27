@@ -11,7 +11,7 @@
 #ifndef PDL_BMC_H
 #define PDL_BMC_H
 
-#include "osal_types.h"
+#include "osal/osal_types.h"
 
 /*
  * BMC服务句柄

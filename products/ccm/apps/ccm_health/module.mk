@@ -8,9 +8,9 @@ ccm_health_SRCS := \
 
 ccm_health_CFLAGS := \
 	-Iproducts/ccm/apps/ccm_health/include \
-	-Iinclude/libccm \
-	-Iinclude/acl \
-	-Iinclude/osal
+	 \
+	-Iinclude \
+	
 
 ccm_health_LDFLAGS := \
 	-L$(STAGING_DIR)/lib \

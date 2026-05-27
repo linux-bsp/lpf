@@ -5,8 +5,8 @@
 #ifndef OSAPI_CLOCK_H
 #define OSAPI_CLOCK_H
 
-#include "osal_platform.h"
-#include "osal_types.h"
+#include "osal/osal_platform.h"
+#include "osal/osal_types.h"
 
 /* 时间转换常量 */
 #define OSAL_MS_PER_SEC         1000ULL     /* 每秒毫秒数 */

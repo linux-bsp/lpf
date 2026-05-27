@@ -6,9 +6,9 @@
  * - PCL_HW_*    - 硬件配置接口
  ************************************************************************/
 
-#include "pcl_api.h"
-#include "util/osal_log.h"
-#include "osal.h"
+#include "pcl/api/pcl_api.h"
+#include "osal/util/osal_log.h"
+#include "osal/osal.h"
 
 /*===========================================================================
  * 内部数据结构

@@ -12,7 +12,7 @@
 #ifndef TEST_SYSTEM_H
 #define TEST_SYSTEM_H
 
-#include "osal_types.h"
+#include "osal/osal_types.h"
 #include <stdbool.h>
 
 /* 系统测试类型 */

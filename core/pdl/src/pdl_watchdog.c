@@ -2,9 +2,9 @@
  * PDL层 - Watchdog服务实现
  ************************************************************************/
 
-#include "pdl_watchdog.h"
-#include "hal_watchdog.h"
-#include "osal.h"
+#include "pdl/pdl_watchdog.h"
+#include "hal/hal_watchdog.h"
+#include "osal/osal.h"
 
 typedef struct
 {

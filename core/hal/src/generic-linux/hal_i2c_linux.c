@@ -11,8 +11,8 @@
 #include <linux/i2c-dev.h>
 #include <sys/ioctl.h>
 #include <pthread.h>
-#include "hal_i2c.h"
-#include "osal.h"
+#include "hal/hal_i2c.h"
+#include "osal/osal.h"
 
 typedef struct
 {

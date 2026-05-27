@@ -7,8 +7,8 @@
 #ifndef ACL_CONFIG_H
 #define ACL_CONFIG_H
 
-#include "acl_types.h"
-#include "acl_tc.h"
-#include "acl_tm.h"
+#include "acl/acl_types.h"
+#include "acl/acl_tc.h"
+#include "acl/acl_tm.h"
 
 #endif /* ACL_CONFIG_H */

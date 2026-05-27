@@ -5,8 +5,8 @@
 
 #include "test_framework.h"
 #include "test_system.h"
-#include "acl_api.h"
-#include "acl_config.h"
+#include "acl/acl_api.h"
+#include "acl/acl_config.h"
 
 /**
  * 测试应用配置端到端验证

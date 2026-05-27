@@ -14,10 +14,10 @@
 #ifndef PCL_BOARD_H
 #define PCL_BOARD_H
 
-#include "pcl_mcu.h"
-#include "pcl_bmc.h"
-#include "pcl_fpga.h"
-#include "pcl_switch.h"
+#include "pcl/pcl_mcu.h"
+#include "pcl/pcl_bmc.h"
+#include "pcl/pcl_fpga.h"
+#include "pcl/pcl_switch.h"
 
 /*===========================================================================
  * 板级配置（顶层）

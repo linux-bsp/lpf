@@ -15,8 +15,8 @@
 #ifndef OSAL_STDIO_H
 #define OSAL_STDIO_H
 
-#include "osal_platform.h"
-#include "osal_types.h"
+#include "osal/osal_platform.h"
+#include "osal/osal_types.h"
 
 /*
  * 标准输入输出

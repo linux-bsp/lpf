@@ -12,12 +12,7 @@ include core/acl/src/module.mk
 # 2. 编译标志
 # -----------------------------------------------------------------------------
 acl_CFLAGS := \
-	-Iinclude/acl \
-	-Iinclude/pdl \
-	-Iinclude/pcl \
-	-Iinclude/pcl/api \
-	-Iinclude/hal \
-	-Iinclude/osal
+	-Iinclude
 
 # -----------------------------------------------------------------------------
 # 3. 链接标志

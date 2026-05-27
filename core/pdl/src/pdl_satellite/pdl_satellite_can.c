@@ -8,8 +8,8 @@
  ************************************************************************/
 
 #include "pdl_satellite_internal.h"
-#include "hal_can.h"
-#include "osal.h"
+#include "hal/hal_can.h"
+#include "osal/osal.h"
 
 /**
  * @brief 初始化卫星CAN通信

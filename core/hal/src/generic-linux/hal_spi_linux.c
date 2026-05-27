@@ -10,8 +10,8 @@
 #include <linux/spi/spidev.h>
 #include <sys/ioctl.h>
 #include <pthread.h>
-#include "hal_spi.h"
-#include "osal.h"
+#include "hal/hal_spi.h"
+#include "osal/osal.h"
 
 typedef struct
 {
