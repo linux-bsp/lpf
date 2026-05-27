@@ -2,8 +2,11 @@
 # 测试框架核心库 CMake 配置
 # =============================================================================
 
-file(GLOB TESTCORE_SRCS
-    "*.c"
+set(TESTCORE_SRCS
+    main.c
+    test_menu.c
+    test_registry.c
+    test_runner.c
 )
 
 add_library(testcore SHARED ${TESTCORE_SRCS})

@@ -10,7 +10,7 @@
 # 函数：从 defconfig 生成 .config
 function(apply_defconfig DEFCONFIG_NAME)
     set(DEFCONFIG_FILE "${CMAKE_SOURCE_DIR}/configs/${DEFCONFIG_NAME}_defconfig")
-    set(CONFIG_FILE "${CMAKE_SOURCE_DIR}/.config")
+    set(CONFIG_FILE "${CMAKE_BINARY_DIR}/.config")
     set(KCONFIG_FILE "${CMAKE_SOURCE_DIR}/Kconfig")
     set(CONF_TOOL "${CMAKE_SOURCE_DIR}/scripts/kconfig/conf")
 
@@ -48,6 +48,7 @@ function(apply_defconfig DEFCONFIG_NAME)
     endif()
 
     # 使用 conf 工具处理 defconfig，生成完整的 .config
+    # 注意：conf 工具默认在当前目录生成 .config，需要移动到构建目录
     execute_process(
         COMMAND "${CONF_TOOL}" --defconfig ${DEFCONFIG_FILE} "${KCONFIG_FILE}"
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
@@ -60,7 +61,13 @@ function(apply_defconfig DEFCONFIG_NAME)
         message(FATAL_ERROR "Failed to apply defconfig: ${DEFCONFIG_NAME}\nOutput: ${CONF_OUTPUT}\nError: ${CONF_ERROR}")
     endif()
 
+    # 将生成的 .config 移动到构建目录
+    if(EXISTS "${CMAKE_SOURCE_DIR}/.config")
+        file(RENAME "${CMAKE_SOURCE_DIR}/.config" "${CONFIG_FILE}")
+    endif()
+
     message(STATUS "Generated .config from ${DEFCONFIG_NAME}_defconfig (with all defaults)")
+    message(STATUS "Config file location: ${CONFIG_FILE}")
 endfunction()
 
 # 函数：读取并解析 .config 文件
@@ -167,7 +174,7 @@ if(DEFINED DEFCONFIG)
 endif()
 
 # 如果 .config 不存在，提示用户
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/.config")
+if(NOT EXISTS "${CMAKE_BINARY_DIR}/.config" AND NOT EXISTS "${CMAKE_SOURCE_DIR}/.config")
     message(FATAL_ERROR
         "\n"
         "=================================================================\n"
@@ -197,4 +204,11 @@ if(NOT EXISTS "${CMAKE_SOURCE_DIR}/.config")
         "\n"
         "=================================================================\n"
     )
+endif()
+
+# 优先使用构建目录中的 .config，如果不存在则使用源码目录中的（兼容旧方式）
+if(EXISTS "${CMAKE_BINARY_DIR}/.config")
+    set(CONFIG_FILE_TO_LOAD "${CMAKE_BINARY_DIR}/.config")
+else()
+    set(CONFIG_FILE_TO_LOAD "${CMAKE_SOURCE_DIR}/.config")
 endif()

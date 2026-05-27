@@ -39,11 +39,17 @@ message(STATUS "C Compiler version: ${CMAKE_C_COMPILER_VERSION}")
 # 包含 Kconfig 模块
 include(cmake/Kconfig.cmake)
 
-# 加载 Kconfig 配置
-load_kconfig("${CMAKE_SOURCE_DIR}/.config")
+# 加载 Kconfig 配置（自动选择构建目录或源码目录中的 .config）
+load_kconfig("${CONFIG_FILE_TO_LOAD}")
 
 # 配置工具链（必须在 Kconfig 加载后）
 include(cmake/Toolchain.cmake)
+
+# 生成版本信息
+include(cmake/Version.cmake)
+
+# 配置校验和生成
+include(cmake/Checksum.cmake)
 
 # 生成 autoconf.h（兼容现有代码）
 set(AUTOCONF_H "${CMAKE_BINARY_DIR}/include/generated/autoconf.h")

@@ -134,3 +134,4 @@ GTAGS
 *.code-workspace
 staging/
 .staging/
+build-*/
