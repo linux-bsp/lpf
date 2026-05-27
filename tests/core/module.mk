@@ -24,7 +24,7 @@ testcore_OBJS := $(call srcs_to_objs,$(testcore_SRCS))
 # -----------------------------------------------------------------------------
 testcore_CFLAGS := \
 	-Itests/include \
-	-Iinclude
+	-I$(STAGING_DIR)/include
 
 # -----------------------------------------------------------------------------
 # 4. 链接标志
@@ -50,6 +50,11 @@ $(eval $(call build_static_lib,$(testcore_STATIC),$(testcore_OBJS)))
 
 # 为此模块的目标文件添加编译标志
 $(testcore_OBJS): CFLAGS += $(testcore_CFLAGS)
+
+# 确保在 OSAL 头文件安装后才编译测试文件
+ifeq ($(CONFIG_OSAL),y)
+$(testcore_OBJS): | $(STAGING_DIR)/lib/libosal.so
+endif
 
 # -----------------------------------------------------------------------------
 # 7. 清理规则
