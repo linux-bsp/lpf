@@ -42,6 +42,10 @@ include(cmake/Kconfig.cmake)
 # 加载 Kconfig 配置（自动选择构建目录或源码目录中的 .config）
 load_kconfig("${CONFIG_FILE_TO_LOAD}")
 
+# 验证配置
+include(cmake/ValidateConfig.cmake)
+validate_config()
+
 # 配置工具链（必须在 Kconfig 加载后）
 include(cmake/Toolchain.cmake)
 
