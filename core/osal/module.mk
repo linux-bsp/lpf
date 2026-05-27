@@ -121,6 +121,11 @@ endif
 # 添加编译标志
 $(osal_OBJS): CFLAGS += $(osal_CFLAGS)
 
+# 确保 OSAL 目标文件在头文件安装后编译（避免并行编译时的文件系统缓存问题）
+ifneq ($(osal_HEADERS),)
+$(osal_OBJS): | install_osal_headers
+endif
+
 # 定义构建规则
 ifeq ($(CONFIG_OSAL),y)
 
