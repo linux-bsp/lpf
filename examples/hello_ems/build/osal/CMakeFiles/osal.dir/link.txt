@@ -1,2 +1,0 @@
-/usr/bin/ar qc libosal.a CMakeFiles/osal.dir/src/common/osal_version.c.o
-/usr/bin/ranlib libosal.a
