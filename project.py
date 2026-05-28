@@ -218,7 +218,7 @@ Examples:
   python3 project.py build --config ccm_h200_100p_v1
 
   # Clean build directory
-  python3 project.py build --clean
+  python3 project.py clean
 
   # Build with existing configuration
   python3 project.py build
@@ -234,8 +234,6 @@ Examples:
                         help="Configuration to load (defconfig name without _defconfig suffix)")
     parser.add_argument("--build-dir", "-b", type=str, default="build",
                         help="Build directory (default: build)")
-    parser.add_argument("--clean", action="store_true",
-                        help="Clean build directory")
     parser.add_argument("--jobs", "-j", type=int,
                         help="Number of parallel jobs")
     parser.add_argument("--verbose", "-v", action="store_true",
@@ -263,7 +261,7 @@ Examples:
         success = build(
             config=args.config,
             build_dir=args.build_dir,
-            clean=args.clean,
+            clean=False,
             jobs=args.jobs,
             verbose=args.verbose
         )
