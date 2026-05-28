@@ -25,16 +25,24 @@ project(ems_sdk C CXX ASM)
 # Include build system
 include(${SDK_PATH}/tools/cmake/compile.cmake)
 
-# Generate build info headers (version and time)
+# Generate build info headers (version and time) at configure time
 get_python(python python_version python_info_str)
 if(NOT python)
     message(FATAL_ERROR "python not found, please install python firstly(python3 recommend)!")
 endif()
 
-set(gen_build_info_config_cmd ${python} ${SDK_PATH}/tools/kconfig/update_build_info.py
-                              --configfile header ${CMAKE_CURRENT_BINARY_DIR}/config/global_build_info_time.h ${CMAKE_CURRENT_BINARY_DIR}/config/global_build_info_version.h
-                              )
-add_custom_target(update_build_info COMMAND ${gen_build_info_config_cmd})
+# Execute at configure time to generate build info headers
+execute_process(
+    COMMAND ${python} ${SDK_PATH}/tools/kconfig/update_build_info.py
+            --configfile header
+            ${CMAKE_CURRENT_BINARY_DIR}/config/global_build_info_time.h
+            ${CMAKE_CURRENT_BINARY_DIR}/config/global_build_info_version.h
+    RESULT_VARIABLE result
+)
+
+if(NOT result EQUAL 0)
+    message(FATAL_ERROR "Failed to generate build info headers")
+endif()
 
 # Add build info directory to include path
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/config)
