@@ -157,11 +157,46 @@ def build(config=None, build_dir="build", clean=False, jobs=None, verbose=False)
     # 检查是否有配置文件
     config_cmake = build_path / "config" / "global_config.cmake"
     if not config_cmake.exists():
-        print("Error: No configuration found. Please run:")
-        print("  python3 build.py menuconfig")
-        print("  or")
-        print("  python3 build.py build --config <config_name>")
-        return False
+        print("No configuration found.")
+        print("\nAvailable configurations:")
+
+        configs = get_configs()
+        if not configs:
+            print("  No configurations available")
+            return False
+
+        for i, cfg in enumerate(configs, 1):
+            print(f"  {i}. {cfg}")
+
+        print("\nPlease select a configuration:")
+        print("  Enter number (1-{}), or 'q' to quit".format(len(configs)))
+
+        try:
+            choice = input("Your choice: ").strip()
+            if choice.lower() == 'q':
+                print("Build cancelled.")
+                return False
+
+            idx = int(choice) - 1
+            if idx < 0 or idx >= len(configs):
+                print(f"Error: Invalid choice. Please enter 1-{len(configs)}")
+                return False
+
+            selected_config = configs[idx]
+            print(f"\nSelected: {selected_config}")
+
+            # 加载选中的配置
+            if not load_config(selected_config, build_dir):
+                return False
+
+            print()  # 空行分隔
+
+        except ValueError:
+            print("Error: Please enter a valid number")
+            return False
+        except KeyboardInterrupt:
+            print("\nBuild cancelled.")
+            return False
 
     print("Building EMS SDK...")
 
