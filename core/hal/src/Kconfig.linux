@@ -4,7 +4,7 @@
 # Fine-grained per-driver configuration for Generic Linux platform
 # ============================================================================
 
-if PLATFORM_GENERIC_LINUX
+if PLATFORM_LINUX
 
 # ============================================================================
 # CAN Bus Driver
@@ -96,4 +96,4 @@ config HAL_WATCHDOG_LINUX
 
 endif # HAL_WATCHDOG
 
-endif # PLATFORM_GENERIC_LINUX
+endif # PLATFORM_LINUX

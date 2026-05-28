@@ -274,7 +274,7 @@ endif()
 **当前实现：**
 ```cmake
 # core/hal/CMakeLists.txt
-if(CONFIG_HAL_PLATFORM_GENERIC_LINUX)
+if(CONFIG_PLATFORM_LINUX)
     set(HAL_PLATFORM_DIR "generic-linux")
 elseif(CONFIG_HAL_PLATFORM_TI_AM62X)
     set(HAL_PLATFORM_DIR "ti-am62x")

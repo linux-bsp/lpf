@@ -34,12 +34,12 @@ if HAL
 
 menu "Platform Configuration"
 
-config PLATFORM_GENERIC_LINUX
-	bool "Generic Linux platform"
+config PLATFORM_LINUX
+	bool "Linux platform"
 	default n
 	depends on OS_LINUX
 	help
-	  Enable generic Linux platform support.
+	  Enable Linux platform support.
 
 	  Uses standard Linux kernel interfaces:
 	  - SocketCAN for CAN bus

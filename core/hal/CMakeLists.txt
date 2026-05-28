@@ -9,8 +9,8 @@
 # Platform-specific driver source files
 # ============================================================================
 
-if(CONFIG_PLATFORM_GENERIC_LINUX)
-    # Generic Linux platform drivers
+if(CONFIG_PLATFORM_LINUX)
+    # Linux platform drivers
 
     if(CONFIG_HAL_CAN_LINUX)
         list(APPEND ADD_SRCS "src/linux/hal_can_linux.c")
