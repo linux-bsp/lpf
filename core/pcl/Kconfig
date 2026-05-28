@@ -69,6 +69,4 @@ config PCL_BUILD_SHARED
 
 endmenu
 
-#source "src/Kconfig.api"
-
 endif # PCL

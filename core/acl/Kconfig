@@ -107,6 +107,4 @@ config ACL_MAX_DEVICES
 
 endmenu
 
-#source "src/Kconfig.api"
-
 endif # ACL
