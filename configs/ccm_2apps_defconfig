@@ -1,0 +1,43 @@
+# ============================================================================
+# Products Layer Trimming Test Configuration
+# ============================================================================
+# This configuration demonstrates products layer (libs/apps) trimming.
+# Only selected apps are enabled.
+# ============================================================================
+
+# Product Selection
+CONFIG_PRODUCT_CCM=y
+CONFIG_PRODUCT_SAMPLE=n
+
+# Core Components - Full stack
+CONFIG_OSAL=y
+CONFIG_HAL=y
+CONFIG_PCL=y
+CONFIG_PDL=y
+CONFIG_ACL=y
+
+# OSAL Configuration (use defaults)
+CONFIG_OS_LINUX=y
+CONFIG_ARCH_X86_64=y
+CONFIG_OSAL_BUILD_SHARED=y
+
+# HAL Configuration (use defaults)
+CONFIG_PLATFORM_GENERIC_LINUX=y
+CONFIG_HAL_BUILD_SHARED=y
+
+# CCM Platform
+CONFIG_PROJECT_H200_AM625=y
+
+# ============================================================================
+# Products Layer Trimming - Only 2 apps
+# ============================================================================
+
+# CCM Libraries - Enable
+CONFIG_LIBCCM=y
+
+# CCM Applications - Only enable 2 apps
+CONFIG_APP_COLLECTOR=y
+CONFIG_APP_COMM=y
+CONFIG_APP_HEALTH=n
+CONFIG_APP_LOGGER=n
+CONFIG_APP_SUPERVISOR=n
