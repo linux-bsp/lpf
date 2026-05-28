@@ -7,7 +7,7 @@
 #ifndef HAL_SERIAL_H
 #define HAL_SERIAL_H
 
-#include "osal/osal.h"
+#include "osal.h"
 
 typedef void* hal_serial_handle_t;
 

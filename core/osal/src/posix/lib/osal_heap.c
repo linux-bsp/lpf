@@ -2,7 +2,7 @@
  * OSAL POSIX实现 - 内存管理
  ************************************************************************/
 
-#include "osal/osal.h"
+#include "osal.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -11,8 +11,8 @@
 #include <linux/can/raw.h>
 #include <sys/ioctl.h>
 #include <poll.h>
-#include "hal/hal_can.h"
-#include "osal/osal.h"
+#include "hal_can.h"
+#include "osal.h"
 
 #ifndef IFNAMSIZ
 #define IFNAMSIZ IF_NAMESIZE

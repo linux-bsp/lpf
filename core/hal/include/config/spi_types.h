@@ -7,7 +7,7 @@
 #ifndef SPI_TYPES_H
 #define SPI_TYPES_H
 
-#include "osal/osal_types.h"
+#include "osal_types.h"
 
 /*
  * ============================================================================

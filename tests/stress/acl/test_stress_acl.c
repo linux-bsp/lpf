@@ -5,8 +5,8 @@
 
 #include "test_framework.h"
 #include "test_stress.h"
-#include "acl/acl_api.h"
-#include "acl/acl_config.h"
+#include "acl_api.h"
+#include "acl_config.h"
 
 /**
  * 测试配置验证并发压力

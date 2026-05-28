@@ -5,8 +5,8 @@
 #ifndef OSAL_SHM_H
 #define OSAL_SHM_H
 
-#include "osal/osal_platform.h"
-#include "osal/osal_types.h"
+#include "osal_platform.h"
+#include "osal_types.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -6,7 +6,7 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
-#include "osal/sys/osal_file.h"
+#include "sys/osal_file.h"
 #include <stdint.h>
 #include <errno.h>
 

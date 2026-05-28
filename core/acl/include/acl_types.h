@@ -7,7 +7,7 @@
 #ifndef ACL_TYPES_H
 #define ACL_TYPES_H
 
-#include "osal/osal_types.h"
+#include "osal_types.h"
 
 /**
  * @brief ACL设备类型枚举

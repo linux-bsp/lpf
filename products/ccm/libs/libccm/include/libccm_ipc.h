@@ -1,7 +1,7 @@
 #ifndef LIBPMC_IPC_H
 #define LIBPMC_IPC_H
 
-#include "osal/osal.h"
+#include "osal.h"
 #include "ipc/osal_shm.h"
 #include "ipc/osal_mutex.h"
 #include "sys/osal_time.h"

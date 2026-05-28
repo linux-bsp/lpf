@@ -4,9 +4,9 @@
  * @note 项目层：提供PMC特定的配置表
  */
 
-#include "acl/acl_config.h"
-#include "acl/acl_api.h"
-#include "osal/osal.h"
+#include "acl_config.h"
+#include "acl_api.h"
+#include "osal.h"
 
 /* 遥控配置表 */
 static const acl_tc_config_t g_pmc_tc_table[TC_FUNC_MAX] = {

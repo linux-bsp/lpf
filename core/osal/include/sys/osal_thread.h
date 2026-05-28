@@ -15,8 +15,8 @@
 #ifndef OSAL_THREAD_H
 #define OSAL_THREAD_H
 
-#include "osal/osal_platform.h"
-#include "osal/osal_types.h"
+#include "osal_platform.h"
+#include "osal_types.h"
 
 /*
  * 线程类型（平台无关）

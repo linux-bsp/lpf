@@ -1,7 +1,7 @@
 #ifndef PMC_HEALTH_H
 #define PMC_HEALTH_H
 
-#include "osal/osal.h"
+#include "osal.h"
 
 /* Health进程初始化 */
 int32_t PMC_Health_Init(void);

@@ -14,7 +14,7 @@
 #ifndef OSAL_SHM_CACHE_H
 #define OSAL_SHM_CACHE_H
 
-#include "osal/osal_types.h"
+#include "osal_types.h"
 
 /* 缓存条目最大数据大小 */
 #define OSAL_SHM_CACHE_MAX_DATA_SIZE  256U

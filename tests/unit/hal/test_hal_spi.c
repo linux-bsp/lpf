@@ -4,8 +4,8 @@
  * @brief HAL SPI驱动单元测试
  */
 
-#include "hal/hal_spi.h"
-#include "osal/osal.h"
+#include "hal_spi.h"
+#include "osal.h"
 
 /*===========================================================================
  * 初始化和清理测试

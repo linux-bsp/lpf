@@ -13,7 +13,7 @@
 #ifndef PCL_MCU_H
 #define PCL_MCU_H
 
-#include "pcl/pcl_common.h"
+#include "pcl_common.h"
 
 /*===========================================================================
  * MCU接口类型枚举（匹配PDL层）

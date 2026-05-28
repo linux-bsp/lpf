@@ -5,7 +5,7 @@
 
 #include "test_framework.h"
 #include "test_performance.h"
-#include "pcl/pcl.h"
+#include "pcl.h"
 
 /**
  * 测试平台配置查询性能

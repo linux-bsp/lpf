@@ -7,8 +7,8 @@
 #ifndef HAL_I2C_H
 #define HAL_I2C_H
 
-#include "osal/osal_types.h"
-#include "hal/config/i2c_types.h"
+#include "osal_types.h"
+#include "config/i2c_types.h"
 
 typedef void* hal_i2c_handle_t;
 

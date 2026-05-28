@@ -3,8 +3,8 @@
  * @brief ACL层API实现（通用）
  */
 
-#include "acl/acl_api.h"
-#include "osal/osal.h"
+#include "acl_api.h"
+#include "osal.h"
 
 /* 全局配置表 */
 static const acl_config_table_t *g_acl_table = NULL;

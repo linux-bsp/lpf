@@ -1,7 +1,7 @@
 #ifndef PMC_COMM_H
 #define PMC_COMM_H
 
-#include "osal/osal.h"
+#include "osal.h"
 
 /* 共享内存名称 */
 #define SHM_TELEMETRY_CACHE    "/pmc_tm_cache"

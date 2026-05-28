@@ -9,7 +9,7 @@
 #ifndef PCL_SWITCH_H
 #define PCL_SWITCH_H
 
-#include "pcl/pcl_hardware_interface.h"
+#include "pcl_hardware_interface.h"
 
 /**
  * @brief Switch外设配置

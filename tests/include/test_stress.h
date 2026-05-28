@@ -13,7 +13,7 @@
 #ifndef TEST_STRESS_H
 #define TEST_STRESS_H
 
-#include "osal/osal_types.h"
+#include "osal_types.h"
 #include <stdbool.h>
 
 /* 压力测试类型 */

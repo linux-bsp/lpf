@@ -16,9 +16,9 @@
 #ifndef OSAL_SCHED_H
 #define OSAL_SCHED_H
 
-#include "osal/osal_platform.h"
-#include "osal/osal_types.h"
-#include "osal/sys/osal_thread.h"
+#include "osal_platform.h"
+#include "osal_types.h"
+#include "sys/osal_thread.h"
 
 /*
  * 调度策略（平台无关）

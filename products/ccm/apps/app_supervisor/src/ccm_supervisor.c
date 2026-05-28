@@ -1,7 +1,7 @@
 #include "ccm_supervisor.h"
 #include "libccm/libccm_ipc.h"
-#include "osal/sys/osal_signal.h"
-#include "osal/sys/osal_process.h"
+#include "sys/osal_signal.h"
+#include "sys/osal_process.h"
 
 /* 全局变量 */
 static pmc_process_heartbeat_t *g_heartbeat = NULL;

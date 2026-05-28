@@ -7,7 +7,7 @@
 #ifndef CAN_TYPES_H
 #define CAN_TYPES_H
 
-#include "osal/osal_types.h"
+#include "osal_types.h"
 
 /*
  * ============================================================================

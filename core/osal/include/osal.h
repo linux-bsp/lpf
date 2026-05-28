@@ -13,41 +13,41 @@
 #ifndef OSAL_H
 #define OSAL_H
 
-#include "osal/osal_platform.h"
-#include "osal/osal_types.h"
+#include "osal_platform.h"
+#include "osal_types.h"
 
 /* IPC - 进程间通信 */
-#include "osal/ipc/osal_mutex.h"
-#include "osal/ipc/osal_semaphore.h"
-#include "osal/ipc/osal_cond.h"
-#include "osal/ipc/osal_shm.h"
-#include "osal/ipc/osal_shm_cache.h"
-#include "osal/ipc/osal_atomic.h"
+#include "ipc/osal_mutex.h"
+#include "ipc/osal_semaphore.h"
+#include "ipc/osal_cond.h"
+#include "ipc/osal_shm.h"
+#include "ipc/osal_shm_cache.h"
+#include "ipc/osal_atomic.h"
 
 /* SYS - 系统调用封装 */
-#include "osal/sys/osal_clock.h"
-#include "osal/sys/osal_signal.h"
-#include "osal/sys/osal_file.h"
-#include "osal/sys/osal_select.h"
-#include "osal/sys/osal_env.h"
-#include "osal/sys/osal_time.h"
-#include "osal/sys/osal_process.h"
-#include "osal/sys/osal_thread.h"
-#include "osal/sys/osal_sched.h"
+#include "sys/osal_clock.h"
+#include "sys/osal_signal.h"
+#include "sys/osal_file.h"
+#include "sys/osal_select.h"
+#include "sys/osal_env.h"
+#include "sys/osal_time.h"
+#include "sys/osal_process.h"
+#include "sys/osal_thread.h"
+#include "sys/osal_sched.h"
 
 /* NET - 网络相关 */
-#include "osal/net/osal_socket.h"
-#include "osal/net/osal_termios.h"
+#include "net/osal_socket.h"
+#include "net/osal_termios.h"
 
 /* LIB - 标准库封装 */
-#include "osal/lib/osal_string.h"
-#include "osal/lib/osal_stdio.h"
-#include "osal/lib/osal_heap.h"
-#include "osal/lib/osal_errno.h"
+#include "lib/osal_string.h"
+#include "lib/osal_stdio.h"
+#include "lib/osal_heap.h"
+#include "lib/osal_errno.h"
 
 /* UTIL - 工具类 */
-#include "osal/util/osal_log.h"
-#include "osal/util/osal_version.h"
+#include "util/osal_log.h"
+#include "util/osal_version.h"
 
 /*
  * OSAL版本信息

@@ -5,7 +5,7 @@
 
 #include "tests_core.h"
 #include "test_assert.h"
-#include "osal/osal.h"
+#include "osal.h"
 #include <stdarg.h>
 
 #define MAX_SUITES 128

@@ -10,8 +10,8 @@
 #include <linux/watchdog.h>
 #include <sys/ioctl.h>
 #include <stdatomic.h>
-#include "hal/hal_watchdog.h"
-#include "osal/osal.h"
+#include "hal_watchdog.h"
+#include "osal.h"
 
 typedef struct
 {

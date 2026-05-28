@@ -5,7 +5,7 @@
 #ifndef OSAPI_HEAP_H
 #define OSAPI_HEAP_H
 
-#include "osal/osal_types.h"
+#include "osal_types.h"
 #include <stdbool.h>
 
 /* 堆监控配置 */

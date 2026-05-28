@@ -2,7 +2,7 @@
  * OSAL - select系统调用封装实现（POSIX）
  ************************************************************************/
 
-#include "osal/sys/osal_select.h"
+#include "sys/osal_select.h"
 #include <sys/select.h>
 #include <string.h>
 

@@ -4,9 +4,9 @@
  * @brief OSAL实时调度单元测试
  */
 
-#include "osal/osal.h"
-#include "osal/sys/osal_sched.h"
-#include "osal/sys/osal_thread.h"
+#include "osal.h"
+#include "sys/osal_sched.h"
+#include "sys/osal_thread.h"
 
 /*===========================================================================
  * 调度策略和优先级测试

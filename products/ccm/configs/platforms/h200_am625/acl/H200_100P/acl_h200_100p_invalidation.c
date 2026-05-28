@@ -4,7 +4,7 @@
  * @note 定义遥控命令对遥测数据的影响关系
  */
 
-#include "acl/acl_config.h"
+#include "acl_config.h"
 #include "pmc_acl_types.h"
 
 /**

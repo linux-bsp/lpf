@@ -1,7 +1,7 @@
 #ifndef PMC_COLLECTOR_H
 #define PMC_COLLECTOR_H
 
-#include "osal/osal.h"
+#include "osal.h"
 
 /* Collector进程初始化 */
 int32_t PMC_Collector_Init(void);

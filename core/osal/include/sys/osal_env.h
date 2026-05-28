@@ -14,8 +14,8 @@
 #ifndef OSAL_ENV_H
 #define OSAL_ENV_H
 
-#include "osal/osal_platform.h"
-#include "osal/osal_types.h"
+#include "osal_platform.h"
+#include "osal_types.h"
 
 /*===========================================================================
  * 环境变量操作

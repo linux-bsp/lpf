@@ -10,8 +10,8 @@
  * - 配置验证
  */
 
-#include "pcl/api/pcl_api.h"
-#include "osal/osal.h"
+#include "api/pcl_api.h"
+#include "osal.h"
 
 /* 测试用的配置数据 */
 static pcl_mcu_cfg_t test_mcu = {

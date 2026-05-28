@@ -8,8 +8,8 @@
 #ifndef ACL_TELEMETRY_CACHE_H
 #define ACL_TELEMETRY_CACHE_H
 
-#include "osal/osal_types.h"
-#include "acl/acl_types.h"
+#include "osal_types.h"
+#include "acl_types.h"
 
 /**
  * @brief 遥测缓存条目
