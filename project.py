@@ -89,6 +89,49 @@ def menuconfig():
     print("\nConfiguration saved.")
     return True
 
+def load_config(config_name, build_dir="build"):
+    """加载配置文件（不编译）"""
+    root_dir = Path(__file__).parent
+    build_path = root_dir / build_dir
+
+    config_file = root_dir / "configs" / f"{config_name}_defconfig"
+    if not config_file.exists():
+        print(f"Error: Config file not found: {config_file}")
+        return False
+
+    print(f"Loading config: {config_name}")
+
+    # 使用 kconfig 工具加载配置
+    tool_path = root_dir / "tools/kconfig/genconfig.py"
+    if not tool_path.exists():
+        print(f"Error: kconfig tool not found: {tool_path}")
+        return False
+
+    build_path.mkdir(exist_ok=True)
+    config_out_path = build_path / "config"
+    config_out_path.mkdir(exist_ok=True)
+
+    cmd = [
+        sys.executable, str(tool_path),
+        "--kconfig", str(root_dir / "Kconfig"),
+        "--defaults", str(config_file),
+        "--env", f"SDK_PATH={root_dir}",
+        "--env", f"PROJECT_PATH={root_dir}",
+        "--env", "BUILD_TYPE=Debug",
+        "--output", "makefile", str(config_out_path / "global_config.mk"),
+        "--output", "cmake", str(config_out_path / "global_config.cmake"),
+        "--output", "header", str(config_out_path / "global_config.h")
+    ]
+
+    result = subprocess.run(cmd, cwd=root_dir)
+    if result.returncode != 0:
+        print("Failed to load configuration!")
+        return False
+
+    print(f"Configuration loaded: {config_name}")
+    print("Run 'python3 project.py build' to compile")
+    return True
+
 def build(config=None, build_dir="build", clean=False, jobs=None, verbose=False):
     """构建项目"""
     root_dir = Path(__file__).parent
@@ -108,38 +151,7 @@ def build(config=None, build_dir="build", clean=False, jobs=None, verbose=False)
 
     # 如果指定了配置，加载配置文件
     if config:
-        config_file = root_dir / "configs" / f"{config}_defconfig"
-        if not config_file.exists():
-            print(f"Error: Config file not found: {config_file}")
-            return False
-
-        print(f"Loading config: {config}")
-
-        # 使用 kconfig 工具加载配置
-        tool_path = root_dir / "tools/kconfig/genconfig.py"
-        if not tool_path.exists():
-            print(f"Error: kconfig tool not found: {tool_path}")
-            return False
-
-        build_path.mkdir(exist_ok=True)
-        config_out_path = build_path / "config"
-        config_out_path.mkdir(exist_ok=True)
-
-        cmd = [
-            sys.executable, str(tool_path),
-            "--kconfig", str(root_dir / "Kconfig"),
-            "--defaults", str(config_file),
-            "--env", f"SDK_PATH={root_dir}",
-            "--env", f"PROJECT_PATH={root_dir}",
-            "--env", "BUILD_TYPE=Debug",
-            "--output", "makefile", str(config_out_path / "global_config.mk"),
-            "--output", "cmake", str(config_out_path / "global_config.cmake"),
-            "--output", "header", str(config_out_path / "global_config.h")
-        ]
-
-        result = subprocess.run(cmd, cwd=root_dir)
-        if result.returncode != 0:
-            print("Failed to load configuration!")
+        if not load_config(config, build_dir):
             return False
 
     # 检查是否有配置文件
@@ -214,6 +226,9 @@ Examples:
   # Open menuconfig
   python3 project.py menuconfig
 
+  # Load a specific config (without building)
+  python3 project.py config ccm_h200_100p_v1
+
   # Build with specific config
   python3 project.py build --config ccm_h200_100p_v1
 
@@ -226,8 +241,10 @@ Examples:
     )
 
     parser.add_argument("cmd", nargs="?", default="build",
-                        choices=["build", "menuconfig", "clean", "distclean"],
+                        choices=["build", "menuconfig", "config", "clean", "distclean"],
                         help="Command to execute")
+    parser.add_argument("config_name", nargs="?",
+                        help="Configuration name (for 'config' command)")
     parser.add_argument("--list", action="store_true",
                         help="List all available products and configs")
     parser.add_argument("--config", "-c", type=str,
@@ -249,6 +266,18 @@ Examples:
     # menuconfig
     if args.cmd == "menuconfig":
         success = menuconfig()
+        return 0 if success else 1
+
+    # config
+    if args.cmd == "config":
+        if not args.config_name:
+            print("Error: config name is required")
+            print("Usage: python3 project.py config <config_name>")
+            print("\nAvailable configurations:")
+            for cfg in get_configs():
+                print(f"  - {cfg}")
+            return 1
+        success = load_config(args.config_name, args.build_dir)
         return 0 if success else 1
 
     # clean / distclean
