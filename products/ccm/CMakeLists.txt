@@ -14,16 +14,23 @@ if(CONFIG_HAL)
     add_subdirectory(${SDK_PATH}/components/hal ${CMAKE_CURRENT_BINARY_DIR}/hal)
 endif()
 
-# Set platform config directory and collect config files
-if(CONFIG_H200_AM625)
-    set(PLATFORM_CONFIG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/configs/platforms/h200_am625)
+# Automatically load platform config based on CONFIG_PROJECT_NAME
+if(CONFIG_PROJECT_NAME)
+    set(PLATFORM_CONFIG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/configs/platforms/${CONFIG_PROJECT_NAME})
 
-    # Collect platform config source files
-    file(GLOB PLATFORM_ACL_SRCS "${PLATFORM_CONFIG_DIR}/acl/*.c" "${PLATFORM_CONFIG_DIR}/acl/*/*.c")
-    file(GLOB PLATFORM_PCL_SRCS "${PLATFORM_CONFIG_DIR}/pcl/*.c")
+    # Check if platform config directory exists
+    if(EXISTS ${PLATFORM_CONFIG_DIR})
+        message("-- Loading platform config: ${CONFIG_PROJECT_NAME}")
 
-    # Add platform config include directories
-    set(PLATFORM_CONFIG_INCLUDE ${PLATFORM_CONFIG_DIR}/acl)
+        # Collect platform config source files
+        file(GLOB PLATFORM_ACL_SRCS "${PLATFORM_CONFIG_DIR}/acl/*.c" "${PLATFORM_CONFIG_DIR}/acl/*/*.c")
+        file(GLOB PLATFORM_PCL_SRCS "${PLATFORM_CONFIG_DIR}/pcl/*.c")
+
+        # Add platform config include directories
+        set(PLATFORM_CONFIG_INCLUDE ${PLATFORM_CONFIG_DIR}/acl)
+    else()
+        message(WARNING "Platform config directory not found: ${PLATFORM_CONFIG_DIR}")
+    endif()
 endif()
 
 # Register PCL with platform config

@@ -13,12 +13,32 @@ menu "CCM Product"
 
 menu "Platform Configuration"
 
-config H200_AM625
-    bool "H200 AM625 Platform"
-    default y
+choice
+    prompt "Select Platform"
+    default PROJECT_H200_AM625
     help
-      Enable H200 AM625 platform configuration.
-      This provides ACL and PCL configuration data for TI AM625 SoC.
+      Select the hardware platform for CCM product.
+
+config PROJECT_H200_AM625
+    bool "H200 AM625 Platform"
+    help
+      TI AM625 SoC based H200 carrier board.
+      Provides ACL and PCL configuration for AM625 platform.
+
+config PROJECT_H200_200P
+    bool "H200 200P Platform"
+    help
+      H200 200P platform configuration.
+
+endchoice
+
+config PROJECT_NAME
+    string
+    default "h200_am625" if PROJECT_H200_AM625
+    default "h200_200p" if PROJECT_H200_200P
+    help
+      Project configuration directory name.
+      Used by CMake to locate platform config files.
 
 endmenu
 
