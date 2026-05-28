@@ -129,7 +129,7 @@ def load_config(config_name, build_dir="build"):
         return False
 
     print(f"Configuration loaded: {config_name}")
-    print("Run 'python3 project.py build' to compile")
+    print("Run 'python3 build.py build' to compile")
     return True
 
 def build(config=None, build_dir="build", clean=False, jobs=None, verbose=False):
@@ -158,9 +158,9 @@ def build(config=None, build_dir="build", clean=False, jobs=None, verbose=False)
     config_cmake = build_path / "config" / "global_config.cmake"
     if not config_cmake.exists():
         print("Error: No configuration found. Please run:")
-        print("  python3 project.py menuconfig")
+        print("  python3 build.py menuconfig")
         print("  or")
-        print("  python3 project.py build --config <config_name>")
+        print("  python3 build.py build --config <config_name>")
         return False
 
     print("Building EMS SDK...")
@@ -221,22 +221,22 @@ def main():
         epilog="""
 Examples:
   # List all products and configs
-  python3 project.py --list
+  python3 build.py --list
 
   # Open menuconfig
-  python3 project.py menuconfig
+  python3 build.py menuconfig
 
   # Load a specific config (without building)
-  python3 project.py config ccm_h200_100p_v1
+  python3 build.py config ccm_h200_100p_v1
 
   # Build with specific config
-  python3 project.py build --config ccm_h200_100p_v1
+  python3 build.py build --config ccm_h200_100p_v1
 
   # Clean build directory
-  python3 project.py clean
+  python3 build.py clean
 
   # Build with existing configuration
-  python3 project.py build
+  python3 build.py build
         """
     )
 
@@ -272,7 +272,7 @@ Examples:
     if args.cmd == "config":
         if not args.config_name:
             print("Error: config name is required")
-            print("Usage: python3 project.py config <config_name>")
+            print("Usage: python3 build.py config <config_name>")
             print("\nAvailable configurations:")
             for cfg in get_configs():
                 print(f"  - {cfg}")
