@@ -76,13 +76,22 @@ def build(product, config=None, build_dir="build", clean=False, jobs=None):
     # 如果只是清理，执行清理后返回
     if clean:
         product_build = product_dir / "build"
+        root_build = root_dir / build_dir / product
+
+        # 清理产品构建目录
         if product_build.exists():
             print(f"Cleaning build directory: {product_build}")
             import shutil
             shutil.rmtree(product_build)
-            print("Clean complete.")
         else:
             print(f"Build directory does not exist: {product_build}")
+
+        # 清理根目录符号链接
+        if root_build.exists() or root_build.is_symlink():
+            print(f"Removing symlink: {root_build}")
+            root_build.unlink()
+
+        print("Clean complete.")
         return True
 
     # 如果指定了配置，复制配置文件
