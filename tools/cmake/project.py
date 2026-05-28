@@ -10,8 +10,16 @@ import os, sys, time, re, shutil
 import subprocess
 from multiprocessing import cpu_count
 
-if not os.path.exists("CMakeLists.txt") or  not os.path.exists("main"):
+if not os.path.exists("CMakeLists.txt"):
     print("please run me at project folder!")
+    exit(1)
+
+# 检查是否有 main 组件或 app_* 组件
+has_main = os.path.exists("main")
+has_apps = os.path.exists("apps") and any(d.startswith("app_") for d in os.listdir("apps") if os.path.isdir(os.path.join("apps", d)))
+
+if not has_main and not has_apps:
+    print("please run me at project folder! (need main/ or apps/app_* directory)")
     exit(1)
 
 try:

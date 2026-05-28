@@ -1,0 +1,13 @@
+config APP_LOGGER
+    bool "Enable CCM Logger Application"
+    default y
+    select OSAL
+    select HAL
+    select PCL
+    select PDL
+    select ACL
+    select H200_AM625
+    select LIBCCM
+    help
+      CCM logging application.
+      Manages system logs and diagnostic data.

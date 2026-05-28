@@ -207,19 +207,39 @@ function(is_path_component ret param_path)
     set(${ret} 1 PARENT_SCOPE)
 endfunction()
 
-function(find_components componet_dirs kconfigs configs found_main find_dir)
+function(find_components componet_dirs kconfigs configs found_main found_apps find_dir)
     set(_componet_dirs ${${componet_dirs}})
     set(_kconfigs ${${configs}})
     set(_configs ${${configs}})
-    set(_found_main ${${found_main}})
+    # 获取父作用域的变量值，如果为空则初始化
+    set(_found_main_value "${${found_main}}")
+    if("${_found_main_value}" STREQUAL "" OR "${_found_main_value}" STREQUAL "${found_main}")
+        set(_found_main 0)
+    else()
+        set(_found_main "${_found_main_value}")
+    endif()
+
+    set(_found_apps_value "${${found_apps}}")
+    if("${_found_apps_value}" STREQUAL "" OR "${_found_apps_value}" STREQUAL "${found_apps}")
+        set(_found_apps "")
+    else()
+        set(_found_apps "${_found_apps_value}")
+    endif()
     file(GLOB component_dirs ${find_dir})
     foreach(component_dir ${component_dirs})
         is_path_component(is_component ${component_dir})
         if(is_component)
             message(STATUS "Find component: ${component_dir}")
             get_filename_component(base_dir ${component_dir} NAME)
+            # 检查是否是 main 组件（兼容旧架构）
             if(${base_dir} STREQUAL "main")
                 set(_found_main 1)
+            endif()
+            # 检查是否是 app_ 开头的应用组件
+            string(REGEX MATCH "^app_" is_app ${base_dir})
+            if(is_app)
+                list(APPEND _found_apps ${component_dir})
+                message(STATUS "Find application component: ${base_dir}")
             endif()
             list(APPEND _componet_dirs ${component_dir})
             if(EXISTS ${component_dir}/Kconfig)
@@ -236,6 +256,7 @@ function(find_components componet_dirs kconfigs configs found_main find_dir)
     set(${kconfigs} ${_kconfigs} PARENT_SCOPE)
     set(${configs} ${_configs} PARENT_SCOPE)
     set(${found_main} ${_found_main} PARENT_SCOPE)
+    set(${found_apps} ${_found_apps} PARENT_SCOPE)
 endfunction()
 
 function(get_python python version info_str)
@@ -262,19 +283,25 @@ macro(project name)
     set(PROJECT_BINARY_DIR "${current_dir}/build")
 
     # Find components in SDK's components folder, register components
-    find_components(components_dirs components_kconfig_files kconfig_defaults_files_args found_main ${SDK_PATH}/components/*)
+    find_components(components_dirs components_kconfig_files kconfig_defaults_files_args found_main found_apps ${SDK_PATH}/components/*)
     # Find components in custom components folder, register components
     if(CUSTOM_COMPONENTS_PATH)
-        find_components(components_dirs components_kconfig_files kconfig_defaults_files_args found_main ${CUSTOM_COMPONENTS_PATH}/*)
+        find_components(components_dirs components_kconfig_files kconfig_defaults_files_args found_main found_apps ${CUSTOM_COMPONENTS_PATH}/*)
     endif()
     # Find components in projects' shared components folder, register components
-    find_components(components_dirs components_kconfig_files kconfig_defaults_files_args found_main ${PROJECT_SOURCE_DIR}/../components/*)
+    find_components(components_dirs components_kconfig_files kconfig_defaults_files_args found_main found_apps ${PROJECT_SOURCE_DIR}/../components/*)
     # Find components in project folder
-    find_components(components_dirs components_kconfig_files kconfig_defaults_files_args found_main ${PROJECT_SOURCE_DIR}/*)
-    find_components(components_dirs components_kconfig_files kconfig_defaults_files_args found_main ${PROJECT_SOURCE_DIR}/components/*)
+    find_components(components_dirs components_kconfig_files kconfig_defaults_files_args found_main found_apps ${PROJECT_SOURCE_DIR}/*)
+    if(NOT CUSTOM_COMPONENTS_PATH)
+        # Only scan PROJECT_SOURCE_DIR/components/* if CUSTOM_COMPONENTS_PATH is not set
+        find_components(components_dirs components_kconfig_files kconfig_defaults_files_args found_main found_apps ${PROJECT_SOURCE_DIR}/components/*)
+    endif()
+    # Find app components in apps folder
+    find_components(components_dirs components_kconfig_files kconfig_defaults_files_args found_main found_apps ${PROJECT_SOURCE_DIR}/apps/*)
 
-    if(NOT found_main)
-        message(FATAL_ERROR "=================\nCan not find main component(folder) in project folder!!\n=================")
+    # 检查是否找到应用组件（app_* 或 main）
+    if(NOT found_main AND NOT found_apps)
+        message(FATAL_ERROR "=================\nCan not find main component or app_* components in project folder!!\n=================")
     endif()
 
     # Find default config file
@@ -454,15 +481,38 @@ macro(project name)
     # Add menuconfig target for makefile
     add_custom_target(menuconfig COMMAND ${generate_config_cmd2})
 
-    # Create dummy source file exe_src.c to satisfy cmake's `add_executable` interface!
-    set(exe_src ${CMAKE_BINARY_DIR}/exe_src.c)
-    add_executable(${name} "${exe_src}")
-    add_custom_command(OUTPUT ${exe_src} COMMAND ${CMAKE_COMMAND} -E touch ${exe_src} VERBATIM)
-    add_custom_target(gen_exe_src DEPENDS "${exe_src}")
-    add_dependencies(${name} gen_exe_src)
+    # 生成可执行文件
+    list(LENGTH found_apps apps_count)
+    if(found_main)
+        # 兼容旧架构：如果有 main 组件，生成单个可执行文件
+        message(STATUS "Building single executable from main component")
+        set(exe_src ${CMAKE_BINARY_DIR}/exe_src.c)
+        add_executable(${name} "${exe_src}")
+        add_custom_command(OUTPUT ${exe_src} COMMAND ${CMAKE_COMMAND} -E touch ${exe_src} VERBATIM)
+        add_custom_target(gen_exe_src DEPENDS "${exe_src}")
+        add_dependencies(${name} gen_exe_src)
+        target_link_libraries(${name} main)
+    elseif(apps_count GREATER 0)
+        # 新架构：为每个 app_* 组件生成独立的可执行文件
+        message(STATUS "Building multiple executables from app_* components (${apps_count} apps)")
+        foreach(app_component ${found_apps})
+            get_filename_component(app_name ${app_component} NAME)
+            # 从 app_xxx 提取 xxx 作为可执行文件名
+            string(REGEX REPLACE "^app_" "" exe_name ${app_name})
 
-    # Add main component(lib)
-    target_link_libraries(${name} main)
+            message(STATUS "Creating executable: ${exe_name} from ${app_name}")
+
+            # 为每个应用创建 dummy source
+            set(app_exe_src ${CMAKE_BINARY_DIR}/${app_name}_exe_src.c)
+            add_executable(${exe_name} "${app_exe_src}")
+            add_custom_command(OUTPUT ${app_exe_src} COMMAND ${CMAKE_COMMAND} -E touch ${app_exe_src} VERBATIM)
+            add_custom_target(gen_${app_name}_exe_src DEPENDS "${app_exe_src}")
+            add_dependencies(${exe_name} gen_${app_name}_exe_src)
+
+            # 链接应用组件
+            target_link_libraries(${exe_name} ${app_name})
+        endforeach()
+    endif()
 
     # Add binary
     if(EXISTS "${PROJECT_PATH}/compile/gen_binary.cmake")
