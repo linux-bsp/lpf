@@ -1,138 +1,45 @@
-# Prerequisites
-*.d
-
-# Object files
+# 编译产物
 *.o
-*.ko
-*.obj
-*.elf
-
-# 但不忽略构建框架文件
-!scripts/build/*.ko
-
-# Linker output
-*.ilk
-*.map
-*.exp
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Libraries
-*.lib
 *.a
-*.la
-*.lo
-
-# 但不忽略构建框架文件
-!scripts/build/*.lib
-!scripts/Makefile.lib
-
-# Shared objects (inc. Windows DLLs)
-*.dll
 *.so
 *.so.*
-*.dylib
-
-# 但不忽略构建框架文件
-!scripts/build/*.dll
-
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
+*.d
+*.elf
 *.hex
+*.out
 
-# 但不忽略构建框架文件
-!scripts/build/*.app
-
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
-
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
-
-# debug information files
-*.dwo
-
-# claude
-.claude/
-
-# 构建输出目录（参考buildroot设计）
-output/
-/build/
+# 构建输出目录
 _build/
-build-cmake/
-target/
-/bin/
-/lib/
+output/
+build-*/
 
-# 但不忽略构建脚本目录
-!scripts/build/
-
-# Products 目录中的可执行文件
-products/**/apps/*/ccm_*
-!products/**/apps/*/*.c
-!products/**/apps/*/*.h
-!products/**/apps/*/Makefile
-
-*.DS_Store
-
-# Kconfig generated files
+# Kconfig 生成文件
 .config
 .config.old
+.config.mk
 include/config/
 include/generated/
-scripts/kconfig/include/
 
-# Kconfig tools (built binaries)
+# Kconfig 工具（编译产物）
 scripts/kconfig/conf
 scripts/kconfig/mconf
-scripts/kconfig/nconf
 scripts/kconfig/*.o
 scripts/kconfig/lxdialog/*.o
-scripts/kconfig/parser.tab.c
-scripts/kconfig/parser.tab.h
-scripts/kconfig/lexer.lex.c
-scripts/kconfig/.*.cmd
-scripts/kconfig/*.cmd
 
-# 编辑器备份文件
+# 编辑器临时文件
 *~
 *.swp
 *.swo
-.*.swp
-*.orig
-*.rej
 *.bak
-\#*\#
-*%
+*.orig
 
-# Tags文件
-tags
-TAGS
-cscope*
-GPATH
-GRTAGS
-GSYMS
-GTAGS
-
-# IDE文件
+# IDE 配置
 .vscode/
 .idea/
 *.code-workspace
-staging/
-.staging/
-build-*/
+
+# 系统文件
+.DS_Store
+
+# Claude
+.claude/
