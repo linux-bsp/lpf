@@ -41,7 +41,7 @@ menuconfig PDL_SATELLITE_SUPPORT
 
 	  If unsure, say Y.
 
-#source "src/pdl_satellite/Kconfig"
+source "core/pdl/src/pdl_satellite/Kconfig"
 
 menuconfig PDL_BMC_SUPPORT
 	bool "BMC peripheral support"
@@ -57,7 +57,7 @@ menuconfig PDL_BMC_SUPPORT
 
 	  If unsure, say Y.
 
-#source "src/pdl_bmc/Kconfig"
+source "core/pdl/src/pdl_bmc/Kconfig"
 
 menuconfig PDL_MCU_SUPPORT
 	bool "MCU peripheral support"
@@ -73,7 +73,7 @@ menuconfig PDL_MCU_SUPPORT
 
 	  If unsure, say Y.
 
-#source "src/pdl_mcu/Kconfig"
+source "core/pdl/src/pdl_mcu/Kconfig"
 
 menuconfig PDL_WATCHDOG_SUPPORT
 	bool "Watchdog peripheral support"
@@ -89,6 +89,6 @@ menuconfig PDL_WATCHDOG_SUPPORT
 
 	  If unsure, say Y.
 
-#source "src/Kconfig.watchdog"
+source "core/pdl/src/Kconfig.watchdog"
 
 endif # PDL
