@@ -1,106 +1,109 @@
 # EMS SDK
 
-嵌入式管理系统 SDK，采用 Kconfig + CMake 混合构建系统。
+EMS (Embedded Management System) 是一个采用 **Kconfig + CMake** 混合构建系统的嵌入式软件项目。
 
 ## 快速开始
 
-### 从根目录构建
+### 1. 列出所有产品和配置
 
 ```bash
-# 列出所有产品和配置
-python3 build.py --list
-
-# 构建指定产品和配置
-python3 build.py --product ccm_product --config h200_100p_v1
-
-# 清理并重新构建
-python3 build.py --product ccm_product --config h200_200p --clean
-
-# 并行编译（使用 8 个线程）
-python3 build.py --product ccm_product --config h200_100p_v2 -j 8
+python3 project.py --list
 ```
 
-构建结果在 `build/<product>/` 目录（符号链接到产品的 build 目录）。
+### 2. 配置项目
 
-### 从产品目录构建
+使用图形化配置界面：
 
 ```bash
-cd products/ccm_product
-
-# 选择配置
-cp configs/h200_100p_v1_defconfig .config.mk
-
-# 编译
-python3 project.py build
-
-# 或使用 menuconfig 自定义配置
 python3 project.py menuconfig
+```
+
+或者加载预定义配置：
+
+```bash
+python3 project.py build --config ccm_h200_100p_v1
+python3 project.py build --config sample_default
+```
+
+### 3. 构建项目
+
+```bash
 python3 project.py build
 ```
 
-## 项目结构
+### 4. 清理构建
+
+```bash
+python3 project.py build --clean
+```
+
+## 项目架构
 
 ```
 EMS/
-├── build.py                  # 根目录构建脚本
-├── CMakeLists.txt            # 顶层 CMake 配置
-│
-├── components/               # SDK 组件（可复用）
+├── Kconfig                    # 根配置文件
+├── CMakeLists.txt            # 根构建文件
+├── project.py                # 统一构建脚本
+├── configs/                  # 预定义配置
+│   ├── ccm_h200_100p_v1_defconfig
+│   ├── ccm_h200_100p_v2_defconfig
+│   ├── ccm_h200_200p_defconfig
+│   └── sample_default_defconfig
+├── components/               # 核心组件
 │   ├── osal/                # 操作系统抽象层
 │   ├── hal/                 # 硬件抽象层
 │   ├── pcl/                 # 协议控制层
 │   ├── pdl/                 # 协议数据层
 │   └── acl/                 # 访问控制层
-│
 ├── products/                 # 产品目录
-│   └── ccm_product/         # CCM 产品线
-│       ├── configs/         # 产品配置
-│       ├── components/      # 产品组件
-│       └── apps/            # 应用程序
-│
-└── tools/                    # 构建工具
-    └── cmake/               # CMake 模块
+│   ├── ccm/                 # CCM 产品
+│   │   ├── Kconfig
+│   │   ├── CMakeLists.txt
+│   │   ├── components/      # 产品特定组件
+│   │   └── apps/            # 产品应用
+│   └── sample/              # Sample 产品
+│       ├── Kconfig
+│       ├── CMakeLists.txt
+│       └── apps/
+└── build/                    # 构建输出
+    ├── config/              # 配置文件
+    └── products/            # 产品构建输出
+        ├── ccm/
+        └── sample/
 ```
 
-## 产品配置
+## 可用产品
 
-### CCM 产品线
+- **CCM**: 卫星载荷控制和数据管理系统
+- **Sample**: 示例产品（演示和模板）
 
-| 型号 | 配置文件 | 应用组合 |
-|------|---------|---------|
-| H200-100P V1 | h200_100p_v1 | collector + comm |
-| H200-100P V2 | h200_100p_v2 | collector + comm + health |
-| H200-200P | h200_200p | 全部应用 |
+## 可用配置
 
-## 构建选项
+- **ccm_h200_100p_v1**: CCM 基础型号（2个应用）
+- **ccm_h200_100p_v2**: CCM 增强型号（3个应用）
+- **ccm_h200_200p**: CCM 完整型号（5个应用）
+- **sample_default**: Sample 默认配置
 
-```bash
-python3 build.py --help
+## 配置系统
 
-Options:
-  --list              列出所有产品和配置
-  --product, -p       指定产品名称
-  --config, -c        指定配置名称
-  --build-dir, -b     指定构建目录（默认: build）
-  --clean             清理后重新构建
-  --jobs, -j          并行编译线程数
-```
+项目使用 Kconfig 进行功能配置：
+
+1. **产品选择**: 选择要构建的产品
+2. **核心组件**: 配置 OSAL、HAL、PCL、PDL、ACL
+3. **产品配置**: 每个产品的特定配置
+
+## 构建系统
+
+- **配置阶段**: Kconfig 生成 `.config` 和 CMake 配置文件
+- **构建阶段**: CMake 根据配置选择性编译产品
+- **输出**: 所有产品的构建输出在 `build/products/` 下
 
 ## 添加新产品
 
 1. 在 `products/` 下创建产品目录
-2. 添加 `CMakeLists.txt` 和 `project.py`
-3. 创建 `configs/` 目录存放配置文件
-4. 创建 `components/` 和 `apps/` 目录
+2. 创建 `Kconfig` 和 `CMakeLists.txt`
+3. 在根 `Kconfig` 中添加产品选择项
+4. 在根 `CMakeLists.txt` 中添加产品构建逻辑
+5. 在 `configs/` 下创建 defconfig 文件
 
-详见 `products/ccm_product/` 示例。
-
-## 开发指南
-
-- [架构设计](docs/ARCHITECTURE.md)
-- [CMake 构建指南](docs/CMAKE_BUILD_GUIDE.md)
-- [编码规范](docs/CODING_STANDARDS.md)
-
-## 许可证
-
-Apache 2.0
+详细文档请参考 `CLAUDE.md`。

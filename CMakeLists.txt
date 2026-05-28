@@ -1,38 +1,56 @@
 cmake_minimum_required(VERSION 3.16)
 
-# 检查是否指定了产品
-if(NOT DEFINED PRODUCT)
-    message(FATAL_ERROR "Please specify PRODUCT, e.g., cmake -DPRODUCT=ccm_product")
+# ============================================================================
+# EMS SDK Root CMakeLists.txt
+# ============================================================================
+# This is the unified build entry point for the entire EMS SDK.
+# It builds all enabled products based on Kconfig configuration.
+# ============================================================================
+
+# Set SDK path (this is the root directory)
+set(SDK_PATH ${CMAKE_CURRENT_LIST_DIR})
+message("-- SDK_PATH: ${SDK_PATH}")
+
+# Load Kconfig configuration
+set(config_file "${CMAKE_CURRENT_BINARY_DIR}/config/global_config.cmake")
+if(EXISTS ${config_file})
+    include(${config_file})
+else()
+    message(FATAL_ERROR "Configuration file not found: ${config_file}\nPlease run: python3 project.py menuconfig")
 endif()
 
-# 产品目录
-set(PRODUCT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/products/${PRODUCT}")
+# Standard CMake project declaration
+project(ems_sdk C CXX ASM)
 
-# 检查产品目录是否存在
-if(NOT EXISTS ${PRODUCT_DIR})
-    message(FATAL_ERROR "Product directory not found: ${PRODUCT_DIR}")
+# Include build system
+include(${SDK_PATH}/tools/cmake/compile.cmake)
+
+# Generate build info headers (version and time)
+get_python(python python_version python_info_str)
+if(NOT python)
+    message(FATAL_ERROR "python not found, please install python firstly(python3 recommend)!")
 endif()
 
-# 检查产品的 CMakeLists.txt 是否存在
-if(NOT EXISTS ${PRODUCT_DIR}/CMakeLists.txt)
-    message(FATAL_ERROR "Product CMakeLists.txt not found: ${PRODUCT_DIR}/CMakeLists.txt")
+set(gen_build_info_config_cmd ${python} ${SDK_PATH}/tools/kconfig/update_build_info.py
+                              --configfile header ${CMAKE_CURRENT_BINARY_DIR}/config/global_build_info_time.h ${CMAKE_CURRENT_BINARY_DIR}/config/global_build_info_version.h
+                              )
+add_custom_target(update_build_info COMMAND ${gen_build_info_config_cmd})
+
+# Add build info directory to include path
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/config)
+
+# ============================================================================
+# Build Products Based on Configuration
+# ============================================================================
+# Each product is built only if CONFIG_PRODUCT_XXX is enabled in .config
+# ============================================================================
+
+if(CONFIG_PRODUCT_CCM)
+    message("-- Building CCM product")
+    add_subdirectory(products/ccm)
 endif()
 
-# 如果指定了配置文件，复制到产品目录
-if(DEFINED CONFIG)
-    set(CONFIG_FILE "${PRODUCT_DIR}/configs/${CONFIG}_defconfig")
-    if(NOT EXISTS ${CONFIG_FILE})
-        message(FATAL_ERROR "Config file not found: ${CONFIG_FILE}")
-    endif()
-    message(STATUS "Loading config: ${CONFIG}")
-    file(COPY ${CONFIG_FILE} DESTINATION ${PRODUCT_DIR})
-    file(RENAME ${PRODUCT_DIR}/${CONFIG}_defconfig ${PRODUCT_DIR}/.config.mk)
+if(CONFIG_PRODUCT_SAMPLE)
+    message("-- Building Sample product")
+    add_subdirectory(products/sample)
 endif()
-
-message(STATUS "Building product: ${PRODUCT}")
-
-# 直接包含产品的 CMakeLists.txt，而不是作为子目录
-# 这样可以避免嵌套 project() 调用的问题
-set(CMAKE_CURRENT_SOURCE_DIR ${PRODUCT_DIR})
-set(CMAKE_CURRENT_BINARY_DIR ${CMAKE_BINARY_DIR}/${PRODUCT})
-include(${PRODUCT_DIR}/CMakeLists.txt)

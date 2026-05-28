@@ -1,46 +1,57 @@
-cmake_minimum_required(VERSION 3.16)
+# ============================================================================
+# CCM Product CMakeLists.txt
+# ============================================================================
+# CCM (Central Control Module) product build configuration.
+# This file is included by the root CMakeLists.txt when CONFIG_PRODUCT_CCM=y
+# ============================================================================
 
-set(SDK_ENV_NAME "EMS_SDK_PATH")
-set(CUSTOM_COMPONENTS_PATH_ENV_NAME "CUSTOM_COMPONENTS_PATH")
-
-set(SDK_PATH_ENV $ENV{${SDK_ENV_NAME}})
-set(CUSTOM_COMPONENTS_PATH_ENV $ENV{${CUSTOM_COMPONENTS_PATH_ENV_NAME}})
-
-# Get SDK path
-if(NOT SDK_PATH)
-    # From products/ccm/ to EMS root: ../../
-    get_filename_component(SDK_PATH "${CMAKE_CURRENT_LIST_DIR}/../../" ABSOLUTE)
-    if(SDK_PATH_ENV)
-        if(EXISTS ${SDK_PATH_ENV})
-            set(SDK_PATH ${SDK_PATH_ENV})
-        else()
-            message(FATAL_ERROR "Env variable '${SDK_ENV_NAME}' set, but '${SDK_PATH_ENV}', path not exists")
-        endif()
-    endif()
+# Register SDK core components
+if(CONFIG_OSAL)
+    add_subdirectory(${SDK_PATH}/components/osal ${CMAKE_CURRENT_BINARY_DIR}/osal)
 endif()
 
-if(NOT CUSTOM_COMPONENTS_PATH)
-    # Set product-level components path: products/ccm/components
-    get_filename_component(CUSTOM_COMPONENTS_PATH "${CMAKE_CURRENT_LIST_DIR}/components" ABSOLUTE)
-    if(CUSTOM_COMPONENTS_PATH_ENV)
-        if(EXISTS ${CUSTOM_COMPONENTS_PATH_ENV})
-            set(CUSTOM_COMPONENTS_PATH ${CUSTOM_COMPONENTS_PATH_ENV})
-        else()
-            message(FATAL_ERROR "Env variable '${CUSTOM_COMPONENTS_PATH_ENV_NAME}' set, but '${CUSTOM_COMPONENTS_PATH_ENV}', path not exists")
-        endif()
-    endif()
+if(CONFIG_HAL)
+    add_subdirectory(${SDK_PATH}/components/hal ${CMAKE_CURRENT_BINARY_DIR}/hal)
 endif()
 
-# Check SDK Path
-if(NOT EXISTS ${SDK_PATH})
-    message(FATAL_ERROR "SDK path Error, Please set SDK_PATH or ${SDK_ENV_NAME} variable")
+if(CONFIG_PCL)
+    add_subdirectory(${SDK_PATH}/components/pcl ${CMAKE_CURRENT_BINARY_DIR}/pcl)
 endif()
 
-# Call compile
-include(${SDK_PATH}/tools/cmake/compile.cmake)
+if(CONFIG_PDL)
+    add_subdirectory(${SDK_PATH}/components/pdl ${CMAKE_CURRENT_BINARY_DIR}/pdl)
+endif()
 
-# Project Name
-set(PROJECT_NAME ccm)
+if(CONFIG_ACL)
+    add_subdirectory(${SDK_PATH}/components/acl ${CMAKE_CURRENT_BINARY_DIR}/acl)
+endif()
 
-message("-- PROJECT_NAME:${PROJECT_NAME}")
-project(${PROJECT_NAME})
+# Register product-specific components
+if(CONFIG_LIBCCM)
+    add_subdirectory(components/libccm)
+endif()
+
+if(CONFIG_H200_AM625)
+    add_subdirectory(components/h200_am625)
+endif()
+
+# Register applications
+if(CONFIG_APP_COLLECTOR)
+    add_subdirectory(apps/app_collector)
+endif()
+
+if(CONFIG_APP_COMM)
+    add_subdirectory(apps/app_comm)
+endif()
+
+if(CONFIG_APP_HEALTH)
+    add_subdirectory(apps/app_health)
+endif()
+
+if(CONFIG_APP_LOGGER)
+    add_subdirectory(apps/app_logger)
+endif()
+
+if(CONFIG_APP_SUPERVISOR)
+    add_subdirectory(apps/app_supervisor)
+endif()
