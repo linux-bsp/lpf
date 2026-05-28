@@ -1,269 +1,106 @@
-# EMS (Embedded Management System)
+# EMS SDK
 
-嵌入式管理系统 - 基于 Linux Kbuild 构建框架的模块化嵌入式软件平台。
-
-## 项目概述
-
-EMS 是一个采用 Linux 内核风格构建系统的嵌入式软件项目，提供了完整的硬件抽象层（HAL）、操作系统抽象层（OSAL）和产品应用框架。
-
-### 核心特性
-
-- **Kbuild 构建系统**: 采用 Linux 内核风格的构建框架，支持配置管理、条件编译、并行构建
-- **Kconfig 配置管理**: 图形化配置界面（menuconfig），支持依赖检查和配置验证
-- **模块化架构**: Core/Products 分层设计，清晰的模块边界和依赖关系
-- **Staging 头文件机制**: 自动化的头文件安装和管理，支持外部构建
-- **标准化输出**: 遵循 Linux 标准目录结构（bin/、lib/、lib/modules/）
+嵌入式管理系统 SDK，采用 Kconfig + CMake 混合构建系统。
 
 ## 快速开始
 
-### 环境要求
-
-- Linux 操作系统（推荐 Ubuntu 20.04+）
-- GCC 工具链
-- Make 4.0+
-- ncurses 开发库（用于 menuconfig）
-
-### 构建步骤
+### 从根目录构建
 
 ```bash
-# 1. 配置项目
-make ccm_h200_am625_debug_defconfig
+# 列出所有产品和配置
+python3 build.py --list
 
-# 或使用图形化配置
-make menuconfig
+# 构建指定产品和配置
+python3 build.py --product ccm_product --config h200_100p_v1
 
-# 2. 编译项目（并行编译）
-make -j$(nproc)
+# 清理并重新构建
+python3 build.py --product ccm_product --config h200_200p --clean
 
-# 3. 查看输出
-ls bin/      # 可执行文件
-ls lib/      # 静态库和动态库
-ls lib/modules/  # 内核模块
-
-# 4. 清理
-make clean      # 清理编译产物
-make mrproper   # 深度清理（包括配置文件）
+# 并行编译（使用 8 个线程）
+python3 build.py --product ccm_product --config h200_100p_v2 -j 8
 ```
 
-### 使用 PRODUCT 变量快速构建
+构建结果在 `build/<product>/` 目录（符号链接到产品的 build 目录）。
+
+### 从产品目录构建
 
 ```bash
-# 一步完成配置和构建
-make PRODUCT=ccm_h200_am625_debug -j$(nproc)
+cd products/ccm_product
+
+# 选择配置
+cp configs/h200_100p_v1_defconfig .config.mk
+
+# 编译
+python3 project.py build
+
+# 或使用 menuconfig 自定义配置
+python3 project.py menuconfig
+python3 project.py build
 ```
 
 ## 项目结构
 
 ```
 EMS/
-├── core/                   # 核心模块
-│   ├── acl/               # 访问控制层
-│   ├── hal/               # 硬件抽象层
-│   ├── osal/              # 操作系统抽象层
-│   ├── pcl/               # 协议控制层
-│   └── pdl/               # 协议数据层
-├── products/              # 产品应用
-│   └── ccm/              # CCM 产品
-│       ├── apps/         # 应用程序
-│       └── libs/         # 产品库
-├── configs/               # 配置文件
-├── scripts/               # 构建脚本
-│   ├── Makefile.build    # 核心构建规则
-│   ├── Makefile.clean    # 清理规则
-│   └── kconfig/          # Kconfig 工具
-├── include/               # 公共头文件（构建时生成）
-├── bin/                   # 可执行文件输出（构建时生成）
-├── lib/                   # 库文件输出（构建时生成）
-└── docs/                  # 项目文档
+├── build.py                  # 根目录构建脚本
+├── CMakeLists.txt            # 顶层 CMake 配置
+│
+├── components/               # SDK 组件（可复用）
+│   ├── osal/                # 操作系统抽象层
+│   ├── hal/                 # 硬件抽象层
+│   ├── pcl/                 # 协议控制层
+│   ├── pdl/                 # 协议数据层
+│   └── acl/                 # 访问控制层
+│
+├── products/                 # 产品目录
+│   └── ccm_product/         # CCM 产品线
+│       ├── configs/         # 产品配置
+│       ├── components/      # 产品组件
+│       └── apps/            # 应用程序
+│
+└── tools/                    # 构建工具
+    └── cmake/               # CMake 模块
 ```
 
-## 构建系统特性
+## 产品配置
 
-### 1. 声明式 Makefile
+### CCM 产品线
 
-采用 Linux 内核风格的声明式语法：
+| 型号 | 配置文件 | 应用组合 |
+|------|---------|---------|
+| H200-100P V1 | h200_100p_v1 | collector + comm |
+| H200-100P V2 | h200_100p_v2 | collector + comm + health |
+| H200-200P | h200_200p | 全部应用 |
 
-```makefile
-# 应用程序
-app-y := ccm_collector
-
-# 静态库
-lib-y := osal
-
-# 动态库
-so-y := libccm
-
-# 内核模块
-obj-m := driver.o
-
-# 复合对象
-ccm_collector-objs := main.o config.o logger.o
-```
-
-### 2. Staging 头文件机制
-
-库的头文件自动安装到 staging 目录，应用程序无需硬编码源码路径：
-
-```makefile
-# 库 Makefile
-lib-y := osal
-header-y := osal.h osal_types.h
-header-y += ipc/osal_mutex.h
-
-# 应用程序 Makefile
-app-y := myapp
-ccflags-y += -I$(objtree)/include  # 自动包含所有库头文件
-```
-
-### 3. 智能库名处理
-
-自动检测库名前缀，避免重复添加：
-
-```makefile
-lib-y += osal        # 输出: libosal.a
-lib-y += libosal.a   # 输出: libosal.a（不会变成 liblibosal.a）
-```
-
-### 4. 条件编译
-
-支持 Kconfig 配置驱动的条件编译：
-
-```makefile
-obj-$(CONFIG_OSAL_NETWORK) += osal_socket.o
-obj-$(CONFIG_HAL_CAN) += hal_can_linux.o
-subdir-$(CONFIG_CCM_APPS) += apps/
-```
-
-### 5. 外部构建支持
-
-支持源码和构建产物分离：
+## 构建选项
 
 ```bash
-make O=/path/to/build ccm_h200_am625_debug_defconfig
-make O=/path/to/build -j$(nproc)
+python3 build.py --help
+
+Options:
+  --list              列出所有产品和配置
+  --product, -p       指定产品名称
+  --config, -c        指定配置名称
+  --build-dir, -b     指定构建目录（默认: build）
+  --clean             清理后重新构建
+  --jobs, -j          并行编译线程数
 ```
 
-## 配置管理
+## 添加新产品
 
-### 可用配置
+1. 在 `products/` 下创建产品目录
+2. 添加 `CMakeLists.txt` 和 `project.py`
+3. 创建 `configs/` 目录存放配置文件
+4. 创建 `components/` 和 `apps/` 目录
 
-```bash
-make help                              # 查看所有可用配置
-make ccm_h200_am625_debug_defconfig   # CCM 调试配置
-make ccm_h200_am625_release_defconfig # CCM 发布配置
-```
-
-### 配置工具
-
-```bash
-make menuconfig    # 图形化配置（推荐）
-make defconfig     # 使用默认配置
-make savedefconfig # 保存最小化配置
-```
-
-## 清理目标
-
-```bash
-make clean         # 清理编译产物（bin/、lib/、*.o、*.a、*.so）
-make mrproper      # 深度清理（包括 .config、kconfig 工具、staging 头文件）
-make distclean     # 完全清理（包括编辑器备份文件等）
-```
+详见 `products/ccm_product/` 示例。
 
 ## 开发指南
 
-### 添加新的应用程序
-
-1. 在 `products/ccm/apps/` 下创建目录
-2. 创建 Makefile：
-
-```makefile
-app-y := myapp
-myapp-objs := main.o module1.o module2.o
-
-ccflags-y += -I$(objtree)/include
-ccflags-y += -I$(src)/include
-```
-
-3. 在父目录 Makefile 中添加：`subdir-y += myapp`
-
-### 添加新的库
-
-1. 在 `core/` 下创建目录
-2. 创建 Makefile：
-
-```makefile
-lib-y := mylib
-mylib-objs := file1.o file2.o
-
-# 导出头文件
-header-y := mylib.h mylib_types.h
-header-y += subdir/mylib_api.h
-
-ccflags-y += -I$(src)/include
-```
-
-3. 头文件放在 `include/` 子目录下
-4. 在父目录 Makefile 中添加：`subdir-y += mylib`
-
-### 编码规范
-
-- 遵循 Linux 内核编码风格
-- 使用 Tab 缩进（8 空格宽度）
-- 函数名使用小写加下划线
-- 详见 `docs/CODING_STANDARDS.md`
-
-## 文档
-
-- [构建系统详解](docs/BUILD_SYSTEM.md) - 构建系统架构和原理
-- [构建指南](docs/BUILD_GUIDE.md) - 详细的构建步骤和选项
-- [架构设计](docs/ARCHITECTURE.md) - 系统架构和模块设计
-- [平台配置指南](docs/PLATFORM.md) - 平台和架构配置说明
-- [OSAL 平台适配](docs/OSAL_PLATFORM.md) - OSAL 多平台支持
-- [Staging 目录说明](docs/STAGING_DIRECTORY.md) - 构建产物管理
-- [配置文件指南](docs/DEFCONFIG_GUIDE.md) - 预定义配置说明
-- [安装指南](docs/INSTALL.md) - 文件安装和部署
-- [编码规范](docs/CODING_STANDARDS.md) - 代码质量和风格标准
-- [Makefile 框架](docs/MAKEFILE_FRAMEWORK.md) - Makefile 框架使用指南
-
-## 故障排除
-
-### 构建失败
-
-```bash
-# 清理后重新构建
-make mrproper
-make ccm_h200_am625_debug_defconfig
-make -j$(nproc)
-```
-
-### 配置问题
-
-```bash
-# 检查配置
-cat .config
-
-# 重新配置
-make menuconfig
-```
-
-### 依赖问题
-
-```bash
-# 查看详细构建过程
-make V=1
-
-# 查看依赖关系
-make -n
-```
+- [架构设计](docs/ARCHITECTURE.md)
+- [CMake 构建指南](docs/CMAKE_BUILD_GUIDE.md)
+- [编码规范](docs/CODING_STANDARDS.md)
 
 ## 许可证
 
-[待添加许可证信息]
-
-## 贡献
-
-[待添加贡献指南]
-
-## 联系方式
-
-[待添加联系方式]
+Apache 2.0
