@@ -1,5 +1,8 @@
 ################# Add include #################
 # 使用标准的 core 组件 include 路径
+# 添加 PDL 头文件路径（只使用类型定义，不链接库）
+list(APPEND ADD_INCLUDE "${CMAKE_SOURCE_DIR}/core/pdl/include")
+
 # 添加平台配置头文件路径（如果有）
 if(PCL_EXTRA_INCLUDE)
     list(APPEND ADD_INCLUDE ${PCL_EXTRA_INCLUDE})
@@ -21,6 +24,8 @@ endif()
 
 ###### Add required/dependent components ######
 # PCL 依赖 OSAL 和 HAL
+# 注意：PCL 只使用 PDL 的头文件（类型定义），不需要链接 PDL 库
+# 因此不添加 PDL 到依赖列表，避免循环依赖
 list(APPEND ADD_REQUIREMENTS osal hal)
 ###############################################
 
