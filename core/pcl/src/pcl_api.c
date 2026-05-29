@@ -166,8 +166,8 @@ int32_t PCL_List(const pcl_platform_config_t **configs, uint32_t *count)
  * 硬件外设配置查询接口（PCL_HW_*）
  *===========================================================================*/
 
-const pcl_mcu_cfg_t* PCL_HW_FindMCU(const pcl_platform_config_t *platform,
-                                        const char *name)
+const pcl_mcu_entry_t* PCL_HW_FindMCU(const pcl_platform_config_t *platform,
+                                      const char *name)
 {
     uint32_t i;
 
@@ -184,8 +184,8 @@ const pcl_mcu_cfg_t* PCL_HW_FindMCU(const pcl_platform_config_t *platform,
     return NULL;
 }
 
-const pcl_mcu_cfg_t* PCL_HW_GetMCU(const pcl_platform_config_t *platform,
-                                       uint32_t id)
+const pcl_mcu_entry_t* PCL_HW_GetMCU(const pcl_platform_config_t *platform,
+                                     uint32_t id)
 {
     uint32_t i;
 
@@ -202,8 +202,8 @@ const pcl_mcu_cfg_t* PCL_HW_GetMCU(const pcl_platform_config_t *platform,
     return NULL;
 }
 
-const pcl_bmc_cfg_t* PCL_HW_FindBMC(const pcl_platform_config_t *platform,
-                                        const char *name)
+const pcl_bmc_entry_t* PCL_HW_FindBMC(const pcl_platform_config_t *platform,
+                                      const char *name)
 {
     uint32_t i;
 
@@ -220,8 +220,8 @@ const pcl_bmc_cfg_t* PCL_HW_FindBMC(const pcl_platform_config_t *platform,
     return NULL;
 }
 
-const pcl_bmc_cfg_t* PCL_HW_GetBMC(const pcl_platform_config_t *platform,
-                                       uint32_t id)
+const pcl_bmc_entry_t* PCL_HW_GetBMC(const pcl_platform_config_t *platform,
+                                     uint32_t id)
 {
     uint32_t i;
 

@@ -9,6 +9,7 @@
  * - 只包含纯硬件外设配置
  * - 不包含业务逻辑（卫星平台、传感器、存储、应用等）
  * - 配置以外设为单位，简洁明了
+ * - 使用 PCL 配置条目（pcl_xxx_entry_t）而非自定义配置
  ************************************************************************/
 
 #ifndef PCL_BOARD_H
@@ -37,10 +38,10 @@ typedef struct {
     const char *product_name;     /* 产品名称（如"h200_100p_base"） */
 
     /* 硬件外设配置数组（NULL结尾） */
-    pcl_mcu_cfg_t    **mcu_arr;      /* MCU外设数组 */
-    pcl_bmc_cfg_t    **bmc_arr;      /* BMC外设数组 */
-    pcl_fpga_cfg_t   **fpga_arr;     /* FPGA外设数组 */
-    pcl_switch_cfg_t **switch_arr;   /* Switch外设数组 */
+    pcl_mcu_entry_t    **mcu_arr;      /* MCU外设数组 */
+    pcl_bmc_entry_t    **bmc_arr;      /* BMC外设数组 */
+    pcl_fpga_cfg_t     **fpga_arr;     /* FPGA外设数组 */
+    pcl_switch_cfg_t   **switch_arr;   /* Switch外设数组 */
 } pcl_platform_config_t;
 
 #endif /* PCL_BOARD_H */

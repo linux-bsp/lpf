@@ -2,77 +2,43 @@
  * PCL MCU外设配置
  *
  * 功能：
- * - MCU外设配置类型定义
- * - 完全匹配PDL层的pdl_mcu.h配置需求
+ * - MCU外设配置容器
+ * - 直接使用 PDL 层的 pdl_mcu_config_t 结构体
+ * - PCL 只负责配置的存储、查询和管理
  *
- * 说明：
- * - MCU作为硬件微控制器，使用物理层硬件接口通信
- * - 支持CAN/UART/I2C/SPI等多种硬件接口
+ * 设计原则：
+ * - 配置结构体由 PDL 层定义（pdl_mcu.h）
+ * - PCL 层只添加配置管理字段（name, description, enabled）
+ * - 避免重复定义，零拷贝传递配置
  ************************************************************************/
 
 #ifndef PCL_MCU_H
 #define PCL_MCU_H
 
+#include "pdl_mcu.h"  /* 直接使用 PDL 层配置 */
 #include "pcl_common.h"
 
 /*===========================================================================
- * MCU接口类型枚举（匹配PDL层）
+ * MCU外设配置条目（PCL层配置容器）
  *===========================================================================*/
 
 /**
- * @brief MCU通信接口类型
- */
-typedef enum {
-    PCL_MCU_INTERFACE_CAN = 0,     /* CAN总线 */
-    PCL_MCU_INTERFACE_SERIAL = 1,  /* 串口 */
-    PCL_MCU_INTERFACE_I2C = 2,     /* I2C（预留） */
-    PCL_MCU_INTERFACE_SPI = 3      /* SPI（预留） */
-} pcl_mcu_interface_t;
-
-/*===========================================================================
- * MCU外设配置（完全匹配PDL层mcu_config_t）
- *===========================================================================*/
-
-/**
- * @brief MCU外设配置
+ * @brief MCU外设配置条目
  *
- * 此结构完全匹配PDL层的mcu_config_t，确保配置可以直接传递给PDL_MCU_Init()
+ * PCL 层只负责配置管理，实际配置结构由 PDL 层定义
  */
 typedef struct {
-    /* 外设基本信息（PCL层扩展字段） */
-    const char *pcl_name;           /* PCL层使用的名称（用于查询） */
-    const char *description;        /* 描述信息 */
-    bool        enabled;            /* 是否启用此MCU */
+    /* PCL 配置管理字段 */
+    const char *name;             /* MCU名称（用于查询，如"power_mcu"） */
+    const char *description;      /* 描述信息 */
+    bool        enabled;          /* 是否启用此MCU */
 
-    /* MCU配置（匹配PDL层） */
-    char name[64];                  /* MCU名称（传递给PDL） */
-    pcl_mcu_interface_t interface;  /* 通信接口类型 */
+    /* PDL 配置（直接引用） */
+    pdl_mcu_config_t config;      /* MCU配置（来自 pdl_mcu.h） */
 
-    /* CAN配置 */
-    struct {
-        const char *device;         /* CAN设备（如can0） */
-        uint32_t    bitrate;        /* 波特率 */
-        uint32_t    tx_id;          /* 发送CAN ID */
-        uint32_t    rx_id;          /* 接收CAN ID */
-    } can;
-
-    /* 串口配置 */
-    struct {
-        const char *device;         /* 串口设备（如/dev/ttyS1） */
-        uint32_t    baudrate;       /* 波特率 */
-        uint8_t     data_bits;      /* 数据位（5-8） */
-        uint8_t     stop_bits;      /* 停止位（1-2） */
-        uint8_t     parity;         /* 校验位（HAL_SERIAL_PARITY_NONE/ODD/EVEN） */
-    } serial;
-
-    /* 通用配置（匹配PDL层） */
-    uint32_t cmd_timeout_ms;        /* 命令超时（ms） */
-    uint32_t retry_count;           /* 重试次数 */
-    bool     enable_crc;            /* 启用CRC校验 */
-
-    /* GPIO控制（PCL层扩展字段，可选） */
+    /* GPIO控制（可选，PCL层扩展） */
     pcl_gpio_config_t *reset_gpio;  /* 复位GPIO */
     pcl_gpio_config_t *irq_gpio;    /* 中断GPIO */
-} pcl_mcu_cfg_t;
+} pcl_mcu_entry_t;
 
 #endif /* PCL_MCU_H */

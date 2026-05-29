@@ -3,36 +3,40 @@
  ************************************************************************/
 
 #include "pcl_config.h"
+#include "hal_serial.h"  /* 需要 HAL_SERIAL_* 常量 */
 
 /*===========================================================================
  * MCU外设配置数组
  *===========================================================================*/
 
-static pcl_mcu_cfg_t mcu_stm32 = {
-    .pcl_name = "stm32_mcu",
+static pcl_mcu_entry_t mcu_stm32 = {
+    .name = "stm32_mcu",
     .description = "STM32 MCU for payload control",
     .enabled = true,
-    
-    .name = "stm32_mcu",
-    .interface = PCL_MCU_INTERFACE_SERIAL,
-    
-    .serial = {
-        .device = "/dev/ttyS1",
-        .baudrate = 115200,
-        .data_bits = 8,
-        .stop_bits = 1,
-        .parity = HAL_SERIAL_PARITY_NONE
+
+    .config = {
+        .name = "stm32_mcu",
+        .interface = PDL_MCU_INTERFACE_SERIAL,
+
+        .serial = {
+            .device = "/dev/ttyS1",
+            .baudrate = 115200,
+            .data_bits = 8,
+            .stop_bits = 1,
+            .parity = HAL_SERIAL_PARITY_NONE,
+            .flow_control = HAL_SERIAL_FLOW_NONE
+        },
+
+        .cmd_timeout_ms = 500,
+        .retry_count = 3,
+        .enable_crc = true
     },
-    
-    .cmd_timeout_ms = 500,
-    .retry_count = 3,
-    .enable_crc = true,
-    
+
     .reset_gpio = NULL,
     .irq_gpio = NULL
 };
 
-static pcl_mcu_cfg_t *pcl_mcu_arr[] = {
+static pcl_mcu_entry_t *pcl_mcu_arr[] = {
     &mcu_stm32,
     NULL
 };
@@ -41,37 +45,42 @@ static pcl_mcu_cfg_t *pcl_mcu_arr[] = {
  * BMC外设配置数组
  *===========================================================================*/
 
-static pcl_bmc_cfg_t bmc_payload = {
+static pcl_bmc_entry_t bmc_payload = {
     .name = "payload_bmc",
     .description = "Payload BMC",
     .enabled = true,
-    
-    .network = {
-        .enabled = true,
-        .ip_addr = "192.168.1.100",
-        .port = 623,
-        .username = "admin",
-        .password = NULL,
-        .timeout_ms = 2000
+
+    .config = {
+        .network = {
+            .enabled = true,
+            .ip_addr = "192.168.1.100",
+            .port = 623,
+            .username = "admin",
+            .password = NULL,
+            .timeout_ms = 2000
+        },
+
+        .serial = {
+            .enabled = true,
+            .device = "/dev/ttyS2",
+            .baudrate = 115200,
+            .data_bits = 8,
+            .stop_bits = 1,
+            .parity = HAL_SERIAL_PARITY_NONE,
+            .timeout_ms = 2000
+        },
+
+        .primary_channel = PDL_BMC_CHANNEL_NETWORK,
+        .auto_switch = true,
+        .retry_count = 3,
+        .health_check_interval = 5000
     },
-    
-    .serial = {
-        .enabled = true,
-        .device = "/dev/ttyS2",
-        .baudrate = 115200,
-        .timeout_ms = 2000
-    },
-    
-    .primary_channel = PCL_BMC_CHANNEL_NETWORK,
-    .auto_switch = true,
-    .retry_count = 3,
-    .health_check_interval = 5000,
-    
+
     .power_gpio = NULL,
     .reset_gpio = NULL
 };
 
-static pcl_bmc_cfg_t *pcl_bmc_arr[] = {
+static pcl_bmc_entry_t *pcl_bmc_arr[] = {
     &bmc_payload,
     NULL
 };

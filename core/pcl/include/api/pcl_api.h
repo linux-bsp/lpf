@@ -87,10 +87,10 @@ int32_t PCL_List(const pcl_platform_config_t **configs, uint32_t *count);
  * @param[in] platform 平台配置
  * @param[in] name MCU名称
  *
- * @return MCU配置指针，失败返回NULL
+ * @return MCU配置条目指针，失败返回NULL
  */
-const pcl_mcu_cfg_t* PCL_HW_FindMCU(const pcl_platform_config_t *platform,
-                                             const char *name);
+const pcl_mcu_entry_t* PCL_HW_FindMCU(const pcl_platform_config_t *platform,
+                                      const char *name);
 
 /**
  * @brief 根据编号获取MCU外设配置
@@ -98,10 +98,10 @@ const pcl_mcu_cfg_t* PCL_HW_FindMCU(const pcl_platform_config_t *platform,
  * @param[in] platform 平台配置
  * @param[in] id MCU编号（第几个）
  *
- * @return MCU配置指针，失败返回NULL
+ * @return MCU配置条目指针，失败返回NULL
  */
-const pcl_mcu_cfg_t* PCL_HW_GetMCU(const pcl_platform_config_t *platform,
-                                            uint32_t id);
+const pcl_mcu_entry_t* PCL_HW_GetMCU(const pcl_platform_config_t *platform,
+                                     uint32_t id);
 
 /**
  * @brief 根据名称查找BMC外设配置
@@ -109,10 +109,10 @@ const pcl_mcu_cfg_t* PCL_HW_GetMCU(const pcl_platform_config_t *platform,
  * @param[in] platform 平台配置
  * @param[in] name BMC名称
  *
- * @return BMC配置指针，失败返回NULL
+ * @return BMC配置条目指针，失败返回NULL
  */
-const pcl_bmc_cfg_t* PCL_HW_FindBMC(const pcl_platform_config_t *platform,
-                                             const char *name);
+const pcl_bmc_entry_t* PCL_HW_FindBMC(const pcl_platform_config_t *platform,
+                                      const char *name);
 
 /**
  * @brief 根据编号获取BMC外设配置
@@ -120,10 +120,10 @@ const pcl_bmc_cfg_t* PCL_HW_FindBMC(const pcl_platform_config_t *platform,
  * @param[in] platform 平台配置
  * @param[in] id BMC编号（第几个）
  *
- * @return BMC配置指针，失败返回NULL
+ * @return BMC配置条目指针，失败返回NULL
  */
-const pcl_bmc_cfg_t* PCL_HW_GetBMC(const pcl_platform_config_t *platform,
-                                            uint32_t id);
+const pcl_bmc_entry_t* PCL_HW_GetBMC(const pcl_platform_config_t *platform,
+                                     uint32_t id);
 
 /**
  * @brief 根据名称查找FPGA外设配置
