@@ -7,9 +7,8 @@
 #ifndef PRL_COMMON_H
 #define PRL_COMMON_H
 
-#include <stdint.h>
-#include <stddef.h>
-#include <stdbool.h>
+/* PRL 层必须且只能依赖 OSAL，不依赖标准库 */
+#include "osal_types.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -117,7 +117,7 @@ int32_t ccm_eth_init(const pdl_ccm_config_t *config, void **handle)
     if (ret != 1)
     {
         LOG_ERROR("PDL_CCM", "Invalid IP address: %s", config->ccm_ip);
-        OSAL_shutdown(ctx->sockfd, OSAL_SHUT_RDWR);
+        OSAL_close(ctx->sockfd);
         OSAL_MutexDelete(ctx->mutex);
         OSAL_Free(ctx);
         return OSAL_ERR_INVALID_PARAM;
@@ -157,8 +157,7 @@ int32_t ccm_eth_deinit(void *handle)
     if (ctx->sockfd >= 0)
     {
         OSAL_shutdown(ctx->sockfd, OSAL_SHUT_RDWR);
-        /* 注意：OSAL_Socket 没有提供 close 接口，需要添加 */
-        /* 临时使用 shutdown，实际应该调用 close(ctx->sockfd) */
+        OSAL_close(ctx->sockfd);
     }
 
     /* 销毁互斥锁 */

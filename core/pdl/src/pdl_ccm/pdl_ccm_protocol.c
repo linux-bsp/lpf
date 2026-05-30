@@ -13,6 +13,31 @@
 #include "osal.h"
 
 /*
+ * 编码心跳消息
+ */
+int32_t ccm_protocol_encode_heartbeat(uint32_t sender_status,
+                                       uint32_t link_quality,
+                                       uint8_t *buf,
+                                       size_t *buf_len)
+{
+    prl_pmc_ccm_heartbeat_t hb;
+
+    if (!buf || !buf_len)
+    {
+        return OSAL_ERR_INVALID_PARAM;
+    }
+
+    /* 填充心跳结构 */
+    hb.sender_status = sender_status;
+    hb.link_quality = link_quality;
+    hb.packet_loss = 0;  /* 默认丢包率 */
+    hb.rtt_ms = 0;       /* 默认往返时延 */
+
+    /* 调用 PRL 层编码 */
+    return prl_pmc_ccm_encode_heartbeat(&hb, buf, buf_len);
+}
+
+/*
  * 编码遥测数据
  */
 int32_t ccm_protocol_encode_telemetry(uint32_t tm_id,
