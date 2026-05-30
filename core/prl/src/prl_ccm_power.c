@@ -23,7 +23,7 @@ int prl_ccm_power_encode_heartbeat(const prl_ccm_power_heartbeat_t *msg,
     }
 
     prl_header_t *hdr = (prl_header_t *)buf;
-    prl_init_header(hdr, PRL_CCM_PWR_MSG_HEARTBEAT, payload_len, 0);
+    prl_init_header(hdr, PRL_DEV_TYPE_CCM, PRL_CCM_PWR_MSG_HEARTBEAT, payload_len, 0);
 
     OSAL_Memcpy(buf + PRL_HEADER_SIZE, msg, payload_len);
     prl_set_packet_crc(buf, total_len);
@@ -47,7 +47,7 @@ int prl_ccm_power_encode_power_on(const prl_ccm_power_on_t *msg,
     }
 
     prl_header_t *hdr = (prl_header_t *)buf;
-    prl_init_header(hdr, PRL_CCM_PWR_MSG_POWER_ON, payload_len, PRL_FLAG_ACK_REQUIRED);
+    prl_init_header(hdr, PRL_DEV_TYPE_CCM, PRL_CCM_PWR_MSG_POWER_ON, payload_len, PRL_FLAG_ACK_REQUIRED);
 
     OSAL_Memcpy(buf + PRL_HEADER_SIZE, msg, payload_len);
     prl_set_packet_crc(buf, total_len);
@@ -71,7 +71,7 @@ int prl_ccm_power_encode_power_off(const prl_ccm_power_off_t *msg,
     }
 
     prl_header_t *hdr = (prl_header_t *)buf;
-    prl_init_header(hdr, PRL_CCM_PWR_MSG_POWER_OFF, payload_len, PRL_FLAG_ACK_REQUIRED);
+    prl_init_header(hdr, PRL_DEV_TYPE_CCM, PRL_CCM_PWR_MSG_POWER_OFF, payload_len, PRL_FLAG_ACK_REQUIRED);
 
     OSAL_Memcpy(buf + PRL_HEADER_SIZE, msg, payload_len);
     prl_set_packet_crc(buf, total_len);
@@ -95,7 +95,7 @@ int prl_ccm_power_encode_voltage_query(const prl_ccm_power_voltage_query_t *msg,
     }
 
     prl_header_t *hdr = (prl_header_t *)buf;
-    prl_init_header(hdr, PRL_CCM_PWR_MSG_VOLTAGE_QUERY, payload_len, 0);
+    prl_init_header(hdr, PRL_DEV_TYPE_CCM, PRL_CCM_PWR_MSG_VOLTAGE_QUERY, payload_len, 0);
 
     OSAL_Memcpy(buf + PRL_HEADER_SIZE, msg, payload_len);
     prl_set_packet_crc(buf, total_len);
@@ -119,7 +119,7 @@ int prl_ccm_power_encode_current_query(const prl_ccm_power_current_query_t *msg,
     }
 
     prl_header_t *hdr = (prl_header_t *)buf;
-    prl_init_header(hdr, PRL_CCM_PWR_MSG_CURRENT_QUERY, payload_len, 0);
+    prl_init_header(hdr, PRL_DEV_TYPE_CCM, PRL_CCM_PWR_MSG_CURRENT_QUERY, payload_len, 0);
 
     OSAL_Memcpy(buf + PRL_HEADER_SIZE, msg, payload_len);
     prl_set_packet_crc(buf, total_len);
@@ -143,7 +143,7 @@ int prl_ccm_power_encode_temp_query(const prl_ccm_power_temp_query_t *msg,
     }
 
     prl_header_t *hdr = (prl_header_t *)buf;
-    prl_init_header(hdr, PRL_CCM_PWR_MSG_TEMP_QUERY, payload_len, 0);
+    prl_init_header(hdr, PRL_DEV_TYPE_CCM, PRL_CCM_PWR_MSG_TEMP_QUERY, payload_len, 0);
 
     OSAL_Memcpy(buf + PRL_HEADER_SIZE, msg, payload_len);
     prl_set_packet_crc(buf, total_len);
@@ -167,7 +167,7 @@ int prl_ccm_power_encode_status_report(const prl_ccm_power_status_report_t *msg,
     }
 
     prl_header_t *hdr = (prl_header_t *)buf;
-    prl_init_header(hdr, PRL_CCM_PWR_MSG_STATUS_REPORT, payload_len, 0);
+    prl_init_header(hdr, PRL_DEV_TYPE_CCM, PRL_CCM_PWR_MSG_STATUS_REPORT, payload_len, 0);
 
     OSAL_Memcpy(buf + PRL_HEADER_SIZE, msg, payload_len);
     prl_set_packet_crc(buf, total_len);
@@ -191,7 +191,7 @@ int prl_ccm_power_encode_alarm(const prl_ccm_power_alarm_t *msg,
     }
 
     prl_header_t *hdr = (prl_header_t *)buf;
-    prl_init_header(hdr, PRL_CCM_PWR_MSG_ALARM, payload_len, PRL_FLAG_ACK_REQUIRED);
+    prl_init_header(hdr, PRL_DEV_TYPE_CCM, PRL_CCM_PWR_MSG_ALARM, payload_len, PRL_FLAG_ACK_REQUIRED);
 
     OSAL_Memcpy(buf + PRL_HEADER_SIZE, msg, payload_len);
     prl_set_packet_crc(buf, total_len);
@@ -215,7 +215,7 @@ int prl_ccm_power_encode_ack(const prl_ccm_power_ack_t *msg,
     }
 
     prl_header_t *hdr = (prl_header_t *)buf;
-    prl_init_header(hdr, PRL_CCM_PWR_MSG_ACK, payload_len, PRL_FLAG_IS_ACK);
+    prl_init_header(hdr, PRL_DEV_TYPE_CCM, PRL_CCM_PWR_MSG_ACK, payload_len, PRL_FLAG_IS_ACK);
 
     OSAL_Memcpy(buf + PRL_HEADER_SIZE, msg, payload_len);
     prl_set_packet_crc(buf, total_len);

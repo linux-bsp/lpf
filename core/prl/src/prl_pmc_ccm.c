@@ -24,7 +24,7 @@ int prl_pmc_ccm_encode_heartbeat(const prl_pmc_ccm_heartbeat_t *msg,
 
     /* 初始化协议头 */
     prl_header_t *hdr = (prl_header_t *)buf;
-    prl_init_header(hdr, PRL_PMC_CCM_MSG_HEARTBEAT, payload_len, 0);
+    prl_init_header(hdr, PRL_DEV_TYPE_PMC, PRL_PMC_CCM_MSG_HEARTBEAT, payload_len, 0);
 
     /* 拷贝消息体 */
     OSAL_Memcpy(buf + PRL_HEADER_SIZE, msg, payload_len);
@@ -57,7 +57,7 @@ int prl_pmc_ccm_encode_telemetry(const prl_pmc_ccm_telemetry_t *msg,
 
     /* 初始化协议头 */
     prl_header_t *hdr = (prl_header_t *)buf;
-    prl_init_header(hdr, PRL_PMC_CCM_MSG_TELEMETRY, payload_len, 0);
+    prl_init_header(hdr, PRL_DEV_TYPE_PMC, PRL_PMC_CCM_MSG_TELEMETRY, payload_len, 0);
 
     /* 拷贝消息体 */
     uint8_t *payload = buf + PRL_HEADER_SIZE;
@@ -96,7 +96,7 @@ int prl_pmc_ccm_encode_command(const prl_pmc_ccm_command_t *msg,
 
     /* 初始化协议头 */
     prl_header_t *hdr = (prl_header_t *)buf;
-    prl_init_header(hdr, PRL_PMC_CCM_MSG_COMMAND, payload_len, PRL_FLAG_ACK_REQUIRED);
+    prl_init_header(hdr, PRL_DEV_TYPE_PMC, PRL_PMC_CCM_MSG_COMMAND, payload_len, PRL_FLAG_ACK_REQUIRED);
 
     /* 拷贝消息体 */
     uint8_t *payload = buf + PRL_HEADER_SIZE;
@@ -135,7 +135,7 @@ int prl_pmc_ccm_encode_firmware_update(const prl_pmc_ccm_firmware_update_t *msg,
 
     /* 初始化协议头 */
     prl_header_t *hdr = (prl_header_t *)buf;
-    prl_init_header(hdr, PRL_PMC_CCM_MSG_FIRMWARE_UPDATE, payload_len, PRL_FLAG_ACK_REQUIRED);
+    prl_init_header(hdr, PRL_DEV_TYPE_PMC, PRL_PMC_CCM_MSG_FIRMWARE_UPDATE, payload_len, PRL_FLAG_ACK_REQUIRED);
 
     /* 拷贝消息体 */
     uint8_t *payload = buf + PRL_HEADER_SIZE;
@@ -169,7 +169,7 @@ int prl_pmc_ccm_encode_node_manage(const prl_pmc_ccm_node_manage_t *msg,
 
     /* 初始化协议头 */
     prl_header_t *hdr = (prl_header_t *)buf;
-    prl_init_header(hdr, PRL_PMC_CCM_MSG_NODE_MANAGE, payload_len, PRL_FLAG_ACK_REQUIRED);
+    prl_init_header(hdr, PRL_DEV_TYPE_PMC, PRL_PMC_CCM_MSG_NODE_MANAGE, payload_len, PRL_FLAG_ACK_REQUIRED);
 
     /* 拷贝消息体 */
     OSAL_Memcpy(buf + PRL_HEADER_SIZE, msg, payload_len);
@@ -197,7 +197,7 @@ int prl_pmc_ccm_encode_power_control(const prl_pmc_ccm_power_control_t *msg,
 
     /* 初始化协议头 */
     prl_header_t *hdr = (prl_header_t *)buf;
-    prl_init_header(hdr, PRL_PMC_CCM_MSG_POWER_CONTROL, payload_len, PRL_FLAG_ACK_REQUIRED);
+    prl_init_header(hdr, PRL_DEV_TYPE_PMC, PRL_PMC_CCM_MSG_POWER_CONTROL, payload_len, PRL_FLAG_ACK_REQUIRED);
 
     /* 拷贝消息体 */
     OSAL_Memcpy(buf + PRL_HEADER_SIZE, msg, payload_len);
@@ -225,7 +225,7 @@ int prl_pmc_ccm_encode_status_query(const prl_pmc_ccm_status_query_t *msg,
 
     /* 初始化协议头 */
     prl_header_t *hdr = (prl_header_t *)buf;
-    prl_init_header(hdr, PRL_PMC_CCM_MSG_STATUS_QUERY, payload_len, PRL_FLAG_ACK_REQUIRED);
+    prl_init_header(hdr, PRL_DEV_TYPE_PMC, PRL_PMC_CCM_MSG_STATUS_QUERY, payload_len, PRL_FLAG_ACK_REQUIRED);
 
     /* 拷贝消息体 */
     OSAL_Memcpy(buf + PRL_HEADER_SIZE, msg, payload_len);
@@ -258,7 +258,7 @@ int prl_pmc_ccm_encode_ack(const prl_pmc_ccm_ack_t *msg,
 
     /* 初始化协议头 */
     prl_header_t *hdr = (prl_header_t *)buf;
-    prl_init_header(hdr, PRL_PMC_CCM_MSG_ACK, payload_len, PRL_FLAG_IS_ACK);
+    prl_init_header(hdr, PRL_DEV_TYPE_PMC, PRL_PMC_CCM_MSG_ACK, payload_len, PRL_FLAG_IS_ACK);
 
     /* 拷贝消息体 */
     uint8_t *payload = buf + PRL_HEADER_SIZE;

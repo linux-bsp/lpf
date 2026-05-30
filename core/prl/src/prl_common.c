@@ -72,13 +72,14 @@ uint32_t prl_get_timestamp(void)
     return time_struct.seconds;
 }
 
-void prl_init_header(prl_header_t *hdr, uint8_t msg_type,
+void prl_init_header(prl_header_t *hdr, uint8_t dev_type, uint8_t msg_type,
                      uint16_t payload_len, uint8_t flags)
 {
     OSAL_Memset(hdr, 0, sizeof(prl_header_t));
 
     hdr->magic = PRL_MAGIC_NUMBER;
     hdr->version = PRL_VERSION;
+    hdr->dev_type = dev_type;
     hdr->msg_type = msg_type;
     hdr->flags = flags;
     hdr->length = payload_len;
@@ -92,7 +93,7 @@ int prl_validate_header(const prl_header_t *hdr, uint8_t expected_type)
         return PRL_ERR_INVALID_MAGIC;
     }
 
-    if ((hdr->version >> 8) != PRL_VERSION_MAJOR) {
+    if ((hdr->version >> 4) != PRL_VERSION_MAJOR) {
         return PRL_ERR_INVALID_VERSION;
     }
 

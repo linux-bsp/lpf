@@ -23,7 +23,7 @@ int prl_ccm_satellite_encode_heartbeat(const prl_ccm_satellite_heartbeat_t *msg,
     }
 
     prl_header_t *hdr = (prl_header_t *)buf;
-    prl_init_header(hdr, PRL_CCM_SAT_MSG_HEARTBEAT, payload_len, 0);
+    prl_init_header(hdr, PRL_DEV_TYPE_CCM, PRL_CCM_SAT_MSG_HEARTBEAT, payload_len, 0);
 
     OSAL_Memcpy(buf + PRL_HEADER_SIZE, msg, payload_len);
     prl_set_packet_crc(buf, total_len);
@@ -52,7 +52,7 @@ int prl_ccm_satellite_encode_telemetry(const prl_ccm_satellite_telemetry_t *msg,
     }
 
     prl_header_t *hdr = (prl_header_t *)buf;
-    prl_init_header(hdr, PRL_CCM_SAT_MSG_TELEMETRY, payload_len, 0);
+    prl_init_header(hdr, PRL_DEV_TYPE_CCM, PRL_CCM_SAT_MSG_TELEMETRY, payload_len, 0);
 
     uint8_t *payload = buf + PRL_HEADER_SIZE;
     OSAL_Memcpy(payload, msg, sizeof(prl_ccm_satellite_telemetry_t));
@@ -87,7 +87,7 @@ int prl_ccm_satellite_encode_telecommand(const prl_ccm_satellite_telecommand_t *
     }
 
     prl_header_t *hdr = (prl_header_t *)buf;
-    prl_init_header(hdr, PRL_CCM_SAT_MSG_TELECOMMAND, payload_len, PRL_FLAG_ACK_REQUIRED);
+    prl_init_header(hdr, PRL_DEV_TYPE_CCM, PRL_CCM_SAT_MSG_TELECOMMAND, payload_len, PRL_FLAG_ACK_REQUIRED);
 
     uint8_t *payload = buf + PRL_HEADER_SIZE;
     OSAL_Memcpy(payload, msg, sizeof(prl_ccm_satellite_telecommand_t));
@@ -117,7 +117,7 @@ int prl_ccm_satellite_encode_time_sync(const prl_ccm_satellite_time_sync_t *msg,
     }
 
     prl_header_t *hdr = (prl_header_t *)buf;
-    prl_init_header(hdr, PRL_CCM_SAT_MSG_TIME_SYNC, payload_len, 0);
+    prl_init_header(hdr, PRL_DEV_TYPE_CCM, PRL_CCM_SAT_MSG_TIME_SYNC, payload_len, 0);
 
     OSAL_Memcpy(buf + PRL_HEADER_SIZE, msg, payload_len);
     prl_set_packet_crc(buf, total_len);
@@ -141,7 +141,7 @@ int prl_ccm_satellite_encode_orbit_data(const prl_ccm_satellite_orbit_data_t *ms
     }
 
     prl_header_t *hdr = (prl_header_t *)buf;
-    prl_init_header(hdr, PRL_CCM_SAT_MSG_ORBIT_DATA, payload_len, 0);
+    prl_init_header(hdr, PRL_DEV_TYPE_CCM, PRL_CCM_SAT_MSG_ORBIT_DATA, payload_len, 0);
 
     OSAL_Memcpy(buf + PRL_HEADER_SIZE, msg, payload_len);
     prl_set_packet_crc(buf, total_len);
@@ -165,7 +165,7 @@ int prl_ccm_satellite_encode_attitude_data(const prl_ccm_satellite_attitude_data
     }
 
     prl_header_t *hdr = (prl_header_t *)buf;
-    prl_init_header(hdr, PRL_CCM_SAT_MSG_ATTITUDE_DATA, payload_len, 0);
+    prl_init_header(hdr, PRL_DEV_TYPE_CCM, PRL_CCM_SAT_MSG_ATTITUDE_DATA, payload_len, 0);
 
     OSAL_Memcpy(buf + PRL_HEADER_SIZE, msg, payload_len);
     prl_set_packet_crc(buf, total_len);
@@ -189,7 +189,7 @@ int prl_ccm_satellite_encode_power_status(const prl_ccm_satellite_power_status_t
     }
 
     prl_header_t *hdr = (prl_header_t *)buf;
-    prl_init_header(hdr, PRL_CCM_SAT_MSG_POWER_STATUS, payload_len, 0);
+    prl_init_header(hdr, PRL_DEV_TYPE_CCM, PRL_CCM_SAT_MSG_POWER_STATUS, payload_len, 0);
 
     OSAL_Memcpy(buf + PRL_HEADER_SIZE, msg, payload_len);
     prl_set_packet_crc(buf, total_len);
@@ -213,7 +213,7 @@ int prl_ccm_satellite_encode_thermal_status(const prl_ccm_satellite_thermal_stat
     }
 
     prl_header_t *hdr = (prl_header_t *)buf;
-    prl_init_header(hdr, PRL_CCM_SAT_MSG_THERMAL_STATUS, payload_len, 0);
+    prl_init_header(hdr, PRL_DEV_TYPE_CCM, PRL_CCM_SAT_MSG_THERMAL_STATUS, payload_len, 0);
 
     OSAL_Memcpy(buf + PRL_HEADER_SIZE, msg, payload_len);
     prl_set_packet_crc(buf, total_len);
@@ -237,7 +237,7 @@ int prl_ccm_satellite_encode_ack(const prl_ccm_satellite_ack_t *msg,
     }
 
     prl_header_t *hdr = (prl_header_t *)buf;
-    prl_init_header(hdr, PRL_CCM_SAT_MSG_ACK, payload_len, PRL_FLAG_IS_ACK);
+    prl_init_header(hdr, PRL_DEV_TYPE_CCM, PRL_CCM_SAT_MSG_ACK, payload_len, PRL_FLAG_IS_ACK);
 
     OSAL_Memcpy(buf + PRL_HEADER_SIZE, msg, payload_len);
     prl_set_packet_crc(buf, total_len);

@@ -20,7 +20,19 @@ extern "C" {
 /* 协议版本 */
 #define PRL_VERSION_MAJOR       1
 #define PRL_VERSION_MINOR       0
-#define PRL_VERSION             ((PRL_VERSION_MAJOR << 8) | PRL_VERSION_MINOR)
+#define PRL_VERSION             ((PRL_VERSION_MAJOR << 4) | PRL_VERSION_MINOR)
+
+/* 设备类型定义 */
+typedef enum {
+    PRL_DEV_TYPE_UNKNOWN    = 0x00,     /* 未知设备 */
+    PRL_DEV_TYPE_MCU        = 0x01,     /* 微控制器 */
+    PRL_DEV_TYPE_CCM        = 0x02,     /* 通信管理板 */
+    PRL_DEV_TYPE_PMC        = 0x03,     /* 载荷管理器 */
+    PRL_DEV_TYPE_GSC        = 0x04,     /* 地面站控制器 */
+    PRL_DEV_TYPE_SATELLITE  = 0x05,     /* 卫星平台 */
+    PRL_DEV_TYPE_POWER      = 0x06,     /* 电源板 */
+    PRL_DEV_TYPE_BMC        = 0x07,     /* 基板管理控制器 */
+} prl_dev_type_t;
 
 /* 协议错误码 */
 typedef enum {
@@ -34,15 +46,17 @@ typedef enum {
     PRL_ERR_BUFFER_TOO_SMALL = -7,  /* 缓冲区太小 */
     PRL_ERR_ENCODE_FAILED   = -8,   /* 编码失败 */
     PRL_ERR_DECODE_FAILED   = -9,   /* 解码失败 */
+    PRL_ERR_INVALID_DEV_TYPE = -10, /* 无效设备类型 */
 } prl_error_t;
 
-/* 协议通用头（所有协议共用） */
+/* 协议通用头（所有设备共用） */
 typedef struct {
     uint16_t magic;         /* 魔数：0xAA55 */
-    uint16_t version;       /* 协议版本 */
+    uint8_t  version;       /* 协议版本 */
+    uint8_t  dev_type;      /* 设备类型（新增） */
     uint8_t  msg_type;      /* 消息类型 */
     uint8_t  flags;         /* 标志位 */
-    uint16_t length;        /* 数据长度（不包括头和CRC） */
+    uint16_t length;        /* 数据长度（不包括头） */
     uint32_t seq;           /* 序列号 */
     uint32_t timestamp;     /* 时间戳（秒） */
     uint16_t crc16;         /* CRC16校验（整个报文） */
@@ -85,11 +99,12 @@ uint32_t prl_get_timestamp(void);
 /**
  * @brief 初始化协议头
  * @param hdr 协议头指针
+ * @param dev_type 设备类型
  * @param msg_type 消息类型
  * @param payload_len 负载长度
  * @param flags 标志位
  */
-void prl_init_header(prl_header_t *hdr, uint8_t msg_type,
+void prl_init_header(prl_header_t *hdr, uint8_t dev_type, uint8_t msg_type,
                      uint16_t payload_len, uint8_t flags);
 
 /**
