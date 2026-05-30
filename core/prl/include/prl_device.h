@@ -21,6 +21,9 @@ typedef enum {
     PRL_MCU_MSG_HEARTBEAT       = 0x04,     /* 心跳 */
     PRL_MCU_MSG_SET_CONFIG      = 0x05,     /* 设置配置 */
     PRL_MCU_MSG_GET_CONFIG      = 0x06,     /* 获取配置 */
+    PRL_MCU_MSG_POWER_ON        = 0x20,     /* 上电 */
+    PRL_MCU_MSG_POWER_OFF       = 0x21,     /* 下电 */
+    PRL_MCU_MSG_CUSTOM          = 0xFF,     /* 自定义命令 */
 } prl_mcu_msg_type_t;
 
 /* MCU 版本信息 */
@@ -45,11 +48,14 @@ typedef struct {
 /* ========== CCM 消息类型 ========== */
 typedef enum {
     PRL_CCM_MSG_HEARTBEAT       = 0x01,     /* 心跳 */
-    PRL_CCM_MSG_GET_STATUS      = 0x02,     /* 获取状态 */
-    PRL_CCM_MSG_SEND_DATA       = 0x03,     /* 发送数据 */
-    PRL_CCM_MSG_RECV_DATA       = 0x04,     /* 接收数据 */
-    PRL_CCM_MSG_SET_MODE        = 0x05,     /* 设置工作模式 */
-    PRL_CCM_MSG_GET_LINK_STATUS = 0x06,     /* 获取链路状态 */
+    PRL_CCM_MSG_TELEMETRY       = 0x02,     /* 遥测数据 */
+    PRL_CCM_MSG_COMMAND         = 0x03,     /* 遥控指令 */
+    PRL_CCM_MSG_TIME_SYNC       = 0x04,     /* 时间同步 */
+    PRL_CCM_MSG_ORBIT_DATA      = 0x05,     /* 轨道数据 */
+    PRL_CCM_MSG_ATTITUDE_DATA   = 0x06,     /* 姿态数据 */
+    PRL_CCM_MSG_POWER_STATUS    = 0x07,     /* 电源状态 */
+    PRL_CCM_MSG_THERMAL_STATUS  = 0x08,     /* 热控状态 */
+    PRL_CCM_MSG_ACK             = 0xFF,     /* 应答 */
 } prl_ccm_msg_type_t;
 
 /* CCM 状态信息 */
@@ -64,11 +70,13 @@ typedef struct {
 /* ========== PMC 消息类型 ========== */
 typedef enum {
     PRL_PMC_MSG_HEARTBEAT       = 0x01,     /* 心跳 */
-    PRL_PMC_MSG_GET_TELEMETRY   = 0x02,     /* 获取遥测数据 */
-    PRL_PMC_MSG_SEND_COMMAND    = 0x03,     /* 发送指令 */
-    PRL_PMC_MSG_GET_STATUS      = 0x04,     /* 获取状态 */
-    PRL_PMC_MSG_SET_POWER       = 0x05,     /* 设置电源 */
-    PRL_PMC_MSG_GET_POWER       = 0x06,     /* 获取电源状态 */
+    PRL_PMC_MSG_TELEMETRY       = 0x02,     /* 遥测数据 */
+    PRL_PMC_MSG_COMMAND         = 0x03,     /* 遥控指令 */
+    PRL_PMC_MSG_FIRMWARE_UPDATE = 0x04,     /* 固件升级 */
+    PRL_PMC_MSG_NODE_MANAGE     = 0x05,     /* 节点管理 */
+    PRL_PMC_MSG_POWER_CONTROL   = 0x06,     /* 电源控制 */
+    PRL_PMC_MSG_STATUS_QUERY    = 0x07,     /* 状态查询 */
+    PRL_PMC_MSG_ACK             = 0xFF,     /* 应答 */
 } prl_pmc_msg_type_t;
 
 /* PMC 遥测数据 */
@@ -83,11 +91,12 @@ typedef struct {
 /* ========== GSC 消息类型 ========== */
 typedef enum {
     PRL_GSC_MSG_HEARTBEAT       = 0x01,     /* 心跳 */
-    PRL_GSC_MSG_SEND_COMMAND    = 0x02,     /* 发送指令 */
-    PRL_GSC_MSG_GET_TELEMETRY   = 0x03,     /* 获取遥测 */
-    PRL_GSC_MSG_GET_STATUS      = 0x04,     /* 获取状态 */
-    PRL_GSC_MSG_FILE_TRANSFER   = 0x05,     /* 文件传输 */
-    PRL_GSC_MSG_TIME_SYNC       = 0x06,     /* 时间同步 */
+    PRL_GSC_MSG_TELEMETRY       = 0x02,     /* 遥测数据 */
+    PRL_GSC_MSG_COMMAND         = 0x03,     /* 遥控指令 */
+    PRL_GSC_MSG_FILE_TRANSFER   = 0x04,     /* 文件传输 */
+    PRL_GSC_MSG_DATABASE_SYNC   = 0x05,     /* 数据库同步 */
+    PRL_GSC_MSG_LOG_UPLOAD      = 0x06,     /* 日志上传 */
+    PRL_GSC_MSG_ACK             = 0xFF,     /* 应答 */
 } prl_gsc_msg_type_t;
 
 /* GSC 状态信息 */
@@ -101,20 +110,27 @@ typedef struct {
 /* ========== SATELLITE 消息类型 ========== */
 typedef enum {
     PRL_SAT_MSG_HEARTBEAT       = 0x01,     /* 心跳 */
-    PRL_SAT_MSG_GET_ORBIT       = 0x02,     /* 获取轨道信息 */
-    PRL_SAT_MSG_GET_ATTITUDE    = 0x03,     /* 获取姿态信息 */
-    PRL_SAT_MSG_SEND_COMMAND    = 0x04,     /* 发送指令 */
-    PRL_SAT_MSG_GET_TELEMETRY   = 0x05,     /* 获取遥测 */
+    PRL_SAT_MSG_TELEMETRY       = 0x02,     /* 遥测数据 */
+    PRL_SAT_MSG_TELECOMMAND     = 0x03,     /* 遥控指令 */
+    PRL_SAT_MSG_TIME_SYNC       = 0x04,     /* 时间同步 */
+    PRL_SAT_MSG_ORBIT_DATA      = 0x05,     /* 轨道数据 */
+    PRL_SAT_MSG_ATTITUDE_DATA   = 0x06,     /* 姿态数据 */
+    PRL_SAT_MSG_POWER_STATUS    = 0x07,     /* 电源状态 */
+    PRL_SAT_MSG_THERMAL_STATUS  = 0x08,     /* 热控状态 */
+    PRL_SAT_MSG_ACK             = 0xFF,     /* 应答 */
 } prl_sat_msg_type_t;
 
 /* ========== POWER 消息类型 ========== */
 typedef enum {
-    PRL_POWER_MSG_GET_STATUS    = 0x01,     /* 获取状态 */
-    PRL_POWER_MSG_SET_OUTPUT    = 0x02,     /* 设置输出 */
-    PRL_POWER_MSG_GET_VOLTAGE   = 0x03,     /* 获取电压 */
-    PRL_POWER_MSG_GET_CURRENT   = 0x04,     /* 获取电流 */
-    PRL_POWER_MSG_ENABLE        = 0x05,     /* 使能 */
-    PRL_POWER_MSG_DISABLE       = 0x06,     /* 禁用 */
+    PRL_POWER_MSG_HEARTBEAT     = 0x01,     /* 心跳 */
+    PRL_POWER_MSG_POWER_ON      = 0x02,     /* 上电 */
+    PRL_POWER_MSG_POWER_OFF     = 0x03,     /* 下电 */
+    PRL_POWER_MSG_VOLTAGE_QUERY = 0x04,     /* 电压查询 */
+    PRL_POWER_MSG_CURRENT_QUERY = 0x05,     /* 电流查询 */
+    PRL_POWER_MSG_TEMP_QUERY    = 0x06,     /* 温度查询 */
+    PRL_POWER_MSG_STATUS_REPORT = 0x07,     /* 状态上报 */
+    PRL_POWER_MSG_ALARM         = 0x08,     /* 告警 */
+    PRL_POWER_MSG_ACK           = 0xFF,     /* 应答 */
 } prl_power_msg_type_t;
 
 /* 电源状态 */
