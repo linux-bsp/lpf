@@ -6,6 +6,7 @@ menuconfig PDL
 	select OSAL
 	select HAL
 	select PCL
+	select TYPES
 	help
 	  Peripheral Driver Layer provides high-level peripheral management
 	  and protocol handling.
@@ -29,7 +30,7 @@ menuconfig PDL
 	  - MCU modules (microcontroller peripherals)
 	  - Watchdog management
 
-	  Dependencies: OSAL, HAL, PCL
+	  Dependencies: OSAL, HAL, PCL, TYPES
 
 	  Recommended: Enable for systems with complex peripheral management
 

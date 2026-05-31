@@ -10,6 +10,10 @@ if(CONFIG_OSAL)
     add_subdirectory(${SDK_PATH}/core/osal ${CMAKE_CURRENT_BINARY_DIR}/osal)
 endif()
 
+# Types module is always built (header-only, no runtime overhead)
+# It's required by PCL and PDL to break circular dependency
+add_subdirectory(${SDK_PATH}/core/types ${CMAKE_CURRENT_BINARY_DIR}/types)
+
 if(CONFIG_HAL)
     add_subdirectory(${SDK_PATH}/core/hal ${CMAKE_CURRENT_BINARY_DIR}/hal)
 endif()
@@ -33,10 +37,6 @@ endif()
 
 if(CONFIG_PRL)
     add_subdirectory(${SDK_PATH}/core/prl ${CMAKE_CURRENT_BINARY_DIR}/prl)
-endif()
-
-if(CONFIG_TM_CACHE)
-    add_subdirectory(${SDK_PATH}/core/tm_cache ${CMAKE_CURRENT_BINARY_DIR}/tm_cache)
 endif()
 
 # Register ACL with platform config

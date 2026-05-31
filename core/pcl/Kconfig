@@ -5,6 +5,7 @@ menuconfig PCL
 	default n
 	select OSAL
 	select HAL
+	select TYPES
 	help
 	  Peripheral Configuration Library provides device-tree-like hardware
 	  configuration management.
@@ -27,7 +28,8 @@ menuconfig PCL
 	  - Runtime board identification
 	  - Peripheral auto-configuration
 
-	  Dependencies: OSAL (for basic services), HAL (for hardware access)
+	  Dependencies: OSAL (for basic services), HAL (for hardware access),
+	                TYPES (for PDL configuration types)
 
 	  Recommended: Enable for products with multiple hardware variants
 
