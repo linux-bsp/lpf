@@ -5,6 +5,7 @@
  ************************************************************************/
 
 #include "hal_serial.h"
+#include "hal_error.h"
 #include "osal.h"
 #include <termios.h>  /* 系统波特率常量 B9600 等 */
 
@@ -72,15 +73,12 @@ int32_t HAL_Serial_Open(const char *device, const hal_serial_config_t *config, h
     if (ctx->fd < 0)
     {
         int32_t err = OSAL_GetErrno();
-        if (OSAL_EBUSY == err)
-        {
-            LOG_ERROR("HAL_Serial", "Device %s is busy (already opened by another process)", device);
-            OSAL_Free(ctx);
-            return OSAL_ERR_BUSY;
-        }
-        LOG_ERROR("HAL_Serial", "Failed to open %s: %s", device, OSAL_StrError(err));
+        int32_t hal_err = HAL_ErrnoToError(err);
+        HAL_SET_ERROR(hal_err, err, "Failed to open %s: %s", device, OSAL_StrError(err));
+        LOG_ERROR("HAL_Serial", "Failed to open %s: %s (errno=%d, hal_err=%d)",
+                  device, OSAL_StrError(err), err, hal_err);
         OSAL_Free(ctx);
-        return OSAL_ERR_GENERIC;
+        return hal_err;
     }
 
     /* 设置为阻塞模式 */
@@ -89,10 +87,14 @@ int32_t HAL_Serial_Open(const char *device, const hal_serial_config_t *config, h
     /* 获取当前配置 */
     if (0 != OSAL_tcgetattr(ctx->fd, &tty))
     {
-        LOG_ERROR("HAL_Serial", "Failed to get attributes: %s", OSAL_StrError(OSAL_GetErrno()));
+        int32_t err = OSAL_GetErrno();
+        int32_t hal_err = HAL_ErrnoToError(err);
+        HAL_SET_ERROR(hal_err, err, "Failed to get attributes: %s", OSAL_StrError(err));
+        LOG_ERROR("HAL_Serial", "Failed to get attributes: %s (errno=%d, hal_err=%d)",
+                  OSAL_StrError(err), err, hal_err);
         OSAL_close(ctx->fd);
         OSAL_Free(ctx);
-        return OSAL_ERR_GENERIC;
+        return hal_err;
     }
 
     /* 配置波特率 */
@@ -158,10 +160,14 @@ int32_t HAL_Serial_Open(const char *device, const hal_serial_config_t *config, h
     /* 应用配置 */
     if (0 != OSAL_tcsetattr(ctx->fd, OSAL_TCSANOW, &tty))
     {
-        LOG_ERROR("HAL_Serial", "Failed to set attributes: %s", OSAL_StrError(OSAL_GetErrno()));
+        int32_t err = OSAL_GetErrno();
+        int32_t hal_err = HAL_ErrnoToError(err);
+        HAL_SET_ERROR(hal_err, err, "Failed to set attributes: %s", OSAL_StrError(err));
+        LOG_ERROR("HAL_Serial", "Failed to set attributes: %s (errno=%d, hal_err=%d)",
+                  OSAL_StrError(err), err, hal_err);
         OSAL_close(ctx->fd);
         OSAL_Free(ctx);
-        return OSAL_ERR_GENERIC;
+        return hal_err;
     }
 
     /* 清空缓冲区 */
@@ -170,10 +176,12 @@ int32_t HAL_Serial_Open(const char *device, const hal_serial_config_t *config, h
     /* 初始化互斥锁 */
     if (OSAL_SUCCESS != OSAL_MutexCreate(&ctx->lock))
     {
-        LOG_ERROR("HAL_Serial", "Failed to initialize mutex");
+        int32_t hal_err = HAL_ERR_GENERIC;
+        HAL_SET_ERROR(hal_err, 0, "Failed to initialize mutex");
+        LOG_ERROR("HAL_Serial", "Failed to initialize mutex (hal_err=%d)", hal_err);
         OSAL_close(ctx->fd);
         OSAL_Free(ctx);
-        return OSAL_ERR_GENERIC;
+        return hal_err;
     }
 
     /* 保存配置 */
@@ -253,9 +261,13 @@ int32_t HAL_Serial_Write(hal_serial_handle_t handle, const void *buffer, uint32_
         }
         else if (ret < 0)
         {
-            LOG_ERROR("HAL_Serial", "Select error: %s", OSAL_StrError(OSAL_GetErrno()));
+            int32_t err = OSAL_GetErrno();
+            int32_t hal_err = HAL_ErrnoToError(err);
+            HAL_SET_ERROR(hal_err, err, "Select error: %s", OSAL_StrError(err));
+            LOG_ERROR("HAL_Serial", "Select error: %s (errno=%d, hal_err=%d)",
+                      OSAL_StrError(err), err, hal_err);
             OSAL_MutexUnlock(ctx->lock);
-            return OSAL_ERR_GENERIC;
+            return hal_err;
         }
     }
 
@@ -263,9 +275,13 @@ int32_t HAL_Serial_Write(hal_serial_handle_t handle, const void *buffer, uint32_
     written = OSAL_write(ctx->fd, buffer, size);
     if (written < 0)
     {
-        LOG_ERROR("HAL_Serial", "Write error: %s", OSAL_StrError(OSAL_GetErrno()));
+        int32_t err = OSAL_GetErrno();
+        int32_t hal_err = HAL_ErrnoToError(err);
+        HAL_SET_ERROR(hal_err, err, "Write error: %s", OSAL_StrError(err));
+        LOG_ERROR("HAL_Serial", "Write error: %s (errno=%d, hal_err=%d)",
+                  OSAL_StrError(err), err, hal_err);
         OSAL_MutexUnlock(ctx->lock);
-        return OSAL_ERR_GENERIC;
+        return hal_err;
     }
 
     OSAL_MutexUnlock(ctx->lock);
@@ -312,9 +328,13 @@ int32_t HAL_Serial_Read(hal_serial_handle_t handle, void *buffer, uint32_t size,
         }
         else if (ret < 0)
         {
-            LOG_ERROR("HAL_Serial", "Select error: %s", OSAL_StrError(OSAL_GetErrno()));
+            int32_t err = OSAL_GetErrno();
+            int32_t hal_err = HAL_ErrnoToError(err);
+            HAL_SET_ERROR(hal_err, err, "Select error: %s", OSAL_StrError(err));
+            LOG_ERROR("HAL_Serial", "Select error: %s (errno=%d, hal_err=%d)",
+                      OSAL_StrError(err), err, hal_err);
             OSAL_MutexUnlock(ctx->lock);
-            return OSAL_ERR_GENERIC;
+            return hal_err;
         }
     }
 
@@ -322,9 +342,13 @@ int32_t HAL_Serial_Read(hal_serial_handle_t handle, void *buffer, uint32_t size,
     nread = OSAL_read(ctx->fd, buffer, size);
     if (nread < 0)
     {
-        LOG_ERROR("HAL_Serial", "Read error: %s", OSAL_StrError(OSAL_GetErrno()));
+        int32_t err = OSAL_GetErrno();
+        int32_t hal_err = HAL_ErrnoToError(err);
+        HAL_SET_ERROR(hal_err, err, "Read error: %s", OSAL_StrError(err));
+        LOG_ERROR("HAL_Serial", "Read error: %s (errno=%d, hal_err=%d)",
+                  OSAL_StrError(err), err, hal_err);
         OSAL_MutexUnlock(ctx->lock);
-        return OSAL_ERR_GENERIC;
+        return hal_err;
     }
 
     OSAL_MutexUnlock(ctx->lock);
@@ -353,9 +377,13 @@ int32_t HAL_Serial_Flush(hal_serial_handle_t handle)
     /* 清空输入输出缓冲区 */
     if (0 != OSAL_tcflush(ctx->fd, OSAL_TCIOFLUSH))
     {
-        LOG_ERROR("HAL_Serial", "Flush error: %s", OSAL_StrError(OSAL_GetErrno()));
+        int32_t err = OSAL_GetErrno();
+        int32_t hal_err = HAL_ErrnoToError(err);
+        HAL_SET_ERROR(hal_err, err, "Flush error: %s", OSAL_StrError(err));
+        LOG_ERROR("HAL_Serial", "Flush error: %s (errno=%d, hal_err=%d)",
+                  OSAL_StrError(err), err, hal_err);
         OSAL_MutexUnlock(ctx->lock);
-        return OSAL_ERR_GENERIC;
+        return hal_err;
     }
 
     OSAL_MutexUnlock(ctx->lock);
@@ -387,9 +415,13 @@ int32_t HAL_Serial_SetConfig(hal_serial_handle_t handle,
     /* 获取当前配置 */
     if (0 != OSAL_tcgetattr(ctx->fd, &tty))
     {
-        LOG_ERROR("HAL_Serial", "Failed to get attributes: %s", OSAL_StrError(OSAL_GetErrno()));
+        int32_t err = OSAL_GetErrno();
+        int32_t hal_err = HAL_ErrnoToError(err);
+        HAL_SET_ERROR(hal_err, err, "Failed to get attributes: %s", OSAL_StrError(err));
+        LOG_ERROR("HAL_Serial", "Failed to get attributes: %s (errno=%d, hal_err=%d)",
+                  OSAL_StrError(err), err, hal_err);
         OSAL_MutexUnlock(ctx->lock);
-        return OSAL_ERR_GENERIC;
+        return hal_err;
     }
 
     /* 配置波特率 */
@@ -437,9 +469,13 @@ int32_t HAL_Serial_SetConfig(hal_serial_handle_t handle,
     /* 应用配置 */
     if (0 != OSAL_tcsetattr(ctx->fd, OSAL_TCSANOW, &tty))
     {
-        LOG_ERROR("HAL_Serial", "Failed to set attributes: %s", OSAL_StrError(OSAL_GetErrno()));
+        int32_t err = OSAL_GetErrno();
+        int32_t hal_err = HAL_ErrnoToError(err);
+        HAL_SET_ERROR(hal_err, err, "Failed to set attributes: %s", OSAL_StrError(err));
+        LOG_ERROR("HAL_Serial", "Failed to set attributes: %s (errno=%d, hal_err=%d)",
+                  OSAL_StrError(err), err, hal_err);
         OSAL_MutexUnlock(ctx->lock);
-        return OSAL_ERR_GENERIC;
+        return hal_err;
     }
 
     /* 更新内部配置 */

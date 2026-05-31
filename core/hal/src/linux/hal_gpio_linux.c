@@ -5,6 +5,7 @@
  ************************************************************************/
 
 #include "hal_gpio.h"
+#include "hal_error.h"
 #include "osal.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -82,9 +83,10 @@ static int32_t gpio_write_file(const char *path, const char *value)
 
     fd = OSAL_open(path, OSAL_O_WRONLY, 0);
     if (fd < 0) {
-        if (errno == EACCES) return OSAL_ERR_PERMISSION;
-        if (errno == ENOENT) return OSAL_ENOENT;
-        return OSAL_EIO;
+        int32_t err = errno;
+        int32_t hal_err = HAL_ErrnoToError(err);
+        HAL_SET_ERROR(hal_err, err, "Failed to open %s: %s", path, strerror(err));
+        return hal_err;
     }
 
     len = (uint32_t)strlen(value);
@@ -92,7 +94,10 @@ static int32_t gpio_write_file(const char *path, const char *value)
     OSAL_close(fd);
 
     if (written != (int32_t)len) {
-        return OSAL_EIO;
+        int32_t err = errno;
+        int32_t hal_err = HAL_ErrnoToError(err);
+        HAL_SET_ERROR(hal_err, err, "Failed to write to %s: %s", path, strerror(err));
+        return hal_err;
     }
 
     return OSAL_SUCCESS;
@@ -108,16 +113,20 @@ static int32_t gpio_read_file(const char *path, char *buffer, size_t size)
 
     fd = OSAL_open(path, OSAL_O_RDONLY, 0);
     if (fd < 0) {
-        if (errno == EACCES) return OSAL_ERR_PERMISSION;
-        if (errno == ENOENT) return OSAL_ENOENT;
-        return OSAL_EIO;
+        int32_t err = errno;
+        int32_t hal_err = HAL_ErrnoToError(err);
+        HAL_SET_ERROR(hal_err, err, "Failed to open %s: %s", path, strerror(err));
+        return hal_err;
     }
 
     len = OSAL_read(fd, buffer, (uint32_t)(size - 1));
     OSAL_close(fd);
 
     if (len < 0) {
-        return OSAL_EIO;
+        int32_t err = errno;
+        int32_t hal_err = HAL_ErrnoToError(err);
+        HAL_SET_ERROR(hal_err, err, "Failed to read from %s: %s", path, strerror(err));
+        return hal_err;
     }
 
     buffer[len] = '\0';
@@ -394,7 +403,10 @@ int32_t HAL_GPIO_SetInterrupt(uint32_t gpio_num, hal_gpio_edge_t edge,
     snprintf(path, sizeof(path), "/sys/class/gpio/gpio%u/value", gpio_num);
     fd = OSAL_open(path, OSAL_O_RDONLY, 0);
     if (fd < 0) {
-        return OSAL_EIO;
+        int32_t err = errno;
+        int32_t hal_err = HAL_ErrnoToError(err);
+        HAL_SET_ERROR(hal_err, err, "Failed to open %s: %s", path, strerror(err));
+        return hal_err;
     }
 
     /* 初始化中断上下文 */
