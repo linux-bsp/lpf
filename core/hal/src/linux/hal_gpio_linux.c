@@ -42,13 +42,15 @@ static osal_mutex_t *gpio_isr_mutex = NULL;
  */
 static int32_t gpio_module_init(void)
 {
+    int32_t ret;
+
     if (gpio_isr_mutex != NULL) {
         return OSAL_SUCCESS;  /* 已初始化 */
     }
 
-    gpio_isr_mutex = OSAL_MutexCreate();
-    if (gpio_isr_mutex == NULL) {
-        return OSAL_ERR_GENERIC;
+    ret = OSAL_MutexCreate(&gpio_isr_mutex);
+    if (ret != OSAL_SUCCESS) {
+        return ret;
     }
 
     return OSAL_SUCCESS;
@@ -60,7 +62,7 @@ static int32_t gpio_module_init(void)
 static void gpio_module_cleanup(void)
 {
     if (gpio_isr_mutex != NULL) {
-        OSAL_MutexDestroy(gpio_isr_mutex);
+        OSAL_MutexDelete(gpio_isr_mutex);
         gpio_isr_mutex = NULL;
     }
 }
