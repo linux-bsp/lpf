@@ -11,6 +11,8 @@
 #include <string.h>
 #include <poll.h>
 #include <errno.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 /*===========================================================================
  * GPIO中断监听线程管理
