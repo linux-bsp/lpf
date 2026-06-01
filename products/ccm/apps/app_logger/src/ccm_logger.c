@@ -4,8 +4,8 @@
 #include <unistd.h>
 
 /* 全局变量 */
-static pmc_log_ringbuffer_t *g_log_ring = NULL;
-static pmc_process_heartbeat_t *g_heartbeat = NULL;
+static ccm_log_ringbuffer_t *g_log_ring = NULL;
+static ccm_process_heartbeat_t *g_heartbeat = NULL;
 static volatile bool g_running = true;
 
 /* 线程ID */
@@ -25,7 +25,7 @@ static void signal_handler(int32_t sig)
 /* 日志收集线程 */
 static void *log_collector_thread(void *arg)
 {
-    char log_entry[PMC_LOG_ENTRY_SIZE];
+    char log_entry[CCM_LOG_ENTRY_SIZE];
     int32_t ret;
 
     (void)arg;
@@ -34,7 +34,7 @@ static void *log_collector_thread(void *arg)
 
     while (g_running) {
         /* 更新心跳 */
-        PMC_Heartbeat_Update(g_heartbeat, CCM_PROCESS_LOGGER);
+        CCM_Heartbeat_Update(g_heartbeat, CCM_PROCESS_LOGGER);
 
         /* 从共享内存读取日志 */
         ret = CCM_Log_Read(g_log_ring, log_entry, sizeof(log_entry));
@@ -53,7 +53,7 @@ static void *log_collector_thread(void *arg)
 
 
 /* 初始化 */
-int32_t PMC_Logger_Init(void)
+int32_t CCM_Logger_Init(void)
 {
     int32_t ret;
 
@@ -71,7 +71,7 @@ int32_t PMC_Logger_Init(void)
     }
 
     /* 初始化心跳 */
-    ret = PMC_Heartbeat_Init(&g_heartbeat);
+    ret = CCM_Heartbeat_Init(&g_heartbeat);
     if (ret != OSAL_SUCCESS) {
         LOG_ERROR("LOGGER", "初始化心跳失败: %d", ret);
         CCM_Log_Cleanup(g_log_ring);
@@ -84,7 +84,7 @@ int32_t PMC_Logger_Init(void)
 
 
 /* 主循环 */
-int32_t PMC_Logger_Run(void)
+int32_t CCM_Logger_Run(void)
 {
     int32_t ret;
 
@@ -112,12 +112,12 @@ int32_t PMC_Logger_Run(void)
 
 
 /* 清理 */
-void PMC_Logger_Cleanup(void)
+void CCM_Logger_Cleanup(void)
 {
     LOG_INFO("LOGGER", "Logger进程清理...");
 
     if (g_heartbeat) {
-        PMC_Heartbeat_Cleanup(g_heartbeat);
+        CCM_Heartbeat_Cleanup(g_heartbeat);
         g_heartbeat = NULL;
     }
 

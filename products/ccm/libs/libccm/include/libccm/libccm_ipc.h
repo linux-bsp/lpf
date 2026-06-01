@@ -72,17 +72,17 @@ typedef struct {
 /* 进程心跳 */
 typedef struct {
     _Atomic uint64_t heartbeat_us[CCM_PROCESS_MAX];  /* 心跳时间戳(微秒) */
-} pmc_process_heartbeat_t;
+} ccm_process_heartbeat_t;
 
 /* 日志环形缓冲区 */
-#define PMC_LOG_ENTRY_SIZE  256
-#define PMC_LOG_ENTRY_COUNT (CCM_SHM_LOG_SIZE / PMC_LOG_ENTRY_SIZE)
+#define CCM_LOG_ENTRY_SIZE  256
+#define PMC_LOG_ENTRY_COUNT (CCM_SHM_LOG_SIZE / CCM_LOG_ENTRY_SIZE)
 
 typedef struct {
-    char entries[PMC_LOG_ENTRY_COUNT][PMC_LOG_ENTRY_SIZE];
+    char entries[PMC_LOG_ENTRY_COUNT][CCM_LOG_ENTRY_SIZE];
     _Atomic uint32_t write_index;           /* 写索引 */
     _Atomic uint32_t read_index;            /* 读索引 */
-} pmc_log_ringbuffer_t;
+} ccm_log_ringbuffer_t;
 
 /* IPC辅助函数 - 遥测缓存操作 */
 int32_t CCM_TM_Cache_Init(ccm_tm_cache_t **cache);
@@ -99,16 +99,16 @@ int32_t CCM_Status_Read(ccm_system_status_t *status, ccm_system_status_t *out_st
 void CCM_Status_Cleanup(ccm_system_status_t *status);
 
 /* IPC辅助函数 - 进程心跳操作 */
-int32_t PMC_Heartbeat_Init(pmc_process_heartbeat_t **heartbeat);
-int32_t PMC_Heartbeat_Update(pmc_process_heartbeat_t *heartbeat, ccm_process_id_t process_id);
-int32_t PMC_Heartbeat_Check(pmc_process_heartbeat_t *heartbeat, ccm_process_id_t process_id,
+int32_t CCM_Heartbeat_Init(ccm_process_heartbeat_t **heartbeat);
+int32_t CCM_Heartbeat_Update(ccm_process_heartbeat_t *heartbeat, ccm_process_id_t process_id);
+int32_t CCM_Heartbeat_Check(ccm_process_heartbeat_t *heartbeat, ccm_process_id_t process_id,
                            uint32_t timeout_ms, bool *alive);
-void PMC_Heartbeat_Cleanup(pmc_process_heartbeat_t *heartbeat);
+void CCM_Heartbeat_Cleanup(ccm_process_heartbeat_t *heartbeat);
 
 /* IPC辅助函数 - 日志操作 */
-int32_t CCM_Log_Init(pmc_log_ringbuffer_t **log_ring);
-int32_t CCM_Log_Write(pmc_log_ringbuffer_t *log_ring, const char *log_entry);
-int32_t CCM_Log_Read(pmc_log_ringbuffer_t *log_ring, char *log_entry, uint32_t size);
-void CCM_Log_Cleanup(pmc_log_ringbuffer_t *log_ring);
+int32_t CCM_Log_Init(ccm_log_ringbuffer_t **log_ring);
+int32_t CCM_Log_Write(ccm_log_ringbuffer_t *log_ring, const char *log_entry);
+int32_t CCM_Log_Read(ccm_log_ringbuffer_t *log_ring, char *log_entry, uint32_t size);
+void CCM_Log_Cleanup(ccm_log_ringbuffer_t *log_ring);
 
 #endif /* LIBCCM_IPC_H */
