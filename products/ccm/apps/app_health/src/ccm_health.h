@@ -1,5 +1,5 @@
-#ifndef PMC_HEALTH_H
-#define PMC_HEALTH_H
+#ifndef CCM_HEALTH_H
+#define CCM_HEALTH_H
 
 #include "osal.h"
 
@@ -12,4 +12,4 @@ int32_t CCM_Health_Run(void);
 /* Health进程清理 */
 void CCM_Health_Cleanup(void);
 
-#endif /* PMC_HEALTH_H */
+#endif /* CCM_HEALTH_H */

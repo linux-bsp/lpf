@@ -7,10 +7,10 @@
 #include "sys/osal_time.h"
 
 /* 共享内存名称定义 */
-#define CCM_SHM_TELEMETRY_CACHE    "/pmc_tm_cache"
-#define CCM_SHM_SYSTEM_STATUS      "/pmc_status"
-#define CCM_SHM_PROCESS_HEARTBEAT  "/pmc_heartbeat"
-#define CCM_SHM_LOG_RINGBUFFER     "/pmc_log_ring"
+#define CCM_SHM_TELEMETRY_CACHE    "/ccm_tm_cache"
+#define CCM_SHM_SYSTEM_STATUS      "/ccm_status"
+#define CCM_SHM_PROCESS_HEARTBEAT  "/ccm_heartbeat"
+#define CCM_SHM_LOG_RINGBUFFER     "/ccm_log_ring"
 
 /* 共享内存大小定义 */
 #define CCM_SHM_TM_CACHE_SIZE      (4 * 1024 * 1024)  /* 4MB */
@@ -76,10 +76,10 @@ typedef struct {
 
 /* 日志环形缓冲区 */
 #define CCM_LOG_ENTRY_SIZE  256
-#define PMC_LOG_ENTRY_COUNT (CCM_SHM_LOG_SIZE / CCM_LOG_ENTRY_SIZE)
+#define CCM_LOG_ENTRY_COUNT (CCM_SHM_LOG_SIZE / CCM_LOG_ENTRY_SIZE)
 
 typedef struct {
-    char entries[PMC_LOG_ENTRY_COUNT][CCM_LOG_ENTRY_SIZE];
+    char entries[CCM_LOG_ENTRY_COUNT][CCM_LOG_ENTRY_SIZE];
     _Atomic uint32_t write_index;           /* 写索引 */
     _Atomic uint32_t read_index;            /* 读索引 */
 } ccm_log_ringbuffer_t;

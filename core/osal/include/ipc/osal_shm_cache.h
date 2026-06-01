@@ -36,7 +36,7 @@ typedef struct {
     uint8_t data[OSAL_SHM_CACHE_MAX_DATA_SIZE];  /* 数据 */
     uint32_t data_len;              /* 数据长度 */
     uint64_t timestamp_us;          /* 时间戳（微秒） */
-    uint32_t validity_ms;           /* 有效期（毫秒） */
+    uint32_t data_validity_ms;      /* 数据有效期（毫秒） */
     osal_cache_status_t status;     /* 状态 */
     bool valid;                     /* 是否曾经更新过 */
     uint32_t update_count;          /* 更新次数 */
@@ -91,12 +91,12 @@ int32_t OSAL_CacheDelete(osal_id_t cache_id);
  * @param[in] entry_id 条目ID
  * @param[in] data 数据
  * @param[in] data_len 数据长度
- * @param[in] validity_ms 有效期（毫秒）
+ * @param[in] data_validity_ms 数据有效期（毫秒）
  * @return OSAL_SUCCESS 成功
  */
 int32_t OSAL_CacheWrite(osal_id_t cache_id, uint32_t entry_id,
                         const uint8_t *data, uint32_t data_len,
-                        uint32_t validity_ms);
+                        uint32_t data_validity_ms);
 
 /**
  * @brief 读取缓存条目（消费者调用，快速读取<50μs）

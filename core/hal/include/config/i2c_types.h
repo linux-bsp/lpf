@@ -4,8 +4,8 @@
  * 定义I2C硬件接口使用的基础数据类型
  ************************************************************************/
 
-#ifndef I2C_TYPES_H
-#define I2C_TYPES_H
+#ifndef HAL_I2C_TYPES_H
+#define HAL_I2C_TYPES_H
 
 #include "osal_types.h"
 
@@ -33,4 +33,4 @@ typedef struct
 #define I2C_M_TEN       0x0010  /* 10位地址 */
 #define I2C_M_NOSTART   0x4000  /* 不发送START */
 
-#endif /* I2C_TYPES_H */
+#endif /* HAL_I2C_TYPES_H */

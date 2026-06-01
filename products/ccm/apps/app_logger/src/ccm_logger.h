@@ -1,5 +1,5 @@
-#ifndef PMC_LOGGER_H
-#define PMC_LOGGER_H
+#ifndef CCM_LOGGER_H
+#define CCM_LOGGER_H
 
 #include "osal.h"
 
@@ -12,4 +12,4 @@ int32_t CCM_Logger_Run(void);
 /* Logger进程清理 */
 void CCM_Logger_Cleanup(void);
 
-#endif /* PMC_LOGGER_H */
+#endif /* CCM_LOGGER_H */

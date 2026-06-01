@@ -12,14 +12,14 @@ int32_t CCM_TM_Cache_Init(ccm_tm_cache_t **cache)
     ret = OSAL_ShmCreate(CCM_SHM_TELEMETRY_CACHE, CCM_SHM_TM_CACHE_SIZE,
                          OSAL_SHM_CREATE | OSAL_SHM_RDWR, &shm);
     if (ret != OSAL_SUCCESS) {
-        LOG_ERROR("LIBPMC", "创建遥测缓存共享内存失败: %d", ret);
+        LOG_ERROR("LIBCCM", "创建遥测缓存共享内存失败: %d", ret);
         return ret;
     }
 
     /* 映射共享内存 */
     ret = OSAL_ShmMap(shm, 0, 0, OSAL_SHM_RDWR, (void **)cache);
     if (ret != OSAL_SUCCESS) {
-        LOG_ERROR("LIBPMC", "映射遥测缓存失败: %d", ret);
+        LOG_ERROR("LIBCCM", "映射遥测缓存失败: %d", ret);
         OSAL_ShmClose(shm);
         return ret;
     }
@@ -37,7 +37,7 @@ int32_t CCM_TM_Cache_Init(ccm_tm_cache_t **cache)
         /* 创建读写锁 */
         ret = OSAL_MutexCreate(&entry->rwlock);
         if (ret != OSAL_SUCCESS) {
-            LOG_ERROR("LIBPMC", "创建遥测锁失败: %d", ret);
+            LOG_ERROR("LIBCCM", "创建遥测锁失败: %d", ret);
             return ret;
         }
     }
@@ -151,14 +151,14 @@ int32_t CCM_Status_Init(ccm_system_status_t **status)
     ret = OSAL_ShmCreate(CCM_SHM_SYSTEM_STATUS, CCM_SHM_STATUS_SIZE,
                          OSAL_SHM_CREATE | OSAL_SHM_RDWR, &shm);
     if (ret != OSAL_SUCCESS) {
-        LOG_ERROR("LIBPMC", "创建系统状态共享内存失败: %d", ret);
+        LOG_ERROR("LIBCCM", "创建系统状态共享内存失败: %d", ret);
         return ret;
     }
 
     /* 映射共享内存 */
     ret = OSAL_ShmMap(shm, 0, 0, OSAL_SHM_RDWR, (void **)status);
     if (ret != OSAL_SUCCESS) {
-        LOG_ERROR("LIBPMC", "映射系统状态失败: %d", ret);
+        LOG_ERROR("LIBCCM", "映射系统状态失败: %d", ret);
         OSAL_ShmClose(shm);
         return ret;
     }
@@ -176,7 +176,7 @@ int32_t CCM_Status_Init(ccm_system_status_t **status)
     /* 创建互斥锁 */
     ret = OSAL_MutexCreate(&(*status)->mutex);
     if (ret != OSAL_SUCCESS) {
-        LOG_ERROR("LIBPMC", "创建状态锁失败: %d", ret);
+        LOG_ERROR("LIBCCM", "创建状态锁失败: %d", ret);
         return ret;
     }
 
@@ -257,14 +257,14 @@ int32_t CCM_Heartbeat_Init(ccm_process_heartbeat_t **heartbeat)
     ret = OSAL_ShmCreate(CCM_SHM_PROCESS_HEARTBEAT, CCM_SHM_HEARTBEAT_SIZE,
                          OSAL_SHM_CREATE | OSAL_SHM_RDWR, &shm);
     if (ret != OSAL_SUCCESS) {
-        LOG_ERROR("LIBPMC", "创建心跳共享内存失败: %d", ret);
+        LOG_ERROR("LIBCCM", "创建心跳共享内存失败: %d", ret);
         return ret;
     }
 
     /* 映射共享内存 */
     ret = OSAL_ShmMap(shm, 0, 0, OSAL_SHM_RDWR, (void **)heartbeat);
     if (ret != OSAL_SUCCESS) {
-        LOG_ERROR("LIBPMC", "映射心跳失败: %d", ret);
+        LOG_ERROR("LIBCCM", "映射心跳失败: %d", ret);
         OSAL_ShmClose(shm);
         return ret;
     }
@@ -327,14 +327,14 @@ int32_t CCM_Log_Init(ccm_log_ringbuffer_t **log_ring)
     ret = OSAL_ShmCreate(CCM_SHM_LOG_RINGBUFFER, CCM_SHM_LOG_SIZE,
                          OSAL_SHM_CREATE | OSAL_SHM_RDWR, &shm);
     if (ret != OSAL_SUCCESS) {
-        LOG_ERROR("LIBPMC", "创建日志共享内存失败: %d", ret);
+        LOG_ERROR("LIBCCM", "创建日志共享内存失败: %d", ret);
         return ret;
     }
 
     /* 映射共享内存 */
     ret = OSAL_ShmMap(shm, 0, 0, OSAL_SHM_RDWR, (void **)log_ring);
     if (ret != OSAL_SUCCESS) {
-        LOG_ERROR("LIBPMC", "映射日志缓冲区失败: %d", ret);
+        LOG_ERROR("LIBCCM", "映射日志缓冲区失败: %d", ret);
         OSAL_ShmClose(shm);
         return ret;
     }
@@ -358,7 +358,7 @@ int32_t CCM_Log_Write(ccm_log_ringbuffer_t *log_ring, const char *log_entry)
     }
 
     write_idx = log_ring->write_index;
-    next_idx = (write_idx + 1) % PMC_LOG_ENTRY_COUNT;
+    next_idx = (write_idx + 1) % CCM_LOG_ENTRY_COUNT;
 
     /* 检查是否满 */
     if (next_idx == log_ring->read_index) {
@@ -396,7 +396,7 @@ int32_t CCM_Log_Read(ccm_log_ringbuffer_t *log_ring, char *log_entry, uint32_t s
     log_entry[size - 1] = '\0';
 
     /* 更新读索引 */
-    log_ring->read_index = (read_idx + 1) % PMC_LOG_ENTRY_COUNT;
+    log_ring->read_index = (read_idx + 1) % CCM_LOG_ENTRY_COUNT;
 
     return OSAL_SUCCESS;
 }

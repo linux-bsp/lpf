@@ -297,7 +297,7 @@ int32_t OSAL_CacheDelete(osal_id_t cache_id)
  */
 int32_t OSAL_CacheWrite(osal_id_t cache_id, uint32_t entry_id,
                         const uint8_t *data, uint32_t data_len,
-                        uint32_t validity_ms)
+                        uint32_t data_validity_ms)
 {
     cache_descriptor_t *cache;
     osal_cache_entry_t *entry;
@@ -327,7 +327,7 @@ int32_t OSAL_CacheWrite(osal_id_t cache_id, uint32_t entry_id,
 
     /* 更新元数据 */
     entry->timestamp_us = get_monotonic_us();
-    entry->validity_ms = validity_ms;
+    entry->data_validity_ms = data_validity_ms;
     entry->status = OSAL_CACHE_STATUS_FRESH;
     entry->valid = true;
     entry->update_count++;
@@ -384,7 +384,7 @@ int32_t OSAL_CacheRead(osal_id_t cache_id, uint32_t entry_id,
     /* 判断新鲜度 */
     if (entry->status == OSAL_CACHE_STATUS_INVALID) {
         status = OSAL_CACHE_STATUS_INVALID;
-    } else if (age_ms < entry->validity_ms) {
+    } else if (age_ms < entry->data_validity_ms) {
         status = OSAL_CACHE_STATUS_FRESH;
     } else {
         status = OSAL_CACHE_STATUS_STALE;
@@ -511,7 +511,7 @@ int32_t OSAL_CacheGetStats(osal_id_t cache_id,
 
         if (entry->status == OSAL_CACHE_STATUS_INVALID) {
             /* 已标记为无效 */
-        } else if (age_ms < entry->validity_ms) {
+        } else if (age_ms < entry->data_validity_ms) {
             (*fresh_count)++;
         } else {
             (*stale_count)++;

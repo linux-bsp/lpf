@@ -1,5 +1,5 @@
-#ifndef PMC_SUPERVISOR_H
-#define PMC_SUPERVISOR_H
+#ifndef CCM_SUPERVISOR_H
+#define CCM_SUPERVISOR_H
 
 #include "osal.h"
 
@@ -12,4 +12,4 @@ int32_t CCM_Supervisor_Run(void);
 /* Supervisor进程清理 */
 void CCM_Supervisor_Cleanup(void);
 
-#endif /* PMC_SUPERVISOR_H */
+#endif /* CCM_SUPERVISOR_H */

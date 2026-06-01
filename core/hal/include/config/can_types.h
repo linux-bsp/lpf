@@ -4,8 +4,8 @@
  * 定义CAN硬件接口使用的基础数据类型
  ************************************************************************/
 
-#ifndef CAN_TYPES_H
-#define CAN_TYPES_H
+#ifndef HAL_CAN_TYPES_H
+#define HAL_CAN_TYPES_H
 
 #include "osal_types.h"
 
@@ -23,4 +23,4 @@ typedef struct
     uint32_t     timestamp;   /* 时间戳 (可选) */
 } hal_can_frame_t;
 
-#endif /* CAN_TYPES_H */
+#endif /* HAL_CAN_TYPES_H */

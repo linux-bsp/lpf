@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
     (void)argc;
     (void)argv;
 
-    LOG_INFO("MAIN", "PMC Supervisor进程启动");
+    LOG_INFO("MAIN", "CCM Supervisor进程启动");
 
     /* 初始化 */
     ret = CCM_Supervisor_Init();
@@ -22,6 +22,6 @@ int main(int argc, char *argv[])
     /* 清理 */
     CCM_Supervisor_Cleanup();
 
-    LOG_INFO("MAIN", "PMC Supervisor进程退出: %d", ret);
+    LOG_INFO("MAIN", "CCM Supervisor进程退出: %d", ret);
     return (ret == OSAL_SUCCESS) ? 0 : 1;
 }

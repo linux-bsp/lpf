@@ -4,8 +4,8 @@
  * 定义SPI硬件接口使用的基础数据类型
  ************************************************************************/
 
-#ifndef SPI_TYPES_H
-#define SPI_TYPES_H
+#ifndef HAL_SPI_TYPES_H
+#define HAL_SPI_TYPES_H
 
 #include "osal_types.h"
 
@@ -35,4 +35,4 @@ typedef struct
     uint8_t        cs_change;   /* 传输后改变CS状态 */
 } hal_spi_transfer_t;
 
-#endif /* SPI_TYPES_H */
+#endif /* HAL_SPI_TYPES_H */

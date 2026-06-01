@@ -1,12 +1,12 @@
-#ifndef PMC_COMM_H
-#define PMC_COMM_H
+#ifndef CCM_COMM_H
+#define CCM_COMM_H
 
 #include "osal.h"
 
 /* 共享内存名称 */
-#define SHM_TELEMETRY_CACHE    "/pmc_tm_cache"
-#define SHM_SYSTEM_STATUS      "/pmc_status"
-#define SHM_HEARTBEAT          "/pmc_heartbeat"
+#define SHM_TELEMETRY_CACHE    "/ccm_tm_cache"
+#define SHM_SYSTEM_STATUS      "/ccm_status"
+#define SHM_HEARTBEAT          "/ccm_heartbeat"
 
 /* 共享内存大小 */
 #define SHM_TM_CACHE_SIZE      (4 * 1024 * 1024)  /* 4MB */
@@ -59,4 +59,4 @@ int32_t CCM_Comm_Run(void);
 /* Communication进程清理 */
 void CCM_Comm_Cleanup(void);
 
-#endif /* PMC_COMM_H */
+#endif /* CCM_COMM_H */

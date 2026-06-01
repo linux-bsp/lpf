@@ -69,7 +69,7 @@ int32_t CCM_Comm_Init(void)
 
 /* 处理遥测请求 */
 __attribute__((unused))
-static int32_t handle_telemetry_request(const pmc_tm_request_t *req, pmc_tm_response_t *resp)
+static int32_t handle_telemetry_request(const ccm_tm_request_t *req, ccm_tm_response_t *resp)
 {
     uint8_t data[CCM_TM_MAX_DATA_SIZE];
     uint32_t size;
@@ -93,7 +93,7 @@ static int32_t handle_telemetry_request(const pmc_tm_request_t *req, pmc_tm_resp
 
 /* 处理遥控命令 */
 __attribute__((unused))
-static int32_t handle_telecommand(const pmc_tc_frame_t *tc)
+static int32_t handle_telecommand(const ccm_tc_frame_t *tc)
 {
     LOG_INFO("COMM", "处理遥控命令: cmd_type=%d, param=%u", tc->cmd_type, tc->param);
 
@@ -123,26 +123,26 @@ int32_t CCM_Comm_Run(void)
 
         /* 模拟处理 */
         #if 0
-        pmc_can_frame_t frame;
+        ccm_can_frame_t frame;
         /* 假设从CAN接收到帧 */
 
-        if (frame.can_id == PMC_CAN_ID_TM_REQUEST) {
+        if (frame.can_id == CCM_CAN_ID_TM_REQUEST) {
             /* 遥测请求 */
-            pmc_tm_request_t req;
-            pmc_tm_response_t resp;
+            ccm_tm_request_t req;
+            ccm_tm_response_t resp;
 
-            if (PMC_Protocol_ParseTM_Request(&frame, &req) == OSAL_SUCCESS) {
+            if (CCM_Protocol_ParseTM_Request(&frame, &req) == OSAL_SUCCESS) {
                 if (handle_telemetry_request(&req, &resp) == OSAL_SUCCESS) {
-                    pmc_can_frame_t resp_frame;
-                    PMC_Protocol_BuildTM_Response(&resp, &resp_frame);
+                    ccm_can_frame_t resp_frame;
+                    CCM_Protocol_BuildTM_Response(&resp, &resp_frame);
                     /* 发送应答到CAN */
                 }
             }
-        } else if (frame.can_id == PMC_CAN_ID_TC_CMD) {
+        } else if (frame.can_id == CCM_CAN_ID_TC_CMD) {
             /* 遥控命令 */
-            pmc_tc_frame_t tc;
+            ccm_tc_frame_t tc;
 
-            if (PMC_Protocol_ParseTC(&frame, &tc) == OSAL_SUCCESS) {
+            if (CCM_Protocol_ParseTC(&frame, &tc) == OSAL_SUCCESS) {
                 handle_telecommand(&tc);
             }
         }
