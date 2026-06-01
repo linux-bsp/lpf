@@ -5,8 +5,8 @@
  * 支持多平台：Linux/RTOS/VxWorks/FreeRTOS等
  ************************************************************************/
 
-#ifndef COMMON_TYPES_H
-#define COMMON_TYPES_H
+#ifndef OSAL_TYPES_H
+#define OSAL_TYPES_H
 
 /* 包含平台检测头文件（提供字节序等宏定义） */
 #include "osal_platform.h"
@@ -388,4 +388,4 @@ OSAL_STATIC_ASSERT(sizeof(uint64_t) == 8, "uint64_must_be_8_bytes");
 #define OSAL_BIT_TEST(val, bit)  (((val) & OSAL_BIT(bit)) != 0)
 #define OSAL_BIT_TOGGLE(val, bit) ((val) ^= OSAL_BIT(bit))
 
-#endif /* COMMON_TYPES_H */
+#endif /* OSAL_TYPES_H */
