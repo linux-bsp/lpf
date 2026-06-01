@@ -29,30 +29,30 @@ const tc_tm_invalidation_map_t g_invalidation_map[] = {
         .affected_count = 1
     },
     {
-        .tc_function = TC_SERVER_POWER_OFF,
-        .affected_tm = { TM_SERVER_POWER_STATUS },
+        .tc_function = TC_POWER_OFF,
+        .affected_tm = { TM_POWER_STATUS },
         .affected_count = 1
     },
     {
-        .tc_function = TC_SERVER_POWER_RESET,
-        .affected_tm = { TM_SERVER_POWER_STATUS, TM_SERVER_CPU_TEMP },
+        .tc_function = TC_POWER_RESET,
+        .affected_tm = { TM_POWER_STATUS, TM_CPU_TEMP },
         .affected_count = 2
     },
     {
-        .tc_function = TC_SERVER_POWER_CYCLE,
-        .affected_tm = { TM_SERVER_POWER_STATUS, TM_SERVER_CPU_TEMP },
+        .tc_function = TC_POWER_CYCLE,
+        .affected_tm = { TM_POWER_STATUS, TM_CPU_TEMP },
         .affected_count = 2
     },
 
     /* 服务器复位 → 影响服务器状态遥测 */
     {
-        .tc_function = TC_SERVER_SOFT_RESET,
-        .affected_tm = { TM_SERVER_POWER_STATUS, TM_SERVER_CPU_TEMP },
+        .tc_function = TC_SOFT_RESET,
+        .affected_tm = { TM_POWER_STATUS, TM_CPU_TEMP },
         .affected_count = 2
     },
     {
-        .tc_function = TC_SERVER_HARD_RESET,
-        .affected_tm = { TM_SERVER_POWER_STATUS, TM_SERVER_CPU_TEMP },
+        .tc_function = TC_HARD_RESET,
+        .affected_tm = { TM_POWER_STATUS, TM_CPU_TEMP },
         .affected_count = 2
     },
 
