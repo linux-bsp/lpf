@@ -5,7 +5,7 @@
 
 /* 全局变量 */
 static pmc_process_heartbeat_t *g_heartbeat = NULL;
-static pmc_system_status_t *g_status = NULL;
+static ccm_system_status_t *g_status = NULL;
 static volatile bool g_running = true;
 
 /* 线程ID */
@@ -34,16 +34,16 @@ static void *satellite_heartbeat_thread(void *arg)
     LOG_INFO("HEALTH", "卫星心跳线程启动");
 
     while (g_running) {
-        pmc_system_status_t status;
+        ccm_system_status_t status;
 
         /* 更新进程心跳 */
-        PMC_Heartbeat_Update(g_heartbeat, PMC_PROCESS_HEALTH);
+        PMC_Heartbeat_Update(g_heartbeat, CCM_PROCESS_HEALTH);
 
         /* TODO: 发送心跳到卫星平台（CAN） */
         LOG_DEBUG("HEALTH", "发送卫星心跳: seq=%u", sequence);
 
         /* TODO: 监测外设状态 */
-        if (PMC_Status_Read(g_status, &status) == OSAL_SUCCESS) {
+        if (CCM_Status_Read(g_status, &status) == OSAL_SUCCESS) {
             if (!status.server_online) {
                 LOG_WARN("HEALTH", "服务器离线");
             }
@@ -147,7 +147,7 @@ int32_t PMC_Health_Init(void)
     }
 
     /* 初始化系统状态 */
-    ret = PMC_Status_Init(&g_status);
+    ret = CCM_Status_Init(&g_status);
     if (ret != OSAL_SUCCESS) {
         LOG_ERROR("HEALTH", "初始化系统状态失败: %d", ret);
         PMC_Heartbeat_Cleanup(g_heartbeat);
@@ -217,7 +217,7 @@ void PMC_Health_Cleanup(void)
     }
 
     if (g_status) {
-        PMC_Status_Cleanup(g_status);
+        CCM_Status_Cleanup(g_status);
         g_status = NULL;
     }
 

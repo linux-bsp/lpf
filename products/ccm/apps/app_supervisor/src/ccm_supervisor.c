@@ -12,16 +12,16 @@ static volatile bool g_running = true;
 typedef struct {
     const char *name;
     const char *path;
-    pmc_process_id_t id;
+    ccm_process_id_t id;
     osal_id_t pid;
     uint32_t restart_count;
 } process_info_t;
 
 static process_info_t g_processes[] = {
-    {"ccm_comm",      "./ccm_comm",      PMC_PROCESS_COMM,      0, 0},
-    {"ccm_collector", "./ccm_collector", PMC_PROCESS_COLLECTOR, 0, 0},
-    {"ccm_health",    "./ccm_health",    PMC_PROCESS_HEALTH,    0, 0},
-    {"ccm_logger",    "./ccm_logger",    PMC_PROCESS_LOGGER,    0, 0},
+    {"ccm_comm",      "./ccm_comm",      CCM_PROCESS_COMM,      0, 0},
+    {"ccm_collector", "./ccm_collector", CCM_PROCESS_COLLECTOR, 0, 0},
+    {"ccm_health",    "./ccm_health",    CCM_PROCESS_HEALTH,    0, 0},
+    {"ccm_logger",    "./ccm_logger",    CCM_PROCESS_LOGGER,    0, 0},
 };
 
 #define PROCESS_COUNT (sizeof(g_processes) / sizeof(g_processes[0]))
@@ -170,7 +170,7 @@ int32_t PMC_Supervisor_Run(void)
     /* 监控循环 */
     while (g_running) {
         /* 更新自己的心跳 */
-        PMC_Heartbeat_Update(g_heartbeat, PMC_PROCESS_SUPERVISOR);
+        PMC_Heartbeat_Update(g_heartbeat, CCM_PROCESS_SUPERVISOR);
 
         /* 检查子进程心跳 */
         check_process_heartbeat();

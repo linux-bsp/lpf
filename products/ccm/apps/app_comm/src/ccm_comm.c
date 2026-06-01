@@ -31,7 +31,7 @@ int32_t PMC_Comm_Init(void)
     OSAL_SignalRegister(SIGINT, signal_handler);
 
     /* 初始化遥测缓存 */
-    ret = PMC_TM_Cache_Init(&g_tm_cache);
+    ret = CCM_TM_Cache_Init(&g_tm_cache);
     if (ret != OSAL_SUCCESS) {
         LOG_ERROR("COMM", "初始化遥测缓存失败: %d", ret);
         return ret;
@@ -41,7 +41,7 @@ int32_t PMC_Comm_Init(void)
     ret = PMC_Heartbeat_Init(&g_heartbeat);
     if (ret != OSAL_SUCCESS) {
         LOG_ERROR("COMM", "初始化心跳失败: %d", ret);
-        PMC_TM_Cache_Cleanup(g_tm_cache);
+        CCM_TM_Cache_Cleanup(g_tm_cache);
         return ret;
     }
 
@@ -71,12 +71,12 @@ int32_t PMC_Comm_Init(void)
 __attribute__((unused))
 static int32_t handle_telemetry_request(const pmc_tm_request_t *req, pmc_tm_response_t *resp)
 {
-    uint8_t data[PMC_TM_MAX_DATA_SIZE];
+    uint8_t data[CCM_TM_MAX_DATA_SIZE];
     uint32_t size;
-    pmc_tm_freshness_t freshness;
+    ccm_tm_freshness_t freshness;
 
     /* 从缓存读取遥测数据 */
-    int32_t ret = PMC_TM_Cache_Read(g_tm_cache, req->tm_type, data, &size, &freshness);
+    int32_t ret = CCM_TM_Cache_Read(g_tm_cache, req->tm_type, data, &size, &freshness);
     if (ret != OSAL_SUCCESS) {
         LOG_WARN("COMM", "读取遥测失败: tm_type=%d", req->tm_type);
         return ret;
@@ -113,7 +113,7 @@ int32_t PMC_Comm_Run(void)
 
     while (g_running) {
         /* 更新心跳 */
-        PMC_Heartbeat_Update(g_heartbeat, PMC_PROCESS_COMM);
+        PMC_Heartbeat_Update(g_heartbeat, CCM_PROCESS_COMM);
 
         /* TODO: 实现CAN接收和处理
          * 1. 从CAN总线接收帧
@@ -162,7 +162,7 @@ void PMC_Comm_Cleanup(void)
     LOG_INFO("COMM", "Communication进程清理...");
 
     if (g_tm_cache) {
-        PMC_TM_Cache_Cleanup(g_tm_cache);
+        CCM_TM_Cache_Cleanup(g_tm_cache);
         g_tm_cache = NULL;
     }
 

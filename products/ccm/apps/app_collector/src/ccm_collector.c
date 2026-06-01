@@ -7,7 +7,7 @@
 /* 全局变量 */
 static pmc_tm_cache_t *g_tm_cache = NULL;
 static pmc_process_heartbeat_t *g_heartbeat = NULL;
-static pmc_system_status_t *g_status = NULL;
+static ccm_system_status_t *g_status = NULL;
 static volatile bool g_running = true;
 
 /* 信号处理 */
@@ -32,7 +32,7 @@ int32_t PMC_Collector_Init(void)
     OSAL_SignalRegister(SIGINT, signal_handler);
 
     /* 初始化遥测缓存 */
-    ret = PMC_TM_Cache_Init(&g_tm_cache);
+    ret = CCM_TM_Cache_Init(&g_tm_cache);
     if (ret != OSAL_SUCCESS) {
         LOG_ERROR("COLLECTOR", "初始化遥测缓存失败: %d", ret);
         return ret;
@@ -42,15 +42,15 @@ int32_t PMC_Collector_Init(void)
     ret = PMC_Heartbeat_Init(&g_heartbeat);
     if (ret != OSAL_SUCCESS) {
         LOG_ERROR("COLLECTOR", "初始化心跳失败: %d", ret);
-        PMC_TM_Cache_Cleanup(g_tm_cache);
+        CCM_TM_Cache_Cleanup(g_tm_cache);
         return ret;
     }
 
     /* 初始化系统状态 */
-    ret = PMC_Status_Init(&g_status);
+    ret = CCM_Status_Init(&g_status);
     if (ret != OSAL_SUCCESS) {
         LOG_ERROR("COLLECTOR", "初始化系统状态失败: %d", ret);
-        PMC_TM_Cache_Cleanup(g_tm_cache);
+        CCM_TM_Cache_Cleanup(g_tm_cache);
         PMC_Heartbeat_Cleanup(g_heartbeat);
         return ret;
     }
@@ -84,7 +84,7 @@ static int32_t collect_server_telemetry(void)
     data[3] = cpu_temp & 0xFF;
 
     /* 写入缓存，有效期2秒 */
-    PMC_TM_Cache_Write(g_tm_cache, PMC_TM_CPU_TEMP, data, 4, 2000);
+    CCM_TM_Cache_Write(g_tm_cache, CCM_TM_CPU_TEMP, data, 4, 2000);
 
     return OSAL_SUCCESS;
 }
@@ -108,7 +108,7 @@ static int32_t collect_power_telemetry(void)
     data[3] = voltage_54v & 0xFF;
 
     /* 写入缓存，有效期500ms */
-    PMC_TM_Cache_Write(g_tm_cache, PMC_TM_VOLTAGE_54V, data, 4, 500);
+    CCM_TM_Cache_Write(g_tm_cache, CCM_TM_VOLTAGE_54V, data, 4, 500);
 
     return OSAL_SUCCESS;
 }
@@ -130,7 +130,7 @@ static int32_t collect_temperature_telemetry(void)
     data[3] = board_temp & 0xFF;
 
     /* 写入缓存，有效期4秒 */
-    PMC_TM_Cache_Write(g_tm_cache, PMC_TM_BOARD_TEMP, data, 4, 4000);
+    CCM_TM_Cache_Write(g_tm_cache, CCM_TM_BOARD_TEMP, data, 4, 4000);
 
     return OSAL_SUCCESS;
 }
@@ -138,7 +138,7 @@ static int32_t collect_temperature_telemetry(void)
 /* 更新系统状态 */
 static int32_t update_system_status(void)
 {
-    pmc_system_status_t status;
+    ccm_system_status_t status;
 
     /* TODO: 从各个外设获取状态 */
     status.server_online = true;
@@ -151,7 +151,7 @@ static int32_t update_system_status(void)
     status.voltage_12v = 12000;
 
     /* 写入共享内存 */
-    PMC_Status_Write(g_status, &status);
+    CCM_Status_Write(g_status, &status);
 
     return OSAL_SUCCESS;
 }
@@ -166,7 +166,7 @@ int32_t PMC_Collector_Run(void)
 
     while (g_running) {
         /* 更新心跳 */
-        PMC_Heartbeat_Update(g_heartbeat, PMC_PROCESS_COLLECTOR);
+        PMC_Heartbeat_Update(g_heartbeat, CCM_PROCESS_COLLECTOR);
 
         /* 快遥采集（100ms周期） */
         if (fast_cycle_count % 1 == 0) {
@@ -199,7 +199,7 @@ void PMC_Collector_Cleanup(void)
     LOG_INFO("COLLECTOR", "Collector进程清理...");
 
     if (g_tm_cache) {
-        PMC_TM_Cache_Cleanup(g_tm_cache);
+        CCM_TM_Cache_Cleanup(g_tm_cache);
         g_tm_cache = NULL;
     }
 
@@ -209,7 +209,7 @@ void PMC_Collector_Cleanup(void)
     }
 
     if (g_status) {
-        PMC_Status_Cleanup(g_status);
+        CCM_Status_Cleanup(g_status);
         g_status = NULL;
     }
 

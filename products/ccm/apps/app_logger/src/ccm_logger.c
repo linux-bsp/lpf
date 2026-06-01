@@ -34,7 +34,7 @@ static void *log_collector_thread(void *arg)
 
     while (g_running) {
         /* 更新心跳 */
-        PMC_Heartbeat_Update(g_heartbeat, PMC_PROCESS_LOGGER);
+        PMC_Heartbeat_Update(g_heartbeat, CCM_PROCESS_LOGGER);
 
         /* 从共享内存读取日志 */
         ret = PMC_Log_Read(g_log_ring, log_entry, sizeof(log_entry));
