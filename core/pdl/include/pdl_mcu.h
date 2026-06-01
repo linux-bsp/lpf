@@ -16,7 +16,7 @@
 #define PDL_MCU_H
 
 #include "osal_types.h"
-#include "pdl_types.h"  /* 使用 types 模块的配置类型定义 */
+#include "pdl_types.h"  /* PDL 配置类型定义 */
 
 /*
  * MCU服务句柄

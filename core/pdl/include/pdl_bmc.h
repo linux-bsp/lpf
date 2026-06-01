@@ -12,7 +12,7 @@
 #define PDL_BMC_H
 
 #include "osal_types.h"
-#include "pdl_types.h"  /* 使用 types 模块的配置类型定义 */
+#include "pdl_types.h"  /* PDL 配置类型定义 */
 
 /*
  * BMC服务句柄

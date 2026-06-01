@@ -16,7 +16,7 @@
 #ifndef PCL_MCU_H
 #define PCL_MCU_H
 
-#include "pdl_types.h"  /* 使用 types 模块的配置类型定义 */
+#include "pdl_types.h"  /* 使用 PDL 模块的配置类型定义 */
 #include "pcl_common.h"
 
 /*===========================================================================

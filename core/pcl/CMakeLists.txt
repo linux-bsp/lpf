@@ -23,10 +23,11 @@ endif()
 ###############################################
 
 ###### Add required/dependent components ######
-# PCL 依赖 OSAL, HAL 和 TYPES
-# PCL 通过 types 模块获取 PDL 配置类型定义，不直接依赖 PDL
-# 这样可以打破循环依赖：PCL→types←PDL, PDL→PCL
-list(APPEND ADD_REQUIREMENTS osal hal types)
+# PCL 依赖 OSAL, HAL 和 PDL
+# PCL 使用 PDL 的配置类型定义（pdl_types.h）
+# 依赖关系：PCL→PDL（头文件），PDL→PCL（配置数据）
+# 这不是循环依赖，因为是不同层面的依赖
+list(APPEND ADD_REQUIREMENTS osal hal pdl)
 ###############################################
 
 #### Add compile option for this component ####
