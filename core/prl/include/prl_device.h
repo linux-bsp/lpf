@@ -151,10 +151,10 @@ typedef enum {
     PRL_BMC_MSG_RESET_SYSTEM    = 0x05,     /* 系统复位 */
 } prl_bmc_msg_type_t;
 
-/* ========== 通用编解码接口 ========== */
+/* ========== 内部编解码接口（仅供 PRL 内部使用） ========== */
 
 /**
- * @brief 编码设备消息
+ * @brief 编码设备消息（内部函数）
  * @param dev_type 设备类型
  * @param msg_type 消息类型
  * @param payload 负载数据
@@ -163,36 +163,40 @@ typedef enum {
  * @param buffer_size 缓冲区大小
  * @param flags 标志位
  * @return 成功返回编码后的总长度，失败返回负数错误码
+ * @note 内部函数，外部请使用 PRL_Encode()
  */
 int prl_device_encode(uint8_t dev_type, uint8_t msg_type,
                       const void *payload, uint16_t payload_len,
                       uint8_t *buffer, size_t buffer_size, uint8_t flags);
 
 /**
- * @brief 解码设备消息
+ * @brief 解码设备消息（内部函数）
  * @param packet 报文数据
  * @param packet_len 报文长度
  * @param dev_type 输出：设备类型
  * @param msg_type 输出：消息类型
- * @param payload 输出：负载数据指针（指向 packet 内部）
+ * @param payload 输出：负载数据指针（指向 packet 内部，零拷贝）
  * @param payload_len 输出：负载长度
  * @return 成功返回 PRL_OK，失败返回负数错误码
+ * @note 内部函数，外部请使用 PRL_Decode()
  */
 int prl_device_decode(const uint8_t *packet, size_t packet_len,
                       uint8_t *dev_type, uint8_t *msg_type,
                       const uint8_t **payload, uint16_t *payload_len);
 
 /**
- * @brief 验证设备类型是否有效
+ * @brief 验证设备类型是否有效（内部函数）
  * @param dev_type 设备类型
  * @return 有效返回 true，无效返回 false
+ * @note 内部函数，外部请使用 PRL_IsDeviceTypeValid()
  */
 bool prl_device_type_valid(uint8_t dev_type);
 
 /**
- * @brief 获取设备类型名称
+ * @brief 获取设备类型名称（内部函数）
  * @param dev_type 设备类型
  * @return 设备类型名称字符串
+ * @note 内部函数，外部请使用 PRL_GetDeviceTypeName()
  */
 const char *prl_device_type_name(uint8_t dev_type);
 

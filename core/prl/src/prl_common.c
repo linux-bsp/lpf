@@ -9,8 +9,8 @@
 #include "lib/osal_heap.h"
 #include "lib/osal_string.h"
 
-/* 全局序列号 */
-static uint32_t g_seq_number = 0;
+/* 全局序列号（非静态，供 prl_api.c 访问） */
+uint32_t g_seq_number = 0;
 
 /**
  * @brief CRC16-CCITT 查找表

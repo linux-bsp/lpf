@@ -6,7 +6,14 @@ list(APPEND ADD_INCLUDE "include")
 # PRL 核心源文件
 list(APPEND ADD_SRCS
     "src/prl_common.c"
+    "src/prl_device.c"
+    "src/prl_api.c"
 )
+
+# MCU 协议
+if(CONFIG_PRL_MCU)
+    list(APPEND ADD_SRCS "src/prl_mcu.c")
+endif()
 
 # GSC-PMC 协议
 if(CONFIG_PRL_GSC_PMC)
