@@ -5,7 +5,7 @@
 #include <unistd.h>
 
 /* 全局变量 */
-static pmc_tm_cache_t *g_tm_cache = NULL;
+static ccm_tm_cache_t *g_tm_cache = NULL;
 static pmc_process_heartbeat_t *g_heartbeat = NULL;
 static volatile bool g_running = true;
 
