@@ -7,9 +7,9 @@ menu "Core Modules"
 
 source "core/osal/Kconfig"
 source "core/hal/Kconfig"
-source "core/pcl/Kconfig"
+source "core/pconfig/Kconfig"
 source "core/pdl/Kconfig"
 source "core/prl/Kconfig"
-source "core/acl/Kconfig"
+source "core/aconfig/Kconfig"
 
 endmenu

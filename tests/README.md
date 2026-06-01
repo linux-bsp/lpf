@@ -5,7 +5,7 @@
 Tests是EMS的统一测试框架，提供完整的测试能力，支持单元测试、性能测试、压力测试和系统测试。
 
 **设计理念**：
-- 统一测试框架，支持所有层级（OSAL/HAL/PDL/PCL/ACL）
+- 统一测试框架，支持所有层级（OSAL/HAL/PDL/PConfig/AConfig）
 - 四种测试类型：单元测试、性能测试、压力测试、系统测试
 - 交互式菜单和命令行两种运行模式
 - 模块化测试注册机制
@@ -24,8 +24,8 @@ Tests是EMS的统一测试框架，提供完整的测试能力，支持单元测
 - OSAL层：线程、队列、互斥锁、信号量、原子操作、时间等
 - HAL层：CAN、UART、I2C、SPI、GPIO、Watchdog等硬件驱动
 - PDL层：BMC、MCU、Watchdog等外设服务
-- PCL层：平台配置查询
-- ACL层：业务配置验证
+- PConfig层：平台配置查询
+- AConfig层：业务配置验证
 
 ## 主要特性
 
@@ -165,7 +165,7 @@ Performance:
 验证多层集成和端到端业务流程。
 
 **特点**：
-- 多层集成测试（OSAL+HAL+PDL+PCL+ACL）
+- 多层集成测试（OSAL+HAL+PDL+PConfig+AConfig）
 - 端到端测试（完整业务流程）
 - 场景测试（真实使用场景）
 - 检查点机制（跟踪测试进度）
@@ -257,7 +257,7 @@ output/
         ├── ems-test           # 统一测试运行器（主程序）
         ├── osal-test -> ems-test  # OSAL层测试快捷方式
         ├── hal-test -> ems-test   # HAL层测试快捷方式
-        ├── pcl-test -> ems-test   # PCL层测试快捷方式
+        ├── pcl-test -> ems-test   # PConfig层测试快捷方式
         └── pdl-test -> ems-test   # PDL层测试快捷方式
 ```
 
@@ -329,7 +329,7 @@ cat build.log | grep -A 5 "test"
 请选择测试层级：
 1. OSAL (操作系统抽象层)
 2. HAL (硬件抽象层)
-3. PCL (外设配置库)
+3. PConfig (外设配置库)
 4. PDL (外设驱动层)
 5. 运行所有测试
 0. 退出
@@ -357,7 +357,7 @@ cat build.log | grep -A 5 "test"
 # 运行指定层级的测试（方式1：使用参数）
 ./build/bin/ems-test -L OSAL    # OSAL层测试
 ./build/bin/ems-test -L HAL     # HAL层测试
-./build/bin/ems-test -L PCL     # PCL层测试
+./build/bin/ems-test -L PConfig     # PConfig层测试
 ./build/bin/ems-test -L PDL     # PDL层测试
 
 # 运行指定层级的测试（方式2：使用快捷方式，推荐）
@@ -434,7 +434,7 @@ tests/
 │   │   ├── test_hal_can.c
 │   │   ├── test_hal_serial.c
 │   │   └── ...
-│   ├── pcl/                    # PCL层单元测试
+│   ├── pcl/                    # PConfig层单元测试
 │   │   └── test_pcl_api.c
 │   └── pdl/                    # PDL层单元测试
 │       ├── test_pdl_bmc.c
@@ -482,7 +482,7 @@ tests/
 
 **注意**：HAL测试需要实际硬件设备（can0、/dev/ttyS0等）
 
-### PCL层测试
+### PConfig层测试
 
 | 模块 | 测试用例数 | 覆盖功能 |
 |------|-----------|---------|
@@ -621,7 +621,7 @@ TEST_ASSERT_MEM_EQUAL(expected, actual, size)
 - `unit/osal/test_osal_version.c` - OSAL版本测试
 - `unit/osal/test_osal_atomic.c` - OSAL原子操作测试
 - `unit/hal/test_hal_can.c` - HAL CAN测试
-- `unit/pcl/test_pcl_api.c` - PCL API测试
+- `unit/pcl/test_pcl_api.c` - PConfig API测试
 - `unit/pdl/test_pdl_bmc.c` - PDL BMC测试
 
 **目录结构**：

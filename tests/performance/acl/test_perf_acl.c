@@ -5,8 +5,8 @@
 
 #include "test_framework.h"
 #include "test_performance.h"
-#include "acl_api.h"
-#include "acl_config.h"
+#include "aconfig_api.h"
+#include "aconfig_config.h"
 
 /**
  * 测试遥控配置查询性能

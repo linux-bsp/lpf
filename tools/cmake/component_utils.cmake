@@ -65,15 +65,15 @@ function(load_platform_config config_var base_dir)
 
     message("-- Loading platform config: ${${config_var}}")
 
-    # Collect ACL config files
-    file(GLOB _acl_srcs "${PLATFORM_CONFIG_DIR}/acl/*.c" "${PLATFORM_CONFIG_DIR}/acl/*/*.c")
+    # Collect ACONFIG config files
+    file(GLOB _acl_srcs "${PLATFORM_CONFIG_DIR}/aconfig/*.c" "${PLATFORM_CONFIG_DIR}/aconfig/*/*.c")
     if(_acl_srcs)
         set(PLATFORM_ACL_SRCS ${_acl_srcs} PARENT_SCOPE)
-        set(PLATFORM_CONFIG_INCLUDE ${PLATFORM_CONFIG_DIR}/acl PARENT_SCOPE)
+        set(PLATFORM_CONFIG_INCLUDE ${PLATFORM_CONFIG_DIR}/aconfig PARENT_SCOPE)
     endif()
 
-    # Collect PCL config files
-    file(GLOB _pcl_srcs "${PLATFORM_CONFIG_DIR}/pcl/*.c")
+    # Collect PCONFIG config files
+    file(GLOB _pcl_srcs "${PLATFORM_CONFIG_DIR}/pconfig/*.c")
     if(_pcl_srcs)
         set(PLATFORM_PCL_SRCS ${_pcl_srcs} PARENT_SCOPE)
     endif()
@@ -81,7 +81,7 @@ endfunction()
 
 # Register an application component with standard dependencies
 # Usage: register_app_component(dep1 dep2 ...)
-# Example: register_app_component(osal hal pcl pdl acl libccm)
+# Example: register_app_component(osal hal pconfig pdl aconfig libccm)
 function(register_app_component)
     # Collect all source files
     if(NOT ADD_SRCS)

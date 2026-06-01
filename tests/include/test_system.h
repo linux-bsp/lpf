@@ -28,8 +28,8 @@ typedef struct {
     bool osal_initialized;
     bool hal_initialized;
     bool pdl_initialized;
-    bool pcl_initialized;
-    bool acl_initialized;
+    bool pconfig_initialized;
+    bool aconfig_initialized;
     void *user_data;
 } system_test_env_t;
 

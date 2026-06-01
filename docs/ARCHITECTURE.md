@@ -15,7 +15,7 @@ graph TB
     end
     
     subgraph "应用控制层"
-        ACL[ACL<br/>Application Control Layer<br/>遥测遥控/配置管理]
+        AConfig[AConfig<br/>Application Control Layer<br/>遥测遥控/配置管理]
     end
     
     subgraph "协议数据层"
@@ -23,7 +23,7 @@ graph TB
     end
     
     subgraph "协议控制层"
-        PCL[PCL<br/>Protocol Control Layer<br/>协议注册/调度]
+        PConfig[PConfig<br/>Protocol Control Layer<br/>协议注册/调度]
     end
     
     subgraph "硬件抽象层"
@@ -39,18 +39,18 @@ graph TB
         HW[Hardware<br/>TI AM62x/Zynq MPSoC]
     end
     
-    Apps --> ACL
-    ACL --> PDL
-    PDL --> PCL
-    PCL --> HAL
+    Apps --> AConfig
+    AConfig --> PDL
+    PDL --> PConfig
+    PConfig --> HAL
     HAL --> OSAL
     OSAL --> OS
     HAL --> HW
     
     style Apps fill:#e1f5ff
-    style ACL fill:#b3e5fc
+    style AConfig fill:#b3e5fc
     style PDL fill:#81d4fa
-    style PCL fill:#4fc3f7
+    style PConfig fill:#4fc3f7
     style HAL fill:#29b6f6
     style OSAL fill:#039be5
     style OS fill:#01579b,color:#fff
@@ -102,7 +102,7 @@ graph TB
 - TI AM62x
 - Xilinx Zynq MPSoC
 
-### PCL（协议控制层）
+### PConfig（协议控制层）
 
 **职责**: 管理通信协议的注册、查找和调度。
 
@@ -122,7 +122,7 @@ graph TB
 - BMC 协议（基板管理控制器）
 - MCU 协议（微控制器通信）
 
-### ACL（应用控制层）
+### AConfig（应用控制层）
 
 **职责**: 提供应用级的控制和管理功能。
 
@@ -150,9 +150,9 @@ graph LR
     end
     
     subgraph "核心模块"
-        ACL[ACL]
+        AConfig[AConfig]
         PDL[PDL]
-        PCL[PCL]
+        PConfig[PConfig]
         HAL[HAL]
         OSAL[OSAL]
     end
@@ -163,18 +163,18 @@ graph LR
     APP2 --> LIBCCM
     APP3 --> H200
     
-    H200 --> ACL
+    H200 --> AConfig
     LIBCCM --> OSAL
     
-    ACL --> PDL
-    ACL --> OSAL
+    AConfig --> PDL
+    AConfig --> OSAL
     
-    PDL --> PCL
+    PDL --> PConfig
     PDL --> HAL
     PDL --> OSAL
     
-    PCL --> HAL
-    PCL --> OSAL
+    PConfig --> HAL
+    PConfig --> OSAL
     
     HAL --> OSAL
     
@@ -183,9 +183,9 @@ graph LR
     style APP3 fill:#e8f5e9
     style LIBCCM fill:#fff3e0
     style H200 fill:#fff3e0
-    style ACL fill:#e1f5ff
+    style AConfig fill:#e1f5ff
     style PDL fill:#e1f5ff
-    style PCL fill:#e1f5ff
+    style PConfig fill:#e1f5ff
     style HAL fill:#e1f5ff
     style OSAL fill:#e1f5ff
 ```
@@ -220,22 +220,22 @@ target_link_libraries(collector
 ```mermaid
 sequenceDiagram
     participant App as 应用程序
-    participant ACL as ACL层
+    participant AConfig as AConfig层
     participant PDL as PDL层
     participant HAL as HAL层
     participant HW as 硬件设备
     
-    App->>ACL: 请求遥测数据
-    ACL->>ACL: 查找配置表
-    ACL->>PDL: 调用设备驱动
+    App->>AConfig: 请求遥测数据
+    AConfig->>AConfig: 查找配置表
+    AConfig->>PDL: 调用设备驱动
     PDL->>HAL: 读取硬件接口
     HAL->>HW: 访问设备
     HW-->>HAL: 返回原始数据
     HAL-->>PDL: 返回数据
     PDL->>PDL: 协议解析
-    PDL-->>ACL: 返回解析后数据
-    ACL->>ACL: 数据缓存
-    ACL-->>App: 返回遥测数据
+    PDL-->>AConfig: 返回解析后数据
+    AConfig->>AConfig: 数据缓存
+    AConfig-->>App: 返回遥测数据
 ```
 
 ### 遥控指令处理流程
@@ -243,24 +243,24 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant App as 应用程序
-    participant ACL as ACL层
+    participant AConfig as AConfig层
     participant PDL as PDL层
     participant HAL as HAL层
     participant HW as 硬件设备
     
-    App->>ACL: 发送遥控指令
-    ACL->>ACL: 指令验证
-    ACL->>ACL: 查找配置表
-    ACL->>PDL: 调用设备驱动
+    App->>AConfig: 发送遥控指令
+    AConfig->>AConfig: 指令验证
+    AConfig->>AConfig: 查找配置表
+    AConfig->>PDL: 调用设备驱动
     PDL->>PDL: 协议封装
     PDL->>HAL: 写入硬件接口
     HAL->>HW: 发送数据
     HW-->>HAL: 返回状态
     HAL-->>PDL: 返回结果
     PDL->>PDL: 协议解析
-    PDL-->>ACL: 返回执行结果
-    ACL->>ACL: 记录日志
-    ACL-->>App: 返回执行状态
+    PDL-->>AConfig: 返回执行结果
+    AConfig->>AConfig: 记录日志
+    AConfig-->>App: 返回执行状态
 ```
 
 ### CAN 通信流程
@@ -293,7 +293,7 @@ sequenceDiagram
 ## 依赖关系
 
 ```
-Apps → ACL → PDL → PCL → HAL → OSAL
+Apps → AConfig → PDL → PConfig → HAL → OSAL
 ```
 
 **规则**:
@@ -495,8 +495,8 @@ graph LR
 ```mermaid
 graph TD
     Start([定时触发]) --> Collect[Collector App]
-    Collect --> ACL[ACL_GetTelemetry]
-    ACL --> Cache{缓存中有数据?}
+    Collect --> AConfig[ACONFIG_GetTelemetry]
+    AConfig --> Cache{缓存中有数据?}
     
     Cache -->|是| Return1[返回缓存数据]
     Cache -->|否| PDL[PDL_Satellite_Read]
@@ -514,7 +514,7 @@ graph TD
     style Start fill:#e8f5e9
     style End fill:#c8e6c9
     style Collect fill:#fff3e0
-    style ACL fill:#e1f5ff
+    style AConfig fill:#e1f5ff
     style PDL fill:#b3e5fc
     style HAL fill:#81d4fa
 ```
@@ -591,14 +591,14 @@ void* HAL_CAN_Open_Linux(...);
 void* HAL_CAN_Open_RTOS(...);
 ```
 
-### 2. 注册表模式 (PCL)
+### 2. 注册表模式 (PConfig)
 
 ```c
 // 协议注册
-PCL_RegisterProtocol(protocol_id, handler);
+PCONFIG_RegisterProtocol(protocol_id, handler);
 
 // 协议查找
-handler = PCL_FindProtocol(protocol_id);
+handler = PCONFIG_FindProtocol(protocol_id);
 
 // 协议调用
 handler(data, len);
@@ -608,17 +608,17 @@ handler(data, len);
 
 ```c
 // 注册回调
-ACL_RegisterCallback(event_type, callback);
+ACONFIG_RegisterCallback(event_type, callback);
 
 // 触发事件
-ACL_NotifyEvent(event_type, data);
+ACONFIG_NotifyEvent(event_type, data);
 ```
 
 ### 4. 单例模式 (全局管理器)
 
 ```c
 // 获取全局实例
-acl_manager_t* ACL_GetManager(void);
+aconfig_manager_t* ACONFIG_GetManager(void);
 ```
 
 ---

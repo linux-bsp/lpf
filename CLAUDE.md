@@ -66,11 +66,12 @@ cmake --build build-cmake -j$(nproc)
 ```
 EMS/
 ├── core/                   # 核心模块（可复用组件）
-│   ├── acl/               # 访问控制层
+│   ├── aconfig/           # 应用配置层（业务功能到硬件设备映射）
 │   ├── hal/               # 硬件抽象层（CAN、UART、I2C、SPI、GPIO 等）
 │   ├── osal/              # 操作系统抽象层（线程、互斥锁、信号量等）
-│   ├── pcl/               # 协议控制层
-│   └── pdl/               # 协议数据层
+│   ├── pconfig/           # 平台配置层（硬件设备配置表）
+│   ├── pdl/               # 协议数据层
+│   └── prl/               # 协议层（内部通信协议封装/解析）
 ├── products/              # 产品应用（特定产品的实现）
 │   └── ccm/              # CCM 产品
 │       ├── apps/         # 应用程序（collector、logger、health、supervisor、comm）
@@ -93,7 +94,7 @@ EMS/
 ### 模块依赖关系
 
 ```
-products/ccm/apps/*  →  h200_am625  →  core/acl  →  core/pdl  →  core/pcl  →  core/hal  →  core/osal
+products/ccm/apps/*  →  h200_am625  →  core/aconfig  →  core/pdl  →  core/pconfig  →  core/hal  →  core/osal
                      →  libccm      →  core/osal
 ```
 
@@ -130,9 +131,10 @@ make savedefconfig
 # 核心模块开关
 CONFIG_OSAL=y              # 操作系统抽象层
 CONFIG_HAL=y               # 硬件抽象层
-CONFIG_PCL=y               # 协议控制层
+CONFIG_PCONFIG=y           # 平台配置层
 CONFIG_PDL=y               # 协议数据层
-CONFIG_ACL=y               # 访问控制层
+CONFIG_PRL=y               # 协议层
+CONFIG_ACONFIG=y           # 应用配置层
 
 # 平台配置
 CONFIG_ARCH_X86_64=y       # x86_64 架构
@@ -396,7 +398,7 @@ make menuconfig
 
 # 2. 关闭不需要的模块
 #    [ ] HAL (Hardware Abstraction Layer)
-#    [ ] PCL (Protocol Control Layer)
+#    [ ] PConfig (Protocol Control Layer)
 
 # 3. 重新生成构建文件
 cmake -B build-cmake

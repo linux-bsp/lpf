@@ -200,7 +200,7 @@ pdl/
 **PDL依赖**：
 - OSAL层：操作系统抽象
 - HAL层：硬件驱动
-- PCL层：硬件配置
+- PConfig层：硬件配置
 
 **被依赖**：
 - Apps层：应用层
@@ -346,7 +346,7 @@ int32 PDL_Sensor_Read(pdl_sensor_handle_t *handle,
 - ❌ 禁止直接调用OSAL系统调用：`OSAL_socket()`, `OSAL_open()`
 - ✅ 使用OSAL日志：`LOG_INFO()`, `LOG_ERROR()`
 - ❌ 禁止使用：`printf()`, `fprintf()`
-- ✅ 使用PCL配置：`PCL_GetMCUConfig()`
+- ✅ 使用PCL配置：`PCONFIG_GetMCUConfig()`
 - ❌ 禁止硬编码配置
 
 **示例**：
@@ -370,7 +370,7 @@ PDL使用PCL配置外设硬件接口：
 
 ```c
 /* 从PCL获取MCU配置 */
-const pcl_mcu_t *mcu_cfg = PCL_GetMCUConfig("mcu0");
+const pconfig_mcu_t *mcu_cfg = PCONFIG_GetMCUConfig("mcu0");
 if (mcu_cfg != NULL) {
     pdl_mcu_config_t pdl_cfg = {
         .name = mcu_cfg->name,

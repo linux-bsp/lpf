@@ -43,7 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Watchdog 驱动（/dev/watchdog）
   - 支持 Linux 和 macOS 平台
 
-- **PCL (外设配置层)**
+- **PConfig (外设配置层)**
   - 设备树风格的硬件配置管理
   - 硬件拓扑描述
   - 平台配置支持（H200-100P V1/V2, H200-200P）
@@ -54,7 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - MCU 通信协议（CAN/UART）
   - Watchdog 服务
 
-- **ACL (应用配置层)**
+- **AConfig (应用配置层)**
   - 遥测数据管理
   - 遥控指令处理
   - 配置表管理
@@ -131,7 +131,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed - 删除
 
 - 删除 5 个软连接（`core/{hal,osal,acl,pdl,pcl}/include/{模块名}`）
-- 删除 ACL API v2 版本（未使用的测试版本）
+- 删除 AConfig API v2 版本（未使用的测试版本）
 - 删除 14 个未使用的 Kconfig 文件
 - 删除冗余的备份文件
 

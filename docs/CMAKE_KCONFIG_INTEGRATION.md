@@ -336,9 +336,9 @@ if(CONFIG_HAL)
     add_subdirectory(core/hal)
 endif()
 
-if(CONFIG_PCL)
-    message(STATUS "Building PCL")
-    add_subdirectory(core/pcl)
+if(CONFIG_PCONFIG)
+    message(STATUS "Building PConfig")
+    add_subdirectory(core/pconfig)
 endif()
 
 if(CONFIG_PDL)
@@ -346,9 +346,9 @@ if(CONFIG_PDL)
     add_subdirectory(core/pdl)
 endif()
 
-if(CONFIG_ACL)
-    message(STATUS "Building ACL")
-    add_subdirectory(core/acl)
+if(CONFIG_ACONFIG)
+    message(STATUS "Building AConfig")
+    add_subdirectory(core/aconfig)
 endif()
 
 # Products 模块
@@ -377,10 +377,10 @@ cmake ..
 # -- Loading Kconfig configuration from .config...
 # --   CONFIG_OSAL=y
 # --   CONFIG_HAL=y
-# --   CONFIG_PCL=y
+# --   CONFIG_PCONFIG=y
 # -- Building OSAL
 # -- Building HAL
-# -- Building PCL
+# -- Building PConfig
 # ...
 
 # 3. 编译
@@ -445,9 +445,9 @@ project(EMS VERSION 1.0.0 LANGUAGES C)
 # Core 模块
 option(CONFIG_OSAL "Enable OSAL" ON)
 option(CONFIG_HAL "Enable HAL" ON)
-option(CONFIG_PCL "Enable PCL" ON)
+option(CONFIG_PCONFIG "Enable PConfig" ON)
 option(CONFIG_PDL "Enable PDL" ON)
-option(CONFIG_ACL "Enable ACL" ON)
+option(CONFIG_ACONFIG "Enable AConfig" ON)
 
 # OSAL 子选项
 option(CONFIG_OSAL_NETWORK "Enable OSAL network support" ON)
@@ -528,7 +528,7 @@ ccmake -B build
 │ CMAKE_BUILD_TYPE         Release                        │
 │ CONFIG_OSAL              ON                             │
 │ CONFIG_HAL               ON                             │
-│ CONFIG_PCL               ON                             │
+│ CONFIG_PCONFIG               ON                             │
 │ CONFIG_ARCH              arm64                          │
 │ CONFIG_OS                linux                          │
 │                                                         │

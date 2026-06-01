@@ -10,15 +10,15 @@
  * - 配置验证
  */
 
-#include "api/pcl_api.h"
+#include "api/pconfig_api.h"
 #include "osal.h"
 
 /* 测试用的配置数据 */
-static pcl_mcu_cfg_t test_mcu = {
+static pconfig_mcu_cfg_t test_mcu = {
     .name = "test_mcu",
     .description = "Test MCU",
     .enabled = true,
-    .interface = PCL_MCU_INTERFACE_SERIAL,
+    .interface = PCONFIG_MCU_INTERFACE_SERIAL,
     .serial = {
         .device = "/dev/ttyS0",
         .baudrate = 115200,
@@ -33,7 +33,7 @@ static pcl_mcu_cfg_t test_mcu = {
     .irq_gpio = NULL
 };
 
-static pcl_bmc_cfg_t test_bmc = {
+static pconfig_bmc_cfg_t test_bmc = {
     .name = "test_bmc",
     .description = "Test BMC",
     .enabled = true,
@@ -56,7 +56,7 @@ static pcl_bmc_cfg_t test_bmc = {
         .timeout_ms = 5000
     },
 
-    .primary_channel = PCL_BMC_CHANNEL_NETWORK,
+    .primary_channel = PCONFIG_BMC_CHANNEL_NETWORK,
     .auto_switch = true,
     .retry_count = 3,
     .health_check_interval = 5000,
@@ -64,11 +64,11 @@ static pcl_bmc_cfg_t test_bmc = {
     .reset_gpio = NULL
 };
 
-static pcl_fpga_cfg_t test_fpga = {
+static pconfig_fpga_cfg_t test_fpga = {
     .name = "test_fpga",
     .description = "Test FPGA",
     .enabled = true,
-    .interface_type = PCL_HW_INTERFACE_SPI,
+    .interface_type = PCONFIG_HW_INTERFACE_SPI,
     .interface_cfg = {
         .spi = {
             .device = "/dev/spidev0.0",
@@ -81,11 +81,11 @@ static pcl_fpga_cfg_t test_fpga = {
     .retry_count = 3
 };
 
-static pcl_switch_cfg_t test_switch = {
+static pconfig_switch_cfg_t test_switch = {
     .name = "test_switch",
     .description = "Test Switch",
     .enabled = true,
-    .interface_type = PCL_HW_INTERFACE_I2C,
+    .interface_type = PCONFIG_HW_INTERFACE_I2C,
     .interface_cfg = {
         .i2c = {
             .device = "/dev/i2c-0",
@@ -97,12 +97,12 @@ static pcl_switch_cfg_t test_switch = {
     .retry_count = 3
 };
 
-static pcl_mcu_cfg_t *test_mcu_arr[] = { &test_mcu, NULL };
-static pcl_bmc_cfg_t *test_bmc_arr[] = { &test_bmc, NULL };
-static pcl_fpga_cfg_t *test_fpga_arr[] = { &test_fpga, NULL };
-static pcl_switch_cfg_t *test_switch_arr[] = { &test_switch, NULL };
+static pconfig_mcu_cfg_t *test_mcu_arr[] = { &test_mcu, NULL };
+static pconfig_bmc_cfg_t *test_bmc_arr[] = { &test_bmc, NULL };
+static pconfig_fpga_cfg_t *test_fpga_arr[] = { &test_fpga, NULL };
+static pconfig_switch_cfg_t *test_switch_arr[] = { &test_switch, NULL };
 
-static const pcl_platform_config_t test_platform_v1 = {
+static const pconfig_platform_config_t test_platform_v1 = {
     .platform_name = "test_platform",
     .chip_name = "test_chip",
     .project_name = "test_project",
@@ -113,7 +113,7 @@ static const pcl_platform_config_t test_platform_v1 = {
     .switch_arr = test_switch_arr
 };
 
-static const pcl_platform_config_t test_platform_v2 = {
+static const pconfig_platform_config_t test_platform_v2 = {
     .platform_name = "test_platform",
     .chip_name = "test_chip",
     .project_name = "test_project",
@@ -128,284 +128,284 @@ static const pcl_platform_config_t test_platform_v2 = {
 
 TEST_CASE(test_pcl_init_success)
 {
-    int32_t ret = PCL_Init();
+    int32_t ret = PCONFIG_Init();
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 重复初始化应该成功 */
-    ret = PCL_Init();
+    ret = PCONFIG_Init();
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-    PCL_Cleanup();
+    PCONFIG_Cleanup();
 }
 
 TEST_CASE(test_pcl_cleanup)
 {
-    PCL_Init();
-    PCL_Cleanup();
+    PCONFIG_Init();
+    PCONFIG_Cleanup();
 
     /* 重复清理应该安全 */
-    PCL_Cleanup();
+    PCONFIG_Cleanup();
 }
 
 /* ========== 配置注册测试 ========== */
 
 TEST_CASE(test_pcl_register_success)
 {
-    PCL_Init();
+    PCONFIG_Init();
 
-    int32_t ret = PCL_Register(&test_platform_v1);
+    int32_t ret = PCONFIG_Register(&test_platform_v1);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-    PCL_Cleanup();
+    PCONFIG_Cleanup();
 }
 
 TEST_CASE(test_pcl_register_null_pointer)
 {
-    PCL_Init();
+    PCONFIG_Init();
 
-    int32_t ret = PCL_Register(NULL);
+    int32_t ret = PCONFIG_Register(NULL);
     TEST_ASSERT_EQUAL(OSAL_ERR_GENERIC, ret);
 
-    PCL_Cleanup();
+    PCONFIG_Cleanup();
 }
 
 TEST_CASE(test_pcl_register_not_initialized)
 {
     /* 未初始化时注册应该失败 */
-    int32_t ret = PCL_Register(&test_platform_v1);
+    int32_t ret = PCONFIG_Register(&test_platform_v1);
     TEST_ASSERT_EQUAL(OSAL_ERR_GENERIC, ret);
 }
 
 TEST_CASE(test_pcl_register_duplicate)
 {
-    PCL_Init();
+    PCONFIG_Init();
 
-    int32_t ret = PCL_Register(&test_platform_v1);
+    int32_t ret = PCONFIG_Register(&test_platform_v1);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 重复注册相同配置应该失败 */
-    ret = PCL_Register(&test_platform_v1);
+    ret = PCONFIG_Register(&test_platform_v1);
     TEST_ASSERT_EQUAL(OSAL_ERR_GENERIC, ret);
 
-    PCL_Cleanup();
+    PCONFIG_Cleanup();
 }
 
 TEST_CASE(test_pcl_register_multiple_versions)
 {
-    PCL_Init();
+    PCONFIG_Init();
 
-    int32_t ret = PCL_Register(&test_platform_v1);
+    int32_t ret = PCONFIG_Register(&test_platform_v1);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 注册不同版本应该成功 */
-    ret = PCL_Register(&test_platform_v2);
+    ret = PCONFIG_Register(&test_platform_v2);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-    PCL_Cleanup();
+    PCONFIG_Cleanup();
 }
 
 /* ========== 配置查询测试 ========== */
 
 TEST_CASE(test_pcl_find_success)
 {
-    PCL_Init();
-    PCL_Register(&test_platform_v1);
+    PCONFIG_Init();
+    PCONFIG_Register(&test_platform_v1);
 
-    const pcl_platform_config_t *found = PCL_Find("test_platform", "test_product_v1", NULL);
+    const pconfig_platform_config_t *found = PCONFIG_Find("test_platform", "test_product_v1", NULL);
     TEST_ASSERT_NOT_NULL(found);
     TEST_ASSERT_STRING_EQUAL("test_platform", found->platform_name);
     TEST_ASSERT_STRING_EQUAL("test_product_v1", found->product_name);
 
-    PCL_Cleanup();
+    PCONFIG_Cleanup();
 }
 
 TEST_CASE(test_pcl_find_without_version)
 {
-    PCL_Init();
-    PCL_Register(&test_platform_v1);
-    PCL_Register(&test_platform_v2);
+    PCONFIG_Init();
+    PCONFIG_Register(&test_platform_v1);
+    PCONFIG_Register(&test_platform_v2);
 
     /* 不指定版本应该返回第一个匹配的 */
-    const pcl_platform_config_t *found = PCL_Find("test_platform", "test_product_v1", NULL);
+    const pconfig_platform_config_t *found = PCONFIG_Find("test_platform", "test_product_v1", NULL);
     TEST_ASSERT_NOT_NULL(found);
     TEST_ASSERT_STRING_EQUAL("test_platform", found->platform_name);
     TEST_ASSERT_STRING_EQUAL("test_product_v1", found->product_name);
 
-    PCL_Cleanup();
+    PCONFIG_Cleanup();
 }
 
 TEST_CASE(test_pcl_find_not_found)
 {
-    PCL_Init();
-    PCL_Register(&test_platform_v1);
+    PCONFIG_Init();
+    PCONFIG_Register(&test_platform_v1);
 
-    const pcl_platform_config_t *found = PCL_Find("nonexistent", "product", NULL);
+    const pconfig_platform_config_t *found = PCONFIG_Find("nonexistent", "product", NULL);
     TEST_ASSERT_NULL(found);
 
-    PCL_Cleanup();
+    PCONFIG_Cleanup();
 }
 
 TEST_CASE(test_pcl_find_null_parameters)
 {
-    PCL_Init();
-    PCL_Register(&test_platform_v1);
+    PCONFIG_Init();
+    PCONFIG_Register(&test_platform_v1);
 
-    const pcl_platform_config_t *found = PCL_Find(NULL, "test_product_v1", NULL);
+    const pconfig_platform_config_t *found = PCONFIG_Find(NULL, "test_product_v1", NULL);
     TEST_ASSERT_NULL(found);
 
-    found = PCL_Find("test_platform", NULL, NULL);
+    found = PCONFIG_Find("test_platform", NULL, NULL);
     TEST_ASSERT_NULL(found);
 
-    PCL_Cleanup();
+    PCONFIG_Cleanup();
 }
 
 TEST_CASE(test_pcl_list_success)
 {
-    PCL_Init();
-    PCL_Register(&test_platform_v1);
-    PCL_Register(&test_platform_v2);
+    PCONFIG_Init();
+    PCONFIG_Register(&test_platform_v1);
+    PCONFIG_Register(&test_platform_v2);
 
-    const pcl_platform_config_t *configs[10];
+    const pconfig_platform_config_t *configs[10];
     uint32_t count = 10;
 
-    int32_t ret = PCL_List(configs, &count);
+    int32_t ret = PCONFIG_List(configs, &count);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_EQUAL(2, count);
     TEST_ASSERT_NOT_NULL(configs[0]);
     TEST_ASSERT_NOT_NULL(configs[1]);
 
-    PCL_Cleanup();
+    PCONFIG_Cleanup();
 }
 
 TEST_CASE(test_pcl_list_null_parameters)
 {
-    PCL_Init();
+    PCONFIG_Init();
 
-    const pcl_platform_config_t *configs[10];
+    const pconfig_platform_config_t *configs[10];
     uint32_t count = 10;
 
-    int32_t ret = PCL_List(NULL, &count);
+    int32_t ret = PCONFIG_List(NULL, &count);
     TEST_ASSERT_EQUAL(OSAL_ERR_GENERIC, ret);
 
-    ret = PCL_List(configs, NULL);
+    ret = PCONFIG_List(configs, NULL);
     TEST_ASSERT_EQUAL(OSAL_ERR_GENERIC, ret);
 
-    PCL_Cleanup();
+    PCONFIG_Cleanup();
 }
 
 /* ========== 硬件外设查询测试 ========== */
 
 TEST_CASE(test_pcl_hw_find_mcu_success)
 {
-    PCL_Init();
-    PCL_Register(&test_platform_v1);
+    PCONFIG_Init();
+    PCONFIG_Register(&test_platform_v1);
 
-    const pcl_mcu_cfg_t *mcu = PCL_HW_FindMCU(&test_platform_v1, "test_mcu");
+    const pconfig_mcu_cfg_t *mcu = PCONFIG_HW_FindMCU(&test_platform_v1, "test_mcu");
     TEST_ASSERT_NOT_NULL(mcu);
     TEST_ASSERT_STRING_EQUAL("test_mcu", mcu->name);
-    TEST_ASSERT_EQUAL(PCL_MCU_INTERFACE_SERIAL, mcu->interface);
+    TEST_ASSERT_EQUAL(PCONFIG_MCU_INTERFACE_SERIAL, mcu->interface);
 
-    PCL_Cleanup();
+    PCONFIG_Cleanup();
 }
 
 TEST_CASE(test_pcl_hw_find_mcu_not_found)
 {
-    PCL_Init();
-    PCL_Register(&test_platform_v1);
+    PCONFIG_Init();
+    PCONFIG_Register(&test_platform_v1);
 
-    const pcl_mcu_cfg_t *mcu = PCL_HW_FindMCU(&test_platform_v1, "nonexistent");
+    const pconfig_mcu_cfg_t *mcu = PCONFIG_HW_FindMCU(&test_platform_v1, "nonexistent");
     TEST_ASSERT_NULL(mcu);
 
-    PCL_Cleanup();
+    PCONFIG_Cleanup();
 }
 
 TEST_CASE(test_pcl_hw_find_mcu_null_parameters)
 {
-    PCL_Init();
-    PCL_Register(&test_platform_v1);
+    PCONFIG_Init();
+    PCONFIG_Register(&test_platform_v1);
 
-    const pcl_mcu_cfg_t *mcu = PCL_HW_FindMCU(NULL, "test_mcu");
+    const pconfig_mcu_cfg_t *mcu = PCONFIG_HW_FindMCU(NULL, "test_mcu");
     TEST_ASSERT_NULL(mcu);
 
-    mcu = PCL_HW_FindMCU(&test_platform_v1, NULL);
+    mcu = PCONFIG_HW_FindMCU(&test_platform_v1, NULL);
     TEST_ASSERT_NULL(mcu);
 
-    PCL_Cleanup();
+    PCONFIG_Cleanup();
 }
 
 TEST_CASE(test_pcl_hw_get_mcu_success)
 {
-    PCL_Init();
-    PCL_Register(&test_platform_v1);
+    PCONFIG_Init();
+    PCONFIG_Register(&test_platform_v1);
 
-    const pcl_mcu_cfg_t *mcu = PCL_HW_GetMCU(&test_platform_v1, 0);
+    const pconfig_mcu_cfg_t *mcu = PCONFIG_HW_GetMCU(&test_platform_v1, 0);
     TEST_ASSERT_NOT_NULL(mcu);
     TEST_ASSERT_STRING_EQUAL("test_mcu", mcu->name);
 
-    PCL_Cleanup();
+    PCONFIG_Cleanup();
 }
 
 TEST_CASE(test_pcl_hw_get_mcu_invalid_id)
 {
-    PCL_Init();
-    PCL_Register(&test_platform_v1);
+    PCONFIG_Init();
+    PCONFIG_Register(&test_platform_v1);
 
-    const pcl_mcu_cfg_t *mcu = PCL_HW_GetMCU(&test_platform_v1, 999);
+    const pconfig_mcu_cfg_t *mcu = PCONFIG_HW_GetMCU(&test_platform_v1, 999);
     TEST_ASSERT_NULL(mcu);
 
-    PCL_Cleanup();
+    PCONFIG_Cleanup();
 }
 
 TEST_CASE(test_pcl_hw_find_bmc_success)
 {
-    PCL_Init();
-    PCL_Register(&test_platform_v1);
+    PCONFIG_Init();
+    PCONFIG_Register(&test_platform_v1);
 
-    const pcl_bmc_cfg_t *bmc = PCL_HW_FindBMC(&test_platform_v1, "test_bmc");
+    const pconfig_bmc_cfg_t *bmc = PCONFIG_HW_FindBMC(&test_platform_v1, "test_bmc");
     TEST_ASSERT_NOT_NULL(bmc);
     TEST_ASSERT_STRING_EQUAL("test_bmc", bmc->name);
-    TEST_ASSERT_EQUAL(PCL_BMC_CHANNEL_NETWORK, bmc->primary_channel);
+    TEST_ASSERT_EQUAL(PCONFIG_BMC_CHANNEL_NETWORK, bmc->primary_channel);
 
-    PCL_Cleanup();
+    PCONFIG_Cleanup();
 }
 
 TEST_CASE(test_pcl_hw_find_fpga_success)
 {
-    PCL_Init();
-    PCL_Register(&test_platform_v1);
+    PCONFIG_Init();
+    PCONFIG_Register(&test_platform_v1);
 
-    const pcl_fpga_cfg_t *fpga = PCL_HW_FindFPGA(&test_platform_v1, "test_fpga");
+    const pconfig_fpga_cfg_t *fpga = PCONFIG_HW_FindFPGA(&test_platform_v1, "test_fpga");
     TEST_ASSERT_NOT_NULL(fpga);
     TEST_ASSERT_STRING_EQUAL("test_fpga", fpga->name);
-    TEST_ASSERT_EQUAL(PCL_HW_INTERFACE_SPI, fpga->interface_type);
+    TEST_ASSERT_EQUAL(PCONFIG_HW_INTERFACE_SPI, fpga->interface_type);
 
-    PCL_Cleanup();
+    PCONFIG_Cleanup();
 }
 
 TEST_CASE(test_pcl_hw_find_switch_success)
 {
-    PCL_Init();
-    PCL_Register(&test_platform_v1);
+    PCONFIG_Init();
+    PCONFIG_Register(&test_platform_v1);
 
-    const pcl_switch_cfg_t *sw = PCL_HW_FindSwitch(&test_platform_v1, "test_switch");
+    const pconfig_switch_cfg_t *sw = PCONFIG_HW_FindSwitch(&test_platform_v1, "test_switch");
     TEST_ASSERT_NOT_NULL(sw);
     TEST_ASSERT_STRING_EQUAL("test_switch", sw->name);
-    TEST_ASSERT_EQUAL(PCL_HW_INTERFACE_I2C, sw->interface_type);
+    TEST_ASSERT_EQUAL(PCONFIG_HW_INTERFACE_I2C, sw->interface_type);
 
-    PCL_Cleanup();
+    PCONFIG_Cleanup();
 }
 
 /* ========== 配置验证测试 ========== */
 
 TEST_CASE(test_pcl_validate_success)
 {
-    int32_t ret = PCL_Validate(&test_platform_v1);
+    int32_t ret = PCONFIG_Validate(&test_platform_v1);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 }
 
 TEST_CASE(test_pcl_validate_null_pointer)
 {
-    int32_t ret = PCL_Validate(NULL);
+    int32_t ret = PCONFIG_Validate(NULL);
     TEST_ASSERT_EQUAL(OSAL_ERR_GENERIC, ret);
 }
 
@@ -422,9 +422,9 @@ typedef struct {
 } thread_test_data_t;
 
 /* 测试用的多个配置 */
-static pcl_platform_config_t test_configs[NUM_THREADS];
-static pcl_mcu_cfg_t test_mcus[NUM_THREADS];
-static pcl_mcu_cfg_t *test_mcu_arrays[NUM_THREADS][2];
+static pconfig_platform_config_t test_configs[NUM_THREADS];
+static pconfig_mcu_cfg_t test_mcus[NUM_THREADS];
+static pconfig_mcu_cfg_t *test_mcu_arrays[NUM_THREADS][2];
 
 /* 初始化测试配置数组 */
 static void init_test_configs(void)
@@ -432,18 +432,18 @@ static void init_test_configs(void)
     int i;
     for (i = 0; i < NUM_THREADS; i++) {
         /* 初始化MCU配置 */
-        OSAL_Memset(&test_mcus[i], 0, sizeof(pcl_mcu_cfg_t));
+        OSAL_Memset(&test_mcus[i], 0, sizeof(pconfig_mcu_cfg_t));
         OSAL_Snprintf((char *)test_mcus[i].name, 32, "mcu_%d", i);
         test_mcus[i].description = "Thread test MCU";
         test_mcus[i].enabled = true;
-        test_mcus[i].interface = PCL_MCU_INTERFACE_SERIAL;
+        test_mcus[i].interface = PCONFIG_MCU_INTERFACE_SERIAL;
 
         /* 设置MCU数组 */
         test_mcu_arrays[i][0] = &test_mcus[i];
         test_mcu_arrays[i][1] = NULL;
 
         /* 初始化平台配置 */
-        OSAL_Memset(&test_configs[i], 0, sizeof(pcl_platform_config_t));
+        OSAL_Memset(&test_configs[i], 0, sizeof(pconfig_platform_config_t));
         test_configs[i].platform_name = "test_platform";
         test_configs[i].chip_name = "test_chip";
         test_configs[i].project_name = "test_project";
@@ -463,7 +463,7 @@ static void* thread_register_func(void *arg)
     int i;
 
     for (i = 0; i < NUM_ITERATIONS; i++) {
-        int32_t ret = PCL_Register(&test_configs[data->thread_id]);
+        int32_t ret = PCONFIG_Register(&test_configs[data->thread_id]);
         if (ret == OSAL_SUCCESS) {
             data->success_count++;
         } else {
@@ -487,7 +487,7 @@ static void* thread_find_func(void *arg)
     OSAL_Snprintf(product_name, 32, "product_%d", data->thread_id % NUM_THREADS);
 
     for (i = 0; i < NUM_ITERATIONS; i++) {
-        const pcl_platform_config_t *found = PCL_Find("test_platform", product_name, NULL);
+        const pconfig_platform_config_t *found = PCONFIG_Find("test_platform", product_name, NULL);
         if (found != NULL) {
             data->success_count++;
         } else {
@@ -507,10 +507,10 @@ static void* thread_list_func(void *arg)
     int i;
 
     for (i = 0; i < NUM_ITERATIONS; i++) {
-        const pcl_platform_config_t *configs[32];
+        const pconfig_platform_config_t *configs[32];
         uint32_t count = 32;
 
-        int32_t ret = PCL_List(configs, &count);
+        int32_t ret = PCONFIG_List(configs, &count);
         if (ret == OSAL_SUCCESS) {
             data->success_count++;
         } else {
@@ -530,7 +530,7 @@ static void* thread_getboard_func(void *arg)
     int i;
 
     for (i = 0; i < NUM_ITERATIONS; i++) {
-        const pcl_platform_config_t *board = PCL_GetBoard();
+        const pconfig_platform_config_t *board = PCONFIG_GetBoard();
         /* GetBoard可能返回NULL（如果没有设置current），这是正常的 */
         data->success_count++;
         (void)board;  /* 避免未使用变量警告 */
@@ -552,7 +552,7 @@ TEST_CASE(test_pcl_concurrent_register)
     init_test_configs();
 
     /* 初始化PCL */
-    ret = PCL_Init();
+    ret = PCONFIG_Init();
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 创建多个线程并发注册配置 */
@@ -577,13 +577,13 @@ TEST_CASE(test_pcl_concurrent_register)
     }
 
     /* 验证注册表中有正确数量的配置 */
-    const pcl_platform_config_t *configs[32];
+    const pconfig_platform_config_t *configs[32];
     uint32_t count = 32;
-    ret = PCL_List(configs, &count);
+    ret = PCONFIG_List(configs, &count);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_EQUAL(NUM_THREADS, count);
 
-    PCL_Cleanup();
+    PCONFIG_Cleanup();
 }
 
 TEST_CASE(test_pcl_concurrent_find)
@@ -597,11 +597,11 @@ TEST_CASE(test_pcl_concurrent_find)
     init_test_configs();
 
     /* 初始化PCL并注册配置 */
-    ret = PCL_Init();
+    ret = PCONFIG_Init();
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     for (i = 0; i < NUM_THREADS; i++) {
-        ret = PCL_Register(&test_configs[i]);
+        ret = PCONFIG_Register(&test_configs[i]);
         TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     }
 
@@ -626,7 +626,7 @@ TEST_CASE(test_pcl_concurrent_find)
         TEST_ASSERT_EQUAL(0, thread_data[i].error_count);
     }
 
-    PCL_Cleanup();
+    PCONFIG_Cleanup();
 }
 
 TEST_CASE(test_pcl_concurrent_mixed_operations)
@@ -640,11 +640,11 @@ TEST_CASE(test_pcl_concurrent_mixed_operations)
     init_test_configs();
 
     /* 初始化PCL并注册一些配置 */
-    ret = PCL_Init();
+    ret = PCONFIG_Init();
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     for (i = 0; i < NUM_THREADS / 2; i++) {
-        ret = PCL_Register(&test_configs[i]);
+        ret = PCONFIG_Register(&test_configs[i]);
         TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     }
 
@@ -683,7 +683,7 @@ TEST_CASE(test_pcl_concurrent_mixed_operations)
     /* 验证没有发生崩溃或死锁 */
     TEST_ASSERT_TRUE(true);
 
-    PCL_Cleanup();
+    PCONFIG_Cleanup();
 }
 
 /* ========== 测试套件注册 ========== */

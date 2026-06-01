@@ -5,7 +5,7 @@
  */
 
 #include "pdl_mcu.h"
-#include "pcl_hardware_interface.h"
+#include "pconfig_hardware_interface.h"
 #include "osal.h"
 
 /*===========================================================================

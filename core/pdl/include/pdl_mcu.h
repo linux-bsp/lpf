@@ -62,7 +62,7 @@ int32_t PDL_MCU_Init(const pdl_mcu_config_t *config, pdl_mcu_handle_t *handle);
 /**
  * @brief 通过设备名称初始化MCU驱动（便捷接口）
  *
- * 此接口内部会调用 PCL_GetBoard() 和 PCL_HW_FindMCU() 查询配置，
+ * 此接口内部会调用 PCONFIG_GetBoard() 和 PCONFIG_HW_FindMCU() 查询配置，
  * 然后调用 PDL_MCU_Init() 完成初始化。
  *
  * @param[in] device_name 设备名称（如 "power_mcu"）
@@ -72,7 +72,7 @@ int32_t PDL_MCU_Init(const pdl_mcu_config_t *config, pdl_mcu_handle_t *handle);
  * @return OSAL_ERR_NOT_FOUND 设备未找到
  * @return OSAL_ERR_GENERIC 初始化失败
  *
- * @note 使用此接口前需要先调用 PCL_Register() 注册平台配置
+ * @note 使用此接口前需要先调用 PCONFIG_Register() 注册平台配置
  */
 int32_t PDL_MCU_InitByName(const char *device_name, pdl_mcu_handle_t *handle);
 

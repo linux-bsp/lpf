@@ -8,7 +8,7 @@ file(GLOB_RECURSE ADD_SRCS "src/*.c")
 
 ###### Add required/dependent components ######
 # CCM Supervisor 依赖核心组件和产品库
-list(APPEND ADD_REQUIREMENTS osal hal pcl pdl acl libccm)
+list(APPEND ADD_REQUIREMENTS osal hal pconfig pdl aconfig libccm)
 ###############################################
 
 #### Add compile option for this component ####

@@ -17,9 +17,9 @@ make menuconfig
 - **Target Platform** - 目标平台（架构、操作系统、工具链）
 - **OSAL** - 操作系统抽象层
 - **HAL** - 硬件抽象层
-- **PCL** - 协议控制层
+- **PConfig** - 协议控制层
 - **PDL** - 协议数据层
-- **ACL** - 应用控制层
+- **AConfig** - 应用控制层
 - **Products** - 产品应用
 - **Test Configuration** - 测试配置
 

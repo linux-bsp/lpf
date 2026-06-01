@@ -21,10 +21,10 @@ load_platform_config(CONFIG_PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR}/configs/pla
 if(CONFIG_PCL)
     # Add platform PCL config sources to PCL component
     if(PLATFORM_PCL_SRCS)
-        set(PCL_EXTRA_SRCS ${PLATFORM_PCL_SRCS})
-        set(PCL_EXTRA_INCLUDE ${PLATFORM_CONFIG_INCLUDE})
+        set(PCONFIG_EXTRA_SRCS ${PLATFORM_PCL_SRCS})
+        set(PCONFIG_EXTRA_INCLUDE ${PLATFORM_CONFIG_INCLUDE})
     endif()
-    add_subdirectory(${SDK_PATH}/core/pcl ${CMAKE_CURRENT_BINARY_DIR}/pcl)
+    add_subdirectory(${SDK_PATH}/core/pconfig ${CMAKE_CURRENT_BINARY_DIR}/pconfig)
 endif()
 
 if(CONFIG_PDL)
@@ -39,10 +39,10 @@ endif()
 if(CONFIG_ACL)
     # Add platform ACL config sources to ACL component
     if(PLATFORM_ACL_SRCS)
-        set(ACL_EXTRA_SRCS ${PLATFORM_ACL_SRCS})
-        set(ACL_EXTRA_INCLUDE ${PLATFORM_CONFIG_INCLUDE})
+        set(ACONFIG_EXTRA_SRCS ${PLATFORM_ACL_SRCS})
+        set(ACONFIG_EXTRA_INCLUDE ${PLATFORM_CONFIG_INCLUDE})
     endif()
-    add_subdirectory(${SDK_PATH}/core/acl ${CMAKE_CURRENT_BINARY_DIR}/acl)
+    add_subdirectory(${SDK_PATH}/core/aconfig ${CMAKE_CURRENT_BINARY_DIR}/aconfig)
 endif()
 
 # Register product-specific libraries

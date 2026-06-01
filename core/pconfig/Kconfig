@@ -1,0 +1,74 @@
+# PCL (Peripheral Configuration Library) Configuration
+
+menuconfig PCL
+	bool "PCL (Peripheral Configuration Library)"
+	default n
+	select OSAL
+	select HAL
+	select TYPES
+	help
+	  Peripheral Configuration Library provides device-tree-like hardware
+	  configuration management.
+
+	  PCL acts as a hardware abstraction layer that describes the physical
+	  hardware configuration of a platform (board variant, peripheral
+	  connections, pin mappings, etc.) in a structured, data-driven way.
+
+	  Key features:
+	  - Platform-specific hardware descriptions
+	  - Board variant management (e.g., H200_100P_V1, H200_100P_V2)
+	  - Peripheral configuration tables
+	  - Runtime hardware detection and configuration
+
+	  Memory footprint: ~10KB code + configuration data (varies by platform)
+
+	  Use cases:
+	  - Multi-board product variants
+	  - Hardware abstraction for applications
+	  - Runtime board identification
+	  - Peripheral auto-configuration
+
+	  Dependencies: OSAL (for basic services), HAL (for hardware access),
+	                TYPES (for PDL configuration types)
+
+	  Recommended: Enable for products with multiple hardware variants
+
+	  If unsure, say Y.
+
+if PCL
+
+menu "PCL Build Configuration"
+
+config PCONFIG_BUILD_STATIC
+	bool "Build static library (.a)"
+	default n
+	help
+	  Build PCL as a static library (libpcl.a).
+
+	  Static linking advantages:
+	  - No runtime dependencies
+	  - Configuration data embedded in executable
+	  - Slightly faster (no dynamic linking)
+
+	  Recommended: Enable for embedded systems with fixed hardware
+
+config PCONFIG_BUILD_SHARED
+	bool "Build shared library (.so)"
+	default n
+	help
+	  Build PCL as a shared library (libpcl.so).
+
+	  Shared library advantages:
+	  - Can update hardware configurations without recompiling apps
+	  - Smaller executable size
+	  - Code sharing between processes
+
+	  Use cases:
+	  - Systems with multiple applications using PCL
+	  - Field-updatable hardware configurations
+
+	  Recommended: Enable for multi-application systems
+
+endmenu
+
+endif # PCL
