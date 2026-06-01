@@ -7,6 +7,7 @@
 #include "hal_gpio.h"
 #include "hal_error.h"
 #include "osal.h"
+#include "osal_flock.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -51,7 +52,7 @@ static int32_t gpio_module_init(void)
     }
 
     /* 创建文件锁 */
-    ret = OSAL_FlockCreate(&g_gpio_flock, "/var/lock/hal_gpio.lock");
+    ret = OSAL_FlockCreate("/var/lock/hal_gpio.lock", &g_gpio_flock);
     if (ret != OSAL_SUCCESS) {
         return ret;
     }
@@ -246,7 +247,7 @@ int32_t HAL_GPIO_Init(uint32_t gpio_num, const hal_gpio_config_t *config)
     }
 
     /* 获取文件锁 */
-    ret = OSAL_FlockLock(g_gpio_flock);
+    ret = OSAL_FlockLock(g_gpio_flock, OSAL_FLOCK_EXCLUSIVE);
     if (ret != OSAL_SUCCESS) {
         return ret;
     }
@@ -311,7 +312,7 @@ int32_t HAL_GPIO_Deinit(uint32_t gpio_num)
     }
 
     /* 获取文件锁 */
-    ret = OSAL_FlockLock(g_gpio_flock);
+    ret = OSAL_FlockLock(g_gpio_flock, OSAL_FLOCK_EXCLUSIVE);
     if (ret != OSAL_SUCCESS) {
         return ret;
     }
@@ -355,7 +356,7 @@ int32_t HAL_GPIO_SetDirection(uint32_t gpio_num, hal_gpio_direction_t direction)
     }
 
     /* 获取文件锁 */
-    ret = OSAL_FlockLock(g_gpio_flock);
+    ret = OSAL_FlockLock(g_gpio_flock, OSAL_FLOCK_EXCLUSIVE);
     if (ret != OSAL_SUCCESS) {
         return ret;
     }
@@ -385,7 +386,7 @@ int32_t HAL_GPIO_GetDirection(uint32_t gpio_num, hal_gpio_direction_t *direction
     }
 
     /* 获取文件锁 */
-    ret = OSAL_FlockLock(g_gpio_flock);
+    ret = OSAL_FlockLock(g_gpio_flock, OSAL_FLOCK_EXCLUSIVE);
     if (ret != OSAL_SUCCESS) {
         return ret;
     }
@@ -420,7 +421,7 @@ int32_t HAL_GPIO_SetLevel(uint32_t gpio_num, hal_gpio_level_t level)
     }
 
     /* 获取文件锁 */
-    ret = OSAL_FlockLock(g_gpio_flock);
+    ret = OSAL_FlockLock(g_gpio_flock, OSAL_FLOCK_EXCLUSIVE);
     if (ret != OSAL_SUCCESS) {
         return ret;
     }
@@ -450,7 +451,7 @@ int32_t HAL_GPIO_GetLevel(uint32_t gpio_num, hal_gpio_level_t *level)
     }
 
     /* 获取文件锁 */
-    ret = OSAL_FlockLock(g_gpio_flock);
+    ret = OSAL_FlockLock(g_gpio_flock, OSAL_FLOCK_EXCLUSIVE);
     if (ret != OSAL_SUCCESS) {
         return ret;
     }
@@ -487,7 +488,7 @@ int32_t HAL_GPIO_SetInterrupt(uint32_t gpio_num, hal_gpio_edge_t edge,
     }
 
     /* 获取文件锁 */
-    ret = OSAL_FlockLock(g_gpio_flock);
+    ret = OSAL_FlockLock(g_gpio_flock, OSAL_FLOCK_EXCLUSIVE);
     if (ret != OSAL_SUCCESS) {
         return ret;
     }
@@ -572,7 +573,7 @@ int32_t HAL_GPIO_EnableInterrupt(uint32_t gpio_num)
     }
 
     /* 获取文件锁 */
-    ret = OSAL_FlockLock(g_gpio_flock);
+    ret = OSAL_FlockLock(g_gpio_flock, OSAL_FLOCK_EXCLUSIVE);
     if (ret != OSAL_SUCCESS) {
         return ret;
     }
@@ -600,7 +601,7 @@ int32_t HAL_GPIO_DisableInterrupt(uint32_t gpio_num)
     }
 
     /* 获取文件锁 */
-    ret = OSAL_FlockLock(g_gpio_flock);
+    ret = OSAL_FlockLock(g_gpio_flock, OSAL_FLOCK_EXCLUSIVE);
     if (ret != OSAL_SUCCESS) {
         return ret;
     }

@@ -55,6 +55,7 @@ int32_t HAL_Serial_Open(const char *device, const hal_serial_config_t *config, h
     hal_serial_context_t *ctx;
     osal_termios_t tty;
     uint32_t speed;
+    int32_t ret;  /* 添加缺失的变量声明 */
 
     if (NULL == device || NULL == handle)
     {
