@@ -93,10 +93,10 @@ int32_t CCM_TM_Cache_Read(ccm_tm_cache_t *cache, uint32_t tm_id,
 void CCM_TM_Cache_Cleanup(ccm_tm_cache_t *cache);
 
 /* IPC辅助函数 - 系统状态操作 */
-int32_t PMC_Status_Init(pmc_system_status_t **status);
-int32_t PMC_Status_Write(pmc_system_status_t *status, const pmc_system_status_t *new_status);
-int32_t PMC_Status_Read(pmc_system_status_t *status, pmc_system_status_t *out_status);
-void PMC_Status_Cleanup(pmc_system_status_t *status);
+int32_t CCM_Status_Init(ccm_system_status_t **status);
+int32_t CCM_Status_Write(ccm_system_status_t *status, const ccm_system_status_t *new_status);
+int32_t CCM_Status_Read(ccm_system_status_t *status, ccm_system_status_t *out_status);
+void CCM_Status_Cleanup(ccm_system_status_t *status);
 
 /* IPC辅助函数 - 进程心跳操作 */
 int32_t PMC_Heartbeat_Init(pmc_process_heartbeat_t **heartbeat);
