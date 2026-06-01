@@ -8,7 +8,7 @@
 #define HAL_ERROR_H
 
 #include <stdint.h>
-#include <errno.h>
+#include "lib/osal_errno.h"
 
 #ifdef __cplusplus
 extern "C" {

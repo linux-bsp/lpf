@@ -83,7 +83,7 @@ int32_t HAL_Serial_Open(const char *device, const hal_serial_config_t *config, h
         int32_t err = OSAL_GetErrno();
         int32_t hal_err = HAL_ErrnoToError(err);
         HAL_SET_ERROR(hal_err, err, "Failed to open %s: %s", device, OSAL_StrError(err));
-        LOG_ERROR("HAL_Serial", "Failed to open %s: %s (errno=%d, hal_err=%d)",
+        LOG_ERROR("HAL_Serial", "Failed to open %s: %s %d(sys_err=%d, hal_err=%d)",
                   device, OSAL_StrError(err), err, hal_err);
         OSAL_Free(ctx);
         return hal_err;
@@ -98,7 +98,7 @@ int32_t HAL_Serial_Open(const char *device, const hal_serial_config_t *config, h
         int32_t err = OSAL_GetErrno();
         int32_t hal_err = HAL_ErrnoToError(err);
         HAL_SET_ERROR(hal_err, err, "Failed to get attributes: %s", OSAL_StrError(err));
-        LOG_ERROR("HAL_Serial", "Failed to get attributes: %s (errno=%d, hal_err=%d)",
+        LOG_ERROR("HAL_Serial", "Failed to get attributes: %s %d(sys_err=%d, hal_err=%d)",
                   OSAL_StrError(err), err, hal_err);
         OSAL_close(ctx->fd);
         OSAL_Free(ctx);
@@ -171,7 +171,7 @@ int32_t HAL_Serial_Open(const char *device, const hal_serial_config_t *config, h
         int32_t err = OSAL_GetErrno();
         int32_t hal_err = HAL_ErrnoToError(err);
         HAL_SET_ERROR(hal_err, err, "Failed to set attributes: %s", OSAL_StrError(err));
-        LOG_ERROR("HAL_Serial", "Failed to set attributes: %s (errno=%d, hal_err=%d)",
+        LOG_ERROR("HAL_Serial", "Failed to set attributes: %s %d(sys_err=%d, hal_err=%d)",
                   OSAL_StrError(err), err, hal_err);
         OSAL_close(ctx->fd);
         OSAL_Free(ctx);
@@ -300,7 +300,7 @@ int32_t HAL_Serial_Write(hal_serial_handle_t handle, const void *buffer, uint32_
             int32_t err = OSAL_GetErrno();
             int32_t hal_err = HAL_ErrnoToError(err);
             HAL_SET_ERROR(hal_err, err, "Select error: %s", OSAL_StrError(err));
-            LOG_ERROR("HAL_Serial", "Select error: %s (errno=%d, hal_err=%d)",
+            LOG_ERROR("HAL_Serial", "Select error: %s %d(sys_err=%d, hal_err=%d)",
                       OSAL_StrError(err), err, hal_err);
             return hal_err;
         }
@@ -330,7 +330,7 @@ int32_t HAL_Serial_Write(hal_serial_handle_t handle, const void *buffer, uint32_
         int32_t err = OSAL_GetErrno();
         int32_t hal_err = HAL_ErrnoToError(err);
         HAL_SET_ERROR(hal_err, err, "Write error: %s", OSAL_StrError(err));
-        LOG_ERROR("HAL_Serial", "Write error: %s (errno=%d, hal_err=%d)",
+        LOG_ERROR("HAL_Serial", "Write error: %s %d(sys_err=%d, hal_err=%d)",
                   OSAL_StrError(err), err, hal_err);
         result = hal_err;
     }
@@ -390,7 +390,7 @@ int32_t HAL_Serial_Read(hal_serial_handle_t handle, void *buffer, uint32_t size,
             int32_t err = OSAL_GetErrno();
             int32_t hal_err = HAL_ErrnoToError(err);
             HAL_SET_ERROR(hal_err, err, "Select error: %s", OSAL_StrError(err));
-            LOG_ERROR("HAL_Serial", "Select error: %s (errno=%d, hal_err=%d)",
+            LOG_ERROR("HAL_Serial", "Select error: %s %d(sys_err=%d, hal_err=%d)",
                       OSAL_StrError(err), err, hal_err);
             return hal_err;
         }
@@ -420,7 +420,7 @@ int32_t HAL_Serial_Read(hal_serial_handle_t handle, void *buffer, uint32_t size,
         int32_t err = OSAL_GetErrno();
         int32_t hal_err = HAL_ErrnoToError(err);
         HAL_SET_ERROR(hal_err, err, "Read error: %s", OSAL_StrError(err));
-        LOG_ERROR("HAL_Serial", "Read error: %s (errno=%d, hal_err=%d)",
+        LOG_ERROR("HAL_Serial", "Read error: %s %d(sys_err=%d, hal_err=%d)",
                   OSAL_StrError(err), err, hal_err);
         result = hal_err;
     }
@@ -478,7 +478,7 @@ int32_t HAL_Serial_Flush(hal_serial_handle_t handle)
         int32_t err = OSAL_GetErrno();
         int32_t hal_err = HAL_ErrnoToError(err);
         HAL_SET_ERROR(hal_err, err, "Flush error: %s", OSAL_StrError(err));
-        LOG_ERROR("HAL_Serial", "Flush error: %s (errno=%d, hal_err=%d)",
+        LOG_ERROR("HAL_Serial", "Flush error: %s %d(sys_err=%d, hal_err=%d)",
                   OSAL_StrError(err), err, hal_err);
         result = hal_err;
     }
@@ -536,7 +536,7 @@ int32_t HAL_Serial_SetConfig(hal_serial_handle_t handle,
         int32_t err = OSAL_GetErrno();
         int32_t hal_err = HAL_ErrnoToError(err);
         HAL_SET_ERROR(hal_err, err, "Failed to get attributes: %s", OSAL_StrError(err));
-        LOG_ERROR("HAL_Serial", "Failed to get attributes: %s (errno=%d, hal_err=%d)",
+        LOG_ERROR("HAL_Serial", "Failed to get attributes: %s %d(sys_err=%d, hal_err=%d)",
                   OSAL_StrError(err), err, hal_err);
         result = hal_err;
         goto unlock;
@@ -590,7 +590,7 @@ int32_t HAL_Serial_SetConfig(hal_serial_handle_t handle,
         int32_t err = OSAL_GetErrno();
         int32_t hal_err = HAL_ErrnoToError(err);
         HAL_SET_ERROR(hal_err, err, "Failed to set attributes: %s", OSAL_StrError(err));
-        LOG_ERROR("HAL_Serial", "Failed to set attributes: %s (errno=%d, hal_err=%d)",
+        LOG_ERROR("HAL_Serial", "Failed to set attributes: %s %d(sys_err=%d, hal_err=%d)",
                   OSAL_StrError(err), err, hal_err);
         result = hal_err;
         goto unlock;

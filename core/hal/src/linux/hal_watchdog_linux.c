@@ -64,7 +64,7 @@ int32_t HAL_WATCHDOG_Init(const hal_watchdog_config_t *config, hal_watchdog_hand
         int32_t hal_err = HAL_ErrnoToError(err);
         HAL_SET_ERROR(hal_err, err, "Failed to open %s: %s",
                       config->device, OSAL_StrError(err));
-        LOG_ERROR("HAL_WDT", "Failed to open %s: %s (errno=%d, hal_err=%d)",
+        LOG_ERROR("HAL_WDT", "Failed to open %s: %s %d(sys_err=%d, hal_err=%d)",
                   config->device, OSAL_StrError(err), err, hal_err);
         OSAL_Free(ctx);
         return hal_err;
@@ -81,7 +81,7 @@ int32_t HAL_WATCHDOG_Init(const hal_watchdog_config_t *config, hal_watchdog_hand
             int32_t err = OSAL_GetErrno();
             int32_t hal_err = HAL_ErrnoToError(err);
             HAL_SET_ERROR(hal_err, err, "Failed to set timeout: %s", OSAL_StrError(err));
-            LOG_ERROR("HAL_WDT", "Failed to set timeout: %s (errno=%d, hal_err=%d)",
+            LOG_ERROR("HAL_WDT", "Failed to set timeout: %s %d(sys_err=%d, hal_err=%d)",
                       OSAL_StrError(err), err, hal_err);
             OSAL_close(ctx->fd);
             OSAL_Free(ctx);
@@ -175,7 +175,7 @@ int32_t HAL_WATCHDOG_Kick(hal_watchdog_handle_t handle)
         int32_t err = OSAL_GetErrno();
         int32_t hal_err = HAL_ErrnoToError(err);
         HAL_SET_ERROR(hal_err, err, "Failed to kick watchdog: %s", OSAL_StrError(err));
-        LOG_ERROR("HAL_WDT", "Failed to kick watchdog: %s (errno=%d, hal_err=%d)",
+        LOG_ERROR("HAL_WDT", "Failed to kick watchdog: %s %d(sys_err=%d, hal_err=%d)",
                   OSAL_StrError(err), err, hal_err);
         return hal_err;
     }
@@ -212,7 +212,7 @@ int32_t HAL_WATCHDOG_Enable(hal_watchdog_handle_t handle)
         int32_t err = OSAL_GetErrno();
         int32_t hal_err = HAL_ErrnoToError(err);
         HAL_SET_ERROR(hal_err, err, "Failed to enable watchdog: %s", OSAL_StrError(err));
-        LOG_ERROR("HAL_WDT", "Failed to enable watchdog: %s (errno=%d, hal_err=%d)",
+        LOG_ERROR("HAL_WDT", "Failed to enable watchdog: %s %d(sys_err=%d, hal_err=%d)",
                   OSAL_StrError(err), err, hal_err);
         return hal_err;
     }
@@ -251,7 +251,7 @@ int32_t HAL_WATCHDOG_Disable(hal_watchdog_handle_t handle)
         int32_t hal_err = HAL_ErrnoToError(err);
         HAL_SET_ERROR(hal_err, err, "Failed to disable watchdog (may not be supported): %s",
                       OSAL_StrError(err));
-        LOG_WARN("HAL_WDT", "Failed to disable watchdog (may not be supported): %s (errno=%d, hal_err=%d)",
+        LOG_WARN("HAL_WDT", "Failed to disable watchdog (may not be supported): %s %d(sys_err=%d, hal_err=%d)",
                  OSAL_StrError(err), err, hal_err);
         return hal_err;
     }
@@ -289,7 +289,7 @@ int32_t HAL_WATCHDOG_SetTimeout(hal_watchdog_handle_t handle, uint32_t timeout_s
         int32_t err = OSAL_GetErrno();
         int32_t hal_err = HAL_ErrnoToError(err);
         HAL_SET_ERROR(hal_err, err, "Failed to set timeout: %s", OSAL_StrError(err));
-        LOG_ERROR("HAL_WDT", "Failed to set timeout: %s (errno=%d, hal_err=%d)",
+        LOG_ERROR("HAL_WDT", "Failed to set timeout: %s %d(sys_err=%d, hal_err=%d)",
                   OSAL_StrError(err), err, hal_err);
         return hal_err;
     }
@@ -327,7 +327,7 @@ int32_t HAL_WATCHDOG_GetTimeout(hal_watchdog_handle_t handle, uint32_t *timeout_
         int32_t err = OSAL_GetErrno();
         int32_t hal_err = HAL_ErrnoToError(err);
         HAL_SET_ERROR(hal_err, err, "Failed to get timeout: %s", OSAL_StrError(err));
-        LOG_ERROR("HAL_WDT", "Failed to get timeout: %s (errno=%d, hal_err=%d)",
+        LOG_ERROR("HAL_WDT", "Failed to get timeout: %s %d(sys_err=%d, hal_err=%d)",
                   OSAL_StrError(err), err, hal_err);
         return hal_err;
     }
@@ -365,7 +365,7 @@ int32_t HAL_WATCHDOG_GetTimeleft(hal_watchdog_handle_t handle, uint32_t *timelef
         int32_t hal_err = HAL_ErrnoToError(err);
         HAL_SET_ERROR(hal_err, err, "Failed to get timeleft (may not be supported): %s",
                       OSAL_StrError(err));
-        LOG_WARN("HAL_WDT", "Failed to get timeleft (may not be supported): %s (errno=%d, hal_err=%d)",
+        LOG_WARN("HAL_WDT", "Failed to get timeleft (may not be supported): %s %d(sys_err=%d, hal_err=%d)",
                  OSAL_StrError(err), err, hal_err);
         return hal_err;
     }

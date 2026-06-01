@@ -93,7 +93,7 @@ static int32_t gpio_write_file(const char *path, const char *value)
 
     fd = OSAL_open(path, OSAL_O_WRONLY, 0);
     if (fd < 0) {
-        int32_t err = errno;
+        int32_t err = OSAL_GetErrno();
         int32_t hal_err = HAL_ErrnoToError(err);
         HAL_SET_ERROR(hal_err, err, "Failed to open %s: %s", path, OSAL_StrError(err));
         return hal_err;
@@ -104,7 +104,7 @@ static int32_t gpio_write_file(const char *path, const char *value)
     OSAL_close(fd);
 
     if (written != (int32_t)len) {
-        int32_t err = errno;
+        int32_t err = OSAL_GetErrno();
         int32_t hal_err = HAL_ErrnoToError(err);
         HAL_SET_ERROR(hal_err, err, "Failed to write to %s: %s", path, OSAL_StrError(err));
         return hal_err;
@@ -123,7 +123,7 @@ static int32_t gpio_read_file(const char *path, char *buffer, size_t size)
 
     fd = OSAL_open(path, OSAL_O_RDONLY, 0);
     if (fd < 0) {
-        int32_t err = errno;
+        int32_t err = OSAL_GetErrno();
         int32_t hal_err = HAL_ErrnoToError(err);
         HAL_SET_ERROR(hal_err, err, "Failed to open %s: %s", path, OSAL_StrError(err));
         return hal_err;
@@ -133,7 +133,7 @@ static int32_t gpio_read_file(const char *path, char *buffer, size_t size)
     OSAL_close(fd);
 
     if (len < 0) {
-        int32_t err = errno;
+        int32_t err = OSAL_GetErrno();
         int32_t hal_err = HAL_ErrnoToError(err);
         HAL_SET_ERROR(hal_err, err, "Failed to read from %s: %s", path, OSAL_StrError(err));
         return hal_err;
@@ -515,7 +515,7 @@ int32_t HAL_GPIO_SetInterrupt(uint32_t gpio_num, hal_gpio_edge_t edge,
     OSAL_Snprintf(path, sizeof(path), "/sys/class/gpio/gpio%u/value", gpio_num);
     fd = OSAL_open(path, OSAL_O_RDONLY, 0);
     if (fd < 0) {
-        int32_t err = errno;
+        int32_t err = OSAL_GetErrno();
         int32_t hal_err = HAL_ErrnoToError(err);
         HAL_SET_ERROR(hal_err, err, "Failed to open %s: %s", path, OSAL_StrError(err));
         OSAL_FlockUnlock(g_gpio_flock);

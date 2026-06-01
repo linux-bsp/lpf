@@ -4,7 +4,6 @@
 
 #include "hal_error.h"
 #include "osal.h"
-#include <stdio.h>
 #include <stdarg.h>
 
 /************************************************************************
@@ -26,7 +25,7 @@ void HAL_SetErrorContext(int32_t hal_err, int32_t sys_err, const char *fmt, ...)
 
     if (fmt != NULL) {
         va_start(args, fmt);
-        vsnprintf(g_hal_error_ctx.message, HAL_ERROR_MSG_SIZE, fmt, args);
+        OSAL_Vsnprintf(g_hal_error_ctx.message, HAL_ERROR_MSG_SIZE, fmt, args);
         va_end(args);
         g_hal_error_ctx.message[HAL_ERROR_MSG_SIZE - 1] = '\0';
     } else {
@@ -55,52 +54,52 @@ int32_t HAL_ErrnoToError(int32_t sys_errno)
             return HAL_SUCCESS;
 
         /* 参数错误 */
-        case EINVAL:
+        case OSAL_EINVAL:
             return HAL_ERR_INVALID_PARAM;
-        case EFAULT:
+        case OSAL_EFAULT:
             return HAL_ERR_INVALID_POINTER;
-        case EBADF:
-        case EBADFD:
+        case OSAL_EBADF:
+        case OSAL_EBADFD:
             return HAL_ERR_INVALID_ID;
 
         /* 资源错误 */
-        case ENOMEM:
+        case OSAL_ENOMEM:
             return HAL_ERR_NO_MEMORY;
-        case EBUSY:
-        case ETXTBSY:
+        case OSAL_EBUSY:
+        case OSAL_ETXTBSY:
             return HAL_ERR_BUSY;
-        case ETIMEDOUT:
+        case OSAL_ETIMEDOUT:
             return HAL_ERR_TIMEOUT;
 
         /* 权限错误 */
-        case EACCES:
-        case EPERM:
+        case OSAL_EACCES:
+        case OSAL_EPERM:
             return HAL_ERR_PERMISSION;
 
         /* 设备错误 */
-        case ENODEV:
-        case ENXIO:
+        case OSAL_ENODEV:
+        case OSAL_ENXIO:
             return HAL_ERR_NO_DEVICE;
-        case ENOENT:
+        case OSAL_ENOENT:
             return HAL_ERR_DEVICE_NOT_FOUND;
-        case ENAMETOOLONG:
+        case OSAL_ENAMETOOLONG:
             return HAL_ERR_NAME_TOO_LONG;
 
         /* I/O错误 */
-        case EIO:
-        case EREMOTEIO:
+        case OSAL_EIO:
+        case OSAL_EREMOTEIO:
             return HAL_ERR_IO;
-        case EPROTO:
-        case EPROTOTYPE:
+        case OSAL_EPROTO:
+        case OSAL_EPROTOTYPE:
             return HAL_ERR_COMM_FAILED;
 
         /* 不支持 */
-        case ENOSYS:
-#if defined(ENOTSUP) && (!defined(EOPNOTSUPP) || ENOTSUP != EOPNOTSUPP)
-        case ENOTSUP:
+        case OSAL_ENOSYS:
+#if defined(OSAL_ENOTSUP) && (!defined(OSAL_EOPNOTSUPP) || OSAL_ENOTSUP != OSAL_EOPNOTSUPP)
+        case OSAL_ENOTSUP:
 #endif
-#ifdef EOPNOTSUPP
-        case EOPNOTSUPP:
+#ifdef OSAL_EOPNOTSUPP
+        case OSAL_EOPNOTSUPP:
 #endif
             return HAL_ERR_NOT_SUPPORTED;
 
