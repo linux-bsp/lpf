@@ -30,7 +30,7 @@ if(CONFIG_PRL)
     add_subdirectory(${SDK_PATH}/core/prl ${CMAKE_CURRENT_BINARY_DIR}/prl)
 endif()
 
-if(CONFIG_ACONFIG)
+if(CONFIG_ACL)
     add_subdirectory(${SDK_PATH}/core/aconfig ${CMAKE_CURRENT_BINARY_DIR}/aconfig)
 endif()
 
