@@ -34,8 +34,8 @@ def get_configs():
     configs = []
     for item in configs_dir.iterdir():
         if item.is_file() and item.name.endswith("_defconfig"):
-            config_name = item.name.replace("_defconfig", "")
-            configs.append(config_name)
+            # 返回完整的文件名（包含_defconfig后缀）
+            configs.append(item.name)
     return sorted(configs)
 
 def menuconfig():
@@ -94,12 +94,15 @@ def load_config(config_name, build_dir="_build"):
     root_dir = Path(__file__).parent
     build_path = root_dir / build_dir
 
-    config_file = root_dir / "configs" / f"{config_name}_defconfig"
+    # 直接使用配置文件名，不拼接_defconfig
+    config_file = root_dir / "configs" / config_name
     if not config_file.exists():
         print(f"Error: Config file not found: {config_file}")
         return False
 
-    print(f"Loading config: {config_name}")
+    # 从文件名中提取配置名称（去掉_defconfig后缀）用于显示
+    display_name = config_name.replace("_defconfig", "") if config_name.endswith("_defconfig") else config_name
+    print(f"Loading config: {display_name}")
 
     # 使用 kconfig 工具加载配置
     tool_path = root_dir / "tools/kconfig/genconfig.py"
@@ -128,7 +131,7 @@ def load_config(config_name, build_dir="_build"):
         print("Failed to load configuration!")
         return False
 
-    print(f"Configuration loaded: {config_name}")
+    print(f"Configuration loaded: {display_name}")
     print("Run 'python3 build.py build' to compile")
     return True
 
@@ -262,10 +265,10 @@ Examples:
   python3 build.py menuconfig
 
   # Load a specific config (without building)
-  python3 build.py config ccm_h200_100p_v1
+  python3 build.py config full_test_defconfig
 
   # Build with specific config
-  python3 build.py build --config ccm_h200_100p_v1
+  python3 build.py build --config full_test_defconfig
 
   # Clean build directory
   python3 build.py clean
@@ -279,11 +282,11 @@ Examples:
                         choices=["build", "menuconfig", "config", "clean", "distclean"],
                         help="Command to execute")
     parser.add_argument("config_name", nargs="?",
-                        help="Configuration name (for 'config' command)")
+                        help="Configuration file name (e.g., full_test_defconfig)")
     parser.add_argument("--list", action="store_true",
                         help="List all available products and configs")
     parser.add_argument("--config", "-c", type=str,
-                        help="Configuration to load (defconfig name without _defconfig suffix)")
+                        help="Configuration file name (e.g., full_test_defconfig)")
     parser.add_argument("--build-dir", "-b", type=str, default="_build",
                         help="Build directory (default: _build)")
     parser.add_argument("--jobs", "-j", type=int,
