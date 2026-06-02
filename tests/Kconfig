@@ -50,6 +50,30 @@ config TEST_ACL
 	  Build ACL layer unit tests.
 	  This will automatically enable the ACL module.
 
+config TEST_PRL
+	bool "Build PRL unit tests"
+	select PRL
+	default n
+	help
+	  Build PRL layer unit tests.
+	  This will automatically enable the PRL module.
+
+config TEST_ACONFIG
+	bool "Build ACONFIG unit tests"
+	select ACONFIG
+	default n
+	help
+	  Build ACONFIG layer unit tests.
+	  This will automatically enable the ACONFIG module.
+
+config TEST_PCONFIG
+	bool "Build PCONFIG unit tests"
+	select PCONFIG
+	default n
+	help
+	  Build PCONFIG layer unit tests.
+	  This will automatically enable the PCONFIG module.
+
 endif # TEST_UNIT
 
 config TEST_PERFORMANCE
@@ -190,6 +214,20 @@ config TEST_SYSTEM_ACL
 	default n
 	help
 	  Build ACL layer system tests.
+
+config TEST_SYSTEM_ACONFIG
+	bool "Build ACONFIG system tests"
+	select ACONFIG
+	default n
+	help
+	  Build ACONFIG layer system tests.
+
+config TEST_SYSTEM_PCONFIG
+	bool "Build PCONFIG system tests"
+	select PCONFIG
+	default n
+	help
+	  Build PCONFIG layer system tests.
 
 config TEST_INTEGRATION
 	bool "Build integration tests"

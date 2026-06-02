@@ -224,3 +224,29 @@ if PRODUCT_SAMPLE
 endif
 
 endmenu
+
+# ============================================================================
+# Testing Configuration
+# ============================================================================
+# Configure test suite and test modules.
+# Tests are only available when BUILD_TESTING is enabled.
+# ============================================================================
+
+config BUILD_TESTING
+	bool "Build test suite"
+	default n
+	help
+	  Enable building of test suite.
+
+	  This option controls whether the test framework and test cases
+	  are compiled. Tests include:
+	  - Unit tests for individual modules
+	  - Performance tests for benchmarking
+	  - Stress tests for stability validation
+	  - System tests for integration testing
+
+if BUILD_TESTING
+	menu "Test Configuration"
+		osource "$SDK_PATH/tests/Kconfig"
+	endmenu
+endif
