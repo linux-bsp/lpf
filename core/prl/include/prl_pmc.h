@@ -125,6 +125,16 @@ typedef struct {
     uint8_t  params[0];         /* 查询参数（变长） */
 } __attribute__((packed)) prl_pmc_status_query_t;
 
+/**
+ * @brief PMC 应答消息
+ */
+typedef struct {
+    uint32_t ack_code;          /* 应答码 */
+    uint32_t ack_seq;           /* 应答序列号 */
+    uint32_t ack_result;        /* 应答结果（0=成功） */
+    uint32_t error_code;        /* 错误码 */
+} __attribute__((packed)) prl_pmc_ack_t;
+
 #ifdef __cplusplus
 }
 #endif
