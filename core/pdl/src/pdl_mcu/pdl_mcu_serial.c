@@ -232,6 +232,9 @@ int32_t mcu_serial_send_command(void *handle,
     int32_t rx_len;
     uint8_t status;
     int32_t ret;
+    uint64_t start_time_us;
+    uint64_t elapsed_us;
+    uint32_t remaining_timeout_ms;
 
     if (NULL == handle)
     {
@@ -239,6 +242,9 @@ int32_t mcu_serial_send_command(void *handle,
     }
 
     ctx = (mcu_serial_context_t *)handle;
+
+    /* 记录起始时间，用于总超时控制 */
+    start_time_us = OSAL_GetMonotonicTime();
 
     /* 封装发送帧 */
     if (OSAL_SUCCESS != mcu_serial_pack_frame(cmd_code, data, data_len, ctx->enable_crc,
@@ -253,10 +259,18 @@ int32_t mcu_serial_send_command(void *handle,
         return OSAL_ERR_GENERIC;
     }
 
-    /* 接收响应 */
+    /* 计算发送后剩余的超时时间 */
+    elapsed_us = OSAL_GetMonotonicTime() - start_time_us;
+    if (elapsed_us / 1000 >= timeout_ms)
+    {
+        return OSAL_ERR_TIMEOUT;  /* 发送阶段已超时 */
+    }
+    remaining_timeout_ms = timeout_ms - (uint32_t)(elapsed_us / 1000);
+
+    /* 接收响应，使用剩余超时时间 */
     OSAL_MutexLock(ctx->rx_mutex);
 
-    rx_len = HAL_Serial_Read(ctx->serial_handle, rx_frame, sizeof(rx_frame), timeout_ms);
+    rx_len = HAL_Serial_Read(ctx->serial_handle, rx_frame, sizeof(rx_frame), remaining_timeout_ms);
 
     if (rx_len > 0)
     {

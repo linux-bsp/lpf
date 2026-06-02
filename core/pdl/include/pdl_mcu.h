@@ -24,6 +24,19 @@
 typedef void* pdl_mcu_handle_t;
 
 /*
+ * MCU设备状态枚举
+ */
+typedef enum
+{
+    PDL_MCU_STATE_UNINITIALIZED = 0,  /* 未初始化 */
+    PDL_MCU_STATE_INIT          = 1,  /* 已初始化 */
+    PDL_MCU_STATE_READY         = 2,  /* 就绪（通信正常） */
+    PDL_MCU_STATE_BUSY          = 3,  /* 忙碌（命令执行中） */
+    PDL_MCU_STATE_ERROR         = 4,  /* 错误状态 */
+    PDL_MCU_STATE_OFFLINE       = 5   /* 离线（通信失败） */
+} pdl_mcu_state_t;
+
+/*
  * MCU版本信息
  */
 typedef struct
@@ -41,6 +54,7 @@ typedef struct
 typedef struct
 {
     bool online;                      /* 在线状态 */
+    pdl_mcu_state_t state;            /* 设备状态 */
     uint32_t uptime_sec;                /* 运行时间 */
     uint8_t error_code;                 /* 错误码 */
     float temperature;                /* 温度 */
@@ -172,5 +186,23 @@ int32_t PDL_MCU_SendCommand(pdl_mcu_handle_t handle,
 int32_t PDL_MCU_FirmwareUpdate(pdl_mcu_handle_t handle,
                              const char *firmware_path,
                              void (*progress_callback)(uint32_t percent));
+
+/**
+ * @brief 获取MCU设备状态
+ *
+ * @param[in] handle MCU句柄
+ *
+ * @return pdl_mcu_state_t 设备状态枚举
+ */
+pdl_mcu_state_t PDL_MCU_GetDeviceState(pdl_mcu_handle_t handle);
+
+/**
+ * @brief 获取设备状态名称
+ *
+ * @param[in] state 设备状态
+ *
+ * @return 状态名称字符串
+ */
+const char* PDL_MCU_GetStateName(pdl_mcu_state_t state);
 
 #endif /* PDL_MCU_H */

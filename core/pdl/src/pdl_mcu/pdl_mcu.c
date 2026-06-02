@@ -21,6 +21,7 @@ typedef struct
     pdl_mcu_interface_t interface;
     void *comm_handle;                /* 通信句柄（CAN/串口） */
     bool initialized;
+    pdl_mcu_state_t state;            /* 设备状态 */
     osal_mutex_t *mutex;
     pdl_mcu_version_t version;
     pdl_mcu_status_t status;
@@ -84,6 +85,7 @@ int32_t PDL_MCU_Init(const pdl_mcu_config_t *config, pdl_mcu_handle_t *handle)
     }
 
     ctx->initialized = true;
+    ctx->state = PDL_MCU_STATE_INIT;  /* 初始化完成，进入 INIT 状态 */
     *handle = (pdl_mcu_handle_t)ctx;
 
     return OSAL_SUCCESS;
@@ -143,6 +145,9 @@ static int32_t mcu_send_command_internal(mcu_context_t *ctx,
     interface = ctx->interface;
     comm_handle = ctx->comm_handle;
     timeout_ms = ctx->config.cmd_timeout_ms;
+
+    /* 进入 BUSY 状态 */
+    ctx->state = PDL_MCU_STATE_BUSY;
     OSAL_MutexUnlock(ctx->mutex);
 
     /* 发送命令时不持有锁，由 HAL 层提供线程安全保护 */
@@ -162,6 +167,17 @@ static int32_t mcu_send_command_internal(mcu_context_t *ctx,
             ret = OSAL_ERR_GENERIC;
             break;
     }
+
+    /* 根据结果更新状态 */
+    OSAL_MutexLock(ctx->mutex);
+    if (OSAL_SUCCESS == ret) {
+        ctx->state = PDL_MCU_STATE_READY;  /* 命令成功，设备就绪 */
+    } else if (OSAL_ERR_TIMEOUT == ret) {
+        ctx->state = PDL_MCU_STATE_OFFLINE;  /* 超时，设备离线 */
+    } else {
+        ctx->state = PDL_MCU_STATE_ERROR;  /* 其他错误 */
+    }
+    OSAL_MutexUnlock(ctx->mutex);
 
     return ret;
 }
@@ -242,11 +258,19 @@ int32_t PDL_MCU_GetStatus(pdl_mcu_handle_t handle, pdl_mcu_status_t *status)
         if (OSAL_SUCCESS == ret)
         {
             status->timestamp_us = OSAL_GetMonotonicTime();
+            /* 同步设备状态 */
+            OSAL_MutexLock(ctx->mutex);
+            status->state = ctx->state;
+            OSAL_MutexUnlock(ctx->mutex);
         }
     }
     else
     {
         status->online = false;
+        /* 同步设备状态 */
+        OSAL_MutexLock(ctx->mutex);
+        status->state = ctx->state;
+        OSAL_MutexUnlock(ctx->mutex);
     }
 
     return ret;
@@ -411,4 +435,48 @@ int32_t PDL_MCU_FirmwareUpdate(pdl_mcu_handle_t handle,
     (void)progress_callback;
     /* TODO: 实现固件升级逻辑 */
     return OSAL_ERR_GENERIC;
+}
+
+/**
+ * @brief 获取MCU设备状态
+ */
+pdl_mcu_state_t PDL_MCU_GetDeviceState(pdl_mcu_handle_t handle)
+{
+    mcu_context_t *ctx;
+    pdl_mcu_state_t state;
+
+    if (NULL == handle)
+    {
+        return PDL_MCU_STATE_UNINITIALIZED;
+    }
+
+    ctx = (mcu_context_t *)handle;
+
+    OSAL_MutexLock(ctx->mutex);
+    state = ctx->state;
+    OSAL_MutexUnlock(ctx->mutex);
+
+    return state;
+}
+
+/**
+ * @brief 获取设备状态名称
+ */
+const char* PDL_MCU_GetStateName(pdl_mcu_state_t state)
+{
+    static const char *state_names[] = {
+        "UNINITIALIZED",  /* 0 */
+        "INIT",           /* 1 */
+        "READY",          /* 2 */
+        "BUSY",           /* 3 */
+        "ERROR",          /* 4 */
+        "OFFLINE"         /* 5 */
+    };
+
+    if (state >= 0 && state < (int32_t)(sizeof(state_names) / sizeof(state_names[0])))
+    {
+        return state_names[state];
+    }
+
+    return "UNKNOWN";
 }
