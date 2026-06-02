@@ -242,7 +242,7 @@ TEST_CASE(test_prl_packet_crc_header_tampered)
     size_t total_len;
 
     /* 构造报文并设置 CRC */
-    prl_init_header(hdr, PRL_DEV_TYPE_SATELLITE, PRL_SAT_MSG_ORBIT_DATA,
+    prl_init_header(hdr, PRL_DEV_TYPE_CCM, PRL_CCM_MSG_ORBIT_DATA,
                     sizeof(payload), 0);
     memcpy(packet + PRL_HEADER_SIZE, payload, sizeof(payload));
     total_len = PRL_HEADER_SIZE + sizeof(payload);
@@ -265,7 +265,7 @@ TEST_CASE(test_prl_zero_length_payload)
     prl_header_t *hdr = (prl_header_t *)packet;
 
     /* 零长度负载 */
-    prl_init_header(hdr, PRL_DEV_TYPE_BMC, PRL_BMC_MSG_GET_SENSOR, 0, 0);
+    prl_init_header(hdr, PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION, 0, 0);
     prl_set_packet_crc(packet, PRL_HEADER_SIZE);
 
     /* 验证应该成功 */

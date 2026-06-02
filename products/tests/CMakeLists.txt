@@ -61,9 +61,11 @@ target_include_directories(libutest PRIVATE
 )
 
 # Framework dependencies - only OSAL
-target_link_libraries(libutest PUBLIC
-    osal
-)
+if(CONFIG_OSAL)
+    target_link_libraries(libutest PUBLIC
+        osal
+    )
+endif()
 
 # ============================================================================
 # Test Executable (ems-test)
@@ -78,6 +80,11 @@ add_executable(ems-test
 target_link_libraries(ems-test PRIVATE
     libutest
 )
+
+# Link OSAL (required by test framework)
+if(CONFIG_OSAL)
+    target_link_libraries(ems-test PRIVATE osal)
+endif()
 
 # Add include directories for test cases
 target_include_directories(ems-test PRIVATE

@@ -124,15 +124,11 @@ TEST_CASE(test_prl_device_encode_all_device_types)
                             payload, sizeof(payload), buffer, sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
-    ret = prl_device_encode(PRL_DEV_TYPE_SATELLITE, PRL_SAT_MSG_HEARTBEAT,
+    ret = prl_device_encode(PRL_DEV_TYPE_CCM, PRL_CCM_MSG_HEARTBEAT,
                             payload, sizeof(payload), buffer, sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
     ret = prl_device_encode(PRL_DEV_TYPE_POWER, PRL_POWER_MSG_HEARTBEAT,
-                            payload, sizeof(payload), buffer, sizeof(buffer), 0);
-    TEST_ASSERT_TRUE(ret > 0);
-
-    ret = prl_device_encode(PRL_DEV_TYPE_BMC, PRL_BMC_MSG_GET_SENSOR,
                             payload, sizeof(payload), buffer, sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 }
