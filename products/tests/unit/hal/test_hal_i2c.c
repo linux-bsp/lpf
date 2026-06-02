@@ -223,7 +223,7 @@ TEST_CASE(test_hal_i2c_read_reg_null_buffer)
 TEST_CASE(test_hal_i2c_transfer_null_handle)
 {
     uint8_t buffer[4] = {0x01, 0x02, 0x03, 0x04};
-    i2c_msg_t msg = {
+    hal_i2c_msg_t msg = {
         .addr = 0x50,
         .flags = 0,
         .len = sizeof(buffer),

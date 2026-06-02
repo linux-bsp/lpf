@@ -74,6 +74,8 @@ if(CONFIG_OSAL_OS_POSIX)
 
     if(CONFIG_OSAL_SYS_FILE)
         list(APPEND ADD_SRCS "src/posix/sys/osal_file.c")
+        # Add Linux-specific file lock support
+        list(APPEND ADD_SRCS "src/linux/osal_flock.c")
     endif()
 
     if(CONFIG_OSAL_SYS_PROCESS)
@@ -86,6 +88,8 @@ if(CONFIG_OSAL_OS_POSIX)
 
     if(CONFIG_OSAL_SYS_SELECT)
         list(APPEND ADD_SRCS "src/posix/sys/osal_select.c")
+        # Add poll() support (required by some HAL drivers)
+        list(APPEND ADD_SRCS "src/posix/sys/osal_poll.c")
     endif()
 
     if(CONFIG_OSAL_SYS_SIGNAL)

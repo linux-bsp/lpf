@@ -219,7 +219,7 @@ TEST_CASE(test_hal_spi_transfer_multi_null_handle)
 {
     uint8_t tx_buffer[4] = {0x01, 0x02, 0x03, 0x04};
     uint8_t rx_buffer[4];
-    spi_transfer_t xfer = {
+    hal_spi_transfer_t xfer = {
         .tx_buf = tx_buffer,
         .rx_buf = rx_buffer,
         .len = sizeof(tx_buffer),

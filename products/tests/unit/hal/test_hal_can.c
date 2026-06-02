@@ -31,7 +31,7 @@ TEST_CASE(test_hal_can_init_success)
     TEST_ASSERT_NOT_NULL(handle);
 
     /* 尝试发送一个测试帧，检查接口是否真正可用 */
-    can_frame_t test_frame = {
+    hal_can_frame_t test_frame = {
         .can_id = 0x001,
         .dlc = 1,
         .data = {0x00}
@@ -124,7 +124,7 @@ TEST_CASE(test_hal_can_send_success)
         .rx_timeout = 1000,
         .tx_timeout = 1000
     };
-    can_frame_t frame = {
+    hal_can_frame_t frame = {
         .can_id = 0x123,
         .dlc = 8,
         .data = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08}
@@ -142,7 +142,7 @@ TEST_CASE(test_hal_can_send_success)
 /* 测试用例: CAN发送 - 空句柄 */
 TEST_CASE(test_hal_can_send_null_handle)
 {
-    can_frame_t frame = {
+    hal_can_frame_t frame = {
         .can_id = 0x123,
         .dlc = 8,
         .data = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08}
@@ -182,7 +182,7 @@ TEST_CASE(test_hal_can_recv_timeout)
         .rx_timeout = 100,
         .tx_timeout = 1000
     };
-    can_frame_t frame;
+    hal_can_frame_t frame;
 
     int32_t ret = HAL_CAN_Init(&config, &handle);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
@@ -196,7 +196,7 @@ TEST_CASE(test_hal_can_recv_timeout)
 /* 测试用例: CAN接收 - 空句柄 */
 TEST_CASE(test_hal_can_recv_null_handle)
 {
-    can_frame_t frame;
+    hal_can_frame_t frame;
 
     int32_t ret = HAL_CAN_Recv(NULL, &frame, 100);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
@@ -232,12 +232,12 @@ TEST_CASE(test_hal_can_loopback)
         .rx_timeout = 1000,
         .tx_timeout = 1000
     };
-    can_frame_t tx_frame = {
+    hal_can_frame_t tx_frame = {
         .can_id = 0x456,
         .dlc = 4,
         .data = {0xAA, 0xBB, 0xCC, 0xDD}
     };
-    can_frame_t rx_frame;
+    hal_can_frame_t rx_frame;
 
     int32_t ret = HAL_CAN_Init(&config, &handle);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
