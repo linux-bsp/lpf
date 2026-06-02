@@ -5,6 +5,11 @@
 #include "test_framework.h"
 #include "prl_device.h"
 #include "prl_common.h"
+#include "prl_mcu.h"
+#include "prl_ccm.h"
+#include "prl_pmc.h"
+#include "prl_gsc.h"
+#include "prl_power.h"
 #include <string.h>
 
 /*===========================================================================
