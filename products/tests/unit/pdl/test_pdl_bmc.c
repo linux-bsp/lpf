@@ -14,8 +14,8 @@
 /* 测试用例: BMC服务初始化 - 网络通道 */
 TEST_CASE(test_pdl_bmc_init_network_success)
 {
-    bmc_handle_t handle = NULL;
-    bmc_config_t config = {
+    pdl_bmc_handle_t handle = NULL;
+    pdl_bmc_config_t config = {
         .network = {
             .enabled = false,  /* 禁用网络避免测试卡死 */
             .ip_addr = "192.168.1.100",
@@ -27,7 +27,7 @@ TEST_CASE(test_pdl_bmc_init_network_success)
         .serial = {
             .enabled = false
         },
-        .primary_channel = BMC_CHANNEL_NETWORK,
+        .primary_channel = PDL_BMC_CHANNEL_NETWORK,
         .auto_switch = true,
         .retry_count = 3,
         .health_check_interval = 10000
@@ -43,8 +43,8 @@ TEST_CASE(test_pdl_bmc_init_network_success)
 /* 测试用例: BMC服务初始化 - 串口通道 */
 TEST_CASE(test_pdl_bmc_init_serial_success)
 {
-    bmc_handle_t handle = NULL;
-    bmc_config_t config = {
+    pdl_bmc_handle_t handle = NULL;
+    pdl_bmc_config_t config = {
         .network = {
             .enabled = false
         },
@@ -54,7 +54,7 @@ TEST_CASE(test_pdl_bmc_init_serial_success)
             .baudrate = 115200,
             .timeout_ms = 5000
         },
-        .primary_channel = BMC_CHANNEL_SERIAL,
+        .primary_channel = PDL_BMC_CHANNEL_SERIAL,
         .auto_switch = false,
         .retry_count = 3,
         .health_check_interval = 10000
@@ -70,7 +70,7 @@ TEST_CASE(test_pdl_bmc_init_serial_success)
 /* 测试用例: BMC服务初始化 - 空配置 */
 TEST_CASE(test_pdl_bmc_init_null_config)
 {
-    bmc_handle_t handle = NULL;
+    pdl_bmc_handle_t handle = NULL;
 
     int32_t ret = PDL_BMC_Init(NULL, &handle);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
@@ -79,7 +79,7 @@ TEST_CASE(test_pdl_bmc_init_null_config)
 /* 测试用例: BMC服务初始化 - 空句柄指针 */
 TEST_CASE(test_pdl_bmc_init_null_handle)
 {
-    bmc_config_t config = {
+    pdl_bmc_config_t config = {
         .network = {
             .enabled = false,  /* 禁用网络避免测试卡死 */
             .ip_addr = "192.168.1.100",
@@ -88,7 +88,7 @@ TEST_CASE(test_pdl_bmc_init_null_handle)
             .password = "admin",
             .timeout_ms = 5000
         },
-        .primary_channel = BMC_CHANNEL_NETWORK,
+        .primary_channel = PDL_BMC_CHANNEL_NETWORK,
         .auto_switch = true,
         .retry_count = 3,
         .health_check_interval = 10000
@@ -101,8 +101,8 @@ TEST_CASE(test_pdl_bmc_init_null_handle)
 /* 测试用例: BMC服务清理 */
 TEST_CASE(test_pdl_bmc_deinit)
 {
-    bmc_handle_t handle = NULL;
-    bmc_config_t config = {
+    pdl_bmc_handle_t handle = NULL;
+    pdl_bmc_config_t config = {
         .network = {
             .enabled = false,  /* 禁用网络避免测试卡死 */
             .ip_addr = "192.168.1.100",
@@ -111,7 +111,7 @@ TEST_CASE(test_pdl_bmc_deinit)
             .password = "admin",
             .timeout_ms = 5000
         },
-        .primary_channel = BMC_CHANNEL_NETWORK,
+        .primary_channel = PDL_BMC_CHANNEL_NETWORK,
         .auto_switch = true,
         .retry_count = 3,
         .health_check_interval = 10000
@@ -139,8 +139,8 @@ TEST_CASE(test_pdl_bmc_deinit_null_handle)
 TEST_CASE(test_pdl_bmc_power_on_success)
 {
     TEST_ASSERT_FALSE(true); // Requires real BMC hardware
-    bmc_handle_t handle = NULL;
-    bmc_config_t config = {
+    pdl_bmc_handle_t handle = NULL;
+    pdl_bmc_config_t config = {
         .network = {
             .enabled = false,  /* 禁用网络避免测试卡死 */
             .ip_addr = "192.168.1.100",
@@ -149,7 +149,7 @@ TEST_CASE(test_pdl_bmc_power_on_success)
             .password = "admin",
             .timeout_ms = 5000
         },
-        .primary_channel = BMC_CHANNEL_NETWORK,
+        .primary_channel = PDL_BMC_CHANNEL_NETWORK,
         .auto_switch = true,
         .retry_count = 3,
         .health_check_interval = 10000
@@ -175,8 +175,8 @@ TEST_CASE(test_pdl_bmc_power_on_null_handle)
 TEST_CASE(test_pdl_bmc_power_off_success)
 {
     TEST_ASSERT_FALSE(true); // Requires real BMC hardware
-    bmc_handle_t handle = NULL;
-    bmc_config_t config = {
+    pdl_bmc_handle_t handle = NULL;
+    pdl_bmc_config_t config = {
         .network = {
             .enabled = false,  /* 禁用网络避免测试卡死 */
             .ip_addr = "192.168.1.100",
@@ -185,7 +185,7 @@ TEST_CASE(test_pdl_bmc_power_off_success)
             .password = "admin",
             .timeout_ms = 5000
         },
-        .primary_channel = BMC_CHANNEL_NETWORK,
+        .primary_channel = PDL_BMC_CHANNEL_NETWORK,
         .auto_switch = true,
         .retry_count = 3,
         .health_check_interval = 10000
@@ -204,8 +204,8 @@ TEST_CASE(test_pdl_bmc_power_off_success)
 TEST_CASE(test_pdl_bmc_power_reset_success)
 {
     TEST_ASSERT_FALSE(true); // Requires real BMC hardware
-    bmc_handle_t handle = NULL;
-    bmc_config_t config = {
+    pdl_bmc_handle_t handle = NULL;
+    pdl_bmc_config_t config = {
         .network = {
             .enabled = false,  /* 禁用网络避免测试卡死 */
             .ip_addr = "192.168.1.100",
@@ -214,7 +214,7 @@ TEST_CASE(test_pdl_bmc_power_reset_success)
             .password = "admin",
             .timeout_ms = 5000
         },
-        .primary_channel = BMC_CHANNEL_NETWORK,
+        .primary_channel = PDL_BMC_CHANNEL_NETWORK,
         .auto_switch = true,
         .retry_count = 3,
         .health_check_interval = 10000
@@ -235,8 +235,8 @@ TEST_CASE(test_pdl_bmc_power_reset_success)
 TEST_CASE(test_pdl_bmc_get_power_state_success)
 {
     TEST_ASSERT_FALSE(true); // Requires real BMC hardware
-    bmc_handle_t handle = NULL;
-    bmc_config_t config = {
+    pdl_bmc_handle_t handle = NULL;
+    pdl_bmc_config_t config = {
         .network = {
             .enabled = false,  /* 禁用网络避免测试卡死 */
             .ip_addr = "192.168.1.100",
@@ -245,12 +245,12 @@ TEST_CASE(test_pdl_bmc_get_power_state_success)
             .password = "admin",
             .timeout_ms = 5000
         },
-        .primary_channel = BMC_CHANNEL_NETWORK,
+        .primary_channel = PDL_BMC_CHANNEL_NETWORK,
         .auto_switch = true,
         .retry_count = 3,
         .health_check_interval = 10000
     };
-    bmc_power_state_t state;
+    pdl_bmc_power_state_t state;
 
     int32_t ret = PDL_BMC_Init(&config, &handle);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
@@ -258,7 +258,7 @@ TEST_CASE(test_pdl_bmc_get_power_state_success)
     ret = PDL_BMC_GetPowerState(handle, &state);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-    TEST_ASSERT_TRUE(state >= BMC_POWER_OFF && state <= BMC_POWER_UNKNOWN);
+    TEST_ASSERT_TRUE(state >= PDL_BMC_POWER_OFF && state <= PDL_BMC_POWER_UNKNOWN);
 
     PDL_BMC_Deinit(handle);
 }
@@ -266,7 +266,7 @@ TEST_CASE(test_pdl_bmc_get_power_state_success)
 /* 测试用例: 获取电源状态 - 空句柄 */
 TEST_CASE(test_pdl_bmc_get_power_state_null_handle)
 {
-    bmc_power_state_t state;
+    pdl_bmc_power_state_t state;
 
     int32_t ret = PDL_BMC_GetPowerState(NULL, &state);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
@@ -275,8 +275,8 @@ TEST_CASE(test_pdl_bmc_get_power_state_null_handle)
 /* 测试用例: 获取电源状态 - 空指针 */
 TEST_CASE(test_pdl_bmc_get_power_state_null_pointer)
 {
-    bmc_handle_t handle = NULL;
-    bmc_config_t config = {
+    pdl_bmc_handle_t handle = NULL;
+    pdl_bmc_config_t config = {
         .network = {
             .enabled = false,  /* 禁用网络避免测试卡死 */
             .ip_addr = "192.168.1.100",
@@ -285,7 +285,7 @@ TEST_CASE(test_pdl_bmc_get_power_state_null_pointer)
             .password = "admin",
             .timeout_ms = 5000
         },
-        .primary_channel = BMC_CHANNEL_NETWORK,
+        .primary_channel = PDL_BMC_CHANNEL_NETWORK,
         .auto_switch = true,
         .retry_count = 3,
         .health_check_interval = 10000
@@ -308,8 +308,8 @@ TEST_CASE(test_pdl_bmc_get_power_state_null_pointer)
 TEST_CASE(test_pdl_bmc_read_sensors_success)
 {
     TEST_ASSERT_FALSE(true); // Requires real BMC hardware
-    bmc_handle_t handle = NULL;
-    bmc_config_t config = {
+    pdl_bmc_handle_t handle = NULL;
+    pdl_bmc_config_t config = {
         .network = {
             .enabled = false,  /* 禁用网络避免测试卡死 */
             .ip_addr = "192.168.1.100",
@@ -318,19 +318,19 @@ TEST_CASE(test_pdl_bmc_read_sensors_success)
             .password = "admin",
             .timeout_ms = 5000
         },
-        .primary_channel = BMC_CHANNEL_NETWORK,
+        .primary_channel = PDL_BMC_CHANNEL_NETWORK,
         .auto_switch = true,
         .retry_count = 3,
         .health_check_interval = 10000
     };
-    bmc_sensor_reading_t readings[16];
+    pdl_bmc_sensor_reading_t readings[16];
     uint32_t actual_count;
 
     int32_t ret = PDL_BMC_Init(&config, &handle);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     OSAL_Memset(readings, 0, sizeof(readings));
-    ret = PDL_BMC_ReadSensors(handle, BMC_SENSOR_TEMP, readings, 16, &actual_count);
+    ret = PDL_BMC_ReadSensors(handle, PDL_BMC_SENSOR_TEMP, readings, 16, &actual_count);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     TEST_ASSERT_TRUE(actual_count <= 16);
@@ -341,18 +341,18 @@ TEST_CASE(test_pdl_bmc_read_sensors_success)
 /* 测试用例: 读取传感器 - 空句柄 */
 TEST_CASE(test_pdl_bmc_read_sensors_null_handle)
 {
-    bmc_sensor_reading_t readings[16];
+    pdl_bmc_sensor_reading_t readings[16];
     uint32_t actual_count;
 
-    int32_t ret = PDL_BMC_ReadSensors(NULL, BMC_SENSOR_TEMP, readings, 16, &actual_count);
+    int32_t ret = PDL_BMC_ReadSensors(NULL, PDL_BMC_SENSOR_TEMP, readings, 16, &actual_count);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
 /* 测试用例: 读取传感器 - 空指针 */
 TEST_CASE(test_pdl_bmc_read_sensors_null_pointer)
 {
-    bmc_handle_t handle = NULL;
-    bmc_config_t config = {
+    pdl_bmc_handle_t handle = NULL;
+    pdl_bmc_config_t config = {
         .network = {
             .enabled = false,  /* 禁用网络避免测试卡死 */
             .ip_addr = "192.168.1.100",
@@ -361,7 +361,7 @@ TEST_CASE(test_pdl_bmc_read_sensors_null_pointer)
             .password = "admin",
             .timeout_ms = 5000
         },
-        .primary_channel = BMC_CHANNEL_NETWORK,
+        .primary_channel = PDL_BMC_CHANNEL_NETWORK,
         .auto_switch = true,
         .retry_count = 3,
         .health_check_interval = 10000
@@ -371,7 +371,7 @@ TEST_CASE(test_pdl_bmc_read_sensors_null_pointer)
     int32_t ret = PDL_BMC_Init(&config, &handle);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-    ret = PDL_BMC_ReadSensors(handle, BMC_SENSOR_TEMP, NULL, 16, &actual_count);
+    ret = PDL_BMC_ReadSensors(handle, PDL_BMC_SENSOR_TEMP, NULL, 16, &actual_count);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 
     PDL_BMC_Deinit(handle);
@@ -385,8 +385,8 @@ TEST_CASE(test_pdl_bmc_read_sensors_null_pointer)
 TEST_CASE(test_pdl_bmc_execute_command_success)
 {
     TEST_ASSERT_FALSE(true); // Requires real BMC hardware
-    bmc_handle_t handle = NULL;
-    bmc_config_t config = {
+    pdl_bmc_handle_t handle = NULL;
+    pdl_bmc_config_t config = {
         .network = {
             .enabled = false,  /* 禁用网络避免测试卡死 */
             .ip_addr = "192.168.1.100",
@@ -395,7 +395,7 @@ TEST_CASE(test_pdl_bmc_execute_command_success)
             .password = "admin",
             .timeout_ms = 5000
         },
-        .primary_channel = BMC_CHANNEL_NETWORK,
+        .primary_channel = PDL_BMC_CHANNEL_NETWORK,
         .auto_switch = true,
         .retry_count = 3,
         .health_check_interval = 10000
@@ -423,8 +423,8 @@ TEST_CASE(test_pdl_bmc_execute_command_null_handle)
 /* 测试用例: 执行命令 - 空命令 */
 TEST_CASE(test_pdl_bmc_execute_command_null_cmd)
 {
-    bmc_handle_t handle = NULL;
-    bmc_config_t config = {
+    pdl_bmc_handle_t handle = NULL;
+    pdl_bmc_config_t config = {
         .network = {
             .enabled = false,  /* 禁用网络避免测试卡死 */
             .ip_addr = "192.168.1.100",
@@ -433,7 +433,7 @@ TEST_CASE(test_pdl_bmc_execute_command_null_cmd)
             .password = "admin",
             .timeout_ms = 5000
         },
-        .primary_channel = BMC_CHANNEL_NETWORK,
+        .primary_channel = PDL_BMC_CHANNEL_NETWORK,
         .auto_switch = true,
         .retry_count = 3,
         .health_check_interval = 10000
@@ -457,8 +457,8 @@ TEST_CASE(test_pdl_bmc_execute_command_null_cmd)
 TEST_CASE(test_pdl_bmc_switch_channel_success)
 {
     TEST_ASSERT_FALSE(true); // Requires real BMC hardware
-    bmc_handle_t handle = NULL;
-    bmc_config_t config = {
+    pdl_bmc_handle_t handle = NULL;
+    pdl_bmc_config_t config = {
         .network = {
             .enabled = false,  /* 禁用网络避免测试卡死 */
             .ip_addr = "192.168.1.100",
@@ -473,7 +473,7 @@ TEST_CASE(test_pdl_bmc_switch_channel_success)
             .baudrate = 115200,
             .timeout_ms = 5000
         },
-        .primary_channel = BMC_CHANNEL_NETWORK,
+        .primary_channel = PDL_BMC_CHANNEL_NETWORK,
         .auto_switch = true,
         .retry_count = 3,
         .health_check_interval = 10000
@@ -482,10 +482,10 @@ TEST_CASE(test_pdl_bmc_switch_channel_success)
     int32_t ret = PDL_BMC_Init(&config, &handle);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-    ret = PDL_BMC_SwitchChannel(handle, BMC_CHANNEL_SERIAL);
+    ret = PDL_BMC_SwitchChannel(handle, PDL_BMC_CHANNEL_SERIAL);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-    ret = PDL_BMC_SwitchChannel(handle, BMC_CHANNEL_NETWORK);
+    ret = PDL_BMC_SwitchChannel(handle, PDL_BMC_CHANNEL_NETWORK);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     PDL_BMC_Deinit(handle);
@@ -494,7 +494,7 @@ TEST_CASE(test_pdl_bmc_switch_channel_success)
 /* 测试用例: 切换通道 - 空句柄 */
 TEST_CASE(test_pdl_bmc_switch_channel_null_handle)
 {
-    int32_t ret = PDL_BMC_SwitchChannel(NULL, BMC_CHANNEL_NETWORK);
+    int32_t ret = PDL_BMC_SwitchChannel(NULL, PDL_BMC_CHANNEL_NETWORK);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -502,8 +502,8 @@ TEST_CASE(test_pdl_bmc_switch_channel_null_handle)
 TEST_CASE(test_pdl_bmc_get_channel_success)
 {
     TEST_ASSERT_FALSE(true); // Requires real BMC hardware
-    bmc_handle_t handle = NULL;
-    bmc_config_t config = {
+    pdl_bmc_handle_t handle = NULL;
+    pdl_bmc_config_t config = {
         .network = {
             .enabled = false,  /* 禁用网络避免测试卡死 */
             .ip_addr = "192.168.1.100",
@@ -512,7 +512,7 @@ TEST_CASE(test_pdl_bmc_get_channel_success)
             .password = "admin",
             .timeout_ms = 5000
         },
-        .primary_channel = BMC_CHANNEL_NETWORK,
+        .primary_channel = PDL_BMC_CHANNEL_NETWORK,
         .auto_switch = true,
         .retry_count = 3,
         .health_check_interval = 10000
@@ -521,8 +521,8 @@ TEST_CASE(test_pdl_bmc_get_channel_success)
     int32_t ret = PDL_BMC_Init(&config, &handle);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-    bmc_channel_t channel = PDL_BMC_GetChannel(handle);
-    TEST_ASSERT_TRUE(channel == BMC_CHANNEL_NETWORK || channel == BMC_CHANNEL_SERIAL);
+    pdl_bmc_channel_t channel = PDL_BMC_GetChannel(handle);
+    TEST_ASSERT_TRUE(channel == PDL_BMC_CHANNEL_NETWORK || channel == PDL_BMC_CHANNEL_SERIAL);
 
     PDL_BMC_Deinit(handle);
 }
@@ -535,8 +535,8 @@ TEST_CASE(test_pdl_bmc_get_channel_success)
 TEST_CASE(test_pdl_bmc_is_connected_success)
 {
     TEST_ASSERT_FALSE(true); // Requires real BMC hardware
-    bmc_handle_t handle = NULL;
-    bmc_config_t config = {
+    pdl_bmc_handle_t handle = NULL;
+    pdl_bmc_config_t config = {
         .network = {
             .enabled = false,  /* 禁用网络避免测试卡死 */
             .ip_addr = "192.168.1.100",
@@ -545,7 +545,7 @@ TEST_CASE(test_pdl_bmc_is_connected_success)
             .password = "admin",
             .timeout_ms = 5000
         },
-        .primary_channel = BMC_CHANNEL_NETWORK,
+        .primary_channel = PDL_BMC_CHANNEL_NETWORK,
         .auto_switch = true,
         .retry_count = 3,
         .health_check_interval = 10000
@@ -568,8 +568,8 @@ TEST_CASE(test_pdl_bmc_is_connected_success)
 TEST_CASE(test_pdl_bmc_get_stats_success)
 {
     TEST_ASSERT_FALSE(true); // Requires real BMC hardware
-    bmc_handle_t handle = NULL;
-    bmc_config_t config = {
+    pdl_bmc_handle_t handle = NULL;
+    pdl_bmc_config_t config = {
         .network = {
             .enabled = false,  /* 禁用网络避免测试卡死 */
             .ip_addr = "192.168.1.100",
@@ -578,7 +578,7 @@ TEST_CASE(test_pdl_bmc_get_stats_success)
             .password = "admin",
             .timeout_ms = 5000
         },
-        .primary_channel = BMC_CHANNEL_NETWORK,
+        .primary_channel = PDL_BMC_CHANNEL_NETWORK,
         .auto_switch = true,
         .retry_count = 3,
         .health_check_interval = 10000
@@ -608,8 +608,8 @@ TEST_CASE(test_pdl_bmc_get_stats_null_handle)
 /* 测试用例: 获取统计信息 - 空指针 */
 TEST_CASE(test_pdl_bmc_get_stats_null_pointer)
 {
-    bmc_handle_t handle = NULL;
-    bmc_config_t config = {
+    pdl_bmc_handle_t handle = NULL;
+    pdl_bmc_config_t config = {
         .network = {
             .enabled = false,  /* 禁用网络避免测试卡死 */
             .ip_addr = "192.168.1.100",
@@ -618,7 +618,7 @@ TEST_CASE(test_pdl_bmc_get_stats_null_pointer)
             .password = "admin",
             .timeout_ms = 5000
         },
-        .primary_channel = BMC_CHANNEL_NETWORK,
+        .primary_channel = PDL_BMC_CHANNEL_NETWORK,
         .auto_switch = true,
         .retry_count = 3,
         .health_check_interval = 10000

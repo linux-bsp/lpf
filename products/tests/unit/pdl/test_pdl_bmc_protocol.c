@@ -255,10 +255,10 @@ TEST_CASE(test_redfish_get_power_state_success)
                                    &protocol_handle);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-    bmc_power_state_t state;
+    pdl_bmc_power_state_t state;
     ret = bmc_redfish_get_power_state(protocol_handle, &state);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
-    TEST_ASSERT_EQUAL(BMC_POWER_ON, state);
+    TEST_ASSERT_EQUAL(PDL_BMC_POWER_ON, state);
 
     bmc_redfish_deinit(protocol_handle);
 }

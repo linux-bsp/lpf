@@ -12,10 +12,10 @@
  * 辅助函数：创建测试配置
  *===========================================================================*/
 
-static void create_can_config(mcu_config_t *config)
+static void create_can_config(pdl_mcu_config_t *config)
 {
-    OSAL_Memset(config, 0, sizeof(mcu_config_t));
-    config->interface = MCU_INTERFACE_CAN;
+    OSAL_Memset(config, 0, sizeof(pdl_mcu_config_t));
+    config->interface = PDL_MCU_INTERFACE_CAN;
     config->can.device = "can0";
     config->can.bitrate = 500000;
     config->can.tx_id = 0x100;
@@ -26,11 +26,11 @@ static void create_can_config(mcu_config_t *config)
     OSAL_Strcpy(config->name, "TEST_MCU");
 }
 
-static void create_serial_config(mcu_config_t *config) __attribute__((unused));
-static void create_serial_config(mcu_config_t *config)
+static void create_serial_config(pdl_mcu_config_t *config) __attribute__((unused));
+static void create_serial_config(pdl_mcu_config_t *config)
 {
-    OSAL_Memset(config, 0, sizeof(mcu_config_t));
-    config->interface = MCU_INTERFACE_SERIAL;
+    OSAL_Memset(config, 0, sizeof(pdl_mcu_config_t));
+    config->interface = PDL_MCU_INTERFACE_SERIAL;
     config->serial.device = "/dev/ttyS1";
     config->serial.baudrate = 115200;
     config->serial.data_bits = 8;
@@ -63,7 +63,7 @@ TEST_CASE(test_pdl_mcu_init_serial_success)
 /* 测试用例: MCU驱动初始化 - 空配置 */
 TEST_CASE(test_pdl_mcu_init_null_config)
 {
-    mcu_handle_t handle = NULL;
+    pdl_mcu_handle_t handle = NULL;
 
     int32_t ret = PDL_MCU_Init(NULL, &handle);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
@@ -72,7 +72,7 @@ TEST_CASE(test_pdl_mcu_init_null_config)
 /* 测试用例: MCU驱动初始化 - 空句柄指针 */
 TEST_CASE(test_pdl_mcu_init_null_handle)
 {
-    mcu_config_t config;
+    pdl_mcu_config_t config;
     create_can_config(&config);
 
     int32_t ret = PDL_MCU_Init(&config, NULL);
@@ -107,7 +107,7 @@ TEST_CASE(test_pdl_mcu_get_version_success)
 /* 测试用例: 获取版本信息 - 空句柄 */
 TEST_CASE(test_pdl_mcu_get_version_null_handle)
 {
-    mcu_version_t version;
+    pdl_mcu_version_t version;
 
     int32_t ret = PDL_MCU_GetVersion(NULL, &version);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
@@ -134,7 +134,7 @@ TEST_CASE(test_pdl_mcu_get_status_success)
 /* 测试用例: 获取状态 - 空句柄 */
 TEST_CASE(test_pdl_mcu_get_status_null_handle)
 {
-    mcu_status_t status;
+    pdl_mcu_status_t status;
 
     int32_t ret = PDL_MCU_GetStatus(NULL, &status);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);

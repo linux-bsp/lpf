@@ -14,11 +14,11 @@
 TEST_CASE(test_pdl_watchdog_init_deinit)
 {
     watchdog_handle_t handle = NULL;
-    watchdog_config_t config = {
+    pdl_watchdog_config_t config = {
         .name = "test_watchdog",
         .device = "/dev/watchdog",
         .timeout_sec = 30,
-        .mode = WATCHDOG_MODE_MANUAL,
+        .mode = PDL_WATCHDOG_MODE_MANUAL,
         .kick_interval_ms = 5000,
         .enable_on_init = false
     };
@@ -39,11 +39,11 @@ TEST_CASE(test_pdl_watchdog_init_deinit)
 TEST_CASE(test_pdl_watchdog_null_params)
 {
     watchdog_handle_t handle = NULL;
-    watchdog_config_t config = {
+    pdl_watchdog_config_t config = {
         .name = "test_watchdog",
         .device = "/dev/watchdog",
         .timeout_sec = 30,
-        .mode = WATCHDOG_MODE_MANUAL,
+        .mode = PDL_WATCHDOG_MODE_MANUAL,
         .kick_interval_ms = 5000,
         .enable_on_init = false
     };
@@ -63,11 +63,11 @@ TEST_CASE(test_pdl_watchdog_null_params)
 TEST_CASE(test_pdl_watchdog_manual_kick)
 {
     watchdog_handle_t handle = NULL;
-    watchdog_config_t config = {
+    pdl_watchdog_config_t config = {
         .name = "test_watchdog",
         .device = "/dev/watchdog",
         .timeout_sec = 30,
-        .mode = WATCHDOG_MODE_MANUAL,
+        .mode = PDL_WATCHDOG_MODE_MANUAL,
         .kick_interval_ms = 5000,
         .enable_on_init = false
     };
@@ -93,7 +93,7 @@ TEST_CASE(test_pdl_watchdog_manual_kick)
     ret = PDL_WATCHDOG_GetStatus(handle, &status);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_EQUAL(6, status.kick_count);
-    TEST_ASSERT_EQUAL(WATCHDOG_MODE_MANUAL, status.mode);
+    TEST_ASSERT_EQUAL(PDL_WATCHDOG_MODE_MANUAL, status.mode);
 
     PDL_WATCHDOG_Deinit(handle);
 }
@@ -104,11 +104,11 @@ TEST_CASE(test_pdl_watchdog_manual_kick)
 TEST_CASE(test_pdl_watchdog_auto_mode)
 {
     watchdog_handle_t handle = NULL;
-    watchdog_config_t config = {
+    pdl_watchdog_config_t config = {
         .name = "test_watchdog",
         .device = "/dev/watchdog",
         .timeout_sec = 30,
-        .mode = WATCHDOG_MODE_AUTO,
+        .mode = PDL_WATCHDOG_MODE_AUTO,
         .kick_interval_ms = 500,  /* 500ms间隔用于测试 */
         .enable_on_init = false
     };
@@ -148,11 +148,11 @@ TEST_CASE(test_pdl_watchdog_auto_mode)
 TEST_CASE(test_pdl_watchdog_get_status)
 {
     watchdog_handle_t handle = NULL;
-    watchdog_config_t config = {
+    pdl_watchdog_config_t config = {
         .name = "test_watchdog",
         .device = "/dev/watchdog",
         .timeout_sec = 60,
-        .mode = WATCHDOG_MODE_MANUAL,
+        .mode = PDL_WATCHDOG_MODE_MANUAL,
         .kick_interval_ms = 5000,
         .enable_on_init = false
     };
@@ -165,7 +165,7 @@ TEST_CASE(test_pdl_watchdog_get_status)
     ret = PDL_WATCHDOG_GetStatus(handle, &status);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_EQUAL(false, status.running);
-    TEST_ASSERT_EQUAL(WATCHDOG_MODE_MANUAL, status.mode);
+    TEST_ASSERT_EQUAL(PDL_WATCHDOG_MODE_MANUAL, status.mode);
     TEST_ASSERT_EQUAL(5000, status.kick_interval_ms);
     TEST_ASSERT_EQUAL(0, status.kick_count);
 
@@ -178,11 +178,11 @@ TEST_CASE(test_pdl_watchdog_get_status)
 TEST_CASE(test_pdl_watchdog_set_interval)
 {
     watchdog_handle_t handle = NULL;
-    watchdog_config_t config = {
+    pdl_watchdog_config_t config = {
         .name = "test_watchdog",
         .device = "/dev/watchdog",
         .timeout_sec = 30,
-        .mode = WATCHDOG_MODE_AUTO,
+        .mode = PDL_WATCHDOG_MODE_AUTO,
         .kick_interval_ms = 5000,
         .enable_on_init = false
     };
@@ -209,11 +209,11 @@ TEST_CASE(test_pdl_watchdog_set_interval)
 TEST_CASE(test_pdl_watchdog_enable_disable)
 {
     watchdog_handle_t handle = NULL;
-    watchdog_config_t config = {
+    pdl_watchdog_config_t config = {
         .name = "test_watchdog",
         .device = "/dev/watchdog",
         .timeout_sec = 30,
-        .mode = WATCHDOG_MODE_MANUAL,
+        .mode = PDL_WATCHDOG_MODE_MANUAL,
         .kick_interval_ms = 5000,
         .enable_on_init = false
     };

@@ -45,7 +45,7 @@ TEST_CASE(test_pdl_satellite_init_success)
 /* 测试用例: 卫星服务初始化 - 空配置 */
 TEST_CASE(test_pdl_satellite_init_null_config)
 {
-    satellite_service_handle_t handle = NULL;
+    pdl_satellite_service_handle_t handle = NULL;
 
     int32_t ret = PDL_Satellite_Init(NULL, &handle);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
@@ -54,7 +54,7 @@ TEST_CASE(test_pdl_satellite_init_null_config)
 /* 测试用例: 卫星服务初始化 - 空句柄指针 */
 TEST_CASE(test_pdl_satellite_init_null_handle)
 {
-    satellite_service_config_t config;
+    pdl_satellite_service_config_t config;
     OSAL_Memset(&config, 0, sizeof(config));
     config.can_device = "can0";
     config.can_bitrate = 500000;
