@@ -1,11 +1,38 @@
 # ============================================================================
 # EMS Test Suite CMakeLists.txt
 # ============================================================================
-# This builds the unified test framework (libutest) and test executable.
+# This builds the test suite as a special "product".
 # Tests are conditionally compiled based on Kconfig configuration.
 # ============================================================================
 
-cmake_minimum_required(VERSION 3.16)
+# ============================================================================
+# Register SDK Core Components (like other products do)
+# ============================================================================
+# Build core modules required by tests
+
+if(CONFIG_OSAL)
+    add_subdirectory(${SDK_PATH}/core/osal ${CMAKE_CURRENT_BINARY_DIR}/osal)
+endif()
+
+if(CONFIG_HAL)
+    add_subdirectory(${SDK_PATH}/core/hal ${CMAKE_CURRENT_BINARY_DIR}/hal)
+endif()
+
+if(CONFIG_PCONFIG)
+    add_subdirectory(${SDK_PATH}/core/pconfig ${CMAKE_CURRENT_BINARY_DIR}/pconfig)
+endif()
+
+if(CONFIG_PDL)
+    add_subdirectory(${SDK_PATH}/core/pdl ${CMAKE_CURRENT_BINARY_DIR}/pdl)
+endif()
+
+if(CONFIG_PRL)
+    add_subdirectory(${SDK_PATH}/core/prl ${CMAKE_CURRENT_BINARY_DIR}/prl)
+endif()
+
+if(CONFIG_ACONFIG)
+    add_subdirectory(${SDK_PATH}/core/aconfig ${CMAKE_CURRENT_BINARY_DIR}/aconfig)
+endif()
 
 # ============================================================================
 # Test Framework Library (libutest)
@@ -27,6 +54,12 @@ target_include_directories(libutest PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
+# Add OSAL headers (required by test framework)
+target_include_directories(libutest PRIVATE
+    ${SDK_PATH}/core/osal/include
+    ${SDK_PATH}/core/types/include
+)
+
 # Framework dependencies - only OSAL
 target_link_libraries(libutest PUBLIC
     osal
@@ -44,6 +77,17 @@ add_executable(ems-test
 # Link test framework
 target_link_libraries(ems-test PRIVATE
     libutest
+)
+
+# Add include directories for test cases
+target_include_directories(ems-test PRIVATE
+    ${SDK_PATH}/core/osal/include
+    ${SDK_PATH}/core/types/include
+    ${SDK_PATH}/core/hal/include
+    ${SDK_PATH}/core/pconfig/include
+    ${SDK_PATH}/core/pdl/include
+    ${SDK_PATH}/core/prl/include
+    ${SDK_PATH}/core/aconfig/include
 )
 
 # ============================================================================

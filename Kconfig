@@ -247,6 +247,6 @@ config BUILD_TESTING
 
 if BUILD_TESTING
 	menu "Test Configuration"
-		osource "$SDK_PATH/tests/Kconfig"
+		osource "$SDK_PATH/products/tests/Kconfig"
 	endmenu
 endif

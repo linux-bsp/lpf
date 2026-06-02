@@ -64,9 +64,9 @@ if(CONFIG_PRODUCT_SAMPLE)
 endif()
 
 # ============================================================================
-# Build Tests if Enabled
+# Build Tests as a Special Product
 # ============================================================================
 if(CONFIG_BUILD_TESTING)
-    message("-- Building test suite")
-    add_subdirectory(tests)
+    message("-- Building test suite (as test product)")
+    add_subdirectory(products/tests)
 endif()

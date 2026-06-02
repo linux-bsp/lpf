@@ -52,6 +52,8 @@ CONFIG_OSAL_UTIL_VERSION=y
 
 # Testing - Enabled
 CONFIG_BUILD_TESTING=y
+CONFIG_TEST_UNIT=y
+CONFIG_TEST_ACONFIG=y
 
 # Products - All Disabled
 # CONFIG_PRODUCT_CCM is not set
