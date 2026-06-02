@@ -6,6 +6,7 @@
 
 #include "pdl_mcu.h"
 #include "pconfig_hardware_interface.h"
+#include "hal_serial.h"
 #include "osal.h"
 
 /*===========================================================================
@@ -22,7 +23,6 @@ static void create_can_config(pdl_mcu_config_t *config)
     config->can.rx_id = 0x200;
     config->cmd_timeout_ms = 5000;
     config->retry_count = 3;
-    config->enable_crc = true;
     OSAL_Strcpy(config->name, "TEST_MCU");
 }
 
@@ -38,7 +38,6 @@ static void create_serial_config(pdl_mcu_config_t *config)
     config->serial.parity = HAL_SERIAL_PARITY_NONE;
     config->cmd_timeout_ms = 5000;
     config->retry_count = 3;
-    config->enable_crc = true;
     OSAL_Strcpy(config->name, "TEST_MCU");
 }
 
