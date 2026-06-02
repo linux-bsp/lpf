@@ -28,8 +28,8 @@
 typedef struct
 {
     hal_serial_handle_t serial_handle;
-    bool enable_crc;
     osal_mutex_t *rx_mutex;
+    /* 注意：CRC 强制启用，不再提供配置选项 */
 } mcu_serial_context_t;
 
 /**
@@ -54,7 +54,7 @@ int32_t mcu_serial_init(const void *config, void **handle)
     }
 
     OSAL_Memset(ctx, 0, sizeof(mcu_serial_context_t));
-    ctx->enable_crc = mcu_cfg->enable_crc;
+    /* CRC 强制启用 */
 
     /* 打开串口设备 */
     serial_config.baud_rate = mcu_cfg->serial.baudrate;
@@ -108,7 +108,6 @@ int32_t mcu_serial_deinit(void *handle)
 static int32_t mcu_serial_pack_frame(uint8_t cmd_code,
                                    const uint8_t *data,
                                    uint32_t data_len,
-                                   bool enable_crc,
                                    uint8_t *frame,
                                    uint32_t frame_size,
                                    uint32_t *actual_size)
@@ -140,18 +139,10 @@ static int32_t mcu_serial_pack_frame(uint8_t cmd_code,
         pos += data_len;
     }
 
-    /* CRC校验 */
-    if (enable_crc)
-    {
-        crc = mcu_protocol_calc_crc16(&frame[FRAME_HEADER_SIZE], pos - FRAME_HEADER_SIZE);
-        frame[pos++] = (uint8_t)(crc >> 8);
-        frame[pos++] = (uint8_t)(crc & 0xFF);
-    }
-    else
-    {
-        frame[pos++] = 0;
-        frame[pos++] = 0;
-    }
+    /* CRC校验（强制启用） */
+    crc = mcu_protocol_calc_crc16(&frame[FRAME_HEADER_SIZE], pos - FRAME_HEADER_SIZE);
+    frame[pos++] = (uint8_t)(crc >> 8);
+    frame[pos++] = (uint8_t)(crc & 0xFF);
 
     *actual_size = pos;
     return OSAL_SUCCESS;
@@ -162,7 +153,6 @@ static int32_t mcu_serial_pack_frame(uint8_t cmd_code,
  */
 static int32_t mcu_serial_unpack_frame(const uint8_t *frame,
                                      uint32_t frame_len,
-                                     bool enable_crc,
                                      uint8_t *status,
                                      uint8_t *data,
                                      uint32_t data_size,
@@ -185,15 +175,12 @@ static int32_t mcu_serial_unpack_frame(const uint8_t *frame,
         return OSAL_ERR_GENERIC;
     }
 
-    /* CRC校验 */
-    if (enable_crc)
+    /* CRC校验（强制启用） */
+    crc_recv = (frame[frame_len - 2] << 8) | frame[frame_len - 1];
+    crc_calc = mcu_protocol_calc_crc16(&frame[FRAME_HEADER_SIZE], frame_len - FRAME_OVERHEAD);
+    if (crc_recv != crc_calc)
     {
-        crc_recv = (frame[frame_len - 2] << 8) | frame[frame_len - 1];
-        crc_calc = mcu_protocol_calc_crc16(&frame[FRAME_HEADER_SIZE], frame_len - FRAME_OVERHEAD);
-        if (crc_recv != crc_calc)
-        {
-            return OSAL_ERR_GENERIC;
-        }
+        return OSAL_ERR_GENERIC;  /* CRC 校验失败 */
     }
 
     /* 解析状态和数据 */
@@ -247,7 +234,7 @@ int32_t mcu_serial_send_command(void *handle,
     start_time_us = OSAL_GetMonotonicTime();
 
     /* 封装发送帧 */
-    if (OSAL_SUCCESS != mcu_serial_pack_frame(cmd_code, data, data_len, ctx->enable_crc,
+    if (OSAL_SUCCESS != mcu_serial_pack_frame(cmd_code, data, data_len,
                               tx_frame, sizeof(tx_frame), &tx_len))
     {
         return OSAL_ERR_GENERIC;
@@ -274,7 +261,7 @@ int32_t mcu_serial_send_command(void *handle,
 
     if (rx_len > 0)
     {
-        ret = mcu_serial_unpack_frame(rx_frame, rx_len, ctx->enable_crc,
+        ret = mcu_serial_unpack_frame(rx_frame, rx_len,
                                             &status, response, resp_size, actual_size);
 
         OSAL_MutexUnlock(ctx->rx_mutex);

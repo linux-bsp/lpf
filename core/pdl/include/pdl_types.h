@@ -71,7 +71,7 @@ typedef struct
     /* 通用配置 */
     uint32_t cmd_timeout_ms;            /* 命令超时（ms） */
     uint32_t retry_count;               /* 重试次数 */
-    bool enable_crc;                  /* 启用CRC校验 */
+    /* 注意：串口通信强制启用 CRC 校验以确保数据完整性（航天环境要求） */
 } pdl_mcu_config_t;
 
 /*===========================================================================

@@ -28,8 +28,8 @@ static pconfig_mcu_entry_t mcu_stm32 = {
         },
 
         .cmd_timeout_ms = 500,
-        .retry_count = 3,
-        .enable_crc = true
+        .retry_count = 3
+        /* 注意：串口通信强制启用 CRC 校验 */
     },
 
     .reset_gpio = NULL,

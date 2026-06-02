@@ -45,7 +45,6 @@ uint16_t mcu_protocol_calc_crc16(const uint8_t *data, uint32_t len)
 int32_t mcu_protocol_pack_frame(uint8_t cmd_code,
                              const uint8_t *data,
                              uint32_t data_len,
-                             bool enable_crc,
                              uint8_t *frame,
                              uint32_t frame_size,
                              uint32_t *actual_size)
@@ -53,11 +52,10 @@ int32_t mcu_protocol_pack_frame(uint8_t cmd_code,
     (void)cmd_code;
     (void)data;
     (void)data_len;
-    (void)enable_crc;
     (void)frame;
     (void)frame_size;
     (void)actual_size;
-    /* 预留接口 */
+    /* 预留接口，CRC 强制启用 */
     return OSAL_ERR_GENERIC;
 }
 
@@ -66,7 +64,6 @@ int32_t mcu_protocol_pack_frame(uint8_t cmd_code,
  */
 int32_t mcu_protocol_unpack_frame(const uint8_t *frame,
                                uint32_t frame_len,
-                               bool enable_crc,
                                uint8_t *cmd_code,
                                uint8_t *data,
                                uint32_t data_size,
@@ -74,11 +71,10 @@ int32_t mcu_protocol_unpack_frame(const uint8_t *frame,
 {
     (void)frame;
     (void)frame_len;
-    (void)enable_crc;
     (void)cmd_code;
     (void)data;
     (void)data_size;
     (void)actual_size;
-    /* 预留接口 */
+    /* 预留接口，CRC 强制启用 */
     return OSAL_ERR_GENERIC;
 }
