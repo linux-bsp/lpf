@@ -80,6 +80,7 @@ int prl_device_decode(const uint8_t *packet, size_t packet_len,
                       const uint8_t **payload, uint16_t *payload_len)
 {
     const prl_header_t *hdr;
+    uint16_t payload_length;  /* 主机字节序的负载长度 */
     int ret;
 
     /* 参数检查 */
@@ -105,22 +106,25 @@ int prl_device_decode(const uint8_t *packet, size_t packet_len,
         return PRL_ERR_INVALID_DEV_TYPE;
     }
 
+    /* 将网络字节序转换为主机字节序 */
+    payload_length = OSAL_ntohs(hdr->length);
+
     /* 验证报文长度 */
-    if (packet_len < (PRL_HEADER_SIZE + hdr->length)) {
+    if (packet_len < (PRL_HEADER_SIZE + payload_length)) {
         return PRL_ERR_INVALID_LENGTH;
     }
 
     /* 验证 CRC */
-    if (!prl_verify_packet_crc(packet, PRL_HEADER_SIZE + hdr->length)) {
+    if (!prl_verify_packet_crc(packet, PRL_HEADER_SIZE + payload_length)) {
         return PRL_ERR_CRC_FAILED;
     }
 
     /* 提取信息 */
     *dev_type = hdr->dev_type;
     *msg_type = hdr->msg_type;
-    *payload_len = hdr->length;
+    *payload_len = payload_length;
 
-    if (hdr->length > 0) {
+    if (payload_length > 0) {
         *payload = packet + PRL_HEADER_SIZE;
     } else {
         *payload = NULL;

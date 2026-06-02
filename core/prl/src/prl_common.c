@@ -3,7 +3,6 @@
  * @brief Protocol Layer Common Implementation
  */
 
-#include <stddef.h>  /* for offsetof */
 #include "prl_common.h"
 #include "sys/osal_clock.h"
 #include "lib/osal_heap.h"
@@ -139,13 +138,16 @@ bool prl_verify_packet_crc(const uint8_t *packet, size_t total_len)
     uint16_t received_crc = OSAL_ntohs(hdr->crc16);  /* 转换为主机字节序 */
 
     /* 分段计算 CRC，避免动态内存分配
-     * CRC 字段位于协议头的偏移 14-15 字节处
+     * CRC 字段位于协议头的偏移 16-17 字节处
      * 计算顺序：[0, crc_offset) + 0x0000 + (crc_offset+2, total_len)
      */
     uint16_t crc = 0xFFFF;
 
-    /* CRC 字段在结构体中的偏移量 */
-    const size_t crc_offset = offsetof(prl_header_t, crc16);
+    /* CRC 字段在结构体中的偏移量（手动计算以避免使用stddef.h）
+     * magic(2) + version(1) + dev_type(1) + msg_type(1) + flags(1) +
+     * length(2) + seq(4) + timestamp(4) = 16 字节
+     */
+    const size_t crc_offset = 16;
 
     /* 第一段：从报文开始到 CRC 字段之前 */
     for (size_t i = 0; i < crc_offset; i++) {

@@ -3,20 +3,19 @@
  ************************************************************************/
 
 #include "test_framework.h"
-#include "prl_device.h"
-#include "prl_common.h"
-#include "prl_mcu.h"
+#include "prl_api.h"      /* 使用公共API */
+#include "prl_mcu.h"      /* 设备消息类型定义 */
 #include "prl_ccm.h"
 #include "prl_pmc.h"
 #include "prl_gsc.h"
 #include "prl_power.h"
-#include <string.h>
+#include "lib/osal_string.h"  /* for OSAL_Memcmp */
 
 /*===========================================================================
  * 基础编解码测试
  *===========================================================================*/
 
-TEST_CASE(test_prl_device_encode_decode_basic)
+TEST_CASE(test_PRL_Encode_decode_basic)
 {
     uint8_t buffer[256];
     uint8_t payload[] = {0x01, 0x02, 0x03, 0x04};
@@ -26,21 +25,21 @@ TEST_CASE(test_prl_device_encode_decode_basic)
     int ret;
 
     /* 编码 MCU 版本查询消息 */
-    ret = prl_device_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
+    ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
                             payload, sizeof(payload), buffer, sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
     /* 解码消息 */
-    ret = prl_device_decode(buffer, ret, &dev_type, &msg_type,
+    ret = PRL_Decode(buffer, ret, &dev_type, &msg_type,
                             &decoded_payload, &payload_len);
     TEST_ASSERT_EQUAL(PRL_OK, ret);
     TEST_ASSERT_EQUAL(PRL_DEV_TYPE_MCU, dev_type);
     TEST_ASSERT_EQUAL(PRL_MCU_MSG_GET_VERSION, msg_type);
     TEST_ASSERT_EQUAL(sizeof(payload), payload_len);
-    TEST_ASSERT_EQUAL(0, memcmp(payload, decoded_payload, payload_len));
+    TEST_ASSERT_EQUAL(0, OSAL_Memcmp(payload, decoded_payload, payload_len));
 }
 
-TEST_CASE(test_prl_device_encode_empty_payload)
+TEST_CASE(test_PRL_Encode_empty_payload)
 {
     uint8_t buffer[256];
     uint8_t dev_type, msg_type;
@@ -49,12 +48,12 @@ TEST_CASE(test_prl_device_encode_empty_payload)
     int ret;
 
     /* 编码无负载消息（如心跳） */
-    ret = prl_device_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                             NULL, 0, buffer, sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
     /* 解码消息 */
-    ret = prl_device_decode(buffer, ret, &dev_type, &msg_type,
+    ret = PRL_Decode(buffer, ret, &dev_type, &msg_type,
                             &decoded_payload, &payload_len);
     TEST_ASSERT_EQUAL(PRL_OK, ret);
     TEST_ASSERT_EQUAL(PRL_DEV_TYPE_MCU, dev_type);
@@ -101,34 +100,34 @@ TEST_CASE(test_prl_device_type_name)
  * 多设备类型测试
  *===========================================================================*/
 
-TEST_CASE(test_prl_device_encode_all_device_types)
+TEST_CASE(test_PRL_Encode_all_device_types)
 {
     uint8_t buffer[256];
     uint8_t payload[] = {0xAA, 0xBB};
     int ret;
 
     /* 测试所有设备类型的编码 */
-    ret = prl_device_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                             payload, sizeof(payload), buffer, sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
-    ret = prl_device_encode(PRL_DEV_TYPE_CCM, PRL_CCM_MSG_HEARTBEAT,
+    ret = PRL_Encode(PRL_DEV_TYPE_CCM, PRL_CCM_MSG_HEARTBEAT,
                             payload, sizeof(payload), buffer, sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
-    ret = prl_device_encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_HEARTBEAT,
+    ret = PRL_Encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_HEARTBEAT,
                             payload, sizeof(payload), buffer, sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
-    ret = prl_device_encode(PRL_DEV_TYPE_GSC, PRL_GSC_MSG_HEARTBEAT,
+    ret = PRL_Encode(PRL_DEV_TYPE_GSC, PRL_GSC_MSG_HEARTBEAT,
                             payload, sizeof(payload), buffer, sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
-    ret = prl_device_encode(PRL_DEV_TYPE_CCM, PRL_CCM_MSG_HEARTBEAT,
+    ret = PRL_Encode(PRL_DEV_TYPE_CCM, PRL_CCM_MSG_HEARTBEAT,
                             payload, sizeof(payload), buffer, sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
-    ret = prl_device_encode(PRL_DEV_TYPE_POWER, PRL_POWER_MSG_HEARTBEAT,
+    ret = PRL_Encode(PRL_DEV_TYPE_POWER, PRL_POWER_MSG_HEARTBEAT,
                             payload, sizeof(payload), buffer, sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 }
@@ -137,29 +136,29 @@ TEST_CASE(test_prl_device_encode_all_device_types)
  * 错误处理测试
  *===========================================================================*/
 
-TEST_CASE(test_prl_device_encode_invalid_params)
+TEST_CASE(test_PRL_Encode_invalid_params)
 {
     uint8_t buffer[256];
     uint8_t payload[] = {0x01, 0x02};
     int ret;
 
     /* NULL 缓冲区 */
-    ret = prl_device_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                             payload, sizeof(payload), NULL, sizeof(buffer), 0);
     TEST_ASSERT_EQUAL(PRL_ERR_INVALID_PARAM, ret);
 
     /* 无效设备类型 */
-    ret = prl_device_encode(PRL_DEV_TYPE_UNKNOWN, PRL_MCU_MSG_HEARTBEAT,
+    ret = PRL_Encode(PRL_DEV_TYPE_UNKNOWN, PRL_MCU_MSG_HEARTBEAT,
                             payload, sizeof(payload), buffer, sizeof(buffer), 0);
     TEST_ASSERT_EQUAL(PRL_ERR_INVALID_DEV_TYPE, ret);
 
     /* 缓冲区太小 */
-    ret = prl_device_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                             payload, sizeof(payload), buffer, 10, 0);
     TEST_ASSERT_EQUAL(PRL_ERR_BUFFER_TOO_SMALL, ret);
 }
 
-TEST_CASE(test_prl_device_decode_invalid_params)
+TEST_CASE(test_PRL_Decode_invalid_params)
 {
     uint8_t buffer[256];
     uint8_t dev_type, msg_type;
@@ -168,19 +167,19 @@ TEST_CASE(test_prl_device_decode_invalid_params)
     int ret;
 
     /* 先编码一个有效消息 */
-    ret = prl_device_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                             NULL, 0, buffer, sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
     /* NULL 参数 */
-    ret = prl_device_decode(NULL, ret, &dev_type, &msg_type, &payload, &payload_len);
+    ret = PRL_Decode(NULL, ret, &dev_type, &msg_type, &payload, &payload_len);
     TEST_ASSERT_EQUAL(PRL_ERR_INVALID_PARAM, ret);
 
-    ret = prl_device_decode(buffer, ret, NULL, &msg_type, &payload, &payload_len);
+    ret = PRL_Decode(buffer, ret, NULL, &msg_type, &payload, &payload_len);
     TEST_ASSERT_EQUAL(PRL_ERR_INVALID_PARAM, ret);
 
     /* 长度太短 */
-    ret = prl_device_decode(buffer, 10, &dev_type, &msg_type, &payload, &payload_len);
+    ret = PRL_Decode(buffer, 10, &dev_type, &msg_type, &payload, &payload_len);
     TEST_ASSERT_EQUAL(PRL_ERR_INVALID_LENGTH, ret);
 }
 
@@ -198,18 +197,18 @@ TEST_CASE(test_prl_device_crc_verification)
     int ret, encoded_len;
 
     /* 编码消息 */
-    encoded_len = prl_device_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_STATUS,
+    encoded_len = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_STATUS,
                                      payload, sizeof(payload), buffer, sizeof(buffer), 0);
     TEST_ASSERT_TRUE(encoded_len > 0);
 
     /* 正常解码应该成功 */
-    ret = prl_device_decode(buffer, encoded_len, &dev_type, &msg_type,
+    ret = PRL_Decode(buffer, encoded_len, &dev_type, &msg_type,
                             &decoded_payload, &payload_len);
     TEST_ASSERT_EQUAL(PRL_OK, ret);
 
     /* 篡改数据，CRC 校验应该失败 */
     buffer[PRL_HEADER_SIZE] ^= 0xFF;
-    ret = prl_device_decode(buffer, encoded_len, &dev_type, &msg_type,
+    ret = PRL_Decode(buffer, encoded_len, &dev_type, &msg_type,
                             &decoded_payload, &payload_len);
     TEST_ASSERT_EQUAL(PRL_ERR_CRC_FAILED, ret);
 }
@@ -233,19 +232,19 @@ TEST_CASE(test_prl_device_large_payload)
     }
 
     /* 编码大负载消息 */
-    ret = prl_device_encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_TELEMETRY,
+    ret = PRL_Encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_TELEMETRY,
                             large_payload, sizeof(large_payload),
                             buffer, sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
     /* 解码并验证 */
-    ret = prl_device_decode(buffer, ret, &dev_type, &msg_type,
+    ret = PRL_Decode(buffer, ret, &dev_type, &msg_type,
                             &decoded_payload, &payload_len);
     TEST_ASSERT_EQUAL(PRL_OK, ret);
     TEST_ASSERT_EQUAL(PRL_DEV_TYPE_PMC, dev_type);
     TEST_ASSERT_EQUAL(PRL_PMC_MSG_TELEMETRY, msg_type);
     TEST_ASSERT_EQUAL(sizeof(large_payload), payload_len);
-    TEST_ASSERT_EQUAL(0, memcmp(large_payload, decoded_payload, payload_len));
+    TEST_ASSERT_EQUAL(0, OSAL_Memcmp(large_payload, decoded_payload, payload_len));
 }
 
 /*===========================================================================
@@ -253,13 +252,13 @@ TEST_CASE(test_prl_device_large_payload)
  *===========================================================================*/
 
 TEST_MODULE_BEGIN(test_prl_device, "PRL")
-    TEST_CASE_REGISTER(test_prl_device_encode_decode_basic, "Encode/decode basic")
-    TEST_CASE_REGISTER(test_prl_device_encode_empty_payload, "Encode empty payload")
+    TEST_CASE_REGISTER(test_PRL_Encode_decode_basic, "Encode/decode basic")
+    TEST_CASE_REGISTER(test_PRL_Encode_empty_payload, "Encode empty payload")
     TEST_CASE_REGISTER(test_prl_device_type_valid, "Device type valid")
     TEST_CASE_REGISTER(test_prl_device_type_name, "Device type name")
-    TEST_CASE_REGISTER(test_prl_device_encode_all_device_types, "Encode all device types")
-    TEST_CASE_REGISTER(test_prl_device_encode_invalid_params, "Encode invalid params")
-    TEST_CASE_REGISTER(test_prl_device_decode_invalid_params, "Decode invalid params")
+    TEST_CASE_REGISTER(test_PRL_Encode_all_device_types, "Encode all device types")
+    TEST_CASE_REGISTER(test_PRL_Encode_invalid_params, "Encode invalid params")
+    TEST_CASE_REGISTER(test_PRL_Decode_invalid_params, "Decode invalid params")
     TEST_CASE_REGISTER(test_prl_device_crc_verification, "CRC verification")
     TEST_CASE_REGISTER(test_prl_device_large_payload, "Large payload")
 TEST_MODULE_END(test_prl_device, "PRL")
