@@ -5,8 +5,8 @@
 # Used for comprehensive full-stack testing.
 # ============================================================================
 
-# Product Selection - All Products
-CONFIG_PRODUCT_CCM=y
+# Product Selection - Disabled for testing
+# CONFIG_PRODUCT_CCM is not set
 
 # Core Components - Full Stack
 CONFIG_OSAL=y
@@ -55,7 +55,6 @@ CONFIG_HAL_WATCHDOG_LINUX=y
 CONFIG_PDL_SATELLITE_SUPPORT=y
 CONFIG_PDL_BMC_SUPPORT=y
 CONFIG_PDL_MCU_SUPPORT=y
-CONFIG_PDL_CCM_SUPPORT=y
 CONFIG_PDL_WATCHDOG_SUPPORT=y
 
 # PRL Protocols - All Enabled (Updated to device-based organization)
@@ -88,15 +87,6 @@ CONFIG_PDL_MCU_CAN=y
 CONFIG_PDL_MCU_SERIAL=y
 CONFIG_PDL_MCU_PROTOCOL=y
 
-# CCM Libraries - All Enabled
-CONFIG_LIBCCM=y
-
-# CCM Applications - All Enabled
-CONFIG_APP_COLLECTOR=y
-CONFIG_APP_COMM=y
-CONFIG_APP_LOGGER=y
-CONFIG_APP_HEALTH=y
-CONFIG_APP_SUPERVISOR=y
 
 # OSAL Features - All Enabled
 CONFIG_OSAL_IPC=y
@@ -143,10 +133,8 @@ CONFIG_OSAL_UTIL_VERSION=y
 CONFIG_BUILD_TESTING=y
 CONFIG_TEST_UNIT=y
 CONFIG_TEST_OSAL=y
-# CONFIG_TEST_HAL is not set (temporarily disabled - API mismatch in HAL tests)
-# CONFIG_TEST_PCL is not set (temporarily disabled - API mismatch)
-# CONFIG_TEST_PDL is not set (temporarily disabled - type mismatch)
-# CONFIG_TEST_ACL is not set (temporarily disabled - no test files yet)
-# CONFIG_TEST_PRL is not set (temporarily disabled - missing message type definitions)
-# CONFIG_TEST_ACONFIG is not set (temporarily disabled - need to verify)
-# CONFIG_TEST_PCONFIG is not set (temporarily disabled - need to verify)
+CONFIG_TEST_HAL=y
+CONFIG_TEST_PCONFIG=y
+CONFIG_TEST_PDL=y
+CONFIG_TEST_ACONFIG=y
+CONFIG_TEST_PRL=y
