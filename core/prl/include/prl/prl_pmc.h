@@ -141,4 +141,4 @@ typedef struct {
 }
 #endif
 
-#endif /* PRL_PMC_H */
+#endif /* PRL_PRL_PMC_H */

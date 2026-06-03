@@ -109,4 +109,4 @@ typedef struct {
 }
 #endif
 
-#endif /* PRL_GSC_H */
+#endif /* PRL_PRL_GSC_H */

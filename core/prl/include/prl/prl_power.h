@@ -172,4 +172,4 @@ typedef struct {
 }
 #endif
 
-#endif /* PRL_POWER_H */
+#endif /* PRL_PRL_POWER_H */
