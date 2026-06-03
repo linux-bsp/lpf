@@ -5,7 +5,7 @@
  */
 
 #include "pdl_mcu.h"
-#include "pconfig_hardware_interface.h"
+#include "pconfig/pconfig.h"
 #include "hal_serial.h"
 #include "osal.h"
 
