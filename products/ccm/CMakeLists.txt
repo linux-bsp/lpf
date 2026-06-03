@@ -17,14 +17,45 @@ endif()
 # Automatically load platform config based on CONFIG_PROJECT_NAME
 load_platform_config(CONFIG_PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR}/configs/platforms)
 
+# Create platform config object library to avoid path duplication
+if(PLATFORM_PCL_SRCS OR PLATFORM_ACL_SRCS)
+    add_library(platform_config_obj OBJECT)
+
+    # Add include directories from core modules
+    target_include_directories(platform_config_obj PRIVATE
+        ${SDK_PATH}/core/pconfig/include
+        ${SDK_PATH}/core/aconfig/include
+        ${SDK_PATH}/core/pdl/include
+        ${SDK_PATH}/core/hal/include
+        ${SDK_PATH}/core/osal/include
+        ${SDK_PATH}/core/types/include
+    )
+
+    if(PLATFORM_PCL_SRCS)
+        target_sources(platform_config_obj PRIVATE ${PLATFORM_PCL_SRCS})
+    endif()
+
+    if(PLATFORM_ACL_SRCS)
+        target_sources(platform_config_obj PRIVATE ${PLATFORM_ACL_SRCS})
+        if(PLATFORM_CONFIG_INCLUDE)
+            target_include_directories(platform_config_obj PRIVATE ${PLATFORM_CONFIG_INCLUDE})
+        endif()
+    endif()
+endif()
+
 # Register PCL with platform config
 if(CONFIG_PCL)
-    # Add platform PCL config sources to PCL component
+    # Clear platform sources - they will be linked via object library
     if(PLATFORM_PCL_SRCS)
-        set(PCONFIG_EXTRA_SRCS ${PLATFORM_PCL_SRCS})
+        set(PCONFIG_PLATFORM_OBJS $<TARGET_OBJECTS:platform_config_obj>)
+        set(PCONFIG_EXTRA_SRCS "")  # Don't add sources directly
         set(PCONFIG_EXTRA_INCLUDE ${PLATFORM_CONFIG_INCLUDE})
     endif()
     add_subdirectory(${SDK_PATH}/core/pconfig ${CMAKE_CURRENT_BINARY_DIR}/pconfig)
+    # Link platform config objects after pconfig is created
+    if(TARGET platform_config_obj AND TARGET pconfig)
+        target_sources(pconfig PRIVATE $<TARGET_OBJECTS:platform_config_obj>)
+    endif()
 endif()
 
 if(CONFIG_PDL)
@@ -37,12 +68,19 @@ endif()
 
 # Register ACL with platform config
 if(CONFIG_ACL)
-    # Add platform ACL config sources to ACL component
+    # Clear platform sources - they will be linked via object library
     if(PLATFORM_ACL_SRCS)
-        set(ACONFIG_EXTRA_SRCS ${PLATFORM_ACL_SRCS})
+        set(ACONFIG_EXTRA_SRCS "")  # Don't add sources directly
         set(ACONFIG_EXTRA_INCLUDE ${PLATFORM_CONFIG_INCLUDE})
     endif()
     add_subdirectory(${SDK_PATH}/core/aconfig ${CMAKE_CURRENT_BINARY_DIR}/aconfig)
+    # Link platform config objects after aconfig is created
+    if(TARGET platform_config_obj AND TARGET aconfig)
+        target_sources(aconfig PRIVATE $<TARGET_OBJECTS:platform_config_obj>)
+        if(PLATFORM_CONFIG_INCLUDE)
+            target_include_directories(aconfig PUBLIC ${PLATFORM_CONFIG_INCLUDE})
+        endif()
+    endif()
 endif()
 
 # Register product-specific libraries
