@@ -9,7 +9,7 @@
 #ifndef PDL_CCM_INTERNAL_H
 #define PDL_CCM_INTERNAL_H
 
-#include "pdl_ccm.h"
+#include "pdl/pdl_ccm_api.h"
 #include "osal.h"
 
 /* 以太网消息最大长度 */

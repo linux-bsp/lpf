@@ -2,8 +2,8 @@
  * PDL层 - Watchdog服务实现
  ************************************************************************/
 
-#include "pdl_watchdog.h"
-#include "hal_watchdog.h"
+#include "pdl/pdl_watchdog_api.h"
+#include "hal/hal_watchdog_api.h"
 #include "osal.h"
 
 typedef struct
@@ -57,7 +57,7 @@ static void *watchdog_kick_thread(void *arg)
 /**
  * @brief 初始化Watchdog服务
  */
-int32_t PDL_WATCHDOG_Init(const pdl_watchdog_config_t *config, watchdog_handle_t *handle)
+int32_t PDL_WATCHDOG_Init(const pdl_watchdog_config_t *config, pdl_watchdog_handle_t *handle)
 {
     watchdog_context_t *ctx;
     hal_watchdog_config_t hal_config;
@@ -106,14 +106,14 @@ int32_t PDL_WATCHDOG_Init(const pdl_watchdog_config_t *config, watchdog_handle_t
              ctx->mode == PDL_WATCHDOG_MODE_AUTO ? "auto" : "manual",
              ctx->kick_interval_ms);
 
-    *handle = (watchdog_handle_t)ctx;
+    *handle = (pdl_watchdog_handle_t)ctx;
     return OSAL_SUCCESS;
 }
 
 /**
  * @brief 关闭Watchdog服务
  */
-int32_t PDL_WATCHDOG_Deinit(watchdog_handle_t handle)
+int32_t PDL_WATCHDOG_Deinit(pdl_watchdog_handle_t handle)
 {
     watchdog_context_t *ctx;
 
@@ -144,7 +144,7 @@ int32_t PDL_WATCHDOG_Deinit(watchdog_handle_t handle)
 /**
  * @brief 启动自动喂狗服务
  */
-int32_t PDL_WATCHDOG_Start(watchdog_handle_t handle)
+int32_t PDL_WATCHDOG_Start(pdl_watchdog_handle_t handle)
 {
     watchdog_context_t *ctx;
     int32_t ret;
@@ -186,7 +186,7 @@ int32_t PDL_WATCHDOG_Start(watchdog_handle_t handle)
 /**
  * @brief 停止自动喂狗服务
  */
-int32_t PDL_WATCHDOG_Stop(watchdog_handle_t handle)
+int32_t PDL_WATCHDOG_Stop(pdl_watchdog_handle_t handle)
 {
     watchdog_context_t *ctx;
 
@@ -214,7 +214,7 @@ int32_t PDL_WATCHDOG_Stop(watchdog_handle_t handle)
 /**
  * @brief 手动喂狗
  */
-int32_t PDL_WATCHDOG_Kick(watchdog_handle_t handle)
+int32_t PDL_WATCHDOG_Kick(pdl_watchdog_handle_t handle)
 {
     watchdog_context_t *ctx;
     int32_t ret;
@@ -240,7 +240,7 @@ int32_t PDL_WATCHDOG_Kick(watchdog_handle_t handle)
 /**
  * @brief 获取Watchdog状态
  */
-int32_t PDL_WATCHDOG_GetStatus(watchdog_handle_t handle, watchdog_status_t *status)
+int32_t PDL_WATCHDOG_GetStatus(pdl_watchdog_handle_t handle, pdl_watchdog_status_t *status)
 {
     watchdog_context_t *ctx;
     uint32_t timeout;
@@ -253,7 +253,7 @@ int32_t PDL_WATCHDOG_GetStatus(watchdog_handle_t handle, watchdog_status_t *stat
 
     ctx = (watchdog_context_t *)handle;
 
-    OSAL_Memset(status, 0, sizeof(watchdog_status_t));
+    OSAL_Memset(status, 0, sizeof(pdl_watchdog_status_t));
     status->enabled = ctx->enabled;
     status->running = ctx->running;
     status->kick_interval_ms = ctx->kick_interval_ms;
@@ -274,7 +274,7 @@ int32_t PDL_WATCHDOG_GetStatus(watchdog_handle_t handle, watchdog_status_t *stat
 /**
  * @brief 设置喂狗间隔
  */
-int32_t PDL_WATCHDOG_SetInterval(watchdog_handle_t handle, uint32_t interval_ms)
+int32_t PDL_WATCHDOG_SetInterval(pdl_watchdog_handle_t handle, uint32_t interval_ms)
 {
     watchdog_context_t *ctx;
 
@@ -301,7 +301,7 @@ int32_t PDL_WATCHDOG_SetInterval(watchdog_handle_t handle, uint32_t interval_ms)
 /**
  * @brief 启用看门狗
  */
-int32_t PDL_WATCHDOG_Enable(watchdog_handle_t handle)
+int32_t PDL_WATCHDOG_Enable(pdl_watchdog_handle_t handle)
 {
     watchdog_context_t *ctx;
     int32_t ret;
@@ -327,7 +327,7 @@ int32_t PDL_WATCHDOG_Enable(watchdog_handle_t handle)
 /**
  * @brief 禁用看门狗
  */
-int32_t PDL_WATCHDOG_Disable(watchdog_handle_t handle)
+int32_t PDL_WATCHDOG_Disable(pdl_watchdog_handle_t handle)
 {
     watchdog_context_t *ctx;
     int32_t ret;

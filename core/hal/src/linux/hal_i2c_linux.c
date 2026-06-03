@@ -10,7 +10,7 @@
 #include <linux/i2c.h>
 #include <linux/i2c-dev.h>
 #include <sys/ioctl.h>
-#include "hal_i2c.h"
+#include "hal/hal_i2c_api.h"
 #include "hal_i2c_internal.h"
 #include "hal/hal_error_api.h"
 #include "osal.h"

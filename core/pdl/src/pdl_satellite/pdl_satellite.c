@@ -7,7 +7,7 @@
  * - 调度内部CAN通信模块
  ************************************************************************/
 
-#include "pdl_satellite.h"
+#include "pdl/pdl_satellite_api.h"
 #include "pdl_satellite_internal.h"
 #include "osal.h"
 

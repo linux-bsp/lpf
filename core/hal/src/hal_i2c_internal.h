@@ -9,7 +9,7 @@
 
 #include "osal.h"
 #include "osal_flock.h"
-#include "hal_i2c_api.h"
+#include "hal/hal_i2c_api.h"
 
 /*===========================================================================
  * 锁配置

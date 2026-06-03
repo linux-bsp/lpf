@@ -9,7 +9,7 @@
 
 #include "osal.h"
 #include "osal_flock.h"
-#include "hal_can_api.h"
+#include "hal/hal_can_api.h"
 
 #ifndef IFNAMSIZ
 #define IFNAMSIZ 16

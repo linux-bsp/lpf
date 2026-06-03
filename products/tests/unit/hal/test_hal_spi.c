@@ -4,7 +4,7 @@
  * @brief HAL SPI驱动单元测试
  */
 
-#include "hal_spi.h"
+#include "hal/hal_spi_api.h"
 #include "osal.h"
 
 /*===========================================================================

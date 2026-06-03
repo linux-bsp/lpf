@@ -6,7 +6,7 @@
 
 #include "pdl/pdl_mcu_api.h"
 #include "pconfig/pconfig.h"
-#include "hal_serial.h"
+#include "hal/hal_serial_api.h"
 #include "osal.h"
 
 /*===========================================================================

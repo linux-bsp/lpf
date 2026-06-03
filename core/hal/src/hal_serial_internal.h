@@ -9,7 +9,7 @@
 
 #include "osal.h"
 #include "osal_flock.h"
-#include "hal_serial_api.h"
+#include "hal/hal_serial_api.h"
 
 /*===========================================================================
  * 锁配置

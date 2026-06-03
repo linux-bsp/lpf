@@ -7,7 +7,7 @@
  * - 调度内部通信模块（CAN/串口）
  ************************************************************************/
 
-#include "pdl_mcu.h"
+#include "pdl/pdl_mcu_api.h"
 #include "pdl_mcu_internal.h"
 #include "pdl_mcu_protocol.h"
 #include "osal.h"

@@ -8,8 +8,8 @@
  ************************************************************************/
 
 #include "pdl_mcu_internal.h"
-#include "pdl_mcu.h"
-#include "hal_serial.h"
+#include "pdl/pdl_mcu_api.h"
+#include "hal/hal_serial_api.h"
 #include "osal.h"
 
 /*

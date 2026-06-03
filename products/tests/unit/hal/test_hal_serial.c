@@ -4,7 +4,7 @@
  * @brief HAL串口驱动单元测试
  */
 
-#include "hal_serial.h"
+#include "hal/hal_serial_api.h"
 #include "osal.h"
 
 /*===========================================================================

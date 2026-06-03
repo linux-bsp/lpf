@@ -4,7 +4,7 @@
  * @brief HAL I2C驱动单元测试
  */
 
-#include "hal_i2c.h"
+#include "hal/hal_i2c_api.h"
 #include "osal.h"
 
 /*===========================================================================

@@ -94,7 +94,7 @@ TEST_CASE(test_prl_init_header)
     prl_init_header(&hdr, PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT, 100, 0);
 
     /* 验证字段（注意：多字节字段使用网络字节序存储） */
-    TEST_ASSERT_EQUAL(OSAL_htons(PRL_MAGIC_NUMBER), hdr.magic);
+    TEST_ASSERT_EQUAL(OSAL_htons(PRL_MAGIC), hdr.magic);
     TEST_ASSERT_EQUAL(PRL_VERSION, hdr.version);
     TEST_ASSERT_EQUAL(PRL_DEV_TYPE_MCU, hdr.dev_type);
     TEST_ASSERT_EQUAL(PRL_MCU_MSG_HEARTBEAT, hdr.msg_type);
@@ -110,13 +110,13 @@ TEST_CASE(test_prl_init_header_with_flags)
 
     /* 初始化带标志位的协议头 */
     prl_init_header(&hdr, PRL_DEV_TYPE_CCM, PRL_CCM_MSG_TELEMETRY,
-                    200, PRL_FLAG_ACK_REQUIRED);
+                    200, PRL_FLAG_NEED_ACK);
 
     /* 验证字段（注意：多字节字段使用网络字节序存储） */
-    TEST_ASSERT_EQUAL(OSAL_htons(PRL_MAGIC_NUMBER), hdr.magic);
+    TEST_ASSERT_EQUAL(OSAL_htons(PRL_MAGIC), hdr.magic);
     TEST_ASSERT_EQUAL(PRL_DEV_TYPE_CCM, hdr.dev_type);
     TEST_ASSERT_EQUAL(PRL_CCM_MSG_TELEMETRY, hdr.msg_type);
-    TEST_ASSERT_EQUAL(PRL_FLAG_ACK_REQUIRED, hdr.flags);
+    TEST_ASSERT_EQUAL(PRL_FLAG_NEED_ACK, hdr.flags);
     TEST_ASSERT_EQUAL(OSAL_htons(200), hdr.length);
 }
 
@@ -178,7 +178,7 @@ TEST_CASE(test_prl_validate_header_invalid_type)
 
     /* 验证错误的消息类型 */
     ret = prl_validate_header(&hdr, PRL_MCU_MSG_GET_VERSION);
-    TEST_ASSERT_EQUAL(PRL_ERR_INVALID_TYPE, ret);
+    TEST_ASSERT_EQUAL(PRL_ERR_INVALID_DEV_TYPE, ret);
 }
 
 TEST_CASE(test_prl_validate_header_invalid_length)

@@ -13,7 +13,7 @@
  */
 TEST_CASE(test_pdl_watchdog_init_deinit)
 {
-    watchdog_handle_t handle = NULL;
+    pdl_watchdog_handle_t handle = NULL;
     pdl_watchdog_config_t config = {
         .name = "test_watchdog",
         .device = "/dev/watchdog",
@@ -38,7 +38,7 @@ TEST_CASE(test_pdl_watchdog_init_deinit)
  */
 TEST_CASE(test_pdl_watchdog_null_params)
 {
-    watchdog_handle_t handle = NULL;
+    pdl_watchdog_handle_t handle = NULL;
     pdl_watchdog_config_t config = {
         .name = "test_watchdog",
         .device = "/dev/watchdog",
@@ -62,7 +62,7 @@ TEST_CASE(test_pdl_watchdog_null_params)
  */
 TEST_CASE(test_pdl_watchdog_manual_kick)
 {
-    watchdog_handle_t handle = NULL;
+    pdl_watchdog_handle_t handle = NULL;
     pdl_watchdog_config_t config = {
         .name = "test_watchdog",
         .device = "/dev/watchdog",
@@ -89,7 +89,7 @@ TEST_CASE(test_pdl_watchdog_manual_kick)
     }
 
     /* 检查状态 */
-    watchdog_status_t status;
+    pdl_watchdog_status_t status;
     ret = PDL_WATCHDOG_GetStatus(handle, &status);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_EQUAL(6, status.kick_count);
@@ -103,7 +103,7 @@ TEST_CASE(test_pdl_watchdog_manual_kick)
  */
 TEST_CASE(test_pdl_watchdog_auto_mode)
 {
-    watchdog_handle_t handle = NULL;
+    pdl_watchdog_handle_t handle = NULL;
     pdl_watchdog_config_t config = {
         .name = "test_watchdog",
         .device = "/dev/watchdog",
@@ -124,7 +124,7 @@ TEST_CASE(test_pdl_watchdog_auto_mode)
     OSAL_msleep(1500);
 
     /* 检查状态 */
-    watchdog_status_t status;
+    pdl_watchdog_status_t status;
     ret = PDL_WATCHDOG_GetStatus(handle, &status);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_EQUAL(true, status.running);
@@ -147,7 +147,7 @@ TEST_CASE(test_pdl_watchdog_auto_mode)
  */
 TEST_CASE(test_pdl_watchdog_get_status)
 {
-    watchdog_handle_t handle = NULL;
+    pdl_watchdog_handle_t handle = NULL;
     pdl_watchdog_config_t config = {
         .name = "test_watchdog",
         .device = "/dev/watchdog",
@@ -161,7 +161,7 @@ TEST_CASE(test_pdl_watchdog_get_status)
     TEST_ASSERT_FALSE(ret != OSAL_SUCCESS); // Watchdog device not available
 
     /* 获取状态 */
-    watchdog_status_t status;
+    pdl_watchdog_status_t status;
     ret = PDL_WATCHDOG_GetStatus(handle, &status);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_EQUAL(false, status.running);
@@ -177,7 +177,7 @@ TEST_CASE(test_pdl_watchdog_get_status)
  */
 TEST_CASE(test_pdl_watchdog_set_interval)
 {
-    watchdog_handle_t handle = NULL;
+    pdl_watchdog_handle_t handle = NULL;
     pdl_watchdog_config_t config = {
         .name = "test_watchdog",
         .device = "/dev/watchdog",
@@ -195,7 +195,7 @@ TEST_CASE(test_pdl_watchdog_set_interval)
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 验证 */
-    watchdog_status_t status;
+    pdl_watchdog_status_t status;
     ret = PDL_WATCHDOG_GetStatus(handle, &status);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_EQUAL(3000, status.kick_interval_ms);
@@ -208,7 +208,7 @@ TEST_CASE(test_pdl_watchdog_set_interval)
  */
 TEST_CASE(test_pdl_watchdog_enable_disable)
 {
-    watchdog_handle_t handle = NULL;
+    pdl_watchdog_handle_t handle = NULL;
     pdl_watchdog_config_t config = {
         .name = "test_watchdog",
         .device = "/dev/watchdog",
@@ -225,7 +225,7 @@ TEST_CASE(test_pdl_watchdog_enable_disable)
     ret = PDL_WATCHDOG_Enable(handle);
     if (ret == OSAL_SUCCESS)
     {
-        watchdog_status_t status;
+        pdl_watchdog_status_t status;
         ret = PDL_WATCHDOG_GetStatus(handle, &status);
         TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
         TEST_ASSERT_EQUAL(true, status.enabled);

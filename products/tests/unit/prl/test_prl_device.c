@@ -78,7 +78,7 @@ TEST_CASE(test_prl_device_type_valid)
     TEST_ASSERT_TRUE(PRL_IsDeviceTypeValid(PRL_DEV_TYPE_BMC));
 
     /* 无效的设备类型 */
-    TEST_ASSERT_FALSE(PRL_IsDeviceTypeValid(PRL_DEV_TYPE_UNKNOWN));
+    TEST_ASSERT_FALSE(PRL_IsDeviceTypeValid(0xFF));
     TEST_ASSERT_FALSE(PRL_IsDeviceTypeValid(0xFF));
 }
 
@@ -92,7 +92,7 @@ TEST_CASE(test_prl_device_type_name)
     TEST_ASSERT_STRING_EQUAL("SATELLITE", PRL_GetDeviceTypeName(PRL_DEV_TYPE_SATELLITE));
     TEST_ASSERT_STRING_EQUAL("POWER", PRL_GetDeviceTypeName(PRL_DEV_TYPE_POWER));
     TEST_ASSERT_STRING_EQUAL("BMC", PRL_GetDeviceTypeName(PRL_DEV_TYPE_BMC));
-    TEST_ASSERT_STRING_EQUAL("UNKNOWN", PRL_GetDeviceTypeName(PRL_DEV_TYPE_UNKNOWN));
+    TEST_ASSERT_STRING_EQUAL("UNKNOWN", PRL_GetDeviceTypeName(0xFF));
     TEST_ASSERT_STRING_EQUAL("INVALID", PRL_GetDeviceTypeName(0xFF));
 }
 
@@ -148,7 +148,7 @@ TEST_CASE(test_PRL_Encode_invalid_params)
     TEST_ASSERT_EQUAL(PRL_ERR_INVALID_PARAM, ret);
 
     /* 无效设备类型 */
-    ret = PRL_Encode(PRL_DEV_TYPE_UNKNOWN, PRL_MCU_MSG_HEARTBEAT,
+    ret = PRL_Encode(0xFF, PRL_MCU_MSG_HEARTBEAT,
                             payload, sizeof(payload), buffer, sizeof(buffer), 0);
     TEST_ASSERT_EQUAL(PRL_ERR_INVALID_DEV_TYPE, ret);
 

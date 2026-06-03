@@ -8,7 +8,7 @@
 #define HAL_WATCHDOG_INTERNAL_H
 
 #include "osal.h"
-#include "hal_watchdog_api.h"
+#include "hal/hal_watchdog_api.h"
 
 /*===========================================================================
  * 内部数据结构
