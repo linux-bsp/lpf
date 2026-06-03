@@ -3,7 +3,6 @@
  ************************************************************************/
 
 #include "hal/hal_error_api.h"
-#include "osal/osal.h"
 #include "osal.h"
 #include <stdarg.h>
 
