@@ -11,7 +11,7 @@
 #include <linux/can/raw.h>
 #include <sys/ioctl.h>
 #include "sys/osal_poll.h"
-#include "hal_can.h"
+#include "hal_can_internal.h"
 #include "hal_error.h"
 #include "osal.h"
 #include "osal_flock.h"
@@ -19,21 +19,6 @@
 #ifndef IFNAMSIZ
 #define IFNAMSIZ IF_NAMESIZE
 #endif
-
-/**
- * @brief CAN 设备上下文（带双重保护）
- */
-typedef struct
-{
-    int32_t sockfd;
-    char interface[IFNAMSIZ];
-    uint32_t baudrate;
-    bool initialized;
-
-    /* 双重保护机制 */
-    osal_flock_t *flock;    /* 文件锁（进程间保护） */
-    osal_mutex_t *mutex;    /* 互斥锁（线程间保护） */
-} hal_can_context_t;
 
 int32_t HAL_CAN_Init(const hal_can_config_t *config, hal_can_handle_t *handle)
 {
