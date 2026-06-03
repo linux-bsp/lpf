@@ -20,8 +20,15 @@ extern "C" {
 #define PRL_ERR_INVALID_LENGTH     -2
 #define PRL_ERR_BUFFER_TOO_SMALL   -3
 #define PRL_ERR_CRC_MISMATCH       -4
+#define PRL_ERR_CRC_FAILED         -4  /* Alias for CRC_MISMATCH */
 #define PRL_ERR_INVALID_MAGIC      -5
 #define PRL_ERR_INVALID_VERSION    -6
+#define PRL_ERR_INVALID_DEV_TYPE   -7
+
+/* ========== Protocol Version ========== */
+
+#define PRL_VERSION_MAJOR           0
+#define PRL_VERSION_MINOR           1
 
 /* ========== Protocol Flags ========== */
 

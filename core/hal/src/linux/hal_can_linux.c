@@ -11,7 +11,7 @@
 #include <linux/can/raw.h>
 #include <sys/ioctl.h>
 #include "sys/osal_poll.h"
-#include "hal/hal_can_internal_api.h"
+#include "hal/hal_can_internal.h"
 #include "hal/hal_error_api.h"
 #include "osal.h"
 #include "osal_flock.h"
