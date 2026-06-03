@@ -22,6 +22,11 @@ endif()
 # Standard CMake project declaration
 project(ems_sdk C CXX ASM)
 
+# Set global output directories for all targets
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+
 # Include build system
 include(${SDK_PATH}/tools/cmake/compile.cmake)
 

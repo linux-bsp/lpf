@@ -65,17 +65,21 @@ function(load_platform_config config_var base_dir)
 
     message("-- Loading platform config: ${${config_var}}")
 
-    # Collect ACONFIG config files
+    # Collect ACONFIG config files - use absolute paths to avoid path issues
     file(GLOB _acl_srcs "${PLATFORM_CONFIG_DIR}/aconfig/*.c" "${PLATFORM_CONFIG_DIR}/aconfig/*/*.c")
     if(_acl_srcs)
         set(PLATFORM_ACL_SRCS ${_acl_srcs} PARENT_SCOPE)
         set(PLATFORM_CONFIG_INCLUDE ${PLATFORM_CONFIG_DIR}/aconfig PARENT_SCOPE)
+        # Export config dir for proper object file placement
+        set(PLATFORM_CONFIG_DIR ${PLATFORM_CONFIG_DIR} PARENT_SCOPE)
     endif()
 
-    # Collect PCONFIG config files
+    # Collect PCONFIG config files - use absolute paths to avoid path issues
     file(GLOB _pcl_srcs "${PLATFORM_CONFIG_DIR}/pconfig/*.c")
     if(_pcl_srcs)
         set(PLATFORM_PCL_SRCS ${_pcl_srcs} PARENT_SCOPE)
+        # Export config dir for proper object file placement
+        set(PLATFORM_CONFIG_DIR ${PLATFORM_CONFIG_DIR} PARENT_SCOPE)
     endif()
 endfunction()
 
