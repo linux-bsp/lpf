@@ -352,7 +352,17 @@ if(CONFIG_TEST_SYSTEM)
         add_executable(test-hal-concurrent
             system/hal/test_hal_concurrent_access.c
         )
-        target_link_libraries(test-hal-concurrent PRIVATE osal pthread rt m)
+        target_link_libraries(test-hal-concurrent PRIVATE pthread rt m)
+        if(TARGET osal)
+            target_link_libraries(test-hal-concurrent PRIVATE osal)
+        endif()
+        if(TARGET hal)
+            target_link_libraries(test-hal-concurrent PRIVATE hal)
+        endif()
+        # Link osal again at the end to resolve symbols
+        if(TARGET osal)
+            target_link_libraries(test-hal-concurrent PRIVATE osal)
+        endif()
         set_target_properties(test-hal-concurrent PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
         )
