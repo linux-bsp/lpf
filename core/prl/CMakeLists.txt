@@ -1,8 +1,9 @@
 ################# Add include #################
-# API 目录：对外公开的头文件（PUBLIC）
-list(APPEND ADD_INCLUDE "api")
-# include 目录：内部私有头文件（PRIVATE）
-list(APPEND ADD_PRIVATE_INCLUDE "include")
+# 公共头文件目录（对外暴露）
+list(APPEND ADD_INCLUDE "include")
+
+# 私有头文件目录（仅内部使用）
+list(APPEND ADD_PRIV_INCLUDE "src")
 ###############################################
 
 ############## Add source files ###############
@@ -49,9 +50,6 @@ list(APPEND ADD_REQUIREMENTS osal)
 ###############################################
 
 # 注册组件
-get_filename_component(PARENT_DIR "${CMAKE_CURRENT_SOURCE_DIR}" DIRECTORY)
-list(APPEND ADD_INCLUDE "${PARENT_DIR}")
-
 if(CONFIG_PRL_BUILD_SHARED)
     register_component(SHARED)
 else()
