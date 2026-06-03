@@ -30,15 +30,15 @@ const aconfig_tc_config_t g_ccm_tc_configs[] = {
     { ACONFIG_TC_FPGA_CONFIG_LOAD,     ACONFIG_DEVICE_FPGA, "main_fpga", true, NULL },
 
     /* 固件升级 → MCU[0] */
-    { ACONFIG_TC_FIRMWARE_UPGRADE_START,  ACONFIG_DEVICE_MCU, 0, true, NULL },
-    { ACONFIG_TC_FIRMWARE_UPGRADE_DATA,   ACONFIG_DEVICE_MCU, 0, true, NULL },
-    { ACONFIG_TC_FIRMWARE_UPGRADE_VERIFY, ACONFIG_DEVICE_MCU, 0, true, NULL },
-    { ACONFIG_TC_FIRMWARE_UPGRADE_COMMIT, ACONFIG_DEVICE_MCU, 0, true, NULL },
+    { ACONFIG_TC_FIRMWARE_UPGRADE_START,  ACONFIG_DEVICE_MCU, "power_mcu", true, NULL },
+    { ACONFIG_TC_FIRMWARE_UPGRADE_DATA,   ACONFIG_DEVICE_MCU, "power_mcu", true, NULL },
+    { ACONFIG_TC_FIRMWARE_UPGRADE_VERIFY, ACONFIG_DEVICE_MCU, "power_mcu", true, NULL },
+    { ACONFIG_TC_FIRMWARE_UPGRADE_COMMIT, ACONFIG_DEVICE_MCU, "power_mcu", true, NULL },
 
     /* 系统控制 */
-    { ACONFIG_TC_SYSTEM_RESET,         ACONFIG_DEVICE_MCU, 0, true, NULL },
-    { ACONFIG_TC_WATCHDOG_ENABLE,      ACONFIG_DEVICE_MCU, 2, true, NULL },  /* MCU[2]是看门狗 */
-    { ACONFIG_TC_WATCHDOG_DISABLE,     ACONFIG_DEVICE_MCU, 2, true, NULL },
+    { ACONFIG_TC_SYSTEM_RESET,         ACONFIG_DEVICE_MCU, "power_mcu", true, NULL },
+    { ACONFIG_TC_WATCHDOG_ENABLE,      ACONFIG_DEVICE_MCU, "watchdog_mcu", true, NULL },
+    { ACONFIG_TC_WATCHDOG_DISABLE,     ACONFIG_DEVICE_MCU, "watchdog_mcu", true, NULL },
 };
 
 const uint32_t g_ccm_tc_config_count = sizeof(g_ccm_tc_configs) / sizeof(aconfig_tc_config_t);
@@ -51,29 +51,29 @@ const uint32_t g_ccm_tc_config_count = sizeof(g_ccm_tc_configs) / sizeof(aconfig
  */
 const aconfig_tm_config_t g_ccm_tm_configs[] = {
     /* 服务器遥测 → BMC，1秒更新周期，2秒有效期 */
-    { ACONFIG_TM_CPU_TEMP,             ACONFIG_DEVICE_BMC, "payload_bmc", 0, 2000, 1000, true, NULL },
-    { ACONFIG_TM_BOARD_TEMP,           ACONFIG_DEVICE_BMC, "payload_bmc", 0, 2000, 1000, true, NULL },
-    { ACONFIG_TM_FAN_SPEED,            ACONFIG_DEVICE_BMC, "payload_bmc", 0, 4000, 2000, true, NULL },
-    { ACONFIG_TM_VOLTAGE_12V,          ACONFIG_DEVICE_MCU, "power_mcu", 0, 4000, 2000, true, NULL },
-    { ACONFIG_TM_VOLTAGE_5V,           ACONFIG_DEVICE_MCU, "power_mcu", 0, 4000, 2000, true, NULL },
-    { ACONFIG_TM_VOLTAGE_3V3,          ACONFIG_DEVICE_MCU, "power_mcu", 0, 4000, 2000, true, NULL },
-    { ACONFIG_TM_CURRENT,              ACONFIG_DEVICE_MCU, "power_mcu", 0, 4000, 2000, true, NULL },
-    { ACONFIG_TM_POWER_STATUS,         ACONFIG_DEVICE_BMC, "payload_bmc", 0, 500,  100,  true, NULL },
+    { ACONFIG_TM_CPU_TEMP,             ACONFIG_DEVICE_BMC, "payload_bmc", 2000, 1000, true, NULL },
+    { ACONFIG_TM_BOARD_TEMP,           ACONFIG_DEVICE_BMC, "payload_bmc", 2000, 1000, true, NULL },
+    { ACONFIG_TM_FAN_SPEED,            ACONFIG_DEVICE_BMC, "payload_bmc", 4000, 2000, true, NULL },
+    { ACONFIG_TM_VOLTAGE_12V,          ACONFIG_DEVICE_MCU, "power_mcu", 4000, 2000, true, NULL },
+    { ACONFIG_TM_VOLTAGE_5V,           ACONFIG_DEVICE_MCU, "power_mcu", 4000, 2000, true, NULL },
+    { ACONFIG_TM_VOLTAGE_3V3,          ACONFIG_DEVICE_MCU, "power_mcu", 4000, 2000, true, NULL },
+    { ACONFIG_TM_CURRENT,              ACONFIG_DEVICE_MCU, "power_mcu", 4000, 2000, true, NULL },
+    { ACONFIG_TM_POWER_STATUS,         ACONFIG_DEVICE_BMC, "payload_bmc", 500,  100,  true, NULL },
 
     /* MCU遥测 → MCU，2秒更新周期，4秒有效期 */
-    { ACONFIG_TM_MCU_STATUS,           ACONFIG_DEVICE_MCU, "power_mcu", 0, 500,  100,  true, NULL },
-    { ACONFIG_TM_MCU_TEMP,             ACONFIG_DEVICE_MCU, "power_mcu", 0, 4000, 2000, true, NULL },
-    { ACONFIG_TM_MCU_UPTIME,           ACONFIG_DEVICE_MCU, "power_mcu", 0, 4000, 2000, true, NULL },
+    { ACONFIG_TM_MCU_STATUS,           ACONFIG_DEVICE_MCU, "power_mcu", 500,  100,  true, NULL },
+    { ACONFIG_TM_MCU_TEMP,             ACONFIG_DEVICE_MCU, "power_mcu", 4000, 2000, true, NULL },
+    { ACONFIG_TM_MCU_UPTIME,           ACONFIG_DEVICE_MCU, "power_mcu", 4000, 2000, true, NULL },
 
     /* FPGA遥测 → FPGA，2秒更新周期，4秒有效期 */
-    { ACONFIG_TM_FPGA_STATUS,          ACONFIG_DEVICE_FPGA, "main_fpga", 0, 500,  100,  true, NULL },
-    { ACONFIG_TM_FPGA_TEMP,            ACONFIG_DEVICE_FPGA, "main_fpga", 0, 4000, 2000, true, NULL },
-    { ACONFIG_TM_FPGA_CONFIG_STATUS,   ACONFIG_DEVICE_FPGA, "main_fpga", 0, 500,  100,  true, NULL },
+    { ACONFIG_TM_FPGA_STATUS,          ACONFIG_DEVICE_FPGA, "main_fpga", 500,  100,  true, NULL },
+    { ACONFIG_TM_FPGA_TEMP,            ACONFIG_DEVICE_FPGA, "main_fpga", 4000, 2000, true, NULL },
+    { ACONFIG_TM_FPGA_CONFIG_STATUS,   ACONFIG_DEVICE_FPGA, "main_fpga", 500,  100,  true, NULL },
 
     /* 系统遥测 */
-    { ACONFIG_TM_SYSTEM_UPTIME,        ACONFIG_DEVICE_MCU, "power_mcu", 0, 4000, 2000, true, NULL },
-    { ACONFIG_TM_WATCHDOG_STATUS,      ACONFIG_DEVICE_MCU, "watchdog_mcu", 0, 500,  100,  true, NULL },
-    { ACONFIG_TM_ERROR_COUNT,          ACONFIG_DEVICE_MCU, "power_mcu", 0, 4000, 2000, true, NULL },
+    { ACONFIG_TM_SYSTEM_UPTIME,        ACONFIG_DEVICE_MCU, "power_mcu", 4000, 2000, true, NULL },
+    { ACONFIG_TM_WATCHDOG_STATUS,      ACONFIG_DEVICE_MCU, "watchdog_mcu", 500,  100,  true, NULL },
+    { ACONFIG_TM_ERROR_COUNT,          ACONFIG_DEVICE_MCU, "power_mcu", 4000, 2000, true, NULL },
 };
 
 const uint32_t g_ccm_tm_config_count = sizeof(g_ccm_tm_configs) / sizeof(aconfig_tm_config_t);
