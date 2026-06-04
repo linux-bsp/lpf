@@ -175,6 +175,8 @@ endif()
 # 注册组件（使用公共函数）
 # Public API headers (对外公开)
 list(APPEND ADD_INCLUDE "include")
+# Internal headers (仅内部使用)
+list(APPEND ADD_INCLUDE "src/include")
 get_filename_component(PARENT_DIR "${CMAKE_CURRENT_SOURCE_DIR}" DIRECTORY)
 list(APPEND ADD_INCLUDE "${PARENT_DIR}")
 

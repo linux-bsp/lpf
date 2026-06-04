@@ -4,6 +4,7 @@ list(APPEND ADD_INCLUDE "include")
 
 # 私有头文件目录（仅内部使用）
 list(APPEND ADD_PRIVATE_INCLUDE "src")
+list(APPEND ADD_PRIVATE_INCLUDE "src/include")
 ###############################################
 
 ############## Add source files ###############

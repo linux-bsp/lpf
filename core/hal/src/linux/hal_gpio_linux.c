@@ -5,7 +5,7 @@
  ************************************************************************/
 
 #include "hal/hal_gpio_api.h"
-#include "hal_gpio_internal.h"
+#include "include/hal_gpio_internal.h"
 #include "osal.h"
 #include "osal_flock.h"
 #include "sys/osal_poll.h"
