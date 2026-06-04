@@ -15,8 +15,8 @@
 #ifndef OSAL_TERMIOS_H
 #define OSAL_TERMIOS_H
 
-#include "osal_platform_internal.h"
-#include "osal_types_internal.h"
+#include "../osal_platform_internal.h"
+#include "../osal_types_internal.h"
 
 /*===========================================================================
  * termios数据结构（不透明类型）

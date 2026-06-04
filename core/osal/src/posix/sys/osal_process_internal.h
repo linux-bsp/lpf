@@ -15,8 +15,8 @@
 #ifndef OSAL_PROCESS_H
 #define OSAL_PROCESS_H
 
-#include "osal_platform_internal.h"
-#include "osal_types_internal.h"
+#include "../osal_platform_internal.h"
+#include "../osal_types_internal.h"
 #include <stdbool.h>
 
 /* 基础进程控制函数（保持兼容） */

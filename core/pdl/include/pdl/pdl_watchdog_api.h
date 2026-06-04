@@ -15,7 +15,7 @@
 #ifndef PDL_WATCHDOG_API_H
 #define PDL_WATCHDOG_API_H
 
-#include "osal_types_internal.h"
+#include "osal/osal_types_api.h"
 #include "pdl_types_api.h"
 
 /*

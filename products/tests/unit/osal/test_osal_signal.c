@@ -7,8 +7,8 @@
  */
 
 #include "osal.h"
-#include "sys/osal_process_internal.h"
-#include "sys/osal_time_internal.h"
+#include "../../../../core/osal/src/posix/sys/osal_process_internal.h"
+#include "../../../../core/osal/src/posix/sys/osal_time_internal.h"
 
 static volatile int32_t g_signal_received = 0;
 static volatile int32_t g_signal_number = 0;

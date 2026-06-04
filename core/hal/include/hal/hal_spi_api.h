@@ -7,7 +7,7 @@
 #ifndef HAL_SPI_API_H
 #define HAL_SPI_API_H
 
-#include "osal_types_internal.h"
+#include "osal/osal_types_api.h"
 #include "hal/config/hal_spi_types.h"
 
 #ifdef __cplusplus

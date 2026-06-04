@@ -7,7 +7,7 @@
 #ifndef ACONFIG_INTERNAL_H
 #define ACONFIG_INTERNAL_H
 
-#include "osal_types_internal.h"
+#include "osal/osal_types_api.h"
 #include "aconfig/aconfig_types.h"
 
 /**

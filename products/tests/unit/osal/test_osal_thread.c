@@ -3,8 +3,8 @@
  ************************************************************************/
 
 #include "test_framework.h"
-#include "sys/osal_thread_internal.h"
-#include "sys/osal_time_internal.h"
+#include "../../../../core/osal/src/posix/sys/osal_thread_internal.h"
+#include "../../../../core/osal/src/posix/sys/osal_time_internal.h"
 
 /*===========================================================================
  * 测试辅助变量

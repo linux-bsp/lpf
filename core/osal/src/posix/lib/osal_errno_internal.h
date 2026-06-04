@@ -17,7 +17,7 @@
 #ifndef OSAL_ERRNO_H
 #define OSAL_ERRNO_H
 
-#include "osal_types_internal.h"
+#include "../osal_types_internal.h"
 
 /*===========================================================================
  * 状态码类型

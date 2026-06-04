@@ -12,8 +12,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "ipc/osal_shm_internal.h"
-#include "lib/osal_errno_internal.h"
+#include "osal_shm_internal.h"
+#include "../lib/osal_errno_internal.h"
 
 /* 共享内存对象结构 */
 struct osal_shm_s {

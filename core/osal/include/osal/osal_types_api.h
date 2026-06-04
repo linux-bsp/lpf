@@ -16,6 +16,6 @@
 #define OSAL_TYPES_API_H
 
 /* 直接包含内部类型定义头文件 */
-#include "../src/include/osal_types_internal.h"
+#include "../../src/posix/osal_types_internal.h"
 
 #endif /* OSAL_TYPES_API_H */

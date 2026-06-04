@@ -7,7 +7,7 @@
 #ifndef HAL_SPI_TYPES_H
 #define HAL_SPI_TYPES_H
 
-#include "osal_types_internal.h"
+#include "osal/osal_types_api.h"
 
 /*
  * ============================================================================

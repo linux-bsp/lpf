@@ -13,7 +13,7 @@
 #ifndef TEST_PERFORMANCE_H
 #define TEST_PERFORMANCE_H
 
-#include "osal_types_internal.h"
+#include "osal/osal_types_api.h"
 #include <stdbool.h>
 
 /* 性能指标类型 */

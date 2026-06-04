@@ -7,7 +7,7 @@
 #ifndef PDL_BMC_INTERNAL_H
 #define PDL_BMC_INTERNAL_H
 
-#include "osal_types_internal.h"
+#include "osal/osal_types_api.h"
 #include "pdl/pdl_bmc_api.h"
 
 /************************************************************************

@@ -7,7 +7,7 @@
 #ifndef OSAL_SEMAPHORE_H
 #define OSAL_SEMAPHORE_H
 
-#include "osal_types_internal.h"
+#include "../osal_types_internal.h"
 
 #ifdef __cplusplus
 extern "C" {

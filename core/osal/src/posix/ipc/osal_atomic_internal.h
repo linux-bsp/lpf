@@ -15,8 +15,8 @@
 #ifndef OSAL_ATOMIC_H
 #define OSAL_ATOMIC_H
 
-#include "osal_platform_internal.h"
-#include "osal_types_internal.h"
+#include "../osal_platform_internal.h"
+#include "../osal_types_internal.h"
 
 /*===========================================================================
  * 原子类型定义
