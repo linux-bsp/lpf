@@ -2,29 +2,6 @@
 # 公共头文件目录（对外暴露）
 list(APPEND ADD_INCLUDE "include")
 
-# 私有头文件目录（仅内部使用）
-list(APPEND ADD_PRIVATE_INCLUDE "src")
-list(APPEND ADD_PRIVATE_INCLUDE "src/include")
-
-# Linux 平台子目录
-if(CONFIG_PLATFORM_LINUX)
-    list(APPEND ADD_PRIVATE_INCLUDE "src/linux/can")
-    list(APPEND ADD_PRIVATE_INCLUDE "src/linux/gpio")
-    list(APPEND ADD_PRIVATE_INCLUDE "src/linux/i2c")
-    list(APPEND ADD_PRIVATE_INCLUDE "src/linux/spi")
-    list(APPEND ADD_PRIVATE_INCLUDE "src/linux/serial")
-    list(APPEND ADD_PRIVATE_INCLUDE "src/linux/watchdog")
-endif()
-
-# macOS 平台子目录
-if(CONFIG_OS_MACOS)
-    list(APPEND ADD_PRIVATE_INCLUDE "src/macos/can")
-    list(APPEND ADD_PRIVATE_INCLUDE "src/macos/gpio")
-    list(APPEND ADD_PRIVATE_INCLUDE "src/macos/i2c")
-    list(APPEND ADD_PRIVATE_INCLUDE "src/macos/spi")
-    list(APPEND ADD_PRIVATE_INCLUDE "src/macos/serial")
-    list(APPEND ADD_PRIVATE_INCLUDE "src/macos/watchdog")
-endif()
 ###############################################
 
 ############## Add source files ###############
