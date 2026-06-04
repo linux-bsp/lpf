@@ -8,7 +8,6 @@
 #define HAL_CAN_INTERNAL_H
 
 #include "osal/osal.h"
-#include "osal/osal.h"
 #include "hal/hal.h"
 
 #ifndef IFNAMSIZ
