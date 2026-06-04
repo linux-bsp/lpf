@@ -2,7 +2,7 @@
  * OSAL POSIX实现 - 内存管理
  ************************************************************************/
 
-#include "osal.h"
+#include "osal_heap_internal.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -156,7 +156,7 @@ void *OSAL_Malloc(uint32_t size)
 
     /* 检查是否会导致整数溢出（uint32_t 最大值是 4GB） */
     if (size > UINT32_MAX - sizeof(mem_block_header_t)) {
-        LOG_ERROR("OSAL_Heap", "Allocation size too large: %u", size);
+        fprintf(stderr, "[OSAL_Heap] Allocation size too large: %u\n", size);
         return NULL;
     }
 

@@ -5,6 +5,8 @@
 #ifndef OSAPI_HEAP_H
 #define OSAPI_HEAP_H
 
+#include <osal/osal_heap_api.h>
+#include <osal/osal_errno_api.h>
 #include "../osal_types_internal.h"
 #include <stdbool.h>
 

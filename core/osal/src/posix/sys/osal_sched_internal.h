@@ -18,7 +18,7 @@
 
 #include "../osal_platform_internal.h"
 #include "../osal_types_internal.h"
-#include "osal_thread_internal.h"
+#include <osal/osal_thread_api.h>
 
 /*
  * 调度策略（平台无关）

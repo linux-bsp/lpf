@@ -17,23 +17,24 @@
 #include "../src/posix/osal_types_internal.h"
 
 /* IPC - 进程间通信 */
-#include "../src/posix/ipc/osal_mutex_internal.h"
-#include "../src/posix/ipc/osal_rwlock_internal.h"
-#include "../src/posix/ipc/osal_semaphore_internal.h"
+#include "osal/osal_mutex_api.h"
+#include "osal/osal_rwlock_api.h"
+#include "osal/osal_semaphore_api.h"
 #include "../src/posix/ipc/osal_cond_internal.h"
-#include "../src/posix/ipc/osal_shm_internal.h"
+#include "osal/osal_shm_api.h"
 #include "../src/posix/ipc/osal_shm_cache_internal.h"
-#include "../src/posix/ipc/osal_atomic_internal.h"
+#include "osal/osal_atomic_api.h"
 
 /* SYS - 系统调用封装 */
 #include "../src/posix/sys/osal_clock_internal.h"
 #include "../src/posix/sys/osal_signal_internal.h"
-#include "../src/posix/sys/osal_file_internal.h"
+#include "osal/osal_file_api.h"
+#include "../src/posix/sys/osal_poll_internal.h"
 #include "../src/posix/sys/osal_select_internal.h"
 #include "../src/posix/sys/osal_env_internal.h"
-#include "../src/posix/sys/osal_time_internal.h"
+#include "osal/osal_time_api.h"
 #include "../src/posix/sys/osal_process_internal.h"
-#include "../src/posix/sys/osal_thread_internal.h"
+#include "osal/osal_thread_api.h"
 #include "../src/posix/sys/osal_sched_internal.h"
 
 /* NET - 网络相关 */
@@ -41,10 +42,10 @@
 #include "../src/posix/net/osal_termios_internal.h"
 
 /* LIB - 标准库封装 */
-#include "../src/posix/lib/osal_string_internal.h"
+#include "osal/osal_string_api.h"
 #include "../src/posix/lib/osal_stdio_internal.h"
-#include "../src/posix/lib/osal_heap_internal.h"
-#include "../src/posix/lib/osal_errno_internal.h"
+#include "osal/osal_heap_api.h"
+#include "osal/osal_errno_api.h"
 
 /* UTIL - 工具类 */
 #include "../src/posix/util/osal_log_internal.h"

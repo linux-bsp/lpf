@@ -8,7 +8,7 @@
 #define OSAL_COND_H
 
 #include "../osal_types_internal.h"
-#include "osal_mutex_internal.h"
+#include <osal/osal_mutex_api.h>
 
 #ifdef __cplusplus
 extern "C" {

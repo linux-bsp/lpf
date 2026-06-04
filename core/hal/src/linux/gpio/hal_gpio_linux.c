@@ -8,8 +8,6 @@
 #include "hal_gpio_internal.h"
 #include "osal.h"
 #include "osal_flock.h"
-#include "../../../osal/src/posix/sys/osal_poll_internal.h"
-#include "../../../osal/src/posix/sys/osal_file_internal.h"
 
 /*===========================================================================
  * GPIO中断监听线程管理
