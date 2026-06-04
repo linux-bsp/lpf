@@ -175,12 +175,12 @@ TEST_CASE(test_semaphore_producer_consumer)
     osal_thread_t producer, consumer;
 
     /* 创建生产者和消费者线程 */
-    OSAL_pthread_create(&producer, NULL, producer_thread, sem);
-    OSAL_pthread_create(&consumer, NULL, consumer_thread, sem);
+    OSAL_ThreadCreate(&producer, producer_thread, sem);
+    OSAL_ThreadCreate(&consumer, consumer_thread, sem);
 
     /* 等待线程完成 */
-    OSAL_pthread_join(producer, NULL);
-    OSAL_pthread_join(consumer, NULL);
+    OSAL_ThreadJoin(producer);
+    OSAL_ThreadJoin(consumer);
 
     /* 验证计数器归零 */
     TEST_ASSERT_EQUAL(0, shared_counter);

@@ -5,8 +5,8 @@
  */
 
 #include "osal.h"
-#include "../../../../core/osal/src/posix/sys/osal_sched_internal.h"
-#include "../../../../core/osal/src/posix/sys/osal_thread_internal.h"
+#include "osal/osal_sched_api.h"
+#include "osal/osal_thread_api.h"
 
 /*===========================================================================
  * 调度策略和优先级测试

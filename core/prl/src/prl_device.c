@@ -5,8 +5,8 @@
  */
 
 #include "prl/prl_device.h"
-#include "../../osal/src/posix/lib/osal_string_internal.h"
-#include "../../osal/src/posix/net/osal_socket_internal.h"  /* for OSAL_ntohs/ntohl */
+#include "osal/osal_string_api.h"
+#include "osal/osal_socket_api.h"  /* for OSAL_ntohs/ntohl */
 
 /* 设备类型名称映射表 */
 static const char *device_type_names[] = {

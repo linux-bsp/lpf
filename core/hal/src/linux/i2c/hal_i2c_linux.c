@@ -13,7 +13,7 @@
 #include "hal/hal_i2c_api.h"
 #include "hal_i2c_internal.h"
 #include "osal.h"
-#include "osal_flock.h"
+#include "osal/osal_flock_api.h"
 
 /**
  * @brief 打开I2C设备

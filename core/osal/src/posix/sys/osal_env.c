@@ -2,7 +2,7 @@
  * OSAL POSIX实现 - 环境变量操作
  ************************************************************************/
 
-#include "osal_env_internal.h"
+#include "osal/osal_env_api.h"
 #include <stdlib.h>
 
 char *OSAL_getenv(const char *name)

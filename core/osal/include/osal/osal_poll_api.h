@@ -15,8 +15,8 @@
 #ifndef OSAL_POLL_H
 #define OSAL_POLL_H
 
-#include "../osal_platform_internal.h"
-#include "../osal_types_internal.h"
+#include "osal/osal_platform.h"
+#include "osal/osal_types_api.h"
 
 /*===========================================================================
  * poll事件标志

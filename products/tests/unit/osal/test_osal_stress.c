@@ -48,13 +48,13 @@ TEST_CASE(test_mutex_stress)
     int32_t i;
 
     for (i = 0; i < STRESS_THREAD_COUNT; i++) {
-        OSAL_pthread_create(&threads[i], NULL, mutex_stress_thread, NULL);
+        OSAL_ThreadCreate(&threads[i], mutex_stress_thread, NULL);
     }
 
     /* 等待所有线程完成 */
 
     for (i = 0; i < STRESS_THREAD_COUNT; i++) {
-        OSAL_pthread_join(threads[i], NULL);
+        OSAL_ThreadJoin(threads[i]);
     }
 
     /* 验证计数器正确 */
@@ -140,23 +140,23 @@ TEST_CASE(test_semaphore_stress)
 
     for (i = 0; i < STRESS_PRODUCER_COUNT; i++) {
         producer_ids[i] = i;
-        OSAL_pthread_create(&producers[i], NULL, sem_producer_thread, &producer_ids[i]);
+        OSAL_ThreadCreate(&producers[i], sem_producer_thread, &producer_ids[i]);
     }
 
     /* 创建消费者线程 */
 
     for (i = 0; i < STRESS_CONSUMER_COUNT; i++) {
-        OSAL_pthread_create(&consumers[i], NULL, sem_consumer_thread, NULL);
+        OSAL_ThreadCreate(&consumers[i], sem_consumer_thread, NULL);
     }
 
     /* 等待所有线程完成 */
 
     for (i = 0; i < STRESS_PRODUCER_COUNT; i++) {
-        OSAL_pthread_join(producers[i], NULL);
+        OSAL_ThreadJoin(producers[i]);
     }
 
     for (i = 0; i < STRESS_CONSUMER_COUNT; i++) {
-        OSAL_pthread_join(consumers[i], NULL);
+        OSAL_ThreadJoin(consumers[i]);
     }
 
     /* 验证生产和消费数量相等 */
@@ -229,23 +229,23 @@ TEST_CASE(test_cond_stress)
     int32_t i;
 
     for (i = 0; i < STRESS_THREAD_COUNT / 2; i++) {
-        OSAL_pthread_create(&waiters[i], NULL, cond_waiter_thread, NULL);
+        OSAL_ThreadCreate(&waiters[i], cond_waiter_thread, NULL);
     }
 
     /* 创建信号线程 */
 
     for (i = 0; i < STRESS_THREAD_COUNT / 2; i++) {
-        OSAL_pthread_create(&signalers[i], NULL, cond_signaler_thread, NULL);
+        OSAL_ThreadCreate(&signalers[i], cond_signaler_thread, NULL);
     }
 
     /* 等待所有线程完成 */
 
     for (i = 0; i < STRESS_THREAD_COUNT / 2; i++) {
-        OSAL_pthread_join(signalers[i], NULL);
+        OSAL_ThreadJoin(signalers[i]);
     }
 
     for (i = 0; i < STRESS_THREAD_COUNT / 2; i++) {
-        OSAL_pthread_join(waiters[i], NULL);
+        OSAL_ThreadJoin(waiters[i]);
     }
 
     /* 验证等待次数 */
@@ -308,13 +308,13 @@ TEST_CASE(test_mixed_stress)
 
     for (i = 0; i < STRESS_THREAD_COUNT; i++) {
         thread_ids[i] = i + 1;
-        OSAL_pthread_create(&threads[i], NULL, mixed_worker_thread, &thread_ids[i]);
+        OSAL_ThreadCreate(&threads[i], mixed_worker_thread, &thread_ids[i]);
     }
 
     /* 等待所有线程完成 */
 
     for (i = 0; i < STRESS_THREAD_COUNT; i++) {
-        OSAL_pthread_join(threads[i], NULL);
+        OSAL_ThreadJoin(threads[i]);
     }
 
     /* 验证数据正确性（所有线程ID之和 * 迭代次数） */

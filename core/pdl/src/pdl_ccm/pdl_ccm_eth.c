@@ -8,10 +8,10 @@
  ************************************************************************/
 
 #include "pdl_ccm_internal.h"
-#include "../../../osal/src/posix/net/osal_socket_internal.h"
-#include "../../../osal/src/posix/sys/osal_time_internal.h"
-#include "../../../osal/src/posix/util/osal_log_internal.h"
-#include "../../../osal/src/posix/lib/osal_errno_internal.h"
+#include "osal/osal_socket_api.h"
+#include "osal/osal_time_api.h"
+#include "osal/osal_log_api.h"
+#include "osal/osal_errno_api.h"
 #include "osal.h"
 #include <string.h>
 

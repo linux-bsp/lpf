@@ -7,7 +7,7 @@
 #ifndef OSAL_COND_H
 #define OSAL_COND_H
 
-#include "../osal_types_internal.h"
+#include "osal/osal_types_api.h"
 #include <osal/osal_mutex_api.h>
 
 #ifdef __cplusplus

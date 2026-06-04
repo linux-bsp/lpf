@@ -567,7 +567,7 @@ TEST_CASE(test_pcl_concurrent_register)
 
     /* 等待所有线程完成 */
     for (i = 0; i < NUM_THREADS; i++) {
-        OSAL_ThreadJoin(threads[i], NULL);
+        OSAL_ThreadJoin(threads[i]);
     }
 
     /* 验证结果：每个配置应该只被成功注册一次 */
@@ -617,7 +617,7 @@ TEST_CASE(test_pcl_concurrent_find)
 
     /* 等待所有线程完成 */
     for (i = 0; i < NUM_THREADS; i++) {
-        OSAL_ThreadJoin(threads[i], NULL);
+        OSAL_ThreadJoin(threads[i]);
     }
 
     /* 验证结果：所有查询都应该成功 */
@@ -677,7 +677,7 @@ TEST_CASE(test_pcl_concurrent_mixed_operations)
 
     /* 等待所有线程完成 */
     for (i = 0; i < NUM_THREADS * 3; i++) {
-        OSAL_ThreadJoin(threads[i], NULL);
+        OSAL_ThreadJoin(threads[i]);
     }
 
     /* 验证没有发生崩溃或死锁 */

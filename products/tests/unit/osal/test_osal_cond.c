@@ -152,11 +152,11 @@ TEST_CASE(test_cond_signal_wakeup)
     void *args[2] = {cond, mutex};
     osal_thread_t producer, consumer;
 
-    OSAL_pthread_create(&consumer, NULL, consumer_thread, args);
-    OSAL_pthread_create(&producer, NULL, producer_signal_thread, args);
+    OSAL_ThreadCreate(&consumer, consumer_thread, args);
+    OSAL_ThreadCreate(&producer, producer_signal_thread, args);
 
-    OSAL_pthread_join(producer, NULL);
-    OSAL_pthread_join(consumer, NULL);
+    OSAL_ThreadJoin(producer);
+    OSAL_ThreadJoin(consumer);
 
     TEST_ASSERT_EQUAL(100, shared_data);
 
@@ -223,17 +223,17 @@ TEST_CASE(test_cond_broadcast_wakeup)
     int32_t i;
 
     for (i = 0; i < 3; i++) {
-        OSAL_pthread_create(&consumers[i], NULL, multi_consumer_thread, args);
+        OSAL_ThreadCreate(&consumers[i], multi_consumer_thread, args);
     }
 
     /* 创建生产者线程 */
-    OSAL_pthread_create(&producer, NULL, producer_broadcast_thread, args);
+    OSAL_ThreadCreate(&producer, producer_broadcast_thread, args);
 
     /* 等待所有线程完成 */
-    OSAL_pthread_join(producer, NULL);
+    OSAL_ThreadJoin(producer);
 
     for (i = 0; i < 3; i++) {
-        OSAL_pthread_join(consumers[i], NULL);
+        OSAL_ThreadJoin(consumers[i]);
     }
 
     /* 验证所有消费者都被唤醒 */

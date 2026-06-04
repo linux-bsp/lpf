@@ -103,12 +103,12 @@ TEST_CASE(test_mutex_protect_shared_resource)
     osal_thread_t thread1, thread2;
 
     /* 创建两个线程同时增加计数器 */
-    OSAL_pthread_create(&thread1, NULL, increment_thread, mutex);
-    OSAL_pthread_create(&thread2, NULL, increment_thread, mutex);
+    OSAL_ThreadCreate(&thread1, increment_thread, mutex);
+    OSAL_ThreadCreate(&thread2, increment_thread, mutex);
 
     /* 等待线程完成 */
-    OSAL_pthread_join(thread1, NULL);
-    OSAL_pthread_join(thread2, NULL);
+    OSAL_ThreadJoin(thread1);
+    OSAL_ThreadJoin(thread2);
 
     /* 验证计数器正确 */
     TEST_ASSERT_EQUAL(2000, shared_counter);

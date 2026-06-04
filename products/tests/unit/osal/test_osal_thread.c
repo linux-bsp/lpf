@@ -3,8 +3,7 @@
  ************************************************************************/
 
 #include "test_framework.h"
-#include "../../../../core/osal/src/posix/sys/osal_thread_internal.h"
-#include "../../../../core/osal/src/posix/sys/osal_time_internal.h"
+#include "osal.h"
 
 /*===========================================================================
  * 测试辅助变量
@@ -51,10 +50,10 @@ TEST_CASE(test_thread_create_join)
     int32_t value = 0;
     void *retval = NULL;
 
-    int32_t ret = OSAL_pthread_create(&thread, NULL, simple_thread_func, &value);
+    int32_t ret = OSAL_ThreadCreate(&thread, simple_thread_func, &value);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-    ret = OSAL_pthread_join(thread, &retval);
+    ret = OSAL_ThreadJoin(thread);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_EQUAL(42, value);
     TEST_ASSERT_EQUAL(123, (int32_t)(intptr_t)retval);

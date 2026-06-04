@@ -5,7 +5,7 @@
  */
 
 #include "osal.h"
-#include "../../../../core/osal/src/posix/sys/osal_time_internal.h"
+#include "osal/osal_time_api.h"
 
 /*===========================================================================
  * OSAL_GetLocalTime 测试

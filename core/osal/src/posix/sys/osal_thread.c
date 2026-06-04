@@ -6,7 +6,7 @@
 #include <pthread.h>
 #include <sched.h>
 
-int32_t OSAL_pthread_create(osal_thread_t *thread,
+int32_t osal_pthread_create(osal_thread_t *thread,
                             void *attr,
                             osal_thread_func_t start_routine,
                             void *arg)
@@ -32,7 +32,7 @@ int32_t OSAL_pthread_create(osal_thread_t *thread,
     return ret;
 }
 
-int32_t OSAL_pthread_join(osal_thread_t thread, void **retval)
+int32_t osal_pthread_join(osal_thread_t thread, void **retval)
 {
     union {
         osal_thread_t osal_thread;
@@ -50,7 +50,7 @@ int32_t OSAL_ThreadCreate(osal_thread_t *thread, osal_thread_func_t func, void *
     if (NULL == thread || NULL == func)
         return OSAL_ERR_INVALID_POINTER;
 
-    ret = OSAL_pthread_create(thread, NULL, func, arg);
+    ret = osal_pthread_create(thread, NULL, func, arg);
     if (0 != ret)
         return OSAL_ERR_GENERIC;
 
@@ -101,7 +101,7 @@ int32_t OSAL_ThreadCreateEx(osal_thread_t *thread,
     }
 
     /* 创建线程 */
-    ret = OSAL_pthread_create(thread, &pthread_attr, func, arg);
+    ret = osal_pthread_create(thread, &pthread_attr, func, arg);
     pthread_attr_destroy(&pthread_attr);
 
     if (0 != ret)
@@ -114,7 +114,7 @@ int32_t OSAL_ThreadJoin(osal_thread_t thread)
 {
     int32_t ret;
 
-    ret = OSAL_pthread_join(thread, NULL);
+    ret = osal_pthread_join(thread, NULL);
     if (0 != ret)
         return OSAL_ERR_GENERIC;
 

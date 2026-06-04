@@ -7,7 +7,7 @@
  ************************************************************************/
 
 #include "pconfig/pconfig_api.h"
-#include "../../osal/src/posix/util/osal_log_internal.h"
+#include "osal/osal_log_api.h"
 #include "osal.h"
 
 /*===========================================================================

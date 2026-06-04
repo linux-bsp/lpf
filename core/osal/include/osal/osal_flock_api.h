@@ -20,7 +20,7 @@
 #ifndef OSAL_FLOCK_H
 #define OSAL_FLOCK_H
 
-#include "../src/posix/osal_types_internal.h"
+#include "osal_types_api.h"
 
 /*===========================================================================
  * 锁文件配置

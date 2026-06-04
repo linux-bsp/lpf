@@ -15,7 +15,7 @@
 
 #include "osal_sched_internal.h"
 #include "../lib/osal_errno_internal.h"
-#include "../osal_types_internal.h"
+#include "osal/osal_types_api.h"
 
 /* 简化错误码别名 */
 #define OSAL_ERR_INVALID_PARAM   OSAL_EINVAL

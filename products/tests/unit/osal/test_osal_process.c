@@ -3,7 +3,7 @@
  ************************************************************************/
 
 #include "test_framework.h"
-#include "../../../../core/osal/src/posix/sys/osal_process_internal.h"
+#include "osal/osal_process_api.h"
 
 /*===========================================================================
  * 测试用例

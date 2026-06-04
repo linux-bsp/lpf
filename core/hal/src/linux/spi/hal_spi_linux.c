@@ -12,7 +12,7 @@
 #include "hal/hal_spi_api.h"
 #include "hal_spi_internal.h"
 #include "osal.h"
-#include "osal_flock.h"
+#include "osal/osal_flock_api.h"
 
 /**
  * @brief 打开SPI设备

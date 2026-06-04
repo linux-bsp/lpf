@@ -11,7 +11,7 @@
 #include <linux/can/raw.h>
 #include <sys/ioctl.h>
 #include "osal.h"
-#include "osal_flock.h"
+#include "osal/osal_flock_api.h"
 #include "hal_can_internal.h"
 
 #ifndef IFNAMSIZ

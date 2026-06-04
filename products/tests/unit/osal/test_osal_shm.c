@@ -3,9 +3,7 @@
  ************************************************************************/
 
 #include "test_framework.h"
-#include "../../../../core/osal/src/posix/ipc/osal_shm_internal.h"
-#include "../../../../core/osal/src/posix/lib/osal_errno_internal.h"
-#include "../../../../core/osal/src/posix/sys/osal_process_internal.h"
+#include "osal.h"
 
 /* 测试多进程场景需要使用fork，使用OSAL封装接口 */
 

@@ -8,7 +8,7 @@
 #define HAL_I2C_INTERNAL_H
 
 #include "osal.h"
-#include "osal_flock.h"
+#include "osal/osal_flock_api.h"
 #include "hal/hal_i2c_api.h"
 
 /*===========================================================================

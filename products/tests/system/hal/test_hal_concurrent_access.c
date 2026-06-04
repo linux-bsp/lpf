@@ -14,7 +14,7 @@
 #include <pthread.h>
 #include <sys/wait.h>
 #include "osal.h"
-#include "osal_flock.h"
+#include "osal/osal_flock_api.h"
 
 /*===========================================================================
  * 测试 1：文件锁基本功能

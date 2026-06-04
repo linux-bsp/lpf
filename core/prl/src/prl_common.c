@@ -4,10 +4,10 @@
  */
 
 #include "prl/prl_common.h"
-#include "../../osal/src/posix/sys/osal_clock_internal.h"
-#include "../../osal/src/posix/lib/osal_heap_internal.h"
-#include "../../osal/src/posix/lib/osal_string_internal.h"
-#include "../../osal/src/posix/net/osal_socket_internal.h"  /* for OSAL_htons/htonl/ntohs/ntohl */
+#include "osal/osal_clock_api.h"
+#include "osal/osal_heap_api.h"
+#include "osal/osal_string_api.h"
+#include "osal/osal_socket_api.h"  /* for OSAL_htons/htonl/ntohs/ntohl */
 
 /* 全局序列号（非静态，供 prl_api.c 访问） */
 uint32_t g_seq_number = 0;

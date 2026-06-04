@@ -8,7 +8,7 @@
 #define HAL_SPI_INTERNAL_H
 
 #include "osal.h"
-#include "osal_flock.h"
+#include "osal/osal_flock_api.h"
 #include "hal/hal_spi_api.h"
 
 /*===========================================================================

@@ -15,8 +15,8 @@
 #ifndef OSAL_TERMIOS_H
 #define OSAL_TERMIOS_H
 
-#include "../osal_platform_internal.h"
-#include "../osal_types_internal.h"
+#include "osal/osal_platform.h"
+#include "osal/osal_types_api.h"
 
 /*===========================================================================
  * termios结构体

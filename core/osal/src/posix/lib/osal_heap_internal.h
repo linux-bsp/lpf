@@ -7,7 +7,7 @@
 
 #include <osal/osal_heap_api.h>
 #include <osal/osal_errno_api.h>
-#include "../osal_types_internal.h"
+#include "osal/osal_types_api.h"
 #include <stdbool.h>
 
 /* 堆监控配置 */

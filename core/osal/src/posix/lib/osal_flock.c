@@ -3,7 +3,7 @@
  * @brief OSAL 文件锁实现（基于 fcntl）
  */
 
-#include "osal_flock.h"
+#include "osal/osal_flock_api.h"
 #include "osal.h"
 #include <fcntl.h>
 #include <unistd.h>

@@ -25,8 +25,8 @@
  *
  *   int main(void) {
  *       osal_thread_t thread;
- *       OSAL_ThreadCreate(&thread, NULL, my_thread_func, NULL);
- *       OSAL_ThreadJoin(thread, NULL);
+ *       OSAL_ThreadCreate(&thread, my_thread_func, NULL);
+ *       OSAL_ThreadJoin(thread);
  *       return 0;
  *   }
  ************************************************************************/
