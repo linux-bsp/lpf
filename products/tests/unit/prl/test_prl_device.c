@@ -3,16 +3,8 @@
  ************************************************************************/
 
 #include "osal/osal.h"
-
-#include "prl/prl_common.h"
-
+#include "prl/prl.h"
 #include "test_framework.h"
-#include "prl/prl_api.h"      /* 使用公共API */
-#include "prl/prl_mcu.h"      /* 设备消息类型定义 */
-#include "prl/prl_ccm.h"
-#include "prl/prl_pmc.h"
-#include "prl/prl_gsc.h"
-#include "prl/prl_power.h"
 
 /*===========================================================================
  * 基础编解码测试

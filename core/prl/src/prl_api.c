@@ -6,9 +6,7 @@
 
 #include "osal/osal.h"
 
-#include "prl/prl_api.h"
-#include "prl/prl_common.h"
-#include "prl/prl_device.h"
+#include "prl/prl.h"
 
 /* 全局初始化标志 */
 static bool g_prl_initialized = false;

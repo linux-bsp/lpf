@@ -7,8 +7,8 @@
 
 #include "osal/osal.h"
 
-#include "prl/prl_mcu.h"
-#include "prl/prl_device.h"
+#include "prl/prl.h"
+
 
 /* 本文件已废弃，所有功能已迁移到 prl_device.c */
 /* 保留此文件仅为编译兼容性 */

@@ -6,7 +6,7 @@
 
 #include "osal/osal.h"
 
-#include "prl/prl_device.h"
+#include "prl/prl.h"
 
 
 /* 设备类型名称映射表 */

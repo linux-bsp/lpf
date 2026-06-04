@@ -6,15 +6,10 @@
  * 对于黑盒测试，请参考 test_prl_device.c
  ************************************************************************/
 
-#include "test_framework.h"
-#include "prl/prl_common.h"
-#include "prl/prl_api.h"      /* 用于公共API */
-#include "prl/prl_mcu.h"
-#include "prl/prl_ccm.h"
-#include "prl/prl_pmc.h"
-#include "prl/prl_gsc.h"
-#include "prl/prl_power.h"
 #include "osal/osal.h"
+#include "prl/prl.h"
+#include "test_framework.h"
+
 
 
 /*===========================================================================

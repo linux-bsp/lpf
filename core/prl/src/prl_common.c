@@ -5,7 +5,7 @@
 
 #include "osal/osal.h"
 
-#include "prl/prl_common.h"
+#include "prl/prl.h"
 
 
 /* 全局序列号（非静态，供 prl_api.c 访问） */

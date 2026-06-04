@@ -6,6 +6,6 @@
 
 #include "osal/osal.h"
 
-#include "prl/prl_pmc.h"
+#include "prl/prl.h"
 
 /* PMC 协议实现（待完善） */

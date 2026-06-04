@@ -8,8 +8,7 @@
 #define PDL_MCU_PROTOCOL_H
 
 #include "pdl/pdl_mcu_api.h"
-#include "prl/prl_device.h"
-#include "prl/prl_mcu.h"
+#include "prl/prl.h"
 
 #ifdef __cplusplus
 extern "C" {

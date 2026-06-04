@@ -9,6 +9,8 @@
 /* Core types and API */
 #include "prl_api.h"
 
+#include "prl_common.h"
+
 /* Device protocols */
 #include "prl_mcu.h"
 #include "prl_ccm.h"

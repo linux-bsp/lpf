@@ -5,6 +5,6 @@
  */
 #include "osal/osal.h"
 
-#include "prl/prl_gsc.h"
+#include "prl/prl.h"
 
 /* GSC 协议实现（待完善） */
