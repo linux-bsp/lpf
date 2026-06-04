@@ -1,5 +1,4 @@
 /**
-#include "osal_types.h"
  * @file prl_device.h
  * @brief Protocol Layer Device Message Utilities
  */
@@ -15,10 +14,18 @@ extern "C" {
 
 /* ========== Internal Device Message Functions ========== */
 
+/**
+ * @brief 编码设备消息（内部函数）
+ * @return 成功返回编码长度（>0），失败返回 OSAL 错误码
+ */
 int prl_device_encode(uint8_t dev_type, uint8_t msg_type,
                       const void *payload, uint16_t payload_len,
                       uint8_t *buffer, size_t buffer_size, uint8_t flags);
 
+/**
+ * @brief 解码设备消息（内部函数）
+ * @return OSAL_SUCCESS 成功，OSAL_ERR_* 失败
+ */
 int prl_device_decode(const uint8_t *packet, size_t packet_len,
                       uint8_t *dev_type, uint8_t *msg_type,
                       const uint8_t **payload, uint16_t *payload_len);

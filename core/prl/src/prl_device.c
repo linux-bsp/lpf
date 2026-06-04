@@ -42,22 +42,22 @@ int prl_device_encode(uint8_t dev_type, uint8_t msg_type,
 
     /* 参数检查 */
     if (!buffer) {
-        return PRL_ERR_INVALID_PARAM;
+        return OSAL_ERR_INVALID_PARAM;
     }
 
     if (!prl_device_type_valid(dev_type)) {
-        return PRL_ERR_INVALID_DEV_TYPE;
+        return OSAL_EINVAL;
     }
 
     /* 检查缓冲区大小 */
     total_len = PRL_HEADER_SIZE + payload_len;
     if (buffer_size < total_len) {
-        return PRL_ERR_BUFFER_TOO_SMALL;
+        return OSAL_ENOBUFS;
     }
 
     /* 检查负载长度 */
     if (payload_len > PRL_MAX_PAYLOAD_SIZE) {
-        return PRL_ERR_INVALID_LENGTH;
+        return OSAL_EINVAL;
     }
 
     /* 初始化协议头 */
@@ -85,25 +85,25 @@ int prl_device_decode(const uint8_t *packet, size_t packet_len,
 
     /* 参数检查 */
     if (!packet || !dev_type || !msg_type || !payload || !payload_len) {
-        return PRL_ERR_INVALID_PARAM;
+        return OSAL_ERR_INVALID_PARAM;
     }
 
     /* 长度检查 */
     if (packet_len < PRL_HEADER_SIZE) {
-        return PRL_ERR_INVALID_LENGTH;
+        return OSAL_EINVAL;
     }
 
     hdr = (const prl_header_t *)packet;
 
     /* 验证协议头 */
     ret = prl_validate_header(hdr, 0);
-    if (ret != PRL_OK) {
+    if (ret != OSAL_SUCCESS) {
         return ret;
     }
 
     /* 验证设备类型 */
     if (!prl_device_type_valid(hdr->dev_type)) {
-        return PRL_ERR_INVALID_DEV_TYPE;
+        return OSAL_EINVAL;
     }
 
     /* 将网络字节序转换为主机字节序 */
@@ -111,12 +111,12 @@ int prl_device_decode(const uint8_t *packet, size_t packet_len,
 
     /* 验证报文长度 */
     if (packet_len < (PRL_HEADER_SIZE + payload_length)) {
-        return PRL_ERR_INVALID_LENGTH;
+        return OSAL_EINVAL;
     }
 
     /* 验证 CRC */
     if (!prl_verify_packet_crc(packet, PRL_HEADER_SIZE + payload_length)) {
-        return PRL_ERR_CRC_FAILED;
+        return OSAL_EBADMSG;
     }
 
     /* 提取信息 */
@@ -130,5 +130,5 @@ int prl_device_decode(const uint8_t *packet, size_t packet_len,
         *payload = NULL;
     }
 
-    return PRL_OK;
+    return OSAL_SUCCESS;
 }

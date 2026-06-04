@@ -233,7 +233,7 @@ int32_t HAL_GPIO_Init(uint32_t gpio_num, const hal_gpio_config_t *config)
     int32_t ret;
 
     if (!config || gpio_num >= MAX_GPIO_PINS) {
-        return OSAL_EINVAL;
+        return OSAL_ERR_INVALID_PARAM;
     }
 
     /* 初始化GPIO模块 */
@@ -304,7 +304,7 @@ int32_t HAL_GPIO_Deinit(uint32_t gpio_num)
     int32_t ret;
 
     if (gpio_num >= MAX_GPIO_PINS) {
-        return OSAL_EINVAL;
+        return OSAL_ERR_INVALID_PARAM;
     }
 
     /* 获取文件锁 */
@@ -348,7 +348,7 @@ int32_t HAL_GPIO_SetDirection(uint32_t gpio_num, hal_gpio_direction_t direction)
     int32_t ret;
 
     if (gpio_num >= MAX_GPIO_PINS) {
-        return OSAL_EINVAL;
+        return OSAL_ERR_INVALID_PARAM;
     }
 
     /* 获取文件锁 */
@@ -378,7 +378,7 @@ int32_t HAL_GPIO_GetDirection(uint32_t gpio_num, hal_gpio_direction_t *direction
     int32_t ret;
 
     if (gpio_num >= MAX_GPIO_PINS || !direction) {
-        return OSAL_EINVAL;
+        return OSAL_ERR_INVALID_PARAM;
     }
 
     /* 获取文件锁 */
@@ -413,7 +413,7 @@ int32_t HAL_GPIO_SetLevel(uint32_t gpio_num, hal_gpio_level_t level)
     int32_t ret;
 
     if (gpio_num >= MAX_GPIO_PINS) {
-        return OSAL_EINVAL;
+        return OSAL_ERR_INVALID_PARAM;
     }
 
     /* 获取文件锁 */
@@ -443,7 +443,7 @@ int32_t HAL_GPIO_GetLevel(uint32_t gpio_num, hal_gpio_level_t *level)
     int32_t ret;
 
     if (gpio_num >= MAX_GPIO_PINS || !level) {
-        return OSAL_EINVAL;
+        return OSAL_ERR_INVALID_PARAM;
     }
 
     /* 获取文件锁 */
@@ -480,7 +480,7 @@ int32_t HAL_GPIO_SetInterrupt(uint32_t gpio_num, hal_gpio_edge_t edge,
     int32_t fd;
 
     if (gpio_num >= MAX_GPIO_PINS || !callback) {
-        return OSAL_EINVAL;
+        return OSAL_ERR_INVALID_PARAM;
     }
 
     /* 获取文件锁 */
@@ -497,7 +497,7 @@ int32_t HAL_GPIO_SetInterrupt(uint32_t gpio_num, hal_gpio_edge_t edge,
         case HAL_GPIO_EDGE_BOTH:    edge_str = "both"; break;
         default:
             OSAL_FlockUnlock(g_gpio_flock);
-            return OSAL_EINVAL;
+            return OSAL_ERR_INVALID_PARAM;
     }
 
     OSAL_Snprintf(path, sizeof(path), "/sys/class/gpio/gpio%u/edge", gpio_num);
@@ -565,7 +565,7 @@ int32_t HAL_GPIO_EnableInterrupt(uint32_t gpio_num)
     int32_t ret;
 
     if (gpio_num >= MAX_GPIO_PINS) {
-        return OSAL_EINVAL;
+        return OSAL_ERR_INVALID_PARAM;
     }
 
     /* 获取文件锁 */
@@ -578,7 +578,7 @@ int32_t HAL_GPIO_EnableInterrupt(uint32_t gpio_num)
     if (!gpio_isr_table[gpio_num].running) {
         OSAL_MutexUnlock(gpio_isr_mutex);
         OSAL_FlockUnlock(g_gpio_flock);
-        return OSAL_EINVAL;
+        return OSAL_ERR_INVALID_PARAM;
     }
     gpio_isr_table[gpio_num].enabled = true;
     OSAL_MutexUnlock(gpio_isr_mutex);
@@ -593,7 +593,7 @@ int32_t HAL_GPIO_DisableInterrupt(uint32_t gpio_num)
     int32_t ret;
 
     if (gpio_num >= MAX_GPIO_PINS) {
-        return OSAL_EINVAL;
+        return OSAL_ERR_INVALID_PARAM;
     }
 
     /* 获取文件锁 */
@@ -606,7 +606,7 @@ int32_t HAL_GPIO_DisableInterrupt(uint32_t gpio_num)
     if (!gpio_isr_table[gpio_num].running) {
         OSAL_MutexUnlock(gpio_isr_mutex);
         OSAL_FlockUnlock(g_gpio_flock);
-        return OSAL_EINVAL;
+        return OSAL_ERR_INVALID_PARAM;
     }
     gpio_isr_table[gpio_num].enabled = false;
     OSAL_MutexUnlock(gpio_isr_mutex);

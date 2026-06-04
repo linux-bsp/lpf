@@ -266,7 +266,7 @@ int32_t mcu_serial_send_command(void *handle,
 
         OSAL_MutexUnlock(ctx->rx_mutex);
 
-        if (OSAL_SUCCESS != ret || 0 != status)
+        if (OSAL_SUCCESS != ret || OSAL_SUCCESS != status)
         {
             return OSAL_ERR_GENERIC;
         }

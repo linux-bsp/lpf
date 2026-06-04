@@ -21,14 +21,14 @@ extern "C" {
 
 /**
  * @brief 初始化 PRL 协议层
- * @return PRL_OK 成功，其他值失败
+ * @return OSAL_SUCCESS 成功，OSAL_ERR_* 失败
  * @note 可选调用，主要用于初始化全局状态（如序列号）
  */
 int PRL_Init(void);
 
 /**
  * @brief 反初始化 PRL 协议层
- * @return PRL_OK 成功，其他值失败
+ * @return OSAL_SUCCESS 成功，OSAL_ERR_* 失败
  */
 int PRL_Deinit(void);
 
@@ -43,7 +43,7 @@ int PRL_Deinit(void);
  * @param[in] buffer_size 缓冲区大小
  * @param[in] flags 标志位（PRL_FLAG_xxx）
  *
- * @return 成功返回编码后的总长度（>0），失败返回负数错误码
+ * @return 成功返回编码后的总长度（>0），失败返回 OSAL 错误码
  *
  * @note
  * - buffer 必须足够大，建议使用 PRL_MAX_PACKET_SIZE
@@ -74,7 +74,7 @@ int PRL_Encode(uint8_t dev_type, uint8_t msg_type,
  * @param[out] payload 输出：负载数据指针（指向 packet 内部，零拷贝）
  * @param[out] payload_len 输出：负载长度
  *
- * @return PRL_OK 成功，其他值失败
+ * @return OSAL_SUCCESS 成功，OSAL_ERR_* 失败
  *
  * @note
  * - payload 指向 packet 内部，无需额外分配内存（零拷贝）
@@ -89,7 +89,7 @@ int PRL_Encode(uint8_t dev_type, uint8_t msg_type,
  * int ret = PRL_Decode(packet, packet_len,
  *                      &dev_type, &msg_type,
  *                      &payload, &payload_len);
- * if (ret == PRL_OK) {
+ * if (ret == OSAL_SUCCESS) {
  *     if (dev_type == PRL_DEV_TYPE_MCU) {
  *         handle_mcu_message(msg_type, payload, payload_len);
  *     }
@@ -164,7 +164,7 @@ uint32_t PRL_GetCurrentSequence(void);
  *
  * @param[in] packet 报文数据
  * @param[in] packet_len 报文长度
- * @return PRL_OK 验证通过，其他值验证失败
+ * @return OSAL_SUCCESS 验证通过，OSAL_ERR_* 验证失败
  *
  * @note 这是一个快速验证接口，不解析负载数据
  */
@@ -176,7 +176,7 @@ int PRL_ValidatePacket(const uint8_t *packet, size_t packet_len);
  * @param[in] packet 报文数据
  * @param[in] packet_len 报文长度
  * @param[out] dev_type 输出：设备类型
- * @return PRL_OK 成功，其他值失败
+ * @return OSAL_SUCCESS 成功，OSAL_ERR_* 失败
  *
  * @note 仅读取协议头，不验证 CRC，用于快速路由
  */
@@ -189,7 +189,7 @@ int PRL_GetDeviceType(const uint8_t *packet, size_t packet_len,
  * @param[in] packet 报文数据
  * @param[in] packet_len 报文长度
  * @param[out] msg_type 输出：消息类型
- * @return PRL_OK 成功，其他值失败
+ * @return OSAL_SUCCESS 成功，OSAL_ERR_* 失败
  *
  * @note 仅读取协议头，不验证 CRC，用于快速路由
  */
@@ -202,7 +202,7 @@ int PRL_GetMessageType(const uint8_t *packet, size_t packet_len,
  * @param[in] packet 报文数据
  * @param[in] packet_len 报文长度
  * @param[out] seq 输出：序列号
- * @return PRL_OK 成功，其他值失败
+ * @return OSAL_SUCCESS 成功，OSAL_ERR_* 失败
  *
  * @note 仅读取协议头，不验证 CRC，用于去重
  */
@@ -219,7 +219,7 @@ int PRL_GetSequence(const uint8_t *packet, size_t packet_len,
  * @param[out] response_buffer 输出缓冲区
  * @param[in] response_buffer_size 缓冲区大小
  *
- * @return 成功返回应答报文长度（>0），失败返回负数错误码
+ * @return 成功返回应答报文长度（>0），失败返回 OSAL 错误码
  *
  * @note
  * - 自动从请求报文中提取设备类型和消息类型

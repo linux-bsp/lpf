@@ -147,7 +147,7 @@ static void *eth_rx_task(void *arg)
 
                 ret = PRL_Decode(msg.payload, msg.payload_len,
                                 &dev_type, &msg_type, &payload, &payload_len);
-                if (ret == PRL_OK && payload_len >= sizeof(prl_pmc_telemetry_t))
+                if (ret == OSAL_SUCCESS && payload_len >= sizeof(prl_pmc_telemetry_t))
                 {
                     const prl_pmc_telemetry_t *tm = (const prl_pmc_telemetry_t *)payload;
                     const uint8_t *data = payload + sizeof(prl_pmc_telemetry_t);

@@ -100,22 +100,22 @@ int prl_validate_header(const prl_header_t *hdr, uint8_t expected_type)
     length = OSAL_ntohs(hdr->length);
 
     if (magic != PRL_MAGIC) {
-        return PRL_ERR_INVALID_MAGIC;
+        return OSAL_EPROTO;  /* 协议错误：魔数不匹配 */
     }
 
     if ((hdr->version >> 4) != PRL_VERSION_MAJOR) {
-        return PRL_ERR_INVALID_VERSION;
+        return OSAL_EPROTO;  /* 协议错误：版本不匹配 */
     }
 
     if (expected_type != 0 && hdr->msg_type != expected_type) {
-        return PRL_ERR_INVALID_DEV_TYPE;
+        return OSAL_EINVAL;  /* 无效的设备类型 */
     }
 
     if (length > PRL_MAX_PAYLOAD_SIZE) {
-        return PRL_ERR_INVALID_LENGTH;
+        return OSAL_EINVAL;  /* 无效的长度 */
     }
 
-    return PRL_OK;
+    return OSAL_SUCCESS;
 }
 
 void prl_set_packet_crc(uint8_t *packet, size_t total_len)

@@ -87,7 +87,7 @@ int32_t pdl_mcu_decode_get_version(const uint8_t *packet, size_t packet_len,
     /* 解码报文 */
     ret = prl_device_decode(packet, packet_len, &dev_type, &msg_type,
                             &payload, &payload_len);
-    if (ret != PRL_OK) {
+    if (ret != OSAL_SUCCESS) {
         return ret;
     }
 
@@ -128,7 +128,7 @@ int32_t pdl_mcu_decode_get_status(const uint8_t *packet, size_t packet_len,
     /* 解码报文 */
     ret = prl_device_decode(packet, packet_len, &dev_type, &msg_type,
                             &payload, &payload_len);
-    if (ret != PRL_OK) {
+    if (ret != OSAL_SUCCESS) {
         return ret;
     }
 
@@ -168,7 +168,7 @@ int32_t pdl_mcu_decode_read_register(const uint8_t *packet, size_t packet_len,
     /* 解码报文 */
     ret = prl_device_decode(packet, packet_len, &dev_type, &msg_type,
                             &payload, &payload_len);
-    if (ret != PRL_OK) {
+    if (ret != OSAL_SUCCESS) {
         return ret;
     }
 
@@ -203,7 +203,7 @@ int32_t pdl_mcu_decode_response(const uint8_t *packet, size_t packet_len,
     /* 解码报文 */
     ret = prl_device_decode(packet, packet_len, &dev_type, &msg_type,
                             &payload, &payload_len);
-    if (ret != PRL_OK) {
+    if (ret != OSAL_SUCCESS) {
         return ret;
     }
 

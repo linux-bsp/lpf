@@ -1,5 +1,4 @@
 /**
-#include "osal_types.h"
  * @file prl_common.h
  * @brief Protocol Layer Common Definitions
  */
@@ -8,22 +7,34 @@
 #define PRL_PRL_COMMON_H
 
 #include "osal_types.h"
+#include "osal/osal_errno_api.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* ========== Error Codes ========== */
+/* ========== Error Codes (DEPRECATED - 迁移到 OSAL 错误码) ========== */
 
-#define PRL_OK                      0
-#define PRL_ERR_INVALID_PARAM      -1
-#define PRL_ERR_INVALID_LENGTH     -2
-#define PRL_ERR_BUFFER_TOO_SMALL   -3
-#define PRL_ERR_CRC_MISMATCH       -4
-#define PRL_ERR_CRC_FAILED         -4  /* Alias for CRC_MISMATCH */
-#define PRL_ERR_INVALID_MAGIC      -5
-#define PRL_ERR_INVALID_VERSION    -6
-#define PRL_ERR_INVALID_DEV_TYPE   -7
+/*
+ * PRL 现在使用 OSAL 标准错误码体系:
+ * - 成功: OSAL_SUCCESS (0)
+ * - 参数错误: OSAL_ERR_INVALID_PARAM, OSAL_EINVAL
+ * - 缓冲区不足: OSAL_ENOBUFS
+ * - 协议错误: OSAL_EPROTO, OSAL_EBADMSG
+ *
+ * 兼容性宏（2026-07-01 删除）：
+ */
+#ifndef PRL_NO_DEPRECATED_ERROR_CODES
+#define PRL_OK                      OSAL_SUCCESS         /* DEPRECATED: use OSAL_SUCCESS */
+#define PRL_ERR_INVALID_PARAM       OSAL_ERR_INVALID_PARAM  /* DEPRECATED: use OSAL_ERR_INVALID_PARAM */
+#define PRL_ERR_INVALID_LENGTH      OSAL_EINVAL          /* DEPRECATED: use OSAL_EINVAL */
+#define PRL_ERR_BUFFER_TOO_SMALL    OSAL_ENOBUFS         /* DEPRECATED: use OSAL_ENOBUFS */
+#define PRL_ERR_CRC_MISMATCH        OSAL_EBADMSG         /* DEPRECATED: use OSAL_EBADMSG */
+#define PRL_ERR_CRC_FAILED          OSAL_EBADMSG         /* DEPRECATED: use OSAL_EBADMSG */
+#define PRL_ERR_INVALID_MAGIC       OSAL_EPROTO          /* DEPRECATED: use OSAL_EPROTO */
+#define PRL_ERR_INVALID_VERSION     OSAL_EPROTO          /* DEPRECATED: use OSAL_EPROTO */
+#define PRL_ERR_INVALID_DEV_TYPE    OSAL_EINVAL          /* DEPRECATED: use OSAL_EINVAL */
+#endif
 
 /* ========== Protocol Version ========== */
 
@@ -78,7 +89,13 @@ uint32_t prl_get_next_seq(void);
 uint32_t prl_get_timestamp(void);
 void prl_init_header(prl_header_t *hdr, uint8_t dev_type, uint8_t msg_type,
                      uint16_t payload_len, uint8_t flags);
+
+/**
+ * @brief 验证协议头
+ * @return OSAL_SUCCESS 成功，OSAL_EPROTO/OSAL_EBADMSG/OSAL_EINVAL 失败
+ */
 int prl_validate_header(const prl_header_t *hdr, uint8_t expected_type);
+
 void prl_set_packet_crc(uint8_t *packet, size_t total_len);
 bool prl_verify_packet_crc(const uint8_t *packet, size_t total_len);
 

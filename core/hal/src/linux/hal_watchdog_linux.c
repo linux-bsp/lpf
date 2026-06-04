@@ -34,13 +34,13 @@ int32_t HAL_WATCHDOG_Init(const hal_watchdog_config_t *config, hal_watchdog_hand
     if (config == NULL || handle == NULL)
     {
         LOG_ERROR("HAL_WDT", "Invalid parameters");
-        return OSAL_EINVAL;
+        return OSAL_ERR_INVALID_PARAM;
     }
 
     if (config->device == NULL)
     {
         LOG_ERROR("HAL_WDT", "Device path is NULL");
-        return OSAL_EINVAL;
+        return OSAL_ERR_INVALID_PARAM;
     }
 
     /* 分配上下文 */
@@ -121,7 +121,7 @@ int32_t HAL_WATCHDOG_Deinit(hal_watchdog_handle_t handle)
     if (handle == NULL)
     {
         LOG_ERROR("HAL_WDT", "Invalid handle");
-        return OSAL_EINVAL;
+        return OSAL_ERR_INVALID_PARAM;
     }
 
     ctx = (hal_watchdog_context_t *)handle;
@@ -158,7 +158,7 @@ int32_t HAL_WATCHDOG_Kick(hal_watchdog_handle_t handle)
     if (handle == NULL)
     {
         LOG_ERROR("HAL_WDT", "Invalid handle");
-        return OSAL_EINVAL;
+        return OSAL_ERR_INVALID_PARAM;
     }
 
     ctx = (hal_watchdog_context_t *)handle;
@@ -195,7 +195,7 @@ int32_t HAL_WATCHDOG_Enable(hal_watchdog_handle_t handle)
     if (handle == NULL)
     {
         LOG_ERROR("HAL_WDT", "Invalid handle");
-        return OSAL_EINVAL;
+        return OSAL_ERR_INVALID_PARAM;
     }
 
     ctx = (hal_watchdog_context_t *)handle;
@@ -233,7 +233,7 @@ int32_t HAL_WATCHDOG_Disable(hal_watchdog_handle_t handle)
     if (handle == NULL)
     {
         LOG_ERROR("HAL_WDT", "Invalid handle");
-        return OSAL_EINVAL;
+        return OSAL_ERR_INVALID_PARAM;
     }
 
     ctx = (hal_watchdog_context_t *)handle;
@@ -272,7 +272,7 @@ int32_t HAL_WATCHDOG_SetTimeout(hal_watchdog_handle_t handle, uint32_t timeout_s
     if (handle == NULL)
     {
         LOG_ERROR("HAL_WDT", "Invalid handle");
-        return OSAL_EINVAL;
+        return OSAL_ERR_INVALID_PARAM;
     }
 
     ctx = (hal_watchdog_context_t *)handle;

@@ -179,7 +179,7 @@ int32_t mcu_can_send_command(void *handle,
             status = rx_frame.data[0];
             resp_len = rx_frame.data[1];
 
-            if (0 != status)
+            if (OSAL_SUCCESS != status)
             {
                 OSAL_MutexUnlock(ctx->rx_mutex);
                 return OSAL_ERR_GENERIC;

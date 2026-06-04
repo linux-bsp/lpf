@@ -12,44 +12,29 @@
 /* 全局初始化标志 */
 static bool g_prl_initialized = false;
 
-/* 错误码描述表 */
-static const char *error_strings[] = {
-    "Success",                      /* PRL_OK = 0 */
-    "Invalid parameter",            /* PRL_ERR_INVALID_PARAM = -1 */
-    "Invalid magic number",         /* PRL_ERR_INVALID_MAGIC = -2 */
-    "Invalid version",              /* PRL_ERR_INVALID_VERSION = -3 */
-    "Invalid message type",         /* PRL_ERR_INVALID_TYPE = -4 */
-    "Invalid length",               /* PRL_ERR_INVALID_LENGTH = -5 */
-    "CRC check failed",             /* PRL_ERR_CRC_FAILED = -6 */
-    "Buffer too small",             /* PRL_ERR_BUFFER_TOO_SMALL = -7 */
-    "Encode failed",                /* PRL_ERR_ENCODE_FAILED = -8 */
-    "Decode failed",                /* PRL_ERR_DECODE_FAILED = -9 */
-    "Invalid device type",          /* PRL_ERR_INVALID_DEV_TYPE = -10 */
-};
-
 int PRL_Init(void)
 {
     if (g_prl_initialized) {
-        return PRL_OK;
+        return OSAL_SUCCESS;
     }
 
     /* 初始化序列号（可选） */
     /* 这里可以从持久化存储中恢复序列号 */
 
     g_prl_initialized = true;
-    return PRL_OK;
+    return OSAL_SUCCESS;
 }
 
 int PRL_Deinit(void)
 {
     if (!g_prl_initialized) {
-        return PRL_OK;
+        return OSAL_SUCCESS;
     }
 
     /* 清理资源（如果有） */
 
     g_prl_initialized = false;
-    return PRL_OK;
+    return OSAL_SUCCESS;
 }
 
 int PRL_Encode(uint8_t dev_type, uint8_t msg_type,
@@ -82,14 +67,8 @@ const char *PRL_GetDeviceTypeName(uint8_t dev_type)
 
 const char *PRL_GetErrorString(int error_code)
 {
-    /* 错误码是负数，转换为数组索引 */
-    int index = -error_code;
-
-    if (index >= 0 && index < (int)(sizeof(error_strings) / sizeof(error_strings[0]))) {
-        return error_strings[index];
-    }
-
-    return "Unknown error";
+    /* 现在使用 OSAL 错误码，直接返回 OSAL 错误描述 */
+    return OSAL_GetStatusName(error_code);
 }
 
 void PRL_GetVersion(uint8_t *major, uint8_t *minor)
@@ -120,38 +99,38 @@ int PRL_ValidatePacket(const uint8_t *packet, size_t packet_len)
 
     /* 参数检查 */
     if (!packet) {
-        return PRL_ERR_INVALID_PARAM;
+        return OSAL_ERR_INVALID_PARAM;
     }
 
     /* 长度检查 */
     if (packet_len < PRL_HEADER_SIZE) {
-        return PRL_ERR_INVALID_LENGTH;
+        return OSAL_EINVAL;
     }
 
     hdr = (const prl_header_t *)packet;
 
     /* 验证协议头 */
     int ret = prl_validate_header(hdr, 0);
-    if (ret != PRL_OK) {
+    if (ret != OSAL_SUCCESS) {
         return ret;
     }
 
     /* 验证设备类型 */
     if (!prl_device_type_valid(hdr->dev_type)) {
-        return PRL_ERR_INVALID_DEV_TYPE;
+        return OSAL_EINVAL;
     }
 
     /* 验证报文长度 */
     if (packet_len < (PRL_HEADER_SIZE + hdr->length)) {
-        return PRL_ERR_INVALID_LENGTH;
+        return OSAL_EINVAL;
     }
 
     /* 验证 CRC */
     if (!prl_verify_packet_crc(packet, PRL_HEADER_SIZE + hdr->length)) {
-        return PRL_ERR_CRC_FAILED;
+        return OSAL_EBADMSG;
     }
 
-    return PRL_OK;
+    return OSAL_SUCCESS;
 }
 
 int PRL_GetDeviceType(const uint8_t *packet, size_t packet_len,
@@ -161,12 +140,12 @@ int PRL_GetDeviceType(const uint8_t *packet, size_t packet_len,
 
     /* 参数检查 */
     if (!packet || !dev_type) {
-        return PRL_ERR_INVALID_PARAM;
+        return OSAL_ERR_INVALID_PARAM;
     }
 
     /* 长度检查 */
     if (packet_len < PRL_HEADER_SIZE) {
-        return PRL_ERR_INVALID_LENGTH;
+        return OSAL_EINVAL;
     }
 
     hdr = (const prl_header_t *)packet;
@@ -174,7 +153,7 @@ int PRL_GetDeviceType(const uint8_t *packet, size_t packet_len,
     /* 提取设备类型 */
     *dev_type = hdr->dev_type;
 
-    return PRL_OK;
+    return OSAL_SUCCESS;
 }
 
 int PRL_GetMessageType(const uint8_t *packet, size_t packet_len,
@@ -184,12 +163,12 @@ int PRL_GetMessageType(const uint8_t *packet, size_t packet_len,
 
     /* 参数检查 */
     if (!packet || !msg_type) {
-        return PRL_ERR_INVALID_PARAM;
+        return OSAL_ERR_INVALID_PARAM;
     }
 
     /* 长度检查 */
     if (packet_len < PRL_HEADER_SIZE) {
-        return PRL_ERR_INVALID_LENGTH;
+        return OSAL_EINVAL;
     }
 
     hdr = (const prl_header_t *)packet;
@@ -197,7 +176,7 @@ int PRL_GetMessageType(const uint8_t *packet, size_t packet_len,
     /* 提取消息类型 */
     *msg_type = hdr->msg_type;
 
-    return PRL_OK;
+    return OSAL_SUCCESS;
 }
 
 int PRL_GetSequence(const uint8_t *packet, size_t packet_len,
@@ -207,12 +186,12 @@ int PRL_GetSequence(const uint8_t *packet, size_t packet_len,
 
     /* 参数检查 */
     if (!packet || !seq) {
-        return PRL_ERR_INVALID_PARAM;
+        return OSAL_ERR_INVALID_PARAM;
     }
 
     /* 长度检查 */
     if (packet_len < PRL_HEADER_SIZE) {
-        return PRL_ERR_INVALID_LENGTH;
+        return OSAL_EINVAL;
     }
 
     hdr = (const prl_header_t *)packet;
@@ -220,7 +199,7 @@ int PRL_GetSequence(const uint8_t *packet, size_t packet_len,
     /* 提取序列号 */
     *seq = hdr->seq;
 
-    return PRL_OK;
+    return OSAL_SUCCESS;
 }
 
 int PRL_BuildResponse(const uint8_t *request_packet, size_t request_len,
@@ -233,26 +212,26 @@ int PRL_BuildResponse(const uint8_t *request_packet, size_t request_len,
 
     /* 参数检查 */
     if (!request_packet || !response_buffer) {
-        return PRL_ERR_INVALID_PARAM;
+        return OSAL_ERR_INVALID_PARAM;
     }
 
     /* 长度检查 */
     if (request_len < PRL_HEADER_SIZE) {
-        return PRL_ERR_INVALID_LENGTH;
+        return OSAL_EINVAL;
     }
 
     req_hdr = (const prl_header_t *)request_packet;
 
     /* 验证请求报文 */
     int ret = prl_validate_header(req_hdr, 0);
-    if (ret != PRL_OK) {
+    if (ret != OSAL_SUCCESS) {
         return ret;
     }
 
     /* 检查响应缓冲区大小 */
     total_len = PRL_HEADER_SIZE + response_payload_len;
     if (response_buffer_size < total_len) {
-        return PRL_ERR_BUFFER_TOO_SMALL;
+        return OSAL_ENOBUFS;
     }
 
     /* 初始化响应协议头 */
