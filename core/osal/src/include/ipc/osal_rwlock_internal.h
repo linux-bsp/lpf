@@ -8,7 +8,7 @@
 #ifndef OSAL_RWLOCK_H
 #define OSAL_RWLOCK_H
 
-#include "osal_types.h"
+#include "osal_types_internal.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -1,5 +1,5 @@
 /**
- * @file osal_shm_cache.h
+ * @file osal_shm_cache_internal.h
  * @brief OSAL共享内存缓存服务
  *
  * 提供通用的共享内存缓存机制，用于进程间数据共享
@@ -11,10 +11,10 @@
  * - 状态快照共享
  */
 
-#ifndef OSAL_SHM_CACHE_H
-#define OSAL_SHM_CACHE_H
+#ifndef OSAL_SHM_CACHE_INTERNAL_H
+#define OSAL_SHM_CACHE_INTERNAL_H
 
-#include "osal_types.h"
+#include "osal_types_internal.h"
 
 /* 缓存条目最大数据大小 */
 #define OSAL_SHM_CACHE_MAX_DATA_SIZE  256U
@@ -146,4 +146,4 @@ int32_t OSAL_CacheGetStats(osal_id_t cache_id,
                            uint32_t *fresh_count,
                            uint32_t *stale_count);
 
-#endif /* OSAL_SHM_CACHE_H */
+#endif /* OSAL_SHM_CACHE_INTERNAL_H */

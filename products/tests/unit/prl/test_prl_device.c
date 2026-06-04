@@ -9,7 +9,7 @@
 #include "prl/prl_pmc.h"
 #include "prl/prl_gsc.h"
 #include "prl/prl_power.h"
-#include "lib/osal_string.h"  /* for OSAL_Memcmp */
+#include "lib/osal_string_internal.h"  /* for OSAL_Memcmp */
 
 /*===========================================================================
  * 基础编解码测试

@@ -7,7 +7,7 @@
 #ifndef PDL_SATELLITE_INTERNAL_H
 #define PDL_SATELLITE_INTERNAL_H
 
-#include "osal_types.h"
+#include "osal_types_internal.h"
 #include "pdl/pdl_satellite_api.h"  /* 引入公共头文件，使用其中的can_status_t定义 */
 
 /*

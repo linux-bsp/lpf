@@ -5,7 +5,7 @@
  */
 
 #include "osal.h"
-#include "sys/osal_time.h"
+#include "sys/osal_time_internal.h"
 
 /*===========================================================================
  * OSAL_GetLocalTime 测试

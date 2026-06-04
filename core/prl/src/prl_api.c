@@ -7,7 +7,7 @@
 #include "prl/prl_api.h"
 #include "prl/prl_common.h"
 #include "prl/prl_device.h"
-#include "lib/osal_string.h"
+#include "lib/osal_string_internal.h"
 
 /* 全局初始化标志 */
 static bool g_prl_initialized = false;

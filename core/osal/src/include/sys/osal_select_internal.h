@@ -15,8 +15,8 @@
 #ifndef OSAL_SELECT_H
 #define OSAL_SELECT_H
 
-#include "osal_platform.h"
-#include "osal_types.h"
+#include "osal_platform_internal.h"
+#include "osal_types_internal.h"
 
 /*===========================================================================
  * 常量定义

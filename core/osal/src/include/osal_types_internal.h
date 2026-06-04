@@ -9,7 +9,7 @@
 #define OSAL_TYPES_H
 
 /* 包含平台检测头文件（提供字节序等宏定义） */
-#include "osal_platform.h"
+#include "osal_platform_internal.h"
 
 /*===========================================================================
  * 平台兼容性处理：C99标准类型

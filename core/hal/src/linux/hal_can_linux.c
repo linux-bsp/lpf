@@ -10,7 +10,7 @@
 #include <linux/can.h>
 #include <linux/can/raw.h>
 #include <sys/ioctl.h>
-#include "sys/osal_poll.h"
+#include "sys/osal_poll_internal.h"
 #include "include/hal_can_internal.h"
 #include "osal.h"
 #include "osal_flock.h"

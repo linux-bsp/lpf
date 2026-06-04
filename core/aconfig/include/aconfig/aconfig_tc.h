@@ -7,7 +7,7 @@
 #ifndef ACONFIG_ACONFIG_TC_H
 #define ACONFIG_ACONFIG_TC_H
 
-#include "osal_types.h"
+#include "osal_types_internal.h"
 
 /**
  * @brief 遥控功能通用枚举

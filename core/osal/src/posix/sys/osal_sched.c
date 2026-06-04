@@ -13,9 +13,9 @@
 #include <errno.h>
 #include <string.h>
 
-#include "sys/osal_sched.h"
-#include "lib/osal_errno.h"
-#include "osal_types.h"
+#include "sys/osal_sched_internal.h"
+#include "lib/osal_errno_internal.h"
+#include "osal_types_internal.h"
 
 /* 简化错误码别名 */
 #define OSAL_ERR_INVALID_PARAM   OSAL_EINVAL

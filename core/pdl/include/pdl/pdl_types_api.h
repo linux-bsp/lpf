@@ -21,7 +21,7 @@
 #ifndef PDL_TYPES_API_H
 #define PDL_TYPES_API_H
 
-#include "osal_types.h"
+#include "osal_types_internal.h"
 
 /*===========================================================================
  * MCU 配置类型

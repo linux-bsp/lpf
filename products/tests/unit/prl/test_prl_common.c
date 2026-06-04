@@ -14,8 +14,8 @@
 #include "prl/prl_pmc.h"
 #include "prl/prl_gsc.h"
 #include "prl/prl_power.h"
-#include "net/osal_socket.h"  /* for OSAL_htons/ntohl */
-#include "lib/osal_string.h"  /* for OSAL_Memcmp */
+#include "net/osal_socket_internal.h"  /* for OSAL_htons/ntohl */
+#include "lib/osal_string_internal.h"  /* for OSAL_Memcmp */
 
 /*===========================================================================
  * CRC16 计算测试

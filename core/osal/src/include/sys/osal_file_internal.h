@@ -15,8 +15,8 @@
 #ifndef OSAL_FILE_H
 #define OSAL_FILE_H
 
-#include "osal_platform.h"
-#include "osal_types.h"
+#include "osal_platform_internal.h"
+#include "osal_types_internal.h"
 
 /*===========================================================================
  * 文件操作标志（对应fcntl.h中的O_*标志）

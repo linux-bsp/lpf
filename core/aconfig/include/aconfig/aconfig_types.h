@@ -7,7 +7,7 @@
 #ifndef ACONFIG_ACONFIG_TYPES_H
 #define ACONFIG_ACONFIG_TYPES_H
 
-#include "osal_types.h"
+#include "osal_types_internal.h"
 
 /**
  * @brief ACONFIG 设备类型枚举
