@@ -5,9 +5,7 @@
  *       AConfig配置关注业务功能，不关注硬件平台
  */
 
-#include <aconfig/aconfig.h>
-#include "aconfig_tc.h"
-#include "aconfig_tm.h"
+#include "aconfig.h"
 
 /**
  * @brief CCM v1.0遥控配置表

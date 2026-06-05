@@ -4,9 +4,7 @@
  * @note 定义遥控命令对遥测数据的影响关系
  */
 
-#include <aconfig/aconfig.h>
-#include "aconfig_tc.h"
-#include "aconfig_tm.h"
+#include "aconfig.h"
 
 /**
  * @brief 遥控命令对遥测的失效映射

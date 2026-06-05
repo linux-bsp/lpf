@@ -23,12 +23,11 @@ if(PLATFORM_PCL_SRCS OR PLATFORM_ACL_SRCS)
 
     # Add include directories from core modules
     target_include_directories(platform_config_obj PRIVATE
-        ${SDK_PATH}/core/pconfig/include
-        ${SDK_PATH}/core/aconfig/include
-        ${SDK_PATH}/core/pdl/include
-        ${SDK_PATH}/core/hal/include
-        ${SDK_PATH}/core/osal/include
-        ${SDK_PATH}/core/types/include
+        ${SDK_PATH}/core/pconfig/include/pconfig
+        ${SDK_PATH}/core/aconfig/include/aconfig
+        ${SDK_PATH}/core/pdl/include/pdl
+        ${SDK_PATH}/core/hal/include/hal
+        ${SDK_PATH}/core/osal/include/osal
     )
 
     if(PLATFORM_PCL_SRCS)

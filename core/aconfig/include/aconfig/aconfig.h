@@ -9,6 +9,8 @@
 
 #include "osal.h"
 #include "aconfig_types.h"
+#include "aconfig_tc.h"
+#include "aconfig_tm.h"
 
 /**
  * @brief ACONFIG 配置统计信息

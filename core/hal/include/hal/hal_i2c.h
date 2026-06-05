@@ -8,7 +8,7 @@
 #define HAL_I2C_H
 
 #include "osal.h"
-#include "hal_i2c_types.h"
+#include "config/hal_i2c_types.h"
 
 #ifdef __cplusplus
 extern "C" {

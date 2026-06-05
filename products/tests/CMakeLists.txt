@@ -58,8 +58,7 @@ target_include_directories(libutest PUBLIC
 
 # Add OSAL headers (required by test framework)
 target_include_directories(libutest PRIVATE
-    ${SDK_PATH}/core/osal/include
-    ${SDK_PATH}/core/types/include
+    ${SDK_PATH}/core/osal/include/osal
 )
 
 # Framework dependencies - only OSAL
@@ -90,14 +89,12 @@ endif()
 
 # Add include directories for test cases
 target_include_directories(ems-test PRIVATE
-    ${SDK_PATH}/core/osal/include
-    ${SDK_PATH}/core/types/include
-    ${SDK_PATH}/core/hal/include
-    ${SDK_PATH}/core/pconfig/include
-    ${SDK_PATH}/core/pdl/include
-    ${SDK_PATH}/core/prl/api
-    ${SDK_PATH}/core/prl/include
-    ${SDK_PATH}/core/aconfig/include
+    ${SDK_PATH}/core/osal/include/osal
+    ${SDK_PATH}/core/hal/include/hal
+    ${SDK_PATH}/core/pconfig/include/pconfig
+    ${SDK_PATH}/core/pdl/include/pdl
+    ${SDK_PATH}/core/prl/include/prl
+    ${SDK_PATH}/core/aconfig/include/aconfig
 )
 
 # ============================================================================
