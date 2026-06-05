@@ -254,7 +254,7 @@ int32_t HAL_CAN_Recv(hal_can_handle_t handle, hal_can_frame_t *frame, int32_t ti
         else if (poll_ret < 0)
         {
             int32_t err = OSAL_GetErrno();
-            LOG_ERROR("HAL_CAN", "Poll failed: %s %d (%d)",
+            LOG_ERROR("HAL_CAN", "Poll failed: %s (%d)",
                       OSAL_StrError(err), err);
             return err;
         }

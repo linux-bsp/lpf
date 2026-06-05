@@ -81,7 +81,7 @@ int32_t HAL_SPI_Open(const hal_spi_config_t *config, hal_spi_handle_t *handle)
     if (impl->fd < 0)
     {
         int32_t err = OSAL_GetErrno();
-        LOG_ERROR("HAL_SPI", "Failed to open device %s: %s %d (%d)",
+        LOG_ERROR("HAL_SPI", "Failed to open device %s: %s (%d)",
                   config->device, OSAL_StrError(err), err);
         OSAL_MutexDelete(impl->mutex);
         OSAL_FlockDestroy(impl->flock);
@@ -94,7 +94,7 @@ int32_t HAL_SPI_Open(const hal_spi_config_t *config, hal_spi_handle_t *handle)
     if (ret < 0)
     {
         int32_t err = OSAL_GetErrno();
-        LOG_ERROR("HAL_SPI", "Failed to set SPI mode: %s %d (%d)",
+        LOG_ERROR("HAL_SPI", "Failed to set SPI mode: %s (%d)",
                   OSAL_StrError(err), err);
         OSAL_close(impl->fd);
         OSAL_MutexDelete(impl->mutex);
@@ -108,7 +108,7 @@ int32_t HAL_SPI_Open(const hal_spi_config_t *config, hal_spi_handle_t *handle)
     if (ret < 0)
     {
         int32_t err = OSAL_GetErrno();
-        LOG_ERROR("HAL_SPI", "Failed to set bits per word: %s %d (%d)",
+        LOG_ERROR("HAL_SPI", "Failed to set bits per word: %s (%d)",
                   OSAL_StrError(err), err);
         OSAL_close(impl->fd);
         OSAL_MutexDelete(impl->mutex);
@@ -122,7 +122,7 @@ int32_t HAL_SPI_Open(const hal_spi_config_t *config, hal_spi_handle_t *handle)
     if (ret < 0)
     {
         int32_t err = OSAL_GetErrno();
-        LOG_ERROR("HAL_SPI", "Failed to set max speed: %s %d (%d)",
+        LOG_ERROR("HAL_SPI", "Failed to set max speed: %s (%d)",
                   OSAL_StrError(err), err);
         OSAL_close(impl->fd);
         OSAL_MutexDelete(impl->mutex);
@@ -213,7 +213,7 @@ int32_t HAL_SPI_Write(hal_spi_handle_t handle, const uint8_t *buffer, uint32_t s
     if (ret < 0)
     {
         int32_t err = OSAL_GetErrno();
-        LOG_ERROR("HAL_SPI", "Write failed: %s %d (%d)",
+        LOG_ERROR("HAL_SPI", "Write failed: %s (%d)",
                   OSAL_StrError(err), err);
         result = err;
     }
@@ -267,7 +267,7 @@ int32_t HAL_SPI_Read(hal_spi_handle_t handle, uint8_t *buffer, uint32_t size)
     if (ret < 0)
     {
         int32_t err = OSAL_GetErrno();
-        LOG_ERROR("HAL_SPI", "Read failed: %s %d (%d)",
+        LOG_ERROR("HAL_SPI", "Read failed: %s (%d)",
                   OSAL_StrError(err), err);
         result = err;
     }
@@ -333,7 +333,7 @@ int32_t HAL_SPI_Transfer(hal_spi_handle_t handle, const uint8_t *tx_buffer,
     if (ret < 0)
     {
         int32_t err = OSAL_GetErrno();
-        LOG_ERROR("HAL_SPI", "Transfer failed: %s %d (%d)",
+        LOG_ERROR("HAL_SPI", "Transfer failed: %s (%d)",
                   OSAL_StrError(err), err);
         result = err;
     }
@@ -412,7 +412,7 @@ int32_t HAL_SPI_TransferMulti(hal_spi_handle_t handle, hal_spi_transfer_t *trans
     if (ret < 0)
     {
         int32_t err = OSAL_GetErrno();
-        LOG_ERROR("HAL_SPI", "Multi-transfer failed: %s %d (%d)",
+        LOG_ERROR("HAL_SPI", "Multi-transfer failed: %s (%d)",
                   OSAL_StrError(err), err);
         result = err;
     }
@@ -466,7 +466,7 @@ int32_t HAL_SPI_SetConfig(hal_spi_handle_t handle, const hal_spi_config_t *confi
         if (ret < 0)
         {
             int32_t err = OSAL_GetErrno();
-            LOG_ERROR("HAL_SPI", "Failed to update mode: %s %d (%d)",
+            LOG_ERROR("HAL_SPI", "Failed to update mode: %s (%d)",
                       OSAL_StrError(err), err);
             result = err;
             goto unlock;
@@ -482,7 +482,7 @@ int32_t HAL_SPI_SetConfig(hal_spi_handle_t handle, const hal_spi_config_t *confi
         if (ret < 0)
         {
             int32_t err = OSAL_GetErrno();
-            LOG_ERROR("HAL_SPI", "Failed to update bits per word: %s %d (%d)",
+            LOG_ERROR("HAL_SPI", "Failed to update bits per word: %s (%d)",
                       OSAL_StrError(err), err);
             result = err;
             goto unlock;
@@ -498,7 +498,7 @@ int32_t HAL_SPI_SetConfig(hal_spi_handle_t handle, const hal_spi_config_t *confi
         if (ret < 0)
         {
             int32_t err = OSAL_GetErrno();
-            LOG_ERROR("HAL_SPI", "Failed to update max speed: %s %d (%d)",
+            LOG_ERROR("HAL_SPI", "Failed to update max speed: %s (%d)",
                       OSAL_StrError(err), err);
             result = err;
             goto unlock;

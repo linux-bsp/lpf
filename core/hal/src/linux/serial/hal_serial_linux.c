@@ -66,7 +66,7 @@ int32_t HAL_Serial_Open(const char *device, const hal_serial_config_t *config, h
     if (ctx->fd < 0)
     {
         int32_t err = OSAL_GetErrno();
-        LOG_ERROR("HAL_Serial", "Failed to open %s: %s %d (%d)",
+        LOG_ERROR("HAL_Serial", "Failed to open %s: %s (%d)",
                   device, OSAL_StrError(err), err);
         OSAL_Free(ctx);
         return err;
@@ -79,7 +79,7 @@ int32_t HAL_Serial_Open(const char *device, const hal_serial_config_t *config, h
     if (0 != OSAL_tcgetattr(ctx->fd, &tty))
     {
         int32_t err = OSAL_GetErrno();
-        LOG_ERROR("HAL_Serial", "Failed to get attributes: %s %d (%d)",
+        LOG_ERROR("HAL_Serial", "Failed to get attributes: %s (%d)",
                   OSAL_StrError(err), err);
         OSAL_close(ctx->fd);
         OSAL_Free(ctx);
@@ -150,7 +150,7 @@ int32_t HAL_Serial_Open(const char *device, const hal_serial_config_t *config, h
     if (0 != OSAL_tcsetattr(ctx->fd, OSAL_TCSANOW, &tty))
     {
         int32_t err = OSAL_GetErrno();
-        LOG_ERROR("HAL_Serial", "Failed to set attributes: %s %d (%d)",
+        LOG_ERROR("HAL_Serial", "Failed to set attributes: %s (%d)",
                   OSAL_StrError(err), err);
         OSAL_close(ctx->fd);
         OSAL_Free(ctx);
@@ -277,7 +277,7 @@ int32_t HAL_Serial_Write(hal_serial_handle_t handle, const void *buffer, uint32_
         else if (ret < 0)
         {
             int32_t err = OSAL_GetErrno();
-            LOG_ERROR("HAL_Serial", "Select error: %s %d (%d)",
+            LOG_ERROR("HAL_Serial", "Select error: %s (%d)",
                       OSAL_StrError(err), err);
             return err;
         }
@@ -305,7 +305,7 @@ int32_t HAL_Serial_Write(hal_serial_handle_t handle, const void *buffer, uint32_
     if (written < 0)
     {
         int32_t err = OSAL_GetErrno();
-        LOG_ERROR("HAL_Serial", "Write error: %s %d (%d)",
+        LOG_ERROR("HAL_Serial", "Write error: %s (%d)",
                   OSAL_StrError(err), err);
         result = err;
     }
@@ -363,7 +363,7 @@ int32_t HAL_Serial_Read(hal_serial_handle_t handle, void *buffer, uint32_t size,
         else if (ret < 0)
         {
             int32_t err = OSAL_GetErrno();
-            LOG_ERROR("HAL_Serial", "Select error: %s %d (%d)",
+            LOG_ERROR("HAL_Serial", "Select error: %s (%d)",
                       OSAL_StrError(err), err);
             return err;
         }
@@ -391,7 +391,7 @@ int32_t HAL_Serial_Read(hal_serial_handle_t handle, void *buffer, uint32_t size,
     if (nread < 0)
     {
         int32_t err = OSAL_GetErrno();
-        LOG_ERROR("HAL_Serial", "Read error: %s %d (%d)",
+        LOG_ERROR("HAL_Serial", "Read error: %s (%d)",
                   OSAL_StrError(err), err);
         result = err;
     }
@@ -447,7 +447,7 @@ int32_t HAL_Serial_Flush(hal_serial_handle_t handle)
     if (0 != OSAL_tcflush(ctx->fd, OSAL_TCIOFLUSH))
     {
         int32_t err = OSAL_GetErrno();
-        LOG_ERROR("HAL_Serial", "Flush error: %s %d (%d)",
+        LOG_ERROR("HAL_Serial", "Flush error: %s (%d)",
                   OSAL_StrError(err), err);
         result = err;
     }
@@ -503,7 +503,7 @@ int32_t HAL_Serial_SetConfig(hal_serial_handle_t handle,
     if (0 != OSAL_tcgetattr(ctx->fd, &tty))
     {
         int32_t err = OSAL_GetErrno();
-        LOG_ERROR("HAL_Serial", "Failed to get attributes: %s %d (%d)",
+        LOG_ERROR("HAL_Serial", "Failed to get attributes: %s (%d)",
                   OSAL_StrError(err), err);
         result = err;
         goto unlock;
@@ -555,7 +555,7 @@ int32_t HAL_Serial_SetConfig(hal_serial_handle_t handle,
     if (0 != OSAL_tcsetattr(ctx->fd, OSAL_TCSANOW, &tty))
     {
         int32_t err = OSAL_GetErrno();
-        LOG_ERROR("HAL_Serial", "Failed to set attributes: %s %d (%d)",
+        LOG_ERROR("HAL_Serial", "Failed to set attributes: %s (%d)",
                   OSAL_StrError(err), err);
         result = err;
         goto unlock;
