@@ -167,10 +167,17 @@ config PRODUCT_SAMPLE
 endmenu
 
 # ============================================================================
-# Toolchain Configuration
+# Build System Configuration
+# ============================================================================
+# Platform and toolchain configuration
 # ============================================================================
 
-menu "Toolchain Configuration"
+menu "Build System Configuration"
+
+# Include platform configuration (OS and Architecture)
+source "Kconfig.platform"
+
+menu "Toolchain"
 
 config TOOLCHAIN_PATH
 	string "Toolchain path"
@@ -179,12 +186,22 @@ config TOOLCHAIN_PATH
 	  Absolute path to the cross-compilation toolchain.
 	  Leave empty to use system default compiler.
 
+	  Example: /opt/toolchains/gcc-arm-11.2-2022.02-x86_64-aarch64-none-linux-gnu/bin
+
 config TOOLCHAIN_PREFIX
 	string "Toolchain prefix"
+	default "aarch64-linux-gnu-" if ARCH_ARM64
+	default "arm-linux-gnueabihf-" if ARCH_ARM32
 	default ""
 	help
-	  Toolchain prefix (e.g., aarch64-linux-gnu-).
-	  Leave empty for native compilation.
+	  Toolchain prefix for cross-compilation.
+
+	  Examples:
+	    ARM64: aarch64-linux-gnu- or aarch64-none-linux-gnu-
+	    ARM32: arm-linux-gnueabihf-
+	    x86_64: Leave empty for native compilation
+
+endmenu
 
 endmenu
 
