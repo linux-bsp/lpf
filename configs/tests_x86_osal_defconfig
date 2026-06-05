@@ -1,0 +1,78 @@
+# ============================================================================
+# OSAL Test Configuration
+# ============================================================================
+# 专注于 OSAL 层的测试配置
+# 包含完整的 OSAL 功能和测试，其他模块最小化
+# ============================================================================
+
+# Architecture and OS
+CONFIG_OS_LINUX=y
+CONFIG_ARCH_X86_64=y
+
+# Platform
+CONFIG_PLATFORM_LINUX=y
+
+# Core Components - OSAL Only
+CONFIG_OSAL=y
+CONFIG_TYPES=y
+
+# Build Configuration - Shared Libraries for Testing
+CONFIG_OSAL_BUILD_SHARED=y
+
+# OSAL Features - All Enabled
+CONFIG_OSAL_IPC=y
+CONFIG_OSAL_FILE=y
+CONFIG_OSAL_THREAD=y
+CONFIG_OSAL_NETWORK=y
+CONFIG_OSAL_SIGNAL=y
+
+# OSAL IPC - All Enabled
+CONFIG_OSAL_IPC_ATOMIC=y
+CONFIG_OSAL_IPC_MUTEX=y
+CONFIG_OSAL_IPC_RWLOCK=y
+CONFIG_OSAL_IPC_SEMAPHORE=y
+CONFIG_OSAL_IPC_COND=y
+CONFIG_OSAL_IPC_SHM=y
+CONFIG_OSAL_IPC_SHM_CACHE=y
+
+# OSAL Library - All Enabled
+CONFIG_OSAL_LIB_ERRNO=y
+CONFIG_OSAL_LIB_HEAP=y
+CONFIG_OSAL_LIB_STDIO=y
+CONFIG_OSAL_LIB_STRING=y
+CONFIG_OSAL_LIB_FLOCK=y
+
+# OSAL System - All Enabled
+CONFIG_OSAL_SYS_CLOCK=y
+CONFIG_OSAL_SYS_ENV=y
+CONFIG_OSAL_SYS_FILE=y
+CONFIG_OSAL_SYS_POLL=y
+CONFIG_OSAL_SYS_PROCESS=y
+CONFIG_OSAL_SYS_SCHED=y
+CONFIG_OSAL_SYS_SELECT=y
+CONFIG_OSAL_SYS_SIGNAL=y
+CONFIG_OSAL_SYS_THREAD=y
+CONFIG_OSAL_SYS_TIME=y
+
+# OSAL Network - All Enabled
+CONFIG_OSAL_NET_SOCKET=y
+CONFIG_OSAL_NET_TERMIOS=y
+
+# OSAL Utility - All Enabled
+CONFIG_OSAL_UTIL_LOG=y
+CONFIG_OSAL_UTIL_VERSION=y
+
+# Testing - OSAL Only
+CONFIG_BUILD_TESTING=y
+CONFIG_TEST_UNIT=y
+CONFIG_TEST_OSAL=y
+
+# Other Modules - Disabled
+# CONFIG_HAL is not set
+# CONFIG_PCL is not set
+# CONFIG_PDL is not set
+# CONFIG_PRL is not set
+# CONFIG_ACL is not set
+
+# Products - Disabled
+# CONFIG_PRODUCT_CCM is not set
