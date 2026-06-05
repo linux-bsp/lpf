@@ -4,8 +4,8 @@
  * 提供统一的SPI总线访问接口（基于Linux /dev/spidev*）
  ************************************************************************/
 
-#ifndef HAL_SPI_API_H
-#define HAL_SPI_API_H
+#ifndef HAL_SPI_H
+#define HAL_SPI_H
 
 #include "osal/osal.h"
 #include "hal/config/hal_spi_types.h"
@@ -165,4 +165,4 @@ int32_t HAL_SPI_SetConfig(hal_spi_handle_t handle, const hal_spi_config_t *confi
 }
 #endif
 
-#endif /* HAL_SPI_API_H */
+#endif /* HAL_SPI_H */

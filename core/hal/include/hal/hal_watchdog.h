@@ -4,8 +4,8 @@
  * 提供统一的看门狗访问接口（基于Linux /dev/watchdog）
  ************************************************************************/
 
-#ifndef HAL_WATCHDOG_API_H
-#define HAL_WATCHDOG_API_H
+#ifndef HAL_WATCHDOG_H
+#define HAL_WATCHDOG_H
 
 #include "osal/osal.h"
 
@@ -183,4 +183,4 @@ int32_t HAL_WATCHDOG_GetStats(hal_watchdog_handle_t handle, uint32_t *kick_count
 }
 #endif
 
-#endif /* HAL_WATCHDOG_API_H */
+#endif /* HAL_WATCHDOG_H */

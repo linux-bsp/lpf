@@ -4,8 +4,8 @@
  * 提供统一的GPIO访问接口（基于Linux sysfs GPIO）
  ************************************************************************/
 
-#ifndef HAL_GPIO_API_H
-#define HAL_GPIO_API_H
+#ifndef HAL_GPIO_H
+#define HAL_GPIO_H
 
 #include "osal/osal.h"
 
@@ -227,4 +227,4 @@ int32_t HAL_GPIO_DisableInterrupt(uint32_t gpio_num);
 }
 #endif
 
-#endif /* HAL_GPIO_API_H */
+#endif /* HAL_GPIO_H */

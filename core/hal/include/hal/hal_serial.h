@@ -4,8 +4,8 @@
  * 提供统一的串口访问接口（支持UART/RS232/RS485）
  ************************************************************************/
 
-#ifndef HAL_SERIAL_API_H
-#define HAL_SERIAL_API_H
+#ifndef HAL_SERIAL_H
+#define HAL_SERIAL_H
 
 #include "osal/osal.h"
 
@@ -171,4 +171,4 @@ int32_t HAL_Serial_SetConfig(hal_serial_handle_t handle,
 }
 #endif
 
-#endif /* HAL_SERIAL_API_H */
+#endif /* HAL_SERIAL_H */

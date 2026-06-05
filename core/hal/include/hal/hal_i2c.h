@@ -4,8 +4,8 @@
  * 提供统一的I2C总线访问接口（基于Linux /dev/i2c-*）
  ************************************************************************/
 
-#ifndef HAL_I2C_API_H
-#define HAL_I2C_API_H
+#ifndef HAL_I2C_H
+#define HAL_I2C_H
 
 #include "osal/osal.h"
 #include "hal/config/hal_i2c_types.h"
@@ -173,4 +173,4 @@ int32_t HAL_I2C_Transfer(hal_i2c_handle_t handle, hal_i2c_msg_t *msgs, uint32_t 
 }
 #endif
 
-#endif /* HAL_I2C_API_H */
+#endif /* HAL_I2C_H */

@@ -4,8 +4,8 @@
  * 提供统一的CAN总线访问接口（基于Linux SocketCAN）
  ************************************************************************/
 
-#ifndef HAL_CAN_API_H
-#define HAL_CAN_API_H
+#ifndef HAL_CAN_H
+#define HAL_CAN_H
 
 #include "osal/osal.h"
 #include "hal/config/hal_can_types.h"
@@ -130,4 +130,4 @@ int32_t HAL_CAN_SetFilter(hal_can_handle_t handle, uint32_t filter_id, uint32_t 
 }
 #endif
 
-#endif /* HAL_CAN_API_H */
+#endif /* HAL_CAN_H */

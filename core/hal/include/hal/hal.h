@@ -31,11 +31,11 @@
 #include "config/hal_uart_config.h"
 
 /* HAL API - 按外设类型组织 */
-#include "hal_can_api.h"
-#include "hal_gpio_api.h"
-#include "hal_i2c_api.h"
-#include "hal_serial_api.h"
-#include "hal_spi_api.h"
-#include "hal_watchdog_api.h"
+#include "hal/hal_can.h"
+#include "hal/hal_gpio.h"
+#include "hal/hal_i2c.h"
+#include "hal/hal_serial.h"
+#include "hal/hal_spi.h"
+#include "hal/hal_watchdog.h"
 
 #endif /* HAL_HAL_H */
