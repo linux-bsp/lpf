@@ -34,7 +34,7 @@ cd EMS
 
 ```bash
 # 加载开发配置
-python3 build.py config ccm_development
+python3 build.py config ccm_development_defconfig
 
 # 编译
 python3 build.py build
@@ -98,30 +98,21 @@ EMS/
 
 | 配置 | 场景 | 平台 | 用途 | 特点 |
 |------|------|------|------|------|
-| `ccm_development` | 开发 | x86_64 | CCM 开发环境 | 包含所有调试功能和测试工具 |
-| `ccm_production` | 生产 | ARM64 | CCM 生产部署 | 优化的生产配置，禁用测试 |
+| `ccm_development_defconfig` | 开发 | x86_64 | CCM 开发环境 | 包含所有调试功能和测试工具 |
+| `ccm_production_defconfig` | 生产 | ARM64 | CCM 生产部署 | 优化的生产配置，禁用测试 |
 
 ### 测试配置
 
 | 配置 | 测试范围 | 平台 | 用途 |
 |------|---------|------|------|
-| `full_test` | 全栈测试 | x86_64 | 所有模块、所有功能 |
-| `osal_test_x86` | OSAL 单元测试 | x86_64 | 仅测试 OSAL 模块 |
-| `osal_test_arm64` | OSAL 单元测试 | ARM64 | 仅测试 OSAL 模块 |
-| `hal_test_linux` | HAL 单元测试 | x86_64 | 仅测试 HAL 模块 |
-| `pdl_test` | PDL 单元测试 | x86_64 | 仅测试 PDL 模块 |
-| `prl_test` | PRL 单元测试 | x86_64 | 仅测试 PRL 协议层 |
-| `aconfig_test` | ACONFIG 单元测试 | x86_64 | 仅测试 ACONFIG 模块 |
-| `acl_test` | ACL 单元测试 | x86_64 | 仅测试 ACL 模块 |
-| `pcl_test` | PCL 单元测试 | x86_64 | 仅测试 PCL 模块 |
-| `system_test` | 系统测试 | x86_64 | 系统级集成测试 |
-| `stress_test` | 压力测试 | x86_64 | 性能和稳定性测试 |
-
-### 其他配置
-
-| 配置 | 用途 | 特点 |
-|------|------|------|
-| `minimal` | 最小化配置 | 仅包含核心功能，适合资源受限环境 |
+| `tests_full_defconfig` | 全栈测试 | x86_64 | 所有模块、所有功能 |
+| `tests_pdl_defconfig` | PDL 单元测试 | x86_64 | 仅测试 PDL 模块 |
+| `tests_prl_defconfig` | PRL 单元测试 | x86_64 | 仅测试 PRL 协议层 |
+| `tests_aconfig_defconfig` | ACONFIG 单元测试 | x86_64 | 仅测试 ACONFIG 模块 |
+| `tests_pconfig_defconfig` | PCONFIG 单元测试 | x86_64 | 仅测试 PCONFIG 模块 |
+| `tests_system_defconfig` | 系统测试 | x86_64 | 系统级集成测试 |
+| `tests_stress_defconfig` | 压力测试 | x86_64 | 性能和稳定性测试 |
+| `tests_minimal_defconfig` | 最小化配置 | x86_64 | 仅包含核心功能，适合资源受限环境 |
 
 ## 🔧 常用命令
 
