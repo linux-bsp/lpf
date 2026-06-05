@@ -17,7 +17,7 @@
 #define PCONFIG_PCONFIG_TYPES_H
 
 #include "osal/osal.h"
-#include "pdl/pdl_types_api.h"
+#include "pdl/pdl_types.h"
 
 /*===========================================================================
  * GPIO配置

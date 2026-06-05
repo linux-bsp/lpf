@@ -18,8 +18,8 @@
  * - 保持类型定义的稳定性和向后兼容性
  ************************************************************************/
 
-#ifndef PDL_TYPES_API_H
-#define PDL_TYPES_API_H
+#ifndef PDL_TYPES_H
+#define PDL_TYPES_H
 
 #include "osal/osal.h"
 
@@ -179,4 +179,4 @@ typedef struct
 	bool enable_on_init;            /* 初始化时是否启用看门狗 */
 } pdl_watchdog_config_t;
 
-#endif /* PDL_TYPES_API_H */
+#endif /* PDL_TYPES_H */

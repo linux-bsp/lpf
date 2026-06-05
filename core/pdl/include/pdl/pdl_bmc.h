@@ -8,11 +8,11 @@
  * - 故障检测和自动恢复
  ************************************************************************/
 
-#ifndef PDL_BMC_API_H
-#define PDL_BMC_API_H
+#ifndef PDL_BMC_H
+#define PDL_BMC_H
 
 #include "osal/osal.h"
-#include "pdl_types_api.h"
+#include "pdl/pdl_types.h"
 
 /*
  * BMC服务句柄
@@ -224,4 +224,4 @@ int32_t PDL_BMC_GetStats(pdl_bmc_handle_t handle,
                        uint32_t *fail_count,
                        uint32_t *switch_count);
 
-#endif /* PDL_BMC_API_H */
+#endif /* PDL_BMC_H */

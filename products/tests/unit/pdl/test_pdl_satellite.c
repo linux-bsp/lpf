@@ -4,7 +4,7 @@
  * @brief PDL卫星平台服务单元测试
  */
 
-#include "pdl/pdl_satellite_api.h"
+#include "pdl/pdl_satellite.h"
 #include "osal/osal.h"
 
 /* 测试回调函数 */

@@ -2,7 +2,7 @@
  * PDL层 - Watchdog服务实现
  ************************************************************************/
 
-#include "pdl/pdl_watchdog_api.h"
+#include "pdl/pdl_watchdog.h"
 #include "hal/hal.h"
 #include "osal/osal.h"
 

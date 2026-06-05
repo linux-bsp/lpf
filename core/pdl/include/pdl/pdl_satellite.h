@@ -8,11 +8,11 @@
  * - 提供统一的平台交互接口
  ************************************************************************/
 
-#ifndef PDL_SATELLITE_API_H
-#define PDL_SATELLITE_API_H
+#ifndef PDL_SATELLITE_H
+#define PDL_SATELLITE_H
 
 #include "osal/osal.h"
-#include "pdl_types_api.h"
+#include "pdl/pdl_types.h"
 
 /* CAN状态码 */
 typedef enum
@@ -108,4 +108,4 @@ int32_t PDL_SATELLITE_GetStats(pdl_satellite_handle_t handle,
                              uint32_t *tx_count,
                              uint32_t *error_count);
 
-#endif /* PDL_SATELLITE_API_H */
+#endif /* PDL_SATELLITE_H */

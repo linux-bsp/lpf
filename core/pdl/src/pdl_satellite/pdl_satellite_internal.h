@@ -8,7 +8,7 @@
 #define PDL_SATELLITE_INTERNAL_H
 
 #include "osal/osal.h"
-#include "pdl/pdl_satellite_api.h"  /* 引入公共头文件，使用其中的can_status_t定义 */
+#include "pdl/pdl_satellite.h"  /* 引入公共头文件，使用其中的can_status_t定义 */
 
 /*
  * 卫星CAN ID定义

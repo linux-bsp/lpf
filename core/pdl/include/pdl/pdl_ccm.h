@@ -11,8 +11,8 @@
  * - PMC 产品中使用，用于与 CCM 通信
  ************************************************************************/
 
-#ifndef PDL_CCM_API_H
-#define PDL_CCM_API_H
+#ifndef PDL_CCM_H
+#define PDL_CCM_H
 
 #include "osal/osal.h"
 
@@ -279,4 +279,4 @@ int32_t PDL_CCM_GetConnectionStatus(pdl_ccm_handle_t handle,
                                      bool *connected,
                                      uint32_t *link_quality);
 
-#endif /* PDL_CCM_API_H */
+#endif /* PDL_CCM_H */

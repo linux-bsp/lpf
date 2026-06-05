@@ -12,11 +12,11 @@
  * - 支持多种通信方式，由配置决定使用哪种
  ************************************************************************/
 
-#ifndef PDL_MCU_API_H
-#define PDL_MCU_API_H
+#ifndef PDL_MCU_H
+#define PDL_MCU_H
 
 #include "osal/osal.h"
-#include "pdl_types_api.h"
+#include "pdl/pdl_types.h"
 
 /*
  * MCU服务句柄
@@ -205,4 +205,4 @@ pdl_mcu_state_t PDL_MCU_GetDeviceState(pdl_mcu_handle_t handle);
  */
 const char* PDL_MCU_GetStateName(pdl_mcu_state_t state);
 
-#endif /* PDL_MCU_API_H */
+#endif /* PDL_MCU_H */

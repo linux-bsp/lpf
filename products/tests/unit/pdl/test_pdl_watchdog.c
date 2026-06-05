@@ -5,7 +5,7 @@
 #include "test_core.h"
 #include "test_assert.h"
 #include "test_registry.h"
-#include "pdl/pdl_watchdog_api.h"
+#include "pdl/pdl_watchdog.h"
 #include "osal/osal.h"
 
 /**

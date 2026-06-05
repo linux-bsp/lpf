@@ -12,11 +12,11 @@
  * - 支持自动喂狗和手动喂狗两种模式
  ************************************************************************/
 
-#ifndef PDL_WATCHDOG_API_H
-#define PDL_WATCHDOG_API_H
+#ifndef PDL_WATCHDOG_H
+#define PDL_WATCHDOG_H
 
 #include "osal/osal.h"
-#include "pdl_types_api.h"
+#include "pdl/pdl_types.h"
 
 /*
  * Watchdog服务句柄
@@ -147,4 +147,4 @@ int32_t PDL_WATCHDOG_Enable(pdl_watchdog_handle_t handle);
  */
 int32_t PDL_WATCHDOG_Disable(pdl_watchdog_handle_t handle);
 
-#endif /* PDL_WATCHDOG_API_H */
+#endif /* PDL_WATCHDOG_H */
