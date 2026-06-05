@@ -177,6 +177,9 @@ menu "Build System Configuration"
 # Include platform configuration (OS and Architecture)
 source "Kconfig.platform"
 
+# Include build and compiler configuration
+source "Kconfig.build"
+
 menu "Toolchain"
 
 config TOOLCHAIN_PATH

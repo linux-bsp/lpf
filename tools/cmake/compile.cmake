@@ -430,13 +430,21 @@ macro(project name)
         include("${SDK_PATH}/tools/cmake/compile_flags.cmake")
     endif()
 
-    # add DEBUG or RELEASE flag globally
-    if(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "Debug")
+    # add DEBUG or RELEASE flag from Kconfig
+    if(CONFIG_BUILD_TYPE_DEBUG)
         add_definitions(-DDEBUG=1 -DRELEASE=0)
-        # message("!!! DEBUG !!!")
     else()
         add_definitions(-DRELEASE=1 -DDEBUG=0)
-        # message("!!! RELEASE !!!")
+    endif()
+
+    # add NDEBUG if assertions are disabled
+    if(NOT CONFIG_ENABLE_ASSERT)
+        add_definitions(-DNDEBUG)
+    endif()
+
+    # add FORTIFY_SOURCE if enabled
+    if(CONFIG_FORTIFY_SOURCE)
+        add_definitions(-D_FORTIFY_SOURCE=2)
     endif()
 
     # Add dependence: update configfile, append time and git info for global config header file
