@@ -11,7 +11,7 @@
 #include "hal/hal.h"
 
 #ifndef IFNAMSIZ
-#define IFNAMSIZ 16
+#define IFNAMSIZ 0x10
 #endif
 
 /*===========================================================================

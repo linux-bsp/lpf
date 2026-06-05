@@ -15,7 +15,7 @@
 #define OSAL_SHM_CACHE_INTERNAL_H
 
 /* 缓存条目最大数据大小 */
-#define OSAL_SHM_CACHE_MAX_DATA_SIZE  256U
+#define OSAL_SHM_CACHE_MAX_DATA_SIZE  0x100U
 
 /**
  * @brief 缓存条目状态

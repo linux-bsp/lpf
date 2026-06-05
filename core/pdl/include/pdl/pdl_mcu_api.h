@@ -28,12 +28,12 @@ typedef void* pdl_mcu_handle_t;
  */
 typedef enum
 {
-	PDL_MCU_STATE_UNINITIALIZED = 0,  /* 未初始化 */
-	PDL_MCU_STATE_INIT          = 1,  /* 已初始化 */
-	PDL_MCU_STATE_READY         = 2,  /* 就绪（通信正常） */
-	PDL_MCU_STATE_BUSY          = 3,  /* 忙碌（命令执行中） */
-	PDL_MCU_STATE_ERROR         = 4,  /* 错误状态 */
-	PDL_MCU_STATE_OFFLINE       = 5   /* 离线（通信失败） */
+	PDL_MCU_STATE_UNINITIALIZED = 0x00,  /* 未初始化 */
+	PDL_MCU_STATE_INIT          = 0x01,  /* 已初始化 */
+	PDL_MCU_STATE_READY         = 0x02,  /* 就绪（通信正常） */
+	PDL_MCU_STATE_BUSY          = 0x03,  /* 忙碌（命令执行中） */
+	PDL_MCU_STATE_ERROR         = 0x04,  /* 错误状态 */
+	PDL_MCU_STATE_OFFLINE       = 0x05   /* 离线（通信失败） */
 } pdl_mcu_state_t;
 
 /*

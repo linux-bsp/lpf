@@ -35,12 +35,12 @@
 /**
  * @brief 默认文件锁超时时间（毫秒）
  */
-#define OSAL_LOCK_DEFAULT_TIMEOUT_MS 5000
+#define OSAL_LOCK_DEFAULT_TIMEOUT_MS 0x1388
 
 /**
  * @brief 锁文件路径最大长度
  */
-#define OSAL_LOCK_PATH_MAX_LEN 256
+#define OSAL_LOCK_PATH_MAX_LEN 0x100
 
 /*===========================================================================
  * 类型定义

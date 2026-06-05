@@ -29,18 +29,18 @@ typedef enum
 /* CCM 电源操作 */
 typedef enum
 {
-	PDL_CCM_POWER_OFF = 0,
-	PDL_CCM_POWER_ON = 1,
-	PDL_CCM_POWER_QUERY = 2
+	PDL_CCM_POWER_OFF = 0x00,
+	PDL_CCM_POWER_ON = 0x01,
+	PDL_CCM_POWER_QUERY = 0x02
 } pdl_ccm_power_op_t;
 
 /* CCM 节点操作 */
 typedef enum
 {
-	PDL_CCM_NODE_QUERY = 0,
-	PDL_CCM_NODE_START = 1,
-	PDL_CCM_NODE_STOP = 2,
-	PDL_CCM_NODE_RESTART = 3
+	PDL_CCM_NODE_QUERY = 0x00,
+	PDL_CCM_NODE_START = 0x01,
+	PDL_CCM_NODE_STOP = 0x02,
+	PDL_CCM_NODE_RESTART = 0x03
 } pdl_ccm_node_op_t;
 
 /*

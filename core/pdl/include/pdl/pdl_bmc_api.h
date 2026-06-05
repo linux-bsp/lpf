@@ -24,9 +24,9 @@ typedef void* pdl_bmc_handle_t;
  */
 typedef enum
 {
-	PDL_BMC_POWER_OFF = 0,
-	PDL_BMC_POWER_ON  = 1,
-	PDL_BMC_POWER_UNKNOWN = 2
+	PDL_BMC_POWER_OFF = 0x00,
+	PDL_BMC_POWER_ON  = 0x01,
+	PDL_BMC_POWER_UNKNOWN = 0x02
 } pdl_bmc_power_state_t;
 
 /*
@@ -47,10 +47,10 @@ typedef struct
  */
 typedef enum
 {
-	PDL_BMC_SENSOR_TEMP = 0,      /* 温度 */
-	PDL_BMC_SENSOR_VOLTAGE = 1,   /* 电压 */
-	PDL_BMC_SENSOR_CURRENT = 2,   /* 电流 */
-	PDL_BMC_SENSOR_FAN = 3        /* 风扇转速 */
+	PDL_BMC_SENSOR_TEMP = 0x00,      /* 温度 */
+	PDL_BMC_SENSOR_VOLTAGE = 0x01,   /* 电压 */
+	PDL_BMC_SENSOR_CURRENT = 0x02,   /* 电流 */
+	PDL_BMC_SENSOR_FAN = 0x03        /* 风扇转速 */
 } pdl_bmc_sensor_type_t;
 
 /*

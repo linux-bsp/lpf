@@ -29,12 +29,12 @@
 #define OSAL_LOG_FILE_BACKUP_COUNT   0x5
 
 /* 日志缓冲区大小 */
-#define OSAL_LOG_PATH_SIZE           256U   /* 日志路径缓冲区大小 */
-#define OSAL_LOG_FILENAME_SIZE       512U   /* 日志文件名缓冲区大小 */
-#define OSAL_LOG_TIMESTAMP_SIZE      64U    /* 时间戳缓冲区大小 */
-#define OSAL_LOG_MESSAGE_SIZE        1024U  /* 日志消息缓冲区大小 */
-#define OSAL_LOG_MAX_MODULES         32U    /* 最大模块数 */
-#define OSAL_LOG_MAX_KV_PAIRS        8U     /* 结构化日志最大键值对数 */
+#define OSAL_LOG_PATH_SIZE           0x100U   /* 日志路径缓冲区大小 */
+#define OSAL_LOG_FILENAME_SIZE       0x200U   /* 日志文件名缓冲区大小 */
+#define OSAL_LOG_TIMESTAMP_SIZE      0x40U    /* 时间戳缓冲区大小 */
+#define OSAL_LOG_MESSAGE_SIZE        0x400U  /* 日志消息缓冲区大小 */
+#define OSAL_LOG_MAX_MODULES         0x20U    /* 最大模块数 */
+#define OSAL_LOG_MAX_KV_PAIRS        0x8U     /* 结构化日志最大键值对数 */
 
 /*
  * 日志模块枚举
