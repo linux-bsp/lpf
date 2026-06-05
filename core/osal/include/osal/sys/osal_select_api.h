@@ -21,10 +21,10 @@
  *===========================================================================*/
 
 /* FD_SETSIZE通常为1024，这里使用固定值 */
-#define OSAL_FD_SETSIZE 1024
+#define OSAL_FD_SETSIZE 0x400
 
 /* 位操作相关常量 */
-#define OSAL_FD_BITS_PER_WORD   32U     /* 每个uint32_t的位数 */
+#define OSAL_FD_BITS_PER_WORD   0x20U     /* 每个uint32_t的位数 */
 
 /*===========================================================================
  * 数据结构
@@ -36,7 +36,7 @@
  * 注意：内部实现与平台相关，但接口保持一致
  */
 typedef struct {
-    uint32_t fds_bits[OSAL_FD_SETSIZE / 32];  /* 位图，每个bit代表一个fd */
+    uint32_t fds_bits[OSAL_FD_SETSIZE / OSAL_FD_BITS_PER_WORD];  /* 位图，每个bit代表一个fd */
 } osal_fd_set_t;
 
 /**

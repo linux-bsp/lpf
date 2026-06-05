@@ -64,7 +64,7 @@
  */
 #if defined(OSAL_ARCH_32BIT)
     /* 32 位架构 */
-    #define OSAL_ARCH_BITS 32
+    #define OSAL_ARCH_BITS 0x20
     #if defined(__arm__) || defined(_M_ARM)
         #define OSAL_ARCH_ARM32
     #elif defined(__i386__) || defined(_M_IX86)
@@ -74,7 +74,7 @@
     #endif
 #elif defined(OSAL_ARCH_64BIT)
     /* 64 位架构 */
-    #define OSAL_ARCH_BITS 64
+    #define OSAL_ARCH_BITS 0x40
     #if defined(__x86_64__) || defined(_M_X64)
         #define OSAL_ARCH_X86_64
     #elif defined(__aarch64__) || defined(_M_ARM64)
@@ -86,22 +86,22 @@
     /* 如果没有 Kconfig 配置，使用编译器自动检测 */
     #if defined(__x86_64__) || defined(_M_X64)
         #define OSAL_ARCH_X86_64
-        #define OSAL_ARCH_BITS 64
+        #define OSAL_ARCH_BITS 0x40
     #elif defined(__i386__) || defined(_M_IX86)
         #define OSAL_ARCH_X86
-        #define OSAL_ARCH_BITS 32
+        #define OSAL_ARCH_BITS 0x20
     #elif defined(__aarch64__) || defined(_M_ARM64)
         #define OSAL_ARCH_ARM64
-        #define OSAL_ARCH_BITS 64
+        #define OSAL_ARCH_BITS 0x40
     #elif defined(__arm__) || defined(_M_ARM)
         #define OSAL_ARCH_ARM32
-        #define OSAL_ARCH_BITS 32
+        #define OSAL_ARCH_BITS 0x20
     #elif defined(__riscv) && (__riscv_xlen == 64)
         #define OSAL_ARCH_RISCV64
-        #define OSAL_ARCH_BITS 64
+        #define OSAL_ARCH_BITS 0x40
     #elif defined(__riscv) && (__riscv_xlen == 32)
         #define OSAL_ARCH_RISCV32
-        #define OSAL_ARCH_BITS 32
+        #define OSAL_ARCH_BITS 0x20
     #endif
 #endif
 
@@ -147,16 +147,16 @@
 /* 字节序检测 */
 #if defined(__BYTE_ORDER__)
     #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-        #define OSAL_LITTLE_ENDIAN 1
-        #define OSAL_BIG_ENDIAN 0
+        #define OSAL_LITTLE_ENDIAN 0x1
+        #define OSAL_BIG_ENDIAN 0x0
     #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-        #define OSAL_LITTLE_ENDIAN 0
-        #define OSAL_BIG_ENDIAN 1
+        #define OSAL_LITTLE_ENDIAN 0x0
+        #define OSAL_BIG_ENDIAN 0x1
     #endif
 #else
     /* 默认假设小端 */
-    #define OSAL_LITTLE_ENDIAN 1
-    #define OSAL_BIG_ENDIAN 0
+    #define OSAL_LITTLE_ENDIAN 0x1
+    #define OSAL_BIG_ENDIAN 0x0
 #endif
 
 /* 对齐宏 */

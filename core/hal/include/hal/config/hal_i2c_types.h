@@ -16,8 +16,8 @@
  */
 
 /* I2C地址模式 */
-#define I2C_ADDR_7BIT   0
-#define I2C_ADDR_10BIT  1
+#define I2C_ADDR_7BIT   0x00
+#define I2C_ADDR_10BIT  0x01
 
 /* I2C传输消息 */
 typedef struct

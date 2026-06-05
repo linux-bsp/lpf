@@ -19,11 +19,11 @@
 /*===========================================================================
  * 地址族（Address Family）
  *===========================================================================*/
-#define OSAL_AF_UNSPEC    0   /* 未指定 */
-#define OSAL_AF_INET      2   /* IPv4 */
-#define OSAL_AF_INET6     10  /* IPv6 */
-#define OSAL_AF_CAN       29  /* CAN总线 */
-#define OSAL_AF_PACKET    17  /* 原始数据包 */
+#define OSAL_AF_UNSPEC    0x00   /* 未指定 */
+#define OSAL_AF_INET      0x02   /* IPv4 */
+#define OSAL_AF_INET6     0x0A   /* IPv6 */
+#define OSAL_AF_CAN       0x1D   /* CAN总线 */
+#define OSAL_AF_PACKET    0x11   /* 原始数据包 */
 
 /* 协议族（Protocol Family）与地址族相同 */
 #define OSAL_PF_UNSPEC    OSAL_AF_UNSPEC
@@ -35,59 +35,59 @@
 /*===========================================================================
  * Socket类型
  *===========================================================================*/
-#define OSAL_SOCK_STREAM    1  /* TCP流式socket */
-#define OSAL_SOCK_DGRAM     2  /* UDP数据报socket */
-#define OSAL_SOCK_RAW       3  /* 原始socket */
+#define OSAL_SOCK_STREAM    0x01  /* TCP流式socket */
+#define OSAL_SOCK_DGRAM     0x02  /* UDP数据报socket */
+#define OSAL_SOCK_RAW       0x03  /* 原始socket */
 
 /*===========================================================================
  * 协议类型
  *===========================================================================*/
-#define OSAL_IPPROTO_IP      0   /* IP协议 */
-#define OSAL_IPPROTO_TCP     6   /* TCP协议 */
-#define OSAL_IPPROTO_UDP     17  /* UDP协议 */
-#define OSAL_IPPROTO_RAW     255 /* 原始IP协议 */
-#define OSAL_CAN_RAW         1   /* CAN原始协议 */
+#define OSAL_IPPROTO_IP      0x00   /* IP协议 */
+#define OSAL_IPPROTO_TCP     0x06   /* TCP协议 */
+#define OSAL_IPPROTO_UDP     0x11   /* UDP协议 */
+#define OSAL_IPPROTO_RAW     0xFF   /* 原始IP协议 */
+#define OSAL_CAN_RAW         0x01   /* CAN原始协议 */
 
 /*===========================================================================
  * Socket选项级别
  *===========================================================================*/
-#define OSAL_SOL_SOCKET      1    /* Socket层选项 */
-#define OSAL_SOL_CAN_RAW     101  /* CAN RAW层选项 */
-#define OSAL_IPPROTO_TCP     6    /* TCP协议层选项 */
+#define OSAL_SOL_SOCKET      0x01    /* Socket层选项 */
+#define OSAL_SOL_CAN_RAW     0x65    /* CAN RAW层选项 */
+#define OSAL_IPPROTO_TCP     0x06    /* TCP协议层选项 */
 
 /*===========================================================================
  * Socket选项名称
  *===========================================================================*/
-#define OSAL_SO_REUSEADDR    2   /* 允许重用本地地址 */
-#define OSAL_SO_KEEPALIVE    9   /* 保持连接 */
-#define OSAL_SO_BROADCAST    6   /* 允许广播 */
-#define OSAL_SO_RCVBUF       8   /* 接收缓冲区大小 */
-#define OSAL_SO_SNDBUF       7   /* 发送缓冲区大小 */
-#define OSAL_SO_RCVTIMEO     20  /* 接收超时 */
-#define OSAL_SO_SNDTIMEO     21  /* 发送超时 */
-#define OSAL_SO_ERROR        4   /* 获取错误状态 */
+#define OSAL_SO_REUSEADDR    0x02   /* 允许重用本地地址 */
+#define OSAL_SO_KEEPALIVE    0x09   /* 保持连接 */
+#define OSAL_SO_BROADCAST    0x06   /* 允许广播 */
+#define OSAL_SO_RCVBUF       0x08   /* 接收缓冲区大小 */
+#define OSAL_SO_SNDBUF       0x07   /* 发送缓冲区大小 */
+#define OSAL_SO_RCVTIMEO     0x14   /* 接收超时 */
+#define OSAL_SO_SNDTIMEO     0x15   /* 发送超时 */
+#define OSAL_SO_ERROR        0x04   /* 获取错误状态 */
 
 /* TCP特定选项 */
-#define OSAL_TCP_NODELAY     1   /* 禁用Nagle算法 */
+#define OSAL_TCP_NODELAY     0x01   /* 禁用Nagle算法 */
 
 /* CAN特定选项 */
-#define OSAL_CAN_RAW_FILTER  1   /* CAN过滤器 */
+#define OSAL_CAN_RAW_FILTER  0x01   /* CAN过滤器 */
 
 /*===========================================================================
  * shutdown参数
  *===========================================================================*/
-#define OSAL_SHUT_RD    0  /* 关闭读 */
-#define OSAL_SHUT_WR    1  /* 关闭写 */
-#define OSAL_SHUT_RDWR  2  /* 关闭读写 */
+#define OSAL_SHUT_RD    0x00  /* 关闭读 */
+#define OSAL_SHUT_WR    0x01  /* 关闭写 */
+#define OSAL_SHUT_RDWR  0x02  /* 关闭读写 */
 
 /*===========================================================================
  * send/recv标志
  *===========================================================================*/
-#define OSAL_MSG_OOB        0x01  /* 带外数据 */
-#define OSAL_MSG_PEEK       0x02  /* 查看数据但不移除 */
-#define OSAL_MSG_DONTROUTE  0x04  /* 不使用路由 */
-#define OSAL_MSG_WAITALL    0x100 /* 等待所有数据 */
-#define OSAL_MSG_NOSIGNAL   0x4000 /* 不产生SIGPIPE信号 */
+#define OSAL_MSG_OOB        0x01    /* 带外数据 */
+#define OSAL_MSG_PEEK       0x02    /* 查看数据但不移除 */
+#define OSAL_MSG_DONTROUTE  0x04    /* 不使用路由 */
+#define OSAL_MSG_WAITALL    0x100   /* 等待所有数据 */
+#define OSAL_MSG_NOSIGNAL   0x4000  /* 不产生SIGPIPE信号 */
 
 /*===========================================================================
  * 地址结构（通用）

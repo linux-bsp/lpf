@@ -1,7 +1,7 @@
 #include "ccm_comm.h"
 #include "libccm/libccm_ipc.h"
 #include "libccm/libccm_protocol.h"
-#include "../../../../../core/osal/src/posix/sys/osal_signal_internal.h"
+#include "osal/sys/osal_signal_api.h"
 #include <unistd.h>
 
 /* 全局变量 */

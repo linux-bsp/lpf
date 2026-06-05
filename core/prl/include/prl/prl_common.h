@@ -23,8 +23,8 @@ extern "C" {
 
 /* ========== Protocol Version ========== */
 
-#define PRL_VERSION_MAJOR           0
-#define PRL_VERSION_MINOR           1
+#define PRL_VERSION_MAJOR           0x00
+#define PRL_VERSION_MINOR           0x01
 
 /* ========== Protocol Flags ========== */
 
@@ -36,8 +36,8 @@ extern "C" {
 
 #define PRL_MAGIC              0xAA55
 #define PRL_VERSION            0x01
-#define PRL_HEADER_SIZE        20
-#define PRL_MAX_PAYLOAD_SIZE   4096
+#define PRL_HEADER_SIZE        0x14
+#define PRL_MAX_PAYLOAD_SIZE   0x1000
 #define PRL_MAX_PACKET_SIZE    (PRL_HEADER_SIZE + PRL_MAX_PAYLOAD_SIZE)
 
 /* ========== Device Types ========== */

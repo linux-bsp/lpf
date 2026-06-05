@@ -45,8 +45,8 @@
     #ifndef __cplusplus
         #ifndef bool
             typedef unsigned char bool;
-            #define true  1
-            #define false 0
+            #define true  0x1
+            #define false 0x0
         #endif
     #endif
 
@@ -81,16 +81,16 @@ typedef uint32_t osal_id_t;
     defined(__x86_64__) || defined(__amd64__) || \
     defined(__aarch64__) || \
     (defined(__riscv) && (__riscv_xlen == 64))
-    #define OSAL_PLATFORM_BITS 64
+    #define OSAL_PLATFORM_BITS 0x40
 #elif defined(__ILP32__) || defined(_WIN32) || \
       defined(__arm__) || defined(__i386__) || \
       (defined(__riscv) && (__riscv_xlen == 32))
-    #define OSAL_PLATFORM_BITS 32
+    #define OSAL_PLATFORM_BITS 0x20
 #elif defined(__MSP430__) || defined(__AVR__)
-    #define OSAL_PLATFORM_BITS 16
+    #define OSAL_PLATFORM_BITS 0x10
 #else
     /* 默认假设32位平台 */
-    #define OSAL_PLATFORM_BITS 32
+    #define OSAL_PLATFORM_BITS 0x20
 #endif
 
 /*
@@ -222,7 +222,7 @@ typedef int64_t osal_nsec_t;
  * - 某些ARM: 128字节
  */
 #ifndef OSAL_CACHE_LINE_SIZE
-    #define OSAL_CACHE_LINE_SIZE 64
+    #define OSAL_CACHE_LINE_SIZE 0x40
 #endif
 
 /*
@@ -286,22 +286,22 @@ typedef int64_t osal_nsec_t;
 /*
  * 配置常量
  */
-#define OS_MAX_TASKS              64
-#define OS_MAX_QUEUES             64
-#define OS_MAX_MUTEXES            64
-#define OS_MAX_API_NAME           20
+#define OS_MAX_TASKS              0x40
+#define OS_MAX_QUEUES             0x40
+#define OS_MAX_MUTEXES            0x40
+#define OS_MAX_API_NAME           0x14
 
 /*
  * 超时常量
  */
-#define OS_PEND                   0
+#define OS_PEND                   0x0
 #define OS_CHECK                  (-1)
 
 /*
  * 任务优先级
  */
-#define OS_TASK_PRIORITY_MIN      1
-#define OS_TASK_PRIORITY_MAX      255
+#define OS_TASK_PRIORITY_MIN      0x1
+#define OS_TASK_PRIORITY_MAX      0xFF
 
 /*===========================================================================
  * 编译时断言（类型安全检查）
@@ -324,27 +324,27 @@ typedef int64_t osal_nsec_t;
 /*
  * 类型大小验证（确保跨平台一致性）
  */
-OSAL_STATIC_ASSERT(sizeof(int8_t)   == 1, "int8_must_be_1_byte");
-OSAL_STATIC_ASSERT(sizeof(int16_t)  == 2, "int16_must_be_2_bytes");
-OSAL_STATIC_ASSERT(sizeof(int32_t)  == 4, "int32_must_be_4_bytes");
-OSAL_STATIC_ASSERT(sizeof(int64_t)  == 8, "int64_must_be_8_bytes");
-OSAL_STATIC_ASSERT(sizeof(uint8_t)  == 1, "uint8_must_be_1_byte");
-OSAL_STATIC_ASSERT(sizeof(uint16_t) == 2, "uint16_must_be_2_bytes");
-OSAL_STATIC_ASSERT(sizeof(uint32_t) == 4, "uint32_must_be_4_bytes");
-OSAL_STATIC_ASSERT(sizeof(uint64_t) == 8, "uint64_must_be_8_bytes");
+OSAL_STATIC_ASSERT(sizeof(int8_t)   == 0x1, "int8_must_be_1_byte");
+OSAL_STATIC_ASSERT(sizeof(int16_t)  == 0x2, "int16_must_be_2_bytes");
+OSAL_STATIC_ASSERT(sizeof(int32_t)  == 0x4, "int32_must_be_4_bytes");
+OSAL_STATIC_ASSERT(sizeof(int64_t)  == 0x8, "int64_must_be_8_bytes");
+OSAL_STATIC_ASSERT(sizeof(uint8_t)  == 0x1, "uint8_must_be_1_byte");
+OSAL_STATIC_ASSERT(sizeof(uint16_t) == 0x2, "uint16_must_be_2_bytes");
+OSAL_STATIC_ASSERT(sizeof(uint32_t) == 0x4, "uint32_must_be_4_bytes");
+OSAL_STATIC_ASSERT(sizeof(uint64_t) == 0x8, "uint64_must_be_8_bytes");
 
 /*
  * 指针类型大小验证
  */
 #if OSAL_PLATFORM_BITS == 64
-    OSAL_STATIC_ASSERT(sizeof(osal_uintptr_t) == 8, "uintptr_must_match_pointer_size");
-    OSAL_STATIC_ASSERT(sizeof(osal_size_t) == 8, "size_must_be_8_bytes_on_64bit");
+    OSAL_STATIC_ASSERT(sizeof(osal_uintptr_t) == 0x8, "uintptr_must_match_pointer_size");
+    OSAL_STATIC_ASSERT(sizeof(osal_size_t) == 0x8, "size_must_be_8_bytes_on_64bit");
 #elif OSAL_PLATFORM_BITS == 32
-    OSAL_STATIC_ASSERT(sizeof(osal_uintptr_t) == 4, "uintptr_must_match_pointer_size");
-    OSAL_STATIC_ASSERT(sizeof(osal_size_t) == 4, "size_must_be_4_bytes_on_32bit");
+    OSAL_STATIC_ASSERT(sizeof(osal_uintptr_t) == 0x4, "uintptr_must_match_pointer_size");
+    OSAL_STATIC_ASSERT(sizeof(osal_size_t) == 0x4, "size_must_be_4_bytes_on_32bit");
 #elif OSAL_PLATFORM_BITS == 16
-    OSAL_STATIC_ASSERT(sizeof(osal_uintptr_t) == 2, "uintptr_must_match_pointer_size");
-    OSAL_STATIC_ASSERT(sizeof(osal_size_t) == 2, "size_must_be_2_bytes_on_16bit");
+    OSAL_STATIC_ASSERT(sizeof(osal_uintptr_t) == 0x2, "uintptr_must_match_pointer_size");
+    OSAL_STATIC_ASSERT(sizeof(osal_size_t) == 0x2, "size_must_be_2_bytes_on_16bit");
 #endif
 
 /*===========================================================================

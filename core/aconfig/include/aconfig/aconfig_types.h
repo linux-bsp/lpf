@@ -14,7 +14,7 @@
  * @note 通用设备类型，可扩展
  */
 typedef enum {
-	ACONFIG_DEVICE_SATELLITE = 0,	/* 卫星设备（如 BMC） */
+	ACONFIG_DEVICE_SATELLITE = 0x00,	/* 卫星设备（如 BMC） */
 	ACONFIG_DEVICE_BMC,		/* 板级管理控制器 */
 	ACONFIG_DEVICE_MCU,		/* 微控制器 */
 	ACONFIG_DEVICE_FPGA,		/* 可编程逻辑器件 */
@@ -29,9 +29,9 @@ typedef enum {
  * @note 通用的数据质量标记
  */
 typedef enum {
-	ACONFIG_TM_STATUS_INVALID = 0,	/* 无效：从未更新或已失效 */
-	ACONFIG_TM_STATUS_FRESH = 1,	/* 新鲜：在有效期内 */
-	ACONFIG_TM_STATUS_STALE = 2	/* 过期：超过有效期但仍可用 */
+	ACONFIG_TM_STATUS_INVALID = 0x00,	/* 无效：从未更新或已失效 */
+	ACONFIG_TM_STATUS_FRESH = 0x01,	/* 新鲜：在有效期内 */
+	ACONFIG_TM_STATUS_STALE = 0x02	/* 过期：超过有效期但仍可用 */
 } aconfig_tm_status_t;
 
 /**

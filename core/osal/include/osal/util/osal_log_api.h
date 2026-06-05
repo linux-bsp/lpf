@@ -16,17 +16,17 @@
 /*
  * 日志级别
  */
-#define OS_LOG_LEVEL_DEBUG  0
-#define OS_LOG_LEVEL_INFO   1
-#define OS_LOG_LEVEL_WARN   2
-#define OS_LOG_LEVEL_ERROR  3
-#define OS_LOG_LEVEL_FATAL  4
+#define OS_LOG_LEVEL_DEBUG  0x0
+#define OS_LOG_LEVEL_INFO   0x1
+#define OS_LOG_LEVEL_WARN   0x2
+#define OS_LOG_LEVEL_ERROR  0x3
+#define OS_LOG_LEVEL_FATAL  0x4
 
 /* 日志配置 */
 #define OSAL_LOG_DEFAULT_LEVEL       OS_LOG_LEVEL_INFO
 #define OSAL_LOG_FILE_PATH           "/var/log/ems.log"
-#define OSAL_LOG_FILE_MAX_SIZE_MB    10
-#define OSAL_LOG_FILE_BACKUP_COUNT   5
+#define OSAL_LOG_FILE_MAX_SIZE_MB    0xA
+#define OSAL_LOG_FILE_BACKUP_COUNT   0x5
 
 /* 日志缓冲区大小 */
 #define OSAL_LOG_PATH_SIZE           256U   /* 日志路径缓冲区大小 */
@@ -40,7 +40,7 @@
  * 日志模块枚举
  */
 typedef enum {
-    LOG_MODULE_OSAL = 0,
+    LOG_MODULE_OSAL = 0x0,
     LOG_MODULE_HAL,
     LOG_MODULE_PCL,
     LOG_MODULE_PDL,

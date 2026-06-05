@@ -129,7 +129,7 @@ int32_t bmc_ipmi_read_sensors(void *protocol_handle,
  */
 typedef enum
 {
-    REDFISH_METHOD_GET = 0,
+    REDFISH_METHOD_GET = 0x00,
     REDFISH_METHOD_POST,
     REDFISH_METHOD_PATCH,
     REDFISH_METHOD_DELETE
@@ -142,7 +142,7 @@ typedef struct
 {
     const char *username;
     const char *password;
-    char session_token[128];
+    char session_token[0x80];
     bool use_session;
 } redfish_auth_t;
 

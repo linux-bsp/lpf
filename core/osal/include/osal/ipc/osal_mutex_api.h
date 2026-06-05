@@ -26,8 +26,8 @@ typedef struct osal_mutex_s osal_mutex_t;
  * @brief 互斥锁类型
  */
 typedef enum {
-	OSAL_MUTEX_NORMAL = 0,      /* 普通互斥锁 */
-	OSAL_MUTEX_RECURSIVE = 1    /* 递归锁（可重入） */
+	OSAL_MUTEX_NORMAL = 0x0,      /* 普通互斥锁 */
+	OSAL_MUTEX_RECURSIVE = 0x1    /* 递归锁（可重入） */
 } osal_mutex_type_t;
 
 /**

@@ -35,7 +35,7 @@ typedef enum {
 /* CAN帧结构 */
 typedef struct {
     uint32_t can_id;                      /* CAN ID */
-    uint8_t data[8];                      /* 数据 */
+    uint8_t data[0x8];                      /* 数据 */
     uint8_t dlc;                          /* 数据长度 */
 } ccm_can_frame_t;
 

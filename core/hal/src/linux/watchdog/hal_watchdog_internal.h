@@ -45,7 +45,7 @@ typedef struct
 /**
  * @brief 默认看门狗超时时间（秒）
  */
-#define HAL_WATCHDOG_DEFAULT_TIMEOUT_SEC  60
+#define HAL_WATCHDOG_DEFAULT_TIMEOUT_SEC  0x3C
 
 /**
  * @brief 看门狗魔术字符（Linux特有，用于安全关闭）

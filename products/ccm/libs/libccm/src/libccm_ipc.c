@@ -1,5 +1,5 @@
 #include "libccm/libccm_ipc.h"
-#include "../../../../../core/osal/src/posix/util/osal_log_internal.h"
+#include "osal/util/osal_log_api.h"
 
 /* 遥测缓存初始化 */
 int32_t CCM_TM_Cache_Init(ccm_tm_cache_t **cache)

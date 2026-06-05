@@ -19,9 +19,9 @@
 /*
  * 调度策略（平台无关）
  */
-#define OSAL_SCHED_OTHER    0   /* 普通调度策略（分时） */
-#define OSAL_SCHED_FIFO     1   /* 先进先出实时调度 */
-#define OSAL_SCHED_RR       2   /* 轮转实时调度 */
+#define OSAL_SCHED_OTHER    0x0   /* 普通调度策略（分时） */
+#define OSAL_SCHED_FIFO     0x1   /* 先进先出实时调度 */
+#define OSAL_SCHED_RR       0x2   /* 轮转实时调度 */
 
 /*
  * 优先级范围
@@ -29,8 +29,8 @@
  * FreeRTOS: 0-configMAX_PRIORITIES-1 (数值越大优先级越高)
  * 统一使用1-99，OSAL层负责转换
  */
-#define OSAL_SCHED_PRIORITY_MIN     1
-#define OSAL_SCHED_PRIORITY_MAX     99
+#define OSAL_SCHED_PRIORITY_MIN     0x01
+#define OSAL_SCHED_PRIORITY_MAX     0x63
 
 /**
  * @brief 设置线程调度策略和优先级

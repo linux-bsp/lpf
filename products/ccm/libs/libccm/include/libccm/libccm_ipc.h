@@ -16,12 +16,12 @@
 #define CCM_SHM_LOG_SIZE           (1 * 1024 * 1024)  /* 1MB */
 
 /* 遥测数据定义 */
-#define CCM_TM_MAX_COUNT           1024
-#define CCM_TM_MAX_DATA_SIZE       256
+#define CCM_TM_MAX_COUNT           0x400
+#define CCM_TM_MAX_DATA_SIZE       0x100
 
 /* 进程ID枚举 */
 typedef enum {
-    CCM_PROCESS_COMM = 0,
+    CCM_PROCESS_COMM = 0x0,
     CCM_PROCESS_COLLECTOR,
     CCM_PROCESS_HEALTH,
     CCM_PROCESS_SUPERVISOR,
@@ -31,7 +31,7 @@ typedef enum {
 
 /* 遥测数据新鲜度 */
 typedef enum {
-    CCM_TM_FRESH = 0,      /* 数据新鲜 */
+    CCM_TM_FRESH = 0x0,      /* 数据新鲜 */
     CCM_TM_STALE,          /* 数据过期但可用 */
     CCM_TM_INVALID         /* 数据无效 */
 } ccm_tm_freshness_t;
@@ -72,7 +72,7 @@ typedef struct {
 } ccm_process_heartbeat_t;
 
 /* 日志环形缓冲区 */
-#define CCM_LOG_ENTRY_SIZE  256
+#define CCM_LOG_ENTRY_SIZE  0x100
 #define CCM_LOG_ENTRY_COUNT (CCM_SHM_LOG_SIZE / CCM_LOG_ENTRY_SIZE)
 
 typedef struct {

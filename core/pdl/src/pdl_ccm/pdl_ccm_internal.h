@@ -13,10 +13,10 @@
 #include "osal/osal.h"
 
 /* 以太网消息最大长度 */
-#define CCM_ETH_MAX_MSG_SIZE    4096
+#define CCM_ETH_MAX_MSG_SIZE    0x1000
 
 /* 重试间隔 */
-#define CCM_RETRY_INTERVAL_MS   100
+#define CCM_RETRY_INTERVAL_MS   0x64
 
 /*
  * CCM 以太网消息结构

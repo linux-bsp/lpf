@@ -119,6 +119,6 @@ int32_t OSAL_Fork(osal_id_t *child_pid);
 int32_t OSAL_Waitpid(osal_id_t pid, int32_t *status, int32_t options);
 
 /* 等待选项 */
-#define OSAL_WNOHANG  1  /* 非阻塞等待 */
+#define OSAL_WNOHANG  0x01  /* 非阻塞等待 */
 
 #endif /* OSAL_PROCESS_H */

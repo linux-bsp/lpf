@@ -42,21 +42,21 @@ extern "C" {
 #define OSAL_S_IXOTH     0x0001  /* 其他执行权限 */
 
 /* lseek的whence参数 */
-#define OSAL_SEEK_SET    0  /* 从文件开头 */
-#define OSAL_SEEK_CUR    1  /* 从当前位置 */
-#define OSAL_SEEK_END    2  /* 从文件末尾 */
+#define OSAL_SEEK_SET    0x00  /* 从文件开头 */
+#define OSAL_SEEK_CUR    0x01  /* 从当前位置 */
+#define OSAL_SEEK_END    0x02  /* 从文件末尾 */
 
 /* fcntl命令 */
-#define OSAL_F_GETFL     3  /* 获取文件状态标志 */
-#define OSAL_F_SETFL     4  /* 设置文件状态标志 */
-#define OSAL_F_GETFD     1  /* 获取文件描述符标志 */
-#define OSAL_F_SETFD     2  /* 设置文件描述符标志 */
+#define OSAL_F_GETFL     0x03  /* 获取文件状态标志 */
+#define OSAL_F_SETFL     0x04  /* 设置文件状态标志 */
+#define OSAL_F_GETFD     0x01  /* 获取文件描述符标志 */
+#define OSAL_F_SETFD     0x02  /* 设置文件描述符标志 */
 
 /* access()的mode参数 */
-#define OSAL_F_OK    0  /* 文件存在 */
-#define OSAL_R_OK    4  /* 可读 */
-#define OSAL_W_OK    2  /* 可写 */
-#define OSAL_X_OK    1  /* 可执行 */
+#define OSAL_F_OK    0x00  /* 文件存在 */
+#define OSAL_R_OK    0x04  /* 可读 */
+#define OSAL_W_OK    0x02  /* 可写 */
+#define OSAL_X_OK    0x01  /* 可执行 */
 
 /*===========================================================================
  * 文件I/O操作 API

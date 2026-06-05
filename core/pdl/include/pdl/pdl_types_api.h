@@ -32,10 +32,10 @@
  */
 typedef enum
 {
-	PDL_MCU_INTERFACE_CAN = 0,     /* CAN总线 */
-	PDL_MCU_INTERFACE_SERIAL = 1,  /* 串口 */
-	PDL_MCU_INTERFACE_I2C = 2,     /* I2C（预留） */
-	PDL_MCU_INTERFACE_SPI = 3      /* SPI（预留） */
+	PDL_MCU_INTERFACE_CAN = 0x00,     /* CAN总线 */
+	PDL_MCU_INTERFACE_SERIAL = 0x01,  /* 串口 */
+	PDL_MCU_INTERFACE_I2C = 0x02,     /* I2C（预留） */
+	PDL_MCU_INTERFACE_SPI = 0x03      /* SPI（预留） */
 } pdl_mcu_interface_t;
 
 /**
@@ -45,7 +45,7 @@ typedef enum
  */
 typedef struct
 {
-	char name[64];                  /* MCU名称 */
+	char name[0x40];                  /* MCU名称 */
 	pdl_mcu_interface_t interface;  /* 通信接口 */
 
 	/* CAN配置 - 嵌入 HAL 配置 */
@@ -83,8 +83,8 @@ typedef struct
  */
 typedef enum
 {
-	PDL_BMC_CHANNEL_NETWORK = 0,  /* 网络通道（IPMI over LAN） */
-	PDL_BMC_CHANNEL_SERIAL  = 1   /* 串口通道（IPMI over Serial） */
+	PDL_BMC_CHANNEL_NETWORK = 0x00,  /* 网络通道（IPMI over LAN） */
+	PDL_BMC_CHANNEL_SERIAL  = 0x01   /* 串口通道（IPMI over Serial） */
 } pdl_bmc_channel_t;
 
 /**
@@ -92,8 +92,8 @@ typedef enum
  */
 typedef enum
 {
-	PDL_BMC_PROTOCOL_IPMI = 0,    /* IPMI协议 */
-	PDL_BMC_PROTOCOL_REDFISH = 1  /* Redfish协议 */
+	PDL_BMC_PROTOCOL_IPMI = 0x00,    /* IPMI协议 */
+	PDL_BMC_PROTOCOL_REDFISH = 0x01  /* Redfish协议 */
 } pdl_bmc_protocol_t;
 
 /**
@@ -162,8 +162,8 @@ typedef struct
  */
 typedef enum
 {
-	PDL_WATCHDOG_MODE_MANUAL = 0,    /* 手动模式：应用自己调用Kick */
-	PDL_WATCHDOG_MODE_AUTO = 1       /* 自动模式：PDL内部线程自动喂狗 */
+	PDL_WATCHDOG_MODE_MANUAL = 0x00,    /* 手动模式：应用自己调用Kick */
+	PDL_WATCHDOG_MODE_AUTO = 0x01       /* 自动模式：PDL内部线程自动喂狗 */
 } pdl_watchdog_mode_t;
 
 /**
@@ -171,7 +171,7 @@ typedef enum
  */
 typedef struct
 {
-	char name[64];                  /* Watchdog名称 */
+	char name[0x40];                  /* Watchdog名称 */
 	const char *device;             /* 设备路径（如/dev/watchdog） */
 	uint32_t timeout_sec;           /* 超时时间（秒） */
 	pdl_watchdog_mode_t mode;           /* 工作模式 */

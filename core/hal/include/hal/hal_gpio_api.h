@@ -18,8 +18,8 @@ extern "C" {
  *===========================================================================*/
 
 typedef enum {
-	HAL_GPIO_DIR_INPUT  = 0,    /* 输入模式 */
-	HAL_GPIO_DIR_OUTPUT = 1     /* 输出模式 */
+	HAL_GPIO_DIR_INPUT  = 0x00,    /* 输入模式 */
+	HAL_GPIO_DIR_OUTPUT = 0x01     /* 输出模式 */
 } hal_gpio_direction_t;
 
 /*===========================================================================
@@ -27,8 +27,8 @@ typedef enum {
  *===========================================================================*/
 
 typedef enum {
-	HAL_GPIO_LEVEL_LOW  = 0,    /* 低电平 */
-	HAL_GPIO_LEVEL_HIGH = 1     /* 高电平 */
+	HAL_GPIO_LEVEL_LOW  = 0x00,    /* 低电平 */
+	HAL_GPIO_LEVEL_HIGH = 0x01     /* 高电平 */
 } hal_gpio_level_t;
 
 /*===========================================================================
@@ -36,10 +36,10 @@ typedef enum {
  *===========================================================================*/
 
 typedef enum {
-	HAL_GPIO_EDGE_NONE    = 0,  /* 无中断 */
-	HAL_GPIO_EDGE_RISING  = 1,  /* 上升沿触发 */
-	HAL_GPIO_EDGE_FALLING = 2,  /* 下降沿触发 */
-	HAL_GPIO_EDGE_BOTH    = 3   /* 双边沿触发 */
+	HAL_GPIO_EDGE_NONE    = 0x00,  /* 无中断 */
+	HAL_GPIO_EDGE_RISING  = 0x01,  /* 上升沿触发 */
+	HAL_GPIO_EDGE_FALLING = 0x02,  /* 下降沿触发 */
+	HAL_GPIO_EDGE_BOTH    = 0x03   /* 双边沿触发 */
 } hal_gpio_edge_t;
 
 /*===========================================================================

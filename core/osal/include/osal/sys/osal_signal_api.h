@@ -8,13 +8,13 @@
 /*
  * 信号类型
  */
-#define OS_SIGNAL_INT       2   /* SIGINT - 中断信号 (Ctrl+C) */
-#define OS_SIGNAL_TERM      15  /* SIGTERM - 终止信号 */
-#define OS_SIGNAL_HUP       1   /* SIGHUP - 挂起信号 */
-#define OS_SIGNAL_QUIT      3   /* SIGQUIT - 退出信号 */
-#define OS_SIGNAL_KILL      9   /* SIGKILL - 强制终止信号 */
-#define OS_SIGNAL_USR1      10  /* SIGUSR1 - 用户自定义信号1 */
-#define OS_SIGNAL_USR2      12  /* SIGUSR2 - 用户自定义信号2 */
+#define OS_SIGNAL_INT       0x2   /* SIGINT - 中断信号 (Ctrl+C) */
+#define OS_SIGNAL_TERM      0xF  /* SIGTERM - 终止信号 */
+#define OS_SIGNAL_HUP       0x1   /* SIGHUP - 挂起信号 */
+#define OS_SIGNAL_QUIT      0x3   /* SIGQUIT - 退出信号 */
+#define OS_SIGNAL_KILL      0x9   /* SIGKILL - 强制终止信号 */
+#define OS_SIGNAL_USR1      0xA  /* SIGUSR1 - 用户自定义信号1 */
+#define OS_SIGNAL_USR2      0xC  /* SIGUSR2 - 用户自定义信号2 */
 
 /* POSIX标准信号常量（用于兼容性） - 仅在未定义时定义 */
 #ifndef SIGINT

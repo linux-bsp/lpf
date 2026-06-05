@@ -14,8 +14,8 @@
 #define SHM_HEARTBEAT_SIZE     (4 * 1024)         /* 4KB */
 
 /* 遥测数据定义 */
-#define TM_MAX_COUNT           1024
-#define TM_MAX_DATA_SIZE       256
+#define TM_MAX_COUNT           0x400
+#define TM_MAX_DATA_SIZE       0x100
 
 /* 遥测新鲜度 */
 typedef enum {

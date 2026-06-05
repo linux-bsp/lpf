@@ -38,17 +38,17 @@ typedef struct
  * 校验位定义
  *===========================================================================*/
 
-#define HAL_SERIAL_PARITY_NONE  0  /* 无校验 */
-#define HAL_SERIAL_PARITY_ODD   1  /* 奇校验 */
-#define HAL_SERIAL_PARITY_EVEN  2  /* 偶校验 */
+#define HAL_SERIAL_PARITY_NONE  0x00  /* 无校验 */
+#define HAL_SERIAL_PARITY_ODD   0x01  /* 奇校验 */
+#define HAL_SERIAL_PARITY_EVEN  0x02  /* 偶校验 */
 
 /*===========================================================================
  * 流控制定义
  *===========================================================================*/
 
-#define HAL_SERIAL_FLOW_NONE    0  /* 无流控 */
-#define HAL_SERIAL_FLOW_HW      1  /* 硬件流控（RTS/CTS） */
-#define HAL_SERIAL_FLOW_SW      2  /* 软件流控（XON/XOFF） */
+#define HAL_SERIAL_FLOW_NONE    0x00  /* 无流控 */
+#define HAL_SERIAL_FLOW_HW      0x01  /* 硬件流控（RTS/CTS） */
+#define HAL_SERIAL_FLOW_SW      0x02  /* 软件流控（XON/XOFF） */
 
 /*===========================================================================
  * API函数

@@ -20,7 +20,7 @@
  *===========================================================================*/
 
 /* 控制字符数组大小 */
-#define OSAL_NCCS 32
+#define OSAL_NCCS 0x20
 
 /**
  * @brief termios结构体
@@ -91,15 +91,15 @@ typedef struct {
 /*===========================================================================
  * c_cc - 控制字符索引
  *===========================================================================*/
-#define OSAL_VINTR    0   /* INTR字符 */
-#define OSAL_VQUIT    1   /* QUIT字符 */
-#define OSAL_VERASE   2   /* ERASE字符 */
-#define OSAL_VKILL    3   /* KILL字符 */
-#define OSAL_VEOF     4   /* EOF字符 */
-#define OSAL_VTIME    5   /* 读超时（十分之一秒） */
-#define OSAL_VMIN     6   /* 读最小字符数 */
-#define OSAL_VSTART   8   /* START字符 */
-#define OSAL_VSTOP    9   /* STOP字符 */
+#define OSAL_VINTR    0x00   /* INTR字符 */
+#define OSAL_VQUIT    0x01   /* QUIT字符 */
+#define OSAL_VERASE   0x02   /* ERASE字符 */
+#define OSAL_VKILL    0x03   /* KILL字符 */
+#define OSAL_VEOF     0x04   /* EOF字符 */
+#define OSAL_VTIME    0x05   /* 读超时（十分之一秒） */
+#define OSAL_VMIN     0x06   /* 读最小字符数 */
+#define OSAL_VSTART   0x08   /* START字符 */
+#define OSAL_VSTOP    0x09   /* STOP字符 */
 
 /*===========================================================================
  * tcsetattr的可选操作
