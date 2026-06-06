@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "osal.h"
 
 int main(int argc, char *argv[])
@@ -6,15 +5,15 @@ int main(int argc, char *argv[])
     (void)argc;
     (void)argv;
 
-    printf("=================================\n");
-    printf("  Sample Product Demo Application\n");
-    printf("=================================\n\n");
+    LOG_INFO("DEMO", "=================================");
+    LOG_INFO("DEMO", "  Sample Product Demo Application");
+    LOG_INFO("DEMO", "=================================");
 
     // 打印版本信息
     print_version_info();
 
-    printf("\nDemo application running...\n");
-    printf("This is a sample application for demonstration purposes.\n");
+    LOG_INFO("DEMO", "Demo application running...");
+    LOG_INFO("DEMO", "This is a sample application for demonstration purposes.");
 
     return 0;
 }

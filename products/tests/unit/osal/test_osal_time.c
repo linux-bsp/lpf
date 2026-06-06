@@ -5,14 +5,13 @@
  */
 
 #include "osal.h"
-#include <sys/time.h>  /* for gettimeofday */
 
 /* 辅助函数：获取当前时间（微秒） */
 static uint64_t get_time_in_micros(void)
 {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return (uint64_t)tv.tv_sec * 1000000ULL + (uint64_t)tv.tv_usec;
+    OS_time_t time_struct;
+    OSAL_GetMonotonicTime(&time_struct);
+    return (uint64_t)time_struct.seconds * 1000000ULL + (uint64_t)time_struct.microsecs;
 }
 
 /*===========================================================================

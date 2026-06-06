@@ -5,7 +5,6 @@
  * 演示如何使用 Mock 功能进行隔离测试
  */
 
-#include <stdint.h>
 #include "test_framework.h"
 #include "test_mock.h"
 #include "osal.h"

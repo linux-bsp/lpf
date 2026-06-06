@@ -5,7 +5,6 @@
 
 #include "test_framework.h"
 #include "pconfig.h"
-#include <string.h>
 
 /* 测试用的MCU配置 */
 static pconfig_mcu_entry_t test_mcu_entries[] = {

@@ -5,7 +5,6 @@
  */
 
 #include "osal.h"
-#include <stdbool.h>
 
 /* 测试日志文件路径 */
 #define TEST_LOG_FILE "/tmp/osal_test.log"

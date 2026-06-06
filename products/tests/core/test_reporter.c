@@ -10,7 +10,6 @@
 
 #include "test_core.h"
 #include "osal.h"
-#include <stdlib.h>
 
 /* Forward declarations */
 extern const test_stats_t* libutest_get_stats(void);

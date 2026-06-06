@@ -8,7 +8,6 @@
 
 #include "test_core.h"
 #include "osal.h"
-#include <string.h>
 
 /**
  * Extract program name from argv[0] (handles both full path and basename)
@@ -141,16 +140,39 @@ static uint32_t parse_tags(const char *str)
 {
     uint32_t tags = 0;
     char buffer[256];
-    char *saveptr = NULL;
     OSAL_Strncpy(buffer, str, sizeof(buffer));
     buffer[sizeof(buffer) - 1] = '\0';
 
-    char *token = strtok_r(buffer, ",", &saveptr);
-    while (token != NULL) {
+    char *token = buffer;
+    char *next = buffer;
+
+    while (*next != '\0') {
+        /* Find next comma or end */
+        while (*next != '\0' && *next != ',') {
+            next++;
+        }
+
+        /* Null-terminate current token */
+        bool has_more = (*next == ',');
+        if (has_more) {
+            *next = '\0';
+            next++;
+        }
+
         /* Trim leading spaces */
         while (*token == ' ') {
             token++;
         }
+
+        /* Trim trailing spaces */
+        char *end = token;
+        while (*end != '\0') {
+            end++;
+        }
+        while (end > token && *(end - 1) == ' ') {
+            end--;
+        }
+        *end = '\0';
 
         if (0 == OSAL_Strcmp(token, "fast")) {
             tags |= TEST_TAG_FAST;
@@ -170,7 +192,8 @@ static uint32_t parse_tags(const char *str)
             tags |= TEST_TAG_PRIVILEGED;
         }
 
-        token = strtok_r(NULL, ",", &saveptr);
+        if (!has_more) break;
+        token = next;
     }
 
     return tags;
