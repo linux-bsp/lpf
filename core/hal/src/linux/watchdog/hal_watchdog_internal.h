@@ -7,7 +7,6 @@
 #ifndef HAL_WATCHDOG_INTERNAL_H
 #define HAL_WATCHDOG_INTERNAL_H
 
-#include <stdatomic.h>
 #include "osal.h"
 #include "hal.h"
 #include "hal_watchdog.h"
@@ -27,7 +26,7 @@ typedef struct
 	char    device[256];              /* 设备路径 */
 	uint32_t timeout_sec;             /* 超时时间（秒） */
 	bool    enabled;                  /* 启用状态 */
-	_Atomic uint32_t kick_count;      /* 喂狗次数（原子操作） */
+	osal_atomic_uint32_t kick_count;  /* 喂狗次数（原子操作） */
 } hal_watchdog_context_t;
 
 /*===========================================================================
