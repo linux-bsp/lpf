@@ -29,16 +29,32 @@
 #define PDL_VERSION_PATCH  0x0
 
 /* 依赖的基础库 */
+#ifdef CONFIG_OSAL
 #include "osal.h"
+#endif /* CONFIG_OSAL */
 
 /* 类型定义（必须最先包含，其他模块依赖它） */
 #include "pdl_types.h"
 
 /* 设备驱动 - 按字母顺序 */
+#ifdef CONFIG_PDL_BMC_SUPPORT
 #include "pdl_bmc.h"         /* BMC（基板管理控制器）驱动 */
+#endif /* CONFIG_PDL_BMC_SUPPORT */
+
+#ifdef CONFIG_PDL_CCM_SUPPORT
 #include "pdl_ccm.h"         /* CCM（通信管理板）驱动 */
+#endif /* CONFIG_PDL_CCM_SUPPORT */
+
+#ifdef CONFIG_PDL_MCU_SUPPORT
 #include "pdl_mcu.h"         /* MCU（微控制器）驱动 */
+#endif /* CONFIG_PDL_MCU_SUPPORT */
+
+#ifdef CONFIG_PDL_SATELLITE_SUPPORT
 #include "pdl_satellite.h"   /* Satellite（卫星平台）驱动 */
+#endif /* CONFIG_PDL_SATELLITE_SUPPORT */
+
+#ifdef CONFIG_PDL_WATCHDOG_SUPPORT
 #include "pdl_watchdog.h"    /* Watchdog（看门狗）驱动 */
+#endif /* CONFIG_PDL_WATCHDOG_SUPPORT */
 
 #endif /* PDL_H */

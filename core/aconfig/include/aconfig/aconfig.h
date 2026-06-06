@@ -2,15 +2,22 @@
  * @file aconfig.h
  * @brief ACONFIG 对外 API - 核心配置管理接口
  * @note 本文件为 ACONFIG 模块的对外 API，提供配置注册和查询功能
+ *
+ * ACONFIG 提供稳定的应用配置层 API，将业务功能映射到硬件设备。
+ * 所有 include 都是无条件编译的核心依赖，因为：
+ * - ACONFIG 必须提供一致的 API 表面，无论底层硬件配置如何
+ * - 条件编译发生在实现层（aconfig.c）和底层（HAL/PDL/PRL）
+ * - 这确保了 API 的稳定性和向后兼容性
  */
 
 #ifndef ACONFIG_H
 #define ACONFIG_H
 
-#include "osal.h"
-#include "aconfig_types.h"
-#include "aconfig_tc.h"
-#include "aconfig_tm.h"
+/* Core dependencies - always required */
+#include "osal.h"              /* OSAL 基础类型和返回值 */
+#include "aconfig_types.h"     /* ACONFIG 核心数据结构 */
+#include "aconfig_tc.h"        /* 遥控功能 ID 枚举 */
+#include "aconfig_tm.h"        /* 遥测功能 ID 枚举 */
 
 /**
  * @brief ACONFIG 配置统计信息

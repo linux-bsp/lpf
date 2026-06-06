@@ -16,8 +16,15 @@
 #ifndef PCONFIG_PCONFIG_TYPES_H
 #define PCONFIG_PCONFIG_TYPES_H
 
+/* Core dependencies */
+#ifdef CONFIG_OSAL
 #include "osal.h"
+#endif /* CONFIG_OSAL */
+
+/* Device driver layer - required for MCU/BMC configuration types */
+#ifdef CONFIG_PDL
 #include "pdl.h"
+#endif /* CONFIG_PDL */
 
 /*===========================================================================
  * GPIO配置
