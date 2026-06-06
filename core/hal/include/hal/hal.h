@@ -20,22 +20,42 @@
 #define HAL_VERSION_MINOR  0x00
 #define HAL_VERSION_PATCH  0x00
 
-/* 基础类型定义 */
+/* 基础类型定义 - 所有 HAL 模块都需要 */
 #include "hal_types.h"
 
-/* 配置和类型定义 */
+/* CAN 总线 */
+#ifdef CONFIG_HAL_CAN
 #include "config/hal_can_config.h"
 #include "config/hal_can_types.h"
-#include "config/hal_i2c_types.h"
-#include "config/hal_spi_types.h"
-#include "config/hal_uart_config.h"
-
-/* HAL API - 按外设类型组织 */
 #include "hal_can.h"
+#endif /* CONFIG_HAL_CAN */
+
+/* GPIO */
+#ifdef CONFIG_HAL_GPIO
 #include "hal_gpio.h"
+#endif /* CONFIG_HAL_GPIO */
+
+/* I2C 总线 */
+#ifdef CONFIG_HAL_I2C
+#include "config/hal_i2c_types.h"
 #include "hal_i2c.h"
-#include "hal_serial.h"
+#endif /* CONFIG_HAL_I2C */
+
+/* SPI 总线 */
+#ifdef CONFIG_HAL_SPI
+#include "config/hal_spi_types.h"
 #include "hal_spi.h"
+#endif /* CONFIG_HAL_SPI */
+
+/* UART/Serial */
+#ifdef CONFIG_HAL_UART
+#include "config/hal_uart_config.h"
+#include "hal_serial.h"
+#endif /* CONFIG_HAL_UART */
+
+/* 看门狗 */
+#ifdef CONFIG_HAL_WATCHDOG
 #include "hal_watchdog.h"
+#endif /* CONFIG_HAL_WATCHDOG */
 
 #endif /* HAL_HAL_H */
