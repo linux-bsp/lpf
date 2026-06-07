@@ -36,38 +36,56 @@ typedef enum
 } pdl_bmc_protocol_t;
 
 /**
+ * @brief BMC通道配置（union形式）
+ *
+ * 使用union表示互斥的通道类型配置
+ */
+typedef union
+{
+	/* 网络通道配置 */
+	struct {
+		const char *ip_addr;      /* IP地址 */
+		uint16_t port;            /* 端口（默认623） */
+		const char *username;     /* 用户名 */
+		const char *password;     /* 密码 */
+		uint32_t timeout_ms;      /* 超时时间 */
+	} network;
+
+	/* 串口通道配置 */
+	struct {
+		const char *device;       /* 串口设备（传递给 HAL） */
+		uint32_t baudrate;        /* 波特率（传递给 HAL） */
+		uint8_t data_bits;        /* 数据位（传递给 HAL，默认8） */
+		uint8_t stop_bits;        /* 停止位（传递给 HAL，默认1） */
+		uint8_t parity;           /* 校验位（传递给 HAL，默认NONE） */
+		uint32_t timeout_ms;      /* 超时时间 */
+	} serial;
+} pdl_bmc_channel_config_t;
+
+/**
  * @brief BMC配置
  *
- * 说明：直接嵌入 HAL 层配置结构体，避免重复定义
+ * 设计说明：
+ * - 使用双union模式支持主备通道配置
+ * - primary_channel指定主通道类型
+ * - backup_channel指定备用通道类型
+ * - auto_switch启用时，主通道故障自动切换到备用通道
+ * - 每个通道配置使用union，节省内存的同时保持灵活性
  */
 typedef struct
 {
-	/* 网络配置 */
-	struct {
-		bool enabled;             /* 是否启用 */
-		const char *ip_addr;      /* IP地址 */
-		uint16_t port;              /* 端口（默认623） */
-		const char *username;     /* 用户名 */
-		const char *password;     /* 密码 */
-		uint32_t timeout_ms;        /* 超时时间 */
-	} network;
+	/* 主通道配置 */
+	pdl_bmc_channel_t primary_channel;       /* 主通道类型 */
+	pdl_bmc_channel_config_t primary_config; /* 主通道配置（union） */
 
-	/* 串口配置 - 嵌入 HAL 配置 */
-	struct {
-		bool enabled;             /* 是否启用 */
-		const char *device;       /* 串口设备（传递给 HAL） */
-		uint32_t baudrate;          /* 波特率（传递给 HAL） */
-		uint8_t data_bits;          /* 数据位（传递给 HAL，默认8） */
-		uint8_t stop_bits;          /* 停止位（传递给 HAL，默认1） */
-		uint8_t parity;             /* 校验位（传递给 HAL，默认NONE） */
-		uint32_t timeout_ms;        /* 超时时间 */
-	} serial;
+	/* 备用通道配置（用于auto_switch） */
+	pdl_bmc_channel_t backup_channel;        /* 备用通道类型 */
+	pdl_bmc_channel_config_t backup_config;  /* 备用通道配置（union） */
 
 	/* 服务配置 */
-	pdl_bmc_channel_t primary_channel;  /* 主通道 */
-	bool auto_switch;             /* 自动切换通道 */
-	uint32_t retry_count;           /* 重试次数 */
-	uint32_t health_check_interval; /* 健康检查间隔(ms) */
+	bool auto_switch;                        /* 自动切换通道 */
+	uint32_t retry_count;                    /* 重试次数 */
+	uint32_t health_check_interval;          /* 健康检查间隔(ms) */
 } pdl_bmc_config_t;
 
 /*

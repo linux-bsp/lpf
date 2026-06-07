@@ -59,8 +59,8 @@ static pconfig_bmc_entry_t test_bmc_entries[] = {
         .description = "Satellite platform BMC",
         .enabled = true,
         .config = {
-            .serial = {
-                .enabled = true,
+            .primary_channel = PDL_BMC_CHANNEL_SERIAL,
+            .primary_config.serial = {
                 .device = "/dev/ttyS1",
                 .baudrate = 115200,
                 .data_bits = 8,
@@ -68,7 +68,14 @@ static pconfig_bmc_entry_t test_bmc_entries[] = {
                 .parity = 0,
                 .timeout_ms = 2000
             },
-            .primary_channel = PDL_BMC_CHANNEL_SERIAL,
+            .backup_channel = PDL_BMC_CHANNEL_NETWORK,
+            .backup_config.network = {
+                .ip_addr = "192.168.1.100",
+                .port = 623,
+                .username = "admin",
+                .password = "admin",
+                .timeout_ms = 5000
+            },
             .auto_switch = false,
             .retry_count = 3,
             .health_check_interval = 5000
@@ -234,7 +241,8 @@ TEST_CASE(test_pconfig_hw_find_bmc_by_name)
 
     TEST_ASSERT_NOT_EQUAL(NULL, bmc);
     TEST_ASSERT_EQUAL(0, OSAL_Strcmp(bmc->name, "satellite_bmc"));
-    TEST_ASSERT_EQUAL(115200, bmc->config.serial.baudrate);
+    TEST_ASSERT_EQUAL(PDL_BMC_CHANNEL_SERIAL, bmc->config.primary_channel);
+    TEST_ASSERT_EQUAL(115200, bmc->config.primary_config.serial.baudrate);
     TEST_ASSERT_TRUE(bmc->enabled);
 }
 

@@ -80,11 +80,16 @@ int32_t PDL_BMC_Init(const pdl_bmc_config_t *config,
     }
 
     /* 初始化网络传输层 */
-    if (config->network.enabled)
+    if (config->primary_channel == PDL_BMC_CHANNEL_NETWORK ||
+        (config->auto_switch && config->backup_channel == PDL_BMC_CHANNEL_NETWORK))
     {
-        ret = bmc_transport_net_init(config->network.ip_addr,
-                                     config->network.port,
-                                     config->network.timeout_ms,
+        const pdl_bmc_channel_config_t *net_cfg =
+            (config->primary_channel == PDL_BMC_CHANNEL_NETWORK) ?
+            &config->primary_config : &config->backup_config;
+
+        ret = bmc_transport_net_init(net_cfg->network.ip_addr,
+                                     net_cfg->network.port,
+                                     net_cfg->network.timeout_ms,
                                      &ctx->net_transport_handle);
         if (OSAL_SUCCESS != ret)
         {
@@ -93,16 +98,21 @@ int32_t PDL_BMC_Init(const pdl_bmc_config_t *config,
         else
         {
             LOG_INFO("BMC", "Network transport opened: %s:%d",
-                     config->network.ip_addr, config->network.port);
+                     net_cfg->network.ip_addr, net_cfg->network.port);
         }
     }
 
     /* 初始化串口传输层 */
-    if (config->serial.enabled)
+    if (config->primary_channel == PDL_BMC_CHANNEL_SERIAL ||
+        (config->auto_switch && config->backup_channel == PDL_BMC_CHANNEL_SERIAL))
     {
-        ret = bmc_transport_serial_init(config->serial.device,
-                                        config->serial.baudrate,
-                                        config->serial.timeout_ms,
+        const pdl_bmc_channel_config_t *serial_cfg =
+            (config->primary_channel == PDL_BMC_CHANNEL_SERIAL) ?
+            &config->primary_config : &config->backup_config;
+
+        ret = bmc_transport_serial_init(serial_cfg->serial.device,
+                                        serial_cfg->serial.baudrate,
+                                        serial_cfg->serial.timeout_ms,
                                         &ctx->serial_transport_handle);
         if (OSAL_SUCCESS != ret)
         {
@@ -110,7 +120,7 @@ int32_t PDL_BMC_Init(const pdl_bmc_config_t *config,
         }
         else
         {
-            LOG_INFO("BMC", "Serial transport opened: %s", config->serial.device);
+            LOG_INFO("BMC", "Serial transport opened: %s", serial_cfg->serial.device);
         }
     }
 
@@ -124,9 +134,22 @@ int32_t PDL_BMC_Init(const pdl_bmc_config_t *config,
                     bmc_transport_net_send_recv : bmc_transport_serial_send_recv;
 
         /* 优先尝试初始化Redfish */
+        const char *username = NULL;
+        const char *password = NULL;
+
+        /* 如果使用网络通道，获取认证信息 */
+        if (ctx->current_channel == PDL_BMC_CHANNEL_NETWORK)
+        {
+            const pdl_bmc_channel_config_t *net_cfg =
+                (config->primary_channel == PDL_BMC_CHANNEL_NETWORK) ?
+                &config->primary_config : &config->backup_config;
+            username = net_cfg->network.username;
+            password = net_cfg->network.password;
+        }
+
         ret = bmc_redfish_init(transport_handle, send_recv,
-                              config->network.username,
-                              config->network.password,
+                              username,
+                              password,
                               &ctx->redfish_handle);
         if (OSAL_SUCCESS == ret)
         {
