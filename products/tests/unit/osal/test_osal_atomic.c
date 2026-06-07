@@ -132,17 +132,21 @@ TEST_CASE(test_atomic_compare_exchange)
     OSAL_AtomicInit(&atomic, 42);
 
     /* 测试CAS成功 */
-    bool result = OSAL_AtomicCompareExchange(&atomic, 42, 100);
+    uint32_t expected = 42;
+    bool result = OSAL_AtomicCompareExchange(&atomic, &expected, 100);
     TEST_ASSERT_TRUE(result);
     TEST_ASSERT_EQUAL(100, OSAL_AtomicLoad(&atomic));
 
-    /* 测试CAS失败（期望值不匹配） */
-    result = OSAL_AtomicCompareExchange(&atomic, 42, 200);
+    /* 测试CAS失败（期望值不匹配），expected应被更新为实际值 */
+    expected = 42;
+    result = OSAL_AtomicCompareExchange(&atomic, &expected, 200);
     TEST_ASSERT_FALSE(result);
     TEST_ASSERT_EQUAL(100, OSAL_AtomicLoad(&atomic));  /* 值不变 */
+    TEST_ASSERT_EQUAL(100, expected);  /* expected被更新为实际值 */
 
     /* 测试CAS成功（交换为0） */
-    result = OSAL_AtomicCompareExchange(&atomic, 100, 0);
+    expected = 100;
+    result = OSAL_AtomicCompareExchange(&atomic, &expected, 0);
     TEST_ASSERT_TRUE(result);
     TEST_ASSERT_EQUAL(0, OSAL_AtomicLoad(&atomic));
 }
@@ -216,13 +220,13 @@ static void* atomic_cas_thread(void *arg)
 
 
     for (i = 0; i < data->iterations; i++) {
-        uint32_t old_value, new_value;
+        uint32_t expected, new_value;
         bool success;
 
         do {
-            old_value = OSAL_AtomicLoad(data->counter);
-            new_value = old_value + 1;
-            success = OSAL_AtomicCompareExchange(data->counter, old_value, new_value);
+            expected = OSAL_AtomicLoad(data->counter);
+            new_value = expected + 1;
+            success = OSAL_AtomicCompareExchange(data->counter, &expected, new_value);
         } while (!success);
     }
 
@@ -374,14 +378,17 @@ TEST_CASE(test_atomic64_compare_exchange)
     OSAL_AtomicInit64(&atomic, 0x123456789ABCDEF0ULL);
 
     /* 测试CAS成功 */
-    bool result = OSAL_AtomicCompareExchange64(&atomic, 0x123456789ABCDEF0ULL, 0xFEDCBA9876543210ULL);
+    uint64_t expected = 0x123456789ABCDEF0ULL;
+    bool result = OSAL_AtomicCompareExchange64(&atomic, &expected, 0xFEDCBA9876543210ULL);
     TEST_ASSERT_TRUE(result);
     TEST_ASSERT_EQUAL(0xFEDCBA9876543210ULL, OSAL_AtomicLoad64(&atomic));
 
-    /* 测试CAS失败 */
-    result = OSAL_AtomicCompareExchange64(&atomic, 0x123456789ABCDEF0ULL, 0x1111111111111111ULL);
+    /* 测试CAS失败，expected应被更新为实际值 */
+    expected = 0x123456789ABCDEF0ULL;
+    result = OSAL_AtomicCompareExchange64(&atomic, &expected, 0x1111111111111111ULL);
     TEST_ASSERT_FALSE(result);
     TEST_ASSERT_EQUAL(0xFEDCBA9876543210ULL, OSAL_AtomicLoad64(&atomic));
+    TEST_ASSERT_EQUAL(0xFEDCBA9876543210ULL, expected);  /* expected被更新 */
 }
 
 TEST_CASE(test_atomic64_overflow)

@@ -91,12 +91,24 @@ uint32_t OSAL_AtomicDecrement(osal_atomic_uint32_t *atomic);
 
 /**
  * @brief 原子比较并交换（CAS）
+ *
+ * 符合标准CAS语义：如果 *atomic == *expected，则设置 *atomic = desired 并返回 true
+ * 否则将 *expected 更新为 *atomic 的实际值并返回 false
+ *
  * @param atomic 原子变量指针
- * @param expected 期望值
+ * @param expected 期望值指针（输入/输出参数）
+ *                 - 输入：期望的当前值
+ *                 - 输出：如果CAS失败，返回实际的当前值
  * @param desired 目标值
  * @return true 交换成功，false 交换失败
+ *
+ * @note 标准用法示例（重试循环）：
+ *       uint32_t expected = OSAL_AtomicLoad(&atomic);
+ *       do {
+ *           uint32_t desired = expected + 1;
+ *       } while (!OSAL_AtomicCompareExchange(&atomic, &expected, desired));
  */
-bool OSAL_AtomicCompareExchange(osal_atomic_uint32_t *atomic, uint32_t expected, uint32_t desired);
+bool OSAL_AtomicCompareExchange(osal_atomic_uint32_t *atomic, uint32_t *expected, uint32_t desired);
 
 /*===========================================================================
  * 64位原子操作 API
@@ -155,12 +167,18 @@ uint64_t OSAL_AtomicDecrement64(osal_atomic_uint64_t *atomic);
 
 /**
  * @brief 64位原子比较并交换（CAS）
+ *
+ * 符合标准CAS语义：如果 *atomic == *expected，则设置 *atomic = desired 并返回 true
+ * 否则将 *expected 更新为 *atomic 的实际值并返回 false
+ *
  * @param atomic 原子变量指针
- * @param expected 期望值
+ * @param expected 期望值指针（输入/输出参数）
+ *                 - 输入：期望的当前值
+ *                 - 输出：如果CAS失败，返回实际的当前值
  * @param desired 目标值
  * @return true 交换成功，false 交换失败
  */
-bool OSAL_AtomicCompareExchange64(osal_atomic_uint64_t *atomic, uint64_t expected, uint64_t desired);
+bool OSAL_AtomicCompareExchange64(osal_atomic_uint64_t *atomic, uint64_t *expected, uint64_t desired);
 
 #ifdef __cplusplus
 }

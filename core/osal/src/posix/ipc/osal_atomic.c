@@ -46,9 +46,9 @@ uint32_t OSAL_AtomicDecrement(osal_atomic_uint32_t *atomic)
     return atomic_fetch_sub(&atomic->value, 1) - 1;
 }
 
-bool OSAL_AtomicCompareExchange(osal_atomic_uint32_t *atomic, uint32_t expected, uint32_t desired)
+bool OSAL_AtomicCompareExchange(osal_atomic_uint32_t *atomic, uint32_t *expected, uint32_t desired)
 {
-    return atomic_compare_exchange_strong(&atomic->value, &expected, desired);
+    return atomic_compare_exchange_strong(&atomic->value, expected, desired);
 }
 
 /*===========================================================================
@@ -90,8 +90,8 @@ uint64_t OSAL_AtomicDecrement64(osal_atomic_uint64_t *atomic)
     return atomic_fetch_sub(&atomic->value, 1) - 1;
 }
 
-bool OSAL_AtomicCompareExchange64(osal_atomic_uint64_t *atomic, uint64_t expected, uint64_t desired)
+bool OSAL_AtomicCompareExchange64(osal_atomic_uint64_t *atomic, uint64_t *expected, uint64_t desired)
 {
-    return atomic_compare_exchange_strong(&atomic->value, &expected, desired);
+    return atomic_compare_exchange_strong(&atomic->value, expected, desired);
 }
 
