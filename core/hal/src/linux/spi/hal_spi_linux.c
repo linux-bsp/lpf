@@ -33,7 +33,7 @@ int32_t HAL_SPI_Open(const hal_spi_config_t *config, hal_spi_handle_t *handle)
     if (NULL == impl)
     {
         LOG_ERROR("HAL_SPI", "Failed to allocate memory");
-        return OSAL_ERR_GENERIC;
+        return OSAL_ERR_NO_MEMORY;
     }
 
     OSAL_Memset(impl, 0, sizeof(hal_spi_context_t));
@@ -372,7 +372,7 @@ int32_t HAL_SPI_TransferMulti(hal_spi_handle_t handle, hal_spi_transfer_t *trans
     if (NULL == xfers)
     {
         LOG_ERROR("HAL_SPI", "Failed to allocate transfer buffer");
-        return OSAL_ERR_GENERIC;
+        return OSAL_ERR_NO_MEMORY;
     }
 
     /* 转换传输格式 */

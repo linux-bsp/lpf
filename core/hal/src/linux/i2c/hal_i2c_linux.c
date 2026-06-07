@@ -34,7 +34,7 @@ int32_t HAL_I2C_Open(const hal_i2c_config_t *config, hal_i2c_handle_t *handle)
     if (NULL == impl)
     {
         LOG_ERROR("HAL_I2C", "Failed to allocate memory");
-        return OSAL_ERR_GENERIC;
+        return OSAL_ERR_NO_MEMORY;
     }
 
     OSAL_Memset(impl, 0, sizeof(hal_i2c_context_t));
@@ -303,7 +303,7 @@ int32_t HAL_I2C_WriteReg(hal_i2c_handle_t handle, uint16_t slave_addr,
     if (NULL == write_buf)
     {
         LOG_ERROR("HAL_I2C", "Failed to allocate write buffer");
-        return OSAL_ERR_GENERIC;
+        return OSAL_ERR_NO_MEMORY;
     }
 
     write_buf[0] = reg_addr;
@@ -405,7 +405,7 @@ int32_t HAL_I2C_Transfer(hal_i2c_handle_t handle, hal_i2c_msg_t *msgs, uint32_t 
     if (NULL == kernel_msgs)
     {
         LOG_ERROR("HAL_I2C", "Failed to allocate message buffer");
-        return OSAL_ERR_GENERIC;
+        return OSAL_ERR_NO_MEMORY;
     }
 
     /* 转换消息格式 */

@@ -38,7 +38,7 @@ int32_t HAL_WATCHDOG_Init(const hal_watchdog_config_t *config, hal_watchdog_hand
     if (ctx == NULL)
     {
         LOG_ERROR("HAL_WDT", "Failed to allocate context");
-        return OSAL_ERR_GENERIC;
+        return OSAL_ERR_NO_MEMORY;
     }
 
     OSAL_Memset(ctx, 0, sizeof(hal_watchdog_context_t));

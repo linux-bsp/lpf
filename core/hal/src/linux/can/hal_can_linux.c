@@ -37,7 +37,7 @@ int32_t HAL_CAN_Init(const hal_can_config_t *config, hal_can_handle_t *handle)
     if (NULL == impl)
     {
         LOG_ERROR("HAL_CAN", "Failed to allocate memory");
-        return OSAL_ERR_GENERIC;
+        return OSAL_ERR_NO_MEMORY;
     }
 
     OSAL_Memset(impl, 0, sizeof(hal_can_context_t));
