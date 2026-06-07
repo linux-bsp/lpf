@@ -38,9 +38,20 @@ static osal_flock_t *g_gpio_flock = NULL;
 static int32_t gpio_module_init(void)
 {
     int32_t ret;
+    uint32_t i;
 
     if (gpio_isr_mutex != NULL) {
         return OSAL_SUCCESS;  /* 已初始化 */
+    }
+
+    /* 初始化GPIO中断上下文表 - 修复未初始化问题 */
+    for (i = 0; i < MAX_GPIO_PINS; i++) {
+        gpio_isr_table[i].gpio_num = 0;
+        gpio_isr_table[i].value_fd = -1;
+        gpio_isr_table[i].callback = NULL;
+        gpio_isr_table[i].user_data = NULL;
+        gpio_isr_table[i].enabled = false;
+        gpio_isr_table[i].running = false;
     }
 
     /* 创建文件锁 */
