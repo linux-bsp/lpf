@@ -87,13 +87,32 @@
 **影响**: 错误处理更加一致和准确
 **提交**: `d9b66fc`
 
+### P1-2: PDL层使用volatile bool进行线程间通信
+**文件**: `core/osal/include/osal/ipc/osal_atomic.h`, `core/osal/src/posix/ipc/osal_atomic.c`, `core/pdl/src/pdl_satellite/pdl_satellite.c`, `core/pdl/src/pdl_watchdog/pdl_watchdog.c`, `core/pdl/src/pdl_ccm/pdl_ccm.c`
+**问题**: 
+- PDL的satellite/watchdog/ccm模块使用volatile bool running控制线程
+- volatile不保证原子性和内存顺序，存在数据竞争
+- 多核系统可能导致线程看到不一致状态
+- 违反C11内存模型，属于未定义行为
+**修复**: 
+- OSAL层新增osal_atomic_bool_t类型和相关API
+  - OSAL_AtomicInitBool/LoadBool/StoreBool/CompareExchangeBool
+  - 内部使用_Atomic uint32_t实现（0=false, 1=true）
+- PDL层所有volatile bool running改为osal_atomic_bool_t
+- 所有读写使用原子操作API
+**影响**: 
+- 消除数据竞争，保证多线程安全
+- 符合C11内存模型，防止编译器/CPU重排序
+- 保证线程间可见性和顺序性
+**提交**: `45000fc`
+
 ## 修复统计
 
 | 优先级 | 修复数量 | 涉及文件数 | 代码行数变更 |
 |--------|---------|-----------|-------------|
 | P0 Critical | 6 | 25+ | ~500行 |
-| P1 High | 1 | 6 | ~10行 |
-| **总计** | **7** | **31+** | **~510行** |
+| P1 High | 2 | 11 | ~110行 |
+| **总计** | **8** | **36+** | **~610行** |
 
 ## 验证结果
 
@@ -112,6 +131,7 @@ python3 build.py build
 3. **内存安全增强**：内存损坏立即终止，防止扩散
 4. **API语义正确**：CAS操作符合标准，指针数组使用计数器
 5. **资源管理规范**：全局状态显式初始化，避免未定义行为
+6. **并发安全保证**：使用原子操作替代volatile，消除数据竞争
 
 ## 后续建议
 
