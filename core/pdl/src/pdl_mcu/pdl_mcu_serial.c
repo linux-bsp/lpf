@@ -115,6 +115,12 @@ static int32_t mcu_serial_pack_frame(uint8_t cmd_code,
     uint32_t pos;
     uint16_t crc;
 
+    /* 协议限制：数据长度字段为uint8_t，最大255字节 */
+    if (data_len > 255)
+    {
+        return OSAL_ERR_INVALID_PARAM;
+    }
+
     required_size = FRAME_OVERHEAD + data_len;
     if (frame_size < required_size)
     {
