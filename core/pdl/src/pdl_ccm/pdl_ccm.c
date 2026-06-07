@@ -36,7 +36,7 @@ typedef struct
     /* 线程控制 */
     osal_thread_t rx_thread;
     osal_thread_t heartbeat_thread;
-    volatile bool running;
+    osal_atomic_bool_t running;       /* 使用原子变量保证多线程安全 */
 
     /* 互斥锁保护 */
     osal_mutex_t *mutex;
@@ -54,7 +54,7 @@ static void *heartbeat_task(void *arg)
 
     LOG_INFO("PDL_CCM", "Heartbeat task started");
 
-    while (ctx->running)
+    while (OSAL_AtomicLoadBool(\&ctx->running))
     {
         /* 检查连接状态 */
         if (!ccm_eth_is_connected(ctx->eth_handle))
@@ -126,7 +126,7 @@ static void *eth_rx_task(void *arg)
 
     LOG_INFO("PDL_CCM", "Ethernet RX task started");
 
-    while (ctx->running)
+    while (OSAL_AtomicLoadBool(\&ctx->running))
     {
         /* 接收以太网消息 */
         ret = ccm_eth_recv(ctx->eth_handle, &msg, ctx->config.recv_timeout_ms);
@@ -240,6 +240,7 @@ int32_t PDL_CCM_Init(const pdl_ccm_config_t *config,
     OSAL_Memset(ctx, 0, sizeof(ccm_driver_context_t));
     OSAL_Memcpy(&ctx->config, config, sizeof(pdl_ccm_config_t));
     ctx->link_quality = 100;  /* 初始链路质量 */
+    OSAL_AtomicInitBool(&ctx->running, false);
 
     /* 创建互斥锁 */
     ret = OSAL_MutexCreate(&ctx->mutex);
@@ -261,7 +262,7 @@ int32_t PDL_CCM_Init(const pdl_ccm_config_t *config,
     }
 
     /* 启动接收线程 */
-    ctx->running = true;
+    OSAL_AtomicStoreBool(\&ctx->running, true);
     ret = OSAL_ThreadCreate(&ctx->rx_thread, eth_rx_task, ctx);
     if (ret != OSAL_SUCCESS)
     {
@@ -277,7 +278,7 @@ int32_t PDL_CCM_Init(const pdl_ccm_config_t *config,
     if (ret != OSAL_SUCCESS)
     {
         LOG_ERROR("PDL_CCM", "Failed to create heartbeat thread");
-        ctx->running = false;
+        OSAL_AtomicStoreBool(\&ctx->running, false);
         OSAL_ThreadJoin(ctx->rx_thread);
         ccm_eth_deinit(ctx->eth_handle);
         OSAL_MutexDelete(ctx->mutex);
@@ -303,7 +304,7 @@ int32_t PDL_CCM_Deinit(pdl_ccm_handle_t handle)
     }
 
     /* 停止线程 */
-    ctx->running = false;
+    OSAL_AtomicStoreBool(\&ctx->running, false);
     OSAL_ThreadJoin(ctx->rx_thread);
     OSAL_ThreadJoin(ctx->heartbeat_thread);
 

@@ -29,7 +29,7 @@ typedef struct
     /* 线程控制 */
     osal_thread_t rx_thread;
     osal_thread_t heartbeat_thread;
-    volatile bool running;
+    osal_atomic_bool_t running;       /* 使用原子变量保证多线程安全 */
 
     /* 互斥锁保护 */
     osal_mutex_t *mutex;
@@ -44,7 +44,7 @@ static void *heartbeat_task(void *arg)
 
     LOG_INFO("SAT", "Heartbeat task started");
 
-    while (ctx->running)
+    while (OSAL_AtomicLoadBool(&ctx->running))
     {
         /* 发送心跳 */
         if (OSAL_SUCCESS == satellite_can_send_heartbeat(ctx->can_handle, PDL_SATELLITE_STATUS_OK))
@@ -79,7 +79,7 @@ static void *can_rx_task(void *arg)
 
     LOG_INFO("SAT", "CAN RX task started");
 
-    while (ctx->running)
+    while (OSAL_AtomicLoadBool(&ctx->running))
     {
         /* 接收CAN消息 */
         ret = satellite_can_recv(ctx->can_handle, &msg, ctx->config.cmd_timeout_ms);
@@ -144,7 +144,7 @@ int32_t PDL_SATELLITE_Init(const pdl_satellite_config_t *config,
 
     OSAL_Memset(ctx, 0, sizeof(satellite_service_context_t));
     OSAL_Memcpy(&ctx->config, config, sizeof(pdl_satellite_config_t));
-    ctx->running = true;
+    OSAL_AtomicInitBool(&ctx->running, true);
 
     /* 创建互斥锁 */
     if (OSAL_SUCCESS != OSAL_MutexCreate(&ctx->mutex))
@@ -165,7 +165,7 @@ int32_t PDL_SATELLITE_Init(const pdl_satellite_config_t *config,
     }
 
     /* 启动运行标志 */
-    ctx->running = true;
+    OSAL_AtomicStoreBool(&ctx->running, true);
 
     /* 创建CAN接收线程 */
     ret = OSAL_ThreadCreate(&ctx->rx_thread, can_rx_task, ctx);
@@ -183,7 +183,7 @@ int32_t PDL_SATELLITE_Init(const pdl_satellite_config_t *config,
     if (OSAL_SUCCESS != ret)
     {
         LOG_ERROR("SAT", "Failed to create heartbeat thread");
-        ctx->running = false;
+        OSAL_AtomicStoreBool(&ctx->running, false);
         OSAL_ThreadJoin(ctx->rx_thread);
         satellite_can_deinit(ctx->can_handle);
         OSAL_MutexDelete(ctx->mutex);
@@ -212,7 +212,7 @@ int32_t PDL_SATELLITE_Deinit(pdl_satellite_handle_t handle)
     ctx = (satellite_service_context_t *)handle;
 
     /* 停止线程 */
-    ctx->running = false;
+    OSAL_AtomicStoreBool(&ctx->running, false);
     OSAL_ThreadJoin(ctx->rx_thread);
     OSAL_ThreadJoin(ctx->heartbeat_thread);
 

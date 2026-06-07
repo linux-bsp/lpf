@@ -16,7 +16,7 @@ typedef struct
 
     /* 自动模式相关 */
     osal_thread_t kick_thread;
-    volatile bool running;
+    osal_atomic_bool_t running;       /* 使用原子变量保证多线程安全 */
     osal_atomic_uint32_t kick_count;
     osal_atomic_uint64_t last_kick_time;  /* 上次喂狗时间戳（微秒） */
 } watchdog_context_t;
@@ -30,7 +30,7 @@ static void *watchdog_kick_thread(void *arg)
 
     LOG_INFO("PDL_WDT", "Auto-kick thread started for %s", ctx->name);
 
-    while (ctx->running)
+    while (OSAL_AtomicLoadBool(&ctx->running))
     {
         /* 喂狗 */
         int32_t ret = HAL_WATCHDOG_Kick(ctx->hal_handle);
@@ -82,7 +82,7 @@ int32_t PDL_WATCHDOG_Init(const pdl_watchdog_config_t *config, pdl_watchdog_hand
     ctx->mode = config->mode;
     ctx->kick_interval_ms = config->kick_interval_ms;
     ctx->enabled = false;
-    ctx->running = false;
+    OSAL_AtomicInitBool(&ctx->running, false);
     OSAL_AtomicInit(&ctx->kick_count, 0);
     OSAL_AtomicInit64(&ctx->last_kick_time, 0);
 
@@ -126,7 +126,7 @@ int32_t PDL_WATCHDOG_Deinit(pdl_watchdog_handle_t handle)
     ctx = (watchdog_context_t *)handle;
 
     /* 停止自动喂狗线程 */
-    if (ctx->running)
+    if (OSAL_AtomicLoadBool(&ctx->running))
     {
         PDL_WATCHDOG_Stop(handle);
     }
@@ -163,19 +163,19 @@ int32_t PDL_WATCHDOG_Start(pdl_watchdog_handle_t handle)
         return OSAL_ERR_GENERIC;
     }
 
-    if (ctx->running)
+    if (OSAL_AtomicLoadBool(&ctx->running))
     {
         LOG_WARN("PDL_WDT", "[%s] Already running", ctx->name);
         return OSAL_SUCCESS;
     }
 
     /* 启动喂狗线程 */
-    ctx->running = true;
+    OSAL_AtomicStoreBool(&ctx->running, true);
     ret = OSAL_ThreadCreate(&ctx->kick_thread, watchdog_kick_thread, ctx);
     if (ret != OSAL_SUCCESS)
     {
         LOG_ERROR("PDL_WDT", "[%s] Failed to create kick thread", ctx->name);
-        ctx->running = false;
+        OSAL_AtomicStoreBool(&ctx->running, false);
         return ret;
     }
 
@@ -198,13 +198,13 @@ int32_t PDL_WATCHDOG_Stop(pdl_watchdog_handle_t handle)
 
     ctx = (watchdog_context_t *)handle;
 
-    if (!ctx->running)
+    if (!OSAL_AtomicLoadBool(&ctx->running))
     {
         return OSAL_SUCCESS;
     }
 
     /* 停止线程 */
-    ctx->running = false;
+    OSAL_AtomicStoreBool(&ctx->running, false);
     OSAL_ThreadJoin(ctx->kick_thread);
 
     LOG_INFO("PDL_WDT", "[%s] Auto-kick service stopped", ctx->name);
@@ -255,7 +255,7 @@ int32_t PDL_WATCHDOG_GetStatus(pdl_watchdog_handle_t handle, pdl_watchdog_status
 
     OSAL_Memset(status, 0, sizeof(pdl_watchdog_status_t));
     status->enabled = ctx->enabled;
-    status->running = ctx->running;
+    status->running = OSAL_AtomicLoadBool(&ctx->running);
     status->kick_interval_ms = ctx->kick_interval_ms;
     status->mode = ctx->mode;
     status->kick_count = OSAL_AtomicLoad(&ctx->kick_count);

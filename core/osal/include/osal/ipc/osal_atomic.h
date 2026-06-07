@@ -34,6 +34,16 @@ typedef struct {
 	_Atomic uint64_t value;
 } osal_atomic_uint64_t;
 
+/**
+ * @brief 原子布尔类型
+ *
+ * 用于线程间的布尔标志位（如运行状态、停止信号）
+ * 内部使用_Atomic uint32_t实现（C11标准不保证_Atomic _Bool可用）
+ */
+typedef struct {
+	_Atomic uint32_t value;  /* 0=false, 1=true */
+} osal_atomic_bool_t;
+
 /*===========================================================================
  * 32位原子操作 API
  *===========================================================================*/
@@ -179,6 +189,44 @@ uint64_t OSAL_AtomicDecrement64(osal_atomic_uint64_t *atomic);
  * @return true 交换成功，false 交换失败
  */
 bool OSAL_AtomicCompareExchange64(osal_atomic_uint64_t *atomic, uint64_t *expected, uint64_t desired);
+
+/*===========================================================================
+ * 布尔原子操作
+ *===========================================================================*/
+
+/**
+ * @brief 初始化布尔原子变量
+ * @param atomic 原子变量指针
+ * @param value 初始值
+ */
+void OSAL_AtomicInitBool(osal_atomic_bool_t *atomic, bool value);
+
+/**
+ * @brief 加载布尔原子变量
+ * @param atomic 原子变量指针
+ * @return 当前值
+ */
+bool OSAL_AtomicLoadBool(const osal_atomic_bool_t *atomic);
+
+/**
+ * @brief 存储布尔原子变量
+ * @param atomic 原子变量指针
+ * @param value 新值
+ */
+void OSAL_AtomicStoreBool(osal_atomic_bool_t *atomic, bool value);
+
+/**
+ * @brief 布尔原子比较并交换（CAS）
+ *
+ * 如果 *atomic == *expected，则设置 *atomic = desired 并返回 true
+ * 否则将 *expected 更新为 *atomic 的实际值并返回 false
+ *
+ * @param atomic 原子变量指针
+ * @param expected 期望值指针（输入/输出参数）
+ * @param desired 目标值
+ * @return true 交换成功，false 交换失败
+ */
+bool OSAL_AtomicCompareExchangeBool(osal_atomic_bool_t *atomic, bool *expected, bool desired);
 
 #ifdef __cplusplus
 }

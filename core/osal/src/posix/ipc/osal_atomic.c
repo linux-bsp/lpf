@@ -95,3 +95,31 @@ bool OSAL_AtomicCompareExchange64(osal_atomic_uint64_t *atomic, uint64_t *expect
     return atomic_compare_exchange_strong(&atomic->value, expected, desired);
 }
 
+/*===========================================================================
+ * 布尔原子操作实现
+ *===========================================================================*/
+
+void OSAL_AtomicInitBool(osal_atomic_bool_t *atomic, bool value)
+{
+    atomic_init(&atomic->value, value ? 1 : 0);
+}
+
+bool OSAL_AtomicLoadBool(const osal_atomic_bool_t *atomic)
+{
+    return atomic_load(&atomic->value) != 0;
+}
+
+void OSAL_AtomicStoreBool(osal_atomic_bool_t *atomic, bool value)
+{
+    atomic_store(&atomic->value, value ? 1 : 0);
+}
+
+bool OSAL_AtomicCompareExchangeBool(osal_atomic_bool_t *atomic, bool *expected, bool desired)
+{
+    uint32_t exp_val = *expected ? 1 : 0;
+    uint32_t des_val = desired ? 1 : 0;
+    bool result = atomic_compare_exchange_strong(&atomic->value, &exp_val, des_val);
+    *expected = (exp_val != 0);
+    return result;
+}
+
