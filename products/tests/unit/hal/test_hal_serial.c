@@ -293,10 +293,8 @@ static void test_hal_serial_flush_null_handle(void)
 }
 
 /*===========================================================================
- * 配置测试 (暂时注释，等待HAL_Serial_SetConfig实现)
+ * 配置测试
  *===========================================================================*/
-
-#if 0  /* HAL_Serial_SetConfig未实现，暂时禁用这些测试 */
 
 /* 测试用例: 设置配置 - 成功 */
 static void test_hal_serial_set_config_success(void)
@@ -365,8 +363,6 @@ static void test_hal_serial_set_config_null_config(void)
 
     HAL_Serial_Close(handle);
 }
-
-#endif  /* HAL_Serial_SetConfig未实现 */
 
 /*===========================================================================
  * 配置参数测试
@@ -438,16 +434,6 @@ static void test_hal_serial_different_databits(void)
 /*===========================================================================
  * 测试模块注册
  *===========================================================================*/
-
-// HAL串口驱动测试
-    /* 初始化和清理 */
-    /* 读写 */
-    /* 刷新 */
-    /* 配置 - 暂时注释，等待HAL_Serial_SetConfig实现 */
-#if 0
-    #endif
-
-    /* 配置参数 */
 
 /* 测试用例数组 - 使用函数指针数组 */
 static const test_case_t test_cases[] = {
@@ -544,6 +530,24 @@ static const test_case_t test_cases[] = {
 	{
 		.name = "test_hal_serial_flush_null_handle",
 		.func = test_hal_serial_flush_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_serial_set_config_success",
+		.func = test_hal_serial_set_config_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_serial_set_config_null_handle",
+		.func = test_hal_serial_set_config_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_serial_set_config_null_config",
+		.func = test_hal_serial_set_config_null_config,
 		.setup = NULL,
 		.teardown = NULL
 	},

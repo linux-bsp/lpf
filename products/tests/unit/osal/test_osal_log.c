@@ -316,7 +316,6 @@ static void test_osal_log_shutdown_twice(void)
  *===========================================================================*/
 
 /* 测试用例: 日志写入性能 */
-/* 已屏蔽：性能测试在某些环境下可能不稳定
 static void test_osal_log_performance(void)
 {
     int32_t ret;
@@ -345,7 +344,6 @@ static void test_osal_log_performance(void)
     OSAL_LogShutdown();
     OSAL_unlink(TEST_LOG_FILE);
 }
-*/
 
 /*===========================================================================
  * 测试模块注册
@@ -442,14 +440,12 @@ static const test_case_t test_cases[] = {
 		.setup = NULL,
 		.teardown = NULL
 	},
-	/* 性能测试已屏蔽 - 在某些环境下可能不稳定
 	{
 		.name = "test_osal_log_performance",
 		.func = test_osal_log_performance,
 		.setup = NULL,
 		.teardown = NULL
 	},
-	*/
 };
 
 /* 测试套件定义 */
