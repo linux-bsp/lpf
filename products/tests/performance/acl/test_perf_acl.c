@@ -11,7 +11,7 @@
 /**
  * 测试遥控配置查询性能
  */
-TEST_CASE(test_perf_tc_config_query) {
+static void test_perf_tc_config_query(void) {
     // TODO: 实现遥控配置查询性能测试
     OSAL_Printf("[ INFO ] TC config query performance test - not implemented yet\n");
 }
@@ -19,7 +19,7 @@ TEST_CASE(test_perf_tc_config_query) {
 /**
  * 测试遥测配置查询性能
  */
-TEST_CASE(test_perf_tm_config_query) {
+static void test_perf_tm_config_query(void) {
     // TODO: 实现遥测配置查询性能测试
     OSAL_Printf("[ INFO ] TM config query performance test - not implemented yet\n");
 }
@@ -27,14 +27,55 @@ TEST_CASE(test_perf_tm_config_query) {
 /**
  * 测试配置验证性能
  */
-TEST_CASE(test_perf_config_validation) {
+static void test_perf_config_validation(void) {
     // TODO: 实现配置验证性能测试
     OSAL_Printf("[ INFO ] Config validation performance test - not implemented yet\n");
 }
 
 /* 注册性能测试模块 */
-TEST_MODULE_BEGIN(perf_acl, "PERFORMANCE")
-    TEST_CASE_REGISTER(test_perf_tc_config_query, "TC config query performance")
-    TEST_CASE_REGISTER(test_perf_tm_config_query, "TM config query performance")
-    TEST_CASE_REGISTER(test_perf_config_validation, "Config validation performance")
-TEST_MODULE_END(perf_acl, "PERFORMANCE")
+
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_perf_tc_config_query",
+		.func = test_perf_tc_config_query,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_perf_tm_config_query",
+		.func = test_perf_tm_config_query,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_perf_config_validation",
+		.func = test_perf_config_validation,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "perf_acl",
+	.module_name = "perf_acl",
+	.layer_name = "ACL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_PERFORMANCE,
+		.tags = TEST_TAG_SLOW,
+		.timeout_ms = 5000,
+		.description = "ACL perf_acl tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_perf_acl_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

@@ -10,7 +10,7 @@
 /**
  * 测试BMC传感器读取性能
  */
-TEST_CASE(test_perf_bmc_sensor_read) {
+static void test_perf_bmc_sensor_read(void) {
     // TODO: 实现BMC传感器读取性能测试
     OSAL_Printf("[ INFO ] BMC sensor read performance test - not implemented yet\n");
 }
@@ -18,7 +18,7 @@ TEST_CASE(test_perf_bmc_sensor_read) {
 /**
  * 测试MCU状态查询性能
  */
-TEST_CASE(test_perf_mcu_status_query) {
+static void test_perf_mcu_status_query(void) {
     // TODO: 实现MCU状态查询性能测试
     OSAL_Printf("[ INFO ] MCU status query performance test - not implemented yet\n");
 }
@@ -26,7 +26,7 @@ TEST_CASE(test_perf_mcu_status_query) {
 /**
  * 测试Watchdog喂狗性能
  */
-TEST_CASE(test_perf_watchdog_kick) {
+static void test_perf_watchdog_kick(void) {
     // TODO: 实现Watchdog喂狗性能测试
     OSAL_Printf("[ INFO ] Watchdog kick performance test - not implemented yet\n");
 }
@@ -34,15 +34,61 @@ TEST_CASE(test_perf_watchdog_kick) {
 /**
  * 测试卫星遥测采集性能
  */
-TEST_CASE(test_perf_satellite_telemetry) {
+static void test_perf_satellite_telemetry(void) {
     // TODO: 实现卫星遥测采集性能测试
     OSAL_Printf("[ INFO ] Satellite telemetry performance test - not implemented yet\n");
 }
 
 /* 注册性能测试模块 */
-TEST_MODULE_BEGIN(perf_pdl, "PERFORMANCE")
-    TEST_CASE_REGISTER(test_perf_bmc_sensor_read, "BMC sensor read performance")
-    TEST_CASE_REGISTER(test_perf_mcu_status_query, "MCU status query performance")
-    TEST_CASE_REGISTER(test_perf_watchdog_kick, "Watchdog kick performance")
-    TEST_CASE_REGISTER(test_perf_satellite_telemetry, "Satellite telemetry performance")
-TEST_MODULE_END(perf_pdl, "PERFORMANCE")
+
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_perf_bmc_sensor_read",
+		.func = test_perf_bmc_sensor_read,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_perf_mcu_status_query",
+		.func = test_perf_mcu_status_query,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_perf_watchdog_kick",
+		.func = test_perf_watchdog_kick,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_perf_satellite_telemetry",
+		.func = test_perf_satellite_telemetry,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "perf_pdl",
+	.module_name = "perf_pdl",
+	.layer_name = "PDL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_PERFORMANCE,
+		.tags = TEST_TAG_SLOW,
+		.timeout_ms = 5000,
+		.description = "PDL perf_pdl tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_perf_pdl_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

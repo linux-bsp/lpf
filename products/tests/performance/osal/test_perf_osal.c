@@ -18,7 +18,7 @@ static const perf_baseline_t mutex_lock_baseline = {
 /**
  * 测试互斥锁性能
  */
-TEST_CASE(test_perf_mutex_lock_unlock) {
+static void test_perf_mutex_lock_unlock(void) {
     const uint32_t iterations = 10000;
     osal_mutex_t *mutex = NULL;
 
@@ -58,7 +58,7 @@ TEST_CASE(test_perf_mutex_lock_unlock) {
 /**
  * 测试原子操作性能
  */
-TEST_CASE(test_perf_atomic_operations) {
+static void test_perf_atomic_operations(void) {
     const uint32_t iterations = 100000;
     osal_atomic_uint32_t counter;
 
@@ -92,7 +92,7 @@ TEST_CASE(test_perf_atomic_operations) {
 /**
  * 测试时间获取性能
  */
-TEST_CASE(test_perf_time_get) {
+static void test_perf_time_get(void) {
     const uint32_t iterations = 10000;
 
     /* 创建性能测量上下文 */
@@ -118,8 +118,49 @@ TEST_CASE(test_perf_time_get) {
 }
 
 /* 注册性能测试模块 */
-TEST_MODULE_BEGIN(perf_osal, "PERFORMANCE")
-    TEST_CASE_REGISTER(test_perf_mutex_lock_unlock, "Mutex lock/unlock performance")
-    TEST_CASE_REGISTER(test_perf_atomic_operations, "Atomic operations performance")
-    TEST_CASE_REGISTER(test_perf_time_get, "Time get performance")
-TEST_MODULE_END(perf_osal, "PERFORMANCE")
+
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_perf_mutex_lock_unlock",
+		.func = test_perf_mutex_lock_unlock,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_perf_atomic_operations",
+		.func = test_perf_atomic_operations,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_perf_time_get",
+		.func = test_perf_time_get,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "perf_osal",
+	.module_name = "perf_osal",
+	.layer_name = "OSAL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_PERFORMANCE,
+		.tags = TEST_TAG_SLOW,
+		.timeout_ms = 5000,
+		.description = "OSAL perf_osal tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_perf_osal_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

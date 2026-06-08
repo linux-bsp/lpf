@@ -9,7 +9,7 @@
  * 基础功能测试
  *===========================================================================*/
 
-TEST_CASE(test_atomic_init_and_load)
+static void test_atomic_init_and_load(void)
 {
     osal_atomic_uint32_t atomic;
 
@@ -26,7 +26,7 @@ TEST_CASE(test_atomic_init_and_load)
     TEST_ASSERT_EQUAL(0xFFFFFFFF, OSAL_AtomicLoad(&atomic));
 }
 
-TEST_CASE(test_atomic_store)
+static void test_atomic_store(void)
 {
     osal_atomic_uint32_t atomic;
 
@@ -43,7 +43,7 @@ TEST_CASE(test_atomic_store)
     TEST_ASSERT_EQUAL(0xDEADBEEF, OSAL_AtomicLoad(&atomic));
 }
 
-TEST_CASE(test_atomic_increment)
+static void test_atomic_increment(void)
 {
     osal_atomic_uint32_t atomic;
 
@@ -62,7 +62,7 @@ TEST_CASE(test_atomic_increment)
     TEST_ASSERT_EQUAL(101, OSAL_AtomicLoad(&atomic));
 }
 
-TEST_CASE(test_atomic_decrement)
+static void test_atomic_decrement(void)
 {
     osal_atomic_uint32_t atomic;
 
@@ -81,7 +81,7 @@ TEST_CASE(test_atomic_decrement)
     TEST_ASSERT_EQUAL(0, OSAL_AtomicLoad(&atomic));
 }
 
-TEST_CASE(test_atomic_fetch_add)
+static void test_atomic_fetch_add(void)
 {
     osal_atomic_uint32_t atomic;
 
@@ -103,7 +103,7 @@ TEST_CASE(test_atomic_fetch_add)
     TEST_ASSERT_EQUAL(1015, OSAL_AtomicLoad(&atomic));
 }
 
-TEST_CASE(test_atomic_fetch_sub)
+static void test_atomic_fetch_sub(void)
 {
     osal_atomic_uint32_t atomic;
 
@@ -125,7 +125,7 @@ TEST_CASE(test_atomic_fetch_sub)
     TEST_ASSERT_EQUAL(0, OSAL_AtomicLoad(&atomic));
 }
 
-TEST_CASE(test_atomic_compare_exchange)
+static void test_atomic_compare_exchange(void)
 {
     osal_atomic_uint32_t atomic;
 
@@ -169,7 +169,6 @@ static void* atomic_increment_thread(void *arg)
 
     uint32_t i;
 
-
     for (i = 0; i < data->iterations; i++) {
         OSAL_AtomicIncrement(data->counter);
     }
@@ -177,7 +176,7 @@ static void* atomic_increment_thread(void *arg)
     return NULL;
 }
 
-TEST_CASE(test_atomic_multithread_increment)
+static void test_atomic_multithread_increment(void)
 {
     osal_atomic_uint32_t counter;
     osal_thread_t threads[THREAD_COUNT];
@@ -218,7 +217,6 @@ static void* atomic_cas_thread(void *arg)
 
     uint32_t i;
 
-
     for (i = 0; i < data->iterations; i++) {
         uint32_t expected, new_value;
         bool success;
@@ -233,7 +231,7 @@ static void* atomic_cas_thread(void *arg)
     return NULL;
 }
 
-TEST_CASE(test_atomic_multithread_cas)
+static void test_atomic_multithread_cas(void)
 {
     osal_atomic_uint32_t counter;
     osal_thread_t threads[THREAD_COUNT];
@@ -272,7 +270,7 @@ TEST_CASE(test_atomic_multithread_cas)
  * 边界测试
  *===========================================================================*/
 
-TEST_CASE(test_atomic_overflow)
+static void test_atomic_overflow(void)
 {
     osal_atomic_uint32_t atomic;
 
@@ -287,7 +285,7 @@ TEST_CASE(test_atomic_overflow)
     TEST_ASSERT_EQUAL(0xFFFFFFFF, OSAL_AtomicLoad(&atomic));  /* 下溢到最大值 */
 }
 
-TEST_CASE(test_atomic_boundary_values)
+static void test_atomic_boundary_values(void)
 {
     osal_atomic_uint32_t atomic;
 
@@ -308,7 +306,7 @@ TEST_CASE(test_atomic_boundary_values)
  * 64位原子操作测试
  *===========================================================================*/
 
-TEST_CASE(test_atomic64_init_and_load)
+static void test_atomic64_init_and_load(void)
 {
     osal_atomic_uint64_t atomic;
 
@@ -325,7 +323,7 @@ TEST_CASE(test_atomic64_init_and_load)
     TEST_ASSERT_EQUAL(UINT64_MAX, OSAL_AtomicLoad64(&atomic));
 }
 
-TEST_CASE(test_atomic64_store)
+static void test_atomic64_store(void)
 {
     osal_atomic_uint64_t atomic;
 
@@ -339,7 +337,7 @@ TEST_CASE(test_atomic64_store)
     TEST_ASSERT_EQUAL(0xFEDCBA9876543210ULL, OSAL_AtomicLoad64(&atomic));
 }
 
-TEST_CASE(test_atomic64_increment_decrement)
+static void test_atomic64_increment_decrement(void)
 {
     osal_atomic_uint64_t atomic;
 
@@ -354,7 +352,7 @@ TEST_CASE(test_atomic64_increment_decrement)
     TEST_ASSERT_EQUAL(1000000000000ULL, OSAL_AtomicLoad64(&atomic));
 }
 
-TEST_CASE(test_atomic64_fetch_add_sub)
+static void test_atomic64_fetch_add_sub(void)
 {
     osal_atomic_uint64_t atomic;
 
@@ -371,7 +369,7 @@ TEST_CASE(test_atomic64_fetch_add_sub)
     TEST_ASSERT_EQUAL(1200000000000ULL, OSAL_AtomicLoad64(&atomic));
 }
 
-TEST_CASE(test_atomic64_compare_exchange)
+static void test_atomic64_compare_exchange(void)
 {
     osal_atomic_uint64_t atomic;
 
@@ -391,7 +389,7 @@ TEST_CASE(test_atomic64_compare_exchange)
     TEST_ASSERT_EQUAL(0xFEDCBA9876543210ULL, expected);  /* expected被更新 */
 }
 
-TEST_CASE(test_atomic64_overflow)
+static void test_atomic64_overflow(void)
 {
     osal_atomic_uint64_t atomic;
 
@@ -418,7 +416,6 @@ static void* atomic64_increment_thread(void *arg)
 
     uint32_t i;
 
-
     for (i = 0; i < data->iterations; i++) {
         OSAL_AtomicIncrement64(data->timestamp);
     }
@@ -426,7 +423,7 @@ static void* atomic64_increment_thread(void *arg)
     return NULL;
 }
 
-TEST_CASE(test_atomic64_multithread_timestamp)
+static void test_atomic64_multithread_timestamp(void)
 {
     osal_atomic_uint64_t timestamp;
     osal_thread_t threads[THREAD_COUNT];
@@ -465,26 +462,141 @@ TEST_CASE(test_atomic64_multithread_timestamp)
  * 测试套件注册
  *===========================================================================*/
 
-TEST_MODULE_BEGIN(test_osal_atomic, "OSAL")
-    /* 32位原子操作测试 */
-    TEST_CASE_REGISTER(test_atomic_init_and_load, "32-bit init and load")
-    TEST_CASE_REGISTER(test_atomic_store, "32-bit store")
-    TEST_CASE_REGISTER(test_atomic_increment, "32-bit increment")
-    TEST_CASE_REGISTER(test_atomic_decrement, "32-bit decrement")
-    TEST_CASE_REGISTER(test_atomic_fetch_add, "32-bit fetch add")
-    TEST_CASE_REGISTER(test_atomic_fetch_sub, "32-bit fetch sub")
-    TEST_CASE_REGISTER(test_atomic_compare_exchange, "32-bit compare exchange")
-    TEST_CASE_REGISTER(test_atomic_multithread_increment, "32-bit multithread increment")
-    TEST_CASE_REGISTER(test_atomic_multithread_cas, "32-bit multithread CAS")
-    TEST_CASE_REGISTER(test_atomic_overflow, "32-bit overflow")
-    TEST_CASE_REGISTER(test_atomic_boundary_values, "32-bit boundary values")
-
+/* 32位原子操作测试 */
     /* 64位原子操作测试 */
-    TEST_CASE_REGISTER(test_atomic64_init_and_load, "64-bit init and load")
-    TEST_CASE_REGISTER(test_atomic64_store, "64-bit store")
-    TEST_CASE_REGISTER(test_atomic64_increment_decrement, "64-bit increment/decrement")
-    TEST_CASE_REGISTER(test_atomic64_fetch_add_sub, "64-bit fetch add/sub")
-    TEST_CASE_REGISTER(test_atomic64_compare_exchange, "64-bit compare exchange")
-    TEST_CASE_REGISTER(test_atomic64_overflow, "64-bit overflow")
-    TEST_CASE_REGISTER(test_atomic64_multithread_timestamp, "64-bit multithread timestamp")
-TEST_MODULE_END(test_osal_atomic, "OSAL")
+
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_atomic_init_and_load",
+		.func = test_atomic_init_and_load,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_atomic_store",
+		.func = test_atomic_store,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_atomic_increment",
+		.func = test_atomic_increment,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_atomic_decrement",
+		.func = test_atomic_decrement,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_atomic_fetch_add",
+		.func = test_atomic_fetch_add,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_atomic_fetch_sub",
+		.func = test_atomic_fetch_sub,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_atomic_compare_exchange",
+		.func = test_atomic_compare_exchange,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_atomic_multithread_increment",
+		.func = test_atomic_multithread_increment,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_atomic_multithread_cas",
+		.func = test_atomic_multithread_cas,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_atomic_overflow",
+		.func = test_atomic_overflow,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_atomic_boundary_values",
+		.func = test_atomic_boundary_values,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_atomic64_init_and_load",
+		.func = test_atomic64_init_and_load,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_atomic64_store",
+		.func = test_atomic64_store,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_atomic64_increment_decrement",
+		.func = test_atomic64_increment_decrement,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_atomic64_fetch_add_sub",
+		.func = test_atomic64_fetch_add_sub,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_atomic64_compare_exchange",
+		.func = test_atomic64_compare_exchange,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_atomic64_overflow",
+		.func = test_atomic64_overflow,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_atomic64_multithread_timestamp",
+		.func = test_atomic64_multithread_timestamp,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "osal_atomic",
+	.module_name = "osal_atomic",
+	.layer_name = "OSAL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "OSAL osal_atomic tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_osal_atomic_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

@@ -26,7 +26,6 @@ static void* mutex_stress_thread(void *arg)
 
     int32_t i;
 
-
     for (i = 0; i < STRESS_ITERATIONS; i++) {
         OSAL_MutexLock(stress_mutex);
         stress_counter++;
@@ -37,7 +36,7 @@ static void* mutex_stress_thread(void *arg)
 }
 
 /* 测试用例1: 互斥锁压力测试 - 多线程竞争 */
-TEST_CASE(test_mutex_stress)
+static void test_mutex_stress(void)
 {
     stress_counter = 0;
     OSAL_MutexCreate(&stress_mutex);
@@ -80,7 +79,6 @@ static void* sem_producer_thread(void *arg)
 
     int32_t i;
 
-
     for (i = 0; i < STRESS_ITERATIONS; i++) {
         OSAL_SemaphoreWait(sem_empty);
         OSAL_MutexLock(sem_mutex);
@@ -102,7 +100,6 @@ static void* sem_consumer_thread(void *arg)
 
     int32_t i;
 
-
     for (i = 0; i < STRESS_ITERATIONS; i++) {
         OSAL_SemaphoreWait(sem_full);
         OSAL_MutexLock(sem_mutex);
@@ -120,7 +117,7 @@ static void* sem_consumer_thread(void *arg)
 }
 
 /* 测试用例2: 信号量压力测试 - 生产者消费者 */
-TEST_CASE(test_semaphore_stress)
+static void test_semaphore_stress(void)
 {
     sem_write_pos = 0;
     sem_read_pos = 0;
@@ -181,7 +178,6 @@ static void* cond_waiter_thread(void *arg)
 
     int32_t i;
 
-
     for (i = 0; i < STRESS_ITERATIONS / 10; i++) {
         OSAL_MutexLock(cond_mutex);
         while (cond_ready_count == 0) {
@@ -201,7 +197,6 @@ static void* cond_signaler_thread(void *arg)
 
     int32_t i;
 
-
     for (i = 0; i < STRESS_ITERATIONS / 10; i++) {
         OSAL_MutexLock(cond_mutex);
         cond_ready_count++;
@@ -214,7 +209,7 @@ static void* cond_signaler_thread(void *arg)
 }
 
 /* 测试用例3: 条件变量压力测试 - 多线程等待/唤醒 */
-TEST_CASE(test_cond_stress)
+static void test_cond_stress(void)
 {
     cond_ready_count = 0;
     cond_wait_count = 0;
@@ -269,7 +264,6 @@ static void* mixed_worker_thread(void *arg)
 
     int32_t i;
 
-
     for (i = 0; i < STRESS_ITERATIONS / 100; i++) {
         /* 使用信号量控制并发 */
         OSAL_SemaphoreWait(mixed_sem);
@@ -291,7 +285,7 @@ static void* mixed_worker_thread(void *arg)
 }
 
 /* 测试用例4: 混合场景压力测试 */
-TEST_CASE(test_mixed_stress)
+static void test_mixed_stress(void)
 {
     mixed_data = 0;
     mixed_ready = false;
@@ -332,9 +326,55 @@ TEST_CASE(test_mixed_stress)
 }
 
 /* 注册测试套件 */
-TEST_MODULE_BEGIN(osal_stress, "OSAL")
-    TEST_CASE_REF(test_mutex_stress)
-    TEST_CASE_REF(test_semaphore_stress)
-    TEST_CASE_REF(test_cond_stress)
-    TEST_CASE_REF(test_mixed_stress)
-TEST_MODULE_END(osal_stress, "OSAL")
+
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_mutex_stress",
+		.func = test_mutex_stress,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_semaphore_stress",
+		.func = test_semaphore_stress,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_cond_stress",
+		.func = test_cond_stress,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_mixed_stress",
+		.func = test_mixed_stress,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "osal_stress",
+	.module_name = "osal_stress",
+	.layer_name = "OSAL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "OSAL osal_stress tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_osal_stress_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

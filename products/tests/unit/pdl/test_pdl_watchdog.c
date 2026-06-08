@@ -12,7 +12,7 @@
 /**
  * @brief 测试：初始化和反初始化
  */
-TEST_CASE(test_pdl_watchdog_init_deinit)
+static void test_pdl_watchdog_init_deinit(void)
 {
     pdl_watchdog_handle_t handle = NULL;
     pdl_watchdog_config_t config = {
@@ -37,7 +37,7 @@ TEST_CASE(test_pdl_watchdog_init_deinit)
 /**
  * @brief 测试：NULL参数检查
  */
-TEST_CASE(test_pdl_watchdog_null_params)
+static void test_pdl_watchdog_null_params(void)
 {
     pdl_watchdog_handle_t handle = NULL;
     pdl_watchdog_config_t config = {
@@ -61,7 +61,7 @@ TEST_CASE(test_pdl_watchdog_null_params)
 /**
  * @brief 测试：手动模式喂狗
  */
-TEST_CASE(test_pdl_watchdog_manual_kick)
+static void test_pdl_watchdog_manual_kick(void)
 {
     pdl_watchdog_handle_t handle = NULL;
     pdl_watchdog_config_t config = {
@@ -102,7 +102,7 @@ TEST_CASE(test_pdl_watchdog_manual_kick)
 /**
  * @brief 测试：自动模式启动和停止
  */
-TEST_CASE(test_pdl_watchdog_auto_mode)
+static void test_pdl_watchdog_auto_mode(void)
 {
     pdl_watchdog_handle_t handle = NULL;
     pdl_watchdog_config_t config = {
@@ -146,7 +146,7 @@ TEST_CASE(test_pdl_watchdog_auto_mode)
 /**
  * @brief 测试：获取状态
  */
-TEST_CASE(test_pdl_watchdog_get_status)
+static void test_pdl_watchdog_get_status(void)
 {
     pdl_watchdog_handle_t handle = NULL;
     pdl_watchdog_config_t config = {
@@ -176,7 +176,7 @@ TEST_CASE(test_pdl_watchdog_get_status)
 /**
  * @brief 测试：设置喂狗间隔
  */
-TEST_CASE(test_pdl_watchdog_set_interval)
+static void test_pdl_watchdog_set_interval(void)
 {
     pdl_watchdog_handle_t handle = NULL;
     pdl_watchdog_config_t config = {
@@ -207,7 +207,7 @@ TEST_CASE(test_pdl_watchdog_set_interval)
 /**
  * @brief 测试：启用和禁用
  */
-TEST_CASE(test_pdl_watchdog_enable_disable)
+static void test_pdl_watchdog_enable_disable(void)
 {
     pdl_watchdog_handle_t handle = NULL;
     pdl_watchdog_config_t config = {
@@ -235,12 +235,72 @@ TEST_CASE(test_pdl_watchdog_enable_disable)
     PDL_WATCHDOG_Deinit(handle);
 }
 
-TEST_SUITE_BEGIN(test_pdl_watchdog, "pdl_watchdog", "PDL")
-    TEST_CASE_REF(test_pdl_watchdog_init_deinit)
-    TEST_CASE_REF(test_pdl_watchdog_null_params)
-    TEST_CASE_REF(test_pdl_watchdog_manual_kick)
-    TEST_CASE_REF(test_pdl_watchdog_auto_mode)
-    TEST_CASE_REF(test_pdl_watchdog_get_status)
-    TEST_CASE_REF(test_pdl_watchdog_set_interval)
-    TEST_CASE_REF(test_pdl_watchdog_enable_disable)
-TEST_SUITE_END(test_pdl_watchdog, "test_pdl_watchdog", "PDL")
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_pdl_watchdog_init_deinit",
+		.func = test_pdl_watchdog_init_deinit,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_watchdog_null_params",
+		.func = test_pdl_watchdog_null_params,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_watchdog_manual_kick",
+		.func = test_pdl_watchdog_manual_kick,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_watchdog_auto_mode",
+		.func = test_pdl_watchdog_auto_mode,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_watchdog_get_status",
+		.func = test_pdl_watchdog_get_status,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_watchdog_set_interval",
+		.func = test_pdl_watchdog_set_interval,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_watchdog_enable_disable",
+		.func = test_pdl_watchdog_enable_disable,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "pdl_watchdog",
+	.module_name = "pdl_watchdog",
+	.layer_name = "PDL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "PDL pdl_watchdog tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_pdl_watchdog_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

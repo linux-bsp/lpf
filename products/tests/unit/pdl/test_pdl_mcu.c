@@ -47,21 +47,21 @@ static void create_serial_config(pdl_mcu_config_t *config)
  *===========================================================================*/
 
 /* 测试用例: MCU驱动初始化 - CAN接口 */
-TEST_CASE(test_pdl_mcu_init_can_success)
+static void test_pdl_mcu_init_can_success(void)
 {
     /* Skip: CAN device not available in test environment */
     TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /* 测试用例: MCU驱动初始化 - 串口接口 */
-TEST_CASE(test_pdl_mcu_init_serial_success)
+static void test_pdl_mcu_init_serial_success(void)
 {
     /* Skip: Serial device /dev/ttyS1 not available in test environment */
     TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /* 测试用例: MCU驱动初始化 - 空配置 */
-TEST_CASE(test_pdl_mcu_init_null_config)
+static void test_pdl_mcu_init_null_config(void)
 {
     pdl_mcu_handle_t handle = NULL;
 
@@ -70,7 +70,7 @@ TEST_CASE(test_pdl_mcu_init_null_config)
 }
 
 /* 测试用例: MCU驱动初始化 - 空句柄指针 */
-TEST_CASE(test_pdl_mcu_init_null_handle)
+static void test_pdl_mcu_init_null_handle(void)
 {
     pdl_mcu_config_t config;
     create_can_config(&config);
@@ -80,14 +80,14 @@ TEST_CASE(test_pdl_mcu_init_null_handle)
 }
 
 /* 测试用例: MCU驱动清理 */
-TEST_CASE(test_pdl_mcu_deinit)
+static void test_pdl_mcu_deinit(void)
 {
     /* Skip: CAN device not available in test environment */
     TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /* 测试用例: 清理空句柄 */
-TEST_CASE(test_pdl_mcu_deinit_null_handle)
+static void test_pdl_mcu_deinit_null_handle(void)
 {
     int32_t ret = PDL_MCU_Deinit(NULL);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
@@ -98,14 +98,14 @@ TEST_CASE(test_pdl_mcu_deinit_null_handle)
  *===========================================================================*/
 
 /* 测试用例: 获取版本信息 - 成功 */
-TEST_CASE(test_pdl_mcu_get_version_success)
+static void test_pdl_mcu_get_version_success(void)
 {
     /* Skip: CAN device not available in test environment */
     TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /* 测试用例: 获取版本信息 - 空句柄 */
-TEST_CASE(test_pdl_mcu_get_version_null_handle)
+static void test_pdl_mcu_get_version_null_handle(void)
 {
     pdl_mcu_version_t version;
 
@@ -114,7 +114,7 @@ TEST_CASE(test_pdl_mcu_get_version_null_handle)
 }
 
 /* 测试用例: 获取版本信息 - 空指针 */
-TEST_CASE(test_pdl_mcu_get_version_null_pointer)
+static void test_pdl_mcu_get_version_null_pointer(void)
 {
     /* Skip: CAN device not available in test environment */
     TEST_ASSERT_TRUE(false); // Hardware not available
@@ -125,14 +125,14 @@ TEST_CASE(test_pdl_mcu_get_version_null_pointer)
  *===========================================================================*/
 
 /* 测试用例: 获取状态 - 成功 */
-TEST_CASE(test_pdl_mcu_get_status_success)
+static void test_pdl_mcu_get_status_success(void)
 {
     /* Skip: CAN device not available in test environment */
     TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /* 测试用例: 获取状态 - 空句柄 */
-TEST_CASE(test_pdl_mcu_get_status_null_handle)
+static void test_pdl_mcu_get_status_null_handle(void)
 {
     pdl_mcu_status_t status;
 
@@ -141,7 +141,7 @@ TEST_CASE(test_pdl_mcu_get_status_null_handle)
 }
 
 /* 测试用例: 获取状态 - 空指针 */
-TEST_CASE(test_pdl_mcu_get_status_null_pointer)
+static void test_pdl_mcu_get_status_null_pointer(void)
 {
     /* Skip: CAN device not available in test environment */
     TEST_ASSERT_TRUE(false); // Hardware not available
@@ -152,14 +152,14 @@ TEST_CASE(test_pdl_mcu_get_status_null_pointer)
  *===========================================================================*/
 
 /* 测试用例: MCU复位 - 成功 */
-TEST_CASE(test_pdl_mcu_reset_success)
+static void test_pdl_mcu_reset_success(void)
 {
     /* Skip: CAN device not available in test environment */
     TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /* 测试用例: MCU复位 - 空句柄 */
-TEST_CASE(test_pdl_mcu_reset_null_handle)
+static void test_pdl_mcu_reset_null_handle(void)
 {
     int32_t ret = PDL_MCU_Reset(NULL);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
@@ -170,14 +170,14 @@ TEST_CASE(test_pdl_mcu_reset_null_handle)
  *===========================================================================*/
 
 /* 测试用例: 读寄存器 - 成功 */
-TEST_CASE(test_pdl_mcu_read_register_success)
+static void test_pdl_mcu_read_register_success(void)
 {
     /* Skip: CAN device not available in test environment */
     TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /* 测试用例: 读寄存器 - 空句柄 */
-TEST_CASE(test_pdl_mcu_read_register_null_handle)
+static void test_pdl_mcu_read_register_null_handle(void)
 {
     uint8_t value;
 
@@ -186,28 +186,28 @@ TEST_CASE(test_pdl_mcu_read_register_null_handle)
 }
 
 /* 测试用例: 读寄存器 - 空指针 */
-TEST_CASE(test_pdl_mcu_read_register_null_pointer)
+static void test_pdl_mcu_read_register_null_pointer(void)
 {
     /* Skip: CAN device not available in test environment */
     TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /* 测试用例: 写寄存器 - 成功 */
-TEST_CASE(test_pdl_mcu_write_register_success)
+static void test_pdl_mcu_write_register_success(void)
 {
     /* Skip: CAN device not available in test environment */
     TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /* 测试用例: 写寄存器 - 空句柄 */
-TEST_CASE(test_pdl_mcu_write_register_null_handle)
+static void test_pdl_mcu_write_register_null_handle(void)
 {
     int32_t ret = PDL_MCU_WriteRegister(NULL, 0x20, 0xAB);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
 /* 测试用例: 读写寄存器验证 */
-TEST_CASE(test_pdl_mcu_register_read_write_verify)
+static void test_pdl_mcu_register_read_write_verify(void)
 {
     /* Skip: CAN device not available in test environment */
     TEST_ASSERT_TRUE(false); // Hardware not available
@@ -218,14 +218,14 @@ TEST_CASE(test_pdl_mcu_register_read_write_verify)
  *===========================================================================*/
 
 /* 测试用例: 发送命令 - 成功 */
-TEST_CASE(test_pdl_mcu_send_command_success)
+static void test_pdl_mcu_send_command_success(void)
 {
     /* Skip: CAN device not available in test environment */
     TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /* 测试用例: 发送命令 - 空句柄 */
-TEST_CASE(test_pdl_mcu_send_command_null_handle)
+static void test_pdl_mcu_send_command_null_handle(void)
 {
     uint8_t cmd_data[] = {0x01};
     uint8_t resp_data[64];
@@ -237,14 +237,14 @@ TEST_CASE(test_pdl_mcu_send_command_null_handle)
 }
 
 /* 测试用例: 发送命令 - 空命令数据 */
-TEST_CASE(test_pdl_mcu_send_command_null_cmd_data)
+static void test_pdl_mcu_send_command_null_cmd_data(void)
 {
     /* Skip: CAN device not available in test environment */
     TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /* 测试用例: 发送命令 - 空响应缓冲区 */
-TEST_CASE(test_pdl_mcu_send_command_null_resp_buffer)
+static void test_pdl_mcu_send_command_null_resp_buffer(void)
 {
     /* Skip: CAN device not available in test environment */
     TEST_ASSERT_TRUE(false); // Hardware not available
@@ -255,21 +255,21 @@ TEST_CASE(test_pdl_mcu_send_command_null_resp_buffer)
  *===========================================================================*/
 
 /* 测试用例: 固件更新 - 成功 */
-TEST_CASE(test_pdl_mcu_firmware_update_success)
+static void test_pdl_mcu_firmware_update_success(void)
 {
     /* Skip: CAN device not available in test environment */
     TEST_ASSERT_TRUE(false); // Hardware not available
 }
 
 /* 测试用例: 固件更新 - 空句柄 */
-TEST_CASE(test_pdl_mcu_firmware_update_null_handle)
+static void test_pdl_mcu_firmware_update_null_handle(void)
 {
     int32_t ret = PDL_MCU_FirmwareUpdate(NULL, "/tmp/test_firmware.bin", NULL);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
 /* 测试用例: 固件更新 - 空路径 */
-TEST_CASE(test_pdl_mcu_firmware_update_null_path)
+static void test_pdl_mcu_firmware_update_null_path(void)
 {
     /* Skip: CAN device not available in test environment */
     TEST_ASSERT_TRUE(false); // Hardware not available
@@ -279,46 +279,201 @@ TEST_CASE(test_pdl_mcu_firmware_update_null_path)
  * 测试模块注册
  *===========================================================================*/
 
-TEST_MODULE_BEGIN(test_pdl_mcu, "PDL")
-    // PDL MCU外设驱动测试
+// PDL MCU外设驱动测试
     /* 初始化和清理 */
-    TEST_CASE_REF(test_pdl_mcu_init_can_success)
-    TEST_CASE_REF(test_pdl_mcu_init_serial_success)
-    TEST_CASE_REF(test_pdl_mcu_init_null_config)
-    TEST_CASE_REF(test_pdl_mcu_init_null_handle)
-    TEST_CASE_REF(test_pdl_mcu_deinit)
-    TEST_CASE_REF(test_pdl_mcu_deinit_null_handle)
-
     /* 版本信息 */
-    TEST_CASE_REF(test_pdl_mcu_get_version_success)
-    TEST_CASE_REF(test_pdl_mcu_get_version_null_handle)
-    TEST_CASE_REF(test_pdl_mcu_get_version_null_pointer)
-
     /* 状态查询 */
-    TEST_CASE_REF(test_pdl_mcu_get_status_success)
-    TEST_CASE_REF(test_pdl_mcu_get_status_null_handle)
-    TEST_CASE_REF(test_pdl_mcu_get_status_null_pointer)
-
     /* 复位 */
-    TEST_CASE_REF(test_pdl_mcu_reset_success)
-    TEST_CASE_REF(test_pdl_mcu_reset_null_handle)
-
     /* 寄存器访问 */
-    TEST_CASE_REF(test_pdl_mcu_read_register_success)
-    TEST_CASE_REF(test_pdl_mcu_read_register_null_handle)
-    TEST_CASE_REF(test_pdl_mcu_read_register_null_pointer)
-    TEST_CASE_REF(test_pdl_mcu_write_register_success)
-    TEST_CASE_REF(test_pdl_mcu_write_register_null_handle)
-    TEST_CASE_REF(test_pdl_mcu_register_read_write_verify)
-
     /* 命令发送 */
-    TEST_CASE_REF(test_pdl_mcu_send_command_success)
-    TEST_CASE_REF(test_pdl_mcu_send_command_null_handle)
-    TEST_CASE_REF(test_pdl_mcu_send_command_null_cmd_data)
-    TEST_CASE_REF(test_pdl_mcu_send_command_null_resp_buffer)
-
     /* 固件更新 */
-    TEST_CASE_REF(test_pdl_mcu_firmware_update_success)
-    TEST_CASE_REF(test_pdl_mcu_firmware_update_null_handle)
-    TEST_CASE_REF(test_pdl_mcu_firmware_update_null_path)
-TEST_MODULE_END(test_pdl_mcu, "PDL")
+
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_pdl_mcu_init_can_success",
+		.func = test_pdl_mcu_init_can_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_mcu_init_serial_success",
+		.func = test_pdl_mcu_init_serial_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_mcu_init_null_config",
+		.func = test_pdl_mcu_init_null_config,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_mcu_init_null_handle",
+		.func = test_pdl_mcu_init_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_mcu_deinit",
+		.func = test_pdl_mcu_deinit,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_mcu_deinit_null_handle",
+		.func = test_pdl_mcu_deinit_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_mcu_get_version_success",
+		.func = test_pdl_mcu_get_version_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_mcu_get_version_null_handle",
+		.func = test_pdl_mcu_get_version_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_mcu_get_version_null_pointer",
+		.func = test_pdl_mcu_get_version_null_pointer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_mcu_get_status_success",
+		.func = test_pdl_mcu_get_status_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_mcu_get_status_null_handle",
+		.func = test_pdl_mcu_get_status_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_mcu_get_status_null_pointer",
+		.func = test_pdl_mcu_get_status_null_pointer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_mcu_reset_success",
+		.func = test_pdl_mcu_reset_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_mcu_reset_null_handle",
+		.func = test_pdl_mcu_reset_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_mcu_read_register_success",
+		.func = test_pdl_mcu_read_register_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_mcu_read_register_null_handle",
+		.func = test_pdl_mcu_read_register_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_mcu_read_register_null_pointer",
+		.func = test_pdl_mcu_read_register_null_pointer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_mcu_write_register_success",
+		.func = test_pdl_mcu_write_register_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_mcu_write_register_null_handle",
+		.func = test_pdl_mcu_write_register_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_mcu_register_read_write_verify",
+		.func = test_pdl_mcu_register_read_write_verify,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_mcu_send_command_success",
+		.func = test_pdl_mcu_send_command_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_mcu_send_command_null_handle",
+		.func = test_pdl_mcu_send_command_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_mcu_send_command_null_cmd_data",
+		.func = test_pdl_mcu_send_command_null_cmd_data,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_mcu_send_command_null_resp_buffer",
+		.func = test_pdl_mcu_send_command_null_resp_buffer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_mcu_firmware_update_success",
+		.func = test_pdl_mcu_firmware_update_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_mcu_firmware_update_null_handle",
+		.func = test_pdl_mcu_firmware_update_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_mcu_firmware_update_null_path",
+		.func = test_pdl_mcu_firmware_update_null_path,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "pdl_mcu",
+	.module_name = "pdl_mcu",
+	.layer_name = "PDL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "PDL pdl_mcu tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_pdl_mcu_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

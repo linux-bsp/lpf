@@ -10,7 +10,7 @@ static int32_t shared_data = 0;
 static bool data_ready = false;
 
 /* 测试用例1: 条件变量创建成功 */
-TEST_CASE(test_cond_create_success)
+static void test_cond_create_success(void)
 {
     osal_cond_t *cond = NULL;
     int32_t ret = OSAL_CondCreate(&cond);
@@ -22,14 +22,14 @@ TEST_CASE(test_cond_create_success)
 }
 
 /* 测试用例2: 条件变量创建失败 - 空指针 */
-TEST_CASE(test_cond_create_nullpointer)
+static void test_cond_create_nullpointer(void)
 {
     int32_t ret = OSAL_CondCreate(NULL);
     TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_POINTER, ret);
 }
 
 /* 测试用例3: 条件变量删除成功 */
-TEST_CASE(test_cond_delete_success)
+static void test_cond_delete_success(void)
 {
     osal_cond_t *cond = NULL;
     OSAL_CondCreate(&cond);
@@ -39,28 +39,28 @@ TEST_CASE(test_cond_delete_success)
 }
 
 /* 测试用例4: 条件变量删除失败 - 空指针 */
-TEST_CASE(test_cond_delete_nullpointer)
+static void test_cond_delete_nullpointer(void)
 {
     int32_t ret = OSAL_CondDelete(NULL);
     TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_POINTER, ret);
 }
 
 /* 测试用例5: 条件变量Signal失败 - 空指针 */
-TEST_CASE(test_cond_signal_nullpointer)
+static void test_cond_signal_nullpointer(void)
 {
     int32_t ret = OSAL_CondSignal(NULL);
     TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_POINTER, ret);
 }
 
 /* 测试用例6: 条件变量Broadcast失败 - 空指针 */
-TEST_CASE(test_cond_broadcast_nullpointer)
+static void test_cond_broadcast_nullpointer(void)
 {
     int32_t ret = OSAL_CondBroadcast(NULL);
     TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_POINTER, ret);
 }
 
 /* 测试用例7: 条件变量Wait失败 - 空指针 */
-TEST_CASE(test_cond_wait_nullpointer)
+static void test_cond_wait_nullpointer(void)
 {
     osal_cond_t *cond = NULL;
     osal_mutex_t *mutex = NULL;
@@ -81,7 +81,7 @@ TEST_CASE(test_cond_wait_nullpointer)
 }
 
 /* 测试用例8: 条件变量超时等待 - 超时 */
-TEST_CASE(test_cond_timedwait_timeout)
+static void test_cond_timedwait_timeout(void)
 {
     osal_cond_t *cond = NULL;
     osal_mutex_t *mutex = NULL;
@@ -138,7 +138,7 @@ static void* consumer_thread(void *arg)
 }
 
 /* 测试用例9: 条件变量Signal唤醒 */
-TEST_CASE(test_cond_signal_wakeup)
+static void test_cond_signal_wakeup(void)
 {
     shared_data = 0;
     data_ready = false;
@@ -204,7 +204,7 @@ static void* producer_broadcast_thread(void *arg)
 }
 
 /* 测试用例10: 条件变量Broadcast唤醒多个线程 */
-TEST_CASE(test_cond_broadcast_wakeup)
+static void test_cond_broadcast_wakeup(void)
 {
     consumer_count = 0;
     data_ready = false;
@@ -245,15 +245,91 @@ TEST_CASE(test_cond_broadcast_wakeup)
 }
 
 /* 注册测试套件 */
-TEST_MODULE_BEGIN(osal_cond, "OSAL")
-    TEST_CASE_REF(test_cond_create_success)
-    TEST_CASE_REF(test_cond_create_nullpointer)
-    TEST_CASE_REF(test_cond_delete_success)
-    TEST_CASE_REF(test_cond_delete_nullpointer)
-    TEST_CASE_REF(test_cond_signal_nullpointer)
-    TEST_CASE_REF(test_cond_broadcast_nullpointer)
-    TEST_CASE_REF(test_cond_wait_nullpointer)
-    TEST_CASE_REF(test_cond_timedwait_timeout)
-    TEST_CASE_REF(test_cond_signal_wakeup)
-    TEST_CASE_REF(test_cond_broadcast_wakeup)
-TEST_MODULE_END(osal_cond, "OSAL")
+
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_cond_create_success",
+		.func = test_cond_create_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_cond_create_nullpointer",
+		.func = test_cond_create_nullpointer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_cond_delete_success",
+		.func = test_cond_delete_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_cond_delete_nullpointer",
+		.func = test_cond_delete_nullpointer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_cond_signal_nullpointer",
+		.func = test_cond_signal_nullpointer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_cond_broadcast_nullpointer",
+		.func = test_cond_broadcast_nullpointer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_cond_wait_nullpointer",
+		.func = test_cond_wait_nullpointer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_cond_timedwait_timeout",
+		.func = test_cond_timedwait_timeout,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_cond_signal_wakeup",
+		.func = test_cond_signal_wakeup,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_cond_broadcast_wakeup",
+		.func = test_cond_broadcast_wakeup,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "osal_cond",
+	.module_name = "osal_cond",
+	.layer_name = "OSAL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "OSAL osal_cond tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_osal_cond_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

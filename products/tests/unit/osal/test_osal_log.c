@@ -14,7 +14,7 @@
  *===========================================================================*/
 
 /* 测试用例: 日志初始化 - 成功 */
-TEST_CASE(test_osal_log_init_success)
+static void test_osal_log_init_success(void)
 {
     int32_t ret;
 
@@ -32,7 +32,7 @@ TEST_CASE(test_osal_log_init_success)
 }
 
 /* 测试用例: 日志初始化 - 空路径（仅终端输出） */
-TEST_CASE(test_osal_log_init_null_path)
+static void test_osal_log_init_null_path(void)
 {
     int32_t ret;
 
@@ -45,7 +45,7 @@ TEST_CASE(test_osal_log_init_null_path)
 }
 
 /* 测试用例: 日志初始化 - 不同级别 */
-TEST_CASE(test_osal_log_init_different_levels)
+static void test_osal_log_init_different_levels(void)
 {
     int32_t ret;
 
@@ -72,7 +72,7 @@ TEST_CASE(test_osal_log_init_different_levels)
  *===========================================================================*/
 
 /* 测试用例: 日志写入 - 基本功能 */
-TEST_CASE(test_osal_log_write_basic)
+static void test_osal_log_write_basic(void)
 {
     int32_t ret;
 
@@ -93,7 +93,7 @@ TEST_CASE(test_osal_log_write_basic)
 }
 
 /* 测试用例: 日志写入 - 格式化 */
-TEST_CASE(test_osal_log_write_formatted)
+static void test_osal_log_write_formatted(void)
 {
     int32_t ret;
 
@@ -111,7 +111,7 @@ TEST_CASE(test_osal_log_write_formatted)
 }
 
 /* 测试用例: 日志写入 - 长消息 */
-TEST_CASE(test_osal_log_write_long_message)
+static void test_osal_log_write_long_message(void)
 {
     int32_t ret;
     char long_msg[512];
@@ -137,7 +137,7 @@ TEST_CASE(test_osal_log_write_long_message)
  *===========================================================================*/
 
 /* 测试用例: 设置日志级别 */
-TEST_CASE(test_osal_log_set_level)
+static void test_osal_log_set_level(void)
 {
     int32_t ret;
 
@@ -173,7 +173,7 @@ TEST_CASE(test_osal_log_set_level)
  *===========================================================================*/
 
 /* 测试用例: 日志轮转 - 基本功能 */
-TEST_CASE(test_osal_log_rotation_basic)
+static void test_osal_log_rotation_basic(void)
 {
     int32_t ret;
 
@@ -204,7 +204,7 @@ TEST_CASE(test_osal_log_rotation_basic)
  *===========================================================================*/
 
 /* 测试用例: Printf - 简单打印 */
-TEST_CASE(test_osal_printf)
+static void test_osal_printf(void)
 {
     int32_t ret;
 
@@ -234,7 +234,6 @@ static void* log_test_task(void *arg)
 
     int32_t i;
 
-
     for (i = 0; i < 10 && g_log_test_running; i++) {
         LOG_INFO("TEST", "Task %d: Message %d", task_id, i);
         OSAL_msleep(10);
@@ -243,7 +242,7 @@ static void* log_test_task(void *arg)
 }
 
 /* 测试用例: 多线程日志写入 */
-TEST_CASE(test_osal_log_multithread)
+static void test_osal_log_multithread(void)
 {
     int32_t ret;
     osal_thread_t task_ids[3];
@@ -283,7 +282,7 @@ TEST_CASE(test_osal_log_multithread)
  *===========================================================================*/
 
 /* 测试用例: 未初始化时写入日志 */
-TEST_CASE(test_osal_log_write_without_init)
+static void test_osal_log_write_without_init(void)
 {
     /* 跳过此测试：当前OSAL日志实现在未初始化时调用LOG_INFO会导致段错误
      * 原因：log_internal_ex函数使用pthread_mutex_lock但没有检查初始化状态
@@ -293,7 +292,7 @@ TEST_CASE(test_osal_log_write_without_init)
 }
 
 /* 测试用例: 重复初始化 */
-TEST_CASE(test_osal_log_init_twice)
+static void test_osal_log_init_twice(void)
 {
     /* 跳过此测试：重复调用OSAL_LogInit会导致文件描述符泄漏和状态损坏
      * 原因：OSAL_LogInit不检查是否已初始化，直接打开新文件而不关闭旧文件
@@ -303,7 +302,7 @@ TEST_CASE(test_osal_log_init_twice)
 }
 
 /* 测试用例: 重复清理 */
-TEST_CASE(test_osal_log_shutdown_twice)
+static void test_osal_log_shutdown_twice(void)
 {
     /* 跳过此测试：重复调用OSAL_LogShutdown后，后续测试可能因状态不一致导致段错误
      * 原因：OSAL_LogShutdown只关闭文件但不清理全局状态，可能影响后续测试
@@ -318,7 +317,7 @@ TEST_CASE(test_osal_log_shutdown_twice)
 
 /* 测试用例: 日志写入性能 */
 /* 已屏蔽：性能测试在某些环境下可能不稳定
-TEST_CASE(test_osal_log_performance)
+static void test_osal_log_performance(void)
 {
     int32_t ret;
     uint64_t start_time, end_time;
@@ -352,35 +351,125 @@ TEST_CASE(test_osal_log_performance)
  * 测试模块注册
  *===========================================================================*/
 
-TEST_MODULE_BEGIN(test_osal_log, "OSAL")
-    // OSAL日志系统测试
+// OSAL日志系统测试
     /* 日志初始化 */
-    TEST_CASE_REF(test_osal_log_init_success)
-    TEST_CASE_REF(test_osal_log_init_null_path)
-    TEST_CASE_REF(test_osal_log_init_different_levels)
-
     /* 日志写入 */
-    TEST_CASE_REF(test_osal_log_write_basic)
-    TEST_CASE_REF(test_osal_log_write_formatted)
-    TEST_CASE_REF(test_osal_log_write_long_message)
-
     /* 日志级别 */
-    TEST_CASE_REF(test_osal_log_set_level)
-
     /* 日志轮转 */
-    TEST_CASE_REF(test_osal_log_rotation_basic)
-
     /* Printf */
-    TEST_CASE_REF(test_osal_printf)
-
     /* 并发测试 */
-    TEST_CASE_REF(test_osal_log_multithread)
-
     /* 边界条件 */
-    TEST_CASE_REF(test_osal_log_write_without_init)
-    TEST_CASE_REF(test_osal_log_init_twice)
-    TEST_CASE_REF(test_osal_log_shutdown_twice)
-
     /* 性能测试 */
-    // TEST_CASE_REF(test_osal_log_performance)  /* 已屏蔽 */
-TEST_MODULE_END(test_osal_log, "OSAL")
+    // /* 已屏蔽 */
+
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_osal_log_init_success",
+		.func = test_osal_log_init_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_log_init_null_path",
+		.func = test_osal_log_init_null_path,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_log_init_different_levels",
+		.func = test_osal_log_init_different_levels,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_log_write_basic",
+		.func = test_osal_log_write_basic,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_log_write_formatted",
+		.func = test_osal_log_write_formatted,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_log_write_long_message",
+		.func = test_osal_log_write_long_message,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_log_set_level",
+		.func = test_osal_log_set_level,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_log_rotation_basic",
+		.func = test_osal_log_rotation_basic,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_printf",
+		.func = test_osal_printf,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_log_multithread",
+		.func = test_osal_log_multithread,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_log_write_without_init",
+		.func = test_osal_log_write_without_init,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_log_init_twice",
+		.func = test_osal_log_init_twice,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_log_shutdown_twice",
+		.func = test_osal_log_shutdown_twice,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_log_performance",
+		.func = test_osal_log_performance,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "osal_log",
+	.module_name = "osal_log",
+	.layer_name = "OSAL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "OSAL osal_log tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_osal_log_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

@@ -15,7 +15,7 @@
  *===========================================================================*/
 
 /* 测试用例: open/close - 成功 */
-TEST_CASE(test_osal_file_open_close_success)
+static void test_osal_file_open_close_success(void)
 {
     int32_t fd;
 
@@ -33,7 +33,7 @@ TEST_CASE(test_osal_file_open_close_success)
 }
 
 /* 测试用例: open - 只读模式 */
-TEST_CASE(test_osal_file_open_readonly)
+static void test_osal_file_open_readonly(void)
 {
     int32_t fd;
 
@@ -52,7 +52,7 @@ TEST_CASE(test_osal_file_open_readonly)
 }
 
 /* 测试用例: open - 文件不存在 */
-TEST_CASE(test_osal_file_open_not_exist)
+static void test_osal_file_open_not_exist(void)
 {
     int32_t fd;
 
@@ -65,7 +65,7 @@ TEST_CASE(test_osal_file_open_not_exist)
 }
 
 /* 测试用例: open - O_EXCL标志 */
-TEST_CASE(test_osal_file_open_excl)
+static void test_osal_file_open_excl(void)
 {
     int32_t fd1, fd2;
 
@@ -91,7 +91,7 @@ TEST_CASE(test_osal_file_open_excl)
  *===========================================================================*/
 
 /* 测试用例: write/read - 成功 */
-TEST_CASE(test_osal_file_write_read_success)
+static void test_osal_file_write_read_success(void)
 {
     int32_t fd;
     osal_ssize_t ret;
@@ -121,7 +121,7 @@ TEST_CASE(test_osal_file_write_read_success)
 }
 
 /* 测试用例: write - 追加模式 */
-TEST_CASE(test_osal_file_write_append)
+static void test_osal_file_write_append(void)
 {
     int32_t fd;
     osal_ssize_t ret;
@@ -156,7 +156,7 @@ TEST_CASE(test_osal_file_write_append)
 }
 
 /* 测试用例: read - EOF */
-TEST_CASE(test_osal_file_read_eof)
+static void test_osal_file_read_eof(void)
 {
     int32_t fd;
     osal_ssize_t ret;
@@ -187,7 +187,7 @@ TEST_CASE(test_osal_file_read_eof)
  *===========================================================================*/
 
 /* 测试用例: lseek - SEEK_SET */
-TEST_CASE(test_osal_file_lseek_set)
+static void test_osal_file_lseek_set(void)
 {
     int32_t fd;
     osal_ssize_t pos;
@@ -214,7 +214,7 @@ TEST_CASE(test_osal_file_lseek_set)
 }
 
 /* 测试用例: lseek - SEEK_CUR */
-TEST_CASE(test_osal_file_lseek_cur)
+static void test_osal_file_lseek_cur(void)
 {
     int32_t fd;
     osal_ssize_t pos;
@@ -249,7 +249,7 @@ TEST_CASE(test_osal_file_lseek_cur)
 }
 
 /* 测试用例: lseek - SEEK_END */
-TEST_CASE(test_osal_file_lseek_end)
+static void test_osal_file_lseek_end(void)
 {
     int32_t fd;
     osal_ssize_t pos;
@@ -278,7 +278,7 @@ TEST_CASE(test_osal_file_lseek_end)
  *===========================================================================*/
 
 /* 测试用例: fcntl - 获取/设置标志 */
-TEST_CASE(test_osal_file_fcntl_flags)
+static void test_osal_file_fcntl_flags(void)
 {
     int32_t fd;
     int32_t flags;
@@ -309,7 +309,7 @@ TEST_CASE(test_osal_file_fcntl_flags)
  *===========================================================================*/
 
 /* 测试用例: write - 空数据 */
-TEST_CASE(test_osal_file_write_empty)
+static void test_osal_file_write_empty(void)
 {
     int32_t fd;
     osal_ssize_t ret;
@@ -327,7 +327,7 @@ TEST_CASE(test_osal_file_write_empty)
 }
 
 /* 测试用例: read - 空缓冲区 */
-TEST_CASE(test_osal_file_read_empty)
+static void test_osal_file_read_empty(void)
 {
     int32_t fd;
     osal_ssize_t ret;
@@ -348,7 +348,7 @@ TEST_CASE(test_osal_file_read_empty)
 }
 
 /* 测试用例: close - 无效文件描述符 */
-TEST_CASE(test_osal_file_close_invalid_fd)
+static void test_osal_file_close_invalid_fd(void)
 {
     int32_t ret;
 
@@ -364,29 +364,121 @@ TEST_CASE(test_osal_file_close_invalid_fd)
  * 测试模块注册
  *===========================================================================*/
 
-TEST_MODULE_BEGIN(test_osal_file, "OSAL")
-    // OSAL文件I/O操作测试
+// OSAL文件I/O操作测试
     /* 文件打开/关闭 */
-    TEST_CASE_REF(test_osal_file_open_close_success)
-    TEST_CASE_REF(test_osal_file_open_readonly)
-    TEST_CASE_REF(test_osal_file_open_not_exist)
-    TEST_CASE_REF(test_osal_file_open_excl)
-
     /* 文件读写 */
-    TEST_CASE_REF(test_osal_file_write_read_success)
-    TEST_CASE_REF(test_osal_file_write_append)
-    TEST_CASE_REF(test_osal_file_read_eof)
-
     /* 文件定位 */
-    TEST_CASE_REF(test_osal_file_lseek_set)
-    TEST_CASE_REF(test_osal_file_lseek_cur)
-    TEST_CASE_REF(test_osal_file_lseek_end)
-
     /* 文件控制 */
-    TEST_CASE_REF(test_osal_file_fcntl_flags)
-
     /* 边界条件 */
-    TEST_CASE_REF(test_osal_file_write_empty)
-    TEST_CASE_REF(test_osal_file_read_empty)
-    TEST_CASE_REF(test_osal_file_close_invalid_fd)
-TEST_MODULE_END(test_osal_file, "OSAL")
+
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_osal_file_open_close_success",
+		.func = test_osal_file_open_close_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_file_open_readonly",
+		.func = test_osal_file_open_readonly,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_file_open_not_exist",
+		.func = test_osal_file_open_not_exist,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_file_open_excl",
+		.func = test_osal_file_open_excl,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_file_write_read_success",
+		.func = test_osal_file_write_read_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_file_write_append",
+		.func = test_osal_file_write_append,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_file_read_eof",
+		.func = test_osal_file_read_eof,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_file_lseek_set",
+		.func = test_osal_file_lseek_set,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_file_lseek_cur",
+		.func = test_osal_file_lseek_cur,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_file_lseek_end",
+		.func = test_osal_file_lseek_end,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_file_fcntl_flags",
+		.func = test_osal_file_fcntl_flags,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_file_write_empty",
+		.func = test_osal_file_write_empty,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_file_read_empty",
+		.func = test_osal_file_read_empty,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_file_close_invalid_fd",
+		.func = test_osal_file_close_invalid_fd,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "osal_file",
+	.module_name = "osal_file",
+	.layer_name = "OSAL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "OSAL osal_file tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_osal_file_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

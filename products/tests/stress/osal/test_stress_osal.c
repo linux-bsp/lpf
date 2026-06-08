@@ -39,7 +39,7 @@ static int32_t mutex_stress_worker(void *user_data, uint32_t iteration) {
 /**
  * 测试互斥锁并发压力
  */
-TEST_CASE(test_stress_mutex_concurrency) {
+static void test_stress_mutex_concurrency(void) {
     mutex_stress_data_t data;
     const uint32_t thread_count = 10;
     const uint32_t duration_sec = 5;
@@ -86,7 +86,7 @@ static int32_t atomic_stress_worker(void *user_data, uint32_t iteration) {
 /**
  * 测试原子操作并发压力
  */
-TEST_CASE(test_stress_atomic_operations) {
+static void test_stress_atomic_operations(void) {
     osal_atomic_uint32_t counter;
     const uint32_t thread_count = 10;
     const uint32_t iterations = 10000;
@@ -126,7 +126,43 @@ TEST_CASE(test_stress_atomic_operations) {
 }
 
 /* 注册压力测试模块 */
-TEST_MODULE_BEGIN(stress_osal, "STRESS")
-    TEST_CASE_REGISTER(test_stress_mutex_concurrency, "Mutex concurrency stress test")
-    TEST_CASE_REGISTER(test_stress_atomic_operations, "Atomic operations stress test")
-TEST_MODULE_END(stress_osal, "STRESS")
+
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_stress_mutex_concurrency",
+		.func = test_stress_mutex_concurrency,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_stress_atomic_operations",
+		.func = test_stress_atomic_operations,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "stress_osal",
+	.module_name = "stress_osal",
+	.layer_name = "OSAL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_STRESS,
+		.tags = TEST_TAG_SLOW,
+		.timeout_ms = 10000,
+		.description = "OSAL stress_osal tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_stress_osal_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

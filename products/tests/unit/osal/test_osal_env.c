@@ -10,7 +10,7 @@
  * 测试用例
  *===========================================================================*/
 
-TEST_CASE(test_osal_getenv_existing)
+static void test_osal_getenv_existing(void)
 {
     /* Get an existing environment variable */
     char *value = OSAL_getenv("PATH");
@@ -18,14 +18,14 @@ TEST_CASE(test_osal_getenv_existing)
     TEST_ASSERT_TRUE(OSAL_strlen(value) > 0);
 }
 
-TEST_CASE(test_osal_getenv_nonexistent)
+static void test_osal_getenv_nonexistent(void)
 {
     /* Get a non-existent environment variable */
     char *value = OSAL_getenv("OSAL_NONEXISTENT_VAR_12345");
     TEST_ASSERT_NULL(value);
 }
 
-TEST_CASE(test_osal_setenv_new_variable)
+static void test_osal_setenv_new_variable(void)
 {
     /* Set a new environment variable */
     int32_t ret = OSAL_setenv("OSAL_TEST_VAR", "test_value", 1);
@@ -40,7 +40,7 @@ TEST_CASE(test_osal_setenv_new_variable)
     OSAL_unsetenv("OSAL_TEST_VAR");
 }
 
-TEST_CASE(test_osal_setenv_overwrite)
+static void test_osal_setenv_overwrite(void)
 {
     /* Set initial value */
     OSAL_setenv("OSAL_TEST_VAR2", "initial", 1);
@@ -58,7 +58,7 @@ TEST_CASE(test_osal_setenv_overwrite)
     OSAL_unsetenv("OSAL_TEST_VAR2");
 }
 
-TEST_CASE(test_osal_setenv_no_overwrite)
+static void test_osal_setenv_no_overwrite(void)
 {
     /* Set initial value */
     OSAL_setenv("OSAL_TEST_VAR3", "initial", 1);
@@ -76,7 +76,7 @@ TEST_CASE(test_osal_setenv_no_overwrite)
     OSAL_unsetenv("OSAL_TEST_VAR3");
 }
 
-TEST_CASE(test_osal_unsetenv_existing)
+static void test_osal_unsetenv_existing(void)
 {
     /* Set a variable */
     OSAL_setenv("OSAL_TEST_VAR4", "temp_value", 1);
@@ -90,14 +90,14 @@ TEST_CASE(test_osal_unsetenv_existing)
     TEST_ASSERT_NULL(value);
 }
 
-TEST_CASE(test_osal_unsetenv_nonexistent)
+static void test_osal_unsetenv_nonexistent(void)
 {
     /* Unset a non-existent variable (should succeed) */
     int32_t ret = OSAL_unsetenv("OSAL_NONEXISTENT_VAR_67890");
     TEST_ASSERT_EQUAL(0, ret);
 }
 
-TEST_CASE(test_osal_env_empty_value)
+static void test_osal_env_empty_value(void)
 {
     /* Set variable with empty value */
     int32_t ret = OSAL_setenv("OSAL_TEST_VAR5", "", 1);
@@ -116,13 +116,78 @@ TEST_CASE(test_osal_env_empty_value)
  * 测试套件注册
  *===========================================================================*/
 
-TEST_MODULE_BEGIN(test_osal_env, "OSAL")
-    TEST_CASE_REF(test_osal_getenv_existing)
-    TEST_CASE_REF(test_osal_getenv_nonexistent)
-    TEST_CASE_REF(test_osal_setenv_new_variable)
-    TEST_CASE_REF(test_osal_setenv_overwrite)
-    TEST_CASE_REF(test_osal_setenv_no_overwrite)
-    TEST_CASE_REF(test_osal_unsetenv_existing)
-    TEST_CASE_REF(test_osal_unsetenv_nonexistent)
-    TEST_CASE_REF(test_osal_env_empty_value)
-TEST_MODULE_END(test_osal_env, "OSAL")
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_osal_getenv_existing",
+		.func = test_osal_getenv_existing,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_getenv_nonexistent",
+		.func = test_osal_getenv_nonexistent,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_setenv_new_variable",
+		.func = test_osal_setenv_new_variable,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_setenv_overwrite",
+		.func = test_osal_setenv_overwrite,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_setenv_no_overwrite",
+		.func = test_osal_setenv_no_overwrite,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_unsetenv_existing",
+		.func = test_osal_unsetenv_existing,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_unsetenv_nonexistent",
+		.func = test_osal_unsetenv_nonexistent,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_env_empty_value",
+		.func = test_osal_env_empty_value,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "osal_env",
+	.module_name = "osal_env",
+	.layer_name = "OSAL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "OSAL osal_env tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_osal_env_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

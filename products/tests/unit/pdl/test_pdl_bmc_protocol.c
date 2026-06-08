@@ -13,7 +13,7 @@
  *===========================================================================*/
 
 /* 测试用例: IPMI帧封装 - 基本命令 */
-TEST_CASE(test_ipmi_pack_request_basic)
+static void test_ipmi_pack_request_basic(void)
 {
     uint8_t frame[256];
     uint32_t frame_len;
@@ -27,7 +27,7 @@ TEST_CASE(test_ipmi_pack_request_basic)
 }
 
 /* 测试用例: IPMI帧封装 - 带数据 */
-TEST_CASE(test_ipmi_pack_request_with_data)
+static void test_ipmi_pack_request_with_data(void)
 {
     uint8_t frame[256];
     uint32_t frame_len;
@@ -42,7 +42,7 @@ TEST_CASE(test_ipmi_pack_request_with_data)
 }
 
 /* 测试用例: IPMI帧封装 - 空缓冲区 */
-TEST_CASE(test_ipmi_pack_request_null_buffer)
+static void test_ipmi_pack_request_null_buffer(void)
 {
     uint32_t frame_len;
 
@@ -54,7 +54,7 @@ TEST_CASE(test_ipmi_pack_request_null_buffer)
 }
 
 /* 测试用例: IPMI帧封装 - 缓冲区太小 */
-TEST_CASE(test_ipmi_pack_request_buffer_too_small)
+static void test_ipmi_pack_request_buffer_too_small(void)
 {
     uint8_t frame[10];
     uint32_t frame_len;
@@ -67,7 +67,7 @@ TEST_CASE(test_ipmi_pack_request_buffer_too_small)
 }
 
 /* 测试用例: IPMI响应解析 - 成功响应 */
-TEST_CASE(test_ipmi_unpack_response_success)
+static void test_ipmi_unpack_response_success(void)
 {
     /* 模拟IPMI响应帧 */
     uint8_t response[] = {
@@ -94,7 +94,7 @@ TEST_CASE(test_ipmi_unpack_response_success)
 }
 
 /* 测试用例: IPMI响应解析 - 空帧 */
-TEST_CASE(test_ipmi_unpack_response_null_frame)
+static void test_ipmi_unpack_response_null_frame(void)
 {
     uint8_t netfn, cmd, cc;
     uint8_t data[16];
@@ -107,7 +107,7 @@ TEST_CASE(test_ipmi_unpack_response_null_frame)
 }
 
 /* 测试用例: IPMI响应解析 - 帧太短 */
-TEST_CASE(test_ipmi_unpack_response_frame_too_short)
+static void test_ipmi_unpack_response_frame_too_short(void)
 {
     uint8_t response[] = {0x06, 0x00, 0xFF};
     uint8_t netfn, cmd, cc;
@@ -160,7 +160,7 @@ static int32_t mock_transport_send_recv(void *handle,
 }
 
 /* 测试用例: Redfish初始化 - 成功 */
-TEST_CASE(test_redfish_init_success)
+static void test_redfish_init_success(void)
 {
     void *protocol_handle = NULL;
     void *mock_transport = (void *)0x12345678;
@@ -177,7 +177,7 @@ TEST_CASE(test_redfish_init_success)
 }
 
 /* 测试用例: Redfish初始化 - 空传输句柄 */
-TEST_CASE(test_redfish_init_null_transport)
+static void test_redfish_init_null_transport(void)
 {
     void *protocol_handle = NULL;
 
@@ -190,7 +190,7 @@ TEST_CASE(test_redfish_init_null_transport)
 }
 
 /* 测试用例: Redfish HTTP请求 - GET方法 */
-TEST_CASE(test_redfish_request_get)
+static void test_redfish_request_get(void)
 {
     void *protocol_handle = NULL;
     void *mock_transport = (void *)0x12345678;
@@ -217,7 +217,7 @@ TEST_CASE(test_redfish_request_get)
 }
 
 /* 测试用例: Redfish HTTP请求 - POST方法 */
-TEST_CASE(test_redfish_request_post)
+static void test_redfish_request_post(void)
 {
     void *protocol_handle = NULL;
     void *mock_transport = (void *)0x12345678;
@@ -244,7 +244,7 @@ TEST_CASE(test_redfish_request_post)
 }
 
 /* 测试用例: Redfish获取电源状态 - 成功 */
-TEST_CASE(test_redfish_get_power_state_success)
+static void test_redfish_get_power_state_success(void)
 {
     void *protocol_handle = NULL;
     void *mock_transport = (void *)0x12345678;
@@ -269,7 +269,7 @@ TEST_CASE(test_redfish_get_power_state_success)
  *===========================================================================*/
 
 /* 测试用例: 网络传输初始化 - 无效IP */
-TEST_CASE(test_transport_net_init_invalid_ip)
+static void test_transport_net_init_invalid_ip(void)
 {
     void *handle = NULL;
 
@@ -278,14 +278,14 @@ TEST_CASE(test_transport_net_init_invalid_ip)
 }
 
 /* 测试用例: 网络传输初始化 - 空句柄 */
-TEST_CASE(test_transport_net_init_null_handle)
+static void test_transport_net_init_null_handle(void)
 {
     int32_t ret = bmc_transport_net_init("192.168.1.100", 623, 5000, NULL);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
 /* 测试用例: 串口传输初始化 - 空设备 */
-TEST_CASE(test_transport_serial_init_null_device)
+static void test_transport_serial_init_null_device(void)
 {
     void *handle = NULL;
 
@@ -297,25 +297,124 @@ TEST_CASE(test_transport_serial_init_null_device)
  * 测试模块注册
  *===========================================================================*/
 
-TEST_MODULE_BEGIN(test_pdl_bmc_protocol, "PDL")
-    /* IPMI协议测试 */
-    TEST_CASE_REF(test_ipmi_pack_request_basic)
-    TEST_CASE_REF(test_ipmi_pack_request_with_data)
-    TEST_CASE_REF(test_ipmi_pack_request_null_buffer)
-    TEST_CASE_REF(test_ipmi_pack_request_buffer_too_small)
-    TEST_CASE_REF(test_ipmi_unpack_response_success)
-    TEST_CASE_REF(test_ipmi_unpack_response_null_frame)
-    TEST_CASE_REF(test_ipmi_unpack_response_frame_too_short)
-
+/* IPMI协议测试 */
     /* Redfish协议测试 */
-    TEST_CASE_REF(test_redfish_init_success)
-    TEST_CASE_REF(test_redfish_init_null_transport)
-    TEST_CASE_REF(test_redfish_request_get)
-    TEST_CASE_REF(test_redfish_request_post)
-    TEST_CASE_REF(test_redfish_get_power_state_success)
-
     /* 传输层测试 */
-    TEST_CASE_REF(test_transport_net_init_invalid_ip)
-    TEST_CASE_REF(test_transport_net_init_null_handle)
-    TEST_CASE_REF(test_transport_serial_init_null_device)
-TEST_MODULE_END(test_pdl_bmc_protocol, "PDL")
+
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_ipmi_pack_request_basic",
+		.func = test_ipmi_pack_request_basic,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_ipmi_pack_request_with_data",
+		.func = test_ipmi_pack_request_with_data,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_ipmi_pack_request_null_buffer",
+		.func = test_ipmi_pack_request_null_buffer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_ipmi_pack_request_buffer_too_small",
+		.func = test_ipmi_pack_request_buffer_too_small,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_ipmi_unpack_response_success",
+		.func = test_ipmi_unpack_response_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_ipmi_unpack_response_null_frame",
+		.func = test_ipmi_unpack_response_null_frame,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_ipmi_unpack_response_frame_too_short",
+		.func = test_ipmi_unpack_response_frame_too_short,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_redfish_init_success",
+		.func = test_redfish_init_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_redfish_init_null_transport",
+		.func = test_redfish_init_null_transport,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_redfish_request_get",
+		.func = test_redfish_request_get,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_redfish_request_post",
+		.func = test_redfish_request_post,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_redfish_get_power_state_success",
+		.func = test_redfish_get_power_state_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_transport_net_init_invalid_ip",
+		.func = test_transport_net_init_invalid_ip,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_transport_net_init_null_handle",
+		.func = test_transport_net_init_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_transport_serial_init_null_device",
+		.func = test_transport_serial_init_null_device,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "pdl_bmc_protocol",
+	.module_name = "pdl_bmc_protocol",
+	.layer_name = "PDL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "PDL pdl_bmc_protocol tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_pdl_bmc_protocol_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

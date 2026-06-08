@@ -12,7 +12,7 @@
  *===========================================================================*/
 
 /* 测试用例: 串口打开 - 成功 */
-TEST_CASE(test_hal_serial_open_success)
+static void test_hal_serial_open_success(void)
 {
     hal_serial_handle_t handle = NULL;
     hal_serial_config_t config = {
@@ -35,7 +35,7 @@ TEST_CASE(test_hal_serial_open_success)
 }
 
 /* 测试用例: 串口打开 - 空设备路径 */
-TEST_CASE(test_hal_serial_open_null_device)
+static void test_hal_serial_open_null_device(void)
 {
     hal_serial_handle_t handle = NULL;
     hal_serial_config_t config = {
@@ -51,7 +51,7 @@ TEST_CASE(test_hal_serial_open_null_device)
 }
 
 /* 测试用例: 串口打开 - 空配置 */
-TEST_CASE(test_hal_serial_open_null_config)
+static void test_hal_serial_open_null_config(void)
 {
     hal_serial_handle_t handle = NULL;
 
@@ -60,7 +60,7 @@ TEST_CASE(test_hal_serial_open_null_config)
 }
 
 /* 测试用例: 串口打开 - 空句柄 */
-TEST_CASE(test_hal_serial_open_null_handle)
+static void test_hal_serial_open_null_handle(void)
 {
     hal_serial_config_t config = {
         .baud_rate = 115200,
@@ -75,7 +75,7 @@ TEST_CASE(test_hal_serial_open_null_handle)
 }
 
 /* 测试用例: 串口打开 - 无效设备 */
-TEST_CASE(test_hal_serial_open_invalid_device)
+static void test_hal_serial_open_invalid_device(void)
 {
     hal_serial_handle_t handle = NULL;
     hal_serial_config_t config = {
@@ -91,7 +91,7 @@ TEST_CASE(test_hal_serial_open_invalid_device)
 }
 
 /* 测试用例: 串口关闭 */
-TEST_CASE(test_hal_serial_close)
+static void test_hal_serial_close(void)
 {
     hal_serial_handle_t handle = NULL;
     hal_serial_config_t config = {
@@ -112,7 +112,7 @@ TEST_CASE(test_hal_serial_close)
 }
 
 /* 测试用例: 串口关闭 - 空句柄 */
-TEST_CASE(test_hal_serial_close_null_handle)
+static void test_hal_serial_close_null_handle(void)
 {
     int32_t ret = HAL_Serial_Close(NULL);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
@@ -123,7 +123,7 @@ TEST_CASE(test_hal_serial_close_null_handle)
  *===========================================================================*/
 
 /* 测试用例: 串口写入 - 成功 */
-TEST_CASE(test_hal_serial_write_success)
+static void test_hal_serial_write_success(void)
 {
     hal_serial_handle_t handle = NULL;
     hal_serial_config_t config = {
@@ -147,7 +147,7 @@ TEST_CASE(test_hal_serial_write_success)
 }
 
 /* 测试用例: 串口写入 - 空句柄 */
-TEST_CASE(test_hal_serial_write_null_handle)
+static void test_hal_serial_write_null_handle(void)
 {
     uint8_t data[] = "test";
 
@@ -156,7 +156,7 @@ TEST_CASE(test_hal_serial_write_null_handle)
 }
 
 /* 测试用例: 串口写入 - 空缓冲区 */
-TEST_CASE(test_hal_serial_write_null_buffer)
+static void test_hal_serial_write_null_buffer(void)
 {
     hal_serial_handle_t handle = NULL;
     hal_serial_config_t config = {
@@ -179,7 +179,7 @@ TEST_CASE(test_hal_serial_write_null_buffer)
 }
 
 /* 测试用例: 串口写入 - 零长度 */
-TEST_CASE(test_hal_serial_write_zero_length)
+static void test_hal_serial_write_zero_length(void)
 {
     hal_serial_handle_t handle = NULL;
     hal_serial_config_t config = {
@@ -203,7 +203,7 @@ TEST_CASE(test_hal_serial_write_zero_length)
 }
 
 /* 测试用例: 串口读取 - 超时 */
-TEST_CASE(test_hal_serial_read_timeout)
+static void test_hal_serial_read_timeout(void)
 {
     hal_serial_handle_t handle = NULL;
     hal_serial_config_t config = {
@@ -227,7 +227,7 @@ TEST_CASE(test_hal_serial_read_timeout)
 }
 
 /* 测试用例: 串口读取 - 空句柄 */
-TEST_CASE(test_hal_serial_read_null_handle)
+static void test_hal_serial_read_null_handle(void)
 {
     uint8_t buffer[64];
 
@@ -236,7 +236,7 @@ TEST_CASE(test_hal_serial_read_null_handle)
 }
 
 /* 测试用例: 串口读取 - 空缓冲区 */
-TEST_CASE(test_hal_serial_read_null_buffer)
+static void test_hal_serial_read_null_buffer(void)
 {
     hal_serial_handle_t handle = NULL;
     hal_serial_config_t config = {
@@ -263,7 +263,7 @@ TEST_CASE(test_hal_serial_read_null_buffer)
  *===========================================================================*/
 
 /* 测试用例: 刷新缓冲区 - 成功 */
-TEST_CASE(test_hal_serial_flush_success)
+static void test_hal_serial_flush_success(void)
 {
     hal_serial_handle_t handle = NULL;
     hal_serial_config_t config = {
@@ -286,7 +286,7 @@ TEST_CASE(test_hal_serial_flush_success)
 }
 
 /* 测试用例: 刷新缓冲区 - 空句柄 */
-TEST_CASE(test_hal_serial_flush_null_handle)
+static void test_hal_serial_flush_null_handle(void)
 {
     int32_t ret = HAL_Serial_Flush(NULL);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
@@ -299,7 +299,7 @@ TEST_CASE(test_hal_serial_flush_null_handle)
 #if 0  /* HAL_Serial_SetConfig未实现，暂时禁用这些测试 */
 
 /* 测试用例: 设置配置 - 成功 */
-TEST_CASE(test_hal_serial_set_config_success)
+static void test_hal_serial_set_config_success(void)
 {
     hal_serial_handle_t handle = NULL;
     hal_serial_config_t config = {
@@ -329,7 +329,7 @@ TEST_CASE(test_hal_serial_set_config_success)
 }
 
 /* 测试用例: 设置配置 - 空句柄 */
-TEST_CASE(test_hal_serial_set_config_null_handle)
+static void test_hal_serial_set_config_null_handle(void)
 {
     hal_serial_config_t config = {
         .baud_rate = 9600,
@@ -344,7 +344,7 @@ TEST_CASE(test_hal_serial_set_config_null_handle)
 }
 
 /* 测试用例: 设置配置 - 空配置 */
-TEST_CASE(test_hal_serial_set_config_null_config)
+static void test_hal_serial_set_config_null_config(void)
 {
     hal_serial_handle_t handle = NULL;
     hal_serial_config_t config = {
@@ -373,7 +373,7 @@ TEST_CASE(test_hal_serial_set_config_null_config)
  *===========================================================================*/
 
 /* 测试用例: 不同波特率 */
-TEST_CASE(test_hal_serial_different_baudrate)
+static void test_hal_serial_different_baudrate(void)
 {
     hal_serial_handle_t handle = NULL;
     hal_serial_config_t config = {
@@ -394,7 +394,7 @@ TEST_CASE(test_hal_serial_different_baudrate)
 }
 
 /* 测试用例: 不同校验位 */
-TEST_CASE(test_hal_serial_different_parity)
+static void test_hal_serial_different_parity(void)
 {
     hal_serial_handle_t handle = NULL;
     hal_serial_config_t config = {
@@ -415,7 +415,7 @@ TEST_CASE(test_hal_serial_different_parity)
 }
 
 /* 测试用例: 不同数据位 */
-TEST_CASE(test_hal_serial_different_databits)
+static void test_hal_serial_different_databits(void)
 {
     hal_serial_handle_t handle = NULL;
     hal_serial_config_t config = {
@@ -439,39 +439,154 @@ TEST_CASE(test_hal_serial_different_databits)
  * 测试模块注册
  *===========================================================================*/
 
-TEST_MODULE_BEGIN(test_hal_serial, "HAL")
-    // HAL串口驱动测试
+// HAL串口驱动测试
     /* 初始化和清理 */
-    TEST_CASE_REF(test_hal_serial_open_success)
-    TEST_CASE_REF(test_hal_serial_open_null_device)
-    TEST_CASE_REF(test_hal_serial_open_null_config)
-    TEST_CASE_REF(test_hal_serial_open_null_handle)
-    TEST_CASE_REF(test_hal_serial_open_invalid_device)
-    TEST_CASE_REF(test_hal_serial_close)
-    TEST_CASE_REF(test_hal_serial_close_null_handle)
-
     /* 读写 */
-    TEST_CASE_REF(test_hal_serial_write_success)
-    TEST_CASE_REF(test_hal_serial_write_null_handle)
-    TEST_CASE_REF(test_hal_serial_write_null_buffer)
-    TEST_CASE_REF(test_hal_serial_write_zero_length)
-    TEST_CASE_REF(test_hal_serial_read_timeout)
-    TEST_CASE_REF(test_hal_serial_read_null_handle)
-    TEST_CASE_REF(test_hal_serial_read_null_buffer)
-
     /* 刷新 */
-    TEST_CASE_REF(test_hal_serial_flush_success)
-    TEST_CASE_REF(test_hal_serial_flush_null_handle)
-
     /* 配置 - 暂时注释，等待HAL_Serial_SetConfig实现 */
 #if 0
-    TEST_CASE_REF(test_hal_serial_set_config_success)
-    TEST_CASE_REF(test_hal_serial_set_config_null_handle)
-    TEST_CASE_REF(test_hal_serial_set_config_null_config)
-#endif
+    #endif
 
     /* 配置参数 */
-    TEST_CASE_REF(test_hal_serial_different_baudrate)
-    TEST_CASE_REF(test_hal_serial_different_parity)
-    TEST_CASE_REF(test_hal_serial_different_databits)
-TEST_MODULE_END(test_hal_serial, "HAL")
+
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_hal_serial_open_success",
+		.func = test_hal_serial_open_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_serial_open_null_device",
+		.func = test_hal_serial_open_null_device,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_serial_open_null_config",
+		.func = test_hal_serial_open_null_config,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_serial_open_null_handle",
+		.func = test_hal_serial_open_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_serial_open_invalid_device",
+		.func = test_hal_serial_open_invalid_device,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_serial_close",
+		.func = test_hal_serial_close,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_serial_close_null_handle",
+		.func = test_hal_serial_close_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_serial_write_success",
+		.func = test_hal_serial_write_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_serial_write_null_handle",
+		.func = test_hal_serial_write_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_serial_write_null_buffer",
+		.func = test_hal_serial_write_null_buffer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_serial_write_zero_length",
+		.func = test_hal_serial_write_zero_length,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_serial_read_timeout",
+		.func = test_hal_serial_read_timeout,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_serial_read_null_handle",
+		.func = test_hal_serial_read_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_serial_read_null_buffer",
+		.func = test_hal_serial_read_null_buffer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_serial_flush_success",
+		.func = test_hal_serial_flush_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_serial_flush_null_handle",
+		.func = test_hal_serial_flush_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_serial_different_baudrate",
+		.func = test_hal_serial_different_baudrate,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_serial_different_parity",
+		.func = test_hal_serial_different_parity,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_serial_different_databits",
+		.func = test_hal_serial_different_databits,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "hal_serial",
+	.module_name = "hal_serial",
+	.layer_name = "HAL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "HAL hal_serial tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_hal_serial_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

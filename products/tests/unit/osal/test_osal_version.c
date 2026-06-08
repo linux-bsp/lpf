@@ -10,7 +10,7 @@
  * 测试用例
  *===========================================================================*/
 
-TEST_CASE(test_osal_get_version_string)
+static void test_osal_get_version_string(void)
 {
     const char *version = OSAL_GetVersionString();
 
@@ -21,7 +21,7 @@ TEST_CASE(test_osal_get_version_string)
     TEST_ASSERT_TRUE(OSAL_strstr(version, "OSAL") != NULL);
 }
 
-TEST_CASE(test_osal_version_format)
+static void test_osal_version_format(void)
 {
     const char *version = OSAL_GetVersionString();
 
@@ -40,7 +40,7 @@ TEST_CASE(test_osal_version_format)
     TEST_ASSERT_TRUE(has_v || has_dot);
 }
 
-TEST_CASE(test_osal_version_consistency)
+static void test_osal_version_consistency(void)
 {
     /* Multiple calls should return the same string */
     const char *v1 = OSAL_GetVersionString();
@@ -53,8 +53,48 @@ TEST_CASE(test_osal_version_consistency)
  * 测试套件注册
  *===========================================================================*/
 
-TEST_MODULE_BEGIN(test_osal_version, "OSAL")
-    TEST_CASE_REGISTER(test_osal_get_version_string, "Get version string")
-    TEST_CASE_REGISTER(test_osal_version_format, "Version format check")
-    TEST_CASE_REGISTER(test_osal_version_consistency, "Version consistency")
-TEST_MODULE_END(test_osal_version, "OSAL")
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_osal_get_version_string",
+		.func = test_osal_get_version_string,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_version_format",
+		.func = test_osal_version_format,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_version_consistency",
+		.func = test_osal_version_consistency,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "osal_version",
+	.module_name = "osal_version",
+	.layer_name = "OSAL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "OSAL osal_version tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_osal_version_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

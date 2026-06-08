@@ -44,7 +44,7 @@ static void* sleep_thread_func(void *arg)
  * 测试用例
  *===========================================================================*/
 
-TEST_CASE(test_thread_create_join)
+static void test_thread_create_join(void)
 {
     osal_thread_t thread;
     int32_t value = 0;
@@ -59,7 +59,7 @@ TEST_CASE(test_thread_create_join)
     TEST_ASSERT_EQUAL(123, (int32_t)(intptr_t)retval);
 }
 
-TEST_CASE(test_thread_create_simplified)
+static void test_thread_create_simplified(void)
 {
     osal_thread_t thread;
     int32_t value = 0;
@@ -72,7 +72,7 @@ TEST_CASE(test_thread_create_simplified)
     TEST_ASSERT_EQUAL(42, value);
 }
 
-TEST_CASE(test_thread_multiple_threads)
+static void test_thread_multiple_threads(void)
 {
     uint32_t i;
     osal_thread_t threads[5];
@@ -94,7 +94,7 @@ TEST_CASE(test_thread_multiple_threads)
     }
 }
 
-TEST_CASE(test_thread_counter)
+static void test_thread_counter(void)
 {
     osal_thread_t thread;
     thread_counter = 0;
@@ -108,7 +108,7 @@ TEST_CASE(test_thread_counter)
     TEST_ASSERT_EQUAL(2, thread_counter);
 }
 
-TEST_CASE(test_thread_concurrent_counter)
+static void test_thread_concurrent_counter(void)
 {
     uint32_t i;
     osal_thread_t threads[10];
@@ -132,7 +132,7 @@ TEST_CASE(test_thread_concurrent_counter)
     TEST_ASSERT_EQUAL(20, thread_counter);
 }
 
-TEST_CASE(test_thread_null_params)
+static void test_thread_null_params(void)
 {
     osal_thread_t thread;
 
@@ -145,7 +145,7 @@ TEST_CASE(test_thread_null_params)
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
-TEST_CASE(test_thread_with_null_arg)
+static void test_thread_with_null_arg(void)
 {
     osal_thread_t thread;
 
@@ -157,7 +157,7 @@ TEST_CASE(test_thread_with_null_arg)
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 }
 
-TEST_CASE(test_thread_timing)
+static void test_thread_timing(void)
 {
     uint32_t i;
     osal_thread_t threads[3];
@@ -187,7 +187,7 @@ TEST_CASE(test_thread_timing)
     TEST_ASSERT_TRUE(elapsed >= 150 && elapsed < 250);
 }
 
-TEST_CASE(test_thread_sequential_execution)
+static void test_thread_sequential_execution(void)
 {
     osal_thread_t thread1, thread2;
     int32_t value1 = 0, value2 = 0;
@@ -212,14 +212,84 @@ TEST_CASE(test_thread_sequential_execution)
  * 测试模块注册
  *===========================================================================*/
 
-TEST_MODULE_BEGIN(test_osal_thread, "OSAL")
-    TEST_CASE_REGISTER(test_thread_create_join, "Thread create and join")
-    TEST_CASE_REGISTER(test_thread_create_simplified, "Thread simplified API")
-    TEST_CASE_REGISTER(test_thread_multiple_threads, "Multiple threads")
-    TEST_CASE_REGISTER(test_thread_counter, "Thread counter")
-    TEST_CASE_REGISTER(test_thread_concurrent_counter, "Concurrent counter")
-    TEST_CASE_REGISTER(test_thread_null_params, "NULL parameters")
-    TEST_CASE_REGISTER(test_thread_with_null_arg, "Thread with NULL arg")
-    TEST_CASE_REGISTER(test_thread_timing, "Thread timing")
-    TEST_CASE_REGISTER(test_thread_sequential_execution, "Sequential execution")
-TEST_MODULE_END(test_osal_thread, "OSAL")
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_thread_create_join",
+		.func = test_thread_create_join,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_thread_create_simplified",
+		.func = test_thread_create_simplified,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_thread_multiple_threads",
+		.func = test_thread_multiple_threads,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_thread_counter",
+		.func = test_thread_counter,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_thread_concurrent_counter",
+		.func = test_thread_concurrent_counter,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_thread_null_params",
+		.func = test_thread_null_params,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_thread_with_null_arg",
+		.func = test_thread_with_null_arg,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_thread_timing",
+		.func = test_thread_timing,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_thread_sequential_execution",
+		.func = test_thread_sequential_execution,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "osal_thread",
+	.module_name = "osal_thread",
+	.layer_name = "OSAL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "OSAL osal_thread tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_osal_thread_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

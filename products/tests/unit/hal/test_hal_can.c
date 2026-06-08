@@ -12,7 +12,7 @@
  *===========================================================================*/
 
 /* 测试用例: CAN初始化 - 成功 */
-TEST_CASE(test_hal_can_init_success)
+static void test_hal_can_init_success(void)
 {
     hal_can_handle_t handle = NULL;
     hal_can_config_t config = {
@@ -48,7 +48,7 @@ TEST_CASE(test_hal_can_init_success)
 }
 
 /* 测试用例: CAN初始化 - 空配置 */
-TEST_CASE(test_hal_can_init_null_config)
+static void test_hal_can_init_null_config(void)
 {
     hal_can_handle_t handle = NULL;
 
@@ -57,7 +57,7 @@ TEST_CASE(test_hal_can_init_null_config)
 }
 
 /* 测试用例: CAN初始化 - 空句柄 */
-TEST_CASE(test_hal_can_init_null_handle)
+static void test_hal_can_init_null_handle(void)
 {
     hal_can_config_t config = {
         .interface = "can0",
@@ -71,7 +71,7 @@ TEST_CASE(test_hal_can_init_null_handle)
 }
 
 /* 测试用例: CAN初始化 - 无效接口 */
-TEST_CASE(test_hal_can_init_invalid_interface)
+static void test_hal_can_init_invalid_interface(void)
 {
     hal_can_handle_t handle = NULL;
     hal_can_config_t config = {
@@ -86,7 +86,7 @@ TEST_CASE(test_hal_can_init_invalid_interface)
 }
 
 /* 测试用例: CAN清理 */
-TEST_CASE(test_hal_can_deinit)
+static void test_hal_can_deinit(void)
 {
     hal_can_handle_t handle = NULL;
     hal_can_config_t config = {
@@ -104,7 +104,7 @@ TEST_CASE(test_hal_can_deinit)
 }
 
 /* 测试用例: CAN清理 - 空句柄 */
-TEST_CASE(test_hal_can_deinit_null_handle)
+static void test_hal_can_deinit_null_handle(void)
 {
     int32_t ret = HAL_CAN_Deinit(NULL);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
@@ -115,7 +115,7 @@ TEST_CASE(test_hal_can_deinit_null_handle)
  *===========================================================================*/
 
 /* 测试用例: CAN发送 - 成功 */
-TEST_CASE(test_hal_can_send_success)
+static void test_hal_can_send_success(void)
 {
     hal_can_handle_t handle = NULL;
     hal_can_config_t config = {
@@ -140,7 +140,7 @@ TEST_CASE(test_hal_can_send_success)
 }
 
 /* 测试用例: CAN发送 - 空句柄 */
-TEST_CASE(test_hal_can_send_null_handle)
+static void test_hal_can_send_null_handle(void)
 {
     hal_can_frame_t frame = {
         .can_id = 0x123,
@@ -153,7 +153,7 @@ TEST_CASE(test_hal_can_send_null_handle)
 }
 
 /* 测试用例: CAN发送 - 空帧 */
-TEST_CASE(test_hal_can_send_null_frame)
+static void test_hal_can_send_null_frame(void)
 {
     hal_can_handle_t handle = NULL;
     hal_can_config_t config = {
@@ -173,7 +173,7 @@ TEST_CASE(test_hal_can_send_null_frame)
 }
 
 /* 测试用例: CAN接收 - 超时 */
-TEST_CASE(test_hal_can_recv_timeout)
+static void test_hal_can_recv_timeout(void)
 {
     hal_can_handle_t handle = NULL;
     hal_can_config_t config = {
@@ -194,7 +194,7 @@ TEST_CASE(test_hal_can_recv_timeout)
 }
 
 /* 测试用例: CAN接收 - 空句柄 */
-TEST_CASE(test_hal_can_recv_null_handle)
+static void test_hal_can_recv_null_handle(void)
 {
     hal_can_frame_t frame;
 
@@ -203,7 +203,7 @@ TEST_CASE(test_hal_can_recv_null_handle)
 }
 
 /* 测试用例: CAN接收 - 空帧 */
-TEST_CASE(test_hal_can_recv_null_frame)
+static void test_hal_can_recv_null_frame(void)
 {
     hal_can_handle_t handle = NULL;
     hal_can_config_t config = {
@@ -223,7 +223,7 @@ TEST_CASE(test_hal_can_recv_null_frame)
 }
 
 /* 测试用例: CAN发送接收回环 */
-TEST_CASE(test_hal_can_loopback)
+static void test_hal_can_loopback(void)
 {
     hal_can_handle_t handle = NULL;
     hal_can_config_t config = {
@@ -266,7 +266,7 @@ TEST_CASE(test_hal_can_loopback)
  *===========================================================================*/
 
 /* 测试用例: 设置过滤器 - 成功 */
-TEST_CASE(test_hal_can_set_filter_success)
+static void test_hal_can_set_filter_success(void)
 {
     hal_can_handle_t handle = NULL;
     hal_can_config_t config = {
@@ -286,7 +286,7 @@ TEST_CASE(test_hal_can_set_filter_success)
 }
 
 /* 测试用例: 设置过滤器 - 空句柄 */
-TEST_CASE(test_hal_can_set_filter_null_handle)
+static void test_hal_can_set_filter_null_handle(void)
 {
     int32_t ret = HAL_CAN_SetFilter(NULL, 0x100, 0x7FF);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
@@ -303,7 +303,7 @@ TEST_CASE(test_hal_can_set_filter_null_handle)
  *===========================================================================*/
 
 /* 测试用例: 不同波特率 */
-TEST_CASE(test_hal_can_different_baudrate)
+static void test_hal_can_different_baudrate(void)
 {
     hal_can_handle_t handle = NULL;
     hal_can_config_t config = {
@@ -323,35 +323,133 @@ TEST_CASE(test_hal_can_different_baudrate)
  * 测试模块注册
  *===========================================================================*/
 
-TEST_MODULE_BEGIN(test_hal_can, "HAL")
-    // HAL CAN驱动测试
+// HAL CAN驱动测试
     /* 初始化和清理 */
-    TEST_CASE_REF(test_hal_can_init_success)
-    TEST_CASE_REF(test_hal_can_init_null_config)
-    TEST_CASE_REF(test_hal_can_init_null_handle)
-    TEST_CASE_REF(test_hal_can_init_invalid_interface)
-    TEST_CASE_REF(test_hal_can_deinit)
-    TEST_CASE_REF(test_hal_can_deinit_null_handle)
-
     /* 发送和接收 */
-    TEST_CASE_REF(test_hal_can_send_success)
-    TEST_CASE_REF(test_hal_can_send_null_handle)
-    TEST_CASE_REF(test_hal_can_send_null_frame)
-    TEST_CASE_REF(test_hal_can_recv_timeout)
-    TEST_CASE_REF(test_hal_can_recv_null_handle)
-    TEST_CASE_REF(test_hal_can_recv_null_frame)
-    TEST_CASE_REF(test_hal_can_loopback)
-
     /* 过滤器 */
-    TEST_CASE_REF(test_hal_can_set_filter_success)
-    TEST_CASE_REF(test_hal_can_set_filter_null_handle)
-
     /* 统计信息 */
-//     TEST_CASE_REF(test_hal_can_get_stats_success)
-//     TEST_CASE_REF(test_hal_can_get_stats_null_handle)
-//     TEST_CASE_REF(test_hal_can_get_stats_null_pointer)
-//     TEST_CASE_REF(test_hal_can_stats_accumulation)
+//     //     //     //     /* 配置参数 */
 
-    /* 配置参数 */
-    TEST_CASE_REF(test_hal_can_different_baudrate)
-TEST_MODULE_END(test_hal_can, "HAL")
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_hal_can_init_success",
+		.func = test_hal_can_init_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_can_init_null_config",
+		.func = test_hal_can_init_null_config,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_can_init_null_handle",
+		.func = test_hal_can_init_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_can_init_invalid_interface",
+		.func = test_hal_can_init_invalid_interface,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_can_deinit",
+		.func = test_hal_can_deinit,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_can_deinit_null_handle",
+		.func = test_hal_can_deinit_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_can_send_success",
+		.func = test_hal_can_send_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_can_send_null_handle",
+		.func = test_hal_can_send_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_can_send_null_frame",
+		.func = test_hal_can_send_null_frame,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_can_recv_timeout",
+		.func = test_hal_can_recv_timeout,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_can_recv_null_handle",
+		.func = test_hal_can_recv_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_can_recv_null_frame",
+		.func = test_hal_can_recv_null_frame,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_can_loopback",
+		.func = test_hal_can_loopback,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_can_set_filter_success",
+		.func = test_hal_can_set_filter_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_can_set_filter_null_handle",
+		.func = test_hal_can_set_filter_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_can_different_baudrate",
+		.func = test_hal_can_different_baudrate,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "hal_can",
+	.module_name = "hal_can",
+	.layer_name = "HAL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "HAL hal_can tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_hal_can_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

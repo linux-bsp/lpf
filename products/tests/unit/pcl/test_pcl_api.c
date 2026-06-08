@@ -126,7 +126,7 @@ static const pconfig_platform_config_t test_platform_v2 = {
 
 /* ========== 初始化和清理测试 ========== */
 
-TEST_CASE(test_pcl_init_success)
+static void test_pcl_init_success(void)
 {
     int32_t ret = PCONFIG_Init();
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
@@ -138,7 +138,7 @@ TEST_CASE(test_pcl_init_success)
     PCONFIG_Cleanup();
 }
 
-TEST_CASE(test_pcl_cleanup)
+static void test_pcl_cleanup(void)
 {
     PCONFIG_Init();
     PCONFIG_Cleanup();
@@ -149,7 +149,7 @@ TEST_CASE(test_pcl_cleanup)
 
 /* ========== 配置注册测试 ========== */
 
-TEST_CASE(test_pcl_register_success)
+static void test_pcl_register_success(void)
 {
     PCONFIG_Init();
 
@@ -159,7 +159,7 @@ TEST_CASE(test_pcl_register_success)
     PCONFIG_Cleanup();
 }
 
-TEST_CASE(test_pcl_register_null_pointer)
+static void test_pcl_register_null_pointer(void)
 {
     PCONFIG_Init();
 
@@ -169,14 +169,14 @@ TEST_CASE(test_pcl_register_null_pointer)
     PCONFIG_Cleanup();
 }
 
-TEST_CASE(test_pcl_register_not_initialized)
+static void test_pcl_register_not_initialized(void)
 {
     /* 未初始化时注册应该失败 */
     int32_t ret = PCONFIG_Register(&test_platform_v1);
     TEST_ASSERT_EQUAL(OSAL_ERR_GENERIC, ret);
 }
 
-TEST_CASE(test_pcl_register_duplicate)
+static void test_pcl_register_duplicate(void)
 {
     PCONFIG_Init();
 
@@ -190,7 +190,7 @@ TEST_CASE(test_pcl_register_duplicate)
     PCONFIG_Cleanup();
 }
 
-TEST_CASE(test_pcl_register_multiple_versions)
+static void test_pcl_register_multiple_versions(void)
 {
     PCONFIG_Init();
 
@@ -206,7 +206,7 @@ TEST_CASE(test_pcl_register_multiple_versions)
 
 /* ========== 配置查询测试 ========== */
 
-TEST_CASE(test_pcl_find_success)
+static void test_pcl_find_success(void)
 {
     PCONFIG_Init();
     PCONFIG_Register(&test_platform_v1);
@@ -219,7 +219,7 @@ TEST_CASE(test_pcl_find_success)
     PCONFIG_Cleanup();
 }
 
-TEST_CASE(test_pcl_find_without_version)
+static void test_pcl_find_without_version(void)
 {
     PCONFIG_Init();
     PCONFIG_Register(&test_platform_v1);
@@ -234,7 +234,7 @@ TEST_CASE(test_pcl_find_without_version)
     PCONFIG_Cleanup();
 }
 
-TEST_CASE(test_pcl_find_not_found)
+static void test_pcl_find_not_found(void)
 {
     PCONFIG_Init();
     PCONFIG_Register(&test_platform_v1);
@@ -245,7 +245,7 @@ TEST_CASE(test_pcl_find_not_found)
     PCONFIG_Cleanup();
 }
 
-TEST_CASE(test_pcl_find_null_parameters)
+static void test_pcl_find_null_parameters(void)
 {
     PCONFIG_Init();
     PCONFIG_Register(&test_platform_v1);
@@ -259,7 +259,7 @@ TEST_CASE(test_pcl_find_null_parameters)
     PCONFIG_Cleanup();
 }
 
-TEST_CASE(test_pcl_list_success)
+static void test_pcl_list_success(void)
 {
     PCONFIG_Init();
     PCONFIG_Register(&test_platform_v1);
@@ -277,7 +277,7 @@ TEST_CASE(test_pcl_list_success)
     PCONFIG_Cleanup();
 }
 
-TEST_CASE(test_pcl_list_null_parameters)
+static void test_pcl_list_null_parameters(void)
 {
     PCONFIG_Init();
 
@@ -295,7 +295,7 @@ TEST_CASE(test_pcl_list_null_parameters)
 
 /* ========== 硬件外设查询测试 ========== */
 
-TEST_CASE(test_pcl_hw_find_mcu_success)
+static void test_pcl_hw_find_mcu_success(void)
 {
     PCONFIG_Init();
     PCONFIG_Register(&test_platform_v1);
@@ -308,7 +308,7 @@ TEST_CASE(test_pcl_hw_find_mcu_success)
     PCONFIG_Cleanup();
 }
 
-TEST_CASE(test_pcl_hw_find_mcu_not_found)
+static void test_pcl_hw_find_mcu_not_found(void)
 {
     PCONFIG_Init();
     PCONFIG_Register(&test_platform_v1);
@@ -319,7 +319,7 @@ TEST_CASE(test_pcl_hw_find_mcu_not_found)
     PCONFIG_Cleanup();
 }
 
-TEST_CASE(test_pcl_hw_find_mcu_null_parameters)
+static void test_pcl_hw_find_mcu_null_parameters(void)
 {
     PCONFIG_Init();
     PCONFIG_Register(&test_platform_v1);
@@ -333,7 +333,7 @@ TEST_CASE(test_pcl_hw_find_mcu_null_parameters)
     PCONFIG_Cleanup();
 }
 
-TEST_CASE(test_pcl_hw_get_mcu_success)
+static void test_pcl_hw_get_mcu_success(void)
 {
     PCONFIG_Init();
     PCONFIG_Register(&test_platform_v1);
@@ -345,7 +345,7 @@ TEST_CASE(test_pcl_hw_get_mcu_success)
     PCONFIG_Cleanup();
 }
 
-TEST_CASE(test_pcl_hw_get_mcu_invalid_id)
+static void test_pcl_hw_get_mcu_invalid_id(void)
 {
     PCONFIG_Init();
     PCONFIG_Register(&test_platform_v1);
@@ -356,7 +356,7 @@ TEST_CASE(test_pcl_hw_get_mcu_invalid_id)
     PCONFIG_Cleanup();
 }
 
-TEST_CASE(test_pcl_hw_find_bmc_success)
+static void test_pcl_hw_find_bmc_success(void)
 {
     PCONFIG_Init();
     PCONFIG_Register(&test_platform_v1);
@@ -369,7 +369,7 @@ TEST_CASE(test_pcl_hw_find_bmc_success)
     PCONFIG_Cleanup();
 }
 
-TEST_CASE(test_pcl_hw_find_fpga_success)
+static void test_pcl_hw_find_fpga_success(void)
 {
     PCONFIG_Init();
     PCONFIG_Register(&test_platform_v1);
@@ -382,7 +382,7 @@ TEST_CASE(test_pcl_hw_find_fpga_success)
     PCONFIG_Cleanup();
 }
 
-TEST_CASE(test_pcl_hw_find_switch_success)
+static void test_pcl_hw_find_switch_success(void)
 {
     PCONFIG_Init();
     PCONFIG_Register(&test_platform_v1);
@@ -397,13 +397,13 @@ TEST_CASE(test_pcl_hw_find_switch_success)
 
 /* ========== 配置验证测试 ========== */
 
-TEST_CASE(test_pcl_validate_success)
+static void test_pcl_validate_success(void)
 {
     int32_t ret = PCONFIG_Validate(&test_platform_v1);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 }
 
-TEST_CASE(test_pcl_validate_null_pointer)
+static void test_pcl_validate_null_pointer(void)
 {
     int32_t ret = PCONFIG_Validate(NULL);
     TEST_ASSERT_EQUAL(OSAL_ERR_GENERIC, ret);
@@ -541,7 +541,7 @@ static void* thread_getboard_func(void *arg)
     return NULL;
 }
 
-TEST_CASE(test_pcl_concurrent_register)
+static void test_pcl_concurrent_register(void)
 {
     osal_thread_t threads[NUM_THREADS];
     thread_test_data_t thread_data[NUM_THREADS];
@@ -586,7 +586,7 @@ TEST_CASE(test_pcl_concurrent_register)
     PCONFIG_Cleanup();
 }
 
-TEST_CASE(test_pcl_concurrent_find)
+static void test_pcl_concurrent_find(void)
 {
     osal_thread_t threads[NUM_THREADS];
     thread_test_data_t thread_data[NUM_THREADS];
@@ -629,7 +629,7 @@ TEST_CASE(test_pcl_concurrent_find)
     PCONFIG_Cleanup();
 }
 
-TEST_CASE(test_pcl_concurrent_mixed_operations)
+static void test_pcl_concurrent_mixed_operations(void)
 {
     osal_thread_t threads[NUM_THREADS * 3];
     thread_test_data_t thread_data[NUM_THREADS * 3];
@@ -688,46 +688,186 @@ TEST_CASE(test_pcl_concurrent_mixed_operations)
 
 /* ========== 测试套件注册 ========== */
 
-TEST_MODULE_BEGIN(test_pcl_init_suite, "PCL")
-    TEST_CASE_REF(test_pcl_init_success)
-    TEST_CASE_REF(test_pcl_cleanup)
-TEST_MODULE_END(test_pcl_init_suite, "PCL")
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_pcl_init_success",
+		.func = test_pcl_init_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pcl_cleanup",
+		.func = test_pcl_cleanup,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pcl_register_success",
+		.func = test_pcl_register_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pcl_register_null_pointer",
+		.func = test_pcl_register_null_pointer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pcl_register_not_initialized",
+		.func = test_pcl_register_not_initialized,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pcl_register_duplicate",
+		.func = test_pcl_register_duplicate,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pcl_register_multiple_versions",
+		.func = test_pcl_register_multiple_versions,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pcl_find_success",
+		.func = test_pcl_find_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pcl_find_without_version",
+		.func = test_pcl_find_without_version,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pcl_find_not_found",
+		.func = test_pcl_find_not_found,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pcl_find_null_parameters",
+		.func = test_pcl_find_null_parameters,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pcl_list_success",
+		.func = test_pcl_list_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pcl_list_null_parameters",
+		.func = test_pcl_list_null_parameters,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pcl_hw_find_mcu_success",
+		.func = test_pcl_hw_find_mcu_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pcl_hw_find_mcu_not_found",
+		.func = test_pcl_hw_find_mcu_not_found,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pcl_hw_find_mcu_null_parameters",
+		.func = test_pcl_hw_find_mcu_null_parameters,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pcl_hw_get_mcu_success",
+		.func = test_pcl_hw_get_mcu_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pcl_hw_get_mcu_invalid_id",
+		.func = test_pcl_hw_get_mcu_invalid_id,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pcl_hw_find_bmc_success",
+		.func = test_pcl_hw_find_bmc_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pcl_hw_find_fpga_success",
+		.func = test_pcl_hw_find_fpga_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pcl_hw_find_switch_success",
+		.func = test_pcl_hw_find_switch_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pcl_validate_success",
+		.func = test_pcl_validate_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pcl_validate_null_pointer",
+		.func = test_pcl_validate_null_pointer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pcl_concurrent_register",
+		.func = test_pcl_concurrent_register,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pcl_concurrent_find",
+		.func = test_pcl_concurrent_find,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pcl_concurrent_mixed_operations",
+		.func = test_pcl_concurrent_mixed_operations,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
 
-TEST_MODULE_BEGIN(test_pcl_register_suite, "PCL")
-    TEST_CASE_REF(test_pcl_register_success)
-    TEST_CASE_REF(test_pcl_register_null_pointer)
-    TEST_CASE_REF(test_pcl_register_not_initialized)
-    TEST_CASE_REF(test_pcl_register_duplicate)
-    TEST_CASE_REF(test_pcl_register_multiple_versions)
-TEST_MODULE_END(test_pcl_register_suite, "PCL")
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "pcl_api",
+	.module_name = "pcl_api",
+	.layer_name = "PCL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "PCL pcl_api tests"
+	}
+};
 
-TEST_MODULE_BEGIN(test_pcl_find_suite, "PCL")
-    TEST_CASE_REF(test_pcl_find_success)
-    TEST_CASE_REF(test_pcl_find_without_version)
-    TEST_CASE_REF(test_pcl_find_not_found)
-    TEST_CASE_REF(test_pcl_find_null_parameters)
-    TEST_CASE_REF(test_pcl_list_success)
-    TEST_CASE_REF(test_pcl_list_null_parameters)
-TEST_MODULE_END(test_pcl_find_suite, "PCL")
-
-TEST_MODULE_BEGIN(test_pcl_hw_suite, "PCL")
-    TEST_CASE_REF(test_pcl_hw_find_mcu_success)
-    TEST_CASE_REF(test_pcl_hw_find_mcu_not_found)
-    TEST_CASE_REF(test_pcl_hw_find_mcu_null_parameters)
-    TEST_CASE_REF(test_pcl_hw_get_mcu_success)
-    TEST_CASE_REF(test_pcl_hw_get_mcu_invalid_id)
-    TEST_CASE_REF(test_pcl_hw_find_bmc_success)
-    TEST_CASE_REF(test_pcl_hw_find_fpga_success)
-    TEST_CASE_REF(test_pcl_hw_find_switch_success)
-TEST_MODULE_END(test_pcl_hw_suite, "PCL")
-
-TEST_MODULE_BEGIN(test_pcl_validate_suite, "PCL")
-    TEST_CASE_REF(test_pcl_validate_success)
-    TEST_CASE_REF(test_pcl_validate_null_pointer)
-TEST_MODULE_END(test_pcl_validate_suite, "PCL")
-
-TEST_MODULE_BEGIN(test_pcl_concurrent_suite, "PCL")
-    TEST_CASE_REF(test_pcl_concurrent_register)
-    TEST_CASE_REF(test_pcl_concurrent_find)
-    TEST_CASE_REF(test_pcl_concurrent_mixed_operations)
-TEST_MODULE_END(test_pcl_concurrent_suite, "PCL")
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_pcl_api_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

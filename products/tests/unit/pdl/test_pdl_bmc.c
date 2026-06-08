@@ -57,7 +57,7 @@ static void create_serial_config(pdl_bmc_config_t *config)
  *===========================================================================*/
 
 /* 测试用例: BMC服务初始化 - 网络通道 */
-TEST_CASE(test_pdl_bmc_init_network_success)
+static void test_pdl_bmc_init_network_success(void)
 {
     pdl_bmc_handle_t handle = NULL;
     pdl_bmc_config_t config;
@@ -71,7 +71,7 @@ TEST_CASE(test_pdl_bmc_init_network_success)
 }
 
 /* 测试用例: BMC服务初始化 - 串口通道 */
-TEST_CASE(test_pdl_bmc_init_serial_success)
+static void test_pdl_bmc_init_serial_success(void)
 {
     pdl_bmc_handle_t handle = NULL;
     pdl_bmc_config_t config;
@@ -85,7 +85,7 @@ TEST_CASE(test_pdl_bmc_init_serial_success)
 }
 
 /* 测试用例: BMC服务初始化 - 空配置 */
-TEST_CASE(test_pdl_bmc_init_null_config)
+static void test_pdl_bmc_init_null_config(void)
 {
     pdl_bmc_handle_t handle = NULL;
 
@@ -94,7 +94,7 @@ TEST_CASE(test_pdl_bmc_init_null_config)
 }
 
 /* 测试用例: BMC服务初始化 - 空句柄指针 */
-TEST_CASE(test_pdl_bmc_init_null_handle)
+static void test_pdl_bmc_init_null_handle(void)
 {
     pdl_bmc_config_t config;
     create_network_config(&config);
@@ -104,7 +104,7 @@ TEST_CASE(test_pdl_bmc_init_null_handle)
 }
 
 /* 测试用例: BMC服务清理 */
-TEST_CASE(test_pdl_bmc_deinit)
+static void test_pdl_bmc_deinit(void)
 {
     pdl_bmc_handle_t handle = NULL;
     pdl_bmc_config_t config;
@@ -118,7 +118,7 @@ TEST_CASE(test_pdl_bmc_deinit)
 }
 
 /* 测试用例: 清理空句柄 */
-TEST_CASE(test_pdl_bmc_deinit_null_handle)
+static void test_pdl_bmc_deinit_null_handle(void)
 {
     int32_t ret = PDL_BMC_Deinit(NULL);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
@@ -129,7 +129,7 @@ TEST_CASE(test_pdl_bmc_deinit_null_handle)
  *===========================================================================*/
 
 /* 测试用例: 电源开启 - 成功 */
-TEST_CASE(test_pdl_bmc_power_on_success)
+static void test_pdl_bmc_power_on_success(void)
 {
     TEST_ASSERT_FALSE(true); // Requires real BMC hardware
     pdl_bmc_handle_t handle = NULL;
@@ -146,14 +146,14 @@ TEST_CASE(test_pdl_bmc_power_on_success)
 }
 
 /* 测试用例: 电源开启 - 空句柄 */
-TEST_CASE(test_pdl_bmc_power_on_null_handle)
+static void test_pdl_bmc_power_on_null_handle(void)
 {
     int32_t ret = PDL_BMC_PowerOn(NULL);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
 /* 测试用例: 电源关闭 - 成功 */
-TEST_CASE(test_pdl_bmc_power_off_success)
+static void test_pdl_bmc_power_off_success(void)
 {
     TEST_ASSERT_FALSE(true); // Requires real BMC hardware
     pdl_bmc_handle_t handle = NULL;
@@ -170,7 +170,7 @@ TEST_CASE(test_pdl_bmc_power_off_success)
 }
 
 /* 测试用例: 电源复位 - 成功 */
-TEST_CASE(test_pdl_bmc_power_reset_success)
+static void test_pdl_bmc_power_reset_success(void)
 {
     TEST_ASSERT_FALSE(true); // Requires real BMC hardware
     pdl_bmc_handle_t handle = NULL;
@@ -189,7 +189,7 @@ TEST_CASE(test_pdl_bmc_power_reset_success)
 }
 
 /* 测试用例: 获取电源状态 - 成功 */
-TEST_CASE(test_pdl_bmc_get_power_state_success)
+static void test_pdl_bmc_get_power_state_success(void)
 {
     TEST_ASSERT_FALSE(true); // Requires real BMC hardware
     pdl_bmc_handle_t handle = NULL;
@@ -209,7 +209,7 @@ TEST_CASE(test_pdl_bmc_get_power_state_success)
 }
 
 /* 测试用例: 获取电源状态 - 空句柄 */
-TEST_CASE(test_pdl_bmc_get_power_state_null_handle)
+static void test_pdl_bmc_get_power_state_null_handle(void)
 {
     pdl_bmc_power_state_t state;
 
@@ -218,7 +218,7 @@ TEST_CASE(test_pdl_bmc_get_power_state_null_handle)
 }
 
 /* 测试用例: 获取电源状态 - 空指针 */
-TEST_CASE(test_pdl_bmc_get_power_state_null_pointer)
+static void test_pdl_bmc_get_power_state_null_pointer(void)
 {
     pdl_bmc_handle_t handle = NULL;
     pdl_bmc_config_t config;
@@ -238,7 +238,7 @@ TEST_CASE(test_pdl_bmc_get_power_state_null_pointer)
  *===========================================================================*/
 
 /* 测试用例: 读取传感器 - 成功 */
-TEST_CASE(test_pdl_bmc_read_sensors_success)
+static void test_pdl_bmc_read_sensors_success(void)
 {
     TEST_ASSERT_FALSE(true); // Requires real BMC hardware
     pdl_bmc_handle_t handle = NULL;
@@ -260,7 +260,7 @@ TEST_CASE(test_pdl_bmc_read_sensors_success)
 }
 
 /* 测试用例: 读取传感器 - 空句柄 */
-TEST_CASE(test_pdl_bmc_read_sensors_null_handle)
+static void test_pdl_bmc_read_sensors_null_handle(void)
 {
     pdl_bmc_sensor_reading_t readings[16];
     uint32_t actual_count;
@@ -270,7 +270,7 @@ TEST_CASE(test_pdl_bmc_read_sensors_null_handle)
 }
 
 /* 测试用例: 读取传感器 - 空指针 */
-TEST_CASE(test_pdl_bmc_read_sensors_null_pointer)
+static void test_pdl_bmc_read_sensors_null_pointer(void)
 {
     pdl_bmc_handle_t handle = NULL;
     pdl_bmc_config_t config;
@@ -291,7 +291,7 @@ TEST_CASE(test_pdl_bmc_read_sensors_null_pointer)
  *===========================================================================*/
 
 /* 测试用例: 执行命令 - 成功 */
-TEST_CASE(test_pdl_bmc_execute_command_success)
+static void test_pdl_bmc_execute_command_success(void)
 {
     TEST_ASSERT_FALSE(true); // Requires real BMC hardware
     pdl_bmc_handle_t handle = NULL;
@@ -309,7 +309,7 @@ TEST_CASE(test_pdl_bmc_execute_command_success)
 }
 
 /* 测试用例: 执行命令 - 空句柄 */
-TEST_CASE(test_pdl_bmc_execute_command_null_handle)
+static void test_pdl_bmc_execute_command_null_handle(void)
 {
     char response[256];
 
@@ -318,7 +318,7 @@ TEST_CASE(test_pdl_bmc_execute_command_null_handle)
 }
 
 /* 测试用例: 执行命令 - 空命令 */
-TEST_CASE(test_pdl_bmc_execute_command_null_cmd)
+static void test_pdl_bmc_execute_command_null_cmd(void)
 {
     pdl_bmc_handle_t handle = NULL;
     pdl_bmc_config_t config;
@@ -339,7 +339,7 @@ TEST_CASE(test_pdl_bmc_execute_command_null_cmd)
  *===========================================================================*/
 
 /* 测试用例: 切换通道 - 成功 */
-TEST_CASE(test_pdl_bmc_switch_channel_success)
+static void test_pdl_bmc_switch_channel_success(void)
 {
     TEST_ASSERT_FALSE(true); // Requires real BMC hardware
     pdl_bmc_handle_t handle = NULL;
@@ -359,14 +359,14 @@ TEST_CASE(test_pdl_bmc_switch_channel_success)
 }
 
 /* 测试用例: 切换通道 - 空句柄 */
-TEST_CASE(test_pdl_bmc_switch_channel_null_handle)
+static void test_pdl_bmc_switch_channel_null_handle(void)
 {
     int32_t ret = PDL_BMC_SwitchChannel(NULL, PDL_BMC_CHANNEL_NETWORK);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
 /* 测试用例: 获取当前通道 - 成功 */
-TEST_CASE(test_pdl_bmc_get_channel_success)
+static void test_pdl_bmc_get_channel_success(void)
 {
     TEST_ASSERT_FALSE(true); // Requires real BMC hardware
     pdl_bmc_handle_t handle = NULL;
@@ -387,7 +387,7 @@ TEST_CASE(test_pdl_bmc_get_channel_success)
  *===========================================================================*/
 
 /* 测试用例: 检查连接状态 - 成功 */
-TEST_CASE(test_pdl_bmc_is_connected_success)
+static void test_pdl_bmc_is_connected_success(void)
 {
     TEST_ASSERT_FALSE(true); // Requires real BMC hardware
     pdl_bmc_handle_t handle = NULL;
@@ -408,7 +408,7 @@ TEST_CASE(test_pdl_bmc_is_connected_success)
  *===========================================================================*/
 
 /* 测试用例: 获取统计信息 - 成功 */
-TEST_CASE(test_pdl_bmc_get_stats_success)
+static void test_pdl_bmc_get_stats_success(void)
 {
     TEST_ASSERT_FALSE(true); // Requires real BMC hardware
     pdl_bmc_handle_t handle = NULL;
@@ -428,7 +428,7 @@ TEST_CASE(test_pdl_bmc_get_stats_success)
 }
 
 /* 测试用例: 获取统计信息 - 空句柄 */
-TEST_CASE(test_pdl_bmc_get_stats_null_handle)
+static void test_pdl_bmc_get_stats_null_handle(void)
 {
     uint32_t cmd_count, success_count, fail_count, switch_count;
 
@@ -437,7 +437,7 @@ TEST_CASE(test_pdl_bmc_get_stats_null_handle)
 }
 
 /* 测试用例: 获取统计信息 - 空指针 */
-TEST_CASE(test_pdl_bmc_get_stats_null_pointer)
+static void test_pdl_bmc_get_stats_null_pointer(void)
 {
     pdl_bmc_handle_t handle = NULL;
     pdl_bmc_config_t config;
@@ -456,45 +456,195 @@ TEST_CASE(test_pdl_bmc_get_stats_null_pointer)
  * 测试模块注册
  *===========================================================================*/
 
-TEST_MODULE_BEGIN(test_pdl_bmc, "PDL")
-    // PDL BMC通信服务测试
+// PDL BMC通信服务测试
     /* 初始化和清理 */
-    TEST_CASE_REF(test_pdl_bmc_init_network_success)
-    TEST_CASE_REF(test_pdl_bmc_init_serial_success)
-    TEST_CASE_REF(test_pdl_bmc_init_null_config)
-    TEST_CASE_REF(test_pdl_bmc_init_null_handle)
-    TEST_CASE_REF(test_pdl_bmc_deinit)
-    TEST_CASE_REF(test_pdl_bmc_deinit_null_handle)
-
     /* 电源控制 */
-    TEST_CASE_REF(test_pdl_bmc_power_on_success)
-    TEST_CASE_REF(test_pdl_bmc_power_on_null_handle)
-    TEST_CASE_REF(test_pdl_bmc_power_off_success)
-    TEST_CASE_REF(test_pdl_bmc_power_reset_success)
-    TEST_CASE_REF(test_pdl_bmc_get_power_state_success)
-    TEST_CASE_REF(test_pdl_bmc_get_power_state_null_handle)
-    TEST_CASE_REF(test_pdl_bmc_get_power_state_null_pointer)
-
     /* 传感器读取 */
-    TEST_CASE_REF(test_pdl_bmc_read_sensors_success)
-    TEST_CASE_REF(test_pdl_bmc_read_sensors_null_handle)
-    TEST_CASE_REF(test_pdl_bmc_read_sensors_null_pointer)
-
     /* 命令执行 */
-    TEST_CASE_REF(test_pdl_bmc_execute_command_success)
-    TEST_CASE_REF(test_pdl_bmc_execute_command_null_handle)
-    TEST_CASE_REF(test_pdl_bmc_execute_command_null_cmd)
-
     /* 通道切换 */
-    TEST_CASE_REF(test_pdl_bmc_switch_channel_success)
-    TEST_CASE_REF(test_pdl_bmc_switch_channel_null_handle)
-    TEST_CASE_REF(test_pdl_bmc_get_channel_success)
-
     /* 连接状态 */
-    TEST_CASE_REF(test_pdl_bmc_is_connected_success)
-
     /* 统计信息 */
-    TEST_CASE_REF(test_pdl_bmc_get_stats_success)
-    TEST_CASE_REF(test_pdl_bmc_get_stats_null_handle)
-    TEST_CASE_REF(test_pdl_bmc_get_stats_null_pointer)
-TEST_MODULE_END(test_pdl_bmc, "PDL")
+
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_pdl_bmc_init_network_success",
+		.func = test_pdl_bmc_init_network_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_bmc_init_serial_success",
+		.func = test_pdl_bmc_init_serial_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_bmc_init_null_config",
+		.func = test_pdl_bmc_init_null_config,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_bmc_init_null_handle",
+		.func = test_pdl_bmc_init_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_bmc_deinit",
+		.func = test_pdl_bmc_deinit,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_bmc_deinit_null_handle",
+		.func = test_pdl_bmc_deinit_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_bmc_power_on_success",
+		.func = test_pdl_bmc_power_on_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_bmc_power_on_null_handle",
+		.func = test_pdl_bmc_power_on_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_bmc_power_off_success",
+		.func = test_pdl_bmc_power_off_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_bmc_power_reset_success",
+		.func = test_pdl_bmc_power_reset_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_bmc_get_power_state_success",
+		.func = test_pdl_bmc_get_power_state_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_bmc_get_power_state_null_handle",
+		.func = test_pdl_bmc_get_power_state_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_bmc_get_power_state_null_pointer",
+		.func = test_pdl_bmc_get_power_state_null_pointer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_bmc_read_sensors_success",
+		.func = test_pdl_bmc_read_sensors_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_bmc_read_sensors_null_handle",
+		.func = test_pdl_bmc_read_sensors_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_bmc_read_sensors_null_pointer",
+		.func = test_pdl_bmc_read_sensors_null_pointer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_bmc_execute_command_success",
+		.func = test_pdl_bmc_execute_command_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_bmc_execute_command_null_handle",
+		.func = test_pdl_bmc_execute_command_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_bmc_execute_command_null_cmd",
+		.func = test_pdl_bmc_execute_command_null_cmd,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_bmc_switch_channel_success",
+		.func = test_pdl_bmc_switch_channel_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_bmc_switch_channel_null_handle",
+		.func = test_pdl_bmc_switch_channel_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_bmc_get_channel_success",
+		.func = test_pdl_bmc_get_channel_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_bmc_is_connected_success",
+		.func = test_pdl_bmc_is_connected_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_bmc_get_stats_success",
+		.func = test_pdl_bmc_get_stats_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_bmc_get_stats_null_handle",
+		.func = test_pdl_bmc_get_stats_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_pdl_bmc_get_stats_null_pointer",
+		.func = test_pdl_bmc_get_stats_null_pointer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "pdl_bmc",
+	.module_name = "pdl_bmc",
+	.layer_name = "PDL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "PDL pdl_bmc tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_pdl_bmc_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

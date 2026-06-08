@@ -11,7 +11,7 @@
  *===========================================================================*/
 
 /* 测试用例: GetLocalTime - 成功获取本地时间 */
-TEST_CASE(test_osal_get_local_time_success)
+static void test_osal_get_local_time_success(void)
 {
     OS_time_t time1, time2;
     int32_t ret;
@@ -34,7 +34,7 @@ TEST_CASE(test_osal_get_local_time_success)
 }
 
 /* 测试用例: GetLocalTime - 空指针 */
-TEST_CASE(test_osal_get_local_time_null_pointer)
+static void test_osal_get_local_time_null_pointer(void)
 {
     int32_t ret = OSAL_GetLocalTime(NULL);
     TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_POINTER, ret);
@@ -45,7 +45,7 @@ TEST_CASE(test_osal_get_local_time_null_pointer)
  *===========================================================================*/
 
 /* 测试用例: SetLocalTime - 未实现 */
-TEST_CASE(test_osal_set_local_time_not_implemented)
+static void test_osal_set_local_time_not_implemented(void)
 {
     OS_time_t time = {1234567890, 0};
     int32_t ret = OSAL_SetLocalTime(&time);
@@ -57,7 +57,7 @@ TEST_CASE(test_osal_set_local_time_not_implemented)
  *===========================================================================*/
 
 /* 测试用例: GetTickCount - 单调递增 */
-TEST_CASE(test_osal_get_tick_count_monotonic)
+static void test_osal_get_tick_count_monotonic(void)
 {
     uint32_t tick1, tick2;
 
@@ -76,7 +76,7 @@ TEST_CASE(test_osal_get_tick_count_monotonic)
 }
 
 /* 测试用例: GetTickCount - 多次调用 */
-TEST_CASE(test_osal_get_tick_count_multiple_calls)
+static void test_osal_get_tick_count_multiple_calls(void)
 {
     uint32_t tick1, tick2, tick3;
 
@@ -96,7 +96,7 @@ TEST_CASE(test_osal_get_tick_count_multiple_calls)
  *===========================================================================*/
 
 /* 测试用例: Milli2Ticks - 成功转换 */
-TEST_CASE(test_osal_milli2ticks_success)
+static void test_osal_milli2ticks_success(void)
 {
     uint32_t ticks;
     int32_t ret;
@@ -119,7 +119,7 @@ TEST_CASE(test_osal_milli2ticks_success)
 }
 
 /* 测试用例: Milli2Ticks - 空指针 */
-TEST_CASE(test_osal_milli2ticks_null_pointer)
+static void test_osal_milli2ticks_null_pointer(void)
 {
     int32_t ret = OSAL_Milli2Ticks(100, NULL);
     TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_POINTER, ret);
@@ -130,7 +130,7 @@ TEST_CASE(test_osal_milli2ticks_null_pointer)
  *===========================================================================*/
 
 /* 测试用例: 时间精度测试 */
-TEST_CASE(test_osal_time_precision)
+static void test_osal_time_precision(void)
 {
     OS_time_t time1, time2;
     uint32_t tick1, tick2;
@@ -158,22 +158,84 @@ TEST_CASE(test_osal_time_precision)
  * 测试套件注册
  *===========================================================================*/
 
-TEST_MODULE_BEGIN(test_osal_clock, "OSAL")
-    /* OSAL_GetLocalTime 测试 */
-    TEST_CASE_REF(test_osal_get_local_time_success)
-    TEST_CASE_REF(test_osal_get_local_time_null_pointer)
-
+/* OSAL_GetLocalTime 测试 */
     /* OSAL_SetLocalTime 测试 */
-    TEST_CASE_REF(test_osal_set_local_time_not_implemented)
-
     /* OSAL_GetTickCount 测试 */
-    TEST_CASE_REF(test_osal_get_tick_count_monotonic)
-    TEST_CASE_REF(test_osal_get_tick_count_multiple_calls)
-
     /* OSAL_Milli2Ticks 测试 */
-    TEST_CASE_REF(test_osal_milli2ticks_success)
-    TEST_CASE_REF(test_osal_milli2ticks_null_pointer)
-
     /* 综合测试 */
-    TEST_CASE_REF(test_osal_time_precision)
-TEST_MODULE_END(test_osal_clock, "OSAL")
+
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_osal_get_local_time_success",
+		.func = test_osal_get_local_time_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_get_local_time_null_pointer",
+		.func = test_osal_get_local_time_null_pointer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_set_local_time_not_implemented",
+		.func = test_osal_set_local_time_not_implemented,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_get_tick_count_monotonic",
+		.func = test_osal_get_tick_count_monotonic,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_get_tick_count_multiple_calls",
+		.func = test_osal_get_tick_count_multiple_calls,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_milli2ticks_success",
+		.func = test_osal_milli2ticks_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_milli2ticks_null_pointer",
+		.func = test_osal_milli2ticks_null_pointer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_time_precision",
+		.func = test_osal_time_precision,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "osal_clock",
+	.module_name = "osal_clock",
+	.layer_name = "OSAL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "OSAL osal_clock tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_osal_clock_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

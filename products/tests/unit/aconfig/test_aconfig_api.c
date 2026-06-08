@@ -98,20 +98,20 @@ static void aconfig_test_teardown(void)
  * 初始化和注册测试
  *===========================================================================*/
 
-TEST_CASE(test_aconfig_init_success)
+static void test_aconfig_init_success(void)
 {
     int32_t ret = ACONFIG_Init();
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 }
 
-TEST_CASE(test_aconfig_register_table_success)
+static void test_aconfig_register_table_success(void)
 {
     ACONFIG_Init();
     int32_t ret = ACONFIG_RegisterTable(&test_config_table);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 }
 
-TEST_CASE(test_aconfig_register_table_null)
+static void test_aconfig_register_table_null(void)
 {
     ACONFIG_Init();
     int32_t ret = ACONFIG_RegisterTable(NULL);
@@ -122,7 +122,7 @@ TEST_CASE(test_aconfig_register_table_null)
  * 遥控配置查询测试
  *===========================================================================*/
 
-TEST_CASE(test_aconfig_get_tc_config_valid)
+static void test_aconfig_get_tc_config_valid(void)
 {
     const aconfig_tc_config_t *cfg = ACONFIG_GetTcConfig(ACONFIG_TC_POWER_ON);
     TEST_ASSERT_NOT_EQUAL(NULL, cfg);
@@ -131,25 +131,25 @@ TEST_CASE(test_aconfig_get_tc_config_valid)
     TEST_ASSERT_TRUE(cfg->enabled);
 }
 
-TEST_CASE(test_aconfig_get_tc_config_invalid)
+static void test_aconfig_get_tc_config_invalid(void)
 {
     const aconfig_tc_config_t *cfg = ACONFIG_GetTcConfig(9999);
     TEST_ASSERT_EQUAL(NULL, cfg);
 }
 
-TEST_CASE(test_aconfig_is_tc_enabled_true)
+static void test_aconfig_is_tc_enabled_true(void)
 {
     bool enabled = ACONFIG_IsTcEnabled(ACONFIG_TC_POWER_ON);
     TEST_ASSERT_TRUE(enabled);
 }
 
-TEST_CASE(test_aconfig_is_tc_enabled_false)
+static void test_aconfig_is_tc_enabled_false(void)
 {
     bool enabled = ACONFIG_IsTcEnabled(ACONFIG_TC_MCU_RESET);
     TEST_ASSERT_FALSE(enabled);
 }
 
-TEST_CASE(test_aconfig_is_tc_enabled_invalid)
+static void test_aconfig_is_tc_enabled_invalid(void)
 {
     bool enabled = ACONFIG_IsTcEnabled(9999);
     TEST_ASSERT_FALSE(enabled);
@@ -159,7 +159,7 @@ TEST_CASE(test_aconfig_is_tc_enabled_invalid)
  * 遥测配置查询测试
  *===========================================================================*/
 
-TEST_CASE(test_aconfig_get_tm_config_valid)
+static void test_aconfig_get_tm_config_valid(void)
 {
     const aconfig_tm_config_t *cfg = ACONFIG_GetTmConfig(ACONFIG_TM_VOLTAGE_5V);
     TEST_ASSERT_NOT_EQUAL(NULL, cfg);
@@ -170,25 +170,25 @@ TEST_CASE(test_aconfig_get_tm_config_valid)
     TEST_ASSERT_TRUE(cfg->enabled);
 }
 
-TEST_CASE(test_aconfig_get_tm_config_invalid)
+static void test_aconfig_get_tm_config_invalid(void)
 {
     const aconfig_tm_config_t *cfg = ACONFIG_GetTmConfig(9999);
     TEST_ASSERT_EQUAL(NULL, cfg);
 }
 
-TEST_CASE(test_aconfig_is_tm_enabled_true)
+static void test_aconfig_is_tm_enabled_true(void)
 {
     bool enabled = ACONFIG_IsTmEnabled(ACONFIG_TM_VOLTAGE_5V);
     TEST_ASSERT_TRUE(enabled);
 }
 
-TEST_CASE(test_aconfig_is_tm_enabled_false)
+static void test_aconfig_is_tm_enabled_false(void)
 {
     bool enabled = ACONFIG_IsTmEnabled(ACONFIG_TM_CPU_TEMP);
     TEST_ASSERT_FALSE(enabled);
 }
 
-TEST_CASE(test_aconfig_is_tm_enabled_invalid)
+static void test_aconfig_is_tm_enabled_invalid(void)
 {
     bool enabled = ACONFIG_IsTmEnabled(9999);
     TEST_ASSERT_FALSE(enabled);
@@ -198,7 +198,7 @@ TEST_CASE(test_aconfig_is_tm_enabled_invalid)
  * 失效映射测试
  *===========================================================================*/
 
-TEST_CASE(test_aconfig_get_invalidation_map_valid)
+static void test_aconfig_get_invalidation_map_valid(void)
 {
     uint32_t affected_ids[10];
     uint32_t actual_count = 0;
@@ -213,7 +213,7 @@ TEST_CASE(test_aconfig_get_invalidation_map_valid)
     TEST_ASSERT_EQUAL(ACONFIG_TM_CURRENT, affected_ids[0]);
 }
 
-TEST_CASE(test_aconfig_get_invalidation_map_invalid)
+static void test_aconfig_get_invalidation_map_invalid(void)
 {
     uint32_t affected_ids[10];
     uint32_t actual_count = 0;
@@ -227,7 +227,7 @@ TEST_CASE(test_aconfig_get_invalidation_map_invalid)
     TEST_ASSERT_EQUAL(0, actual_count);
 }
 
-TEST_CASE(test_aconfig_get_invalidation_map_null_pointer)
+static void test_aconfig_get_invalidation_map_null_pointer(void)
 {
     uint32_t actual_count = 0;
 
@@ -243,7 +243,7 @@ TEST_CASE(test_aconfig_get_invalidation_map_null_pointer)
  * 统计信息测试
  *===========================================================================*/
 
-TEST_CASE(test_aconfig_get_statistics)
+static void test_aconfig_get_statistics(void)
 {
     aconfig_statistics_t stats;
     int32_t ret = ACONFIG_GetStatistics(&stats);
@@ -256,7 +256,7 @@ TEST_CASE(test_aconfig_get_statistics)
     TEST_ASSERT_EQUAL(1, stats.invalidation_map_count);
 }
 
-TEST_CASE(test_aconfig_get_statistics_null)
+static void test_aconfig_get_statistics_null(void)
 {
     int32_t ret = ACONFIG_GetStatistics(NULL);
     TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_POINTER, ret);
@@ -266,7 +266,7 @@ TEST_CASE(test_aconfig_get_statistics_null)
  * 打印配置测试（仅验证不崩溃）
  *===========================================================================*/
 
-TEST_CASE(test_aconfig_print_config)
+static void test_aconfig_print_config(void)
 {
     /* 仅验证函数不崩溃 */
     ACONFIG_PrintConfig();
@@ -274,27 +274,6 @@ TEST_CASE(test_aconfig_print_config)
 }
 
 /* 注册测试套件 */
-static const test_case_t aconfig_api_cases[] = {
-    TEST_CASE_REF(test_aconfig_init_success)
-    TEST_CASE_REF(test_aconfig_register_table_success)
-    TEST_CASE_REF(test_aconfig_register_table_null)
-    TEST_CASE_REF(test_aconfig_get_tc_config_valid)
-    TEST_CASE_REF(test_aconfig_get_tc_config_invalid)
-    TEST_CASE_REF(test_aconfig_is_tc_enabled_true)
-    TEST_CASE_REF(test_aconfig_is_tc_enabled_false)
-    TEST_CASE_REF(test_aconfig_is_tc_enabled_invalid)
-    TEST_CASE_REF(test_aconfig_get_tm_config_valid)
-    TEST_CASE_REF(test_aconfig_get_tm_config_invalid)
-    TEST_CASE_REF(test_aconfig_is_tm_enabled_true)
-    TEST_CASE_REF(test_aconfig_is_tm_enabled_false)
-    TEST_CASE_REF(test_aconfig_is_tm_enabled_invalid)
-    TEST_CASE_REF(test_aconfig_get_invalidation_map_valid)
-    TEST_CASE_REF(test_aconfig_get_invalidation_map_invalid)
-    TEST_CASE_REF(test_aconfig_get_invalidation_map_null_pointer)
-    TEST_CASE_REF(test_aconfig_get_statistics)
-    TEST_CASE_REF(test_aconfig_get_statistics_null)
-    TEST_CASE_REF(test_aconfig_print_config)
-};
 
 static const test_suite_t aconfig_api_suite = {
     .suite_name = "aconfig_api",
@@ -309,4 +288,146 @@ static const test_suite_t aconfig_api_suite = {
 __attribute__((constructor))
 static void register_aconfig_api(void) {
     libutest_register_suite(&aconfig_api_suite);
+}
+
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_aconfig_init_success",
+		.func = test_aconfig_init_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_aconfig_register_table_success",
+		.func = test_aconfig_register_table_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_aconfig_register_table_null",
+		.func = test_aconfig_register_table_null,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_aconfig_get_tc_config_valid",
+		.func = test_aconfig_get_tc_config_valid,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_aconfig_get_tc_config_invalid",
+		.func = test_aconfig_get_tc_config_invalid,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_aconfig_is_tc_enabled_true",
+		.func = test_aconfig_is_tc_enabled_true,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_aconfig_is_tc_enabled_false",
+		.func = test_aconfig_is_tc_enabled_false,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_aconfig_is_tc_enabled_invalid",
+		.func = test_aconfig_is_tc_enabled_invalid,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_aconfig_get_tm_config_valid",
+		.func = test_aconfig_get_tm_config_valid,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_aconfig_get_tm_config_invalid",
+		.func = test_aconfig_get_tm_config_invalid,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_aconfig_is_tm_enabled_true",
+		.func = test_aconfig_is_tm_enabled_true,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_aconfig_is_tm_enabled_false",
+		.func = test_aconfig_is_tm_enabled_false,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_aconfig_is_tm_enabled_invalid",
+		.func = test_aconfig_is_tm_enabled_invalid,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_aconfig_get_invalidation_map_valid",
+		.func = test_aconfig_get_invalidation_map_valid,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_aconfig_get_invalidation_map_invalid",
+		.func = test_aconfig_get_invalidation_map_invalid,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_aconfig_get_invalidation_map_null_pointer",
+		.func = test_aconfig_get_invalidation_map_null_pointer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_aconfig_get_statistics",
+		.func = test_aconfig_get_statistics,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_aconfig_get_statistics_null",
+		.func = test_aconfig_get_statistics_null,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_aconfig_print_config",
+		.func = test_aconfig_print_config,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "aconfig_api",
+	.module_name = "aconfig_api",
+	.layer_name = "ACONFIG",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "ACONFIG aconfig_api tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_aconfig_api_tests(void)
+{
+	libutest_register_suite(&test_suite);
 }

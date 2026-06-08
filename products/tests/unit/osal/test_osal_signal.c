@@ -19,7 +19,7 @@ static void test_signal_handler(int32_t signum)
 }
 
 /* 测试用例1: 注册信号处理函数 */
-TEST_CASE(test_signal_register_success)
+static void test_signal_register_success(void)
 {
     g_signal_received = 0;
     g_signal_number = 0;
@@ -42,7 +42,7 @@ TEST_CASE(test_signal_register_success)
 }
 
 /* 测试用例2: 忽略信号 */
-TEST_CASE(test_signal_ignore_success)
+static void test_signal_ignore_success(void)
 {
     g_signal_received = 0;
     g_signal_number = 0;
@@ -64,7 +64,7 @@ TEST_CASE(test_signal_ignore_success)
 }
 
 /* 测试用例3: 阻塞信号 */
-TEST_CASE(test_signal_block_success)
+static void test_signal_block_success(void)
 {
     g_signal_received = 0;
     g_signal_number = 0;
@@ -99,7 +99,7 @@ TEST_CASE(test_signal_block_success)
 }
 
 /* 测试用例4: 恢复默认信号处理 */
-TEST_CASE(test_signal_default_success)
+static void test_signal_default_success(void)
 {
     g_signal_received = 0;
     g_signal_number = 0;
@@ -117,7 +117,7 @@ TEST_CASE(test_signal_default_success)
 }
 
 /* 测试用例5: 多个信号处理 */
-TEST_CASE(test_signal_register_multiple)
+static void test_signal_register_multiple(void)
 {
     g_signal_received = 0;
     g_signal_number = 0;
@@ -142,7 +142,7 @@ TEST_CASE(test_signal_register_multiple)
 }
 
 /* 测试用例6: 无效参数测试 */
-TEST_CASE(test_signal_register_invalidparams)
+static void test_signal_register_invalidparams(void)
 {
     /* NULL处理函数 */
     int32_t ret = OSAL_SignalRegister(OS_SIGNAL_USR1, NULL);
@@ -150,11 +150,67 @@ TEST_CASE(test_signal_register_invalidparams)
 }
 
 /* 注册测试套件 - 自动注册 */
-TEST_MODULE_BEGIN(osal_signal, "OSAL")
-    TEST_CASE_REF(test_signal_register_success)
-    TEST_CASE_REF(test_signal_ignore_success)
-    TEST_CASE_REF(test_signal_block_success)
-    TEST_CASE_REF(test_signal_default_success)
-    TEST_CASE_REF(test_signal_register_multiple)
-    TEST_CASE_REF(test_signal_register_invalidparams)
-TEST_MODULE_END(osal_signal, "OSAL")
+
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_signal_register_success",
+		.func = test_signal_register_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_signal_ignore_success",
+		.func = test_signal_ignore_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_signal_block_success",
+		.func = test_signal_block_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_signal_default_success",
+		.func = test_signal_default_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_signal_register_multiple",
+		.func = test_signal_register_multiple,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_signal_register_invalidparams",
+		.func = test_signal_register_invalidparams,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "osal_signal",
+	.module_name = "osal_signal",
+	.layer_name = "OSAL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "OSAL osal_signal tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_osal_signal_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

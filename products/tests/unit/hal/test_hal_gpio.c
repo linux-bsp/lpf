@@ -23,7 +23,7 @@ static void test_gpio_isr_callback(uint32_t gpio_num, hal_gpio_level_t level, vo
     }
 }
 
-TEST_CASE(test_gpio_init_deinit)
+static void test_gpio_init_deinit(void)
 {
     hal_gpio_config_t config = {
         .direction = HAL_GPIO_DIR_OUTPUT,
@@ -52,7 +52,7 @@ TEST_CASE(test_gpio_init_deinit)
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 }
 
-TEST_CASE(test_gpio_set_get_direction)
+static void test_gpio_set_get_direction(void)
 {
     hal_gpio_config_t config = {
         .direction = HAL_GPIO_DIR_OUTPUT,
@@ -89,7 +89,7 @@ TEST_CASE(test_gpio_set_get_direction)
     HAL_GPIO_Deinit(test_gpio);
 }
 
-TEST_CASE(test_gpio_set_get_level)
+static void test_gpio_set_get_level(void)
 {
     hal_gpio_config_t config = {
         .direction = HAL_GPIO_DIR_OUTPUT,
@@ -131,7 +131,7 @@ TEST_CASE(test_gpio_set_get_level)
     HAL_GPIO_Deinit(test_gpio);
 }
 
-TEST_CASE(test_gpio_interrupt_setup)
+static void test_gpio_interrupt_setup(void)
 {
     hal_gpio_config_t config = {
         .direction = HAL_GPIO_DIR_INPUT,
@@ -164,7 +164,7 @@ TEST_CASE(test_gpio_interrupt_setup)
     HAL_GPIO_Deinit(test_gpio);
 }
 
-TEST_CASE(test_gpio_invalid_params)
+static void test_gpio_invalid_params(void)
 {
     hal_gpio_config_t config = {
         .direction = HAL_GPIO_DIR_OUTPUT,
@@ -191,7 +191,7 @@ TEST_CASE(test_gpio_invalid_params)
     TEST_ASSERT_EQUAL(OSAL_EINVAL, ret);
 }
 
-TEST_CASE(test_gpio_output_mode)
+static void test_gpio_output_mode(void)
 {
     hal_gpio_config_t config = {
         .direction = HAL_GPIO_DIR_OUTPUT,
@@ -230,7 +230,7 @@ TEST_CASE(test_gpio_output_mode)
     HAL_GPIO_Deinit(test_gpio);
 }
 
-TEST_CASE(test_gpio_input_mode)
+static void test_gpio_input_mode(void)
 {
     hal_gpio_config_t config = {
         .direction = HAL_GPIO_DIR_INPUT,
@@ -264,12 +264,72 @@ TEST_CASE(test_gpio_input_mode)
  * 测试模块注册
  *===========================================================================*/
 
-TEST_MODULE_BEGIN(test_hal_gpio, "HAL")
-    TEST_CASE_REGISTER(test_gpio_init_deinit, "GPIO init and deinit")
-    TEST_CASE_REGISTER(test_gpio_set_get_direction, "GPIO direction control")
-    TEST_CASE_REGISTER(test_gpio_set_get_level, "GPIO level control")
-    TEST_CASE_REGISTER(test_gpio_interrupt_setup, "GPIO interrupt setup")
-    TEST_CASE_REGISTER(test_gpio_invalid_params, "GPIO invalid parameters")
-    TEST_CASE_REGISTER(test_gpio_output_mode, "GPIO output mode")
-    TEST_CASE_REGISTER(test_gpio_input_mode, "GPIO input mode")
-TEST_MODULE_END(test_hal_gpio, "HAL")
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_gpio_init_deinit",
+		.func = test_gpio_init_deinit,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_gpio_set_get_direction",
+		.func = test_gpio_set_get_direction,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_gpio_set_get_level",
+		.func = test_gpio_set_get_level,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_gpio_interrupt_setup",
+		.func = test_gpio_interrupt_setup,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_gpio_invalid_params",
+		.func = test_gpio_invalid_params,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_gpio_output_mode",
+		.func = test_gpio_output_mode,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_gpio_input_mode",
+		.func = test_gpio_input_mode,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "hal_gpio",
+	.module_name = "hal_gpio",
+	.layer_name = "HAL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "HAL hal_gpio tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_hal_gpio_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

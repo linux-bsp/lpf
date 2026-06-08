@@ -15,13 +15,11 @@
 #include "prl_power.h"
 #include "test_framework.h"
 
-
-
 /*===========================================================================
  * CRC16 计算测试
  *===========================================================================*/
 
-TEST_CASE(test_prl_crc16_basic)
+static void test_prl_crc16_basic(void)
 {
     uint8_t data1[] = {0x01, 0x02, 0x03, 0x04};
     uint8_t data2[] = {0xFF, 0xFF, 0xFF, 0xFF};
@@ -39,7 +37,7 @@ TEST_CASE(test_prl_crc16_basic)
     TEST_ASSERT_NOT_EQUAL(0, crc);
 }
 
-TEST_CASE(test_prl_crc16_consistency)
+static void test_prl_crc16_consistency(void)
 {
     uint8_t data[] = {0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0};
     uint16_t crc1, crc2;
@@ -50,7 +48,7 @@ TEST_CASE(test_prl_crc16_consistency)
     TEST_ASSERT_EQUAL(crc1, crc2);
 }
 
-TEST_CASE(test_prl_crc16_different_data)
+static void test_prl_crc16_different_data(void)
 {
     uint8_t data1[] = {0x01, 0x02, 0x03};
     uint8_t data2[] = {0x01, 0x02, 0x04};
@@ -67,7 +65,7 @@ TEST_CASE(test_prl_crc16_different_data)
  *===========================================================================*/
 
 /* 注意: 此测试直接调用内部函数 prl_get_next_seq() 验证序列号递增逻辑 */
-TEST_CASE(test_prl_seq_number)
+static void test_prl_seq_number(void)
 {
     uint32_t seq1, seq2, seq3;
 
@@ -86,7 +84,7 @@ TEST_CASE(test_prl_seq_number)
  * 协议头初始化测试
  *===========================================================================*/
 
-TEST_CASE(test_prl_init_header)
+static void test_prl_init_header(void)
 {
     prl_header_t hdr;
 
@@ -104,7 +102,7 @@ TEST_CASE(test_prl_init_header)
     TEST_ASSERT_TRUE(OSAL_ntohl(hdr.timestamp) > 0);
 }
 
-TEST_CASE(test_prl_init_header_with_flags)
+static void test_prl_init_header_with_flags(void)
 {
     prl_header_t hdr;
 
@@ -124,7 +122,7 @@ TEST_CASE(test_prl_init_header_with_flags)
  * 协议头验证测试
  *===========================================================================*/
 
-TEST_CASE(test_prl_validate_header_valid)
+static void test_prl_validate_header_valid(void)
 {
     prl_header_t hdr;
     int ret;
@@ -141,7 +139,7 @@ TEST_CASE(test_prl_validate_header_valid)
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 }
 
-TEST_CASE(test_prl_validate_header_invalid_magic)
+static void test_prl_validate_header_invalid_magic(void)
 {
     prl_header_t hdr;
     int ret;
@@ -155,7 +153,7 @@ TEST_CASE(test_prl_validate_header_invalid_magic)
     TEST_ASSERT_EQUAL(OSAL_EPROTO, ret);
 }
 
-TEST_CASE(test_prl_validate_header_invalid_version)
+static void test_prl_validate_header_invalid_version(void)
 {
     prl_header_t hdr;
     int ret;
@@ -169,7 +167,7 @@ TEST_CASE(test_prl_validate_header_invalid_version)
     TEST_ASSERT_EQUAL(OSAL_EPROTO, ret);
 }
 
-TEST_CASE(test_prl_validate_header_invalid_type)
+static void test_prl_validate_header_invalid_type(void)
 {
     prl_header_t hdr;
     int ret;
@@ -181,7 +179,7 @@ TEST_CASE(test_prl_validate_header_invalid_type)
     TEST_ASSERT_EQUAL(OSAL_EINVAL, ret);
 }
 
-TEST_CASE(test_prl_validate_header_invalid_length)
+static void test_prl_validate_header_invalid_length(void)
 {
     prl_header_t hdr;
     int ret;
@@ -199,7 +197,7 @@ TEST_CASE(test_prl_validate_header_invalid_length)
  * 报文 CRC 设置和验证测试
  *===========================================================================*/
 
-TEST_CASE(test_prl_packet_crc)
+static void test_prl_packet_crc(void)
 {
     uint8_t packet[256];
     prl_header_t *hdr = (prl_header_t *)packet;
@@ -220,7 +218,7 @@ TEST_CASE(test_prl_packet_crc)
     TEST_ASSERT_TRUE(prl_verify_packet_crc(packet, total_len));
 }
 
-TEST_CASE(test_prl_packet_crc_tampered)
+static void test_prl_packet_crc_tampered(void)
 {
     uint8_t packet[256];
     prl_header_t *hdr = (prl_header_t *)packet;
@@ -241,7 +239,7 @@ TEST_CASE(test_prl_packet_crc_tampered)
     TEST_ASSERT_FALSE(prl_verify_packet_crc(packet, total_len));
 }
 
-TEST_CASE(test_prl_packet_crc_header_tampered)
+static void test_prl_packet_crc_header_tampered(void)
 {
     uint8_t packet[256];
     prl_header_t *hdr = (prl_header_t *)packet;
@@ -266,7 +264,7 @@ TEST_CASE(test_prl_packet_crc_header_tampered)
  * 边界条件测试
  *===========================================================================*/
 
-TEST_CASE(test_prl_zero_length_payload)
+static void test_prl_zero_length_payload(void)
 {
     uint8_t packet[PRL_HEADER_SIZE];
     prl_header_t *hdr = (prl_header_t *)packet;
@@ -279,7 +277,7 @@ TEST_CASE(test_prl_zero_length_payload)
     TEST_ASSERT_TRUE(prl_verify_packet_crc(packet, PRL_HEADER_SIZE));
 }
 
-TEST_CASE(test_prl_max_payload)
+static void test_prl_max_payload(void)
 {
     uint8_t packet[PRL_MAX_PACKET_SIZE];
     prl_header_t *hdr = (prl_header_t *)packet;
@@ -305,21 +303,126 @@ TEST_CASE(test_prl_max_payload)
  * 测试套件注册
  *===========================================================================*/
 
-TEST_MODULE_BEGIN(test_prl_common, "PRL")
-    TEST_CASE_REGISTER(test_prl_crc16_basic, "CRC16 basic")
-    TEST_CASE_REGISTER(test_prl_crc16_consistency, "CRC16 consistency")
-    TEST_CASE_REGISTER(test_prl_crc16_different_data, "CRC16 different data")
-    TEST_CASE_REGISTER(test_prl_seq_number, "Sequence number")
-    TEST_CASE_REGISTER(test_prl_init_header, "Init header")
-    TEST_CASE_REGISTER(test_prl_init_header_with_flags, "Init header with flags")
-    TEST_CASE_REGISTER(test_prl_validate_header_valid, "Validate valid header")
-    TEST_CASE_REGISTER(test_prl_validate_header_invalid_magic, "Validate invalid magic")
-    TEST_CASE_REGISTER(test_prl_validate_header_invalid_version, "Validate invalid version")
-    TEST_CASE_REGISTER(test_prl_validate_header_invalid_type, "Validate invalid type")
-    TEST_CASE_REGISTER(test_prl_validate_header_invalid_length, "Validate invalid length")
-    TEST_CASE_REGISTER(test_prl_packet_crc, "Packet CRC")
-    TEST_CASE_REGISTER(test_prl_packet_crc_tampered, "Packet CRC tampered")
-    TEST_CASE_REGISTER(test_prl_packet_crc_header_tampered, "Packet CRC header tampered")
-    TEST_CASE_REGISTER(test_prl_zero_length_payload, "Zero length payload")
-    TEST_CASE_REGISTER(test_prl_max_payload, "Max payload")
-TEST_MODULE_END(test_prl_common, "PRL")
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_prl_crc16_basic",
+		.func = test_prl_crc16_basic,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_prl_crc16_consistency",
+		.func = test_prl_crc16_consistency,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_prl_crc16_different_data",
+		.func = test_prl_crc16_different_data,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_prl_seq_number",
+		.func = test_prl_seq_number,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_prl_init_header",
+		.func = test_prl_init_header,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_prl_init_header_with_flags",
+		.func = test_prl_init_header_with_flags,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_prl_validate_header_valid",
+		.func = test_prl_validate_header_valid,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_prl_validate_header_invalid_magic",
+		.func = test_prl_validate_header_invalid_magic,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_prl_validate_header_invalid_version",
+		.func = test_prl_validate_header_invalid_version,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_prl_validate_header_invalid_type",
+		.func = test_prl_validate_header_invalid_type,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_prl_validate_header_invalid_length",
+		.func = test_prl_validate_header_invalid_length,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_prl_packet_crc",
+		.func = test_prl_packet_crc,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_prl_packet_crc_tampered",
+		.func = test_prl_packet_crc_tampered,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_prl_packet_crc_header_tampered",
+		.func = test_prl_packet_crc_header_tampered,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_prl_zero_length_payload",
+		.func = test_prl_zero_length_payload,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_prl_max_payload",
+		.func = test_prl_max_payload,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "prl_common",
+	.module_name = "prl_common",
+	.layer_name = "PRL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "PRL prl_common tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_prl_common_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

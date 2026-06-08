@@ -42,7 +42,7 @@ SYSTEM_ENV_TEARDOWN(full_stack) {
 /**
  * 系统测试：OSAL + HAL 集成
  */
-SYSTEM_TEST_CASE(osal_hal_integration) {
+SYSTEM_static void osal_hal_integration(void) {
     OSAL_Printf("[ TEST     ] Testing OSAL + HAL integration\n");
 
     /* 检查点1：OSAL初始化 */
@@ -65,7 +65,7 @@ SYSTEM_TEST_CASE(osal_hal_integration) {
 /**
  * 系统测试：HAL + PDL 集成
  */
-SYSTEM_TEST_CASE(hal_pdl_integration) {
+SYSTEM_static void hal_pdl_integration(void) {
     OSAL_Printf("[ TEST     ] Testing HAL + PDL integration\n");
 
     /* 检查点1：HAL初始化 */
@@ -108,7 +108,7 @@ SYSTEM_TEST_CASE(hal_pdl_integration) {
 /**
  * 系统测试：完整栈端到端测试
  */
-SYSTEM_TEST_CASE(full_stack_e2e) {
+SYSTEM_static void full_stack_e2e(void) {
     OSAL_Printf("[ TEST     ] Testing full stack end-to-end\n");
 
     /* 检查点1：所有层初始化 */
@@ -144,7 +144,6 @@ static void* concurrent_thread_func(void *arg) {
 
     uint32_t i;
 
-
     for (i = 0; i < 1000; i++) {
         OSAL_MutexLock(data->mutex);
         OSAL_AtomicIncrement(data->counter);
@@ -156,7 +155,7 @@ static void* concurrent_thread_func(void *arg) {
 /**
  * 系统测试：并发场景测试
  */
-SYSTEM_TEST_CASE(concurrent_scenario) {
+SYSTEM_static void concurrent_scenario(void) {
     (void)env;  /* 未使用的参数 */
     OSAL_Printf("[ TEST     ] Testing concurrent scenario\n");
 
@@ -211,7 +210,7 @@ SYSTEM_TEST_CASE(concurrent_scenario) {
 /**
  * 运行系统集成测试
  */
-TEST_CASE(test_system_integration_suite) {
+static void test_system_integration_suite(void) {
     system_test_context_t *ctx;
 
     /* 测试1：OSAL + HAL 集成 */
@@ -256,6 +255,37 @@ TEST_CASE(test_system_integration_suite) {
 }
 
 /* 注册系统测试模块 */
-TEST_MODULE_BEGIN(system_integration, "SYSTEM")
-    TEST_CASE_REGISTER(test_system_integration_suite, "System integration test suite")
-TEST_MODULE_END(system_integration, "SYSTEM")
+
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_system_integration_suite",
+		.func = test_system_integration_suite,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "system_integration",
+	.module_name = "system_integration",
+	.layer_name = "UNKNOWN",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_SYSTEM,
+		.tags = TEST_TAG_SLOW | TEST_TAG_HARDWARE,
+		.timeout_ms = 5000,
+		.description = "UNKNOWN system_integration tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_system_integration_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

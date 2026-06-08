@@ -17,7 +17,7 @@ static uint64_t get_time_in_micros(void)
  *===========================================================================*/
 
 /* 测试用例: msleep - 毫秒延时 */
-TEST_CASE(test_osal_msleep_success)
+static void test_osal_msleep_success(void)
 {
     uint64_t start_time, end_time, elapsed_ms;
 
@@ -37,7 +37,7 @@ TEST_CASE(test_osal_msleep_success)
 }
 
 /* 测试用例: usleep - 微秒延时 */
-TEST_CASE(test_osal_usleep_success)
+static void test_osal_usleep_success(void)
 {
     uint64_t start_time, end_time, elapsed_us;
 
@@ -57,7 +57,7 @@ TEST_CASE(test_osal_usleep_success)
 }
 
 /* 测试用例: sleep - 秒延时 */
-TEST_CASE(test_osal_sleep_success)
+static void test_osal_sleep_success(void)
 {
     uint64_t start_time, end_time, elapsed_ms;
 
@@ -77,7 +77,7 @@ TEST_CASE(test_osal_sleep_success)
 }
 
 /* 测试用例: nanosleep - 纳秒延时 */
-TEST_CASE(test_osal_nanosleep_success)
+static void test_osal_nanosleep_success(void)
 {
     uint64_t start_time, end_time, elapsed_us;
 
@@ -97,7 +97,7 @@ TEST_CASE(test_osal_nanosleep_success)
 }
 
 /* 测试用例: msleep - OSAL毫秒延时（替代TaskDelay） */
-TEST_CASE(test_osal_task_delay_success)
+static void test_osal_task_delay_success(void)
 {
     uint64_t start_time, end_time, elapsed_ms;
 
@@ -121,7 +121,7 @@ TEST_CASE(test_osal_task_delay_success)
  *===========================================================================*/
 
 /* 测试用例: GetLocalTime - 获取本地时间 */
-TEST_CASE(test_osal_get_local_time_success)
+static void test_osal_get_local_time_success(void)
 {
     OS_time_t time1, time2;
     int32_t ret;
@@ -146,14 +146,14 @@ TEST_CASE(test_osal_get_local_time_success)
 }
 
 /* 测试用例: GetLocalTime - 空指针 */
-TEST_CASE(test_osal_get_local_time_null_pointer)
+static void test_osal_get_local_time_null_pointer(void)
 {
     int32_t ret = OSAL_GetLocalTime(NULL);
     TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_POINTER, ret);
 }
 
 /* 测试用例: GetTickCount - 获取系统滴答 */
-TEST_CASE(test_osal_get_tick_count)
+static void test_osal_get_tick_count(void)
 {
     uint32_t tick1, tick2;
 
@@ -172,7 +172,7 @@ TEST_CASE(test_osal_get_tick_count)
 }
 
 /* 测试用例: 时间单调性 */
-TEST_CASE(test_osal_time_monotonic)
+static void test_osal_time_monotonic(void)
 {
     OS_time_t prev_time, curr_time;
 
@@ -201,35 +201,35 @@ TEST_CASE(test_osal_time_monotonic)
  *===========================================================================*/
 
 /* 测试用例: msleep - 零延时 */
-TEST_CASE(test_osal_msleep_zero)
+static void test_osal_msleep_zero(void)
 {
     int32_t ret = OSAL_msleep(0);
     TEST_ASSERT_EQUAL(0, ret);
 }
 
 /* 测试用例: usleep - 零延时 */
-TEST_CASE(test_osal_usleep_zero)
+static void test_osal_usleep_zero(void)
 {
     int32_t ret = OSAL_usleep(0);
     TEST_ASSERT_EQUAL(0, ret);
 }
 
 /* 测试用例: sleep - 零延时 */
-TEST_CASE(test_osal_sleep_zero)
+static void test_osal_sleep_zero(void)
 {
     int32_t ret = OSAL_sleep(0);
     TEST_ASSERT_EQUAL(0, ret);
 }
 
 /* 测试用例: msleep - 零延时（替代TaskDelay） */
-TEST_CASE(test_osal_task_delay_zero)
+static void test_osal_task_delay_zero(void)
 {
     int32_t ret = OSAL_msleep(0);
     TEST_ASSERT_EQUAL(0, ret);
 }
 
 /* 测试用例: 短延时精度 */
-TEST_CASE(test_osal_short_delay_precision)
+static void test_osal_short_delay_precision(void)
 {
     uint64_t start_time, end_time, elapsed_us;
 
@@ -244,7 +244,7 @@ TEST_CASE(test_osal_short_delay_precision)
 }
 
 /* 测试用例: 长延时精度 */
-TEST_CASE(test_osal_long_delay_precision)
+static void test_osal_long_delay_precision(void)
 {
     uint64_t start_time, end_time, elapsed_ms;
 
@@ -263,7 +263,7 @@ TEST_CASE(test_osal_long_delay_precision)
  *===========================================================================*/
 
 /* 测试用例: 时间获取性能 */
-TEST_CASE(test_osal_time_get_performance)
+static void test_osal_time_get_performance(void)
 {
     uint64_t start_time, end_time;
     const int32_t iterations = 1000;
@@ -287,29 +287,132 @@ TEST_CASE(test_osal_time_get_performance)
  * 测试模块注册
  *===========================================================================*/
 
-TEST_MODULE_BEGIN(test_osal_time, "OSAL")
-    // OSAL时间操作测试
+// OSAL时间操作测试
     /* 延时函数 */
-    TEST_CASE_REF(test_osal_msleep_success)
-    TEST_CASE_REF(test_osal_usleep_success)
-    TEST_CASE_REF(test_osal_sleep_success)
-    TEST_CASE_REF(test_osal_nanosleep_success)
-    TEST_CASE_REF(test_osal_task_delay_success)
-
     /* 时间获取 */
-    TEST_CASE_REF(test_osal_get_local_time_success)
-    TEST_CASE_REF(test_osal_get_local_time_null_pointer)
-    TEST_CASE_REF(test_osal_get_tick_count)
-    TEST_CASE_REF(test_osal_time_monotonic)
-
     /* 边界条件 */
-    TEST_CASE_REF(test_osal_msleep_zero)
-    TEST_CASE_REF(test_osal_usleep_zero)
-    TEST_CASE_REF(test_osal_sleep_zero)
-    TEST_CASE_REF(test_osal_task_delay_zero)
-    TEST_CASE_REF(test_osal_short_delay_precision)
-    TEST_CASE_REF(test_osal_long_delay_precision)
-
     /* 性能测试 */
-    TEST_CASE_REF(test_osal_time_get_performance)
-TEST_MODULE_END(test_osal_time, "OSAL")
+
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_osal_msleep_success",
+		.func = test_osal_msleep_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_usleep_success",
+		.func = test_osal_usleep_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_sleep_success",
+		.func = test_osal_sleep_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_nanosleep_success",
+		.func = test_osal_nanosleep_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_task_delay_success",
+		.func = test_osal_task_delay_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_get_local_time_success",
+		.func = test_osal_get_local_time_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_get_local_time_null_pointer",
+		.func = test_osal_get_local_time_null_pointer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_get_tick_count",
+		.func = test_osal_get_tick_count,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_time_monotonic",
+		.func = test_osal_time_monotonic,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_msleep_zero",
+		.func = test_osal_msleep_zero,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_usleep_zero",
+		.func = test_osal_usleep_zero,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_sleep_zero",
+		.func = test_osal_sleep_zero,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_task_delay_zero",
+		.func = test_osal_task_delay_zero,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_short_delay_precision",
+		.func = test_osal_short_delay_precision,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_long_delay_precision",
+		.func = test_osal_long_delay_precision,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_time_get_performance",
+		.func = test_osal_time_get_performance,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "osal_time",
+	.module_name = "osal_time",
+	.layer_name = "OSAL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "OSAL osal_time tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_osal_time_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

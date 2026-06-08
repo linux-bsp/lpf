@@ -10,7 +10,7 @@
 /**
  * 测试CAN并发发送压力
  */
-TEST_CASE(test_stress_can_concurrent_send) {
+static void test_stress_can_concurrent_send(void) {
     // TODO: 实现CAN并发发送压力测试
     OSAL_Printf("[ INFO ] CAN concurrent send stress test - not implemented yet\n");
 }
@@ -18,7 +18,7 @@ TEST_CASE(test_stress_can_concurrent_send) {
 /**
  * 测试UART长时间传输压力
  */
-TEST_CASE(test_stress_uart_long_running) {
+static void test_stress_uart_long_running(void) {
     // TODO: 实现UART长时间传输压力测试
     OSAL_Printf("[ INFO ] UART long running stress test - not implemented yet\n");
 }
@@ -26,7 +26,7 @@ TEST_CASE(test_stress_uart_long_running) {
 /**
  * 测试GPIO高频读写压力
  */
-TEST_CASE(test_stress_gpio_high_frequency) {
+static void test_stress_gpio_high_frequency(void) {
     // TODO: 实现GPIO高频读写压力测试
     OSAL_Printf("[ INFO ] GPIO high frequency stress test - not implemented yet\n");
 }
@@ -34,7 +34,7 @@ TEST_CASE(test_stress_gpio_high_frequency) {
 /**
  * 测试I2C资源耗尽场景
  */
-TEST_CASE(test_stress_i2c_resource_exhaustion) {
+static void test_stress_i2c_resource_exhaustion(void) {
     // TODO: 实现I2C资源耗尽压力测试
     OSAL_Printf("[ INFO ] I2C resource exhaustion stress test - not implemented yet\n");
 }
@@ -42,16 +42,67 @@ TEST_CASE(test_stress_i2c_resource_exhaustion) {
 /**
  * 测试SPI并发传输压力
  */
-TEST_CASE(test_stress_spi_concurrent_transfer) {
+static void test_stress_spi_concurrent_transfer(void) {
     // TODO: 实现SPI并发传输压力测试
     OSAL_Printf("[ INFO ] SPI concurrent transfer stress test - not implemented yet\n");
 }
 
 /* 注册压力测试模块 */
-TEST_MODULE_BEGIN(stress_hal, "STRESS")
-    TEST_CASE_REGISTER(test_stress_can_concurrent_send, "CAN concurrent send stress")
-    TEST_CASE_REGISTER(test_stress_uart_long_running, "UART long running stress")
-    TEST_CASE_REGISTER(test_stress_gpio_high_frequency, "GPIO high frequency stress")
-    TEST_CASE_REGISTER(test_stress_i2c_resource_exhaustion, "I2C resource exhaustion stress")
-    TEST_CASE_REGISTER(test_stress_spi_concurrent_transfer, "SPI concurrent transfer stress")
-TEST_MODULE_END(stress_hal, "STRESS")
+
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_stress_can_concurrent_send",
+		.func = test_stress_can_concurrent_send,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_stress_uart_long_running",
+		.func = test_stress_uart_long_running,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_stress_gpio_high_frequency",
+		.func = test_stress_gpio_high_frequency,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_stress_i2c_resource_exhaustion",
+		.func = test_stress_i2c_resource_exhaustion,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_stress_spi_concurrent_transfer",
+		.func = test_stress_spi_concurrent_transfer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "stress_hal",
+	.module_name = "stress_hal",
+	.layer_name = "HAL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_STRESS,
+		.tags = TEST_TAG_SLOW,
+		.timeout_ms = 10000,
+		.description = "HAL stress_hal tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_stress_hal_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

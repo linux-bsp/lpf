@@ -20,7 +20,7 @@ struct test_data {
 /**
  * 测试1：创建和删除共享内存
  */
-TEST_CASE(test_osal_shm_create_unlink) {
+static void test_osal_shm_create_unlink(void) {
     osal_shm_t shm;
     int32_t ret;
 
@@ -49,7 +49,7 @@ TEST_CASE(test_osal_shm_create_unlink) {
 /**
  * 测试2：独占创建模式
  */
-TEST_CASE(test_osal_shm_exclusive_create) {
+static void test_osal_shm_exclusive_create(void) {
     osal_shm_t shm1, shm2;
     int32_t ret;
 
@@ -74,7 +74,7 @@ TEST_CASE(test_osal_shm_exclusive_create) {
 /**
  * 测试3：映射和解除映射
  */
-TEST_CASE(test_osal_shm_map_unmap) {
+static void test_osal_shm_map_unmap(void) {
     osal_shm_t shm;
     void *addr;
     int32_t ret;
@@ -115,7 +115,7 @@ TEST_CASE(test_osal_shm_map_unmap) {
 /**
  * 测试4：多进程共享（使用fork模拟）
  */
-TEST_CASE(test_osal_shm_multiprocess) {
+static void test_osal_shm_multiprocess(void) {
     osal_shm_t shm;
     void *addr;
     int32_t ret;
@@ -191,7 +191,7 @@ TEST_CASE(test_osal_shm_multiprocess) {
 /**
  * 测试5：只读映射
  */
-TEST_CASE(test_osal_shm_readonly_map) {
+static void test_osal_shm_readonly_map(void) {
     osal_shm_t shm;
     void *addr_rw, *addr_ro;
     int32_t ret;
@@ -234,7 +234,7 @@ TEST_CASE(test_osal_shm_readonly_map) {
 /**
  * 测试6：部分映射
  */
-TEST_CASE(test_osal_shm_partial_map) {
+static void test_osal_shm_partial_map(void) {
     osal_shm_t shm;
     void *addr;
     int32_t ret;
@@ -268,7 +268,7 @@ TEST_CASE(test_osal_shm_partial_map) {
 /**
  * 测试7：参数校验
  */
-TEST_CASE(test_osal_shm_parameter_validation) {
+static void test_osal_shm_parameter_validation(void) {
     osal_shm_t shm;
     void *addr;
     int32_t ret;
@@ -302,12 +302,73 @@ TEST_CASE(test_osal_shm_parameter_validation) {
 }
 
 /* 测试模块定义 */
-TEST_MODULE_BEGIN(test_osal_shm, "OSAL")
-    TEST_CASE_REGISTER(test_osal_shm_create_unlink, "Create and unlink shared memory")
-    TEST_CASE_REGISTER(test_osal_shm_exclusive_create, "Exclusive create mode")
-    TEST_CASE_REGISTER(test_osal_shm_map_unmap, "Map and unmap shared memory")
-    TEST_CASE_REGISTER(test_osal_shm_multiprocess, "Multi-process shared memory")
-    TEST_CASE_REGISTER(test_osal_shm_readonly_map, "Read-only mapping")
-    TEST_CASE_REGISTER(test_osal_shm_partial_map, "Partial mapping")
-    TEST_CASE_REGISTER(test_osal_shm_parameter_validation, "Parameter validation")
-TEST_MODULE_END(test_osal_shm, "OSAL")
+
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_osal_shm_create_unlink",
+		.func = test_osal_shm_create_unlink,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_shm_exclusive_create",
+		.func = test_osal_shm_exclusive_create,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_shm_map_unmap",
+		.func = test_osal_shm_map_unmap,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_shm_multiprocess",
+		.func = test_osal_shm_multiprocess,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_shm_readonly_map",
+		.func = test_osal_shm_readonly_map,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_shm_partial_map",
+		.func = test_osal_shm_partial_map,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_shm_parameter_validation",
+		.func = test_osal_shm_parameter_validation,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "osal_shm",
+	.module_name = "osal_shm",
+	.layer_name = "OSAL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "OSAL osal_shm tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_osal_shm_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

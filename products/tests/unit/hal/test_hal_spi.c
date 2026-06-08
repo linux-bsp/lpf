@@ -12,7 +12,7 @@
  *===========================================================================*/
 
 /* 测试用例: SPI打开 - 成功 */
-TEST_CASE(test_hal_spi_open_success)
+static void test_hal_spi_open_success(void)
 {
     hal_spi_handle_t handle = NULL;
     hal_spi_config_t config = {
@@ -36,7 +36,7 @@ TEST_CASE(test_hal_spi_open_success)
 }
 
 /* 测试用例: SPI打开 - 空配置 */
-TEST_CASE(test_hal_spi_open_null_config)
+static void test_hal_spi_open_null_config(void)
 {
     hal_spi_handle_t handle = NULL;
 
@@ -45,7 +45,7 @@ TEST_CASE(test_hal_spi_open_null_config)
 }
 
 /* 测试用例: SPI打开 - 空句柄 */
-TEST_CASE(test_hal_spi_open_null_handle)
+static void test_hal_spi_open_null_handle(void)
 {
     hal_spi_config_t config = {
         .device = "/dev/spidev0.0",
@@ -60,7 +60,7 @@ TEST_CASE(test_hal_spi_open_null_handle)
 }
 
 /* 测试用例: SPI打开 - 无效设备 */
-TEST_CASE(test_hal_spi_open_invalid_device)
+static void test_hal_spi_open_invalid_device(void)
 {
     hal_spi_handle_t handle = NULL;
     hal_spi_config_t config = {
@@ -76,7 +76,7 @@ TEST_CASE(test_hal_spi_open_invalid_device)
 }
 
 /* 测试用例: SPI关闭 */
-TEST_CASE(test_hal_spi_close)
+static void test_hal_spi_close(void)
 {
     hal_spi_handle_t handle = NULL;
     hal_spi_config_t config = {
@@ -97,7 +97,7 @@ TEST_CASE(test_hal_spi_close)
 }
 
 /* 测试用例: SPI关闭 - 空句柄 */
-TEST_CASE(test_hal_spi_close_null_handle)
+static void test_hal_spi_close_null_handle(void)
 {
     int32_t ret = HAL_SPI_Close(NULL);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
@@ -108,7 +108,7 @@ TEST_CASE(test_hal_spi_close_null_handle)
  *===========================================================================*/
 
 /* 测试用例: SPI写入 - 空句柄 */
-TEST_CASE(test_hal_spi_write_null_handle)
+static void test_hal_spi_write_null_handle(void)
 {
     uint8_t buffer[4] = {0x01, 0x02, 0x03, 0x04};
 
@@ -117,7 +117,7 @@ TEST_CASE(test_hal_spi_write_null_handle)
 }
 
 /* 测试用例: SPI写入 - 空缓冲区 */
-TEST_CASE(test_hal_spi_write_null_buffer)
+static void test_hal_spi_write_null_buffer(void)
 {
     hal_spi_handle_t handle = NULL;
     hal_spi_config_t config = {
@@ -140,7 +140,7 @@ TEST_CASE(test_hal_spi_write_null_buffer)
 }
 
 /* 测试用例: SPI读取 - 空句柄 */
-TEST_CASE(test_hal_spi_read_null_handle)
+static void test_hal_spi_read_null_handle(void)
 {
     uint8_t buffer[4];
 
@@ -149,7 +149,7 @@ TEST_CASE(test_hal_spi_read_null_handle)
 }
 
 /* 测试用例: SPI读取 - 空缓冲区 */
-TEST_CASE(test_hal_spi_read_null_buffer)
+static void test_hal_spi_read_null_buffer(void)
 {
     hal_spi_handle_t handle = NULL;
     hal_spi_config_t config = {
@@ -176,7 +176,7 @@ TEST_CASE(test_hal_spi_read_null_buffer)
  *===========================================================================*/
 
 /* 测试用例: SPI全双工传输 - 空句柄 */
-TEST_CASE(test_hal_spi_transfer_null_handle)
+static void test_hal_spi_transfer_null_handle(void)
 {
     uint8_t tx_buffer[4] = {0x01, 0x02, 0x03, 0x04};
     uint8_t rx_buffer[4];
@@ -186,7 +186,7 @@ TEST_CASE(test_hal_spi_transfer_null_handle)
 }
 
 /* 测试用例: SPI全双工传输 - 回环测试 */
-TEST_CASE(test_hal_spi_transfer_loopback)
+static void test_hal_spi_transfer_loopback(void)
 {
     hal_spi_handle_t handle = NULL;
     hal_spi_config_t config = {
@@ -215,7 +215,7 @@ TEST_CASE(test_hal_spi_transfer_loopback)
 }
 
 /* 测试用例: SPI批量传输 - 空句柄 */
-TEST_CASE(test_hal_spi_transfer_multi_null_handle)
+static void test_hal_spi_transfer_multi_null_handle(void)
 {
     uint8_t tx_buffer[4] = {0x01, 0x02, 0x03, 0x04};
     uint8_t rx_buffer[4];
@@ -234,7 +234,7 @@ TEST_CASE(test_hal_spi_transfer_multi_null_handle)
 }
 
 /* 测试用例: SPI批量传输 - 空传输数组 */
-TEST_CASE(test_hal_spi_transfer_multi_null_transfers)
+static void test_hal_spi_transfer_multi_null_transfers(void)
 {
     hal_spi_handle_t handle = NULL;
     hal_spi_config_t config = {
@@ -261,7 +261,7 @@ TEST_CASE(test_hal_spi_transfer_multi_null_transfers)
  *===========================================================================*/
 
 /* 测试用例: SPI设置配置 - 空句柄 */
-TEST_CASE(test_hal_spi_set_config_null_handle)
+static void test_hal_spi_set_config_null_handle(void)
 {
     hal_spi_config_t config = {
         .device = "/dev/spidev0.0",
@@ -276,7 +276,7 @@ TEST_CASE(test_hal_spi_set_config_null_handle)
 }
 
 /* 测试用例: SPI设置配置 - 空配置 */
-TEST_CASE(test_hal_spi_set_config_null_config)
+static void test_hal_spi_set_config_null_config(void)
 {
     hal_spi_handle_t handle = NULL;
     hal_spi_config_t config = {
@@ -299,7 +299,7 @@ TEST_CASE(test_hal_spi_set_config_null_config)
 }
 
 /* 测试用例: SPI设置配置 - 更改模式 */
-TEST_CASE(test_hal_spi_set_config_change_mode)
+static void test_hal_spi_set_config_change_mode(void)
 {
     hal_spi_handle_t handle = NULL;
     hal_spi_config_t config = {
@@ -327,29 +327,137 @@ TEST_CASE(test_hal_spi_set_config_change_mode)
  * 测试套件注册
  *===========================================================================*/
 
-TEST_MODULE_BEGIN(test_hal_spi, "HAL")
-    /* 初始化和清理 */
-    TEST_CASE_REF(test_hal_spi_open_success)
-    TEST_CASE_REF(test_hal_spi_open_null_config)
-    TEST_CASE_REF(test_hal_spi_open_null_handle)
-    TEST_CASE_REF(test_hal_spi_open_invalid_device)
-    TEST_CASE_REF(test_hal_spi_close)
-    TEST_CASE_REF(test_hal_spi_close_null_handle)
-
+/* 初始化和清理 */
     /* 读写操作 */
-    TEST_CASE_REF(test_hal_spi_write_null_handle)
-    TEST_CASE_REF(test_hal_spi_write_null_buffer)
-    TEST_CASE_REF(test_hal_spi_read_null_handle)
-    TEST_CASE_REF(test_hal_spi_read_null_buffer)
-
     /* 传输操作 */
-    TEST_CASE_REF(test_hal_spi_transfer_null_handle)
-    TEST_CASE_REF(test_hal_spi_transfer_loopback)
-    TEST_CASE_REF(test_hal_spi_transfer_multi_null_handle)
-    TEST_CASE_REF(test_hal_spi_transfer_multi_null_transfers)
-
     /* 配置操作 */
-    TEST_CASE_REF(test_hal_spi_set_config_null_handle)
-    TEST_CASE_REF(test_hal_spi_set_config_null_config)
-    TEST_CASE_REF(test_hal_spi_set_config_change_mode)
-TEST_MODULE_END(test_hal_spi, "HAL")
+
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_hal_spi_open_success",
+		.func = test_hal_spi_open_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_spi_open_null_config",
+		.func = test_hal_spi_open_null_config,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_spi_open_null_handle",
+		.func = test_hal_spi_open_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_spi_open_invalid_device",
+		.func = test_hal_spi_open_invalid_device,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_spi_close",
+		.func = test_hal_spi_close,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_spi_close_null_handle",
+		.func = test_hal_spi_close_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_spi_write_null_handle",
+		.func = test_hal_spi_write_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_spi_write_null_buffer",
+		.func = test_hal_spi_write_null_buffer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_spi_read_null_handle",
+		.func = test_hal_spi_read_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_spi_read_null_buffer",
+		.func = test_hal_spi_read_null_buffer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_spi_transfer_null_handle",
+		.func = test_hal_spi_transfer_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_spi_transfer_loopback",
+		.func = test_hal_spi_transfer_loopback,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_spi_transfer_multi_null_handle",
+		.func = test_hal_spi_transfer_multi_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_spi_transfer_multi_null_transfers",
+		.func = test_hal_spi_transfer_multi_null_transfers,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_spi_set_config_null_handle",
+		.func = test_hal_spi_set_config_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_spi_set_config_null_config",
+		.func = test_hal_spi_set_config_null_config,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_spi_set_config_change_mode",
+		.func = test_hal_spi_set_config_change_mode,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "hal_spi",
+	.module_name = "hal_spi",
+	.layer_name = "HAL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "HAL hal_spi tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_hal_spi_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

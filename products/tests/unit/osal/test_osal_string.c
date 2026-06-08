@@ -11,7 +11,7 @@
  *===========================================================================*/
 
 /* 测试用例: Memset - 成功 */
-TEST_CASE(test_osal_memset_success)
+static void test_osal_memset_success(void)
 {
     uint32_t i;
     uint8_t buffer[64];
@@ -22,7 +22,6 @@ TEST_CASE(test_osal_memset_success)
     TEST_ASSERT_NOT_NULL(ret);
     TEST_ASSERT_EQUAL(buffer, ret);
 
-
     for (i = 0; i < sizeof(buffer); i++) {
         TEST_ASSERT_EQUAL(0, buffer[i]);
     }
@@ -31,14 +30,13 @@ TEST_CASE(test_osal_memset_success)
     ret = OSAL_memset(buffer, 0xFF, sizeof(buffer));
     TEST_ASSERT_NOT_NULL(ret);
 
-
     for (i = 0; i < sizeof(buffer); i++) {
         TEST_ASSERT_EQUAL(0xFF, buffer[i]);
     }
 }
 
 /* 测试用例: Memcpy - 成功 */
-TEST_CASE(test_osal_memcpy_success)
+static void test_osal_memcpy_success(void)
 {
     uint32_t i;
     uint8_t src[32] = {1, 2, 3, 4, 5, 6, 7, 8};
@@ -51,14 +49,13 @@ TEST_CASE(test_osal_memcpy_success)
     TEST_ASSERT_NOT_NULL(ret);
     TEST_ASSERT_EQUAL(dest, ret);
 
-
     for (i = 0; i < 8; i++) {
         TEST_ASSERT_EQUAL(src[i], dest[i]);
     }
 }
 
 /* 测试用例: Memmove - 重叠区域 */
-TEST_CASE(test_osal_memmove_overlap)
+static void test_osal_memmove_overlap(void)
 {
     uint8_t buffer[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
     void *ret;
@@ -75,7 +72,7 @@ TEST_CASE(test_osal_memmove_overlap)
 }
 
 /* 测试用例: Memcmp - 相等 */
-TEST_CASE(test_osal_memcmp_equal)
+static void test_osal_memcmp_equal(void)
 {
     uint8_t buf1[8] = {1, 2, 3, 4, 5, 6, 7, 8};
     uint8_t buf2[8] = {1, 2, 3, 4, 5, 6, 7, 8};
@@ -85,7 +82,7 @@ TEST_CASE(test_osal_memcmp_equal)
 }
 
 /* 测试用例: Memcmp - 不相等 */
-TEST_CASE(test_osal_memcmp_not_equal)
+static void test_osal_memcmp_not_equal(void)
 {
     uint8_t buf1[8] = {1, 2, 3, 4, 5, 6, 7, 8};
     uint8_t buf2[8] = {1, 2, 3, 5, 5, 6, 7, 8};  /* 第4个字节不同 */
@@ -100,7 +97,7 @@ TEST_CASE(test_osal_memcmp_not_equal)
  *===========================================================================*/
 
 /* 测试用例: Strlen - 成功 */
-TEST_CASE(test_osal_strlen_success)
+static void test_osal_strlen_success(void)
 {
     const char *str1 = "Hello";
     const char *str2 = "";
@@ -112,7 +109,7 @@ TEST_CASE(test_osal_strlen_success)
 }
 
 /* 测试用例: Strcmp - 相等 */
-TEST_CASE(test_osal_strcmp_equal)
+static void test_osal_strcmp_equal(void)
 {
     const char *str1 = "Hello";
     const char *str2 = "Hello";
@@ -122,7 +119,7 @@ TEST_CASE(test_osal_strcmp_equal)
 }
 
 /* 测试用例: Strcmp - 不相等 */
-TEST_CASE(test_osal_strcmp_not_equal)
+static void test_osal_strcmp_not_equal(void)
 {
     const char *str1 = "Hello";
     const char *str2 = "World";
@@ -136,7 +133,7 @@ TEST_CASE(test_osal_strcmp_not_equal)
 }
 
 /* 测试用例: Strncmp - 成功 */
-TEST_CASE(test_osal_strncmp_success)
+static void test_osal_strncmp_success(void)
 {
     const char *str1 = "Hello World";
     const char *str2 = "Hello Earth";
@@ -151,7 +148,7 @@ TEST_CASE(test_osal_strncmp_success)
 }
 
 /* 测试用例: Strcasecmp - 忽略大小写 */
-TEST_CASE(test_osal_strcasecmp_success)
+static void test_osal_strcasecmp_success(void)
 {
     const char *str1 = "Hello";
     const char *str2 = "HELLO";
@@ -168,7 +165,7 @@ TEST_CASE(test_osal_strcasecmp_success)
 }
 
 /* 测试用例: Strcpy - 成功 */
-TEST_CASE(test_osal_strcpy_success)
+static void test_osal_strcpy_success(void)
 {
     const char *src = "Hello";
     char dest[32];
@@ -183,7 +180,7 @@ TEST_CASE(test_osal_strcpy_success)
 }
 
 /* 测试用例: Strncpy - 成功 */
-TEST_CASE(test_osal_strncpy_success)
+static void test_osal_strncpy_success(void)
 {
     const char *src = "Hello World";
     char dest[32];
@@ -199,7 +196,7 @@ TEST_CASE(test_osal_strncpy_success)
 }
 
 /* 测试用例: Strcat - 成功 */
-TEST_CASE(test_osal_strcat_success)
+static void test_osal_strcat_success(void)
 {
     char dest[32] = "Hello";
     const char *src = " World";
@@ -212,7 +209,7 @@ TEST_CASE(test_osal_strcat_success)
 }
 
 /* 测试用例: Strncat - 成功 */
-TEST_CASE(test_osal_strncat_success)
+static void test_osal_strncat_success(void)
 {
     char dest[32] = "Hello";
     const char *src = " World";
@@ -226,7 +223,7 @@ TEST_CASE(test_osal_strncat_success)
 }
 
 /* 测试用例: Strstr - 找到子串 */
-TEST_CASE(test_osal_strstr_found)
+static void test_osal_strstr_found(void)
 {
     const char *haystack = "Hello World";
     const char *needle = "World";
@@ -237,7 +234,7 @@ TEST_CASE(test_osal_strstr_found)
 }
 
 /* 测试用例: Strstr - 未找到子串 */
-TEST_CASE(test_osal_strstr_not_found)
+static void test_osal_strstr_not_found(void)
 {
     const char *haystack = "Hello World";
     const char *needle = "Earth";
@@ -251,7 +248,7 @@ TEST_CASE(test_osal_strstr_not_found)
  *===========================================================================*/
 
 /* 测试用例: Sprintf - 成功 */
-TEST_CASE(test_osal_sprintf_success)
+static void test_osal_sprintf_success(void)
 {
     char buffer[64];
     int32_t ret;
@@ -262,7 +259,7 @@ TEST_CASE(test_osal_sprintf_success)
 }
 
 /* 测试用例: Snprintf - 成功 */
-TEST_CASE(test_osal_snprintf_success)
+static void test_osal_snprintf_success(void)
 {
     char buffer[16];
     int32_t ret;
@@ -279,7 +276,7 @@ TEST_CASE(test_osal_snprintf_success)
 }
 
 /* 测试用例: Sscanf - 成功 */
-TEST_CASE(test_osal_sscanf_success)
+static void test_osal_sscanf_success(void)
 {
     const char *str = "Hello 42 3.14";
     char word[32];
@@ -296,7 +293,7 @@ TEST_CASE(test_osal_sscanf_success)
  *===========================================================================*/
 
 /* 测试用例: Atoi - 成功 */
-TEST_CASE(test_osal_atoi_success)
+static void test_osal_atoi_success(void)
 {
     TEST_ASSERT_EQUAL(0, OSAL_atoi("0"));
     TEST_ASSERT_EQUAL(42, OSAL_atoi("42"));
@@ -306,7 +303,7 @@ TEST_CASE(test_osal_atoi_success)
 }
 
 /* 测试用例: Atoi - 无效输入 */
-TEST_CASE(test_osal_atoi_invalid)
+static void test_osal_atoi_invalid(void)
 {
     TEST_ASSERT_EQUAL(0, OSAL_atoi("abc"));
     TEST_ASSERT_EQUAL(0, OSAL_atoi(""));
@@ -314,7 +311,7 @@ TEST_CASE(test_osal_atoi_invalid)
 }
 
 /* 测试用例: Atol - 成功 */
-TEST_CASE(test_osal_atol_success)
+static void test_osal_atol_success(void)
 {
     TEST_ASSERT_EQUAL(0, OSAL_atol("0"));
     TEST_ASSERT_EQUAL(123456789, OSAL_atol("123456789"));
@@ -322,7 +319,7 @@ TEST_CASE(test_osal_atol_success)
 }
 
 /* 测试用例: Strtol - 不同进制 */
-TEST_CASE(test_osal_strtol_base)
+static void test_osal_strtol_base(void)
 {
     char *endptr;
     int64_t ret;
@@ -352,36 +349,174 @@ TEST_CASE(test_osal_strtol_base)
  * 测试模块注册
  *===========================================================================*/
 
-TEST_MODULE_BEGIN(test_osal_string, "OSAL")
-    // OSAL字符串和内存操作测试
+// OSAL字符串和内存操作测试
     /* 内存操作 */
-    TEST_CASE_REF(test_osal_memset_success)
-    TEST_CASE_REF(test_osal_memcpy_success)
-    TEST_CASE_REF(test_osal_memmove_overlap)
-    TEST_CASE_REF(test_osal_memcmp_equal)
-    TEST_CASE_REF(test_osal_memcmp_not_equal)
-
     /* 字符串操作 */
-    TEST_CASE_REF(test_osal_strlen_success)
-    TEST_CASE_REF(test_osal_strcmp_equal)
-    TEST_CASE_REF(test_osal_strcmp_not_equal)
-    TEST_CASE_REF(test_osal_strncmp_success)
-    TEST_CASE_REF(test_osal_strcasecmp_success)
-    TEST_CASE_REF(test_osal_strcpy_success)
-    TEST_CASE_REF(test_osal_strncpy_success)
-    TEST_CASE_REF(test_osal_strcat_success)
-    TEST_CASE_REF(test_osal_strncat_success)
-    TEST_CASE_REF(test_osal_strstr_found)
-    TEST_CASE_REF(test_osal_strstr_not_found)
-
     /* 字符串格式化 */
-    TEST_CASE_REF(test_osal_sprintf_success)
-    TEST_CASE_REF(test_osal_snprintf_success)
-    TEST_CASE_REF(test_osal_sscanf_success)
-
     /* 字符串转换 */
-    TEST_CASE_REF(test_osal_atoi_success)
-    TEST_CASE_REF(test_osal_atoi_invalid)
-    TEST_CASE_REF(test_osal_atol_success)
-    TEST_CASE_REF(test_osal_strtol_base)
-TEST_MODULE_END(test_osal_string, "OSAL")
+
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_osal_memset_success",
+		.func = test_osal_memset_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_memcpy_success",
+		.func = test_osal_memcpy_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_memmove_overlap",
+		.func = test_osal_memmove_overlap,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_memcmp_equal",
+		.func = test_osal_memcmp_equal,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_memcmp_not_equal",
+		.func = test_osal_memcmp_not_equal,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_strlen_success",
+		.func = test_osal_strlen_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_strcmp_equal",
+		.func = test_osal_strcmp_equal,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_strcmp_not_equal",
+		.func = test_osal_strcmp_not_equal,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_strncmp_success",
+		.func = test_osal_strncmp_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_strcasecmp_success",
+		.func = test_osal_strcasecmp_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_strcpy_success",
+		.func = test_osal_strcpy_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_strncpy_success",
+		.func = test_osal_strncpy_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_strcat_success",
+		.func = test_osal_strcat_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_strncat_success",
+		.func = test_osal_strncat_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_strstr_found",
+		.func = test_osal_strstr_found,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_strstr_not_found",
+		.func = test_osal_strstr_not_found,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_sprintf_success",
+		.func = test_osal_sprintf_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_snprintf_success",
+		.func = test_osal_snprintf_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_sscanf_success",
+		.func = test_osal_sscanf_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_atoi_success",
+		.func = test_osal_atoi_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_atoi_invalid",
+		.func = test_osal_atoi_invalid,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_atol_success",
+		.func = test_osal_atol_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_strtol_base",
+		.func = test_osal_strtol_base,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "osal_string",
+	.module_name = "osal_string",
+	.layer_name = "OSAL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "OSAL osal_string tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_osal_string_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

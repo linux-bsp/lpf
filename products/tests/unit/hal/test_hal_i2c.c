@@ -12,7 +12,7 @@
  *===========================================================================*/
 
 /* 测试用例: I2C打开 - 成功 */
-TEST_CASE(test_hal_i2c_open_success)
+static void test_hal_i2c_open_success(void)
 {
     hal_i2c_handle_t handle = NULL;
     hal_i2c_config_t config = {
@@ -33,7 +33,7 @@ TEST_CASE(test_hal_i2c_open_success)
 }
 
 /* 测试用例: I2C打开 - 空配置 */
-TEST_CASE(test_hal_i2c_open_null_config)
+static void test_hal_i2c_open_null_config(void)
 {
     hal_i2c_handle_t handle = NULL;
 
@@ -42,7 +42,7 @@ TEST_CASE(test_hal_i2c_open_null_config)
 }
 
 /* 测试用例: I2C打开 - 空句柄 */
-TEST_CASE(test_hal_i2c_open_null_handle)
+static void test_hal_i2c_open_null_handle(void)
 {
     hal_i2c_config_t config = {
         .device = "/dev/i2c-0",
@@ -54,7 +54,7 @@ TEST_CASE(test_hal_i2c_open_null_handle)
 }
 
 /* 测试用例: I2C打开 - 无效设备 */
-TEST_CASE(test_hal_i2c_open_invalid_device)
+static void test_hal_i2c_open_invalid_device(void)
 {
     hal_i2c_handle_t handle = NULL;
     hal_i2c_config_t config = {
@@ -67,7 +67,7 @@ TEST_CASE(test_hal_i2c_open_invalid_device)
 }
 
 /* 测试用例: I2C关闭 */
-TEST_CASE(test_hal_i2c_close)
+static void test_hal_i2c_close(void)
 {
     hal_i2c_handle_t handle = NULL;
     hal_i2c_config_t config = {
@@ -85,7 +85,7 @@ TEST_CASE(test_hal_i2c_close)
 }
 
 /* 测试用例: I2C关闭 - 空句柄 */
-TEST_CASE(test_hal_i2c_close_null_handle)
+static void test_hal_i2c_close_null_handle(void)
 {
     int32_t ret = HAL_I2C_Close(NULL);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
@@ -96,7 +96,7 @@ TEST_CASE(test_hal_i2c_close_null_handle)
  *===========================================================================*/
 
 /* 测试用例: I2C写入 - 空句柄 */
-TEST_CASE(test_hal_i2c_write_null_handle)
+static void test_hal_i2c_write_null_handle(void)
 {
     uint8_t buffer[4] = {0x01, 0x02, 0x03, 0x04};
 
@@ -105,7 +105,7 @@ TEST_CASE(test_hal_i2c_write_null_handle)
 }
 
 /* 测试用例: I2C写入 - 空缓冲区 */
-TEST_CASE(test_hal_i2c_write_null_buffer)
+static void test_hal_i2c_write_null_buffer(void)
 {
     hal_i2c_handle_t handle = NULL;
     hal_i2c_config_t config = {
@@ -125,7 +125,7 @@ TEST_CASE(test_hal_i2c_write_null_buffer)
 }
 
 /* 测试用例: I2C读取 - 空句柄 */
-TEST_CASE(test_hal_i2c_read_null_handle)
+static void test_hal_i2c_read_null_handle(void)
 {
     uint8_t buffer[4];
 
@@ -134,7 +134,7 @@ TEST_CASE(test_hal_i2c_read_null_handle)
 }
 
 /* 测试用例: I2C读取 - 空缓冲区 */
-TEST_CASE(test_hal_i2c_read_null_buffer)
+static void test_hal_i2c_read_null_buffer(void)
 {
     hal_i2c_handle_t handle = NULL;
     hal_i2c_config_t config = {
@@ -158,7 +158,7 @@ TEST_CASE(test_hal_i2c_read_null_buffer)
  *===========================================================================*/
 
 /* 测试用例: I2C写寄存器 - 空句柄 */
-TEST_CASE(test_hal_i2c_write_reg_null_handle)
+static void test_hal_i2c_write_reg_null_handle(void)
 {
     uint8_t buffer[4] = {0x01, 0x02, 0x03, 0x04};
 
@@ -167,7 +167,7 @@ TEST_CASE(test_hal_i2c_write_reg_null_handle)
 }
 
 /* 测试用例: I2C写寄存器 - 空缓冲区 */
-TEST_CASE(test_hal_i2c_write_reg_null_buffer)
+static void test_hal_i2c_write_reg_null_buffer(void)
 {
     hal_i2c_handle_t handle = NULL;
     hal_i2c_config_t config = {
@@ -187,7 +187,7 @@ TEST_CASE(test_hal_i2c_write_reg_null_buffer)
 }
 
 /* 测试用例: I2C读寄存器 - 空句柄 */
-TEST_CASE(test_hal_i2c_read_reg_null_handle)
+static void test_hal_i2c_read_reg_null_handle(void)
 {
     uint8_t buffer[4];
 
@@ -196,7 +196,7 @@ TEST_CASE(test_hal_i2c_read_reg_null_handle)
 }
 
 /* 测试用例: I2C读寄存器 - 空缓冲区 */
-TEST_CASE(test_hal_i2c_read_reg_null_buffer)
+static void test_hal_i2c_read_reg_null_buffer(void)
 {
     hal_i2c_handle_t handle = NULL;
     hal_i2c_config_t config = {
@@ -220,7 +220,7 @@ TEST_CASE(test_hal_i2c_read_reg_null_buffer)
  *===========================================================================*/
 
 /* 测试用例: I2C传输 - 空句柄 */
-TEST_CASE(test_hal_i2c_transfer_null_handle)
+static void test_hal_i2c_transfer_null_handle(void)
 {
     uint8_t buffer[4] = {0x01, 0x02, 0x03, 0x04};
     hal_i2c_msg_t msg = {
@@ -235,7 +235,7 @@ TEST_CASE(test_hal_i2c_transfer_null_handle)
 }
 
 /* 测试用例: I2C传输 - 空消息 */
-TEST_CASE(test_hal_i2c_transfer_null_msgs)
+static void test_hal_i2c_transfer_null_msgs(void)
 {
     hal_i2c_handle_t handle = NULL;
     hal_i2c_config_t config = {
@@ -258,28 +258,131 @@ TEST_CASE(test_hal_i2c_transfer_null_msgs)
  * 测试套件注册
  *===========================================================================*/
 
-TEST_MODULE_BEGIN(test_hal_i2c, "HAL")
-    /* 初始化和清理 */
-    TEST_CASE_REF(test_hal_i2c_open_success)
-    TEST_CASE_REF(test_hal_i2c_open_null_config)
-    TEST_CASE_REF(test_hal_i2c_open_null_handle)
-    TEST_CASE_REF(test_hal_i2c_open_invalid_device)
-    TEST_CASE_REF(test_hal_i2c_close)
-    TEST_CASE_REF(test_hal_i2c_close_null_handle)
-
+/* 初始化和清理 */
     /* 读写操作 */
-    TEST_CASE_REF(test_hal_i2c_write_null_handle)
-    TEST_CASE_REF(test_hal_i2c_write_null_buffer)
-    TEST_CASE_REF(test_hal_i2c_read_null_handle)
-    TEST_CASE_REF(test_hal_i2c_read_null_buffer)
-
     /* 寄存器操作 */
-    TEST_CASE_REF(test_hal_i2c_write_reg_null_handle)
-    TEST_CASE_REF(test_hal_i2c_write_reg_null_buffer)
-    TEST_CASE_REF(test_hal_i2c_read_reg_null_handle)
-    TEST_CASE_REF(test_hal_i2c_read_reg_null_buffer)
-
     /* 传输操作 */
-    TEST_CASE_REF(test_hal_i2c_transfer_null_handle)
-    TEST_CASE_REF(test_hal_i2c_transfer_null_msgs)
-TEST_MODULE_END(test_hal_i2c, "HAL")
+
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_hal_i2c_open_success",
+		.func = test_hal_i2c_open_success,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_i2c_open_null_config",
+		.func = test_hal_i2c_open_null_config,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_i2c_open_null_handle",
+		.func = test_hal_i2c_open_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_i2c_open_invalid_device",
+		.func = test_hal_i2c_open_invalid_device,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_i2c_close",
+		.func = test_hal_i2c_close,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_i2c_close_null_handle",
+		.func = test_hal_i2c_close_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_i2c_write_null_handle",
+		.func = test_hal_i2c_write_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_i2c_write_null_buffer",
+		.func = test_hal_i2c_write_null_buffer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_i2c_read_null_handle",
+		.func = test_hal_i2c_read_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_i2c_read_null_buffer",
+		.func = test_hal_i2c_read_null_buffer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_i2c_write_reg_null_handle",
+		.func = test_hal_i2c_write_reg_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_i2c_write_reg_null_buffer",
+		.func = test_hal_i2c_write_reg_null_buffer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_i2c_read_reg_null_handle",
+		.func = test_hal_i2c_read_reg_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_i2c_read_reg_null_buffer",
+		.func = test_hal_i2c_read_reg_null_buffer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_i2c_transfer_null_handle",
+		.func = test_hal_i2c_transfer_null_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_i2c_transfer_null_msgs",
+		.func = test_hal_i2c_transfer_null_msgs,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "hal_i2c",
+	.module_name = "hal_i2c",
+	.layer_name = "HAL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "HAL hal_i2c tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_hal_i2c_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

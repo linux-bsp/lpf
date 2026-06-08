@@ -10,7 +10,7 @@
 /**
  * 测试BMC传感器并发读取压力
  */
-TEST_CASE(test_stress_bmc_concurrent_read) {
+static void test_stress_bmc_concurrent_read(void) {
     // TODO: 实现BMC传感器并发读取压力测试
     OSAL_Printf("[ INFO ] BMC concurrent read stress test - not implemented yet\n");
 }
@@ -18,7 +18,7 @@ TEST_CASE(test_stress_bmc_concurrent_read) {
 /**
  * 测试MCU状态长时间查询压力
  */
-TEST_CASE(test_stress_mcu_long_running_query) {
+static void test_stress_mcu_long_running_query(void) {
     // TODO: 实现MCU状态长时间查询压力测试
     OSAL_Printf("[ INFO ] MCU long running query stress test - not implemented yet\n");
 }
@@ -26,7 +26,7 @@ TEST_CASE(test_stress_mcu_long_running_query) {
 /**
  * 测试Watchdog高频喂狗压力
  */
-TEST_CASE(test_stress_watchdog_high_frequency_kick) {
+static void test_stress_watchdog_high_frequency_kick(void) {
     // TODO: 实现Watchdog高频喂狗压力测试
     OSAL_Printf("[ INFO ] Watchdog high frequency kick stress test - not implemented yet\n");
 }
@@ -34,15 +34,61 @@ TEST_CASE(test_stress_watchdog_high_frequency_kick) {
 /**
  * 测试卫星遥测并发采集压力
  */
-TEST_CASE(test_stress_satellite_concurrent_telemetry) {
+static void test_stress_satellite_concurrent_telemetry(void) {
     // TODO: 实现卫星遥测并发采集压力测试
     OSAL_Printf("[ INFO ] Satellite concurrent telemetry stress test - not implemented yet\n");
 }
 
 /* 注册压力测试模块 */
-TEST_MODULE_BEGIN(stress_pdl, "STRESS")
-    TEST_CASE_REGISTER(test_stress_bmc_concurrent_read, "BMC concurrent read stress")
-    TEST_CASE_REGISTER(test_stress_mcu_long_running_query, "MCU long running query stress")
-    TEST_CASE_REGISTER(test_stress_watchdog_high_frequency_kick, "Watchdog high frequency kick stress")
-    TEST_CASE_REGISTER(test_stress_satellite_concurrent_telemetry, "Satellite concurrent telemetry stress")
-TEST_MODULE_END(stress_pdl, "STRESS")
+
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_stress_bmc_concurrent_read",
+		.func = test_stress_bmc_concurrent_read,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_stress_mcu_long_running_query",
+		.func = test_stress_mcu_long_running_query,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_stress_watchdog_high_frequency_kick",
+		.func = test_stress_watchdog_high_frequency_kick,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_stress_satellite_concurrent_telemetry",
+		.func = test_stress_satellite_concurrent_telemetry,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "stress_pdl",
+	.module_name = "stress_pdl",
+	.layer_name = "PDL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_STRESS,
+		.tags = TEST_TAG_SLOW,
+		.timeout_ms = 10000,
+		.description = "PDL stress_pdl tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_stress_pdl_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

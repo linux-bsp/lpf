@@ -6,13 +6,12 @@
 
 #include "osal.h"
 
-
 /*===========================================================================
  * 调度策略和优先级测试
  *===========================================================================*/
 
 /* 测试用例: 设置和获取调度策略 - SCHED_FIFO */
-TEST_CASE(test_osal_sched_set_policy_fifo)
+static void test_osal_sched_set_policy_fifo(void)
 {
     int32_t policy, priority;
     int32_t ret;
@@ -39,7 +38,7 @@ TEST_CASE(test_osal_sched_set_policy_fifo)
 }
 
 /* 测试用例: 设置和获取调度策略 - SCHED_RR */
-TEST_CASE(test_osal_sched_set_policy_rr)
+static void test_osal_sched_set_policy_rr(void)
 {
     int32_t policy, priority;
     int32_t ret;
@@ -65,7 +64,7 @@ TEST_CASE(test_osal_sched_set_policy_rr)
 }
 
 /* 测试用例: 设置无效的调度策略 */
-TEST_CASE(test_osal_sched_set_policy_invalid)
+static void test_osal_sched_set_policy_invalid(void)
 {
     int32_t ret;
 
@@ -75,7 +74,7 @@ TEST_CASE(test_osal_sched_set_policy_invalid)
 }
 
 /* 测试用例: 设置无效的优先级 */
-TEST_CASE(test_osal_sched_set_priority_invalid)
+static void test_osal_sched_set_priority_invalid(void)
 {
     int32_t ret;
 
@@ -89,7 +88,7 @@ TEST_CASE(test_osal_sched_set_priority_invalid)
 }
 
 /* 测试用例: 设置和获取优先级 */
-TEST_CASE(test_osal_sched_set_priority)
+static void test_osal_sched_set_priority(void)
 {
     int32_t priority;
     int32_t ret;
@@ -119,7 +118,7 @@ TEST_CASE(test_osal_sched_set_priority)
  *===========================================================================*/
 
 /* 测试用例: 设置和获取CPU亲和性 */
-TEST_CASE(test_osal_sched_set_affinity)
+static void test_osal_sched_set_affinity(void)
 {
     int32_t cpu_id;
     int32_t cpu_count;
@@ -161,7 +160,7 @@ TEST_CASE(test_osal_sched_set_affinity)
 }
 
 /* 测试用例: 设置无效的CPU亲和性 */
-TEST_CASE(test_osal_sched_set_affinity_invalid)
+static void test_osal_sched_set_affinity_invalid(void)
 {
     int32_t cpu_count;
     int32_t ret;
@@ -184,7 +183,7 @@ TEST_CASE(test_osal_sched_set_affinity_invalid)
 }
 
 /* 测试用例: 获取CPU亲和性 - NULL指针 */
-TEST_CASE(test_osal_sched_get_affinity_null)
+static void test_osal_sched_get_affinity_null(void)
 {
     int32_t ret;
 
@@ -197,7 +196,7 @@ TEST_CASE(test_osal_sched_get_affinity_null)
  *===========================================================================*/
 
 /* 测试用例: 锁定和解锁内存 */
-TEST_CASE(test_osal_mem_lock)
+static void test_osal_mem_lock(void)
 {
     int32_t ret;
 
@@ -222,7 +221,7 @@ TEST_CASE(test_osal_mem_lock)
 }
 
 /* 测试用例: 锁定所有内存 */
-TEST_CASE(test_osal_mem_lock_all)
+static void test_osal_mem_lock_all(void)
 {
     int32_t ret;
 
@@ -251,7 +250,7 @@ TEST_CASE(test_osal_mem_lock_all)
  *===========================================================================*/
 
 /* 测试用例: 获取CPU数量 */
-TEST_CASE(test_osal_get_cpu_count)
+static void test_osal_get_cpu_count(void)
 {
     int32_t cpu_count;
 
@@ -261,7 +260,7 @@ TEST_CASE(test_osal_get_cpu_count)
 }
 
 /* 测试用例: 获取调度策略的优先级范围 */
-TEST_CASE(test_osal_sched_get_priority_range)
+static void test_osal_sched_get_priority_range(void)
 {
     int32_t min_priority, max_priority;
 
@@ -313,7 +312,7 @@ static void *sched_test_thread(void *arg)
 }
 
 /* 测试用例: 为新线程设置调度策略 */
-TEST_CASE(test_osal_sched_thread_policy)
+static void test_osal_sched_thread_policy(void)
 {
     osal_thread_t thread;
     int32_t ret;
@@ -354,27 +353,114 @@ TEST_CASE(test_osal_sched_thread_policy)
  * 测试模块注册
  *===========================================================================*/
 
-TEST_MODULE_BEGIN(test_osal_sched, "OSAL Realtime Scheduling Tests")
-    /* 调度策略和优先级测试 */
-    TEST_CASE_REGISTER(test_osal_sched_set_policy_fifo, "Set SCHED_FIFO policy")
-    TEST_CASE_REGISTER(test_osal_sched_set_policy_rr, "Set SCHED_RR policy")
-    TEST_CASE_REGISTER(test_osal_sched_set_policy_invalid, "Set invalid policy")
-    TEST_CASE_REGISTER(test_osal_sched_set_priority_invalid, "Set invalid priority")
-    TEST_CASE_REGISTER(test_osal_sched_set_priority, "Set and get priority")
-
+/* 调度策略和优先级测试 */
     /* CPU亲和性测试 */
-    TEST_CASE_REGISTER(test_osal_sched_set_affinity, "Set CPU affinity")
-    TEST_CASE_REGISTER(test_osal_sched_set_affinity_invalid, "Set invalid CPU affinity")
-    TEST_CASE_REGISTER(test_osal_sched_get_affinity_null, "Get affinity with NULL pointer")
-
     /* 内存锁定测试 */
-    TEST_CASE_REGISTER(test_osal_mem_lock, "Lock and unlock memory")
-    TEST_CASE_REGISTER(test_osal_mem_lock_all, "Lock all memory")
-
     /* 系统信息查询测试 */
-    TEST_CASE_REGISTER(test_osal_get_cpu_count, "Get CPU count")
-    TEST_CASE_REGISTER(test_osal_sched_get_priority_range, "Get priority range")
-
     /* 多线程调度测试 */
-    TEST_CASE_REGISTER(test_osal_sched_thread_policy, "Set thread scheduling policy")
-TEST_MODULE_END(test_osal_sched, "OSAL")
+
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_osal_sched_set_policy_fifo",
+		.func = test_osal_sched_set_policy_fifo,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_sched_set_policy_rr",
+		.func = test_osal_sched_set_policy_rr,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_sched_set_policy_invalid",
+		.func = test_osal_sched_set_policy_invalid,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_sched_set_priority_invalid",
+		.func = test_osal_sched_set_priority_invalid,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_sched_set_priority",
+		.func = test_osal_sched_set_priority,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_sched_set_affinity",
+		.func = test_osal_sched_set_affinity,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_sched_set_affinity_invalid",
+		.func = test_osal_sched_set_affinity_invalid,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_sched_get_affinity_null",
+		.func = test_osal_sched_get_affinity_null,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_mem_lock",
+		.func = test_osal_mem_lock,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_mem_lock_all",
+		.func = test_osal_mem_lock_all,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_get_cpu_count",
+		.func = test_osal_get_cpu_count,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_sched_get_priority_range",
+		.func = test_osal_sched_get_priority_range,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_sched_thread_policy",
+		.func = test_osal_sched_thread_policy,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "osal_sched",
+	.module_name = "osal_sched",
+	.layer_name = "OSAL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "OSAL osal_sched tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_osal_sched_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

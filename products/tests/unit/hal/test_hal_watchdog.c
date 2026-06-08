@@ -11,7 +11,7 @@
 /**
  * @brief 测试：初始化和反初始化
  */
-TEST_CASE(test_hal_watchdog_init_deinit)
+static void test_hal_watchdog_init_deinit(void)
 {
     hal_watchdog_handle_t handle = NULL;
     hal_watchdog_config_t config = {
@@ -35,7 +35,7 @@ TEST_CASE(test_hal_watchdog_init_deinit)
 /**
  * @brief 测试：NULL参数检查
  */
-TEST_CASE(test_hal_watchdog_null_params)
+static void test_hal_watchdog_null_params(void)
 {
     hal_watchdog_handle_t handle = NULL;
     hal_watchdog_config_t config = {
@@ -61,7 +61,7 @@ TEST_CASE(test_hal_watchdog_null_params)
 /**
  * @brief 测试：喂狗功能
  */
-TEST_CASE(test_hal_watchdog_kick)
+static void test_hal_watchdog_kick(void)
 {
     hal_watchdog_handle_t handle = NULL;
     hal_watchdog_config_t config = {
@@ -98,7 +98,7 @@ TEST_CASE(test_hal_watchdog_kick)
 /**
  * @brief 测试：超时时间设置和获取
  */
-TEST_CASE(test_hal_watchdog_timeout)
+static void test_hal_watchdog_timeout(void)
 {
     hal_watchdog_handle_t handle = NULL;
     hal_watchdog_config_t config = {
@@ -136,7 +136,7 @@ TEST_CASE(test_hal_watchdog_timeout)
 /**
  * @brief 测试：获取剩余时间
  */
-TEST_CASE(test_hal_watchdog_timeleft)
+static void test_hal_watchdog_timeleft(void)
 {
     hal_watchdog_handle_t handle = NULL;
     hal_watchdog_config_t config = {
@@ -171,7 +171,7 @@ TEST_CASE(test_hal_watchdog_timeleft)
 /**
  * @brief 测试：启用和禁用看门狗
  */
-TEST_CASE(test_hal_watchdog_enable_disable)
+static void test_hal_watchdog_enable_disable(void)
 {
     hal_watchdog_handle_t handle = NULL;
     hal_watchdog_config_t config = {
@@ -209,7 +209,7 @@ TEST_CASE(test_hal_watchdog_enable_disable)
 /**
  * @brief 测试：无效句柄
  */
-TEST_CASE(test_hal_watchdog_invalid_handle)
+static void test_hal_watchdog_invalid_handle(void)
 {
     int32_t ret = HAL_WATCHDOG_Kick(NULL);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
@@ -222,12 +222,72 @@ TEST_CASE(test_hal_watchdog_invalid_handle)
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
-TEST_SUITE_BEGIN(test_hal_watchdog, "hal_watchdog", "HAL")
-    TEST_CASE_REF(test_hal_watchdog_init_deinit)
-    TEST_CASE_REF(test_hal_watchdog_null_params)
-    TEST_CASE_REF(test_hal_watchdog_kick)
-    TEST_CASE_REF(test_hal_watchdog_timeout)
-    TEST_CASE_REF(test_hal_watchdog_timeleft)
-    TEST_CASE_REF(test_hal_watchdog_enable_disable)
-    TEST_CASE_REF(test_hal_watchdog_invalid_handle)
-TEST_SUITE_END(test_hal_watchdog, "test_hal_watchdog", "HAL")
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_hal_watchdog_init_deinit",
+		.func = test_hal_watchdog_init_deinit,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_watchdog_null_params",
+		.func = test_hal_watchdog_null_params,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_watchdog_kick",
+		.func = test_hal_watchdog_kick,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_watchdog_timeout",
+		.func = test_hal_watchdog_timeout,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_watchdog_timeleft",
+		.func = test_hal_watchdog_timeleft,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_watchdog_enable_disable",
+		.func = test_hal_watchdog_enable_disable,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_watchdog_invalid_handle",
+		.func = test_hal_watchdog_invalid_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "hal_watchdog",
+	.module_name = "hal_watchdog",
+	.layer_name = "HAL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "HAL hal_watchdog tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_hal_watchdog_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

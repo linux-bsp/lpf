@@ -15,7 +15,7 @@
  * 基础编解码测试
  *===========================================================================*/
 
-TEST_CASE(test_PRL_Encode_decode_basic)
+static void test_PRL_Encode_decode_basic(void)
 {
     uint8_t buffer[256];
     uint8_t payload[] = {0x01, 0x02, 0x03, 0x04};
@@ -39,7 +39,7 @@ TEST_CASE(test_PRL_Encode_decode_basic)
     TEST_ASSERT_EQUAL(0, OSAL_memcmp(payload, decoded_payload, payload_len));
 }
 
-TEST_CASE(test_PRL_Encode_empty_payload)
+static void test_PRL_Encode_empty_payload(void)
 {
     uint8_t buffer[256];
     uint8_t dev_type, msg_type;
@@ -66,7 +66,7 @@ TEST_CASE(test_PRL_Encode_empty_payload)
  * 设备类型测试
  *===========================================================================*/
 
-TEST_CASE(test_prl_device_type_valid)
+static void test_prl_device_type_valid(void)
 {
     /* 有效的设备类型 */
     TEST_ASSERT_TRUE(PRL_IsDeviceTypeValid(PRL_DEV_TYPE_MCU));
@@ -82,7 +82,7 @@ TEST_CASE(test_prl_device_type_valid)
     TEST_ASSERT_FALSE(PRL_IsDeviceTypeValid(0xFF));
 }
 
-TEST_CASE(test_prl_device_type_name)
+static void test_prl_device_type_name(void)
 {
     /* 验证设备类型名称 */
     TEST_ASSERT_STRING_EQUAL("MCU", PRL_GetDeviceTypeName(PRL_DEV_TYPE_MCU));
@@ -100,7 +100,7 @@ TEST_CASE(test_prl_device_type_name)
  * 多设备类型测试
  *===========================================================================*/
 
-TEST_CASE(test_PRL_Encode_all_device_types)
+static void test_PRL_Encode_all_device_types(void)
 {
     uint8_t buffer[256];
     uint8_t payload[] = {0xAA, 0xBB};
@@ -136,7 +136,7 @@ TEST_CASE(test_PRL_Encode_all_device_types)
  * 错误处理测试
  *===========================================================================*/
 
-TEST_CASE(test_PRL_Encode_invalid_params)
+static void test_PRL_Encode_invalid_params(void)
 {
     uint8_t buffer[256];
     uint8_t payload[] = {0x01, 0x02};
@@ -158,7 +158,7 @@ TEST_CASE(test_PRL_Encode_invalid_params)
     TEST_ASSERT_EQUAL(OSAL_ENOBUFS, ret);
 }
 
-TEST_CASE(test_PRL_Decode_invalid_params)
+static void test_PRL_Decode_invalid_params(void)
 {
     uint8_t buffer[256];
     uint8_t dev_type, msg_type;
@@ -187,7 +187,7 @@ TEST_CASE(test_PRL_Decode_invalid_params)
  * CRC 校验测试
  *===========================================================================*/
 
-TEST_CASE(test_prl_device_crc_verification)
+static void test_prl_device_crc_verification(void)
 {
     uint8_t buffer[256];
     uint8_t payload[] = {0x11, 0x22, 0x33};
@@ -217,7 +217,7 @@ TEST_CASE(test_prl_device_crc_verification)
  * 大负载测试
  *===========================================================================*/
 
-TEST_CASE(test_prl_device_large_payload)
+static void test_prl_device_large_payload(void)
 {
     uint8_t buffer[4096 + PRL_HEADER_SIZE];
     uint8_t large_payload[4096];
@@ -251,14 +251,84 @@ TEST_CASE(test_prl_device_large_payload)
  * 测试套件注册
  *===========================================================================*/
 
-TEST_MODULE_BEGIN(test_prl_device, "PRL")
-    TEST_CASE_REGISTER(test_PRL_Encode_decode_basic, "Encode/decode basic")
-    TEST_CASE_REGISTER(test_PRL_Encode_empty_payload, "Encode empty payload")
-    TEST_CASE_REGISTER(test_prl_device_type_valid, "Device type valid")
-    TEST_CASE_REGISTER(test_prl_device_type_name, "Device type name")
-    TEST_CASE_REGISTER(test_PRL_Encode_all_device_types, "Encode all device types")
-    TEST_CASE_REGISTER(test_PRL_Encode_invalid_params, "Encode invalid params")
-    TEST_CASE_REGISTER(test_PRL_Decode_invalid_params, "Decode invalid params")
-    TEST_CASE_REGISTER(test_prl_device_crc_verification, "CRC verification")
-    TEST_CASE_REGISTER(test_prl_device_large_payload, "Large payload")
-TEST_MODULE_END(test_prl_device, "PRL")
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_PRL_Encode_decode_basic",
+		.func = test_PRL_Encode_decode_basic,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_PRL_Encode_empty_payload",
+		.func = test_PRL_Encode_empty_payload,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_prl_device_type_valid",
+		.func = test_prl_device_type_valid,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_prl_device_type_name",
+		.func = test_prl_device_type_name,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_PRL_Encode_all_device_types",
+		.func = test_PRL_Encode_all_device_types,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_PRL_Encode_invalid_params",
+		.func = test_PRL_Encode_invalid_params,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_PRL_Decode_invalid_params",
+		.func = test_PRL_Decode_invalid_params,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_prl_device_crc_verification",
+		.func = test_prl_device_crc_verification,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_prl_device_large_payload",
+		.func = test_prl_device_large_payload,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "prl_device",
+	.module_name = "prl_device",
+	.layer_name = "PRL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "PRL prl_device tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_prl_device_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}

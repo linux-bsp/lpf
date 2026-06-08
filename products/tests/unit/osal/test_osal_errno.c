@@ -10,7 +10,7 @@
  * 测试用例
  *===========================================================================*/
 
-TEST_CASE(test_osal_get_errno)
+static void test_osal_get_errno(void)
 {
     /* Set errno to a known value */
     OSAL_SetErrno(OSAL_EINVAL);
@@ -20,7 +20,7 @@ TEST_CASE(test_osal_get_errno)
     TEST_ASSERT_EQUAL(OSAL_EINVAL, err);
 }
 
-TEST_CASE(test_osal_set_errno)
+static void test_osal_set_errno(void)
 {
     /* Set errno to different values */
     OSAL_SetErrno(OSAL_ENOENT);
@@ -33,7 +33,7 @@ TEST_CASE(test_osal_set_errno)
     TEST_ASSERT_EQUAL(0, OSAL_GetErrno());
 }
 
-TEST_CASE(test_osal_strerror)
+static void test_osal_strerror(void)
 {
     /* Test common error codes */
     const char *msg;
@@ -51,7 +51,7 @@ TEST_CASE(test_osal_strerror)
     TEST_ASSERT_TRUE(OSAL_strlen(msg) > 0);
 }
 
-TEST_CASE(test_osal_get_status_name)
+static void test_osal_get_status_name(void)
 {
     /* Test OSAL status code names */
     const char *name;
@@ -73,9 +73,54 @@ TEST_CASE(test_osal_get_status_name)
  * 测试套件注册
  *===========================================================================*/
 
-TEST_MODULE_BEGIN(test_osal_errno, "OSAL")
-    TEST_CASE_REF(test_osal_get_errno)
-    TEST_CASE_REF(test_osal_set_errno)
-    TEST_CASE_REF(test_osal_strerror)
-    TEST_CASE_REF(test_osal_get_status_name)
-TEST_MODULE_END(test_osal_errno, "OSAL")
+/* 测试用例数组 - 使用函数指针数组 */
+static const test_case_t test_cases[] = {
+	{
+		.name = "test_osal_get_errno",
+		.func = test_osal_get_errno,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_set_errno",
+		.func = test_osal_set_errno,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_strerror",
+		.func = test_osal_strerror,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_osal_get_status_name",
+		.func = test_osal_get_status_name,
+		.setup = NULL,
+		.teardown = NULL
+	},
+};
+
+/* 测试套件定义 */
+static const test_suite_t test_suite = {
+	.suite_name = "osal_errno",
+	.module_name = "osal_errno",
+	.layer_name = "OSAL",
+	.cases = test_cases,
+	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.suite_setup = NULL,
+	.suite_teardown = NULL,
+	.metadata = {
+		.category = TEST_CATEGORY_UNIT,
+		.tags = TEST_TAG_FAST,
+		.timeout_ms = 100,
+		.description = "OSAL osal_errno tests"
+	}
+};
+
+/* 测试套件注册函数 */
+__attribute__((constructor))
+static void register_osal_errno_tests(void)
+{
+	libutest_register_suite(&test_suite);
+}
