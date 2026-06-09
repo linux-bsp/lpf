@@ -12,6 +12,7 @@
 _build/
 output/
 build-*/
+build*/
 
 # Kconfig 生成文件
 .config
