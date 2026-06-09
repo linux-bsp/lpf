@@ -2,6 +2,9 @@
  * TI AM625平台 - H200-100P-AM625载荷板V2配置
  ************************************************************************/
 
+#include "osal.h"
+#include "hal.h"
+#include "pdl.h"
 #include "pconfig.h"
 
 static pconfig_mcu_entry_t *pconfig_mcu_arr[] = { NULL };
