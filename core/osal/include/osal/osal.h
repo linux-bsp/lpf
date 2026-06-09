@@ -65,5 +65,6 @@
 /* UTIL - 工具类 */
 #include "util/osal_log.h"
 #include "util/osal_version.h"
+#include "util/osal_crc.h"
 
 #endif /* OSAL_H */

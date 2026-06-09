@@ -26,14 +26,14 @@ static void test_prl_crc16_basic(void)
     uint8_t data3[] = {0x00, 0x00, 0x00, 0x00};
     uint16_t crc;
 
-    /* 测试不同数据的 CRC 计算 */
-    crc = prl_calc_crc16(data1, sizeof(data1));
+    /* 测试不同数据的 CRC 计算（使用 OSAL CRC 函数） */
+    crc = OSAL_CRC16_CCITT(data1, sizeof(data1));
     TEST_ASSERT_NOT_EQUAL(0, crc);
 
-    crc = prl_calc_crc16(data2, sizeof(data2));
+    crc = OSAL_CRC16_CCITT(data2, sizeof(data2));
     TEST_ASSERT_NOT_EQUAL(0, crc);
 
-    crc = prl_calc_crc16(data3, sizeof(data3));
+    crc = OSAL_CRC16_CCITT(data3, sizeof(data3));
     TEST_ASSERT_NOT_EQUAL(0, crc);
 }
 
@@ -43,8 +43,8 @@ static void test_prl_crc16_consistency(void)
     uint16_t crc1, crc2;
 
     /* 相同数据应该产生相同的 CRC */
-    crc1 = prl_calc_crc16(data, sizeof(data));
-    crc2 = prl_calc_crc16(data, sizeof(data));
+    crc1 = OSAL_CRC16_CCITT(data, sizeof(data));
+    crc2 = OSAL_CRC16_CCITT(data, sizeof(data));
     TEST_ASSERT_EQUAL(crc1, crc2);
 }
 
@@ -55,8 +55,8 @@ static void test_prl_crc16_different_data(void)
     uint16_t crc1, crc2;
 
     /* 不同数据应该产生不同的 CRC */
-    crc1 = prl_calc_crc16(data1, sizeof(data1));
-    crc2 = prl_calc_crc16(data2, sizeof(data2));
+    crc1 = OSAL_CRC16_CCITT(data1, sizeof(data1));
+    crc2 = OSAL_CRC16_CCITT(data2, sizeof(data2));
     TEST_ASSERT_NOT_EQUAL(crc1, crc2);
 }
 

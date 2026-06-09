@@ -68,7 +68,6 @@ typedef struct {
 
 /* ========== Internal Functions ========== */
 
-uint16_t prl_calc_crc16(const uint8_t *data, size_t len);
 uint32_t prl_get_next_seq(void);
 uint32_t prl_get_timestamp(void);
 void prl_init_header(prl_header_t *hdr, uint8_t dev_type, uint8_t msg_type,

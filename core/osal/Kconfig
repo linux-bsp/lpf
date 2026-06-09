@@ -374,6 +374,52 @@ config OSAL_MAX_MUTEXES
 endmenu
 
 # =============================================================================
+# Utility Functions
+# =============================================================================
+
+menu "Utility Functions"
+
+config OSAL_UTIL_LOG
+	bool "Logging utilities"
+	default y
+	help
+	  Enable OSAL logging utilities.
+
+config OSAL_UTIL_VERSION
+	bool "Version utilities"
+	default y
+	help
+	  Enable OSAL version query utilities.
+
+config OSAL_UTIL_CRC
+	bool "CRC checksum algorithms"
+	default y
+	help
+	  Enable CRC checksum algorithms.
+
+	  Provides:
+	  - CRC16-CCITT: Fast table-based implementation for communication protocols
+	  - CRC32: For file integrity checking (reserved)
+
+	  Features:
+	  - Thread-safe (stateless functions)
+	  - Incremental calculation support
+	  - Optimized with lookup tables
+
+	  Memory impact: ~1KB (CRC16 lookup table)
+	  Performance: ~10-20 cycles per byte
+
+	  Use cases:
+	  - Protocol packet checksums (PRL, PDL)
+	  - Hardware ID validation (HWID)
+	  - Configuration integrity checking
+	  - Firmware update verification
+
+	  Recommended: Enable for most systems
+
+endmenu
+
+# =============================================================================
 # Debug Options
 # =============================================================================
 

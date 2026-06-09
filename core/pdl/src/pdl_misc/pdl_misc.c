@@ -14,29 +14,6 @@
  *===========================================================================*/
 
 /**
- * @brief 计算 HWID 的 CRC16
- *
- * @param hwid HWID 指针
- * @return CRC16 值
- *
- * @note 校验前 18 字节（不包括 crc16 字段本身）
- */
-static uint16_t pdl_misc_calculate_hwid_crc(const pdl_hwid_t *hwid)
-{
-    /* TODO: 实现真正的 CRC16 算法 */
-    /* 当前返回简单校验和作为占位 */
-    const uint8_t *data = (const uint8_t *)hwid;
-    uint16_t sum = 0;
-    size_t i;
-
-    for (i = 0; i < sizeof(pdl_hwid_t) - sizeof(uint16_t); i++) {
-        sum += data[i];
-    }
-
-    return sum;
-}
-
-/**
  * @brief 验证 HWID 有效性
  *
  * @param hwid HWID 指针
@@ -60,8 +37,10 @@ static bool pdl_misc_validate_hwid(const pdl_hwid_t *hwid)
         return false;
     }
 
-    /* 验证 CRC */
-    calculated_crc = pdl_misc_calculate_hwid_crc(hwid);
+    /* 验证 CRC（使用 OSAL CRC16-CCITT） */
+    /* CRC 字段在结构体末尾，计算时将其视为 0 */
+    calculated_crc = OSAL_CRC16_CCITT((const uint8_t *)hwid,
+                                       sizeof(pdl_hwid_t) - sizeof(uint16_t));
     if (calculated_crc != hwid->crc16) {
         return false;
     }
@@ -111,8 +90,9 @@ int32_t PDL_MISC_GetHWID(pdl_hwid_t *hwid)
     hwid->serial_number = 0x00000001;
     hwid->manufacture_date = 0x0821; /* 2024-01-01 */
 
-    /* 计算 CRC */
-    hwid->crc16 = pdl_misc_calculate_hwid_crc(hwid);
+    /* 计算 CRC（使用 OSAL CRC16-CCITT） */
+    hwid->crc16 = OSAL_CRC16_CCITT((const uint8_t *)hwid,
+                                    sizeof(pdl_hwid_t) - sizeof(uint16_t));
 
     return OSAL_SUCCESS;
 

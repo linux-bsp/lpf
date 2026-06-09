@@ -122,6 +122,11 @@ if(CONFIG_OSAL_OS_POSIX)
         list(APPEND ADD_SRCS "src/posix/util/osal_version.c")
     endif()
 
+    # CRC algorithm (platform-independent)
+    if(CONFIG_OSAL_UTIL_CRC)
+        list(APPEND ADD_SRCS "src/osal_crc.c")
+    endif()
+
 elseif(CONFIG_OSAL_OS_WIN32)
     # Windows platform
     # TODO: Add Windows-specific source files when implemented
