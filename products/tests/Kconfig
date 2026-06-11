@@ -110,14 +110,14 @@ if TEST_PERFORMANCE
 config TEST_PERFORMANCE_OSAL
 	bool "Build OSAL performance tests"
 	select OSAL
-	default n
+	default y
 	help
 	  Build OSAL layer performance tests.
 
 config TEST_PERFORMANCE_HAL
 	bool "Build HAL performance tests"
 	select HAL
-	default n
+	default y
 	help
 	  Build HAL layer performance tests.
 
@@ -131,7 +131,7 @@ config TEST_PERFORMANCE_PCL
 config TEST_PERFORMANCE_PDL
 	bool "Build PDL performance tests"
 	select PDL
-	default n
+	default y
 	help
 	  Build PDL layer performance tests.
 
