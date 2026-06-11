@@ -27,14 +27,9 @@ else()
     set(USE_NATIVE_KCONFIG_TOOLS ${KCONFIG_TOOLS_BUILT})
 endif()
 
-# Fallback to Python genconfig.py if native tools not available
+# Native tools are required - no Python fallback
 if(NOT USE_NATIVE_KCONFIG_TOOLS)
-    find_package(Python3 COMPONENTS Interpreter REQUIRED)
-    set(KCONFIG_GENCONFIG_PY "${CMAKE_CURRENT_LIST_DIR}/../tools/kconfig/genconfig.py")
-    if(NOT EXISTS "${KCONFIG_GENCONFIG_PY}")
-        message(FATAL_ERROR "Neither native kconfig tools nor genconfig.py found")
-    endif()
-    message(STATUS "Using Python-based genconfig.py (native tools not available)")
+    message(FATAL_ERROR "Native kconfig tools not built. This should not happen - check KconfigTools.cmake")
 endif()
 
 # Function: kconfig_config
@@ -486,96 +481,6 @@ function(_kconfig_create_targets_native kconfig_file config_file autoconf_h cmak
 endfunction()
 
 # ============================================================================
-# Python genconfig.py Backend (Fallback)
-# ============================================================================
-
-# Internal: Generate headers using Python genconfig.py
-function(_kconfig_generate_headers_python kconfig_file config_file autoconf_h cmake_config)
-    set(cmd_args
-        ${Python3_EXECUTABLE}
-        ${KCONFIG_GENCONFIG_PY}
-        --kconfig ${kconfig_file}
-        --config ${config_file}
-        --output header ${autoconf_h}
-        --output cmake ${cmake_config}
-    )
-
-    set(ENV{srctree} "${CMAKE_SOURCE_DIR}")
-    set(ENV{KCONFIG_CONFIG} "${config_file}")
-
-    execute_process(
-        COMMAND ${cmd_args}
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        RESULT_VARIABLE result
-        OUTPUT_QUIET
-        ERROR_VARIABLE error
-    )
-
-    if(NOT result EQUAL 0)
-        message(WARNING "Failed to generate headers: ${error}")
-    endif()
-endfunction()
-
-# Internal: Load defconfig using Python genconfig.py
-function(_kconfig_load_defconfig_python kconfig_file defconfig config_file autoconf_h cmake_config)
-    set(cmd_args
-        ${Python3_EXECUTABLE}
-        ${KCONFIG_GENCONFIG_PY}
-        --kconfig ${kconfig_file}
-        --defaults ${defconfig}
-        --output makefile ${config_file}
-        --output header ${autoconf_h}
-        --output cmake ${cmake_config}
-    )
-
-    set(ENV{srctree} "${CMAKE_SOURCE_DIR}")
-    set(ENV{KCONFIG_CONFIG} "${config_file}")
-
-    execute_process(
-        COMMAND ${cmd_args}
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        RESULT_VARIABLE result
-        OUTPUT_QUIET
-        ERROR_VARIABLE error
-    )
-
-    if(NOT result EQUAL 0)
-        message(FATAL_ERROR "Failed to load defconfig: ${error}")
-    endif()
-
-    message(STATUS "Loaded defconfig: ${defconfig}")
-endfunction()
-
-# Internal: Create custom targets for Python backend
-function(_kconfig_create_targets_python kconfig_file config_file autoconf_h cmake_config)
-    add_custom_target(menuconfig
-        COMMAND ${Python3_EXECUTABLE} ${KCONFIG_GENCONFIG_PY}
-            --kconfig ${kconfig_file}
-            --menuconfig True
-            --output makefile ${config_file}
-            --output header ${autoconf_h}
-            --output cmake ${cmake_config}
-        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --cyan
-            "Configuration saved to ${config_file}"
-        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow
-            "Re-run cmake to apply changes"
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        COMMENT "Opening menuconfig..."
-        VERBATIM
-        USES_TERMINAL
-    )
-
-    add_custom_target(list_defconfigs
-        COMMAND ${CMAKE_COMMAND} -E echo "Available defconfigs:"
-        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR} ls -1 configs/*_defconfig
-        COMMENT "Listing available defconfigs"
-        VERBATIM
-    )
-
-    message(STATUS "Created targets: menuconfig, list_defconfigs (Python backend)")
-endfunction()
-
-# ============================================================================
 # Common Functions
 # ============================================================================
 
@@ -659,5 +564,5 @@ endfunction()
 if(USE_NATIVE_KCONFIG_TOOLS)
     message(STATUS "Kconfig.cmake loaded (Native Buildroot tools backend)")
 else()
-    message(STATUS "Kconfig.cmake loaded (Python genconfig.py backend)")
+    # Python backend removed - native tools only
 endif()
