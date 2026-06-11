@@ -153,16 +153,16 @@ config PRODUCT_CCM
 
 	  If unsure, say N.
 
-config PRODUCT_SAMPLE
-	bool "Sample Product"
-	default n
-	help
-	  Enable Sample product (demonstration and template).
-
-	  Sample product provides a minimal working example showing
-	  how to structure a product using the ES-Middleware SDK framework.
-
-	  Useful for learning and as a starting point for new products.
+# config PRODUCT_SAMPLE
+# 	bool "Sample Product"
+# 	default n
+# 	help
+# 	  Enable Sample product (demonstration and template).
+#
+# 	  Sample product provides a minimal working example showing
+# 	  how to structure a product using the ES-Middleware SDK framework.
+#
+# 	  Useful for learning and as a starting point for new products.
 
 endmenu
 
@@ -217,12 +217,12 @@ endmenu
 
 menu "Core Components"
 
-osource "$SDK_PATH/core/osal/Kconfig"
-osource "$SDK_PATH/core/hal/Kconfig"
-osource "$SDK_PATH/core/pconfig/Kconfig"
-osource "$SDK_PATH/core/pdl/Kconfig"
-osource "$SDK_PATH/core/prl/Kconfig"
-osource "$SDK_PATH/core/aconfig/Kconfig"
+source "core/osal/Kconfig"
+source "core/hal/Kconfig"
+source "core/pconfig/Kconfig"
+source "core/pdl/Kconfig"
+source "core/prl/Kconfig"
+source "core/aconfig/Kconfig"
 
 endmenu
 
@@ -236,12 +236,12 @@ endmenu
 menu "Product Configuration"
 
 if PRODUCT_CCM
-	osource "$SDK_PATH/products/ccm/Kconfig"
+	source "products/ccm/Kconfig"
 endif
 
-if PRODUCT_SAMPLE
-	osource "$SDK_PATH/products/sample/Kconfig"
-endif
+# if PRODUCT_SAMPLE
+# 	osource "products/sample/Kconfig"
+# endif
 
 endmenu
 
@@ -267,6 +267,6 @@ config BUILD_TESTING
 
 if BUILD_TESTING
 	menu "Test Configuration"
-		osource "$SDK_PATH/products/tests/Kconfig"
+		source "products/tests/Kconfig"
 	endmenu
 endif
