@@ -10,18 +10,21 @@ ES-Middleware (Embedded Software - Middleware) 是一个采用 **Kconfig + CMake
 - 📦 **多产品支持**: 一套代码支持多个产品变体
 - 🔧 **跨平台**: 支持 Linux/RTOS/Bare-metal
 - 📋 **场景化配置**: 提供开发、生产、测试等多种预定义配置
+- ⚡ **零 Python 依赖**: 纯 CMake + Make 工作流，适合嵌入式环境
 
 ## 🚀 快速开始
 
 ### 1. 环境准备
 
 ```bash
-# Ubuntu/Debian
-sudo apt-get install build-essential cmake python3 libncurses-dev flex bison
+# Ubuntu/Debian (最小依赖)
+sudo apt-get install build-essential cmake libncurses-dev
 
 # macOS
-brew install cmake python3 ncurses flex bison
+brew install cmake ncurses
 ```
+
+**注意**: 无需安装 Python！构建系统完全基于 CMake + Make。
 
 ### 2. 获取代码
 
@@ -33,17 +36,32 @@ cd ES-Middleware
 ### 3. 编译第一个示例
 
 ```bash
-# 加载开发配置
-python3 build.py config ccm_h200_100p_am625_debug_defconfig
+# 查看可用配置
+make list
 
-# 编译
-python3 build.py build
+# 一键式配置并构建
+make all CONFIG=tests_x86_minimal
 
-# 运行
-./_build/bin/collector
+# 或分步操作
+make config CONFIG=tests_x86_minimal
+make build
+
+# 运行测试
+./_build/bin/es-middleware-test --all
 ```
 
 **就这么简单！** 🎉
+
+### 常用命令
+
+```bash
+make help              # 显示帮助信息
+make list              # 列出所有配置
+make menuconfig        # 图形化配置界面
+make build             # 构建项目
+make clean             # 清理构建产物
+make distclean         # 完全清理
+```
 
 ## 📚 文档导航
 
