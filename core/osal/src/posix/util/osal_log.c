@@ -681,7 +681,10 @@ static void log_internal_ex(log_level_t level, const char *module,
                                    color_reset,
                                    message);
         if (console_len > 0) {
-            (void)write(STDOUT_FILENO, console_buf, console_len);
+            ssize_t ret = write(STDOUT_FILENO, console_buf, (size_t)console_len);
+            if (ret < 0) {
+                /* Write failed, but we can't log it (would cause recursion) */
+            }
         }
     }
 
@@ -743,7 +746,10 @@ static void log_internal(log_level_t level, const char *module,
                                    color_reset,
                                    message);
         if (console_len > 0) {
-            (void)write(STDOUT_FILENO, console_buf, console_len);
+            ssize_t ret = write(STDOUT_FILENO, console_buf, (size_t)console_len);
+            if (ret < 0) {
+                /* Write failed, but we can't log it (would cause recursion) */
+            }
         }
     }
     else
@@ -757,7 +763,10 @@ static void log_internal(log_level_t level, const char *module,
                                    color_reset,
                                    message);
         if (console_len > 0) {
-            (void)write(STDOUT_FILENO, console_buf, console_len);
+            ssize_t ret = write(STDOUT_FILENO, console_buf, (size_t)console_len);
+            if (ret < 0) {
+                /* Write failed, but we can't log it (would cause recursion) */
+            }
         }
     }
 
@@ -849,7 +858,10 @@ void OSAL_Printf(const char *format, ...)
     va_end(args);
 
     if (len > 0) {
-        (void)write(STDOUT_FILENO, buffer, len);
+        ssize_t ret = write(STDOUT_FILENO, buffer, (size_t)len);
+        if (ret < 0) {
+            /* Write failed, but we can't log it (would cause recursion) */
+        }
     }
 }
 
@@ -944,7 +956,10 @@ void OSAL_LogStructured(int32_t level, log_module_t module, const char *message,
                                    color_reset,
                                    full_message);
         if (console_len > 0) {
-            (void)write(STDOUT_FILENO, console_buf, console_len);
+            ssize_t ret = write(STDOUT_FILENO, console_buf, (size_t)console_len);
+            if (ret < 0) {
+                /* Write failed, but we can't log it (would cause recursion) */
+            }
         }
     }
 
