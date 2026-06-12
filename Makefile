@@ -310,7 +310,19 @@ mrproper distclean: clean
 # Installation target
 
 PHONY += install
-install: all
+install:
+	@if [ ! -d "$(BUILD_DIR)" ] || [ ! -f "$(BUILD_DIR)/Makefile" ]; then \
+		echo ""; \
+		echo "===================================================================";\
+		echo "ERROR: Build directory not found or not configured!";\
+		echo "===================================================================";\
+		echo "Build directory: $(BUILD_DIR)";\
+		echo "";\
+		echo "Please run 'make all' first to build the project.";\
+		echo "===================================================================";\
+		echo "";\
+		exit 1;\
+	fi
 	@echo "  INSTALL $(if $(DESTDIR),$(DESTDIR))$(CMAKE_INSTALL_PREFIX)"
 	$(Q)$(MAKE) -C $(BUILD_DIR) install $(if $(DESTDIR),DESTDIR=$(DESTDIR))
 	@echo ""
