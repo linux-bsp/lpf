@@ -778,7 +778,7 @@ TEST_CASE(test_queue_receive)
     OSAL_QueueCreate(&queue_id, "test_queue", 10, OSAL_SIZEOF(uint32), 0);
     
     uint32 data;
-    OSAL_QueueGet(queue_id, &data, sizeof(data), OSAL_WAIT_FOREVER);  // 危险
+    OSAL_QueueGet(queue_id, &data, OSAL_SIZEOF(data), OSAL_WAIT_FOREVER);  // 危险
 }
 ```
 

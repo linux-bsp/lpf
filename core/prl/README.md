@@ -221,7 +221,7 @@ int32_t PDL_MCU_GetVersion(pdl_mcu_handle_t handle, pdl_mcu_version_t *version)
     PRL_Decode(rx_buf, rx_len, &dev_type, &msg_type, &payload, &payload_len);
     
     /* 5. 处理业务数据 */
-    memcpy(version, payload, sizeof(pdl_mcu_version_t));
+    memcpy(version, payload, OSAL_SIZEOF(pdl_mcu_version_t));
     
     return OSAL_SUCCESS;
 }
@@ -426,7 +426,7 @@ prl_pmc_ccm_heartbeat_t heartbeat = {
 
 /* 编码 */
 uint8_t buf[PRL_MAX_PACKET_SIZE];
-size_t len = sizeof(buf);
+size_t len = OSAL_SIZEOF(buf);
 int ret = prl_pmc_ccm_encode_heartbeat(&heartbeat, buf, &len);
 
 /* 发送 */
@@ -469,7 +469,7 @@ uint8_t tm_data[128] = { /* 遥测数据 */ };
 size_t tm_data_len = 64;
 
 uint8_t buf[PRL_MAX_PACKET_SIZE];
-size_t len = sizeof(buf);
+size_t len = OSAL_SIZEOF(buf);
 prl_pmc_ccm_encode_telemetry(&telemetry, tm_data, tm_data_len, buf, &len);
 
 /* 解码变长消息 */
