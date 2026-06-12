@@ -62,6 +62,7 @@ static void print_usage(const char *program_name)
         OSAL_Printf("  -m <module>            Run tests from specific module\n");
         OSAL_Printf("  -s <suite>             Run specific test suite\n");
         OSAL_Printf("  -l, --list             List all available tests\n");
+        OSAL_Printf("  -l, --list -m <module> List tests from specific module\n");
         OSAL_Printf("  -i, --interactive      Interactive menu (default)\n");
         OSAL_Printf("  -h, --help             Show this help message\n\n");
         OSAL_Printf("Filtering Options:\n");
@@ -83,6 +84,8 @@ static void print_usage(const char *program_name)
         OSAL_Printf("  %s -L OSAL             # Run all OSAL tests\n", program_name);
         OSAL_Printf("  %s -m test_osal_mutex  # Run specific module\n", program_name);
         OSAL_Printf("  %s -s osal_mutex       # Run specific suite\n");
+        OSAL_Printf("  %s --list              # List all tests\n", program_name);
+        OSAL_Printf("  %s --list -m test_osal # List tests from test_osal module\n", program_name);
         OSAL_Printf("  %s --category unit     # Run only unit tests\n", program_name);
         OSAL_Printf("  %s -a --format junit --output report.xml  # CI integration\n", program_name);
         OSAL_Printf("  %s -a --format json --output results.json # JSON export\n\n", program_name);
@@ -99,6 +102,7 @@ static void print_usage(const char *program_name)
         OSAL_Printf("  -a, --all              Run all %s tests\n", layer);
         OSAL_Printf("  -s <suite>             Run specific test suite\n");
         OSAL_Printf("  -l, --list             List all %s tests\n", layer);
+        OSAL_Printf("  -l, --list -m <module> List tests from specific module\n");
         OSAL_Printf("  -i, --interactive      Interactive menu\n");
         OSAL_Printf("  -h, --help             Show this help message\n\n");
         OSAL_Printf("Filtering Options:\n");
@@ -110,6 +114,7 @@ static void print_usage(const char *program_name)
         OSAL_Printf("Examples:\n");
         OSAL_Printf("  %s                     # Run all %s tests\n", program_name, layer);
         OSAL_Printf("  %s --list              # List %s tests\n", program_name, layer);
+        OSAL_Printf("  %s --list -m <module>  # List tests from specific module\n", program_name);
         OSAL_Printf("  %s -s <suite>          # Run specific suite\n", program_name);
         OSAL_Printf("  %s --fast              # Run fast %s tests\n", program_name, layer);
         OSAL_Printf("  %s --format junit --output report.xml  # CI integration\n\n", program_name);
@@ -399,7 +404,10 @@ int main(int argc, char *argv[])
 
     /* List all tests */
     if (0 == OSAL_strcmp(argv[1], "-l") || 0 == OSAL_strcmp(argv[1], "--list")) {
-        if (layer_filter) {
+        /* Check for -m parameter after --list */
+        if (argc >= 4 && 0 == OSAL_strcmp(argv[2], "-m")) {
+            libutest_list_module(argv[3]);
+        } else if (layer_filter) {
             libutest_print_layer(layer_filter);
         } else {
             libutest_list_all();

@@ -24,7 +24,8 @@ extern uint32_t test_get_suites_by_module_filtered(const char *module_name, cons
 extern uint32_t test_get_filtered_suites(const test_filter_t *filter, const test_suite_t **suites, uint32_t max_suites);
 
 /**
- * Read user input
+ * Read user input (numeric or special keys)
+ * Returns: numeric choice, -2 for 'b'/'B' (back), -3 for 'q'/'Q' (quit)
  */
 static int32_t read_choice(void)
 {
@@ -33,6 +34,16 @@ static int32_t read_choice(void)
         return -1;
     }
 
+    /* Check for special single-character commands */
+    char first_char = buffer[0];
+    if (first_char == 'b' || first_char == 'B') {
+        return -2;  /* Back */
+    }
+    if (first_char == 'q' || first_char == 'Q') {
+        return -3;  /* Quit */
+    }
+
+    /* Try parsing as numeric */
     int32_t choice;
     if (OSAL_sscanf(buffer, "%d", &choice) != 1) {
         return -1;
@@ -311,11 +322,18 @@ static int32_t menu_select_test(const test_suite_t *suite)
 
         OSAL_Printf("%u. Back to suite selection\n", suite->case_count + 1);
         OSAL_Printf("%u. Exit\n", suite->case_count + 2);
-        OSAL_Printf("\nEnter your choice: ");
+        OSAL_Printf("\nEnter your choice (or 'b' for Back, 'q' for Quit): ");
 
         int32_t choice = read_choice();
 
-        if (0 == choice) {
+        if (choice == -2) {
+            /* 'b' or 'B' - Back */
+            return OSAL_SUCCESS;
+        } else if (choice == -3) {
+            /* 'q' or 'Q' - Quit */
+            OSAL_Printf("\nExiting...\n");
+            OSAL_Exit(0);
+        } else if (0 == choice) {
             return libutest_run_suite(suite->suite_name);
         } else if (choice > 0 && choice <= (int32_t)suite->case_count) {
             return libutest_run_test(suite->suite_name, suite->cases[choice - 1].name);
@@ -351,11 +369,18 @@ static int32_t menu_select_suite(const test_suite_t **suites, uint32_t count, co
 
         OSAL_Printf("%u. Back\n", count + 1);
         OSAL_Printf("%u. Exit\n", count + 2);
-        OSAL_Printf("\nEnter your choice: ");
+        OSAL_Printf("\nEnter your choice (or 'b' for Back, 'q' for Quit): ");
 
         int32_t choice = read_choice();
 
-        if (0 == choice) {
+        if (choice == -2) {
+            /* 'b' or 'B' - Back */
+            return OSAL_SUCCESS;
+        } else if (choice == -3) {
+            /* 'q' or 'Q' - Quit */
+            OSAL_Printf("\nExiting...\n");
+            OSAL_Exit(0);
+        } else if (0 == choice) {
             /* Run all suites */
             libutest_reset_stats();
             uint32_t i;
@@ -406,11 +431,18 @@ static int32_t menu_select_module(const test_filter_t *filter)
 
         OSAL_Printf("%u. Back to main menu\n", module_count + 1);
         OSAL_Printf("%u. Exit\n", module_count + 2);
-        OSAL_Printf("\nEnter your choice: ");
+        OSAL_Printf("\nEnter your choice (or 'b' for Back, 'q' for Quit): ");
 
         int32_t choice = read_choice();
 
-        if (choice > 0 && choice <= (int32_t)module_count) {
+        if (choice == -2) {
+            /* 'b' or 'B' - Back */
+            return OSAL_SUCCESS;
+        } else if (choice == -3) {
+            /* 'q' or 'Q' - Quit */
+            OSAL_Printf("\nExiting...\n");
+            OSAL_Exit(0);
+        } else if (choice > 0 && choice <= (int32_t)module_count) {
             const test_suite_t *suites[MAX_SUITES];
             uint32_t count;
             if (filter && filter->enabled) {
@@ -462,11 +494,18 @@ static int32_t menu_select_layer(const test_filter_t *filter)
 
         OSAL_Printf("%u. Back to main menu\n", layer_count + 1);
         OSAL_Printf("%u. Exit\n", layer_count + 2);
-        OSAL_Printf("\nEnter your choice: ");
+        OSAL_Printf("\nEnter your choice (or 'b' for Back, 'q' for Quit): ");
 
         int32_t choice = read_choice();
 
-        if (choice > 0 && choice <= (int32_t)layer_count) {
+        if (choice == -2) {
+            /* 'b' or 'B' - Back */
+            return OSAL_SUCCESS;
+        } else if (choice == -3) {
+            /* 'q' or 'Q' - Quit */
+            OSAL_Printf("\nExiting...\n");
+            OSAL_Exit(0);
+        } else if (choice > 0 && choice <= (int32_t)layer_count) {
             const test_suite_t *suites[MAX_SUITES];
             uint32_t count;
             if (filter && filter->enabled) {
@@ -523,35 +562,51 @@ int32_t libutest_interactive_menu_filtered(const test_filter_t *filter)
 
     while (1) {
         OSAL_Printf("\n=== Main Menu ===\n");
-        OSAL_Printf("1. Run all tests\n");
-        OSAL_Printf("2. Select by layer\n");
-        OSAL_Printf("3. Select by module\n");
-        OSAL_Printf("4. List all tests\n");
+        OSAL_Printf("1. Select by layer\n");
+        OSAL_Printf("2. Select by module\n");
+        OSAL_Printf("3. List all tests\n");
+        OSAL_Printf("4. Run all tests\n");
         OSAL_Printf("5. Exit\n");
-        OSAL_Printf("\nEnter your choice: ");
+        OSAL_Printf("\nEnter your choice (or 'q' for Quit): ");
 
         int32_t choice = read_choice();
 
         switch (choice) {
             case 1:
-                if (filter && filter->enabled) {
-                    libutest_run_all_filtered(filter);
-                } else {
-                    libutest_run_all();
-                }
-                break;
-
-            case 2:
                 menu_select_layer(filter);
                 break;
 
-            case 3:
+            case 2:
                 menu_select_module(filter);
                 break;
 
-            case 4:
+            case 3:
                 libutest_list_all();
                 break;
+
+            case 4: {
+                char confirm;
+                OSAL_Printf("Are you sure you want to run all tests? (y/n): ");
+                char buffer[16];
+                if (OSAL_Fgets(buffer, OSAL_sizeof(buffer), OSAL_stdin) != NULL) {
+                    if (OSAL_sscanf(buffer, " %c", &confirm) == 1) {
+                        if (confirm == 'y' || confirm == 'Y') {
+                            if (filter && filter->enabled) {
+                                libutest_run_all_filtered(filter);
+                            } else {
+                                libutest_run_all();
+                            }
+                        } else {
+                            OSAL_Printf("Cancelled.\n");
+                        }
+                    } else {
+                        OSAL_Printf("Cancelled.\n");
+                    }
+                } else {
+                    OSAL_Printf("Cancelled.\n");
+                }
+                break;
+            }
 
             case 5:
                 OSAL_Printf("\nExiting...\n");

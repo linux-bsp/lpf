@@ -320,6 +320,149 @@ static void test_hal_can_different_baudrate(void)
 }
 
 /*===========================================================================
+ * 独立发送测试
+ *===========================================================================*/
+
+/* 测试用例: CAN仅发送 - 标准帧 */
+static void test_can_send_only(void)
+{
+    hal_can_handle_t handle = NULL;
+    hal_can_config_t config = {
+        .interface = "can0",
+        .baudrate = 500000,
+        .rx_timeout = 1000,
+        .tx_timeout = 1000
+    };
+
+    /* 初始化CAN */
+    int32_t ret = HAL_CAN_Init(&config, &handle);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+    TEST_ASSERT_NOT_NULL(handle);
+
+    /* 测试标准帧发送 */
+    hal_can_frame_t std_frame = {
+        .can_id = 0x123,
+        .dlc = 8,
+        .data = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88}
+    };
+    ret = HAL_CAN_Send(handle, &std_frame);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    /* 测试扩展帧发送 (CAN_EFF_FLAG = 0x80000000) */
+    hal_can_frame_t ext_frame = {
+        .can_id = 0x80012345,  /* Extended ID with EFF flag */
+        .dlc = 6,
+        .data = {0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x00, 0x00}
+    };
+    ret = HAL_CAN_Send(handle, &ext_frame);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    /* 测试RTR帧发送 (CAN_RTR_FLAG = 0x40000000) */
+    hal_can_frame_t rtr_frame = {
+        .can_id = 0x40000456,  /* RTR frame */
+        .dlc = 0,
+        .data = {0}
+    };
+    ret = HAL_CAN_Send(handle, &rtr_frame);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    /* 测试不同数据长度 */
+    hal_can_frame_t short_frame = {
+        .can_id = 0x200,
+        .dlc = 2,
+        .data = {0x12, 0x34}
+    };
+    ret = HAL_CAN_Send(handle, &short_frame);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    /* 测试多帧连续发送 */
+    int32_t i;
+    for (i = 0; i < 10; i++) {
+        hal_can_frame_t burst_frame = {
+            .can_id = 0x300 + i,
+            .dlc = 4,
+            .data = {(uint8_t)i, (uint8_t)(i+1), (uint8_t)(i+2), (uint8_t)(i+3)}
+        };
+        ret = HAL_CAN_Send(handle, &burst_frame);
+        TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+    }
+
+    /* 清理 */
+    ret = HAL_CAN_Deinit(handle);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+}
+
+/*===========================================================================
+ * 独立接收测试
+ *===========================================================================*/
+
+/* 测试用例: CAN仅接收 - 带过滤器 */
+static void test_can_receive_only(void)
+{
+    hal_can_handle_t handle = NULL;
+    hal_can_config_t config = {
+        .interface = "can0",
+        .baudrate = 500000,
+        .rx_timeout = 1000,
+        .tx_timeout = 1000
+    };
+
+    /* 初始化CAN */
+    int32_t ret = HAL_CAN_Init(&config, &handle);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+    TEST_ASSERT_NOT_NULL(handle);
+
+    /* 设置过滤器 - 只接收ID 0x100-0x1FF的帧 */
+    ret = HAL_CAN_SetFilter(handle, 0x100, 0x700);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    /* 尝试接收多个帧（带超时） */
+    hal_can_frame_t rx_frame;
+    int32_t received_count = 0;
+    int32_t i;
+
+    for (i = 0; i < 5; i++) {
+        ret = HAL_CAN_Recv(handle, &rx_frame, 500);
+        if (ret == OSAL_SUCCESS) {
+            received_count++;
+
+            /* 验证接收到的帧符合过滤器规则 */
+            TEST_ASSERT_TRUE((rx_frame.can_id & 0x700) == 0x100);
+
+            /* 验证数据长度有效 */
+            TEST_ASSERT_TRUE(rx_frame.dlc <= 8);
+        } else if (ret == OSAL_ERR_TIMEOUT) {
+            /* 超时是正常的（没有外部发送者） */
+            break;
+        } else {
+            /* 其他错误 */
+            TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+        }
+    }
+
+    /* 测试长超时接收（可能超时） */
+    ret = HAL_CAN_Recv(handle, &rx_frame, 1000);
+    if (ret == OSAL_SUCCESS) {
+        /* 如果接收到帧，验证数据 */
+        TEST_ASSERT_TRUE(rx_frame.dlc <= 8);
+        received_count++;
+    } else {
+        /* 超时是预期的（除非有外部CAN流量） */
+        TEST_ASSERT_EQUAL(OSAL_ERR_TIMEOUT, ret);
+    }
+
+    /* 测试短超时接收 */
+    ret = HAL_CAN_Recv(handle, &rx_frame, 100);
+    if (ret != OSAL_SUCCESS) {
+        TEST_ASSERT_EQUAL(OSAL_ERR_TIMEOUT, ret);
+    }
+
+    /* 清理 */
+    ret = HAL_CAN_Deinit(handle);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+}
+
+/*===========================================================================
  * 测试模块注册
  *===========================================================================*/
 
@@ -425,6 +568,18 @@ static const test_case_t test_cases[] = {
 	{
 		.name = "test_hal_can_different_baudrate",
 		.func = test_hal_can_different_baudrate,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_can_send_only",
+		.func = test_can_send_only,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_can_receive_only",
+		.func = test_can_receive_only,
 		.setup = NULL,
 		.teardown = NULL
 	},
