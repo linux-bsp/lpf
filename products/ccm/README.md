@@ -41,14 +41,12 @@ cp configs/h200_200p_defconfig .config.mk
 
 ```bash
 # 使用 menuconfig 图形界面调整配置
-python3 project.py menuconfig
 ```
 
 ### 3. 编译
 
 ```bash
 # 编译所有启用的应用
-python3 project.py build
 
 # 编译结果在 build/ 目录
 ls -lh build/collector build/comm build/health build/logger build/supervisor
@@ -58,10 +56,8 @@ ls -lh build/collector build/comm build/health build/logger build/supervisor
 
 ```bash
 # 清理构建产物
-python3 project.py clean
 
 # 完全清理（包括配置）
-python3 project.py distclean
 ```
 
 ## 目录结构
@@ -69,7 +65,6 @@ python3 project.py distclean
 ```
 ccm_product/
 ├── CMakeLists.txt          # 产品构建配置
-├── project.py              # 构建脚本
 ├── config_defaults.mk      # 默认配置
 ├── .config.mk              # 当前配置（从 configs/ 复制）
 │
@@ -108,7 +103,6 @@ ccm_product/
 3. 使用新配置：
    ```bash
    cp configs/new_product_defconfig .config.mk
-   python3 project.py build
    ```
 
 ## 注意事项

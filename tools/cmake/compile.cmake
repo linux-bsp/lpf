@@ -286,8 +286,6 @@ function(find_components componet_dirs kconfigs configs found_main found_apps fi
     set(${found_apps} ${_found_apps} PARENT_SCOPE)
 endfunction()
 
-# Note: get_python function removed - no Python dependency required
-
 
 macro(project name)
     get_filename_component(current_dir ${CMAKE_CURRENT_LIST_FILE} DIRECTORY)
@@ -335,46 +333,6 @@ macro(project name)
         endif()
     endif()
 
-    # NOTE: The following genconfig.py-based configuration generation is deprecated
-    # The project now uses native Kconfig tools (conf/mconf/nconf) via cmake/Kconfig.cmake
-    # This code is kept for reference but should not be used
-    #
-    # # Generate config file from Kconfig
-    # get_python(python python_version python_info_str)
-    # if(NOT python)
-    #     message(FATAL_ERROR "python not found, please install python firstly(python3 recommend)!")
-    # endif()
-    # message(STATUS "python command: ${python}, version: ${python_info_str}")
-    # string(REPLACE ";" " " components_kconfig_files "${kconfig_defaults_files_args}")
-    # string(REPLACE ";" " " components_kconfig_files "${components_kconfig_files}")
-    # set(generate_config_cmd ${python} -u ${SDK_PATH}/tools/kconfig/genconfig.py
-    #                         --kconfig "${SDK_PATH}/Kconfig"
-    #                         ${kconfig_defaults_files_args}
-    #                         --menuconfig False
-    #                         --env "SDK_PATH=${SDK_PATH}"
-    #                         --env "PROJECT_PATH=${PROJECT_SOURCE_DIR}"
-    #                         --env "CUSTOM_COMPONENTS_PATH=${CUSTOM_COMPONENTS_PATH}"
-    #                         --env "BUILD_TYPE=${CMAKE_BUILD_TYPE}"
-    #                         --output makefile ${PROJECT_BINARY_DIR}/config/global_config.mk
-    #                         --output cmake  ${PROJECT_BINARY_DIR}/config/global_config.cmake
-    #                         --output header ${PROJECT_BINARY_DIR}/config/global_config.h
-    #                         )
-    # set(generate_config_cmd2 ${python} -u ${SDK_PATH}/tools/kconfig/genconfig.py
-    #                         --kconfig "${SDK_PATH}/Kconfig"
-    #                         ${kconfig_defaults_files_args}
-    #                         --menuconfig True
-    #                         --env "SDK_PATH=${SDK_PATH}"
-    #                         --env "PROJECT_PATH=${PROJECT_SOURCE_DIR}"
-    #                         --env "CUSTOM_COMPONENTS_PATH=${CUSTOM_COMPONENTS_PATH}"
-    #                         --env "BUILD_TYPE=${CMAKE_BUILD_TYPE}"
-    #                         --output makefile ${PROJECT_BINARY_DIR}/config/global_config.mk
-    #                         --output cmake  ${PROJECT_BINARY_DIR}/config/global_config.cmake
-    #                         --output header ${PROJECT_BINARY_DIR}/config/global_config.h
-    #                         )
-    # execute_process(COMMAND ${generate_config_cmd} RESULT_VARIABLE cmd_res)
-    # if(NOT cmd_res EQUAL 0)
-    #     message(FATAL_ERROR "Check Kconfig content")
-    # endif()
 
     # Include confiurations
     set(global_config_dir "${PROJECT_BINARY_DIR}/config")
@@ -463,30 +421,9 @@ macro(project name)
     endif()
 
     # Add dependence: update configfile, append time and git info for global config header file
-    # we didn't generate build info for cmake and makefile for if we do, it will always rebuild cmake
-    # everytime we execute make
-    set(gen_build_info_config_cmd ${python}  ${SDK_PATH}/tools/kconfig/update_build_info.py
-                                  --configfile header ${PROJECT_BINARY_DIR}/config/global_build_info_time.h ${PROJECT_BINARY_DIR}/config/global_build_info_version.h
-                                  )
-    add_custom_target(update_build_info COMMAND ${gen_build_info_config_cmd})
 
-    # NOTE: Component sorting disabled - sort_components.py removed
-    # Components will be processed in default order
-    # set(component_priority_conf_file "${PROJECT_PATH}/compile/priority.conf")
-    # set(sort_components ${python}  ${SDK_PATH}/tools/cmake/sort_components.py
-    #                                ${component_priority_conf_file} ${components_dirs}
-    #                     )
-    # execute_process(COMMAND ${sort_components} OUTPUT_VARIABLE component_dirs_sorted RESULT_VARIABLE cmd_res)
-    # if(cmd_res EQUAL 2)
-    #     message(STATUS "No components priority config file")
-    #     set(component_dirs_sorted ${components_dirs})
-    # elseif(cmd_res EQUAL 0)
-    #     message(STATUS "Config components priority success")
-    # else()
-    #     message(STATUS "Components priority config fail ${component_dirs_sorted}, check config file:${component_priority_conf_file}")
-    # endif()
 
-    # Use components in default order (no Python sorting)
+    # Use components in default order
     set(component_dirs_sorted ${components_dirs})
 
     # Call CMakeLists.txt

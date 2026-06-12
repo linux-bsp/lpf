@@ -65,7 +65,7 @@ make list        # 列出所有可用配置
 **注意**：
 - 推荐使用 `make` 命令，遵循 Linux 内核/Buildroot 风格
 - 构建输出目录为 `_build/`
-- 零 Python 依赖，仅需 Make + CMake + GCC + ncurses
+- 仅需 Make + CMake + GCC + ncurses
 - 可执行文件位于 `_build/bin/`，库文件位于 `_build/lib/`
 
 ## 项目架构
@@ -131,8 +131,6 @@ products/ccm/apps/*  →  libccm  →  core/aconfig  →  core/pconfig  →  cor
   2. conf --olddefconfig .config       →  规范化配置（填充派生值）
                   ↓
   CMake 配置阶段:
-  3. kconfig_load()                    →  调用 genconfig.py
-  4. genconfig.py .config              →  生成 kconfig.cmake + autoconf.h
   5. include(kconfig.cmake)            →  导入 CMake 变量
   6. add_compile_options(-include)     →  自动包含 autoconf.h
                   ↓
@@ -275,8 +273,6 @@ kconfig_load()
 ```
 
 **功能**：
-1. **检查 .config 存在性** - 如果不存在，提示运行 `python3 build.py config`
-2. **生成 CMake 变量文件** - 调用 `genconfig.py` 生成 `_build/kconfig.cmake`
 3. **生成 C 头文件** - 生成 `_build/autoconf.h` 供 C 代码使用
 4. **导入 CMake 变量** - `include(kconfig.cmake)` 使所有 `CONFIG_*` 变量在 CMake 中可用
 5. **配置自动包含** - 添加 `-include autoconf.h` 编译选项，使所有 C 文件自动包含配置宏
@@ -292,7 +288,6 @@ kconfig_load()
 
 **错误处理**：
 - 如果 `.config` 不存在，CMake 配置失败并显示错误消息
-- 如果 `genconfig.py` 执行失败，显示详细错误信息和诊断建议
 
 **示例**：
 ```cmake
@@ -1218,7 +1213,6 @@ dot -Tpng deps.dot -o deps.png
 | 找不到 CONFIG_XXX CMake 变量 | `.config` 未加载或未生成 | 运行 `make <name>` |
 | CONFIG_XXX 在 C 代码中未定义 | `autoconf.h` 未生成 | 检查 `_build/autoconf.h` 是否存在，重新运行 CMake |
 | 配置修改后不生效 | CMake 缓存未更新 | 运行 `make distclean && make <name>` |
-| kconfig.cmake 生成失败 | Python 脚本错误 | 检查 `tools/config/genconfig.py` 输出，确认 `.config` 格式正确 |
 | menuconfig 无法运行 | 缺少 ncurses 依赖 | 安装依赖：`sudo apt install libncurses-dev flex bison` |
 | CMake 配置阶段报错 | Config.in 集成失败 | 检查 CMake 输出，确认 `kconfig_load()` 成功执行 |
 | 找不到头文件 | `target_include_directories` 未设置 | 检查模块 CMakeLists.txt 的头文件路径配置 |
@@ -1264,7 +1258,6 @@ grep "kconfig_load" CMakeLists.txt
 
 3. **派生符号未生成**（如 `CONFIG_PROJECT_NAME`）
    - 原因：defconfig 只包含用户选项，不包含派生值
-   - 解决：`build.py config` 已自动运行 `conf --olddefconfig` 规范化配置
    - 验证：`cat .config | grep CONFIG_PROJECT_NAME` 应该有值
 
 4. **CMake 缓存问题**
@@ -1325,7 +1318,6 @@ ls -l .config
 ls -l _build/kconfig.cmake
 
 # 3. 检查 CMake 是否检测到变化
-make -- VERBOSE=1 2>&1 | grep "Re-run.*genconfig"
 ```
 
 **解决方案**：
@@ -1354,17 +1346,12 @@ make -- VERBOSE=1 2>&1 | grep "Re-run.*genconfig"
 
 **注意**：CMake 会自动检测 `.config` 的 mtime 变化。如果配置没有生效，说明 CMake 缓存了旧值。
 
-#### 问题：genconfig.py 生成失败
 
-**症状**：CMake 配置阶段报错 `genconfig.py failed with exit code X`
 
 **诊断步骤**：
 ```bash
 # 1. 手动运行生成脚本
-python3 tools/config/genconfig.py .config _build/kconfig.cmake _build/autoconf.h
 
-# 2. 检查 Python 环境
-python3 --version  # 应该 >= 3.6
 
 # 3. 检查 .config 格式
 file .config       # 应该是文本文件
@@ -1373,12 +1360,6 @@ head -20 .config   # 检查是否有语法错误
 
 **可能原因和解决方案**：
 
-1. **Python 版本过低**
-   ```bash
-   # 需要 Python 3.6+
-   python3 --version
-   # 如果版本太低，升级 Python
-   ```
 
 2. **.config 格式错误**
    ```bash
@@ -1387,10 +1368,8 @@ head -20 .config   # 检查是否有语法错误
    make <defconfig>
    ```
 
-3. **genconfig.py 文件损坏**
    ```bash
    # 检查文件完整性
-   python3 -m py_compile tools/config/genconfig.py
    ```
 
 4. **权限问题**
@@ -1533,11 +1512,10 @@ add_dependencies(mylib gen_header)  # 确保顺序
 ## 最近更新
 
 - **2026-06-11**: Kconfig + CMake 集成架构完成
-  - **重大升级**：从 Python 脚本生成配置文件迁移到 CMake 原生集成
+  - **重大升级**：使用 CMake 原生集成配置管理系统
   - **新增功能**：
     - `kconfig_load()` CMake 函数：自动加载配置、生成变量、配置编译选项
     - `kconfig_print_summary()` CMake 函数：调试配置问题的辅助工具
-    - `genconfig.py` 工具：将 `.config` 转换为 `kconfig.cmake` 和 `autoconf.h`
     - 配置规范化：自动运行 `conf --olddefconfig` 填充派生值
   - **工作流改进**：
     - 修复 `CONFIG_PROJECT_NAME` 等派生符号未生成的问题
@@ -1553,7 +1531,6 @@ add_dependencies(mylib gen_header)  # 确保顺序
     - 配置管理最佳实践
     - 常见问题诊断和解决方案
     - 开发任务示例（添加模块、应用、测试）
-  - **向后兼容**：保持 `python3 build.py` 命令接口不变，内部实现升级为 CMake 原生
 
 - **2026-06-05**: 头文件引用规范更新
   - 移除所有头文件 include 的命名空间前缀

@@ -108,7 +108,6 @@ ES-Middleware/
 │       └── configs/         # 平台配置
 ├── configs/                  # 预定义配置
 ├── docs/                     # 文档
-└── build.py                  # 统一构建脚本
 ```
 
 ## 🎯 可用配置

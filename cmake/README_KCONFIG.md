@@ -228,7 +228,6 @@ endif()
 CMake automatically reconfigures when:
 - `.config` file changes (modified by menuconfig/nconfig)
 - Any `Kconfig` file changes
-- Defconfig loaded via `python3 build.py config`
 
 This ensures build is always in sync with configuration.
 

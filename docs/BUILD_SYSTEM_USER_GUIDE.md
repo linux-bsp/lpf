@@ -443,7 +443,6 @@ CLion can use the generated CMake build system directly:
 
 ## Backward Compatibility
 
-The enhanced build.py maintains full backward compatibility with previous workflows:
 
 ```bash
 # Old workflow (still works)

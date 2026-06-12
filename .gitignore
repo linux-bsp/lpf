@@ -42,11 +42,5 @@ scripts/kconfig/lxdialog/*.o
 # 系统文件
 .DS_Store
 
-# Python缓存
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
 # Claude
 .claude/

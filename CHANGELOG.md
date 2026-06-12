@@ -74,7 +74,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### 构建系统
 - Config.in 配置系统（menuconfig 图形化配置）
 - CMake 构建系统（3.16+）
-- Python 构建脚本（build.py）
 - 6 个预定义配置文件
 - 支持静态库和动态库
 - 支持交叉编译
@@ -117,7 +116,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### 文档改进
 - 修复 README.md 中的错误命令
-- 统一所有文档使用 `python3 build.py` 命令
 - 添加架构图和流程图（Mermaid）
 - 完善 API 说明和使用示例
 
