@@ -75,11 +75,11 @@ static const aconfig_invalidation_map_t test_inv_map[] = {
 static const aconfig_config_table_t test_config_table = {
     .name = "test_config",
     .tc_table = test_tc_table,
-    .tc_count = sizeof(test_tc_table) / sizeof(test_tc_table[0]),
+    .tc_count = OSAL_SIZEOF(test_tc_table) / OSAL_SIZEOF(test_tc_table[0]),
     .tm_table = test_tm_table,
-    .tm_count = sizeof(test_tm_table) / sizeof(test_tm_table[0]),
+    .tm_count = OSAL_SIZEOF(test_tm_table) / OSAL_SIZEOF(test_tm_table[0]),
     .inv_map = test_inv_map,
-    .inv_count = sizeof(test_inv_map) / sizeof(test_inv_map[0])
+    .inv_count = OSAL_SIZEOF(test_inv_map) / OSAL_SIZEOF(test_inv_map[0])
 };
 
 /* 测试夹具 */
@@ -397,7 +397,7 @@ static const test_suite_t test_suite = {
 	.module_name = "aconfig_api",
 	.layer_name = "ACONFIG",
 	.cases = test_cases,
-	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.case_count = OSAL_SIZEOF(test_cases) / OSAL_SIZEOF(test_case_t),
 	.suite_setup = NULL,
 	.suite_teardown = NULL,
 	.metadata = {

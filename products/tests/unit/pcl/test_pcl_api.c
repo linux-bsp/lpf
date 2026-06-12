@@ -432,7 +432,7 @@ static void init_test_configs(void)
     int i;
     for (i = 0; i < NUM_THREADS; i++) {
         /* 初始化MCU配置 */
-        OSAL_memset(&test_mcus[i], 0, sizeof(pconfig_mcu_cfg_t));
+        OSAL_memset(&test_mcus[i], 0, OSAL_SIZEOF(pconfig_mcu_cfg_t));
         OSAL_snprintf((char *)test_mcus[i].name, 32, "mcu_%d", i);
         test_mcus[i].description = "Thread test MCU";
         test_mcus[i].enabled = true;
@@ -443,7 +443,7 @@ static void init_test_configs(void)
         test_mcu_arrays[i][1] = NULL;
 
         /* 初始化平台配置 */
-        OSAL_memset(&test_configs[i], 0, sizeof(pconfig_platform_config_t));
+        OSAL_memset(&test_configs[i], 0, OSAL_SIZEOF(pconfig_platform_config_t));
         test_configs[i].platform_name = "test_platform";
         test_configs[i].chip_name = "test_chip";
         test_configs[i].project_name = "test_project";
@@ -854,7 +854,7 @@ static const test_suite_t test_suite = {
 	.module_name = "pcl_api",
 	.layer_name = "PCL",
 	.cases = test_cases,
-	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.case_count = OSAL_SIZEOF(test_cases) / OSAL_SIZEOF(test_case_t),
 	.suite_setup = NULL,
 	.suite_teardown = NULL,
 	.metadata = {

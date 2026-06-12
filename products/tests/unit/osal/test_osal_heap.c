@@ -198,7 +198,7 @@ static void test_osal_malloc_alignment(void)
 
     /* 验证对齐（通常是8字节或16字节对齐） */
     uintptr_t addr = (uintptr_t)ptr;
-    TEST_ASSERT_EQUAL(0, addr % sizeof(void *));
+    TEST_ASSERT_EQUAL(0, addr % OSAL_SIZEOF(void *));
 
     OSAL_free(ptr);
 }
@@ -495,7 +495,7 @@ static const test_suite_t test_suite = {
 	.module_name = "osal_heap",
 	.layer_name = "OSAL",
 	.cases = test_cases,
-	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.case_count = OSAL_SIZEOF(test_cases) / OSAL_SIZEOF(test_case_t),
 	.suite_setup = NULL,
 	.suite_teardown = NULL,
 	.metadata = {

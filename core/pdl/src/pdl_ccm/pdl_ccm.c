@@ -395,19 +395,19 @@ int32_t PDL_CCM_SendTelemetry(pdl_ccm_handle_t handle,
     tm->data_length = len;
 
     /* 拷贝变长数据 */
-    if (len > 0 && len <= (PRL_MAX_PACKET_SIZE - sizeof(prl_pmc_telemetry_t)))
+    if (len > 0 && len <= (PRL_MAX_PACKET_SIZE - OSAL_SIZEOF(prl_pmc_telemetry_t)))
     {
-        OSAL_memcpy(prl_buf + sizeof(prl_pmc_telemetry_t), data, len);
+        OSAL_memcpy(prl_buf + OSAL_SIZEOF(prl_pmc_telemetry_t), data, len);
     }
-    else if (len > (PRL_MAX_PACKET_SIZE - sizeof(prl_pmc_telemetry_t)))
+    else if (len > (PRL_MAX_PACKET_SIZE - OSAL_SIZEOF(prl_pmc_telemetry_t)))
     {
         LOG_ERROR("PDL_CCM", "Telemetry data too large");
         return OSAL_ERR_INVALID_PARAM;
     }
 
     ret = PRL_Encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_TELEMETRY,
-                    prl_buf, sizeof(prl_pmc_telemetry_t) + len,
-                    buf, sizeof(buf), 0);
+                    prl_buf, OSAL_SIZEOF(prl_pmc_telemetry_t) + len,
+                    buf, OSAL_SIZEOF(buf), 0);
     if (ret < 0)
     {
         LOG_ERROR("PDL_CCM", "Failed to encode telemetry");
@@ -471,19 +471,19 @@ int32_t PDL_CCM_SendCommand(pdl_ccm_handle_t handle,
     tc->param_length = params_len;
 
     /* 拷贝变长参数 */
-    if (params_len > 0 && params && params_len <= (PRL_MAX_PACKET_SIZE - sizeof(prl_pmc_command_t)))
+    if (params_len > 0 && params && params_len <= (PRL_MAX_PACKET_SIZE - OSAL_SIZEOF(prl_pmc_command_t)))
     {
-        OSAL_memcpy(prl_buf + sizeof(prl_pmc_command_t), params, params_len);
+        OSAL_memcpy(prl_buf + OSAL_SIZEOF(prl_pmc_command_t), params, params_len);
     }
-    else if (params_len > (PRL_MAX_PACKET_SIZE - sizeof(prl_pmc_command_t)))
+    else if (params_len > (PRL_MAX_PACKET_SIZE - OSAL_SIZEOF(prl_pmc_command_t)))
     {
         LOG_ERROR("PDL_CCM", "Command params too large");
         return OSAL_ERR_INVALID_PARAM;
     }
 
     ret = PRL_Encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_COMMAND,
-                    prl_buf, sizeof(prl_pmc_command_t) + params_len,
-                    buf, sizeof(buf), 0);
+                    prl_buf, OSAL_SIZEOF(prl_pmc_command_t) + params_len,
+                    buf, OSAL_SIZEOF(buf), 0);
     if (ret < 0)
     {
         LOG_ERROR("PDL_CCM", "Failed to encode command");
@@ -552,19 +552,19 @@ int32_t PDL_CCM_SendFirmwareUpdate(pdl_ccm_handle_t handle,
     fw->chunk_crc = 0;  /* TODO: 计算 CRC */
 
     /* 拷贝变长数据 */
-    if (len > 0 && len <= (PRL_MAX_PACKET_SIZE - sizeof(prl_pmc_firmware_update_t)))
+    if (len > 0 && len <= (PRL_MAX_PACKET_SIZE - OSAL_SIZEOF(prl_pmc_firmware_update_t)))
     {
-        OSAL_memcpy(prl_buf + sizeof(prl_pmc_firmware_update_t), data, len);
+        OSAL_memcpy(prl_buf + OSAL_SIZEOF(prl_pmc_firmware_update_t), data, len);
     }
-    else if (len > (PRL_MAX_PACKET_SIZE - sizeof(prl_pmc_firmware_update_t)))
+    else if (len > (PRL_MAX_PACKET_SIZE - OSAL_SIZEOF(prl_pmc_firmware_update_t)))
     {
         LOG_ERROR("PDL_CCM", "Firmware chunk too large");
         return OSAL_ERR_INVALID_PARAM;
     }
 
     ret = PRL_Encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_FIRMWARE_UPDATE,
-                    prl_buf, sizeof(prl_pmc_firmware_update_t) + len,
-                    buf, sizeof(buf), 0);
+                    prl_buf, OSAL_SIZEOF(prl_pmc_firmware_update_t) + len,
+                    buf, OSAL_SIZEOF(buf), 0);
     if (ret < 0)
     {
         LOG_ERROR("PDL_CCM", "Failed to encode firmware update");
@@ -623,7 +623,7 @@ int32_t PDL_CCM_NodeManage(pdl_ccm_handle_t handle,
         .node_status = 0
     };
     ret = PRL_Encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_NODE_MANAGE,
-                    &nm, sizeof(nm), buf, sizeof(buf), 0);
+                    &nm, OSAL_SIZEOF(nm), buf, OSAL_SIZEOF(buf), 0);
     if (ret < 0)
     {
         LOG_ERROR("PDL_CCM", "Failed to encode node manage");
@@ -688,7 +688,7 @@ int32_t PDL_CCM_PowerControl(pdl_ccm_handle_t handle,
         .delay_ms = 0
     };
     ret = PRL_Encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_POWER_CONTROL,
-                    &pc, sizeof(pc), buf, sizeof(buf), 0);
+                    &pc, OSAL_SIZEOF(pc), buf, OSAL_SIZEOF(buf), 0);
     if (ret < 0)
     {
         LOG_ERROR("PDL_CCM", "Failed to encode power control");
@@ -752,7 +752,7 @@ int32_t PDL_CCM_QueryStatus(pdl_ccm_handle_t handle,
         .param_count = 0
     };
     ret = PRL_Encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_STATUS_QUERY,
-                    &sq, sizeof(sq), buf, sizeof(buf), 0);
+                    &sq, OSAL_SIZEOF(sq), buf, OSAL_SIZEOF(buf), 0);
     if (ret < 0)
     {
         LOG_ERROR("PDL_CCM", "Failed to encode status query");
@@ -815,7 +815,7 @@ int32_t PDL_CCM_SendHeartbeat(pdl_ccm_handle_t handle,
         .rtt_ms = 0
     };
     ret = PRL_Encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_HEARTBEAT,
-                    &hb, sizeof(hb), buf, sizeof(buf), 0);
+                    &hb, OSAL_SIZEOF(hb), buf, OSAL_SIZEOF(buf), 0);
     if (ret < 0)
     {
         return ret;

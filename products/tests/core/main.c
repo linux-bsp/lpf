@@ -140,8 +140,8 @@ static uint32_t parse_tags(const char *str)
 {
     uint32_t tags = 0;
     char buffer[256];
-    OSAL_strncpy(buffer, str, sizeof(buffer));
-    buffer[sizeof(buffer) - 1] = '\0';
+    OSAL_strncpy(buffer, str, OSAL_SIZEOF(buffer));
+    buffer[OSAL_SIZEOF(buffer) - 1] = '\0';
 
     char *token = buffer;
     char *next = buffer;

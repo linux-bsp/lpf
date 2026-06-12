@@ -100,7 +100,7 @@ static void test_hal_i2c_write_null_handle(void)
 {
     uint8_t buffer[4] = {0x01, 0x02, 0x03, 0x04};
 
-    int32_t ret = HAL_I2C_Write(NULL, 0x50, buffer, sizeof(buffer));
+    int32_t ret = HAL_I2C_Write(NULL, 0x50, buffer, OSAL_SIZEOF(buffer));
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -129,7 +129,7 @@ static void test_hal_i2c_read_null_handle(void)
 {
     uint8_t buffer[4];
 
-    int32_t ret = HAL_I2C_Read(NULL, 0x50, buffer, sizeof(buffer));
+    int32_t ret = HAL_I2C_Read(NULL, 0x50, buffer, OSAL_SIZEOF(buffer));
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -162,7 +162,7 @@ static void test_hal_i2c_write_reg_null_handle(void)
 {
     uint8_t buffer[4] = {0x01, 0x02, 0x03, 0x04};
 
-    int32_t ret = HAL_I2C_WriteReg(NULL, 0x50, 0x00, buffer, sizeof(buffer));
+    int32_t ret = HAL_I2C_WriteReg(NULL, 0x50, 0x00, buffer, OSAL_SIZEOF(buffer));
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 

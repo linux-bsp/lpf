@@ -276,7 +276,7 @@ void OSAL_LogEmit(int32_t level, const char *module,
     do { \
         log_kv_pair_t __kv_pairs[] = { __VA_ARGS__ }; \
         OSAL_LogStructured(OS_LOG_LEVEL_INFO, module, msg, __kv_pairs, \
-                          sizeof(__kv_pairs) / sizeof(log_kv_pair_t)); \
+                          OSAL_SIZEOF(__kv_pairs) / OSAL_SIZEOF(log_kv_pair_t)); \
     } while(0)
 
 #endif /* OSAL_LOG_H */

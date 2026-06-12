@@ -26,7 +26,7 @@ static void init_registry(void)
     if (g_registered_suites == NULL) {
         g_suite_capacity = INITIAL_CAPACITY;
         g_registered_suites = (const test_suite_t **)OSAL_malloc(
-            g_suite_capacity * sizeof(test_suite_t *));
+            g_suite_capacity * OSAL_SIZEOF(test_suite_t *));
         if (g_registered_suites == NULL) {
             OSAL_Printf("FATAL: Failed to allocate test suite registry\n");
             g_suite_capacity = 0;
@@ -41,7 +41,7 @@ static bool expand_registry(void)
 {
     uint32_t new_capacity = g_suite_capacity * GROWTH_FACTOR;
     const test_suite_t **new_suites = (const test_suite_t **)OSAL_malloc(
-        new_capacity * sizeof(test_suite_t *));
+        new_capacity * OSAL_SIZEOF(test_suite_t *));
 
     if (new_suites == NULL) {
         OSAL_Printf("ERROR: Failed to expand test suite registry\n");
@@ -50,7 +50,7 @@ static bool expand_registry(void)
 
     /* Copy old data to new buffer */
     OSAL_memcpy(new_suites, g_registered_suites,
-                g_suite_count * sizeof(test_suite_t *));
+                g_suite_count * OSAL_SIZEOF(test_suite_t *));
 
     /* Free old buffer and update registry */
     OSAL_free(g_registered_suites);

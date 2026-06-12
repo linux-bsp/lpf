@@ -156,8 +156,8 @@ int32_t OSAL_LogInit(const char *log_file_path, int32_t level)
     if (NULL != log_file_path)
     {
         pthread_mutex_lock(&g_log_mutex);
-        strncpy(g_log_file_path, log_file_path, sizeof(g_log_file_path) - 1);
-        g_log_file_path[sizeof(g_log_file_path) - 1] = '\0';
+        strncpy(g_log_file_path, log_file_path, OSAL_SIZEOF(g_log_file_path) - 1);
+        g_log_file_path[OSAL_SIZEOF(g_log_file_path) - 1] = '\0';
         g_log_file = fopen(log_file_path, "a");
         pthread_mutex_unlock(&g_log_mutex);
 
@@ -325,7 +325,7 @@ int32_t OSAL_LogSetRemote(const char *host, uint16_t port)
     }
 
     /* 配置远程地址 */
-    memset(&addr, 0, sizeof(addr));
+    memset(&addr, 0, OSAL_SIZEOF(addr));
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
     if (inet_pton(AF_INET, host, &addr.sin_addr) <= 0)
@@ -605,7 +605,7 @@ static void send_remote_log(const char *log_message)
 
     /* 发送日志（不持有锁，避免阻塞） */
     sendto(sock, log_message, strlen(log_message), 0,
-           (struct sockaddr *)&addr, sizeof(addr));
+           (struct sockaddr *)&addr, OSAL_SIZEOF(addr));
 }
 
 /**
@@ -920,9 +920,9 @@ void OSAL_LogStructured(int32_t level, log_module_t module, const char *message,
             {
                 int written = snprintf(kv_buffer + offset, OSAL_SIZEOF(kv_buffer) - offset,
                                       " %s=%s", kv_pairs[i].key, kv_pairs[i].value);
-                if (written > 0 && (offset + written) < OSAL_SIZEOF(kv_buffer))
+                if (written > 0 && (offset + (size_t)written) < OSAL_SIZEOF(kv_buffer))
                 {
-                    offset += written;
+                    offset += (size_t)written;
                 }
             }
         }

@@ -56,7 +56,7 @@ static void test_pdl_satellite_init_null_config(void)
 static void test_pdl_satellite_init_null_handle(void)
 {
     pdl_satellite_config_t config;
-    OSAL_memset(&config, 0, sizeof(config));
+    OSAL_memset(&config, 0, OSAL_SIZEOF(config));
     config.can_device = "can0";
     config.can_bitrate = 500000;
     config.heartbeat_interval_ms = 1000;
@@ -348,7 +348,7 @@ static const test_suite_t test_suite = {
 	.module_name = "pdl_satellite",
 	.layer_name = "PDL",
 	.cases = test_cases,
-	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.case_count = OSAL_SIZEOF(test_cases) / OSAL_SIZEOF(test_case_t),
 	.suite_setup = NULL,
 	.suite_teardown = NULL,
 	.metadata = {

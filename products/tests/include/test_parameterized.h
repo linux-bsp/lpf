@@ -50,7 +50,7 @@
 #define TEST_CASE_PARAMETERIZED(test_name, data_type, data_array) \
     static void test_name##_impl(void *param); \
     static void test_name(void) { \
-        size_t _test_count = sizeof(data_array) / sizeof(data_type); \
+        size_t _test_count = OSAL_SIZEOF(data_array) / OSAL_SIZEOF(data_type); \
         size_t _test_i; \
         for (_test_i = 0; _test_i < _test_count; _test_i++) { \
             if (g_test_failed) { \
@@ -77,7 +77,7 @@
 #define TEST_CASE_PARAMETERIZED_CONTINUE(test_name, data_type, data_array) \
     static void test_name##_impl(void *param); \
     static void test_name(void) { \
-        size_t _test_count = sizeof(data_array) / sizeof(data_type); \
+        size_t _test_count = OSAL_SIZEOF(data_array) / OSAL_SIZEOF(data_type); \
         size_t _test_i; \
         size_t _test_failed_count = 0; \
         for (_test_i = 0; _test_i < _test_count; _test_i++) { \
