@@ -43,7 +43,7 @@ static void log_printf(const char *fmt, ...)
         char buf[LOG_BUF_SIZE];
         va_list args;
         va_start(args, fmt);
-        OSAL_vsnprintf(buf, sizeof(buf), fmt, args);
+        OSAL_vsnprintf(buf, OSAL_SIZEOF(buf), fmt, args);
         va_end(args);
         OSAL_write(g_test_log_fd, buf, OSAL_strlen(buf));
     }

@@ -16,7 +16,7 @@
 
 static void create_can_config(pdl_mcu_config_t *config)
 {
-    OSAL_memset(config, 0, sizeof(pdl_mcu_config_t));
+    OSAL_memset(config, 0, OSAL_SIZEOF(pdl_mcu_config_t));
     config->interface = PDL_MCU_INTERFACE_CAN;
     config->hw.can.device = "can0";
     config->hw.can.bitrate = 500000;
@@ -30,7 +30,7 @@ static void create_can_config(pdl_mcu_config_t *config)
 static void create_serial_config(pdl_mcu_config_t *config) __attribute__((unused));
 static void create_serial_config(pdl_mcu_config_t *config)
 {
-    OSAL_memset(config, 0, sizeof(pdl_mcu_config_t));
+    OSAL_memset(config, 0, OSAL_SIZEOF(pdl_mcu_config_t));
     config->interface = PDL_MCU_INTERFACE_SERIAL;
     config->hw.serial.device = "/dev/ttyS1";
     config->hw.serial.baudrate = 115200;
@@ -231,8 +231,8 @@ static void test_pdl_mcu_send_command_null_handle(void)
     uint8_t resp_data[64];
     uint32_t actual_size;
 
-    int32_t ret = PDL_MCU_SendCommand(NULL, 0x10, cmd_data, sizeof(cmd_data),
-                                      resp_data, sizeof(resp_data), &actual_size);
+    int32_t ret = PDL_MCU_SendCommand(NULL, 0x10, cmd_data, OSAL_SIZEOF(cmd_data),
+                                      resp_data, OSAL_SIZEOF(resp_data), &actual_size);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -460,7 +460,7 @@ static const test_suite_t test_suite = {
 	.module_name = "pdl_mcu",
 	.layer_name = "PDL",
 	.cases = test_cases,
-	.case_count = sizeof(test_cases) / sizeof(test_case_t),
+	.case_count = OSAL_SIZEOF(test_cases) / OSAL_SIZEOF(test_case_t),
 	.suite_setup = NULL,
 	.suite_teardown = NULL,
 	.metadata = {
