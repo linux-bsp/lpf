@@ -40,14 +40,14 @@ int32_t PDL_MCU_Init(const pdl_mcu_config_t *config, pdl_mcu_handle_t *handle)
         return OSAL_ERR_GENERIC;
     }
 
-    ctx = (mcu_context_t *)OSAL_malloc(OSAL_SIZEOF(mcu_context_t));
+    ctx = (mcu_context_t *)OSAL_malloc(OSAL_sizeof(mcu_context_t));
     if (NULL == ctx)
     {
         return OSAL_ERR_NO_MEMORY;
     }
 
-    OSAL_memset(ctx, 0, OSAL_SIZEOF(mcu_context_t));
-    OSAL_memcpy(&ctx->config, config, OSAL_SIZEOF(pdl_mcu_config_t));
+    OSAL_memset(ctx, 0, OSAL_sizeof(mcu_context_t));
+    OSAL_memcpy(&ctx->config, config, OSAL_sizeof(pdl_mcu_config_t));
     ctx->interface = config->interface;
 
     /* 创建互斥锁 */
@@ -201,7 +201,7 @@ int32_t PDL_MCU_GetVersion(pdl_mcu_handle_t handle, pdl_mcu_version_t *version)
     ctx = (mcu_context_t *)handle;
 
     /* 使用 PRL 协议编码请求 */
-    tx_len = pdl_mcu_encode_get_version(tx_buf, OSAL_SIZEOF(tx_buf));
+    tx_len = pdl_mcu_encode_get_version(tx_buf, OSAL_sizeof(tx_buf));
     if (tx_len < 0)
     {
         return OSAL_ERR_GENERIC;
@@ -210,7 +210,7 @@ int32_t PDL_MCU_GetVersion(pdl_mcu_handle_t handle, pdl_mcu_version_t *version)
     /* 发送请求并接收响应 */
     ret = mcu_send_command_internal(ctx, MCU_CMD_GET_VERSION,
                                     tx_buf, (uint32_t)tx_len,
-                                    rx_buf, OSAL_SIZEOF(rx_buf), &actual_size);
+                                    rx_buf, OSAL_sizeof(rx_buf), &actual_size);
 
     if (OSAL_SUCCESS == ret)
     {
@@ -240,7 +240,7 @@ int32_t PDL_MCU_GetStatus(pdl_mcu_handle_t handle, pdl_mcu_status_t *status)
     ctx = (mcu_context_t *)handle;
 
     /* 使用 PRL 协议编码请求 */
-    tx_len = pdl_mcu_encode_get_status(tx_buf, OSAL_SIZEOF(tx_buf));
+    tx_len = pdl_mcu_encode_get_status(tx_buf, OSAL_sizeof(tx_buf));
     if (tx_len < 0)
     {
         return OSAL_ERR_GENERIC;
@@ -249,7 +249,7 @@ int32_t PDL_MCU_GetStatus(pdl_mcu_handle_t handle, pdl_mcu_status_t *status)
     /* 发送请求并接收响应 */
     ret = mcu_send_command_internal(ctx, MCU_CMD_GET_STATUS,
                                     tx_buf, (uint32_t)tx_len,
-                                    rx_buf, OSAL_SIZEOF(rx_buf), &actual_size);
+                                    rx_buf, OSAL_sizeof(rx_buf), &actual_size);
 
     if (OSAL_SUCCESS == ret)
     {
@@ -295,7 +295,7 @@ int32_t PDL_MCU_Reset(pdl_mcu_handle_t handle)
     ctx = (mcu_context_t *)handle;
 
     /* 使用 PRL 协议编码请求 */
-    tx_len = pdl_mcu_encode_reset(tx_buf, OSAL_SIZEOF(tx_buf));
+    tx_len = pdl_mcu_encode_reset(tx_buf, OSAL_sizeof(tx_buf));
     if (tx_len < 0)
     {
         return OSAL_ERR_GENERIC;
@@ -304,7 +304,7 @@ int32_t PDL_MCU_Reset(pdl_mcu_handle_t handle)
     /* 发送请求 */
     return mcu_send_command_internal(ctx, MCU_CMD_RESET,
                                     tx_buf, (uint32_t)tx_len,
-                                    rx_buf, OSAL_SIZEOF(rx_buf), &actual_size);
+                                    rx_buf, OSAL_sizeof(rx_buf), &actual_size);
 }
 
 /**
@@ -326,7 +326,7 @@ int32_t PDL_MCU_ReadRegister(pdl_mcu_handle_t handle, uint8_t reg_addr, uint8_t 
     ctx = (mcu_context_t *)handle;
 
     /* 使用 PRL 协议编码请求 */
-    tx_len = pdl_mcu_encode_read_register(reg_addr, tx_buf, OSAL_SIZEOF(tx_buf));
+    tx_len = pdl_mcu_encode_read_register(reg_addr, tx_buf, OSAL_sizeof(tx_buf));
     if (tx_len < 0)
     {
         return OSAL_ERR_GENERIC;
@@ -335,7 +335,7 @@ int32_t PDL_MCU_ReadRegister(pdl_mcu_handle_t handle, uint8_t reg_addr, uint8_t 
     /* 发送请求并接收响应 */
     ret = mcu_send_command_internal(ctx, MCU_CMD_READ_REG,
                                     tx_buf, (uint32_t)tx_len,
-                                    rx_buf, OSAL_SIZEOF(rx_buf), &actual_size);
+                                    rx_buf, OSAL_sizeof(rx_buf), &actual_size);
 
     if (OSAL_SUCCESS == ret)
     {
@@ -365,7 +365,7 @@ int32_t PDL_MCU_WriteRegister(pdl_mcu_handle_t handle, uint8_t reg_addr, uint8_t
     ctx = (mcu_context_t *)handle;
 
     /* 使用 PRL 协议编码请求 */
-    tx_len = pdl_mcu_encode_write_register(reg_addr, value, tx_buf, OSAL_SIZEOF(tx_buf));
+    tx_len = pdl_mcu_encode_write_register(reg_addr, value, tx_buf, OSAL_sizeof(tx_buf));
     if (tx_len < 0)
     {
         return OSAL_ERR_GENERIC;
@@ -374,7 +374,7 @@ int32_t PDL_MCU_WriteRegister(pdl_mcu_handle_t handle, uint8_t reg_addr, uint8_t
     /* 发送请求 */
     return mcu_send_command_internal(ctx, MCU_CMD_WRITE_REG,
                                     tx_buf, (uint32_t)tx_len,
-                                    rx_buf, OSAL_SIZEOF(rx_buf), &actual_size);
+                                    rx_buf, OSAL_sizeof(rx_buf), &actual_size);
 }
 
 /**
@@ -403,7 +403,7 @@ int32_t PDL_MCU_SendCommand(pdl_mcu_handle_t handle,
 
     /* 使用 PRL 协议编码请求 */
     tx_len = pdl_mcu_encode_custom_command(cmd_code, data, data_len,
-                                           tx_buf, OSAL_SIZEOF(tx_buf));
+                                           tx_buf, OSAL_sizeof(tx_buf));
     if (tx_len < 0)
     {
         return OSAL_ERR_GENERIC;
@@ -412,7 +412,7 @@ int32_t PDL_MCU_SendCommand(pdl_mcu_handle_t handle,
     /* 发送请求并接收响应 */
     ret = mcu_send_command_internal(ctx, cmd_code,
                                     tx_buf, (uint32_t)tx_len,
-                                    rx_buf, OSAL_SIZEOF(rx_buf), &rx_size);
+                                    rx_buf, OSAL_sizeof(rx_buf), &rx_size);
 
     if (OSAL_SUCCESS == ret)
     {
@@ -473,7 +473,7 @@ const char* PDL_MCU_GetStateName(pdl_mcu_state_t state)
         "OFFLINE"         /* 5 */
     };
 
-    if (state >= 0 && state < (int32_t)(OSAL_SIZEOF(state_names) / OSAL_SIZEOF(state_names[0])))
+    if (state >= 0 && state < (int32_t)(OSAL_sizeof(state_names) / OSAL_sizeof(state_names[0])))
     {
         return state_names[state];
     }

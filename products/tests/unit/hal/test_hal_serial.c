@@ -140,7 +140,7 @@ static void test_hal_serial_write_success(void)
         TEST_ASSERT_FALSE(true); // /dev/ttyS0 not available
     }
 
-    ret = HAL_Serial_Write(handle, data, OSAL_SIZEOF(data), 1000);
+    ret = HAL_Serial_Write(handle, data, OSAL_sizeof(data), 1000);
     TEST_ASSERT_TRUE(ret > 0);
 
     HAL_Serial_Close(handle);
@@ -151,7 +151,7 @@ static void test_hal_serial_write_null_handle(void)
 {
     uint8_t data[] = "test";
 
-    int32_t ret = HAL_Serial_Write(NULL, data, OSAL_SIZEOF(data), 1000);
+    int32_t ret = HAL_Serial_Write(NULL, data, OSAL_sizeof(data), 1000);
     TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_POINTER, ret);
 }
 
@@ -220,7 +220,7 @@ static void test_hal_serial_read_timeout(void)
         TEST_ASSERT_FALSE(true); // /dev/ttyS0 not available
     }
 
-    ret = HAL_Serial_Read(handle, buffer, OSAL_SIZEOF(buffer), 100);
+    ret = HAL_Serial_Read(handle, buffer, OSAL_sizeof(buffer), 100);
     /* 超时或读取到数据都是正常的 */
 
     HAL_Serial_Close(handle);
@@ -231,7 +231,7 @@ static void test_hal_serial_read_null_handle(void)
 {
     uint8_t buffer[64];
 
-    int32_t ret = HAL_Serial_Read(NULL, buffer, OSAL_SIZEOF(buffer), 100);
+    int32_t ret = HAL_Serial_Read(NULL, buffer, OSAL_sizeof(buffer), 100);
     TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_POINTER, ret);
 }
 
@@ -577,7 +577,7 @@ static const test_suite_t test_suite = {
 	.module_name = "hal_serial",
 	.layer_name = "HAL",
 	.cases = test_cases,
-	.case_count = OSAL_SIZEOF(test_cases) / OSAL_SIZEOF(test_case_t),
+	.case_count = OSAL_sizeof(test_cases) / OSAL_sizeof(test_case_t),
 	.suite_setup = NULL,
 	.suite_teardown = NULL,
 	.metadata = {

@@ -21,7 +21,7 @@ static void test_ipmi_pack_request_basic(void)
     int32_t ret = bmc_ipmi_pack_request(IPMI_NETFN_CHASSIS_REQ,
                                         IPMI_CMD_CHASSIS_CONTROL,
                                         NULL, 0,
-                                        frame, OSAL_SIZEOF(frame), &frame_len);
+                                        frame, OSAL_sizeof(frame), &frame_len);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_TRUE(frame_len > 0);
 }
@@ -35,10 +35,10 @@ static void test_ipmi_pack_request_with_data(void)
 
     int32_t ret = bmc_ipmi_pack_request(IPMI_NETFN_CHASSIS_REQ,
                                         IPMI_CMD_CHASSIS_CONTROL,
-                                        data, OSAL_SIZEOF(data),
-                                        frame, OSAL_SIZEOF(frame), &frame_len);
+                                        data, OSAL_sizeof(data),
+                                        frame, OSAL_sizeof(frame), &frame_len);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
-    TEST_ASSERT_TRUE(frame_len > OSAL_SIZEOF(data));
+    TEST_ASSERT_TRUE(frame_len > OSAL_sizeof(data));
 }
 
 /* 测试用例: IPMI帧封装 - 空缓冲区 */
@@ -62,7 +62,7 @@ static void test_ipmi_pack_request_buffer_too_small(void)
     int32_t ret = bmc_ipmi_pack_request(IPMI_NETFN_CHASSIS_REQ,
                                         IPMI_CMD_CHASSIS_CONTROL,
                                         NULL, 0,
-                                        frame, OSAL_SIZEOF(frame), &frame_len);
+                                        frame, OSAL_sizeof(frame), &frame_len);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -86,9 +86,9 @@ static void test_ipmi_unpack_response_success(void)
     uint8_t data[16];
     uint32_t data_len;
 
-    int32_t ret = bmc_ipmi_unpack_response(response, OSAL_SIZEOF(response),
+    int32_t ret = bmc_ipmi_unpack_response(response, OSAL_sizeof(response),
                                            &netfn, &cmd, &cc,
-                                           data, OSAL_SIZEOF(data), &data_len);
+                                           data, OSAL_sizeof(data), &data_len);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_EQUAL(0x00, cc);
 }
@@ -102,7 +102,7 @@ static void test_ipmi_unpack_response_null_frame(void)
 
     int32_t ret = bmc_ipmi_unpack_response(NULL, 0,
                                            &netfn, &cmd, &cc,
-                                           data, OSAL_SIZEOF(data), &data_len);
+                                           data, OSAL_sizeof(data), &data_len);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -114,9 +114,9 @@ static void test_ipmi_unpack_response_frame_too_short(void)
     uint8_t data[16];
     uint32_t data_len;
 
-    int32_t ret = bmc_ipmi_unpack_response(response, OSAL_SIZEOF(response),
+    int32_t ret = bmc_ipmi_unpack_response(response, OSAL_sizeof(response),
                                            &netfn, &cmd, &cc,
-                                           data, OSAL_SIZEOF(data), &data_len);
+                                           data, OSAL_sizeof(data), &data_len);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -209,7 +209,7 @@ static void test_redfish_request_get(void)
                              REDFISH_METHOD_GET,
                              "/redfish/v1/Systems/1",
                              NULL,
-                             response, OSAL_SIZEOF(response), &response_len);
+                             response, OSAL_sizeof(response), &response_len);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_TRUE(response_len > 0);
 
@@ -237,7 +237,7 @@ static void test_redfish_request_post(void)
                              REDFISH_METHOD_POST,
                              "/redfish/v1/Systems/1/Actions/ComputerSystem.Reset",
                              json_body,
-                             response, OSAL_SIZEOF(response), &response_len);
+                             response, OSAL_sizeof(response), &response_len);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     bmc_redfish_deinit(protocol_handle);
@@ -401,7 +401,7 @@ static const test_suite_t test_suite = {
 	.module_name = "pdl_bmc_protocol",
 	.layer_name = "PDL",
 	.cases = test_cases,
-	.case_count = OSAL_SIZEOF(test_cases) / OSAL_SIZEOF(test_case_t),
+	.case_count = OSAL_sizeof(test_cases) / OSAL_sizeof(test_case_t),
 	.suite_setup = NULL,
 	.suite_teardown = NULL,
 	.metadata = {

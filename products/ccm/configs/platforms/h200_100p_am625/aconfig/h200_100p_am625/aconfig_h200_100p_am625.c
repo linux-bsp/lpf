@@ -39,7 +39,7 @@ const aconfig_tc_config_t g_ccm_tc_configs[] = {
     { ACONFIG_TC_WATCHDOG_DISABLE,     ACONFIG_DEVICE_MCU, "watchdog_mcu", true, NULL },
 };
 
-const uint32_t g_ccm_tc_config_count = OSAL_SIZEOF(g_ccm_tc_configs) / OSAL_SIZEOF(aconfig_tc_config_t);
+const uint32_t g_ccm_tc_config_count = OSAL_sizeof(g_ccm_tc_configs) / OSAL_sizeof(aconfig_tc_config_t);
 
 /**
  * @brief CCM v1.0遥测配置表
@@ -74,4 +74,4 @@ const aconfig_tm_config_t g_ccm_tm_configs[] = {
     { ACONFIG_TM_ERROR_COUNT,          ACONFIG_DEVICE_MCU, "power_mcu", 4000, 2000, true, NULL },
 };
 
-const uint32_t g_ccm_tm_config_count = OSAL_SIZEOF(g_ccm_tm_configs) / OSAL_SIZEOF(aconfig_tm_config_t);
+const uint32_t g_ccm_tm_config_count = OSAL_sizeof(g_ccm_tm_configs) / OSAL_sizeof(aconfig_tm_config_t);

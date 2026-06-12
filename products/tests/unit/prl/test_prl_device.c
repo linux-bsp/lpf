@@ -26,7 +26,7 @@ static void test_PRL_Encode_decode_basic(void)
 
     /* 编码 MCU 版本查询消息 */
     ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
-                            payload, OSAL_SIZEOF(payload), buffer, OSAL_SIZEOF(buffer), 0);
+                            payload, OSAL_sizeof(payload), buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
     /* 解码消息 */
@@ -35,7 +35,7 @@ static void test_PRL_Encode_decode_basic(void)
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_EQUAL(PRL_DEV_TYPE_MCU, dev_type);
     TEST_ASSERT_EQUAL(PRL_MCU_MSG_GET_VERSION, msg_type);
-    TEST_ASSERT_EQUAL(OSAL_SIZEOF(payload), payload_len);
+    TEST_ASSERT_EQUAL(OSAL_sizeof(payload), payload_len);
     TEST_ASSERT_EQUAL(0, OSAL_memcmp(payload, decoded_payload, payload_len));
 }
 
@@ -49,7 +49,7 @@ static void test_PRL_Encode_empty_payload(void)
 
     /* 编码无负载消息（如心跳） */
     ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
-                            NULL, 0, buffer, OSAL_SIZEOF(buffer), 0);
+                            NULL, 0, buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
     /* 解码消息 */
@@ -108,27 +108,27 @@ static void test_PRL_Encode_all_device_types(void)
 
     /* 测试所有设备类型的编码 */
     ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
-                            payload, OSAL_SIZEOF(payload), buffer, OSAL_SIZEOF(buffer), 0);
+                            payload, OSAL_sizeof(payload), buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
     ret = PRL_Encode(PRL_DEV_TYPE_CCM, PRL_CCM_MSG_HEARTBEAT,
-                            payload, OSAL_SIZEOF(payload), buffer, OSAL_SIZEOF(buffer), 0);
+                            payload, OSAL_sizeof(payload), buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
     ret = PRL_Encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_HEARTBEAT,
-                            payload, OSAL_SIZEOF(payload), buffer, OSAL_SIZEOF(buffer), 0);
+                            payload, OSAL_sizeof(payload), buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
     ret = PRL_Encode(PRL_DEV_TYPE_GSC, PRL_GSC_MSG_HEARTBEAT,
-                            payload, OSAL_SIZEOF(payload), buffer, OSAL_SIZEOF(buffer), 0);
+                            payload, OSAL_sizeof(payload), buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
     ret = PRL_Encode(PRL_DEV_TYPE_CCM, PRL_CCM_MSG_HEARTBEAT,
-                            payload, OSAL_SIZEOF(payload), buffer, OSAL_SIZEOF(buffer), 0);
+                            payload, OSAL_sizeof(payload), buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
     ret = PRL_Encode(PRL_DEV_TYPE_POWER, PRL_POWER_MSG_HEARTBEAT,
-                            payload, OSAL_SIZEOF(payload), buffer, OSAL_SIZEOF(buffer), 0);
+                            payload, OSAL_sizeof(payload), buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 }
 
@@ -144,17 +144,17 @@ static void test_PRL_Encode_invalid_params(void)
 
     /* NULL 缓冲区 */
     ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
-                            payload, OSAL_SIZEOF(payload), NULL, OSAL_SIZEOF(buffer), 0);
+                            payload, OSAL_sizeof(payload), NULL, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_PARAM, ret);
 
     /* 无效设备类型 */
     ret = PRL_Encode(0xFF, PRL_MCU_MSG_HEARTBEAT,
-                            payload, OSAL_SIZEOF(payload), buffer, OSAL_SIZEOF(buffer), 0);
+                            payload, OSAL_sizeof(payload), buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_EQUAL(OSAL_EINVAL, ret);
 
     /* 缓冲区太小 */
     ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
-                            payload, OSAL_SIZEOF(payload), buffer, 10, 0);
+                            payload, OSAL_sizeof(payload), buffer, 10, 0);
     TEST_ASSERT_EQUAL(OSAL_ENOBUFS, ret);
 }
 
@@ -168,7 +168,7 @@ static void test_PRL_Decode_invalid_params(void)
 
     /* 先编码一个有效消息 */
     ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
-                            NULL, 0, buffer, OSAL_SIZEOF(buffer), 0);
+                            NULL, 0, buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
     /* NULL 参数 */
@@ -198,7 +198,7 @@ static void test_prl_device_crc_verification(void)
 
     /* 编码消息 */
     encoded_len = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_STATUS,
-                                     payload, OSAL_SIZEOF(payload), buffer, OSAL_SIZEOF(buffer), 0);
+                                     payload, OSAL_sizeof(payload), buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(encoded_len > 0);
 
     /* 正常解码应该成功 */
@@ -227,14 +227,14 @@ static void test_prl_device_large_payload(void)
     int ret;
 
     /* 填充大负载数据 */
-    for (int i = 0; i < OSAL_SIZEOF(large_payload); i++) {
+    for (int i = 0; i < OSAL_sizeof(large_payload); i++) {
         large_payload[i] = (uint8_t)(i & 0xFF);
     }
 
     /* 编码大负载消息 */
     ret = PRL_Encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_TELEMETRY,
-                            large_payload, OSAL_SIZEOF(large_payload),
-                            buffer, OSAL_SIZEOF(buffer), 0);
+                            large_payload, OSAL_sizeof(large_payload),
+                            buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
     /* 解码并验证 */
@@ -243,7 +243,7 @@ static void test_prl_device_large_payload(void)
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_EQUAL(PRL_DEV_TYPE_PMC, dev_type);
     TEST_ASSERT_EQUAL(PRL_PMC_MSG_TELEMETRY, msg_type);
-    TEST_ASSERT_EQUAL(OSAL_SIZEOF(large_payload), payload_len);
+    TEST_ASSERT_EQUAL(OSAL_sizeof(large_payload), payload_len);
     TEST_ASSERT_EQUAL(0, OSAL_memcmp(large_payload, decoded_payload, payload_len));
 }
 
@@ -315,7 +315,7 @@ static const test_suite_t test_suite = {
 	.module_name = "prl_device",
 	.layer_name = "PRL",
 	.cases = test_cases,
-	.case_count = OSAL_SIZEOF(test_cases) / OSAL_SIZEOF(test_case_t),
+	.case_count = OSAL_sizeof(test_cases) / OSAL_sizeof(test_case_t),
 	.suite_setup = NULL,
 	.suite_teardown = NULL,
 	.metadata = {

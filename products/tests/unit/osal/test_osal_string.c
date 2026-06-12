@@ -18,19 +18,19 @@ static void test_osal_memset_success(void)
     void *ret;
 
     /* 填充0 */
-    ret = OSAL_memset(buffer, 0, OSAL_SIZEOF(buffer));
+    ret = OSAL_memset(buffer, 0, OSAL_sizeof(buffer));
     TEST_ASSERT_NOT_NULL(ret);
     TEST_ASSERT_EQUAL(buffer, ret);
 
-    for (i = 0; i < OSAL_SIZEOF(buffer); i++) {
+    for (i = 0; i < OSAL_sizeof(buffer); i++) {
         TEST_ASSERT_EQUAL(0, buffer[i]);
     }
 
     /* 填充0xFF */
-    ret = OSAL_memset(buffer, 0xFF, OSAL_SIZEOF(buffer));
+    ret = OSAL_memset(buffer, 0xFF, OSAL_sizeof(buffer));
     TEST_ASSERT_NOT_NULL(ret);
 
-    for (i = 0; i < OSAL_SIZEOF(buffer); i++) {
+    for (i = 0; i < OSAL_sizeof(buffer); i++) {
         TEST_ASSERT_EQUAL(0xFF, buffer[i]);
     }
 }
@@ -43,7 +43,7 @@ static void test_osal_memcpy_success(void)
     uint8_t dest[32];
     void *ret;
 
-    OSAL_memset(dest, 0, OSAL_SIZEOF(dest));
+    OSAL_memset(dest, 0, OSAL_sizeof(dest));
 
     ret = OSAL_memcpy(dest, src, 8);
     TEST_ASSERT_NOT_NULL(ret);
@@ -171,7 +171,7 @@ static void test_osal_strcpy_success(void)
     char dest[32];
     char *ret;
 
-    OSAL_memset(dest, 0, OSAL_SIZEOF(dest));
+    OSAL_memset(dest, 0, OSAL_sizeof(dest));
 
     ret = OSAL_strcpy(dest, src);
     TEST_ASSERT_NOT_NULL(ret);
@@ -186,7 +186,7 @@ static void test_osal_strncpy_success(void)
     char dest[32];
     char *ret;
 
-    OSAL_memset(dest, 0, OSAL_SIZEOF(dest));
+    OSAL_memset(dest, 0, OSAL_sizeof(dest));
 
     /* 拷贝前5个字符 */
     ret = OSAL_strncpy(dest, src, 5);
@@ -265,12 +265,12 @@ static void test_osal_snprintf_success(void)
     int32_t ret;
 
     /* 正常情况 */
-    ret = OSAL_snprintf(buffer, OSAL_SIZEOF(buffer), "Hello %s", "World");
+    ret = OSAL_snprintf(buffer, OSAL_sizeof(buffer), "Hello %s", "World");
     TEST_ASSERT_TRUE(ret > 0);
     TEST_ASSERT_EQUAL(0, OSAL_strcmp(buffer, "Hello World"));
 
     /* 截断情况 */
-    ret = OSAL_snprintf(buffer, OSAL_SIZEOF(buffer), "This is a very long string");
+    ret = OSAL_snprintf(buffer, OSAL_sizeof(buffer), "This is a very long string");
     TEST_ASSERT_TRUE(ret > 0);
     TEST_ASSERT_EQUAL(15, OSAL_strlen(buffer));  /* 最多15个字符（不含\0） */
 }
@@ -503,7 +503,7 @@ static const test_suite_t test_suite = {
 	.module_name = "osal_string",
 	.layer_name = "OSAL",
 	.cases = test_cases,
-	.case_count = OSAL_SIZEOF(test_cases) / OSAL_SIZEOF(test_case_t),
+	.case_count = OSAL_sizeof(test_cases) / OSAL_sizeof(test_case_t),
 	.suite_setup = NULL,
 	.suite_teardown = NULL,
 	.metadata = {

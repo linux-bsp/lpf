@@ -100,7 +100,7 @@ static void test_hal_i2c_write_null_handle(void)
 {
     uint8_t buffer[4] = {0x01, 0x02, 0x03, 0x04};
 
-    int32_t ret = HAL_I2C_Write(NULL, 0x50, buffer, OSAL_SIZEOF(buffer));
+    int32_t ret = HAL_I2C_Write(NULL, 0x50, buffer, OSAL_sizeof(buffer));
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -129,7 +129,7 @@ static void test_hal_i2c_read_null_handle(void)
 {
     uint8_t buffer[4];
 
-    int32_t ret = HAL_I2C_Read(NULL, 0x50, buffer, OSAL_SIZEOF(buffer));
+    int32_t ret = HAL_I2C_Read(NULL, 0x50, buffer, OSAL_sizeof(buffer));
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -162,7 +162,7 @@ static void test_hal_i2c_write_reg_null_handle(void)
 {
     uint8_t buffer[4] = {0x01, 0x02, 0x03, 0x04};
 
-    int32_t ret = HAL_I2C_WriteReg(NULL, 0x50, 0x00, buffer, OSAL_SIZEOF(buffer));
+    int32_t ret = HAL_I2C_WriteReg(NULL, 0x50, 0x00, buffer, OSAL_sizeof(buffer));
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -191,7 +191,7 @@ static void test_hal_i2c_read_reg_null_handle(void)
 {
     uint8_t buffer[4];
 
-    int32_t ret = HAL_I2C_ReadReg(NULL, 0x50, 0x00, buffer, OSAL_SIZEOF(buffer));
+    int32_t ret = HAL_I2C_ReadReg(NULL, 0x50, 0x00, buffer, OSAL_sizeof(buffer));
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -226,7 +226,7 @@ static void test_hal_i2c_transfer_null_handle(void)
     hal_i2c_msg_t msg = {
         .addr = 0x50,
         .flags = 0,
-        .len = OSAL_SIZEOF(buffer),
+        .len = OSAL_sizeof(buffer),
         .buf = buffer
     };
 
@@ -369,7 +369,7 @@ static const test_suite_t test_suite = {
 	.module_name = "hal_i2c",
 	.layer_name = "HAL",
 	.cases = test_cases,
-	.case_count = OSAL_SIZEOF(test_cases) / OSAL_SIZEOF(test_case_t),
+	.case_count = OSAL_sizeof(test_cases) / OSAL_sizeof(test_case_t),
 	.suite_setup = NULL,
 	.suite_teardown = NULL,
 	.metadata = {

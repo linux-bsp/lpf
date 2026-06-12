@@ -17,7 +17,7 @@ const char* test_tags_to_string(uint32_t tags, char *buf, uint32_t buf_size)
 {
     static char static_buf[256];
     char *output = buf ? buf : static_buf;
-    uint32_t size = buf ? buf_size : OSAL_SIZEOF(static_buf);
+    uint32_t size = buf ? buf_size : OSAL_sizeof(static_buf);
     uint32_t pos = 0;
     bool first = true;
 

@@ -28,7 +28,7 @@ int32_t OSAL_RwlockCreate(osal_rwlock_t **rwlock)
         return OSAL_ERR_INVALID_POINTER;
     }
 
-    lock = (osal_rwlock_t *)malloc(OSAL_SIZEOF(osal_rwlock_t));
+    lock = (osal_rwlock_t *)malloc(OSAL_sizeof(osal_rwlock_t));
     if (NULL == lock) {
         return OSAL_ERR_NO_MEMORY;
     }

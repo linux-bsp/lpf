@@ -114,7 +114,7 @@ static pconfig_switch_cfg_t *pconfig_switch_arr[] = {
  *===========================================================================*/
 
 /* 辅助宏：计算指针数组中有效元素数量（排除NULL结尾） */
-#define ARRAY_COUNT(arr) ((OSAL_SIZEOF(arr) / OSAL_SIZEOF(arr[0])) - 1)
+#define ARRAY_COUNT(arr) ((OSAL_sizeof(arr) / OSAL_sizeof(arr[0])) - 1)
 
 const pconfig_platform_config_t pconfig_h200_100p_am625_base = {
     .platform_name = "ti/am6254",

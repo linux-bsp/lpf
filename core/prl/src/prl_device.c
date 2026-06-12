@@ -28,7 +28,7 @@ bool prl_device_type_valid(uint8_t dev_type)
 
 const char *prl_device_type_name(uint8_t dev_type)
 {
-    if (dev_type < OSAL_SIZEOF(device_type_names) / OSAL_SIZEOF(device_type_names[0])) {
+    if (dev_type < OSAL_sizeof(device_type_names) / OSAL_sizeof(device_type_names[0])) {
         return device_type_names[dev_type];
     }
     return "INVALID";

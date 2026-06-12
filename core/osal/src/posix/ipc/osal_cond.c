@@ -25,7 +25,7 @@ int32_t OSAL_CondCreate(osal_cond_t **cond)
         return OSAL_ERR_INVALID_POINTER;
     }
 
-    new_cond = (osal_cond_t *)malloc(OSAL_SIZEOF(osal_cond_t));
+    new_cond = (osal_cond_t *)malloc(OSAL_sizeof(osal_cond_t));
     if (new_cond == NULL) {
         return OSAL_ERR_GENERIC;
     }

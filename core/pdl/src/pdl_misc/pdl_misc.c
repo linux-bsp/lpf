@@ -40,7 +40,7 @@ static bool pdl_misc_validate_hwid(const pdl_hwid_t *hwid)
     /* 验证 CRC（使用 OSAL CRC16-CCITT） */
     /* CRC 字段在结构体末尾，计算时将其视为 0 */
     calculated_crc = OSAL_CRC16_CCITT((const uint8_t *)hwid,
-                                       OSAL_SIZEOF(pdl_hwid_t) - OSAL_SIZEOF(uint16_t));
+                                       OSAL_sizeof(pdl_hwid_t) - OSAL_sizeof(uint16_t));
     if (calculated_crc != hwid->crc16) {
         return false;
     }
@@ -78,7 +78,7 @@ int32_t PDL_MISC_GetHWID(pdl_hwid_t *hwid)
     }
 
     /* 默认返回一个测试用的HWID */
-    OSAL_memset(hwid, 0, OSAL_SIZEOF(pdl_hwid_t));
+    OSAL_memset(hwid, 0, OSAL_sizeof(pdl_hwid_t));
 
     hwid->magic = PDL_HWID_MAGIC;
     hwid->format_version = PDL_HWID_FORMAT_V1;
@@ -92,13 +92,13 @@ int32_t PDL_MISC_GetHWID(pdl_hwid_t *hwid)
 
     /* 计算 CRC（使用 OSAL CRC16-CCITT） */
     hwid->crc16 = OSAL_CRC16_CCITT((const uint8_t *)hwid,
-                                    OSAL_SIZEOF(pdl_hwid_t) - OSAL_SIZEOF(uint16_t));
+                                    OSAL_sizeof(pdl_hwid_t) - OSAL_sizeof(uint16_t));
 
     return OSAL_SUCCESS;
 
 #else
     /* 其他平台：返回未实现 */
-    OSAL_memset(hwid, 0, OSAL_SIZEOF(pdl_hwid_t));
+    OSAL_memset(hwid, 0, OSAL_sizeof(pdl_hwid_t));
     hwid->magic = PDL_HWID_INVALID;
     return OSAL_ERR_NOT_IMPLEMENTED;
 #endif

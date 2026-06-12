@@ -369,14 +369,14 @@ OSAL_STATIC_ASSERT(sizeof(uint64_t) == 0x8, "uint64_must_be_8_bytes");
 /*
  * 数组元素个数
  */
-#define OSAL_ARRAY_SIZE(arr)    (OSAL_SIZEOF(arr) / OSAL_SIZEOF((arr)[0]))
+#define OSAL_ARRAY_SIZE(arr)    (OSAL_sizeof(arr) / OSAL_sizeof((arr)[0]))
 
 /*
- * OSAL_SIZEOF 包装宏
+ * OSAL_sizeof 包装宏
  * - 提供统一的大小查询接口
  * - 返回 osal_size_t 类型以保证跨平台一致性
  */
-#define OSAL_SIZEOF(x)          ((osal_size_t)sizeof(x))
+#define OSAL_sizeof(x)          ((osal_size_t)sizeof(x))
 
 /*
  * 结构体成员偏移量

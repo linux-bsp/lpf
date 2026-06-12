@@ -56,7 +56,7 @@ int32_t OSAL_ThreadAttrCreate(osal_thread_attr_t **attr)
 	if (NULL == attr)
 		return OSAL_ERR_INVALID_POINTER;
 
-	new_attr = (osal_thread_attr_t *)malloc(OSAL_SIZEOF(osal_thread_attr_t));
+	new_attr = (osal_thread_attr_t *)malloc(OSAL_sizeof(osal_thread_attr_t));
 	if (NULL == new_attr)
 		return OSAL_ERR_NO_MEMORY;
 

@@ -16,7 +16,7 @@ static void signal_handler(int32_t sig)
     if (sig == SIGTERM || sig == SIGINT) {
         const char msg[] = "LOGGER: 收到退出信号\n";
         g_running = false;
-        (void)OSAL_write(OSAL_STDERR_FILENO, msg, OSAL_SIZEOF(msg) - 1);
+        (void)OSAL_write(OSAL_STDERR_FILENO, msg, OSAL_sizeof(msg) - 1);
     }
 }
 
@@ -36,7 +36,7 @@ static void *log_collector_thread(void *arg)
         CCM_Heartbeat_Update(g_heartbeat, CCM_PROCESS_LOGGER);
 
         /* 从共享内存读取日志 */
-        ret = CCM_Log_Read(g_log_ring, log_entry, OSAL_SIZEOF(log_entry));
+        ret = CCM_Log_Read(g_log_ring, log_entry, OSAL_sizeof(log_entry));
         if (ret == OSAL_SUCCESS) {
             /* TODO: 写入日志文件或输出到控制台 */
             LOG_DEBUG("LOGGER", "收到日志: %s", log_entry);

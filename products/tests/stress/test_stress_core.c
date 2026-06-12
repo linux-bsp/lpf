@@ -101,14 +101,14 @@ stress_context_t* stress_context_create(const char *name,
         return NULL;
     }
 
-    stress_context_t *ctx = (stress_context_t*)OSAL_malloc(OSAL_SIZEOF(stress_context_t));
+    stress_context_t *ctx = (stress_context_t*)OSAL_malloc(OSAL_sizeof(stress_context_t));
     if (!ctx) {
         return NULL;
     }
 
-    OSAL_memset(ctx, 0, OSAL_SIZEOF(stress_context_t));
-    OSAL_strncpy(ctx->name, name, OSAL_SIZEOF(ctx->name) - 1);
-    ctx->name[OSAL_SIZEOF(ctx->name) - 1] = '\0';
+    OSAL_memset(ctx, 0, OSAL_sizeof(stress_context_t));
+    OSAL_strncpy(ctx->name, name, OSAL_sizeof(ctx->name) - 1);
+    ctx->name[OSAL_sizeof(ctx->name) - 1] = '\0';
     ctx->config = *config;
 
     /* 初始化原子变量 */
@@ -158,9 +158,9 @@ int32_t stress_run(stress_context_t *ctx,
 
     /* 创建工作线程 */
     osal_thread_t *threads = (osal_thread_t*)OSAL_malloc(
-        OSAL_SIZEOF(osal_thread_t) * ctx->config.thread_count);
+        OSAL_sizeof(osal_thread_t) * ctx->config.thread_count);
     worker_thread_args_t *args = (worker_thread_args_t*)OSAL_malloc(
-        OSAL_SIZEOF(worker_thread_args_t) * ctx->config.thread_count);
+        OSAL_sizeof(worker_thread_args_t) * ctx->config.thread_count);
 
     if (!threads || !args) {
         if (threads) OSAL_free(threads);
@@ -178,7 +178,7 @@ int32_t stress_run(stress_context_t *ctx,
         args[i].thread_id = i;
 
         char thread_name[32];
-        OSAL_snprintf(thread_name, OSAL_SIZEOF(thread_name), "stress_worker_%u", i);
+        OSAL_snprintf(thread_name, OSAL_sizeof(thread_name), "stress_worker_%u", i);
 
         if (OSAL_ThreadCreate(&threads[i], worker_thread_func, &args[i]) != 0) {
             /* 创建失败，停止已启动的线程 */
@@ -235,7 +235,7 @@ int32_t stress_get_stats(stress_context_t *ctx, stress_stats_t *stats) {
         return -1;
     }
 
-    OSAL_memset(stats, 0, OSAL_SIZEOF(stress_stats_t));
+    OSAL_memset(stats, 0, OSAL_sizeof(stress_stats_t));
 
     stats->total_operations = OSAL_AtomicLoad64(&ctx->total_operations);
     stats->successful_ops = OSAL_AtomicLoad64(&ctx->successful_ops);

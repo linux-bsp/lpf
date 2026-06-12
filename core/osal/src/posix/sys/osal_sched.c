@@ -82,7 +82,7 @@ int32_t OSAL_SchedSetPolicy(osal_thread_t thread, int32_t policy, int32_t priori
     }
 
     /* 设置优先级 */
-    memset(&param, 0, OSAL_SIZEOF(param));
+    memset(&param, 0, OSAL_sizeof(param));
     param.sched_priority = priority;
 
     ret = pthread_setschedparam(pthread, posix_policy, &param);
@@ -192,7 +192,7 @@ int32_t OSAL_SchedSetAffinity(osal_thread_t thread, int32_t cpu_id)
     CPU_ZERO(&cpuset);
     CPU_SET(cpu_id, &cpuset);
 
-    ret = pthread_setaffinity_np(pthread, OSAL_SIZEOF(cpu_set_t), &cpuset);
+    ret = pthread_setaffinity_np(pthread, OSAL_sizeof(cpu_set_t), &cpuset);
     if (ret != 0) {
         return OSAL_ERR_GENERIC;
     }
@@ -231,7 +231,7 @@ int32_t OSAL_SchedGetAffinity(osal_thread_t thread, int32_t *cpu_id)
 
     /* 获取CPU亲和性 */
     CPU_ZERO(&cpuset);
-    ret = pthread_getaffinity_np(pthread, OSAL_SIZEOF(cpu_set_t), &cpuset);
+    ret = pthread_getaffinity_np(pthread, OSAL_sizeof(cpu_set_t), &cpuset);
     if (ret != 0) {
         return OSAL_ERR_GENERIC;
     }

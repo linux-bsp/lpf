@@ -111,8 +111,8 @@ static void test_osal_file_write_read_success(void)
     TEST_ASSERT_EQUAL(0, pos);
 
     /* 读取数据 */
-    OSAL_memset(read_buffer, 0, OSAL_SIZEOF(read_buffer));
-    ret = OSAL_read(fd, read_buffer, OSAL_SIZEOF(read_buffer));
+    OSAL_memset(read_buffer, 0, OSAL_sizeof(read_buffer));
+    ret = OSAL_read(fd, read_buffer, OSAL_sizeof(read_buffer));
     TEST_ASSERT_EQUAL((osal_ssize_t)OSAL_strlen(write_data), ret);
     TEST_ASSERT_EQUAL(0, OSAL_strncmp(read_buffer, write_data, OSAL_strlen(write_data)));
 
@@ -147,8 +147,8 @@ static void test_osal_file_write_append(void)
     /* 读取并验证 */
     fd = OSAL_open(TEST_FILE_PATH, OSAL_O_RDONLY, 0);
     TEST_ASSERT_TRUE(fd >= 0);
-    OSAL_memset(read_buffer, 0, OSAL_SIZEOF(read_buffer));
-    ret = OSAL_read(fd, read_buffer, OSAL_SIZEOF(read_buffer));
+    OSAL_memset(read_buffer, 0, OSAL_sizeof(read_buffer));
+    ret = OSAL_read(fd, read_buffer, OSAL_sizeof(read_buffer));
     TEST_ASSERT_EQUAL((osal_ssize_t)(OSAL_strlen(data1) + OSAL_strlen(data2)), ret);
 
     OSAL_close(fd);
@@ -171,11 +171,11 @@ static void test_osal_file_read_eof(void)
 
     /* 移动到文件开头并读取 */
     OSAL_lseek(fd, 0, OSAL_SEEK_SET);
-    ret = OSAL_read(fd, buffer, OSAL_SIZEOF(buffer));
+    ret = OSAL_read(fd, buffer, OSAL_sizeof(buffer));
     TEST_ASSERT_EQUAL((osal_ssize_t)OSAL_strlen(data), ret);
 
     /* 再次读取（应该返回0，表示EOF） */
-    ret = OSAL_read(fd, buffer, OSAL_SIZEOF(buffer));
+    ret = OSAL_read(fd, buffer, OSAL_sizeof(buffer));
     TEST_ASSERT_EQUAL(0, ret);
 
     OSAL_close(fd);
@@ -205,7 +205,7 @@ static void test_osal_file_lseek_set(void)
     TEST_ASSERT_EQUAL(5, pos);
 
     /* 读取1个字节 */
-    OSAL_memset(buffer, 0, OSAL_SIZEOF(buffer));
+    OSAL_memset(buffer, 0, OSAL_sizeof(buffer));
     OSAL_read(fd, buffer, 1);
     TEST_ASSERT_EQUAL('5', buffer[0]);
 
@@ -240,7 +240,7 @@ static void test_osal_file_lseek_cur(void)
     TEST_ASSERT_EQUAL(5, pos);
 
     /* 读取1个字节 */
-    OSAL_memset(buffer, 0, OSAL_SIZEOF(buffer));
+    OSAL_memset(buffer, 0, OSAL_sizeof(buffer));
     OSAL_read(fd, buffer, 1);
     TEST_ASSERT_EQUAL('5', buffer[0]);
 
@@ -465,7 +465,7 @@ static const test_suite_t test_suite = {
 	.module_name = "osal_file",
 	.layer_name = "OSAL",
 	.cases = test_cases,
-	.case_count = OSAL_SIZEOF(test_cases) / OSAL_SIZEOF(test_case_t),
+	.case_count = OSAL_sizeof(test_cases) / OSAL_sizeof(test_case_t),
 	.suite_setup = NULL,
 	.suite_teardown = NULL,
 	.metadata = {

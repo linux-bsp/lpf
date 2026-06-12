@@ -112,7 +112,7 @@ static void test_hal_spi_write_null_handle(void)
 {
     uint8_t buffer[4] = {0x01, 0x02, 0x03, 0x04};
 
-    int32_t ret = HAL_SPI_Write(NULL, buffer, OSAL_SIZEOF(buffer));
+    int32_t ret = HAL_SPI_Write(NULL, buffer, OSAL_sizeof(buffer));
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -144,7 +144,7 @@ static void test_hal_spi_read_null_handle(void)
 {
     uint8_t buffer[4];
 
-    int32_t ret = HAL_SPI_Read(NULL, buffer, OSAL_SIZEOF(buffer));
+    int32_t ret = HAL_SPI_Read(NULL, buffer, OSAL_sizeof(buffer));
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -181,7 +181,7 @@ static void test_hal_spi_transfer_null_handle(void)
     uint8_t tx_buffer[4] = {0x01, 0x02, 0x03, 0x04};
     uint8_t rx_buffer[4];
 
-    int32_t ret = HAL_SPI_Transfer(NULL, tx_buffer, rx_buffer, OSAL_SIZEOF(tx_buffer));
+    int32_t ret = HAL_SPI_Transfer(NULL, tx_buffer, rx_buffer, OSAL_sizeof(tx_buffer));
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -204,7 +204,7 @@ static void test_hal_spi_transfer_loopback(void)
         TEST_ASSERT_FALSE(true); // /dev/spidev0.0 not available
     }
 
-    ret = HAL_SPI_Transfer(handle, tx_buffer, rx_buffer, OSAL_SIZEOF(tx_buffer));
+    ret = HAL_SPI_Transfer(handle, tx_buffer, rx_buffer, OSAL_sizeof(tx_buffer));
 
     /* 注意: 需要硬件回环才能验证数据 */
     if (OSAL_SUCCESS == ret) {
@@ -222,7 +222,7 @@ static void test_hal_spi_transfer_multi_null_handle(void)
     hal_spi_transfer_t xfer = {
         .tx_buf = tx_buffer,
         .rx_buf = rx_buffer,
-        .len = OSAL_SIZEOF(tx_buffer),
+        .len = OSAL_sizeof(tx_buffer),
         .speed_hz = 0,
         .delay_usecs = 0,
         .bits_per_word = 0,
@@ -444,7 +444,7 @@ static const test_suite_t test_suite = {
 	.module_name = "hal_spi",
 	.layer_name = "HAL",
 	.cases = test_cases,
-	.case_count = OSAL_SIZEOF(test_cases) / OSAL_SIZEOF(test_case_t),
+	.case_count = OSAL_sizeof(test_cases) / OSAL_sizeof(test_case_t),
 	.suite_setup = NULL,
 	.suite_teardown = NULL,
 	.metadata = {

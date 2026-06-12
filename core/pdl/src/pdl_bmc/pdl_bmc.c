@@ -59,15 +59,15 @@ int32_t PDL_BMC_Init(const pdl_bmc_config_t *config,
     }
 
     /* 分配上下文 */
-    ctx = (bmc_context_t *)OSAL_malloc(OSAL_SIZEOF(bmc_context_t));
+    ctx = (bmc_context_t *)OSAL_malloc(OSAL_sizeof(bmc_context_t));
     if (NULL == ctx)
     {
         LOG_ERROR("BMC", "Failed to allocate context");
         return OSAL_ERR_NO_MEMORY;
     }
 
-    OSAL_memset(ctx, 0, OSAL_SIZEOF(bmc_context_t));
-    OSAL_memcpy(&ctx->config, config, OSAL_SIZEOF(pdl_bmc_config_t));
+    OSAL_memset(ctx, 0, OSAL_sizeof(bmc_context_t));
+    OSAL_memcpy(&ctx->config, config, OSAL_sizeof(pdl_bmc_config_t));
     ctx->current_channel = config->primary_channel;
     ctx->current_protocol = PDL_BMC_PROTOCOL_REDFISH;
 

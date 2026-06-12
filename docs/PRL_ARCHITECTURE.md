@@ -77,7 +77,7 @@ int32_t PDL_MCU_GetVersion(pdl_mcu_handle_t handle, pdl_mcu_version_t *version)
     // 1. 使用 PRL 编码请求
     uint8_t tx_buf[PRL_MAX_PACKET_SIZE];
     int len = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
-                         NULL, 0, tx_buf, OSAL_SIZEOF(tx_buf), 0);
+                         NULL, 0, tx_buf, OSAL_sizeof(tx_buf), 0);
     
     // 2. 通过 HAL 发送
     HAL_CAN_Send(handle->can_handle, tx_buf, len);
@@ -94,7 +94,7 @@ int32_t PDL_MCU_GetVersion(pdl_mcu_handle_t handle, pdl_mcu_version_t *version)
     PRL_Decode(rx_buf, rx_len, &dev_type, &msg_type, &payload, &payload_len);
     
     // 5. 解析业务数据
-    memcpy(version, payload, OSAL_SIZEOF(pdl_mcu_version_t));
+    memcpy(version, payload, OSAL_sizeof(pdl_mcu_version_t));
     
     return OSAL_SUCCESS;
 }
@@ -295,8 +295,8 @@ void example_encode(void)
     /* 编码 */
     uint8_t buffer[PRL_MAX_PACKET_SIZE];
     int len = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
-                         &version, OSAL_SIZEOF(version),
-                         buffer, OSAL_SIZEOF(buffer), 0);
+                         &version, OSAL_sizeof(version),
+                         buffer, OSAL_sizeof(buffer), 0);
     
     if (len > 0) {
         /* 发送 buffer */
@@ -338,7 +338,7 @@ int32_t PDL_MCU_GetVersion(pdl_mcu_handle_t handle, pdl_mcu_version_t *version)
     
     /* 1. 编码请求 */
     int len = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
-                         NULL, 0, tx_buf, OSAL_SIZEOF(tx_buf),
+                         NULL, 0, tx_buf, OSAL_sizeof(tx_buf),
                          PRL_FLAG_ACK_REQUIRED);
     if (len < 0) {
         return OSAL_ERR_GENERIC;
@@ -370,12 +370,12 @@ int32_t PDL_MCU_GetVersion(pdl_mcu_handle_t handle, pdl_mcu_version_t *version)
     /* 5. 验证响应 */
     if (dev_type != PRL_DEV_TYPE_MCU ||
         msg_type != PRL_MCU_MSG_GET_VERSION ||
-        payload_len != OSAL_SIZEOF(prl_mcu_version_t)) {
+        payload_len != OSAL_sizeof(prl_mcu_version_t)) {
         return OSAL_ERR_GENERIC;
     }
     
     /* 6. 复制数据 */
-    memcpy(version, payload, OSAL_SIZEOF(prl_mcu_version_t));
+    memcpy(version, payload, OSAL_sizeof(prl_mcu_version_t));
     
     return OSAL_SUCCESS;
 }
@@ -533,8 +533,8 @@ void test_encode_decode(void)
     
     /* 编码 */
     int len = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
-                         &version_in, OSAL_SIZEOF(version_in),
-                         buffer, OSAL_SIZEOF(buffer), 0);
+                         &version_in, OSAL_sizeof(version_in),
+                         buffer, OSAL_sizeof(buffer), 0);
     assert(len > 0);
     
     /* 解码 */

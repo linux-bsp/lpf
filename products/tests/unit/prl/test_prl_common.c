@@ -27,13 +27,13 @@ static void test_prl_crc16_basic(void)
     uint16_t crc;
 
     /* 测试不同数据的 CRC 计算（使用 OSAL CRC 函数） */
-    crc = OSAL_CRC16_CCITT(data1, OSAL_SIZEOF(data1));
+    crc = OSAL_CRC16_CCITT(data1, OSAL_sizeof(data1));
     TEST_ASSERT_NOT_EQUAL(0, crc);
 
-    crc = OSAL_CRC16_CCITT(data2, OSAL_SIZEOF(data2));
+    crc = OSAL_CRC16_CCITT(data2, OSAL_sizeof(data2));
     TEST_ASSERT_NOT_EQUAL(0, crc);
 
-    crc = OSAL_CRC16_CCITT(data3, OSAL_SIZEOF(data3));
+    crc = OSAL_CRC16_CCITT(data3, OSAL_sizeof(data3));
     TEST_ASSERT_NOT_EQUAL(0, crc);
 }
 
@@ -43,8 +43,8 @@ static void test_prl_crc16_consistency(void)
     uint16_t crc1, crc2;
 
     /* 相同数据应该产生相同的 CRC */
-    crc1 = OSAL_CRC16_CCITT(data, OSAL_SIZEOF(data));
-    crc2 = OSAL_CRC16_CCITT(data, OSAL_SIZEOF(data));
+    crc1 = OSAL_CRC16_CCITT(data, OSAL_sizeof(data));
+    crc2 = OSAL_CRC16_CCITT(data, OSAL_sizeof(data));
     TEST_ASSERT_EQUAL(crc1, crc2);
 }
 
@@ -55,8 +55,8 @@ static void test_prl_crc16_different_data(void)
     uint16_t crc1, crc2;
 
     /* 不同数据应该产生不同的 CRC */
-    crc1 = OSAL_CRC16_CCITT(data1, OSAL_SIZEOF(data1));
-    crc2 = OSAL_CRC16_CCITT(data2, OSAL_SIZEOF(data2));
+    crc1 = OSAL_CRC16_CCITT(data1, OSAL_sizeof(data1));
+    crc2 = OSAL_CRC16_CCITT(data2, OSAL_sizeof(data2));
     TEST_ASSERT_NOT_EQUAL(crc1, crc2);
 }
 
@@ -206,9 +206,9 @@ static void test_prl_packet_crc(void)
 
     /* 构造报文 */
     prl_init_header(hdr, PRL_DEV_TYPE_GSC, PRL_GSC_MSG_TELEMETRY,
-                    OSAL_SIZEOF(payload), 0);
-    OSAL_memcpy(packet + PRL_HEADER_SIZE, payload, OSAL_SIZEOF(payload));
-    total_len = PRL_HEADER_SIZE + OSAL_SIZEOF(payload);
+                    OSAL_sizeof(payload), 0);
+    OSAL_memcpy(packet + PRL_HEADER_SIZE, payload, OSAL_sizeof(payload));
+    total_len = PRL_HEADER_SIZE + OSAL_sizeof(payload);
 
     /* 设置 CRC */
     prl_set_packet_crc(packet, total_len);
@@ -227,9 +227,9 @@ static void test_prl_packet_crc_tampered(void)
 
     /* 构造报文并设置 CRC */
     prl_init_header(hdr, PRL_DEV_TYPE_POWER, PRL_POWER_MSG_STATUS_REPORT,
-                    OSAL_SIZEOF(payload), 0);
-    OSAL_memcpy(packet + PRL_HEADER_SIZE, payload, OSAL_SIZEOF(payload));
-    total_len = PRL_HEADER_SIZE + OSAL_SIZEOF(payload);
+                    OSAL_sizeof(payload), 0);
+    OSAL_memcpy(packet + PRL_HEADER_SIZE, payload, OSAL_sizeof(payload));
+    total_len = PRL_HEADER_SIZE + OSAL_sizeof(payload);
     prl_set_packet_crc(packet, total_len);
 
     /* 篡改负载数据 */
@@ -248,9 +248,9 @@ static void test_prl_packet_crc_header_tampered(void)
 
     /* 构造报文并设置 CRC */
     prl_init_header(hdr, PRL_DEV_TYPE_CCM, PRL_CCM_MSG_ORBIT_DATA,
-                    OSAL_SIZEOF(payload), 0);
-    OSAL_memcpy(packet + PRL_HEADER_SIZE, payload, OSAL_SIZEOF(payload));
-    total_len = PRL_HEADER_SIZE + OSAL_SIZEOF(payload);
+                    OSAL_sizeof(payload), 0);
+    OSAL_memcpy(packet + PRL_HEADER_SIZE, payload, OSAL_sizeof(payload));
+    total_len = PRL_HEADER_SIZE + OSAL_sizeof(payload);
     prl_set_packet_crc(packet, total_len);
 
     /* 篡改协议头（除了 CRC 字段） */
@@ -409,7 +409,7 @@ static const test_suite_t test_suite = {
 	.module_name = "prl_common",
 	.layer_name = "PRL",
 	.cases = test_cases,
-	.case_count = OSAL_SIZEOF(test_cases) / OSAL_SIZEOF(test_case_t),
+	.case_count = OSAL_sizeof(test_cases) / OSAL_sizeof(test_case_t),
 	.suite_setup = NULL,
 	.suite_teardown = NULL,
 	.metadata = {

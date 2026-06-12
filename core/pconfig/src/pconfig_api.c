@@ -45,7 +45,7 @@ int32_t PCONFIG_Init(void)
         return ret;
     }
 
-    OSAL_memset(&g_registry, 0, OSAL_SIZEOF(g_registry));
+    OSAL_memset(&g_registry, 0, OSAL_sizeof(g_registry));
     g_initialized = true;
 
     LOG_INFO("PCL", "Platform configuration library initialized");
@@ -58,7 +58,7 @@ void PCONFIG_Cleanup(void)
         return;
     }
 
-    OSAL_memset(&g_registry, 0, OSAL_SIZEOF(g_registry));
+    OSAL_memset(&g_registry, 0, OSAL_sizeof(g_registry));
     g_initialized = false;
 
     /* 销毁互斥锁 */

@@ -10,7 +10,7 @@ test_mock_registry_t g_mock_registry = {0};
 
 void test_mock_init(void)
 {
-    OSAL_memset(&g_mock_registry, 0, OSAL_SIZEOF(test_mock_registry_t));
+    OSAL_memset(&g_mock_registry, 0, OSAL_sizeof(test_mock_registry_t));
 }
 
 void test_mock_reset_all(void)

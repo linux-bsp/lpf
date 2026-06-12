@@ -29,7 +29,7 @@ extern uint32_t test_get_filtered_suites(const test_filter_t *filter, const test
 static int32_t read_choice(void)
 {
     char buffer[16];
-    if (OSAL_Fgets(buffer, OSAL_SIZEOF(buffer), OSAL_stdin) == NULL) {
+    if (OSAL_Fgets(buffer, OSAL_sizeof(buffer), OSAL_stdin) == NULL) {
         return -1;
     }
 
@@ -66,8 +66,8 @@ static void display_suite_metadata(const test_suite_t *suite)
     char tags_buf[128];
     char timeout_buf[32];
 
-    test_tags_to_string(suite->metadata.tags, tags_buf, OSAL_SIZEOF(tags_buf));
-    format_timeout(suite->metadata.timeout_ms, timeout_buf, OSAL_SIZEOF(timeout_buf));
+    test_tags_to_string(suite->metadata.tags, tags_buf, OSAL_sizeof(tags_buf));
+    format_timeout(suite->metadata.timeout_ms, timeout_buf, OSAL_sizeof(timeout_buf));
 
     OSAL_Printf("    Category: %s | Tags: %s | Timeout: %s\n",
                 test_category_name(suite->metadata.category),
@@ -124,19 +124,19 @@ static void display_filter_status(const test_filter_t *filter)
 
     if (filter->include_tags != 0) {
         char tags_buf[128];
-        test_tags_to_string(filter->include_tags, tags_buf, OSAL_SIZEOF(tags_buf));
+        test_tags_to_string(filter->include_tags, tags_buf, OSAL_sizeof(tags_buf));
         OSAL_Printf("    - Include tags: %s\n", tags_buf);
     }
 
     if (filter->exclude_tags != 0) {
         char tags_buf[128];
-        test_tags_to_string(filter->exclude_tags, tags_buf, OSAL_SIZEOF(tags_buf));
+        test_tags_to_string(filter->exclude_tags, tags_buf, OSAL_sizeof(tags_buf));
         OSAL_Printf("    - Exclude tags: %s\n", tags_buf);
     }
 
     if (filter->max_timeout_ms > 0) {
         char timeout_buf[32];
-        format_timeout(filter->max_timeout_ms, timeout_buf, OSAL_SIZEOF(timeout_buf));
+        format_timeout(filter->max_timeout_ms, timeout_buf, OSAL_sizeof(timeout_buf));
         OSAL_Printf("    - Max timeout: %s\n", timeout_buf);
     }
 }
@@ -420,7 +420,7 @@ static int32_t menu_select_module(const test_filter_t *filter)
             }
 
             char context[128];
-            OSAL_snprintf(context, OSAL_SIZEOF(context), "in module %s", modules[choice - 1]);
+            OSAL_snprintf(context, OSAL_sizeof(context), "in module %s", modules[choice - 1]);
             menu_select_suite(suites, count, context);
         } else if (choice == (int32_t)(module_count + 1)) {
             return OSAL_SUCCESS;
@@ -476,7 +476,7 @@ static int32_t menu_select_layer(const test_filter_t *filter)
             }
 
             char context[128];
-            OSAL_snprintf(context, OSAL_SIZEOF(context), "in layer %s", layers[choice - 1]);
+            OSAL_snprintf(context, OSAL_sizeof(context), "in layer %s", layers[choice - 1]);
             menu_select_suite(suites, count, context);
         } else if (choice == (int32_t)(layer_count + 1)) {
             return OSAL_SUCCESS;

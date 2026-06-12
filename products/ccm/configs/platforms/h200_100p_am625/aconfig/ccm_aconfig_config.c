@@ -97,7 +97,7 @@ static const aconfig_invalidation_map_t g_ccm_inv_map[] = {
     {
         .source_tm_id = ACONFIG_TC_POWER_OFF,
         .affected_tm_ids = g_affected_by_power_off,
-        .affected_count = OSAL_SIZEOF(g_affected_by_power_off) / OSAL_SIZEOF(uint32_t)
+        .affected_count = OSAL_sizeof(g_affected_by_power_off) / OSAL_sizeof(uint32_t)
     }
 };
 
@@ -109,7 +109,7 @@ static const aconfig_config_table_t g_ccm_acl_table = {
     .tm_table = g_ccm_tm_table,
     .tm_count = ACONFIG_TM_FUNC_MAX,
     .inv_map = g_ccm_inv_map,
-    .inv_count = OSAL_SIZEOF(g_ccm_inv_map) / OSAL_SIZEOF(aconfig_invalidation_map_t)
+    .inv_count = OSAL_sizeof(g_ccm_inv_map) / OSAL_sizeof(aconfig_invalidation_map_t)
 };
 
 /**

@@ -121,8 +121,8 @@ static void test_osal_log_write_long_message(void)
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 构造长消息 */
-    OSAL_memset(long_msg, 'A', OSAL_SIZEOF(long_msg) - 1);
-    long_msg[OSAL_SIZEOF(long_msg) - 1] = '\0';
+    OSAL_memset(long_msg, 'A', OSAL_sizeof(long_msg) - 1);
+    long_msg[OSAL_sizeof(long_msg) - 1] = '\0';
 
     /* 写入长消息 */
     LOG_INFO("TEST", "%s", long_msg);
@@ -454,7 +454,7 @@ static const test_suite_t test_suite = {
 	.module_name = "osal_log",
 	.layer_name = "OSAL",
 	.cases = test_cases,
-	.case_count = OSAL_SIZEOF(test_cases) / OSAL_SIZEOF(test_case_t),
+	.case_count = OSAL_sizeof(test_cases) / OSAL_sizeof(test_case_t),
 	.suite_setup = NULL,
 	.suite_teardown = NULL,
 	.metadata = {

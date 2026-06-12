@@ -54,9 +54,9 @@ int len = PRL_Encode(
     PRL_DEV_TYPE_MCU,           /* 设备类型 */
     PRL_MCU_MSG_GET_VERSION,    /* 消息类型 */
     &version,                   /* 负载数据 */
-    OSAL_SIZEOF(version),            /* 负载长度 */
+    OSAL_sizeof(version),            /* 负载长度 */
     buffer,                     /* 输出缓冲区 */
-    OSAL_SIZEOF(buffer),             /* 缓冲区大小 */
+    OSAL_sizeof(buffer),             /* 缓冲区大小 */
     0                           /* 标志位 */
 );
 
@@ -204,7 +204,7 @@ int32_t PDL_MCU_GetVersion(pdl_mcu_handle_t handle, pdl_mcu_version_t *version)
     
     /* 1. 使用 PRL 编码请求 */
     int len = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
-                         NULL, 0, tx_buf, OSAL_SIZEOF(tx_buf),
+                         NULL, 0, tx_buf, OSAL_sizeof(tx_buf),
                          PRL_FLAG_ACK_REQUIRED);
     
     /* 2. 通过 HAL 发送 */
@@ -221,7 +221,7 @@ int32_t PDL_MCU_GetVersion(pdl_mcu_handle_t handle, pdl_mcu_version_t *version)
     PRL_Decode(rx_buf, rx_len, &dev_type, &msg_type, &payload, &payload_len);
     
     /* 5. 处理业务数据 */
-    memcpy(version, payload, OSAL_SIZEOF(pdl_mcu_version_t));
+    memcpy(version, payload, OSAL_sizeof(pdl_mcu_version_t));
     
     return OSAL_SUCCESS;
 }

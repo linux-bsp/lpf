@@ -250,7 +250,7 @@ static void test_pdl_bmc_read_sensors_success(void)
     int32_t ret = PDL_BMC_Init(&config, &handle);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-    OSAL_memset(readings, 0, OSAL_SIZEOF(readings));
+    OSAL_memset(readings, 0, OSAL_sizeof(readings));
     ret = PDL_BMC_ReadSensors(handle, PDL_BMC_SENSOR_TEMP, readings, 16, &actual_count);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
@@ -302,7 +302,7 @@ static void test_pdl_bmc_execute_command_success(void)
     int32_t ret = PDL_BMC_Init(&config, &handle);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-    ret = PDL_BMC_ExecuteCommand(handle, "chassis status", response, OSAL_SIZEOF(response));
+    ret = PDL_BMC_ExecuteCommand(handle, "chassis status", response, OSAL_sizeof(response));
     TEST_ASSERT_TRUE(ret >= 0);
 
     PDL_BMC_Deinit(handle);
@@ -313,7 +313,7 @@ static void test_pdl_bmc_execute_command_null_handle(void)
 {
     char response[256];
 
-    int32_t ret = PDL_BMC_ExecuteCommand(NULL, "chassis status", response, OSAL_SIZEOF(response));
+    int32_t ret = PDL_BMC_ExecuteCommand(NULL, "chassis status", response, OSAL_sizeof(response));
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -328,7 +328,7 @@ static void test_pdl_bmc_execute_command_null_cmd(void)
     int32_t ret = PDL_BMC_Init(&config, &handle);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-    ret = PDL_BMC_ExecuteCommand(handle, NULL, response, OSAL_SIZEOF(response));
+    ret = PDL_BMC_ExecuteCommand(handle, NULL, response, OSAL_sizeof(response));
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 
     PDL_BMC_Deinit(handle);
@@ -631,7 +631,7 @@ static const test_suite_t test_suite = {
 	.module_name = "pdl_bmc",
 	.layer_name = "PDL",
 	.cases = test_cases,
-	.case_count = OSAL_SIZEOF(test_cases) / OSAL_SIZEOF(test_case_t),
+	.case_count = OSAL_sizeof(test_cases) / OSAL_sizeof(test_case_t),
 	.suite_setup = NULL,
 	.suite_teardown = NULL,
 	.metadata = {

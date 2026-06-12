@@ -96,11 +96,11 @@ int32_t libutest_export_junit_xml(const char *output_path)
     }
 
     /* XML header */
-    len = OSAL_snprintf(buf, OSAL_SIZEOF(buf), "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+    len = OSAL_snprintf(buf, OSAL_sizeof(buf), "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     OSAL_write(fd, buf, len);
 
     /* Root testsuites element */
-    len = OSAL_snprintf(buf, OSAL_SIZEOF(buf),
+    len = OSAL_snprintf(buf, OSAL_sizeof(buf),
                         "<testsuites tests=\"%u\" failures=\"%u\" time=\"%.3f\">\n",
                         stats->total,
                         stats->failed,
@@ -110,8 +110,8 @@ int32_t libutest_export_junit_xml(const char *output_path)
     /* Helper macro to write test cases */
 #define WRITE_TESTSUITE_HEADER() do { \
     if (current_suite) { \
-        xml_escape(current_suite, escaped_name, OSAL_SIZEOF(escaped_name)); \
-        len = OSAL_snprintf(buf, OSAL_SIZEOF(buf), \
+        xml_escape(current_suite, escaped_name, OSAL_sizeof(escaped_name)); \
+        len = OSAL_snprintf(buf, OSAL_sizeof(buf), \
                             "  <testsuite name=\"%s\" tests=\"%u\" failures=\"%u\" time=\"%.3f\">\n", \
                             escaped_name, suite_tests, suite_failures, suite_time_ms / 1000.0); \
         OSAL_write(fd, buf, len); \
@@ -120,7 +120,7 @@ int32_t libutest_export_junit_xml(const char *output_path)
 
 #define WRITE_TESTSUITE_FOOTER() do { \
     if (current_suite) { \
-        len = OSAL_snprintf(buf, OSAL_SIZEOF(buf), "  </testsuite>\n"); \
+        len = OSAL_snprintf(buf, OSAL_sizeof(buf), "  </testsuite>\n"); \
         OSAL_write(fd, buf, len); \
     } \
 } while(0)
@@ -138,8 +138,8 @@ int32_t libutest_export_junit_xml(const char *output_path)
         }
 
         /* Write test case */
-        xml_escape(node->test_name, escaped_name, OSAL_SIZEOF(escaped_name));
-        len = OSAL_snprintf(buf, OSAL_SIZEOF(buf),
+        xml_escape(node->test_name, escaped_name, OSAL_sizeof(escaped_name));
+        len = OSAL_snprintf(buf, OSAL_sizeof(buf),
                             "    <testcase name=\"%s\" time=\"%.3f\"/>\n",
                             escaped_name, node->elapsed_ms / 1000.0);
         OSAL_write(fd, buf, len);
@@ -161,17 +161,17 @@ int32_t libutest_export_junit_xml(const char *output_path)
         }
 
         /* Write test case with failure */
-        xml_escape(node->test_name, escaped_name, OSAL_SIZEOF(escaped_name));
-        len = OSAL_snprintf(buf, OSAL_SIZEOF(buf),
+        xml_escape(node->test_name, escaped_name, OSAL_sizeof(escaped_name));
+        len = OSAL_snprintf(buf, OSAL_sizeof(buf),
                             "    <testcase name=\"%s\" time=\"%.3f\">\n",
                             escaped_name, node->elapsed_ms / 1000.0);
         OSAL_write(fd, buf, len);
 
-        len = OSAL_snprintf(buf, OSAL_SIZEOF(buf),
+        len = OSAL_snprintf(buf, OSAL_sizeof(buf),
                             "      <failure message=\"Test assertion failed\"/>\n");
         OSAL_write(fd, buf, len);
 
-        len = OSAL_snprintf(buf, OSAL_SIZEOF(buf), "    </testcase>\n");
+        len = OSAL_snprintf(buf, OSAL_sizeof(buf), "    </testcase>\n");
         OSAL_write(fd, buf, len);
 
         suite_tests++;
@@ -186,7 +186,7 @@ int32_t libutest_export_junit_xml(const char *output_path)
 #undef WRITE_TESTSUITE_FOOTER
 
     /* Close root element */
-    len = OSAL_snprintf(buf, OSAL_SIZEOF(buf), "</testsuites>\n");
+    len = OSAL_snprintf(buf, OSAL_sizeof(buf), "</testsuites>\n");
     OSAL_write(fd, buf, len);
 
     OSAL_close(fd);
@@ -222,11 +222,11 @@ int32_t libutest_export_json(const char *output_path)
     }
 
     /* Root object */
-    len = OSAL_snprintf(buf, OSAL_SIZEOF(buf), "{\n");
+    len = OSAL_snprintf(buf, OSAL_sizeof(buf), "{\n");
     OSAL_write(fd, buf, len);
 
     /* Summary statistics */
-    len = OSAL_snprintf(buf, OSAL_SIZEOF(buf),
+    len = OSAL_snprintf(buf, OSAL_sizeof(buf),
                         "  \"summary\": {\n"
                         "    \"total\": %u,\n"
                         "    \"passed\": %u,\n"
@@ -242,49 +242,49 @@ int32_t libutest_export_json(const char *output_path)
     OSAL_write(fd, buf, len);
 
     /* Passed tests array */
-    len = OSAL_snprintf(buf, OSAL_SIZEOF(buf), "  \"passed\": [\n");
+    len = OSAL_snprintf(buf, OSAL_sizeof(buf), "  \"passed\": [\n");
     OSAL_write(fd, buf, len);
 
     first = true;
     for (node = stats->passed_list_head; node != NULL; node = node->next) {
         if (!first) {
-            len = OSAL_snprintf(buf, OSAL_SIZEOF(buf), ",\n");
+            len = OSAL_snprintf(buf, OSAL_sizeof(buf), ",\n");
             OSAL_write(fd, buf, len);
         }
         first = false;
 
-        len = OSAL_snprintf(buf, OSAL_SIZEOF(buf),
+        len = OSAL_snprintf(buf, OSAL_sizeof(buf),
                             "    {\"suite\": \"%s\", \"test\": \"%s\", \"elapsed_ms\": %u}",
                             node->suite_name, node->test_name, node->elapsed_ms);
         OSAL_write(fd, buf, len);
     }
 
-    len = OSAL_snprintf(buf, OSAL_SIZEOF(buf), "\n  ],\n");
+    len = OSAL_snprintf(buf, OSAL_sizeof(buf), "\n  ],\n");
     OSAL_write(fd, buf, len);
 
     /* Failed tests array */
-    len = OSAL_snprintf(buf, OSAL_SIZEOF(buf), "  \"failed\": [\n");
+    len = OSAL_snprintf(buf, OSAL_sizeof(buf), "  \"failed\": [\n");
     OSAL_write(fd, buf, len);
 
     first = true;
     for (node = stats->failed_list_head; node != NULL; node = node->next) {
         if (!first) {
-            len = OSAL_snprintf(buf, OSAL_SIZEOF(buf), ",\n");
+            len = OSAL_snprintf(buf, OSAL_sizeof(buf), ",\n");
             OSAL_write(fd, buf, len);
         }
         first = false;
 
-        len = OSAL_snprintf(buf, OSAL_SIZEOF(buf),
+        len = OSAL_snprintf(buf, OSAL_sizeof(buf),
                             "    {\"suite\": \"%s\", \"test\": \"%s\", \"elapsed_ms\": %u}",
                             node->suite_name, node->test_name, node->elapsed_ms);
         OSAL_write(fd, buf, len);
     }
 
-    len = OSAL_snprintf(buf, OSAL_SIZEOF(buf), "\n  ]\n");
+    len = OSAL_snprintf(buf, OSAL_sizeof(buf), "\n  ]\n");
     OSAL_write(fd, buf, len);
 
     /* Close root object */
-    len = OSAL_snprintf(buf, OSAL_SIZEOF(buf), "}\n");
+    len = OSAL_snprintf(buf, OSAL_sizeof(buf), "}\n");
     OSAL_write(fd, buf, len);
 
     OSAL_close(fd);
@@ -345,7 +345,7 @@ void libutest_print_slowest_tests(uint32_t top_n)
     if (stats->total == 0) return;
 
     /* Allocate array for all test pointers */
-    all_tests = (test_result_node_t **)OSAL_malloc(stats->total * OSAL_SIZEOF(test_result_node_t *));
+    all_tests = (test_result_node_t **)OSAL_malloc(stats->total * OSAL_sizeof(test_result_node_t *));
     if (!all_tests) {
         OSAL_Printf("Error: Failed to allocate memory for slowest tests report\n");
         return;
@@ -411,12 +411,12 @@ void libutest_print_suite_stats(void)
     if (stats->total == 0) return;
 
     /* Allocate suite statistics array */
-    suite_stats = (suite_stats_t *)OSAL_malloc(max_suites * OSAL_SIZEOF(suite_stats_t));
+    suite_stats = (suite_stats_t *)OSAL_malloc(max_suites * OSAL_sizeof(suite_stats_t));
     if (!suite_stats) {
         OSAL_Printf("Error: Failed to allocate memory for suite statistics\n");
         return;
     }
-    OSAL_memset(suite_stats, 0, max_suites * OSAL_SIZEOF(suite_stats_t));
+    OSAL_memset(suite_stats, 0, max_suites * OSAL_sizeof(suite_stats_t));
 
     /* Process passed tests */
     for (node = stats->passed_list_head; node != NULL; node = node->next) {

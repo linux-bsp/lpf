@@ -45,14 +45,14 @@ system_test_context_t* system_test_create(const char *name,
     }
 
     system_test_context_t *ctx = (system_test_context_t*)OSAL_malloc(
-        OSAL_SIZEOF(system_test_context_t));
+        OSAL_sizeof(system_test_context_t));
     if (!ctx) {
         return NULL;
     }
 
-    OSAL_memset(ctx, 0, OSAL_SIZEOF(system_test_context_t));
-    OSAL_strncpy(ctx->name, name, OSAL_SIZEOF(ctx->name) - 1);
-    ctx->name[OSAL_SIZEOF(ctx->name) - 1] = '\0';
+    OSAL_memset(ctx, 0, OSAL_sizeof(system_test_context_t));
+    OSAL_strncpy(ctx->name, name, OSAL_sizeof(ctx->name) - 1);
+    ctx->name[OSAL_sizeof(ctx->name) - 1] = '\0';
     ctx->type = type;
 
     return ctx;
@@ -132,8 +132,8 @@ void system_test_checkpoint(system_test_context_t *ctx,
     }
 
     checkpoint_record_t *cp = &ctx->checkpoints[ctx->checkpoint_count++];
-    OSAL_strncpy(cp->name, checkpoint_name, OSAL_SIZEOF(cp->name) - 1);
-    cp->name[OSAL_SIZEOF(cp->name) - 1] = '\0';
+    OSAL_strncpy(cp->name, checkpoint_name, OSAL_sizeof(cp->name) - 1);
+    cp->name[OSAL_sizeof(cp->name) - 1] = '\0';
     cp->passed = passed;
     cp->timestamp_ms = OSAL_GetTickCount();
 

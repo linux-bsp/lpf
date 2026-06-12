@@ -188,7 +188,7 @@ int32_t ACONFIG_GetInvalidationMap(uint32_t source_tm_id,
             /* 复制受影响的ID */
             uint32_t copy_count = (map->affected_count < max_count) ?
                                    map->affected_count : max_count;
-            OSAL_memcpy(affected_ids, map->affected_tm_ids, copy_count * OSAL_SIZEOF(uint32_t));
+            OSAL_memcpy(affected_ids, map->affected_tm_ids, copy_count * OSAL_sizeof(uint32_t));
             *actual_count = map->affected_count;
             break;
         }
@@ -209,7 +209,7 @@ int32_t ACONFIG_GetStatistics(aconfig_statistics_t *stats)
         return OSAL_ERR_INVALID_POINTER;
     }
 
-    OSAL_memset(stats, 0, OSAL_SIZEOF(aconfig_statistics_t));
+    OSAL_memset(stats, 0, OSAL_sizeof(aconfig_statistics_t));
 
     /* 获取读锁 */
     if (OSAL_SUCCESS != OSAL_RwlockRdlock(g_acl_rwlock)) {
