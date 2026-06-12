@@ -188,9 +188,9 @@ endif
 # Pattern rule to build Kconfig tools: conf, mconf, nconf, gconf, qconf
 # Matches: _build/kconfig-tools/conf, _build/kconfig-tools/mconf, etc.
 $(KCONFIG_TOOLS_DIR)/%onf:
-	@mkdir -p $(TOPDIR)/$(@D)/lxdialog
+	@mkdir -p $(@D)/lxdialog
 	@$(MAKE) CC="$(HOSTCC)" HOSTCC="$(HOSTCC)" \
-		obj=$(TOPDIR)/$(@D) -C $(CONFIG) -f Makefile.br $(@F)
+		obj=$(abspath $(@D)) -C $(CONFIG) -f Makefile.br $(@F)
 
 _ensure_kconfig_tools: $(KCONFIG_CONF)
 
