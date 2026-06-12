@@ -372,6 +372,13 @@ OSAL_STATIC_ASSERT(sizeof(uint64_t) == 0x8, "uint64_must_be_8_bytes");
 #define OSAL_ARRAY_SIZE(arr)    (sizeof(arr) / sizeof((arr)[0]))
 
 /*
+ * sizeof 包装宏
+ * - 提供统一的大小查询接口
+ * - 返回 osal_size_t 类型以保证跨平台一致性
+ */
+#define OSAL_SIZEOF(x)          ((osal_size_t)sizeof(x))
+
+/*
  * 结构体成员偏移量
  */
 #define OSAL_OFFSETOF(type, member)  ((osal_size_t)&(((type *)0)->member))

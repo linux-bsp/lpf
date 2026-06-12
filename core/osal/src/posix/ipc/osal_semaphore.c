@@ -39,14 +39,14 @@ int32_t OSAL_SemaphoreCreate(osal_semaphore_t **sem, uint32_t initial_value)
     if (initial_value > (uint32_t)INT32_MAX)
         return OSAL_ERR_INVALID_SEM_VALUE;
 
-    new_sem = (osal_semaphore_t *)malloc(sizeof(osal_semaphore_t));
+    new_sem = (osal_semaphore_t *)malloc(OSAL_SIZEOF(osal_semaphore_t));
     if (NULL == new_sem)
         return OSAL_ERR_GENERIC;
 
 #ifdef __APPLE__
     /* macOS使用命名信号量 */
     static uint32_t sem_counter = 0;
-    snprintf(new_sem->name, sizeof(new_sem->name), "/osal_sem_%d_%u", getpid(), sem_counter++);
+    snprintf(new_sem->name, OSAL_SIZEOF(new_sem->name), "/osal_sem_%d_%u", getpid(), sem_counter++);
 
     /* 先尝试删除可能存在的同名信号量 */
     sem_unlink(new_sem->name);

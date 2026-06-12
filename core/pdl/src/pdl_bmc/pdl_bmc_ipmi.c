@@ -92,13 +92,13 @@ int32_t bmc_ipmi_init(void *transport_handle,
         return OSAL_ERR_GENERIC;
     }
 
-    ctx = (bmc_ipmi_context_t *)OSAL_malloc(sizeof(bmc_ipmi_context_t));
+    ctx = (bmc_ipmi_context_t *)OSAL_malloc(OSAL_SIZEOF(bmc_ipmi_context_t));
     if (NULL == ctx)
     {
         return OSAL_ERR_GENERIC;
     }
 
-    OSAL_memset(ctx, 0, sizeof(bmc_ipmi_context_t));
+    OSAL_memset(ctx, 0, OSAL_SIZEOF(bmc_ipmi_context_t));
     ctx->transport_handle = transport_handle;
     ctx->send_recv = send_recv;
     ctx->seq_num = 0;
@@ -156,8 +156,8 @@ int32_t bmc_ipmi_pack_request(uint8_t netfn,
         return OSAL_ERR_GENERIC;
     }
 
-    required_size = sizeof(rmcp_header_t) + sizeof(ipmi_session_header_t) +
-                            sizeof(ipmi_msg_header_t) + data_len + 1;
+    required_size = OSAL_SIZEOF(rmcp_header_t) + OSAL_SIZEOF(ipmi_session_header_t) +
+                            OSAL_SIZEOF(ipmi_msg_header_t) + data_len + 1;
     if (frame_size < required_size)
     {
         return OSAL_ERR_GENERIC;
@@ -171,17 +171,17 @@ int32_t bmc_ipmi_pack_request(uint8_t netfn,
     rmcp->reserved = 0;
     rmcp->seq = 0xFF;
     rmcp->class = RMCP_CLASS_IPMI;
-    pos += sizeof(rmcp_header_t);
+    pos += OSAL_SIZEOF(rmcp_header_t);
 
     /* IPMI会话头部（无认证） */
     session = (ipmi_session_header_t *)&frame[pos];
     session->auth_type = IPMI_AUTH_TYPE_NONE;
     session->session_seq = 0;
     session->session_id = 0;
-    pos += sizeof(ipmi_session_header_t);
+    pos += OSAL_SIZEOF(ipmi_session_header_t);
 
     /* IPMI消息长度 */
-    msg_len = sizeof(ipmi_msg_header_t) - 3 + data_len + 1;
+    msg_len = OSAL_SIZEOF(ipmi_msg_header_t) - 3 + data_len + 1;
     frame[pos++] = msg_len;
 
     /* IPMI消息头部 */
@@ -192,7 +192,7 @@ int32_t bmc_ipmi_pack_request(uint8_t netfn,
     msg->rq_addr = IPMI_REMOTE_SWID;
     msg->rq_seq_lun = 0x00;
     msg->cmd = cmd;
-    pos += sizeof(ipmi_msg_header_t);
+    pos += OSAL_SIZEOF(ipmi_msg_header_t);
 
     /* 数据 */
     if (NULL != data && data_len > 0)
@@ -231,7 +231,7 @@ int32_t bmc_ipmi_unpack_response(const uint8_t *frame,
     uint8_t cc;
     uint32_t copy_len;
 
-    if (NULL == frame || frame_len < sizeof(rmcp_header_t) + sizeof(ipmi_session_header_t) + 10)
+    if (NULL == frame || frame_len < OSAL_SIZEOF(rmcp_header_t) + OSAL_SIZEOF(ipmi_session_header_t) + 10)
     {
         return OSAL_ERR_GENERIC;
     }
@@ -239,10 +239,10 @@ int32_t bmc_ipmi_unpack_response(const uint8_t *frame,
     pos = 0;
 
     /* 跳过RMCP头部 */
-    pos += sizeof(rmcp_header_t);
+    pos += OSAL_SIZEOF(rmcp_header_t);
 
     /* 跳过IPMI会话头部 */
-    pos += sizeof(ipmi_session_header_t);
+    pos += OSAL_SIZEOF(ipmi_session_header_t);
 
     /* 消息长度 */
     pos++;
@@ -315,14 +315,14 @@ static int32_t ipmi_send_command(bmc_ipmi_context_t *ctx,
     uint8_t resp_netfn, resp_cmd, completion_code;
 
     ret = bmc_ipmi_pack_request(netfn, cmd, req_data, req_len,
-                                        request, sizeof(request), &request_len);
+                                        request, OSAL_SIZEOF(request), &request_len);
     if (OSAL_SUCCESS != ret)
     {
         return ret;
     }
 
     ret = ctx->send_recv(ctx->transport_handle, request, request_len,
-                        response, sizeof(response), &response_len);
+                        response, OSAL_SIZEOF(response), &response_len);
     if (OSAL_SUCCESS != ret)
     {
         return ret;
@@ -368,7 +368,7 @@ int32_t bmc_ipmi_power_on(void *protocol_handle)
     req_data = IPMI_CHASSIS_POWER_UP;
 
     ret = ipmi_send_command(ctx, IPMI_NETFN_CHASSIS_REQ, IPMI_CMD_CHASSIS_CONTROL,
-                                   &req_data, 1, resp_data, sizeof(resp_data), &resp_len);
+                                   &req_data, 1, resp_data, OSAL_SIZEOF(resp_data), &resp_len);
 
     OSAL_MutexUnlock(ctx->mutex);
 
@@ -398,7 +398,7 @@ int32_t bmc_ipmi_power_off(void *protocol_handle)
     req_data = IPMI_CHASSIS_POWER_DOWN;
 
     ret = ipmi_send_command(ctx, IPMI_NETFN_CHASSIS_REQ, IPMI_CMD_CHASSIS_CONTROL,
-                                   &req_data, 1, resp_data, sizeof(resp_data), &resp_len);
+                                   &req_data, 1, resp_data, OSAL_SIZEOF(resp_data), &resp_len);
 
     OSAL_MutexUnlock(ctx->mutex);
 
@@ -428,7 +428,7 @@ int32_t bmc_ipmi_power_reset(void *protocol_handle)
     req_data = IPMI_CHASSIS_HARD_RESET;
 
     ret = ipmi_send_command(ctx, IPMI_NETFN_CHASSIS_REQ, IPMI_CMD_CHASSIS_CONTROL,
-                                   &req_data, 1, resp_data, sizeof(resp_data), &resp_len);
+                                   &req_data, 1, resp_data, OSAL_SIZEOF(resp_data), &resp_len);
 
     OSAL_MutexUnlock(ctx->mutex);
 
@@ -455,7 +455,7 @@ int32_t bmc_ipmi_get_power_state(void *protocol_handle, pdl_bmc_power_state_t *s
     OSAL_MutexLock(ctx->mutex);
 
     ret = ipmi_send_command(ctx, IPMI_NETFN_CHASSIS_REQ, IPMI_CMD_GET_CHASSIS_STATUS,
-                                   NULL, 0, resp_data, sizeof(resp_data), &resp_len);
+                                   NULL, 0, resp_data, OSAL_SIZEOF(resp_data), &resp_len);
 
     if (OSAL_SUCCESS == ret && resp_len >= 1)
     {

@@ -24,8 +24,8 @@ set(PROJECT_DIST_DIR   "${parent_dir}/dist")
 message(STATUS "SDK_PATH:${SDK_PATH}")
 message(STATUS "PROJECT_PATH:${PROJECT_SOURCE_DIR}")
 
-include(${SDK_PATH}/tools/cmake/tools.cmake)
-include(${SDK_PATH}/tools/cmake/component_utils.cmake)
+include(${SDK_PATH}/scripts/cmake/tools.cmake)
+include(${SDK_PATH}/scripts/cmake/component_utils.cmake)
 
 function(register_component)
     get_filename_component(component_dir ${CMAKE_CURRENT_LIST_FILE} DIRECTORY)
@@ -400,7 +400,7 @@ macro(project name)
     if(EXISTS "${PROJECT_PATH}/compile/compile_flags.cmake")
         include("${PROJECT_PATH}/compile/compile_flags.cmake")
     else()
-        include("${SDK_PATH}/tools/cmake/compile_flags.cmake")
+        include("${SDK_PATH}/scripts/cmake/compile_flags.cmake")
     endif()
 
     # add DEBUG or RELEASE flag from Kconfig
@@ -489,7 +489,7 @@ macro(project name)
     if(EXISTS "${PROJECT_PATH}/compile/gen_binary.cmake")
         include("${PROJECT_PATH}/compile/gen_binary.cmake")
     else()
-        include("${SDK_PATH}/tools/cmake/gen_binary.cmake")
+        include("${SDK_PATH}/scripts/cmake/gen_binary.cmake")
     endif()
 
 endmacro()

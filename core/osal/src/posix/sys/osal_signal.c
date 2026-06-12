@@ -18,7 +18,7 @@ int32_t OSAL_SignalRegister(int32_t signum, os_signal_handler_t handler)
     if (NULL == handler)
         return OSAL_ERR_INVALID_POINTER;
 
-    memset(&sa, 0, sizeof(sa));
+    memset(&sa, 0, OSAL_SIZEOF(sa));
 
     handler_union.osal_handler = handler;
     sa.sa_handler = handler_union.posix_handler;
@@ -39,7 +39,7 @@ int32_t OSAL_SignalIgnore(int32_t signum)
 {
     struct sigaction sa;
 
-    memset(&sa, 0, sizeof(sa));
+    memset(&sa, 0, OSAL_SIZEOF(sa));
     sa.sa_handler = SIG_IGN;
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
@@ -57,7 +57,7 @@ int32_t OSAL_SignalDefault(int32_t signum)
 {
     struct sigaction sa;
 
-    memset(&sa, 0, sizeof(sa));
+    memset(&sa, 0, OSAL_SIZEOF(sa));
     sa.sa_handler = SIG_DFL;
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;

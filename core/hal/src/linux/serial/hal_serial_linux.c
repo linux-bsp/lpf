@@ -52,14 +52,14 @@ int32_t HAL_Serial_Open(const char *device, const hal_serial_config_t *config, h
         return OSAL_ERR_INVALID_POINTER;
     }
 
-    ctx = (hal_serial_context_t *)OSAL_malloc(sizeof(hal_serial_context_t));
+    ctx = (hal_serial_context_t *)OSAL_malloc(OSAL_SIZEOF(hal_serial_context_t));
     if (NULL == ctx)
     {
         LOG_ERROR("HAL_Serial", "Failed to allocate context");
         return OSAL_ERR_NO_MEMORY;
     }
 
-    OSAL_memset(ctx, 0, sizeof(hal_serial_context_t));
+    OSAL_memset(ctx, 0, OSAL_SIZEOF(hal_serial_context_t));
 
     /* 打开串口设备（O_EXCL 保证独占访问，防止多进程竞争） */
     ctx->fd = OSAL_open(device, OSAL_O_RDWR | OSAL_O_NOCTTY | OSAL_O_NONBLOCK | OSAL_O_EXCL, 0);
@@ -168,7 +168,7 @@ int32_t HAL_Serial_Open(const char *device, const hal_serial_config_t *config, h
     {
         dev_name = device + 5;  /* 跳过 /dev/ */
     }
-    OSAL_snprintf(lock_file, sizeof(lock_file), HAL_SERIAL_LOCK_PATH_FMT, dev_name);
+    OSAL_snprintf(lock_file, OSAL_SIZEOF(lock_file), HAL_SERIAL_LOCK_PATH_FMT, dev_name);
     ret = OSAL_FlockCreate(lock_file, &ctx->flock);
     if (ret != OSAL_SUCCESS)
     {
@@ -190,9 +190,9 @@ int32_t HAL_Serial_Open(const char *device, const hal_serial_config_t *config, h
     }
 
     /* 保存配置 */
-    OSAL_memcpy(&ctx->config, config, sizeof(hal_serial_config_t));
-    OSAL_strncpy(ctx->device, device, sizeof(ctx->device) - 1);
-    ctx->device[sizeof(ctx->device) - 1] = '\0';
+    OSAL_memcpy(&ctx->config, config, OSAL_SIZEOF(hal_serial_config_t));
+    OSAL_strncpy(ctx->device, device, OSAL_SIZEOF(ctx->device) - 1);
+    ctx->device[OSAL_SIZEOF(ctx->device) - 1] = '\0';
 
     *handle = (hal_serial_handle_t)ctx;
 
@@ -562,7 +562,7 @@ int32_t HAL_Serial_SetConfig(hal_serial_handle_t handle,
     }
 
     /* 更新内部配置 */
-    OSAL_memcpy(&ctx->config, config, sizeof(hal_serial_config_t));
+    OSAL_memcpy(&ctx->config, config, OSAL_SIZEOF(hal_serial_config_t));
 
     LOG_INFO("HAL_Serial", "Config updated: baudrate=%u, databits=%u, stopbits=%u, parity=%u",
              config->baud_rate, config->data_bits, config->stop_bits, config->parity);

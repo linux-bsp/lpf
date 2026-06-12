@@ -108,7 +108,7 @@ int32_t pdl_mcu_decode_get_version(const uint8_t *packet, size_t packet_len,
     version->patch = payload[2];
     version->build = payload[3];
 
-    OSAL_snprintf(version->version_string, sizeof(version->version_string),
+    OSAL_snprintf(version->version_string, OSAL_SIZEOF(version->version_string),
                   "%d.%d.%d.%d", version->major, version->minor,
                   version->patch, version->build);
 

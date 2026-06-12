@@ -49,7 +49,7 @@ static int32_t json_get_string(const char *json, const char *key, char *value, u
         return OSAL_ERR_GENERIC;
     }
 
-    OSAL_snprintf(search_key, sizeof(search_key), "\"%s\"", key);
+    OSAL_snprintf(search_key, OSAL_SIZEOF(search_key), "\"%s\"", key);
 
     key_pos = OSAL_strstr(json, search_key);
     if (NULL == key_pos)
@@ -149,7 +149,7 @@ static int32_t build_http_request(bmc_redfish_context_t *ctx,
     }
     else if (ctx->auth.username != NULL && ctx->auth.password != NULL)
     {
-        OSAL_snprintf(auth_str, sizeof(auth_str), "%s:%s", ctx->auth.username, ctx->auth.password);
+        OSAL_snprintf(auth_str, OSAL_SIZEOF(auth_str), "%s:%s", ctx->auth.username, ctx->auth.password);
         len += OSAL_snprintf(request + len, request_size - len,
             "Authorization: Basic %s\r\n", auth_str);
     }
@@ -237,13 +237,13 @@ int32_t bmc_redfish_init(void *transport_handle,
         return OSAL_ERR_GENERIC;
     }
 
-    ctx = (bmc_redfish_context_t *)OSAL_malloc(sizeof(bmc_redfish_context_t));
+    ctx = (bmc_redfish_context_t *)OSAL_malloc(OSAL_SIZEOF(bmc_redfish_context_t));
     if (NULL == ctx)
     {
         return OSAL_ERR_GENERIC;
     }
 
-    OSAL_memset(ctx, 0, sizeof(bmc_redfish_context_t));
+    OSAL_memset(ctx, 0, OSAL_SIZEOF(bmc_redfish_context_t));
     ctx->transport_handle = transport_handle;
     ctx->send_recv = send_recv;
     ctx->auth.username = username;
@@ -310,7 +310,7 @@ int32_t bmc_redfish_request(void *protocol_handle,
     OSAL_MutexLock(ctx->mutex);
 
     ret = build_http_request(ctx, method, uri, json_body,
-                                     request, sizeof(request), &request_len);
+                                     request, OSAL_SIZEOF(request), &request_len);
     if (OSAL_SUCCESS != ret)
     {
         OSAL_MutexUnlock(ctx->mutex);
@@ -319,7 +319,7 @@ int32_t bmc_redfish_request(void *protocol_handle,
 
     ret = ctx->send_recv(ctx->transport_handle,
                         (const uint8_t *)request, request_len,
-                        http_response, sizeof(http_response), &http_response_len);
+                        http_response, OSAL_SIZEOF(http_response), &http_response_len);
     if (OSAL_SUCCESS != ret)
     {
         OSAL_MutexUnlock(ctx->mutex);
@@ -358,7 +358,7 @@ int32_t bmc_redfish_power_on(void *protocol_handle)
 
     return bmc_redfish_request(protocol_handle, REDFISH_METHOD_POST,
                               "/redfish/v1/Systems/1/Actions/ComputerSystem.Reset",
-                              json_body, response, sizeof(response), &response_len);
+                              json_body, response, OSAL_SIZEOF(response), &response_len);
 }
 
 /**
@@ -379,7 +379,7 @@ int32_t bmc_redfish_power_off(void *protocol_handle)
 
     return bmc_redfish_request(protocol_handle, REDFISH_METHOD_POST,
                               "/redfish/v1/Systems/1/Actions/ComputerSystem.Reset",
-                              json_body, response, sizeof(response), &response_len);
+                              json_body, response, OSAL_SIZEOF(response), &response_len);
 }
 
 /**
@@ -400,7 +400,7 @@ int32_t bmc_redfish_power_reset(void *protocol_handle)
 
     return bmc_redfish_request(protocol_handle, REDFISH_METHOD_POST,
                               "/redfish/v1/Systems/1/Actions/ComputerSystem.Reset",
-                              json_body, response, sizeof(response), &response_len);
+                              json_body, response, OSAL_SIZEOF(response), &response_len);
 }
 
 /**
@@ -420,14 +420,14 @@ int32_t bmc_redfish_get_power_state(void *protocol_handle, pdl_bmc_power_state_t
 
     ret = bmc_redfish_request(protocol_handle, REDFISH_METHOD_GET,
                                      "/redfish/v1/Systems/1",
-                                     NULL, response, sizeof(response), &response_len);
+                                     NULL, response, OSAL_SIZEOF(response), &response_len);
     if (OSAL_SUCCESS != ret)
     {
         *state = PDL_BMC_POWER_UNKNOWN;
         return ret;
     }
 
-    if (OSAL_SUCCESS == json_get_string(response, "PowerState", power_state, sizeof(power_state)))
+    if (OSAL_SUCCESS == json_get_string(response, "PowerState", power_state, OSAL_SIZEOF(power_state)))
     {
         if (OSAL_strcmp(power_state, "On") == 0)
         {

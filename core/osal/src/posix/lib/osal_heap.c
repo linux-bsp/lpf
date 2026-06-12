@@ -47,7 +47,7 @@ static uint32_t read_memory_from_proc(const char *field)
         return 0;
 
     value = 0;
-    while (NULL != fgets(line, sizeof(line), fp)) {
+    while (NULL != fgets(line, OSAL_SIZEOF(line), fp)) {
         if (0 == strncmp(line, field, strlen(field))) {
             sscanf(line, "%*s %u", &value);
             break;
@@ -155,13 +155,13 @@ void *OSAL_malloc(uint32_t size)
     } ptr_union;
 
     /* 检查是否会导致整数溢出（uint32_t 最大值是 4GB） */
-    if (size > UINT32_MAX - sizeof(mem_block_header_t)) {
+    if (size > UINT32_MAX - OSAL_SIZEOF(mem_block_header_t)) {
         fprintf(stderr, "[OSAL_Heap] Allocation size too large: %u\n", size);
         return NULL;
     }
 
     /* 分配额外空间存储块头 */
-    total_size = (size_t)size + sizeof(mem_block_header_t);
+    total_size = (size_t)size + OSAL_SIZEOF(mem_block_header_t);
     raw_ptr = malloc(total_size);
 
     if (NULL == raw_ptr) {

@@ -116,7 +116,7 @@ int32_t OSAL_CacheCreate(const char *name, uint32_t max_entries, osal_id_t *cach
     }
 
     /* 计算共享内存大小 */
-    shm_size = sizeof(shm_cache_header_t) + max_entries * sizeof(osal_cache_entry_t);
+    shm_size = OSAL_SIZEOF(shm_cache_header_t) + max_entries * OSAL_SIZEOF(osal_cache_entry_t);
 
     /* 创建共享内存 */
     shm_fd = shm_open(name, O_CREAT | O_RDWR, 0666);
@@ -148,7 +148,7 @@ int32_t OSAL_CacheCreate(const char *name, uint32_t max_entries, osal_id_t *cach
     header->magic = SHM_CACHE_MAGIC;
     header->version = SHM_CACHE_VERSION;
     header->max_entries = max_entries;
-    header->entry_size = sizeof(osal_cache_entry_t);
+    header->entry_size = OSAL_SIZEOF(osal_cache_entry_t);
 
     /* 初始化进程间互斥锁 */
     pthread_mutexattr_init(&mutex_attr);
@@ -166,8 +166,8 @@ int32_t OSAL_CacheCreate(const char *name, uint32_t max_entries, osal_id_t *cach
     /* 填充缓存描述符 */
     cache = &g_cache_table[slot];
     cache->in_use = true;
-    strncpy(cache->name, name, sizeof(cache->name) - 1);
-    cache->name[sizeof(cache->name) - 1] = '\0';
+    strncpy(cache->name, name, OSAL_SIZEOF(cache->name) - 1);
+    cache->name[OSAL_SIZEOF(cache->name) - 1] = '\0';
     cache->shm_fd = shm_fd;
     cache->shm_ptr = shm_ptr;
     cache->shm_size = shm_size;
@@ -239,8 +239,8 @@ int32_t OSAL_CacheOpen(const char *name, osal_id_t *cache_id)
     /* 填充缓存描述符 */
     cache = &g_cache_table[slot];
     cache->in_use = true;
-    strncpy(cache->name, name, sizeof(cache->name) - 1);
-    cache->name[sizeof(cache->name) - 1] = '\0';
+    strncpy(cache->name, name, OSAL_SIZEOF(cache->name) - 1);
+    cache->name[OSAL_SIZEOF(cache->name) - 1] = '\0';
     cache->shm_fd = shm_fd;
     cache->shm_ptr = shm_ptr;
     cache->shm_size = st.st_size;
@@ -285,7 +285,7 @@ int32_t OSAL_CacheDelete(osal_id_t cache_id)
     shm_unlink(cache->name);
 
     /* 清空描述符 */
-    memset(cache, 0, sizeof(cache_descriptor_t));
+    memset(cache, 0, OSAL_SIZEOF(cache_descriptor_t));
 
     pthread_mutex_unlock(&g_cache_table_mutex);
 

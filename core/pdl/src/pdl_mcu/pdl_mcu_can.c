@@ -38,13 +38,13 @@ int32_t mcu_can_init(const void *config, void **handle)
     }
 
     mcu_cfg = (const pdl_mcu_config_t *)config;
-    ctx = (mcu_can_context_t *)OSAL_malloc(sizeof(mcu_can_context_t));
+    ctx = (mcu_can_context_t *)OSAL_malloc(OSAL_SIZEOF(mcu_can_context_t));
     if (NULL == ctx)
     {
         return OSAL_ERR_NO_MEMORY;
     }
 
-    OSAL_memset(ctx, 0, sizeof(mcu_can_context_t));
+    OSAL_memset(ctx, 0, OSAL_SIZEOF(mcu_can_context_t));
     ctx->tx_id = mcu_cfg->hw.can.tx_id;
     ctx->rx_id = mcu_cfg->hw.can.rx_id;
 

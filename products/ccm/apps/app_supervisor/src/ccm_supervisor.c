@@ -23,7 +23,7 @@ static process_info_t g_processes[] = {
     {"ccm_logger",    "./ccm_logger",    CCM_PROCESS_LOGGER,    0, 0},
 };
 
-#define PROCESS_COUNT (sizeof(g_processes) / sizeof(g_processes[0]))
+#define PROCESS_COUNT (OSAL_SIZEOF(g_processes) / OSAL_SIZEOF(g_processes[0]))
 
 /* 信号处理 */
 static void signal_handler(int32_t sig)
@@ -31,7 +31,7 @@ static void signal_handler(int32_t sig)
     if (sig == SIGTERM || sig == SIGINT) {
         const char msg[] = "SUPERVISOR: 收到退出信号\n";
         g_running = false;
-        (void)OSAL_write(OSAL_STDERR_FILENO, msg, sizeof(msg) - 1);
+        (void)OSAL_write(OSAL_STDERR_FILENO, msg, OSAL_SIZEOF(msg) - 1);
     }
     /* SIGCHLD处理移除，改用轮询检查子进程状态 */
 }

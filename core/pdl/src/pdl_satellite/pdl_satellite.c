@@ -135,15 +135,15 @@ int32_t PDL_SATELLITE_Init(const pdl_satellite_config_t *config,
     }
 
     /* 分配上下文 */
-    ctx = (satellite_service_context_t *)OSAL_malloc(sizeof(satellite_service_context_t));
+    ctx = (satellite_service_context_t *)OSAL_malloc(OSAL_SIZEOF(satellite_service_context_t));
     if (NULL == ctx)
     {
         LOG_ERROR("SAT", "Failed to allocate context");
         return OSAL_ERR_NO_MEMORY;
     }
 
-    OSAL_memset(ctx, 0, sizeof(satellite_service_context_t));
-    OSAL_memcpy(&ctx->config, config, sizeof(pdl_satellite_config_t));
+    OSAL_memset(ctx, 0, OSAL_SIZEOF(satellite_service_context_t));
+    OSAL_memcpy(&ctx->config, config, OSAL_SIZEOF(pdl_satellite_config_t));
     OSAL_AtomicInitBool(&ctx->running, true);
 
     /* 创建互斥锁 */

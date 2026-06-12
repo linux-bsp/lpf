@@ -47,13 +47,13 @@ int32_t mcu_serial_init(const void *config, void **handle)
     }
 
     mcu_cfg = (const pdl_mcu_config_t *)config;
-    ctx = (mcu_serial_context_t *)OSAL_malloc(sizeof(mcu_serial_context_t));
+    ctx = (mcu_serial_context_t *)OSAL_malloc(OSAL_SIZEOF(mcu_serial_context_t));
     if (NULL == ctx)
     {
         return OSAL_ERR_NO_MEMORY;
     }
 
-    OSAL_memset(ctx, 0, sizeof(mcu_serial_context_t));
+    OSAL_memset(ctx, 0, OSAL_SIZEOF(mcu_serial_context_t));
     /* CRC 强制启用 */
 
     /* 打开串口设备 */
@@ -241,7 +241,7 @@ int32_t mcu_serial_send_command(void *handle,
 
     /* 封装发送帧 */
     if (OSAL_SUCCESS != mcu_serial_pack_frame(cmd_code, data, data_len,
-                              tx_frame, sizeof(tx_frame), &tx_len))
+                              tx_frame, OSAL_SIZEOF(tx_frame), &tx_len))
     {
         return OSAL_ERR_GENERIC;
     }
@@ -263,7 +263,7 @@ int32_t mcu_serial_send_command(void *handle,
     /* 接收响应，使用剩余超时时间 */
     OSAL_MutexLock(ctx->rx_mutex);
 
-    rx_len = HAL_Serial_Read(ctx->serial_handle, rx_frame, sizeof(rx_frame), remaining_timeout_ms);
+    rx_len = HAL_Serial_Read(ctx->serial_handle, rx_frame, OSAL_SIZEOF(rx_frame), remaining_timeout_ms);
 
     if (rx_len > 0)
     {

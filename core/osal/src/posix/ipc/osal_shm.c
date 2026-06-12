@@ -97,7 +97,7 @@ int32_t OSAL_ShmCreate(const char *name, size_t size, int32_t flags, osal_shm_t 
     }
 
     /* 分配共享内存对象 */
-    shm_obj = (struct osal_shm_s *)malloc(sizeof(struct osal_shm_s));
+    shm_obj = (struct osal_shm_s *)malloc(OSAL_SIZEOF(struct osal_shm_s));
     if (shm_obj == NULL) {
         close(fd);
         return OSAL_ERR_NO_MEMORY;
@@ -105,8 +105,8 @@ int32_t OSAL_ShmCreate(const char *name, size_t size, int32_t flags, osal_shm_t 
 
     shm_obj->fd = fd;
     shm_obj->size = size;
-    strncpy(shm_obj->name, name, sizeof(shm_obj->name) - 1);
-    shm_obj->name[sizeof(shm_obj->name) - 1] = '\0';
+    strncpy(shm_obj->name, name, OSAL_SIZEOF(shm_obj->name) - 1);
+    shm_obj->name[OSAL_SIZEOF(shm_obj->name) - 1] = '\0';
 
     *shm = (osal_shm_t)shm_obj;
     return OSAL_SUCCESS;

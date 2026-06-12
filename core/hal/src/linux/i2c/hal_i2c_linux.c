@@ -30,16 +30,16 @@ int32_t HAL_I2C_Open(const hal_i2c_config_t *config, hal_i2c_handle_t *handle)
         return OSAL_ERR_GENERIC;
 
     /* 分配句柄 */
-    impl = (hal_i2c_context_t *)OSAL_malloc(sizeof(hal_i2c_context_t));
+    impl = (hal_i2c_context_t *)OSAL_malloc(OSAL_SIZEOF(hal_i2c_context_t));
     if (NULL == impl)
     {
         LOG_ERROR("HAL_I2C", "Failed to allocate memory");
         return OSAL_ERR_NO_MEMORY;
     }
 
-    OSAL_memset(impl, 0, sizeof(hal_i2c_context_t));
-    OSAL_strncpy(impl->device, config->device, sizeof(impl->device) - 1);
-    impl->device[sizeof(impl->device) - 1] = '\0';
+    OSAL_memset(impl, 0, OSAL_SIZEOF(hal_i2c_context_t));
+    OSAL_strncpy(impl->device, config->device, OSAL_SIZEOF(impl->device) - 1);
+    impl->device[OSAL_SIZEOF(impl->device) - 1] = '\0';
     impl->timeout = config->timeout;
     impl->initialized = false;
 
@@ -58,12 +58,12 @@ int32_t HAL_I2C_Open(const hal_i2c_config_t *config, hal_i2c_handle_t *handle)
     int bus_num = 0;
     if (OSAL_sscanf(dev_name, "i2c-%d", &bus_num) == 1)
     {
-        OSAL_snprintf(lock_file, sizeof(lock_file), HAL_I2C_LOCK_PATH_FMT, bus_num);
+        OSAL_snprintf(lock_file, OSAL_SIZEOF(lock_file), HAL_I2C_LOCK_PATH_FMT, bus_num);
     }
     else
     {
         /* 如果无法解析，使用设备名 */
-        OSAL_snprintf(lock_file, sizeof(lock_file), OSAL_LOCK_DIR "/hal_i2c_%s.lock", dev_name);
+        OSAL_snprintf(lock_file, OSAL_SIZEOF(lock_file), OSAL_LOCK_DIR "/hal_i2c_%s.lock", dev_name);
     }
 
     ret = OSAL_FlockCreate(lock_file, &impl->flock);
@@ -401,7 +401,7 @@ int32_t HAL_I2C_Transfer(hal_i2c_handle_t handle, hal_i2c_msg_t *msgs, uint32_t 
         return OSAL_ERR_GENERIC;
 
     /* 分配内核消息结构 */
-    kernel_msgs = (struct i2c_msg *)OSAL_malloc(sizeof(struct i2c_msg) * num);
+    kernel_msgs = (struct i2c_msg *)OSAL_malloc(OSAL_SIZEOF(struct i2c_msg) * num);
     if (NULL == kernel_msgs)
     {
         LOG_ERROR("HAL_I2C", "Failed to allocate message buffer");

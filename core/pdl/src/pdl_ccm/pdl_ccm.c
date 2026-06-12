@@ -71,7 +71,7 @@ static void *heartbeat_task(void *arg)
             .rtt_ms = 0
         };
         ret = PRL_Encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_HEARTBEAT,
-                        &hb, sizeof(hb), buf, sizeof(buf), 0);
+                        &hb, OSAL_SIZEOF(hb), buf, OSAL_SIZEOF(buf), 0);
         if (ret < 0)
         {
             LOG_ERROR("PDL_CCM", "Failed to encode heartbeat");
@@ -145,11 +145,11 @@ static void *eth_rx_task(void *arg)
 
                 ret = PRL_Decode(msg.payload, msg.payload_len,
                                 &dev_type, &msg_type, &payload, &payload_len);
-                if (ret == OSAL_SUCCESS && payload_len >= sizeof(prl_pmc_telemetry_t))
+                if (ret == OSAL_SUCCESS && payload_len >= OSAL_SIZEOF(prl_pmc_telemetry_t))
                 {
                     const prl_pmc_telemetry_t *tm = (const prl_pmc_telemetry_t *)payload;
-                    const uint8_t *data = payload + sizeof(prl_pmc_telemetry_t);
-                    size_t data_len = payload_len - sizeof(prl_pmc_telemetry_t);
+                    const uint8_t *data = payload + OSAL_SIZEOF(prl_pmc_telemetry_t);
+                    size_t data_len = payload_len - OSAL_SIZEOF(prl_pmc_telemetry_t);
 
                     if (ctx->tm_callback)
                     {
@@ -166,11 +166,11 @@ static void *eth_rx_task(void *arg)
 
                 ret = PRL_Decode(msg.payload, msg.payload_len,
                                 &dev_type, &msg_type, &payload, &payload_len);
-                if (ret == PRL_OK && payload_len >= sizeof(prl_pmc_command_t))
+                if (ret == PRL_OK && payload_len >= OSAL_SIZEOF(prl_pmc_command_t))
                 {
                     const prl_pmc_command_t *tc = (const prl_pmc_command_t *)payload;
-                    const uint8_t *params = payload + sizeof(prl_pmc_command_t);
-                    size_t params_len = payload_len - sizeof(prl_pmc_command_t);
+                    const uint8_t *params = payload + OSAL_SIZEOF(prl_pmc_command_t);
+                    size_t params_len = payload_len - OSAL_SIZEOF(prl_pmc_command_t);
 
                     if (ctx->tc_callback)
                     {
@@ -187,7 +187,7 @@ static void *eth_rx_task(void *arg)
 
                 ret = PRL_Decode(msg.payload, msg.payload_len,
                                 &dev_type, &msg_type, &payload, &payload_len);
-                if (ret == PRL_OK && payload_len >= sizeof(prl_pmc_ack_t))
+                if (ret == PRL_OK && payload_len >= OSAL_SIZEOF(prl_pmc_ack_t))
                 {
                     const prl_pmc_ack_t *ack = (const prl_pmc_ack_t *)payload;
                     LOG_DEBUG("PDL_CCM", "Received ACK seq=%u result=%u",
@@ -229,15 +229,15 @@ int32_t PDL_CCM_Init(const pdl_ccm_config_t *config,
     }
 
     /* 分配上下文 */
-    ctx = (ccm_driver_context_t *)OSAL_malloc(sizeof(ccm_driver_context_t));
+    ctx = (ccm_driver_context_t *)OSAL_malloc(OSAL_SIZEOF(ccm_driver_context_t));
     if (!ctx)
     {
         LOG_ERROR("PDL_CCM", "Failed to allocate context");
         return OSAL_ERR_NO_MEMORY;
     }
 
-    OSAL_memset(ctx, 0, sizeof(ccm_driver_context_t));
-    OSAL_memcpy(&ctx->config, config, sizeof(pdl_ccm_config_t));
+    OSAL_memset(ctx, 0, OSAL_SIZEOF(ccm_driver_context_t));
+    OSAL_memcpy(&ctx->config, config, OSAL_SIZEOF(pdl_ccm_config_t));
     ctx->link_quality = 100;  /* 初始链路质量 */
     OSAL_AtomicInitBool(&ctx->running, false);
 

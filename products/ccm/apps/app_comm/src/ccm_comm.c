@@ -14,7 +14,7 @@ static void signal_handler(int32_t sig)
     if (sig == SIGTERM || sig == SIGINT) {
         const char msg[] = "COMM: 收到退出信号\n";
         g_running = false;
-        (void)OSAL_write(OSAL_STDERR_FILENO, msg, sizeof(msg) - 1);
+        (void)OSAL_write(OSAL_STDERR_FILENO, msg, OSAL_SIZEOF(msg) - 1);
     }
 }
 

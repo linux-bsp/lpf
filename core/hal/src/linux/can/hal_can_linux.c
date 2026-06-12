@@ -34,14 +34,14 @@ int32_t HAL_CAN_Init(const hal_can_config_t *config, hal_can_handle_t *handle)
     if (OSAL_strlen(config->interface) >= IFNAMSIZ)
         return OSAL_ERR_NAME_TOO_LONG;
 
-    impl = (hal_can_context_t *)OSAL_malloc(sizeof(hal_can_context_t));
+    impl = (hal_can_context_t *)OSAL_malloc(OSAL_SIZEOF(hal_can_context_t));
     if (NULL == impl)
     {
         LOG_ERROR("HAL_CAN", "Failed to allocate memory");
         return OSAL_ERR_NO_MEMORY;
     }
 
-    OSAL_memset(impl, 0, sizeof(hal_can_context_t));
+    OSAL_memset(impl, 0, OSAL_SIZEOF(hal_can_context_t));
     OSAL_strncpy(impl->interface, config->interface, IFNAMSIZ - 1);
     impl->interface[IFNAMSIZ - 1] = '\0';
     impl->baudrate = config->baudrate;
@@ -49,7 +49,7 @@ int32_t HAL_CAN_Init(const hal_can_config_t *config, hal_can_handle_t *handle)
 
     /* 创建文件锁（进程间保护） */
     char lock_file[OSAL_LOCK_PATH_MAX_LEN];
-    OSAL_snprintf(lock_file, sizeof(lock_file), HAL_CAN_LOCK_PATH_FMT, config->interface);
+    OSAL_snprintf(lock_file, OSAL_SIZEOF(lock_file), HAL_CAN_LOCK_PATH_FMT, config->interface);
     ret = OSAL_FlockCreate(lock_file, &impl->flock);
     if (ret != OSAL_SUCCESS)
     {
@@ -80,7 +80,7 @@ int32_t HAL_CAN_Init(const hal_can_config_t *config, hal_can_handle_t *handle)
         return err;
     }
 
-    OSAL_memset(&ifr, 0, sizeof(ifr));
+    OSAL_memset(&ifr, 0, OSAL_SIZEOF(ifr));
     OSAL_strncpy(ifr.ifr_name, config->interface, IFNAMSIZ - 1);
     ret = OSAL_ioctl(impl->sockfd, SIOCGIFINDEX, &ifr);
     if (ret < 0)
@@ -95,11 +95,11 @@ int32_t HAL_CAN_Init(const hal_can_config_t *config, hal_can_handle_t *handle)
         return err;
     }
 
-    OSAL_memset(&addr, 0, sizeof(addr));
+    OSAL_memset(&addr, 0, OSAL_SIZEOF(addr));
     addr.can_family = OSAL_AF_CAN;
     addr.can_ifindex = ifr.ifr_ifindex;
 
-    ret = OSAL_bind(impl->sockfd, (const osal_sockaddr_t *)&addr, sizeof(addr));
+    ret = OSAL_bind(impl->sockfd, (const osal_sockaddr_t *)&addr, OSAL_SIZEOF(addr));
     if (ret < 0)
     {
         int32_t err = OSAL_GetErrno();
@@ -117,7 +117,7 @@ int32_t HAL_CAN_Init(const hal_can_config_t *config, hal_can_handle_t *handle)
         struct timeval tv;
         tv.tv_sec = config->rx_timeout / 1000;
         tv.tv_usec = (config->rx_timeout % 1000) * 1000;
-        OSAL_setsockopt(impl->sockfd, OSAL_SOL_SOCKET, OSAL_SO_RCVTIMEO, &tv, sizeof(tv));
+        OSAL_setsockopt(impl->sockfd, OSAL_SOL_SOCKET, OSAL_SO_RCVTIMEO, &tv, OSAL_SIZEOF(tv));
     }
 
     if (config->tx_timeout > 0)
@@ -125,7 +125,7 @@ int32_t HAL_CAN_Init(const hal_can_config_t *config, hal_can_handle_t *handle)
         struct timeval tv;
         tv.tv_sec = config->tx_timeout / 1000;
         tv.tv_usec = (config->tx_timeout % 1000) * 1000;
-        OSAL_setsockopt(impl->sockfd, OSAL_SOL_SOCKET, OSAL_SO_SNDTIMEO, &tv, sizeof(tv));
+        OSAL_setsockopt(impl->sockfd, OSAL_SOL_SOCKET, OSAL_SO_SNDTIMEO, &tv, OSAL_SIZEOF(tv));
     }
 
     impl->initialized = true;
@@ -204,13 +204,13 @@ int32_t HAL_CAN_Send(hal_can_handle_t handle, const hal_can_frame_t *frame)
     }
 
     /* 临界区：硬件访问 */
-    OSAL_memset(&can_frame, 0, sizeof(can_frame));
+    OSAL_memset(&can_frame, 0, OSAL_SIZEOF(can_frame));
     can_frame.can_id = frame->can_id;
     can_frame.can_dlc = frame->dlc;
     OSAL_memcpy(can_frame.data, frame->data, frame->dlc);
 
-    ret = OSAL_write(impl->sockfd, &can_frame, sizeof(struct can_frame));
-    if (ret != sizeof(struct can_frame))
+    ret = OSAL_write(impl->sockfd, &can_frame, OSAL_SIZEOF(struct can_frame));
+    if (ret != OSAL_SIZEOF(struct can_frame))
     {
         int32_t err = OSAL_GetErrno();
         LOG_ERROR("HAL_CAN", "Send failed: %s (%d)",
@@ -279,7 +279,7 @@ int32_t HAL_CAN_Recv(hal_can_handle_t handle, hal_can_frame_t *frame, int32_t ti
     }
 
     /* 临界区：读取数据 */
-    ret = OSAL_read(impl->sockfd, &can_frame, sizeof(struct can_frame));
+    ret = OSAL_read(impl->sockfd, &can_frame, OSAL_SIZEOF(struct can_frame));
     if (ret < 0)
     {
         int32_t err = OSAL_GetErrno();
@@ -294,14 +294,14 @@ int32_t HAL_CAN_Recv(hal_can_handle_t handle, hal_can_frame_t *frame, int32_t ti
             result = err;
         }
     }
-    else if (ret != sizeof(struct can_frame))
+    else if (ret != OSAL_SIZEOF(struct can_frame))
     {
-        LOG_ERROR("HAL_CAN", "Incomplete receive: %d/%u bytes", (int32_t)ret, (uint32_t)sizeof(struct can_frame));
+        LOG_ERROR("HAL_CAN", "Incomplete receive: %d/%u bytes", (int32_t)ret, (uint32_t)OSAL_SIZEOF(struct can_frame));
         result = OSAL_ERR_GENERIC;
     }
     else
     {
-        OSAL_memset(frame, 0, sizeof(hal_can_frame_t));
+        OSAL_memset(frame, 0, OSAL_SIZEOF(hal_can_frame_t));
         frame->can_id = can_frame.can_id;
         frame->dlc = (can_frame.can_dlc > 8) ? 8 : can_frame.can_dlc;
         OSAL_memcpy(frame->data, can_frame.data, frame->dlc);
@@ -350,7 +350,7 @@ int32_t HAL_CAN_SetFilter(hal_can_handle_t handle, uint32_t filter_id, uint32_t 
     rfilter.can_id = filter_id;
     rfilter.can_mask = filter_mask;
 
-    if (OSAL_setsockopt(impl->sockfd, OSAL_SOL_CAN_RAW, CAN_RAW_FILTER, &rfilter, sizeof(rfilter)) < 0)
+    if (OSAL_setsockopt(impl->sockfd, OSAL_SOL_CAN_RAW, CAN_RAW_FILTER, &rfilter, OSAL_SIZEOF(rfilter)) < 0)
     {
         int32_t err = OSAL_GetErrno();
         LOG_ERROR("HAL_CAN", "Failed to set filter: %s (%d)",

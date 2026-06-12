@@ -40,7 +40,7 @@ uint32_t prl_get_timestamp(void)
 void prl_init_header(prl_header_t *hdr, uint8_t dev_type, uint8_t msg_type,
                      uint16_t payload_len, uint8_t flags)
 {
-    OSAL_memset(hdr, 0, sizeof(prl_header_t));
+    OSAL_memset(hdr, 0, OSAL_SIZEOF(prl_header_t));
 
     /* 多字节字段使用网络字节序（大端），确保跨平台兼容性 */
     hdr->magic = OSAL_htons(PRL_MAGIC);
@@ -123,7 +123,7 @@ bool prl_verify_packet_crc(const uint8_t *packet, size_t total_len)
 
     /* 第二段：CRC 字段作为 0x0000 处理 */
     uint8_t zeros[2] = {0x00, 0x00};
-    crc = OSAL_CRC16_CCITT_Update(crc, zeros, 2);
+    crc = OSAL_CRC16_CCITT_Update(crc, zeros, OSAL_SIZEOF(zeros));
 
     /* 第三段：从 CRC 字段之后到报文结束 */
     crc = OSAL_CRC16_CCITT_Update(crc, packet + crc_offset + 2,

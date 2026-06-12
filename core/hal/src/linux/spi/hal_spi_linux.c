@@ -29,16 +29,16 @@ int32_t HAL_SPI_Open(const hal_spi_config_t *config, hal_spi_handle_t *handle)
         return OSAL_ERR_GENERIC;
 
     /* 分配句柄 */
-    impl = (hal_spi_context_t *)OSAL_malloc(sizeof(hal_spi_context_t));
+    impl = (hal_spi_context_t *)OSAL_malloc(OSAL_SIZEOF(hal_spi_context_t));
     if (NULL == impl)
     {
         LOG_ERROR("HAL_SPI", "Failed to allocate memory");
         return OSAL_ERR_NO_MEMORY;
     }
 
-    OSAL_memset(impl, 0, sizeof(hal_spi_context_t));
-    OSAL_strncpy(impl->device, config->device, sizeof(impl->device) - 1);
-    impl->device[sizeof(impl->device) - 1] = '\0';
+    OSAL_memset(impl, 0, OSAL_SIZEOF(hal_spi_context_t));
+    OSAL_strncpy(impl->device, config->device, OSAL_SIZEOF(impl->device) - 1);
+    impl->device[OSAL_SIZEOF(impl->device) - 1] = '\0';
     impl->mode = config->mode;
     impl->bits_per_word = config->bits_per_word;
     impl->max_speed_hz = config->max_speed_hz;
@@ -57,7 +57,7 @@ int32_t HAL_SPI_Open(const hal_spi_config_t *config, hal_spi_handle_t *handle)
         slash++;
     }
 
-    OSAL_snprintf(lock_file, sizeof(lock_file), HAL_SPI_LOCK_PATH_FMT, dev_name);
+    OSAL_snprintf(lock_file, OSAL_SIZEOF(lock_file), HAL_SPI_LOCK_PATH_FMT, dev_name);
     ret = OSAL_FlockCreate(lock_file, &impl->flock);
     if (ret != OSAL_SUCCESS)
     {
@@ -319,7 +319,7 @@ int32_t HAL_SPI_Transfer(hal_spi_handle_t handle, const uint8_t *tx_buffer,
     }
 
     /* 临界区：构造传输结构 (参考: Linux内核 spidev.h) */
-    OSAL_memset(&xfer, 0, sizeof(xfer));
+    OSAL_memset(&xfer, 0, OSAL_SIZEOF(xfer));
     xfer.tx_buf = (uintptr_t)tx_buffer;
     xfer.rx_buf = (uintptr_t)rx_buffer;
     xfer.len = size;
@@ -368,7 +368,7 @@ int32_t HAL_SPI_TransferMulti(hal_spi_handle_t handle, hal_spi_transfer_t *trans
         return OSAL_ERR_GENERIC;
 
     /* 分配内核传输结构 */
-    xfers = (struct spi_ioc_transfer *)OSAL_malloc(sizeof(struct spi_ioc_transfer) * num);
+    xfers = (struct spi_ioc_transfer *)OSAL_malloc(OSAL_SIZEOF(struct spi_ioc_transfer) * num);
     if (NULL == xfers)
     {
         LOG_ERROR("HAL_SPI", "Failed to allocate transfer buffer");
@@ -376,7 +376,7 @@ int32_t HAL_SPI_TransferMulti(hal_spi_handle_t handle, hal_spi_transfer_t *trans
     }
 
     /* 转换传输格式 */
-    OSAL_memset(xfers, 0, sizeof(struct spi_ioc_transfer) * num);
+    OSAL_memset(xfers, 0, OSAL_SIZEOF(struct spi_ioc_transfer) * num);
     for (i = 0; i < num; i++)
     {
         xfers[i].tx_buf = (uintptr_t)transfers[i].tx_buf;

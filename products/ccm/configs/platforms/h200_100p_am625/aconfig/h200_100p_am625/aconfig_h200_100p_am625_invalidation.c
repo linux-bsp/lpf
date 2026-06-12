@@ -105,4 +105,4 @@ const tc_tm_invalidation_map_t g_invalidation_map[] = {
     },
 };
 
-const uint32_t g_invalidation_map_count = sizeof(g_invalidation_map) / sizeof(tc_tm_invalidation_map_t);
+const uint32_t g_invalidation_map_count = OSAL_SIZEOF(g_invalidation_map) / OSAL_SIZEOF(tc_tm_invalidation_map_t);

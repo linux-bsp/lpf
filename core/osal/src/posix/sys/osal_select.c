@@ -12,7 +12,7 @@
 
 void OSAL_FD_ZERO(osal_fd_set_t *set)
 {
-    memset(set, 0, sizeof(osal_fd_set_t));
+    memset(set, 0, OSAL_SIZEOF(osal_fd_set_t));
 }
 
 void OSAL_FD_SET(int32_t fd, osal_fd_set_t *set)

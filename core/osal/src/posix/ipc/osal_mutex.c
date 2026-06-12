@@ -25,7 +25,7 @@ int32_t OSAL_MutexAttrCreate(osal_mutex_attr_t **attr)
 	if (NULL == attr)
 		return OSAL_ERR_INVALID_POINTER;
 
-	new_attr = (osal_mutex_attr_t *)malloc(sizeof(osal_mutex_attr_t));
+	new_attr = (osal_mutex_attr_t *)malloc(OSAL_SIZEOF(osal_mutex_attr_t));
 	if (NULL == new_attr)
 		return OSAL_ERR_NO_MEMORY;
 
@@ -75,7 +75,7 @@ int32_t OSAL_MutexCreate(osal_mutex_t **mutex)
     if (NULL == mutex)
         return OSAL_ERR_INVALID_POINTER;
 
-    new_mutex = (osal_mutex_t *)malloc(sizeof(osal_mutex_t));
+    new_mutex = (osal_mutex_t *)malloc(OSAL_SIZEOF(osal_mutex_t));
     if (NULL == new_mutex)
         return OSAL_ERR_NO_MEMORY;
 
@@ -98,7 +98,7 @@ int32_t OSAL_MutexCreateEx(osal_mutex_t **mutex, const osal_mutex_attr_t *attr)
     if (NULL == mutex)
         return OSAL_ERR_INVALID_POINTER;
 
-    new_mutex = (osal_mutex_t *)malloc(sizeof(osal_mutex_t));
+    new_mutex = (osal_mutex_t *)malloc(OSAL_SIZEOF(osal_mutex_t));
     if (NULL == new_mutex)
         return OSAL_ERR_NO_MEMORY;
 

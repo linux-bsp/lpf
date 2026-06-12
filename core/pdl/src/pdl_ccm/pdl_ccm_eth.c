@@ -48,14 +48,14 @@ int32_t ccm_eth_init(const pdl_ccm_config_t *config, void **handle)
     }
 
     /* 分配上下文 */
-    ctx = (ccm_eth_context_t *)OSAL_malloc(sizeof(ccm_eth_context_t));
+    ctx = (ccm_eth_context_t *)OSAL_malloc(OSAL_SIZEOF(ccm_eth_context_t));
     if (!ctx)
     {
         return OSAL_ERR_NO_MEMORY;
     }
 
-    OSAL_memset(ctx, 0, sizeof(ccm_eth_context_t));
-    OSAL_strncpy(ctx->ccm_ip, config->ccm_ip, sizeof(ctx->ccm_ip) - 1);
+    OSAL_memset(ctx, 0, OSAL_SIZEOF(ccm_eth_context_t));
+    OSAL_strncpy(ctx->ccm_ip, config->ccm_ip, OSAL_SIZEOF(ctx->ccm_ip) - 1);
     ctx->ccm_port = config->ccm_port;
     ctx->timeout_ms = config->send_timeout_ms;
     ctx->seq_num = 0;
@@ -83,27 +83,27 @@ int32_t ccm_eth_init(const pdl_ccm_config_t *config, void **handle)
     /* 设置 socket 选项 */
     int32_t reuse = 1;
     OSAL_setsockopt(ctx->sockfd, OSAL_SOL_SOCKET, OSAL_SO_REUSEADDR,
-                    &reuse, sizeof(reuse));
+                    &reuse, OSAL_SIZEOF(reuse));
 
     /* 设置接收超时 */
     tv.tv_sec = config->recv_timeout_ms / 1000;
     tv.tv_usec = (config->recv_timeout_ms % 1000) * 1000;
     OSAL_setsockopt(ctx->sockfd, OSAL_SOL_SOCKET, OSAL_SO_RCVTIMEO,
-                    &tv, sizeof(tv));
+                    &tv, OSAL_SIZEOF(tv));
 
     /* 设置发送超时 */
     tv.tv_sec = config->send_timeout_ms / 1000;
     tv.tv_usec = (config->send_timeout_ms % 1000) * 1000;
     OSAL_setsockopt(ctx->sockfd, OSAL_SOL_SOCKET, OSAL_SO_SNDTIMEO,
-                    &tv, sizeof(tv));
+                    &tv, OSAL_SIZEOF(tv));
 
     /* 禁用 Nagle 算法（降低延迟） */
     int32_t nodelay = 1;
     OSAL_setsockopt(ctx->sockfd, OSAL_IPPROTO_TCP, OSAL_TCP_NODELAY,
-                    &nodelay, sizeof(nodelay));
+                    &nodelay, OSAL_SIZEOF(nodelay));
 
     /* 构造服务器地址 */
-    OSAL_memset(&server_addr, 0, sizeof(server_addr));
+    OSAL_memset(&server_addr, 0, OSAL_SIZEOF(server_addr));
     server_addr.sin_family = OSAL_AF_INET;
     server_addr.sin_port = OSAL_htons(config->ccm_port);
 
@@ -119,7 +119,7 @@ int32_t ccm_eth_init(const pdl_ccm_config_t *config, void **handle)
     }
 
     /* 连接到服务器 */
-    ret = OSAL_connect(ctx->sockfd, (osal_sockaddr_t *)&server_addr, sizeof(server_addr));
+    ret = OSAL_connect(ctx->sockfd, (osal_sockaddr_t *)&server_addr, OSAL_SIZEOF(server_addr));
     if (ret == 0)
     {
         ctx->connected = true;

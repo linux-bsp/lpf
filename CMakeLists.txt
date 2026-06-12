@@ -135,7 +135,7 @@ message(STATUS "  Headers: ${CMAKE_INSTALL_PREFIX}/${INSTALL_INCLUDEDIR}")
 # Include Build System
 # ============================================================================
 
-include(${SDK_PATH}/tools/cmake/compile.cmake)
+include(${SDK_PATH}/scripts/cmake/compile.cmake)
 include(${SDK_PATH}/cmake/ComponentAPI.cmake)
 
 # ============================================================================

@@ -44,13 +44,13 @@ int32_t bmc_transport_net_init(const char *ip_addr, uint16_t port, uint32_t time
         return OSAL_ERR_GENERIC;
     }
 
-    ctx = (bmc_transport_net_context_t *)OSAL_malloc(sizeof(bmc_transport_net_context_t));
+    ctx = (bmc_transport_net_context_t *)OSAL_malloc(OSAL_SIZEOF(bmc_transport_net_context_t));
     if (NULL == ctx)
     {
         return OSAL_ERR_GENERIC;
     }
 
-    OSAL_memset(ctx, 0, sizeof(bmc_transport_net_context_t));
+    OSAL_memset(ctx, 0, OSAL_SIZEOF(bmc_transport_net_context_t));
     ctx->timeout_ms = timeout_ms;
 
     /* 创建TCP Socket */
@@ -64,11 +64,11 @@ int32_t bmc_transport_net_init(const char *ip_addr, uint16_t port, uint32_t time
     /* 设置超时 */
     tv.tv_sec = timeout_ms / 1000;
     tv.tv_usec = (timeout_ms % 1000) * 1000;
-    OSAL_setsockopt(ctx->sockfd, OSAL_SOL_SOCKET, OSAL_SO_RCVTIMEO, &tv, sizeof(tv));
-    OSAL_setsockopt(ctx->sockfd, OSAL_SOL_SOCKET, OSAL_SO_SNDTIMEO, &tv, sizeof(tv));
+    OSAL_setsockopt(ctx->sockfd, OSAL_SOL_SOCKET, OSAL_SO_RCVTIMEO, &tv, OSAL_SIZEOF(tv));
+    OSAL_setsockopt(ctx->sockfd, OSAL_SOL_SOCKET, OSAL_SO_SNDTIMEO, &tv, OSAL_SIZEOF(tv));
 
     /* 连接到远程地址 */
-    OSAL_memset(&server_addr, 0, sizeof(server_addr));
+    OSAL_memset(&server_addr, 0, OSAL_SIZEOF(server_addr));
     server_addr.sin_family = OSAL_AF_INET;
     server_addr.sin_port = OSAL_htons(port);
     if (OSAL_inet_pton(OSAL_AF_INET, ip_addr, &server_addr.sin_addr) <= 0)
@@ -78,7 +78,7 @@ int32_t bmc_transport_net_init(const char *ip_addr, uint16_t port, uint32_t time
         return OSAL_ERR_GENERIC;
     }
 
-    if (OSAL_connect(ctx->sockfd, (osal_sockaddr_t *)&server_addr, sizeof(server_addr)) < 0)
+    if (OSAL_connect(ctx->sockfd, (osal_sockaddr_t *)&server_addr, OSAL_SIZEOF(server_addr)) < 0)
     {
         OSAL_close(ctx->sockfd);
         OSAL_free(ctx);
@@ -168,13 +168,13 @@ int32_t bmc_transport_serial_init(const char *device, uint32_t baudrate, uint32_
         return OSAL_ERR_GENERIC;
     }
 
-    ctx = (bmc_transport_serial_context_t *)OSAL_malloc(sizeof(bmc_transport_serial_context_t));
+    ctx = (bmc_transport_serial_context_t *)OSAL_malloc(OSAL_SIZEOF(bmc_transport_serial_context_t));
     if (NULL == ctx)
     {
         return OSAL_ERR_GENERIC;
     }
 
-    OSAL_memset(ctx, 0, sizeof(bmc_transport_serial_context_t));
+    OSAL_memset(ctx, 0, OSAL_SIZEOF(bmc_transport_serial_context_t));
     ctx->timeout_ms = timeout_ms;
 
     /* 打开串口 */

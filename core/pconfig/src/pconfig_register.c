@@ -35,7 +35,7 @@ static const pconfig_platform_config_t* g_all_configs[] = {
     /* 在这里添加新的配置 */
 };
 
-#define CONFIG_COUNT (sizeof(g_all_configs) / sizeof(g_all_configs[0]))
+#define CONFIG_COUNT (OSAL_SIZEOF(g_all_configs) / OSAL_SIZEOF(g_all_configs[0]))
 
 /*===========================================================================
  * 注册函数
