@@ -56,7 +56,7 @@ config TEST_OSAL_CLOCK
 	bool "Clock and timing tests"
 	default y
 	help
-	  Test OSAL clock operations (gettime, monotonic clock, clock resolution).
+	  Test OSAL clock operations (gettime, monotonic, resolution).
 
 	  Coverage:
 	    - System clock retrieval (CLOCK_REALTIME)
@@ -75,7 +75,7 @@ config TEST_OSAL_COND
 	bool "Condition variable tests"
 	default y
 	help
-	  Test OSAL condition variable operations (wait, signal, broadcast, timed wait).
+	  Test OSAL condition variable (wait, signal, broadcast, timed).
 
 	  Coverage:
 	    - Condition variable creation and destruction
@@ -320,7 +320,7 @@ config TEST_OSAL_STRESS
 	bool "OSAL stress tests"
 	default y
 	help
-	  Test OSAL components under stress conditions (high concurrency, memory pressure).
+	  Test OSAL under stress (high concurrency, memory pressure).
 
 	  Coverage:
 	    - High-frequency mutex lock/unlock operations
@@ -383,7 +383,7 @@ config TEST_OSAL_TIME
 	bool "Time operations tests"
 	default y
 	help
-	  Test OSAL time operations (sleep, usleep, nanosleep, time conversions).
+	  Test OSAL time operations (sleep, usleep, nanosleep, conversions).
 
 	  Coverage:
 	    - Sleep operations (sleep, usleep, nanosleep)

@@ -24,7 +24,7 @@ config TEST_HAL_CAN
 	bool "CAN bus tests"
 	default y
 	help
-	  Test HAL CAN bus operations (init, send, receive, filter, error handling).
+	  Test HAL CAN bus operations (init, send, receive, filter, errors).
 
 	  Coverage:
 	    - CAN controller initialization and configuration

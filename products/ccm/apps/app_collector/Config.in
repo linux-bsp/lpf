@@ -10,4 +10,4 @@ config APP_COLLECTOR
     select LIBCCM
     help
       CCM data collector application.
-      Collects telemetry data from satellite platform and stores to local storage.
+      Collects telemetry data from satellite and stores locally.

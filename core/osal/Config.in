@@ -149,7 +149,7 @@ config OSAL_BUILD_STATIC
 	help
 	  Build libosal.a static library.
 
-	  Static libraries are linked directly into the executable at compile time.
+	  Static libraries are linked directly into the executable.
 
 	  Advantages:
 	  - No runtime dependencies
@@ -161,7 +161,7 @@ config OSAL_BUILD_STATIC
 	  - Cannot share code between processes
 	  - Must recompile to update library
 
-	  Recommended: Enable for embedded systems and single-application deployments
+	  Recommended: Enable for embedded systems and single-application
 
 config OSAL_BUILD_SHARED
 	bool "Build shared library"
@@ -169,7 +169,7 @@ config OSAL_BUILD_SHARED
 	help
 	  Build libosal.so shared library (Linux) or libosal.dll (Windows).
 
-	  Shared libraries are loaded at runtime and can be shared between processes.
+	  Shared libraries are loaded at runtime, shared between processes.
 
 	  Advantages:
 	  - Smaller executable size
@@ -181,8 +181,8 @@ config OSAL_BUILD_SHARED
 	  - Slightly slower (dynamic linking overhead)
 	  - More complex deployment
 
-	  Recommended: Enable for multi-application systems or when library updates
-	  are needed without recompiling applications
+	  Recommended: Enable for multi-application systems or when
+	  library updates are needed without recompiling applications
 
 	  Note: Not available for bare-metal or some RTOS targets
 
@@ -398,7 +398,7 @@ config OSAL_UTIL_CRC
 	  Enable CRC checksum algorithms.
 
 	  Provides:
-	  - CRC16-CCITT: Fast table-based implementation for communication protocols
+	  - CRC16-CCITT: Fast table-based implementation
 	  - CRC32: For file integrity checking (reserved)
 
 	  Features:

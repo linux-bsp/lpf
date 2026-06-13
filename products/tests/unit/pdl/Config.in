@@ -65,7 +65,7 @@ config TEST_PDL_MCU
 	bool "MCU device driver tests"
 	default y
 	help
-	  Test PDL MCU device driver operations (init, command, status, control).
+	  Test PDL MCU device driver (init, command, status, control).
 
 	  Coverage:
 	    - MCU device initialization
@@ -86,7 +86,7 @@ config TEST_PDL_SATELLITE
 	bool "Satellite device driver tests"
 	default y
 	help
-	  Test PDL satellite device driver operations (init, telemetry, command).
+	  Test PDL satellite device driver (init, telemetry, command).
 
 	  Coverage:
 	    - Satellite interface initialization
@@ -107,7 +107,7 @@ config TEST_PDL_WATCHDOG
 	bool "Watchdog device driver tests"
 	default y
 	help
-	  Test PDL watchdog device driver operations (init, enable, disable, feed).
+	  Test PDL watchdog device driver (init, enable, disable, feed).
 
 	  Coverage:
 	    - Watchdog driver initialization

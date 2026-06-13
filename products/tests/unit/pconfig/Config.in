@@ -19,7 +19,7 @@ config TEST_PCONFIG_API
 	bool "PCONFIG API tests"
 	default y
 	help
-	  Test PCONFIG API operations (init, query, device lookup, configuration).
+	  Test PCONFIG API operations (init, query, lookup, config).
 
 	  Coverage:
 	    - Platform configuration initialization

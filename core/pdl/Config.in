@@ -218,9 +218,9 @@ menuconfig PDL_CCM_SUPPORT
 	default n
 	select OSAL_NETWORK
 	help
-	  Enable CCM (Communication Control Module) support for PMC communication.
+	  Enable CCM (Communication Control Module) for PMC communication.
 
-	  CCM provides high-level communication interface with PMC (Power Management
+	  CCM provides high-level interface with PMC (Power Management
 	  Controller) over Ethernet, handling:
 	  - TCP/IP socket communication
 	  - Message framing and CRC validation
@@ -236,7 +236,7 @@ menuconfig PDL_CCM_SUPPORT
 	  Memory footprint: ~8KB
 
 	  Communication protocol:
-	  - Frame format: [Magic(2B)][Type(1B)][Reserved(1B)][SeqNum(4B)][Length(4B)][CRC32(4B)][Payload(NB)]
+	  - Frame: [Magic][Type][Rsv][SeqNum][Len][CRC32][Payload]
 	  - Magic number: 0xAA55
 	  - CRC32 validation for data integrity
 

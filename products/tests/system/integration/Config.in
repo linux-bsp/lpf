@@ -18,7 +18,7 @@ config TEST_INTEGRATION_ALL
 	  Enable all full-stack integration tests at once.
 
 	  Integration tests verify the complete system:
-	    - All layers working together (ACONFIG→PCONFIG→PDL→PRL→HAL→OSAL)
+	    - All layers working together (ACONFIG→PCONFIG→PDL→PRL→HAL)
 	    - End-to-end data flows
 	    - Real mission scenarios
 	    - Cross-layer error handling

@@ -153,7 +153,7 @@ config TEST_STRESS
 	default n
 	help
 	  Build stress tests for all modules.
-	  Stress tests verify system behavior under heavy load and extreme conditions.
+	  Stress tests verify system behavior under heavy load and extremes.
 
 if TEST_STRESS
 
@@ -260,7 +260,7 @@ config TEST_INTEGRATION
 	bool "Build integration tests"
 	default n
 	help
-	  Build integration tests that verify interactions between multiple modules.
+	  Build integration tests verifying interactions between modules.
 
 # Source fine-grained system and integration test configurations
 source "products/tests/system/Config.in"

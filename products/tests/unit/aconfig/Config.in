@@ -19,7 +19,7 @@ config TEST_ACONFIG_API
 	bool "ACONFIG API tests"
 	default y
 	help
-	  Test ACONFIG API operations (init, telecommand lookup, telemetry query).
+	  Test ACONFIG API operations (init, telecommand, telemetry query).
 
 	  Coverage:
 	    - Application configuration initialization

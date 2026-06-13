@@ -346,7 +346,7 @@ config HAL_POWER_MANAGEMENT
 	  - RTOS: Depends on RTOS PM support
 	  - Bare-metal: Direct peripheral control
 
-	  Recommended: Enable for battery-powered or thermally-constrained systems
+	  Recommended: Enable for battery-powered or constrained systems
 
 endmenu
 

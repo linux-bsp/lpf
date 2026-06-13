@@ -30,12 +30,12 @@ choice
 	  Quick start with a predefined configuration template.
 
 	  Templates provide optimized configurations for different scenarios:
-	  - RTOS Minimal: Ultra-compact for resource-constrained RTOS (<50KB RAM)
-	  - Linux Minimal: Essential features for storage-limited Linux systems
-	  - Linux Standard: Balanced configuration for typical Linux products
+	  - RTOS Minimal: Ultra-compact for resource-constrained RTOS
+	  - Linux Minimal: Essential features for storage-limited Linux
+	  - Linux Standard: Balanced configuration for typical Linux
 	  - Linux Full: All features enabled for development and testing
 
-	  After loading a template, you can further customize individual options.
+	  After loading a template, customize individual options as needed.
 
 	  If you prefer manual configuration, select "None".
 
@@ -610,7 +610,7 @@ config TOOLCHAIN_PATH
 	  Absolute path to the cross-compilation toolchain.
 	  Leave empty to use system default compiler.
 
-	  Example: /opt/toolchains/gcc-arm-11.2-2022.02-x86_64-aarch64-none-linux-gnu/bin
+	  Example: /opt/toolchains/gcc-arm-11.2/bin
 
 config TOOLCHAIN_PREFIX
 	string "Toolchain prefix"
