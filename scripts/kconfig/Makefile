@@ -87,7 +87,14 @@ endif
 	$(MTIME_IS_COARSE) && sleep 1
 
 %_defconfig: $(obj)/conf
-	$(Q)$< -D configs/$@ Config.in
+	@config_name=$@; \
+	subdir=$${config_name%%_*}; \
+	if [ -f configs/$$subdir/$$config_name ]; then \
+		$(Q)$< -D configs/$$subdir/$$config_name Config.in; \
+	else \
+		echo "Error: Configuration file configs/$$subdir/$$config_name not found"; \
+		exit 1; \
+	fi
 	$(MTIME_IS_COARSE) && sleep 1
 
 # Help text used by make help

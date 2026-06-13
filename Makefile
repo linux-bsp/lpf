@@ -459,13 +459,17 @@ help:
 	@echo '                  - Specify CMake toolchain for cross-compilation'
 	@echo ''
 	@echo 'Available defconfigs (make list):'
-	@for config in $(sort $(notdir $(wildcard $(srctree)/configs/*_defconfig))); do \
-		printf "  %-30s\n" $$config; \
+	@for subdir in $(sort $(notdir $(wildcard $(srctree)/configs/*/))); do \
+		echo ""; \
+		echo "  $$subdir configurations:"; \
+		for config in $(sort $(notdir $(wildcard $(srctree)/configs/$$subdir/*_defconfig))); do \
+			printf "    %-30s\n" $$config; \
+		done; \
 	done
 	@echo ''
 	@echo 'Examples:'
 	@echo '  # Standard workflow'
-	@echo '  make ccm_h200_100p_am625_release_defconfig'
+	@echo '  make tests_x86_full_defconfig'
 	@echo '  make -j$$(nproc)'
 	@echo '  make install DESTDIR=/tmp/staging'
 	@echo ''
