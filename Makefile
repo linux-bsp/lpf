@@ -397,14 +397,12 @@ PHONY += clean distclean mrproper
 clean:
 	@echo "  CLEAN   build artifacts"
 	$(Q)rm -rf $(BUILD_DIR)
-	$(Q)rm -f include/autoconf.h
 
 # distclean: Remove build artifacts and configuration
 distclean: clean
 	@echo "  CLEAN   configuration"
 	$(Q)rm -f .config .config.old .kconfig.d
-	$(Q)rm -rf include/config include/generated
-	$(Q)rm -f include/autoconf.h include/version.h
+	$(Q)rm -rf include
 
 # mrproper: Remove everything including kconfig tools
 mrproper: distclean
