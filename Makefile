@@ -33,6 +33,9 @@ endif
 # Build directory (for CMake build artifacts)
 BUILD_DIR ?= _build
 
+# Kconfig directory
+KCONFIG_DIR := scripts/kconfig
+
 # Normalize BUILD_DIR
 override BUILD_DIR := $(patsubst %/,%,$(BUILD_DIR))
 
@@ -306,9 +309,7 @@ mrproper distclean: clean
 	$(Q)rm -f .config .config.old .kconfig.d
 	$(Q)rm -rf include/config include/generated
 	@echo "  CLEAN   kconfig tools"
-	$(Q)rm -f scripts/kconfig/conf scripts/kconfig/mconf scripts/kconfig/nconf scripts/kconfig/qconf
-	$(Q)rm -f scripts/kconfig/*.o scripts/kconfig/.*.cmd
-	$(Q)rm -f scripts/kconfig/lxdialog/*.o scripts/kconfig/lxdialog/.*.cmd
+	$(Q)$(MAKE) -C $(KCONFIG_DIR) clean
 
 # ===========================================================================
 # Installation target
