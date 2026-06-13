@@ -246,7 +246,7 @@ ifeq ($(dot-config),1)
 # with it and forgot to run make oldconfig.
 # If kconfig.d is missing then we are probably in a cleaned tree so
 # we execute the config step to be sure to catch updated Config.in files
-include/autoconf.h: .kconfig.d .config FORCE
+include/autoconf.h: .config $(wildcard .kconfig.d)
 	$(Q)$(MAKE) -f $(srctree)/Makefile silentoldconfig
 
 else
