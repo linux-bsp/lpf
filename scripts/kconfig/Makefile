@@ -273,8 +273,8 @@ endif
 # Clean target
 PHONY += clean
 clean:
-	rm -f $(clean-files)
-	rm -f conf mconf nconf qconf gconf kxgettext
-	rm -f *.o .*.cmd
-	rm -f lxdialog/*.o lxdialog/.*.cmd lxdialog/lxdialog
+	@rm -f $(clean-files)
+	@rm -f conf mconf nconf qconf gconf kxgettext
+	@rm -f *.o .*.cmd
+	@rm -f lxdialog/*.o lxdialog/.*.cmd lxdialog/lxdialog
 
