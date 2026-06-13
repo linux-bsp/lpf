@@ -216,10 +216,34 @@ export KBUILD_DEFCONFIG
 config: scripts_basic FORCE
 	$(Q)mkdir -p include
 	$(Q)$(MAKE) $(build)=scripts/kconfig $@
+	@if [ -f .config ]; then \
+		echo ""; \
+		echo "==================================================================="; \
+		echo "Configuration file generated: $(CURDIR)/.config"; \
+		echo "==================================================================="; \
+		echo ""; \
+		echo "Next steps:"; \
+		echo "  make all          - Build the project with this configuration"; \
+		echo "  make menuconfig   - Modify configuration interactively"; \
+		echo "==================================================================="; \
+		echo ""; \
+	fi
 
 %config: scripts_basic FORCE
 	$(Q)mkdir -p include
 	$(Q)$(MAKE) $(build)=scripts/kconfig $@
+	@if [ -f .config ]; then \
+		echo ""; \
+		echo "==================================================================="; \
+		echo "Configuration file generated: $(CURDIR)/.config"; \
+		echo "==================================================================="; \
+		echo ""; \
+		echo "Next steps:"; \
+		echo "  make all          - Build the project with this configuration"; \
+		echo "  make menuconfig   - Modify configuration interactively"; \
+		echo "==================================================================="; \
+		echo ""; \
+	fi
 
 else
 # ===========================================================================
