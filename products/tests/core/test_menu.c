@@ -612,6 +612,11 @@ int32_t libutest_interactive_menu_filtered(const test_filter_t *filter)
                 OSAL_Printf("\nExiting...\n");
                 return OSAL_SUCCESS;
 
+            case -3:
+                /* 'q' or 'Q' - Quit */
+                OSAL_Printf("\nExiting...\n");
+                return OSAL_SUCCESS;
+
             default:
                 OSAL_Printf("Invalid choice. Please try again.\n");
                 break;
