@@ -257,7 +257,7 @@ ip link show vcan0
 
 **必须遵守**：
 - ✅ 使用OSAL封装的系统调用：`OSAL_socket()`, `OSAL_open()`, `OSAL_close()`
-- ❌ 禁止直接调用：`socket()`, `open()`, `close()`, `memcpy()`, `strlen()`
+- ❌ 禁止直接调用：`socket()`, `open()`, `close()`, `memcpy()`, `strlen()`（应使用 OSAL 封装）
 - ✅ 使用OSAL日志：`LOG_INFO()`, `LOG_ERROR()`
 - ❌ 禁止使用：`printf()`, `fprintf()`
 
