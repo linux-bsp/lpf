@@ -62,6 +62,7 @@ static void print_usage(const char *program_name)
         OSAL_printf("  -m <module>            Run tests from specific module\n");
         OSAL_printf("  -s <suite>             Run specific test suite\n");
         OSAL_printf("  -l, --list             List all available tests\n");
+        OSAL_printf("  -l, --list -L <layer>  List tests from specific layer\n");
         OSAL_printf("  -l, --list -m <module> List tests from specific module\n");
         OSAL_printf("  -i, --interactive      Interactive menu (default)\n");
         OSAL_printf("  -h, --help             Show this help message\n\n");
@@ -85,6 +86,7 @@ static void print_usage(const char *program_name)
         OSAL_printf("  %s -m test_osal_mutex  # Run specific module\n", program_name);
         OSAL_printf("  %s -s osal_mutex       # Run specific suite\n");
         OSAL_printf("  %s --list              # List all tests\n", program_name);
+        OSAL_printf("  %s --list -L OSAL      # List tests from OSAL layer\n", program_name);
         OSAL_printf("  %s --list -m test_osal # List tests from test_osal module\n", program_name);
         OSAL_printf("  %s --category unit     # Run only unit tests\n", program_name);
         OSAL_printf("  %s -a --format junit --output report.xml  # CI integration\n", program_name);
@@ -401,8 +403,12 @@ int main(int argc, char *argv[])
 
     /* List all tests */
     if (0 == OSAL_strcmp(argv[1], "-l") || 0 == OSAL_strcmp(argv[1], "--list")) {
+        /* Check for -L parameter after --list */
+        if (argc >= 4 && 0 == OSAL_strcmp(argv[2], "-L")) {
+            libutest_list_layer(argv[3]);
+        }
         /* Check for -m parameter after --list */
-        if (argc >= 4 && 0 == OSAL_strcmp(argv[2], "-m")) {
+        else if (argc >= 4 && 0 == OSAL_strcmp(argv[2], "-m")) {
             libutest_list_module(argv[3]);
         } else if (layer_filter) {
             libutest_print_layer(layer_filter);
