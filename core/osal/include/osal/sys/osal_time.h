@@ -79,7 +79,7 @@ int32_t OSAL_nanosleep(uint64_t nsec);
  * @note 用于超时计算、性能测量等场景，不受NTP同步影响
  *       封装clock_gettime(CLOCK_MONOTONIC)
  */
-int64_t OSAL_GetMonotonicTime(void);
+int64_t OSAL_get_monotonic_time(void);
 
 /**
  * @brief 获取启动时钟时间（包含休眠时间）
@@ -87,14 +87,14 @@ int64_t OSAL_GetMonotonicTime(void);
  * @note 与CLOCK_MONOTONIC类似，但包含系统休眠时间
  *       封装clock_gettime(CLOCK_BOOTTIME)
  */
-int64_t OSAL_GetBootTime(void);
+int64_t OSAL_get_boot_time(void);
 
 /**
  * @brief 获取高精度时间戳（纳秒）
  * @return 时间戳（纳秒），用于性能测量
  * @note 用于微秒级性能测量，封装clock_gettime(CLOCK_MONOTONIC)
  */
-int64_t OSAL_GetHighResTime(void);
+int64_t OSAL_get_highres_time(void);
 
 #ifdef __cplusplus
 }

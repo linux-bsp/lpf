@@ -54,12 +54,12 @@ static void* worker_thread_func(void *arg) {
     uint32_t iteration = 0;
 
     while (!stress_should_stop(ctx)) {
-        uint64_t start_us = OSAL_GetMonotonicTime();
+        uint64_t start_us = OSAL_get_monotonic_time();
 
         /* 执行工作函数 */
         int32_t result = args->worker(args->user_data, iteration);
 
-        uint64_t end_us = OSAL_GetMonotonicTime();
+        uint64_t end_us = OSAL_get_monotonic_time();
         double latency_us = (double)(end_us - start_us);
 
         /* 更新统计 */
@@ -154,7 +154,7 @@ int32_t stress_run(stress_context_t *ctx,
 
     ctx->running = true;
     ctx->should_stop = false;
-    ctx->start_time_ms = OSAL_GetMonotonicTime() / 1000;
+    ctx->start_time_ms = OSAL_get_monotonic_time() / 1000;
 
     /* 创建工作线程 */
     osal_thread_t *threads = (osal_thread_t*)OSAL_malloc(
@@ -243,7 +243,7 @@ int32_t stress_get_stats(stress_context_t *ctx, stress_stats_t *stats) {
     stats->timeout_ops = OSAL_AtomicLoad64(&ctx->timeout_ops);
     stats->error_count = OSAL_AtomicLoad(&ctx->error_count);
 
-    uint64_t elapsed_ms = (OSAL_GetMonotonicTime() / 1000) - ctx->start_time_ms;
+    uint64_t elapsed_ms = (OSAL_get_monotonic_time() / 1000) - ctx->start_time_ms;
     stats->elapsed_time_ms = elapsed_ms;
 
     if (elapsed_ms > 0) {

@@ -29,7 +29,7 @@ uint32_t prl_get_next_seq(void)
 uint32_t prl_get_timestamp(void)
 {
     OS_time_t time_struct;
-    OSAL_GetLocalTime(&time_struct);
+    OSAL_get_local_time(&time_struct);
     return time_struct.seconds;
 }
 

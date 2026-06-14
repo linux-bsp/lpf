@@ -257,7 +257,7 @@ int32_t PDL_MCU_GetStatus(pdl_mcu_handle_t handle, pdl_mcu_status_t *status)
         ret = pdl_mcu_decode_get_status(rx_buf, actual_size, status);
         if (OSAL_SUCCESS == ret)
         {
-            status->timestamp_us = OSAL_GetMonotonicTime();
+            status->timestamp_us = OSAL_get_monotonic_time();
             /* 同步设备状态 */
             OSAL_MutexLock(ctx->mutex);
             status->state = ctx->state;

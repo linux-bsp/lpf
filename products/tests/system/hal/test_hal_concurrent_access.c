@@ -69,7 +69,7 @@ void test_multiprocess_concurrent(void)
 
     for (int i = 0; i < num_processes; i++) {
         osal_id_t pid;
-        int32_t ret = OSAL_Fork(&pid);
+        int32_t ret = OSAL_fork(&pid);
 
         if (ret != OSAL_SUCCESS) {
             LOG_INFO("TEST", "❌ fork 失败\n");
@@ -81,19 +81,19 @@ void test_multiprocess_concurrent(void)
             osal_flock_t *flock = NULL;
 
             if (OSAL_flock_create(lock_file, &flock) != OSAL_SUCCESS) {
-                LOG_INFO("TEST", "进程 %d: 创建文件锁失败\n", OSAL_Getpid());
-                OSAL_Exit(1);
+                LOG_INFO("TEST", "进程 %d: 创建文件锁失败\n", OSAL_getpid());
+                OSAL_exit(1);
             }
 
             for (int j = 0; j < iterations; j++) {
                 /* 获取锁 */
                 if (OSAL_flock_timed_lock(flock, OSAL_FLOCK_EXCLUSIVE, 5000) != OSAL_SUCCESS) {
-                    LOG_INFO("TEST", "进程 %d: 加锁超时\n", OSAL_Getpid());
+                    LOG_INFO("TEST", "进程 %d: 加锁超时\n", OSAL_getpid());
                     continue;
                 }
 
                 /* 临界区：模拟硬件访问 */
-                LOG_INFO("TEST", "进程 %d: 进入临界区 (迭代 %d/%d)\n", OSAL_Getpid(), j+1, iterations);
+                LOG_INFO("TEST", "进程 %d: 进入临界区 (迭代 %d/%d)\n", OSAL_getpid(), j+1, iterations);
                 OSAL_usleep(100000);  /* 100ms */
 
                 /* 释放锁 */
@@ -101,14 +101,14 @@ void test_multiprocess_concurrent(void)
             }
 
             OSAL_flock_destroy(flock);
-            OSAL_Exit(0);
+            OSAL_exit(0);
         }
     }
 
     /* 父进程等待所有子进程 */
     for (int i = 0; i < num_processes; i++) {
         int status;
-        OSAL_Waitpid(-1, &status, 0);
+        OSAL_waitpid(-1, &status, 0);
     }
 
     LOG_INFO("TEST", "✅ 多进程并发测试完成\n");
@@ -213,7 +213,7 @@ void test_timeout_mechanism(void)
 
     /* 第一个进程持有锁 */
     osal_id_t pid;
-    int32_t ret = OSAL_Fork(&pid);
+    int32_t ret = OSAL_fork(&pid);
 
     if (ret != OSAL_SUCCESS) {
         LOG_INFO("TEST", "❌ fork 失败\n");
@@ -228,7 +228,7 @@ void test_timeout_mechanism(void)
         OSAL_sleep(3);
         OSAL_flock_unlock(flock);
         LOG_INFO("TEST", "子进程: 释放锁\n");
-        OSAL_Exit(0);
+        OSAL_exit(0);
     } else {
         /* 父进程：等待 1 秒后尝试获取锁（应该超时） */
         OSAL_sleep(1);
@@ -243,7 +243,7 @@ void test_timeout_mechanism(void)
 
         /* 等待子进程退出 */
         int status;
-        OSAL_Waitpid(pid, &status, 0);
+        OSAL_waitpid(pid, &status, 0);
     }
 
     OSAL_flock_destroy(flock);

@@ -164,7 +164,7 @@ static void test_thread_timing(void)
     int32_t sleep_times[3] = {50, 100, 150};
     uint64_t start_time, end_time;
 
-    start_time = OSAL_GetTickCount();
+    start_time = OSAL_get_tick_count();
 
     /* 创建3个不同睡眠时间的线程 */
 
@@ -180,7 +180,7 @@ static void test_thread_timing(void)
         TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     }
 
-    end_time = OSAL_GetTickCount();
+    end_time = OSAL_get_tick_count();
     uint64_t elapsed = end_time - start_time;
 
     /* 总时间应该接近最长的睡眠时间（150ms），因为线程并发执行 */

@@ -305,7 +305,7 @@ int32_t HAL_CAN_Recv(hal_can_handle_t handle, hal_can_frame_t *frame, int32_t ti
         frame->can_id = can_frame.can_id;
         frame->dlc = (can_frame.can_dlc > 8) ? 8 : can_frame.can_dlc;
         OSAL_memcpy(frame->data, can_frame.data, frame->dlc);
-        frame->timestamp = OSAL_GetTickCount();
+        frame->timestamp = OSAL_get_tick_count();
         result = OSAL_SUCCESS;
     }
 

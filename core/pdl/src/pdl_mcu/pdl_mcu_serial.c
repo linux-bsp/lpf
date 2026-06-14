@@ -237,7 +237,7 @@ int32_t mcu_serial_send_command(void *handle,
     ctx = (mcu_serial_context_t *)handle;
 
     /* 记录起始时间，用于总超时控制 */
-    start_time_us = OSAL_GetMonotonicTime();
+    start_time_us = OSAL_get_monotonic_time();
 
     /* 封装发送帧 */
     if (OSAL_SUCCESS != mcu_serial_pack_frame(cmd_code, data, data_len,
@@ -253,7 +253,7 @@ int32_t mcu_serial_send_command(void *handle,
     }
 
     /* 计算发送后剩余的超时时间 */
-    elapsed_us = OSAL_GetMonotonicTime() - start_time_us;
+    elapsed_us = OSAL_get_monotonic_time() - start_time_us;
     if (elapsed_us / 1000 >= timeout_ms)
     {
         return OSAL_ERR_TIMEOUT;  /* 发送阶段已超时 */

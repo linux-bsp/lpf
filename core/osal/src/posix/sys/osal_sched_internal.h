@@ -135,7 +135,7 @@ int32_t OSAL_SchedGetAffinity(osal_thread_t thread, int32_t *cpu_id);
  * @note Linux需要root权限或CAP_IPC_LOCK能力
  * @note 锁定后内存使用量会增加，需确保有足够物理内存
  */
-int32_t OSAL_MemLock(bool lock_all);
+int32_t OSAL_mlock(bool lock_all);
 
 /**
  * @brief 解锁进程内存
@@ -143,7 +143,7 @@ int32_t OSAL_MemLock(bool lock_all);
  * @return OSAL_SUCCESS 成功
  * @return OSAL_ERR_GENERIC 解锁失败
  */
-int32_t OSAL_MemUnlock(void);
+int32_t OSAL_munlock(void);
 
 /**
  * @brief 获取系统CPU数量
@@ -151,7 +151,7 @@ int32_t OSAL_MemUnlock(void);
  * @return CPU数量（>0）
  * @return -1 获取失败
  */
-int32_t OSAL_GetCPUCount(void);
+int32_t OSAL_get_cpu_count(void);
 
 /**
  * @brief 获取调度策略的最小优先级

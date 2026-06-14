@@ -9,7 +9,7 @@
 /* 辅助函数：获取当前时间（微秒） */
 static uint64_t get_time_in_micros(void)
 {
-    return (uint64_t)OSAL_GetMonotonicTime();
+    return (uint64_t)OSAL_get_monotonic_time();
 }
 
 /*===========================================================================
@@ -127,7 +127,7 @@ static void test_osal_get_local_time_success(void)
     int32_t ret;
 
     /* 获取第一次时间 */
-    ret = OSAL_GetLocalTime(&time1);
+    ret = OSAL_get_local_time(&time1);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_TRUE(time1.seconds > 0);
 
@@ -135,7 +135,7 @@ static void test_osal_get_local_time_success(void)
     OSAL_msleep(10);
 
     /* 获取第二次时间 */
-    ret = OSAL_GetLocalTime(&time2);
+    ret = OSAL_get_local_time(&time2);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 验证时间递增 */
@@ -148,7 +148,7 @@ static void test_osal_get_local_time_success(void)
 /* 测试用例: GetLocalTime - 空指针 */
 static void test_osal_get_local_time_null_pointer(void)
 {
-    int32_t ret = OSAL_GetLocalTime(NULL);
+    int32_t ret = OSAL_get_local_time(NULL);
     TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_POINTER, ret);
 }
 
@@ -158,13 +158,13 @@ static void test_osal_get_tick_count(void)
     uint32_t tick1, tick2;
 
     /* 获取第一次滴答 */
-    tick1 = OSAL_GetTickCount();
+    tick1 = OSAL_get_tick_count();
 
     /* 短暂延时 */
     OSAL_msleep(50);
 
     /* 获取第二次滴答 */
-    tick2 = OSAL_GetTickCount();
+    tick2 = OSAL_get_tick_count();
 
     /* 验证滴答递增（允许±20ms误差） */
     uint32_t diff = tick2 - tick1;
@@ -176,14 +176,14 @@ static void test_osal_time_monotonic(void)
 {
     OS_time_t prev_time, curr_time;
 
-    OSAL_GetLocalTime(&prev_time);
+    OSAL_get_local_time(&prev_time);
 
     /* 连续获取10次时间，验证单调递增 */
     int32_t i;
 
     for (i = 0; i < 10; i++) {
         OSAL_usleep(1000);  /* 1毫秒 */
-        OSAL_GetLocalTime(&curr_time);
+        OSAL_get_local_time(&curr_time);
 
         /* 验证时间递增 */
         if (curr_time.seconds == prev_time.seconds) {
@@ -274,7 +274,7 @@ static void test_osal_time_get_performance(void)
     int32_t i;
 
     for (i = 0; i < iterations; i++) {
-        OSAL_GetLocalTime(&time_struct);
+        OSAL_get_local_time(&time_struct);
     }
     end_time = get_time_in_micros();
 

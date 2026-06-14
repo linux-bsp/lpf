@@ -390,7 +390,7 @@ int32_t PDL_CCM_SendTelemetry(pdl_ccm_handle_t handle,
     prl_pmc_telemetry_t *tm = (prl_pmc_telemetry_t *)prl_buf;
     tm->tm_id = tm_id;
     tm->tm_source = tm_source;
-    tm->timestamp_us = OSAL_GetMonotonicTime();
+    tm->timestamp_us = OSAL_get_monotonic_time();
     tm->data_type = 0;
     tm->data_length = len;
 

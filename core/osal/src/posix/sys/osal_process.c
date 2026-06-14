@@ -14,22 +14,22 @@
  * 基础进程控制函数（保持兼容）
  */
 
-void OSAL_Exit(int32_t status)
+void OSAL_exit(int32_t status)
 {
     exit(status);
 }
 
-int32_t OSAL_Getpid(void)
+int32_t OSAL_getpid(void)
 {
     return getpid();
 }
 
-int32_t OSAL_Kill(int32_t pid, int32_t sig)
+int32_t OSAL_kill(int32_t pid, int32_t sig)
 {
     return kill(pid, sig);
 }
 
-void OSAL_Abort(void)
+void OSAL_abort(void)
 {
     abort();
 }
@@ -155,7 +155,7 @@ osal_id_t OSAL_ProcessGetParentId(void)
     return (osal_id_t)getppid();
 }
 
-int32_t OSAL_Fork(osal_id_t *child_pid)
+int32_t OSAL_fork(osal_id_t *child_pid)
 {
     pid_t pid;
 
@@ -175,7 +175,7 @@ int32_t OSAL_Fork(osal_id_t *child_pid)
     return OSAL_SUCCESS;
 }
 
-int32_t OSAL_Waitpid(osal_id_t pid, int32_t *status, int32_t options)
+int32_t OSAL_waitpid(osal_id_t pid, int32_t *status, int32_t options)
 {
     int wait_status;
     int posix_options;

@@ -328,13 +328,13 @@ static void test_osal_log_performance(void)
     OSAL_log_set_max_file_size(10 * 1024 * 1024);  // 10MB
 
     // 测试写入性能
-    start_time = OSAL_GetTickCount();
+    start_time = OSAL_get_tick_count();
     int32_t i;
 
     for (i = 0; i < iterations; i++) {
         LOG_INFO("TEST", "Performance test message %d", i);
     }
-    end_time = OSAL_GetTickCount();
+    end_time = OSAL_get_tick_count();
 
     // 平均每条日志应该小于1ms
     uint64_t elapsed = end_time - start_time;

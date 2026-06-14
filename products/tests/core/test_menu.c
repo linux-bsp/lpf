@@ -332,7 +332,7 @@ static int32_t menu_select_test(const test_suite_t *suite)
         } else if (choice == -3) {
             /* 'q' or 'Q' - Quit */
             OSAL_printf("\nExiting...\n");
-            OSAL_Exit(0);
+            OSAL_exit(0);
         } else if (0 == choice) {
             return libutest_run_suite(suite->suite_name);
         } else if (choice > 0 && choice <= (int32_t)suite->case_count) {
@@ -341,7 +341,7 @@ static int32_t menu_select_test(const test_suite_t *suite)
             return OSAL_SUCCESS;
         } else if (choice == (int32_t)(suite->case_count + 2)) {
             OSAL_printf("\nExiting...\n");
-            OSAL_Exit(0);
+            OSAL_exit(0);
         } else {
             OSAL_printf("Invalid choice. Please try again.\n");
         }
@@ -379,7 +379,7 @@ static int32_t menu_select_suite(const test_suite_t **suites, uint32_t count, co
         } else if (choice == -3) {
             /* 'q' or 'Q' - Quit */
             OSAL_printf("\nExiting...\n");
-            OSAL_Exit(0);
+            OSAL_exit(0);
         } else if (0 == choice) {
             /* Run all suites */
             libutest_reset_stats();
@@ -395,7 +395,7 @@ static int32_t menu_select_suite(const test_suite_t **suites, uint32_t count, co
             return OSAL_SUCCESS;
         } else if (choice == (int32_t)(count + 2)) {
             OSAL_printf("\nExiting...\n");
-            OSAL_Exit(0);
+            OSAL_exit(0);
         } else {
             OSAL_printf("Invalid choice. Please try again.\n");
         }
@@ -441,7 +441,7 @@ static int32_t menu_select_module(const test_filter_t *filter)
         } else if (choice == -3) {
             /* 'q' or 'Q' - Quit */
             OSAL_printf("\nExiting...\n");
-            OSAL_Exit(0);
+            OSAL_exit(0);
         } else if (choice > 0 && choice <= (int32_t)module_count) {
             const test_suite_t *suites[MAX_SUITES];
             uint32_t count;
@@ -458,7 +458,7 @@ static int32_t menu_select_module(const test_filter_t *filter)
             return OSAL_SUCCESS;
         } else if (choice == (int32_t)(module_count + 2)) {
             OSAL_printf("\nExiting...\n");
-            OSAL_Exit(0);
+            OSAL_exit(0);
         } else {
             OSAL_printf("Invalid choice. Please try again.\n");
         }
@@ -504,7 +504,7 @@ static int32_t menu_select_layer(const test_filter_t *filter)
         } else if (choice == -3) {
             /* 'q' or 'Q' - Quit */
             OSAL_printf("\nExiting...\n");
-            OSAL_Exit(0);
+            OSAL_exit(0);
         } else if (choice > 0 && choice <= (int32_t)layer_count) {
             const test_suite_t *suites[MAX_SUITES];
             uint32_t count;
@@ -521,7 +521,7 @@ static int32_t menu_select_layer(const test_filter_t *filter)
             return OSAL_SUCCESS;
         } else if (choice == (int32_t)(layer_count + 2)) {
             OSAL_printf("\nExiting...\n");
-            OSAL_Exit(0);
+            OSAL_exit(0);
         } else {
             OSAL_printf("Invalid choice. Please try again.\n");
         }

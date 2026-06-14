@@ -334,13 +334,13 @@ static void test_osal_malloc_performance(void)
     uint64_t start_time, end_time;
 
     /* 测试分配性能 */
-    start_time = OSAL_GetTickCount();
+    start_time = OSAL_get_tick_count();
     int32_t i;
 
     for (i = 0; i < iterations; i++) {
         ptrs[i] = OSAL_malloc(64);
     }
-    end_time = OSAL_GetTickCount();
+    end_time = OSAL_get_tick_count();
 
     /* 验证所有分配成功 */
 

@@ -29,7 +29,7 @@ static void test_signal_register_success(void)
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 发送信号给自己 */
-    OSAL_Kill(OSAL_Getpid(), SIGUSR1);
+    OSAL_kill(OSAL_getpid(), SIGUSR1);
 
     /* 等待信号处理 */
     OSAL_msleep(100);
@@ -56,7 +56,7 @@ static void test_signal_ignore_success(void)
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 发送信号 */
-    OSAL_Kill(OSAL_Getpid(), SIGUSR2);
+    OSAL_kill(OSAL_getpid(), SIGUSR2);
     OSAL_usleep(100000);
 
     /* 信号应该被忽略，处理函数不应该被调用 */
@@ -78,7 +78,7 @@ static void test_signal_block_success(void)
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 发送信号 */
-    OSAL_Kill(OSAL_Getpid(), SIGUSR1);
+    OSAL_kill(OSAL_getpid(), SIGUSR1);
     OSAL_usleep(100000);
 
     /* 信号被阻塞，处理函数不应该被调用 */
@@ -130,7 +130,7 @@ static void test_signal_register_multiple(void)
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 发送SIGUSR1 */
-    OSAL_Kill(OSAL_Getpid(), SIGUSR1);
+    OSAL_kill(OSAL_getpid(), SIGUSR1);
     OSAL_usleep(100000);
 
     TEST_ASSERT_EQUAL(1, g_signal_received);

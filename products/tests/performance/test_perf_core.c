@@ -120,14 +120,14 @@ void perf_context_destroy(perf_context_t *ctx) {
 void perf_begin(perf_context_t *ctx) {
     if (!ctx) return;
 
-    ctx->start_time_us = OSAL_GetMonotonicTime();
+    ctx->start_time_us = OSAL_get_monotonic_time();
     ctx->measuring = true;
 }
 
 void perf_end(perf_context_t *ctx) {
     if (!ctx || !ctx->measuring) return;
 
-    uint64_t end_time_us = OSAL_GetMonotonicTime();
+    uint64_t end_time_us = OSAL_get_monotonic_time();
     double elapsed_us = (double)(end_time_us - ctx->start_time_us);
 
     perf_record(ctx, elapsed_us);

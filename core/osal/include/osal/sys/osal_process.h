@@ -17,10 +17,10 @@
 
 
 /* 基础进程控制函数（保持兼容） */
-void OSAL_Exit(int32_t status);
-int32_t OSAL_Getpid(void);
-int32_t OSAL_Kill(int32_t pid, int32_t sig);
-void OSAL_Abort(void);
+void OSAL_exit(int32_t status);
+int32_t OSAL_getpid(void);
+int32_t OSAL_kill(int32_t pid, int32_t sig);
+void OSAL_abort(void);
 
 /* 进程管理接口（新增，支持多进程架构） */
 
@@ -101,7 +101,7 @@ osal_id_t OSAL_ProcessGetParentId(void);
  *
  * @note 父进程中 *child_pid > 0，子进程中 *child_pid == 0
  */
-int32_t OSAL_Fork(osal_id_t *child_pid);
+int32_t OSAL_fork(osal_id_t *child_pid);
 
 /**
  * @brief 等待指定子进程退出
@@ -115,7 +115,7 @@ int32_t OSAL_Fork(osal_id_t *child_pid);
  * @return OSAL_ERR_INVALID_ID 无子进程
  * @return OSAL_ERR_GENERIC 系统调用失败
  */
-int32_t OSAL_Waitpid(osal_id_t pid, int32_t *status, int32_t options);
+int32_t OSAL_waitpid(osal_id_t pid, int32_t *status, int32_t options);
 
 /* 等待选项 */
 #define OSAL_WNOHANG  0x01  /* 非阻塞等待 */

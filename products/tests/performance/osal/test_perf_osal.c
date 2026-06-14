@@ -96,7 +96,7 @@ static void test_perf_time_get(void) {
     const uint32_t iterations = 10000;
 
     /* 创建性能测量上下文 */
-    perf_context_t *ctx = perf_context_create("OSAL_GetMonotonicTime",
+    perf_context_t *ctx = perf_context_create("OSAL_get_monotonic_time",
                                                PERF_METRIC_LATENCY,
                                                iterations);
     TEST_ASSERT_NOT_NULL(ctx);
@@ -106,7 +106,7 @@ static void test_perf_time_get(void) {
 
     for (i = 0; i < iterations; i++) {
         perf_begin(ctx);
-        OSAL_GetMonotonicTime();
+        OSAL_get_monotonic_time();
         perf_end(ctx);
     }
 

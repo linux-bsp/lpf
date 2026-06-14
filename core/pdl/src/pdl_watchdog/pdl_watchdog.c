@@ -37,7 +37,7 @@ static void *watchdog_kick_thread(void *arg)
         if (ret == OSAL_SUCCESS)
         {
             OSAL_AtomicFetchAdd(&ctx->kick_count, 1);
-            OSAL_AtomicStore64(&ctx->last_kick_time, OSAL_GetMonotonicTime());
+            OSAL_AtomicStore64(&ctx->last_kick_time, OSAL_get_monotonic_time());
             LOG_DEBUG("PDL_WDT", "[%s] Kicked (count=%u)",
                      ctx->name, OSAL_AtomicLoad(&ctx->kick_count));
         }
@@ -231,7 +231,7 @@ int32_t PDL_WATCHDOG_Kick(pdl_watchdog_handle_t handle)
     if (ret == OSAL_SUCCESS)
     {
         OSAL_AtomicFetchAdd(&ctx->kick_count, 1);
-        OSAL_AtomicStore64(&ctx->last_kick_time, OSAL_GetMonotonicTime());
+        OSAL_AtomicStore64(&ctx->last_kick_time, OSAL_get_monotonic_time());
     }
 
     return ret;

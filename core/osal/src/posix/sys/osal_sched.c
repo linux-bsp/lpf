@@ -176,7 +176,7 @@ int32_t OSAL_SchedSetAffinity(osal_thread_t thread, int32_t cpu_id)
     int cpu_count;
 
     /* 参数校验 */
-    cpu_count = OSAL_GetCPUCount();
+    cpu_count = OSAL_get_cpu_count();
     if (cpu_id < 0 || cpu_id >= cpu_count) {
         return OSAL_ERR_INVALID_PARAM;
     }
@@ -237,7 +237,7 @@ int32_t OSAL_SchedGetAffinity(osal_thread_t thread, int32_t *cpu_id)
     }
 
     /* 返回第一个设置的CPU */
-    cpu_count = OSAL_GetCPUCount();
+    cpu_count = OSAL_get_cpu_count();
     for (i = 0; i < cpu_count; i++) {
         if (CPU_ISSET(i, &cpuset)) {
             *cpu_id = i;
@@ -260,7 +260,7 @@ int32_t OSAL_SchedGetAffinity(osal_thread_t thread, int32_t *cpu_id)
 /*
  * 锁定进程内存，防止页面交换
  */
-int32_t OSAL_MemLock(bool lock_all)
+int32_t OSAL_mlock(bool lock_all)
 {
     int ret;
 
@@ -288,7 +288,7 @@ int32_t OSAL_MemLock(bool lock_all)
 /*
  * 解锁进程内存
  */
-int32_t OSAL_MemUnlock(void)
+int32_t OSAL_munlock(void)
 {
     int ret;
 
@@ -303,7 +303,7 @@ int32_t OSAL_MemUnlock(void)
 /*
  * 获取系统CPU数量
  */
-int32_t OSAL_GetCPUCount(void)
+int32_t OSAL_get_cpu_count(void)
 {
     long cpu_count;
 

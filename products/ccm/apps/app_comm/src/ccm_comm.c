@@ -57,7 +57,7 @@ int32_t CCM_Comm_Init(void)
     }
 
     /* 锁定内存 */
-    ret = OSAL_MemLock(true);
+    ret = OSAL_mlock(true);
     if (ret != OSAL_SUCCESS) {
         LOG_WARN("COMM", "锁定内存失败: %d (需要root权限)", ret);
     }

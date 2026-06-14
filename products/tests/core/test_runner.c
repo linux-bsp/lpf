@@ -152,14 +152,14 @@ static test_result_t run_test_case(const test_case_t *test, const char *suite_na
     g_current_test = test->name;
     LOG_RUN(test->name);
 
-    uint32_t start_time = OSAL_GetTickCount();
+    uint32_t start_time = OSAL_get_tick_count();
 
     /* Setup */
     if (test->setup) {
         test->setup();
         if (g_test_failed) {
             LOG_DETAIL("[  FAILED  ] Setup failed for %s\n", test->name);
-            add_test_result(suite_name, test->name, TEST_RESULT_FAIL, OSAL_GetTickCount() - start_time);
+            add_test_result(suite_name, test->name, TEST_RESULT_FAIL, OSAL_get_tick_count() - start_time);
             return TEST_RESULT_FAIL;
         }
     }
@@ -175,7 +175,7 @@ static test_result_t run_test_case(const test_case_t *test, const char *suite_na
         if (!g_test_failed) g_test_failed = failed_before;
     }
 
-    uint32_t elapsed = OSAL_GetTickCount() - start_time;
+    uint32_t elapsed = OSAL_get_tick_count() - start_time;
 
     /* Result */
     test_result_t result = g_test_failed ? TEST_RESULT_FAIL : TEST_RESULT_PASS;
@@ -233,13 +233,13 @@ static void run_suites_and_report(const test_suite_t **suites, uint32_t count, c
     open_test_log();
     libutest_reset_stats();
 
-    start_time = OSAL_GetTickCount();
+    start_time = OSAL_get_tick_count();
 
     for (i = 0; i < count; i++) {
         run_suite(suites[i]);
     }
 
-    g_stats.total_time_ms = OSAL_GetTickCount() - start_time;
+    g_stats.total_time_ms = OSAL_get_tick_count() - start_time;
     if (g_stats.total > 0) {
         g_stats.avg_time_ms = g_stats.total_time_ms / g_stats.total;
     }

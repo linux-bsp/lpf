@@ -125,7 +125,7 @@ static void test_osal_sched_set_affinity(void)
     int32_t ret;
 
     /* 获取CPU数量 */
-    cpu_count = OSAL_GetCPUCount();
+    cpu_count = OSAL_get_cpu_count();
     TEST_ASSERT_TRUE(cpu_count > 0);
 
     /* 如果只有一个CPU，跳过测试 */
@@ -165,7 +165,7 @@ static void test_osal_sched_set_affinity_invalid(void)
     int32_t cpu_count;
     int32_t ret;
 
-    cpu_count = OSAL_GetCPUCount();
+    cpu_count = OSAL_get_cpu_count();
 
     /* CPU ID过大 */
     ret = OSAL_SchedSetAffinity(0, cpu_count);
@@ -201,7 +201,7 @@ static void test_osal_mem_lock(void)
     int32_t ret;
 
     /* 锁定当前内存 */
-    ret = OSAL_MemLock(false);
+    ret = OSAL_mlock(false);
 
     if (ret == OSAL_ERR_PERMISSION) {
         TEST_MESSAGE("SKIPPED: Need root permission or CAP_IPC_LOCK capability");
@@ -216,7 +216,7 @@ static void test_osal_mem_lock(void)
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 解锁内存 */
-    ret = OSAL_MemUnlock();
+    ret = OSAL_munlock();
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -226,7 +226,7 @@ static void test_osal_mem_lock_all(void)
     int32_t ret;
 
     /* 锁定所有内存（包括未来分配的） */
-    ret = OSAL_MemLock(true);
+    ret = OSAL_mlock(true);
 
     if (ret == OSAL_ERR_PERMISSION) {
         TEST_MESSAGE("SKIPPED: Need root permission or CAP_IPC_LOCK capability");
@@ -241,7 +241,7 @@ static void test_osal_mem_lock_all(void)
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 解锁内存 */
-    ret = OSAL_MemUnlock();
+    ret = OSAL_munlock();
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -254,7 +254,7 @@ static void test_osal_get_cpu_count(void)
 {
     int32_t cpu_count;
 
-    cpu_count = OSAL_GetCPUCount();
+    cpu_count = OSAL_get_cpu_count();
     TEST_ASSERT_TRUE(cpu_count > 0);
     TEST_ASSERT_TRUE(cpu_count <= 256);  /* 合理的上限 */
 }

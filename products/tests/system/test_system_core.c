@@ -79,7 +79,7 @@ int32_t system_test_run(system_test_context_t *ctx,
         return -1;
     }
 
-    ctx->start_time_ms = OSAL_GetTickCount();
+    ctx->start_time_ms = OSAL_get_tick_count();
 
     /* 环境初始化 */
     if (ctx->setup_func) {
@@ -103,7 +103,7 @@ int32_t system_test_run(system_test_context_t *ctx,
         OSAL_printf("[ TEARDOWN OK ] Environment cleaned up\n");
     }
 
-    ctx->end_time_ms = OSAL_GetTickCount();
+    ctx->end_time_ms = OSAL_get_tick_count();
     ctx->test_passed = (test_result == 0);
 
     /* 打印结果 */
@@ -135,7 +135,7 @@ void system_test_checkpoint(system_test_context_t *ctx,
     OSAL_strncpy(cp->name, checkpoint_name, OSAL_sizeof(cp->name) - 1);
     cp->name[OSAL_sizeof(cp->name) - 1] = '\0';
     cp->passed = passed;
-    cp->timestamp_ms = OSAL_GetTickCount();
+    cp->timestamp_ms = OSAL_get_tick_count();
 
     if (passed) {
         ctx->checkpoints_passed++;

@@ -7,7 +7,7 @@
 #include "osal.h"
 
 /*===========================================================================
- * OSAL_GetLocalTime 测试
+ * OSAL_get_local_time 测试
  *===========================================================================*/
 
 /* 测试用例: GetLocalTime - 成功获取本地时间 */
@@ -16,14 +16,14 @@ static void test_osal_get_local_time_success(void)
     OS_time_t time1, time2;
     int32_t ret;
 
-    ret = OSAL_GetLocalTime(&time1);
+    ret = OSAL_get_local_time(&time1);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_TRUE(time1.seconds > 0);
     TEST_ASSERT_TRUE(time1.microsecs < 1000000);
 
     /* 等待一小段时间后再次获取 */
     OSAL_msleep(10); /* 10ms */
-    ret = OSAL_GetLocalTime(&time2);
+    ret = OSAL_get_local_time(&time2);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 验证时间递增 */
@@ -36,24 +36,24 @@ static void test_osal_get_local_time_success(void)
 /* 测试用例: GetLocalTime - 空指针 */
 static void test_osal_get_local_time_null_pointer(void)
 {
-    int32_t ret = OSAL_GetLocalTime(NULL);
+    int32_t ret = OSAL_get_local_time(NULL);
     TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_POINTER, ret);
 }
 
 /*===========================================================================
- * OSAL_SetLocalTime 测试
+ * OSAL_set_local_time 测试
  *===========================================================================*/
 
 /* 测试用例: SetLocalTime - 未实现 */
 static void test_osal_set_local_time_not_implemented(void)
 {
     OS_time_t time = {1234567890, 0};
-    int32_t ret = OSAL_SetLocalTime(&time);
+    int32_t ret = OSAL_set_local_time(&time);
     TEST_ASSERT_EQUAL(OSAL_ERR_NOT_IMPLEMENTED, ret);
 }
 
 /*===========================================================================
- * OSAL_GetTickCount 测试
+ * OSAL_get_tick_count 测试
  *===========================================================================*/
 
 /* 测试用例: GetTickCount - 单调递增 */
@@ -61,13 +61,13 @@ static void test_osal_get_tick_count_monotonic(void)
 {
     uint32_t tick1, tick2;
 
-    tick1 = OSAL_GetTickCount();
+    tick1 = OSAL_get_tick_count();
     TEST_ASSERT_TRUE(tick1 > 0);
 
     /* 等待一小段时间 */
     OSAL_msleep(50); /* 50ms */
 
-    tick2 = OSAL_GetTickCount();
+    tick2 = OSAL_get_tick_count();
     TEST_ASSERT_TRUE(tick2 > tick1);
 
     /* 验证时间差大约是50ms（允许误差） */
@@ -80,11 +80,11 @@ static void test_osal_get_tick_count_multiple_calls(void)
 {
     uint32_t tick1, tick2, tick3;
 
-    tick1 = OSAL_GetTickCount();
+    tick1 = OSAL_get_tick_count();
     OSAL_msleep(10); /* 10ms */
-    tick2 = OSAL_GetTickCount();
+    tick2 = OSAL_get_tick_count();
     OSAL_msleep(10); /* 10ms */
-    tick3 = OSAL_GetTickCount();
+    tick3 = OSAL_get_tick_count();
 
     /* 验证单调递增 */
     TEST_ASSERT_TRUE(tick2 > tick1);
@@ -136,13 +136,13 @@ static void test_osal_time_precision(void)
     uint32_t tick1, tick2;
 
     /* 同时获取两种时间 */
-    OSAL_GetLocalTime(&time1);
-    tick1 = OSAL_GetTickCount();
+    OSAL_get_local_time(&time1);
+    tick1 = OSAL_get_tick_count();
 
     OSAL_msleep(100); /* 100ms */
 
-    OSAL_GetLocalTime(&time2);
-    tick2 = OSAL_GetTickCount();
+    OSAL_get_local_time(&time2);
+    tick2 = OSAL_get_tick_count();
 
     /* 验证两种时间测量的一致性 */
     uint64_t time_diff_us = (time2.seconds - time1.seconds) * 1000000ULL +
@@ -158,9 +158,9 @@ static void test_osal_time_precision(void)
  * 测试套件注册
  *===========================================================================*/
 
-/* OSAL_GetLocalTime 测试 */
-    /* OSAL_SetLocalTime 测试 */
-    /* OSAL_GetTickCount 测试 */
+/* OSAL_get_local_time 测试 */
+    /* OSAL_set_local_time 测试 */
+    /* OSAL_get_tick_count 测试 */
     /* OSAL_Milli2Ticks 测试 */
     /* 综合测试 */
 

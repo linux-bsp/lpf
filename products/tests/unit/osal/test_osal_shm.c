@@ -139,7 +139,7 @@ static void test_osal_shm_multiprocess(void) {
     data->counter = 0;
 
     /* Fork子进程 */
-    ret = OSAL_Fork(&pid);
+    ret = OSAL_fork(&pid);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     if (pid == 0) {
@@ -149,12 +149,12 @@ static void test_osal_shm_multiprocess(void) {
 
         ret = OSAL_ShmCreate(TEST_SHM_NAME, TEST_SHM_SIZE, OSAL_SHM_RDWR, &child_shm);
         if (ret != OSAL_SUCCESS) {
-            OSAL_Exit(1);
+            OSAL_exit(1);
         }
 
         ret = OSAL_ShmMap(child_shm, 0, 0, OSAL_SHM_RDWR, &child_addr);
         if (ret != OSAL_SUCCESS) {
-            OSAL_Exit(2);
+            OSAL_exit(2);
         }
 
         /* 修改共享数据 */
@@ -168,11 +168,11 @@ static void test_osal_shm_multiprocess(void) {
         /* 清理并退出 */
         OSAL_ShmUnmap(child_addr, TEST_SHM_SIZE);
         OSAL_ShmClose(child_shm);
-        OSAL_Exit(0);
+        OSAL_exit(0);
     } else {
         /* 父进程：等待子进程完成 */
         int32_t status;
-        int32_t wait_ret = OSAL_Waitpid(pid, &status, 0);
+        int32_t wait_ret = OSAL_waitpid(pid, &status, 0);
         TEST_ASSERT(wait_ret > 0);
         TEST_ASSERT_EQUAL(0, status);
 

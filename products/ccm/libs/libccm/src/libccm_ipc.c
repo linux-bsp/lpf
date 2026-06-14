@@ -49,7 +49,7 @@ int32_t CCM_TM_Cache_Init(ccm_tm_cache_t **cache)
 /* 计算新鲜度 */
 static ccm_tm_freshness_t calculate_freshness(uint64_t timestamp_us, uint32_t validity_ms)
 {
-    uint64_t now_us = OSAL_GetMonotonicTime();
+    uint64_t now_us = OSAL_get_monotonic_time();
     uint64_t age_ms = (now_us - timestamp_us) / 1000;
 
     if (age_ms > validity_ms * 2) {
@@ -83,7 +83,7 @@ int32_t CCM_TM_Cache_Write(ccm_tm_cache_t *cache, uint32_t tm_id,
     /* 写入数据 */
     OSAL_memcpy(entry->data, data, size);
     entry->data_size = size;
-    entry->timestamp_us = OSAL_GetMonotonicTime();
+    entry->timestamp_us = OSAL_get_monotonic_time();
     entry->validity_ms = validity_ms;
     entry->freshness = CCM_TM_FRESH;
 
@@ -285,7 +285,7 @@ int32_t CCM_Heartbeat_Update(ccm_process_heartbeat_t *heartbeat, ccm_process_id_
         return OSAL_ERR_INVALID_POINTER;
     }
 
-    heartbeat->heartbeat_us[process_id] = OSAL_GetMonotonicTime();
+    heartbeat->heartbeat_us[process_id] = OSAL_get_monotonic_time();
     return OSAL_SUCCESS;
 }
 
@@ -301,7 +301,7 @@ int32_t CCM_Heartbeat_Check(ccm_process_heartbeat_t *heartbeat, ccm_process_id_t
         return OSAL_ERR_INVALID_POINTER;
     }
 
-    now_us = OSAL_GetMonotonicTime();
+    now_us = OSAL_get_monotonic_time();
     last_hb = heartbeat->heartbeat_us[process_id];
     age_ms = (now_us - last_hb) / 1000;
 
