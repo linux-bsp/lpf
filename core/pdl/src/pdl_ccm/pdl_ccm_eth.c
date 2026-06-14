@@ -29,7 +29,7 @@ typedef struct
     uint32_t timeout_ms;         /* 超时时间（毫秒） */
     bool connected;              /* 连接状态 */
     uint32_t seq_num;            /* 消息序列号 */
-    osal_mutex_t *mutex;         /* 互斥锁 */
+    pthread_mutex_t mutex;         /* 互斥锁 */
 } ccm_eth_context_t;
 
 /*
@@ -63,7 +63,7 @@ int32_t ccm_eth_init(const pdl_ccm_config_t *config, void **handle)
     ctx->connected = false;
 
     /* 创建互斥锁 */
-    ret = OSAL_MutexCreate(&ctx->mutex);
+    ret = OSAL_pthread_mutex_init(&ctx->mutex, NULL);
     if (ret != OSAL_SUCCESS)
     {
         OSAL_free(ctx);
@@ -75,7 +75,7 @@ int32_t ccm_eth_init(const pdl_ccm_config_t *config, void **handle)
     if (ctx->sockfd < 0)
     {
         LOG_ERROR("PDL_CCM", "Failed to create socket");
-        OSAL_MutexDelete(ctx->mutex);
+        OSAL_pthread_mutex_destroy(&ctx->mutex);
         OSAL_free(ctx);
         return OSAL_ERR_GENERIC;
     }
@@ -113,7 +113,7 @@ int32_t ccm_eth_init(const pdl_ccm_config_t *config, void **handle)
     {
         LOG_ERROR("PDL_CCM", "Invalid IP address: %s", config->ccm_ip);
         OSAL_close(ctx->sockfd);
-        OSAL_MutexDelete(ctx->mutex);
+        OSAL_pthread_mutex_destroy(&ctx->mutex);
         OSAL_free(ctx);
         return OSAL_ERR_INVALID_PARAM;
     }
@@ -156,7 +156,7 @@ int32_t ccm_eth_deinit(void *handle)
     }
 
     /* 销毁互斥锁 */
-    OSAL_MutexDelete(ctx->mutex);
+    OSAL_pthread_mutex_destroy(&ctx->mutex);
 
     /* 释放上下文 */
     OSAL_free(ctx);
@@ -187,9 +187,9 @@ int32_t ccm_eth_send(void *handle, const ccm_eth_msg_t *msg, uint32_t timeout_ms
     }
 
     /* 构造以太网帧 */
-    OSAL_MutexLock(ctx->mutex);
+    OSAL_pthread_mutex_lock(&ctx->mutex);
     uint32_t seq = ctx->seq_num++;
-    OSAL_MutexUnlock(ctx->mutex);
+    OSAL_pthread_mutex_unlock(&ctx->mutex);
 
     /* 帧格式：
      * [0-1]   魔术字 0xAA55

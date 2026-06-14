@@ -20,7 +20,7 @@ typedef struct
     int32_t (*send_recv)(void*, const uint8_t*, uint32_t, uint8_t*, uint32_t, uint32_t*);
     redfish_auth_t auth;
     char base_url[128];
-    osal_mutex_t *mutex;
+    pthread_mutex_t mutex;
 } bmc_redfish_context_t;
 
 /*
@@ -251,7 +251,7 @@ int32_t bmc_redfish_init(void *transport_handle,
     ctx->auth.use_session = false;
     OSAL_strcpy(ctx->base_url, "bmc");
 
-    if (OSAL_SUCCESS != OSAL_MutexCreate(&ctx->mutex))
+    if (OSAL_SUCCESS != OSAL_pthread_mutex_init(&ctx->mutex, NULL))
     {
         OSAL_free(ctx);
         return OSAL_ERR_GENERIC;
@@ -275,7 +275,7 @@ int32_t bmc_redfish_deinit(void *protocol_handle)
 
     ctx = (bmc_redfish_context_t *)protocol_handle;
 
-    OSAL_MutexDelete(ctx->mutex);
+    OSAL_pthread_mutex_destroy(&ctx->mutex);
     OSAL_free(ctx);
 
     return OSAL_SUCCESS;
@@ -307,13 +307,13 @@ int32_t bmc_redfish_request(void *protocol_handle,
 
     ctx = (bmc_redfish_context_t *)protocol_handle;
 
-    OSAL_MutexLock(ctx->mutex);
+    OSAL_pthread_mutex_lock(&ctx->mutex);
 
     ret = build_http_request(ctx, method, uri, json_body,
                                      request, OSAL_sizeof(request), &request_len);
     if (OSAL_SUCCESS != ret)
     {
-        OSAL_MutexUnlock(ctx->mutex);
+        OSAL_pthread_mutex_unlock(&ctx->mutex);
         return ret;
     }
 
@@ -322,7 +322,7 @@ int32_t bmc_redfish_request(void *protocol_handle,
                         http_response, OSAL_sizeof(http_response), &http_response_len);
     if (OSAL_SUCCESS != ret)
     {
-        OSAL_MutexUnlock(ctx->mutex);
+        OSAL_pthread_mutex_unlock(&ctx->mutex);
         return ret;
     }
 
@@ -335,7 +335,7 @@ int32_t bmc_redfish_request(void *protocol_handle,
         ret = OSAL_ERR_GENERIC;
     }
 
-    OSAL_MutexUnlock(ctx->mutex);
+    OSAL_pthread_mutex_unlock(&ctx->mutex);
 
     return ret;
 }

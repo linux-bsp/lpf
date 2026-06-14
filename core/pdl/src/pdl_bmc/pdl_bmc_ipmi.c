@@ -19,7 +19,7 @@ typedef struct
     void *transport_handle;
     int32_t (*send_recv)(void*, const uint8_t*, uint32_t, uint8_t*, uint32_t, uint32_t*);
     uint8_t seq_num;
-    osal_mutex_t *mutex;
+    pthread_mutex_t mutex;
 } bmc_ipmi_context_t;
 
 /*
@@ -103,7 +103,7 @@ int32_t bmc_ipmi_init(void *transport_handle,
     ctx->send_recv = send_recv;
     ctx->seq_num = 0;
 
-    if (OSAL_SUCCESS != OSAL_MutexCreate(&ctx->mutex))
+    if (OSAL_SUCCESS != OSAL_pthread_mutex_init(&ctx->mutex, NULL))
     {
         OSAL_free(ctx);
         return OSAL_ERR_GENERIC;
@@ -127,7 +127,7 @@ int32_t bmc_ipmi_deinit(void *protocol_handle)
 
     ctx = (bmc_ipmi_context_t *)protocol_handle;
 
-    OSAL_MutexDelete(ctx->mutex);
+    OSAL_pthread_mutex_destroy(&ctx->mutex);
     OSAL_free(ctx);
 
     return OSAL_SUCCESS;
@@ -363,14 +363,14 @@ int32_t bmc_ipmi_power_on(void *protocol_handle)
 
     ctx = (bmc_ipmi_context_t *)protocol_handle;
 
-    OSAL_MutexLock(ctx->mutex);
+    OSAL_pthread_mutex_lock(&ctx->mutex);
 
     req_data = IPMI_CHASSIS_POWER_UP;
 
     ret = ipmi_send_command(ctx, IPMI_NETFN_CHASSIS_REQ, IPMI_CMD_CHASSIS_CONTROL,
                                    &req_data, 1, resp_data, OSAL_sizeof(resp_data), &resp_len);
 
-    OSAL_MutexUnlock(ctx->mutex);
+    OSAL_pthread_mutex_unlock(&ctx->mutex);
 
     return ret;
 }
@@ -393,14 +393,14 @@ int32_t bmc_ipmi_power_off(void *protocol_handle)
 
     ctx = (bmc_ipmi_context_t *)protocol_handle;
 
-    OSAL_MutexLock(ctx->mutex);
+    OSAL_pthread_mutex_lock(&ctx->mutex);
 
     req_data = IPMI_CHASSIS_POWER_DOWN;
 
     ret = ipmi_send_command(ctx, IPMI_NETFN_CHASSIS_REQ, IPMI_CMD_CHASSIS_CONTROL,
                                    &req_data, 1, resp_data, OSAL_sizeof(resp_data), &resp_len);
 
-    OSAL_MutexUnlock(ctx->mutex);
+    OSAL_pthread_mutex_unlock(&ctx->mutex);
 
     return ret;
 }
@@ -423,14 +423,14 @@ int32_t bmc_ipmi_power_reset(void *protocol_handle)
 
     ctx = (bmc_ipmi_context_t *)protocol_handle;
 
-    OSAL_MutexLock(ctx->mutex);
+    OSAL_pthread_mutex_lock(&ctx->mutex);
 
     req_data = IPMI_CHASSIS_HARD_RESET;
 
     ret = ipmi_send_command(ctx, IPMI_NETFN_CHASSIS_REQ, IPMI_CMD_CHASSIS_CONTROL,
                                    &req_data, 1, resp_data, OSAL_sizeof(resp_data), &resp_len);
 
-    OSAL_MutexUnlock(ctx->mutex);
+    OSAL_pthread_mutex_unlock(&ctx->mutex);
 
     return ret;
 }
@@ -452,7 +452,7 @@ int32_t bmc_ipmi_get_power_state(void *protocol_handle, pdl_bmc_power_state_t *s
 
     ctx = (bmc_ipmi_context_t *)protocol_handle;
 
-    OSAL_MutexLock(ctx->mutex);
+    OSAL_pthread_mutex_lock(&ctx->mutex);
 
     ret = ipmi_send_command(ctx, IPMI_NETFN_CHASSIS_REQ, IPMI_CMD_GET_CHASSIS_STATUS,
                                    NULL, 0, resp_data, OSAL_sizeof(resp_data), &resp_len);
@@ -466,7 +466,7 @@ int32_t bmc_ipmi_get_power_state(void *protocol_handle, pdl_bmc_power_state_t *s
         *state = PDL_BMC_POWER_UNKNOWN;
     }
 
-    OSAL_MutexUnlock(ctx->mutex);
+    OSAL_pthread_mutex_unlock(&ctx->mutex);
 
     return ret;
 }
@@ -489,7 +489,7 @@ int32_t bmc_ipmi_read_sensors(void *protocol_handle,
 
     ctx = (bmc_ipmi_context_t *)protocol_handle;
 
-    OSAL_MutexLock(ctx->mutex);
+    OSAL_pthread_mutex_lock(&ctx->mutex);
 
     (void)type;
     (void)readings;
@@ -500,7 +500,7 @@ int32_t bmc_ipmi_read_sensors(void *protocol_handle,
         *actual_count = 0;
     }
 
-    OSAL_MutexUnlock(ctx->mutex);
+    OSAL_pthread_mutex_unlock(&ctx->mutex);
 
     return OSAL_ERR_GENERIC;
 }

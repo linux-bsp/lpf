@@ -127,14 +127,14 @@ static void test_full_stack_e2e(void) {
     /* 检查点2：基本功能测试 */
     /* 注意：Queue API不存在，简化测试 */
     osal_mutex_t *mutex = NULL;
-    int32_t ret = OSAL_MutexCreate(&mutex);
+    int32_t ret = OSAL_pthread_mutex_init(&mutex, NULL);
     TEST_ASSERT_EQUAL(0, ret);
 
     if (ret == 0) {
-        OSAL_MutexLock(mutex);
-        OSAL_MutexUnlock(mutex);
+        OSAL_pthread_mutex_lock(&mutex);
+        OSAL_pthread_mutex_unlock(&mutex);
         TEST_ASSERT_TRUE(1);
-        OSAL_MutexDelete(mutex);
+        OSAL_pthread_mutex_destroy(&mutex);
     }
 
     OSAL_printf("[ PASS     ] Full stack E2E test passed\n");
@@ -142,7 +142,7 @@ static void test_full_stack_e2e(void) {
 
 /* 线程数据结构 */
 typedef struct {
-    osal_mutex_t *mutex;
+    pthread_mutex_t mutex;
     osal_atomic_uint32_t *counter;
 } concurrent_thread_data_t;
 
@@ -153,9 +153,9 @@ static void* concurrent_thread_func(void *arg) {
     uint32_t i;
 
     for (i = 0; i < 1000; i++) {
-        OSAL_MutexLock(data->mutex);
+        OSAL_pthread_mutex_lock(&data->mutex);
         OSAL_AtomicIncrement(data->counter);
-        OSAL_MutexUnlock(data->mutex);
+        OSAL_pthread_mutex_unlock(&data->mutex);
     }
     return NULL;
 }
@@ -174,7 +174,7 @@ static void test_concurrent_scenario(void) {
     OSAL_AtomicStore(&counter, 0);
 
     /* 检查点1：创建互斥锁 */
-    int32_t ret = OSAL_MutexCreate(&mutex);
+    int32_t ret = OSAL_pthread_mutex_init(&mutex, NULL);
     TEST_ASSERT_EQUAL(0, ret);
 
     /* 检查点2：创建多个并发线程 */
@@ -208,7 +208,7 @@ static void test_concurrent_scenario(void) {
                final_count, expected_count);
 
     /* 清理 */
-    OSAL_MutexDelete(mutex);
+    OSAL_pthread_mutex_destroy(&mutex);
 
     OSAL_printf("[ PASS     ] Concurrent scenario test passed\n");
 }

@@ -29,12 +29,12 @@ struct stress_context {
     /* 延迟统计 */
     double total_latency_us;
     double max_latency_us;
-    osal_mutex_t *stats_mutex;
+    pthread_mutex_t stats_mutex;
 
     /* 错误记录 */
     char error_messages[MAX_ERROR_MESSAGES][128];
     uint32_t error_msg_count;
-    osal_mutex_t *error_mutex;
+    pthread_mutex_t error_mutex;
 };
 
 /* 工作线程参数 */
@@ -77,12 +77,12 @@ static void* worker_thread_func(void *arg) {
         }
 
         /* 更新延迟统计 */
-        OSAL_MutexLock(ctx->stats_mutex);
+        OSAL_pthread_mutex_lock(&ctx->stats_mutex);
         ctx->total_latency_us += latency_us;
         if (latency_us > ctx->max_latency_us) {
             ctx->max_latency_us = latency_us;
         }
-        OSAL_MutexUnlock(ctx->stats_mutex);
+        OSAL_pthread_mutex_unlock(&ctx->stats_mutex);
 
         iteration++;
 
@@ -119,13 +119,13 @@ stress_context_t* stress_context_create(const char *name,
     OSAL_AtomicInit(&ctx->error_count, 0);
 
     /* 创建互斥锁 */
-    if (OSAL_MutexCreate(&ctx->stats_mutex) != 0) {
+    if (OSAL_pthread_mutex_init(&ctx->stats_mutex, NULL) != 0) {
         OSAL_free(ctx);
         return NULL;
     }
 
-    if (OSAL_MutexCreate(&ctx->error_mutex) != 0) {
-        OSAL_MutexDelete(ctx->stats_mutex);
+    if (OSAL_pthread_mutex_init(&ctx->error_mutex, NULL) != 0) {
+        OSAL_pthread_mutex_destroy(&ctx->stats_mutex);
         OSAL_free(ctx);
         return NULL;
     }
@@ -136,10 +136,10 @@ stress_context_t* stress_context_create(const char *name,
 void stress_context_destroy(stress_context_t *ctx) {
     if (ctx) {
         if (ctx->stats_mutex) {
-            OSAL_MutexDelete(ctx->stats_mutex);
+            OSAL_pthread_mutex_destroy(&ctx->stats_mutex);
         }
         if (ctx->error_mutex) {
-            OSAL_MutexDelete(ctx->error_mutex);
+            OSAL_pthread_mutex_destroy(&ctx->error_mutex);
         }
         OSAL_free(ctx);
     }
@@ -250,12 +250,12 @@ int32_t stress_get_stats(stress_context_t *ctx, stress_stats_t *stats) {
         stats->ops_per_sec = (double)stats->total_operations / (elapsed_ms / 1000.0);
     }
 
-    OSAL_MutexLock(ctx->stats_mutex);
+    OSAL_pthread_mutex_lock(&ctx->stats_mutex);
     if (stats->total_operations > 0) {
         stats->avg_latency_us = ctx->total_latency_us / stats->total_operations;
     }
     stats->max_latency_us = ctx->max_latency_us;
-    OSAL_MutexUnlock(ctx->stats_mutex);
+    OSAL_pthread_mutex_unlock(&ctx->stats_mutex);
 
     return 0;
 }
@@ -300,13 +300,13 @@ void stress_record_error(stress_context_t *ctx, const char *error_msg) {
 
     OSAL_AtomicIncrement(&ctx->error_count);
 
-    OSAL_MutexLock(ctx->error_mutex);
+    OSAL_pthread_mutex_lock(&ctx->error_mutex);
     if (ctx->error_msg_count < MAX_ERROR_MESSAGES) {
         OSAL_strncpy(ctx->error_messages[ctx->error_msg_count], error_msg, 127);
         ctx->error_messages[ctx->error_msg_count][127] = '\0';
         ctx->error_msg_count++;
     }
-    OSAL_MutexUnlock(ctx->error_mutex);
+    OSAL_pthread_mutex_unlock(&ctx->error_mutex);
 }
 
 bool stress_should_stop(stress_context_t *ctx) {

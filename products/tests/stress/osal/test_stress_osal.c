@@ -9,7 +9,7 @@
 
 /* 共享测试数据 */
 typedef struct {
-    osal_mutex_t *mutex;
+    pthread_mutex_t mutex;
     osal_atomic_uint32_t counter;
     uint32_t expected_count;
 } mutex_stress_data_t;
@@ -22,7 +22,7 @@ static int32_t mutex_stress_worker(void *user_data, uint32_t iteration) {
     (void)iteration;  /* 未使用的参数 */
 
     /* 加锁 */
-    int32_t ret = OSAL_MutexLock(data->mutex);
+    int32_t ret = OSAL_pthread_mutex_lock(&data->mutex);
     if (ret != OSAL_SUCCESS) {
         return ret;
     }
@@ -31,7 +31,7 @@ static int32_t mutex_stress_worker(void *user_data, uint32_t iteration) {
     OSAL_AtomicIncrement(&data->counter);
 
     /* 解锁 */
-    OSAL_MutexUnlock(data->mutex);
+    OSAL_pthread_mutex_unlock(&data->mutex);
 
     return 0;
 }
@@ -45,7 +45,7 @@ static void test_stress_mutex_concurrency(void) {
     const uint32_t duration_sec = 5;
 
     /* 初始化测试数据 */
-    TEST_ASSERT_EQUAL(OSAL_MutexCreate(&data.mutex), OSAL_SUCCESS);
+    TEST_ASSERT_EQUAL(OSAL_pthread_mutex_init(&data.mutex, NULL), 0);
     OSAL_AtomicInit(&data.counter, 0);
 
     /* 创建压力测试上下文 */
@@ -67,7 +67,7 @@ static void test_stress_mutex_concurrency(void) {
 
     /* 清理 */
     stress_context_destroy(ctx);
-    OSAL_MutexDelete(data.mutex);
+    OSAL_pthread_mutex_destroy(&data.mutex);
 }
 
 /**

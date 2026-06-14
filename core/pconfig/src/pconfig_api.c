@@ -24,7 +24,7 @@ typedef struct {
 
 static pconfig_registry_t g_registry = {0};
 static bool g_initialized = false;
-static osal_mutex_t *g_registry_mutex = NULL;
+static pthread_mutex_t g_registry_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 /*===========================================================================
  * 配置库初始化
@@ -39,7 +39,7 @@ int32_t PCONFIG_Init(void)
     }
 
     /* 创建互斥锁保护全局注册表 */
-    ret = OSAL_MutexCreate(&g_registry_mutex);
+    ret = OSAL_pthread_mutex_init(&g_registry_mutex, NULL);
     if (OSAL_SUCCESS != ret) {
         LOG_ERROR("PCL", "Failed to create registry mutex");
         return ret;
@@ -63,7 +63,7 @@ void PCONFIG_Cleanup(void)
 
     /* 销毁互斥锁 */
     if (NULL != g_registry_mutex) {
-        OSAL_MutexDelete(g_registry_mutex);
+        OSAL_pthread_mutex_destroy(&g_registry_mutex);
         g_registry_mutex = NULL;
     }
 
@@ -98,7 +98,7 @@ int32_t PCONFIG_Register(const pconfig_platform_config_t *config)
     }
 
     /* 加锁保护全局注册表 */
-    ret = OSAL_MutexLock(g_registry_mutex);
+    ret = OSAL_pthread_mutex_lock(&g_registry_mutex);
     if (OSAL_SUCCESS != ret) {
         LOG_ERROR("PCL", "Failed to lock registry mutex");
         return ret;
@@ -106,7 +106,7 @@ int32_t PCONFIG_Register(const pconfig_platform_config_t *config)
 
     /* 检查注册表是否已满 */
     if (g_registry.count >= MAX_PLATFORM_CONFIGS) {
-        OSAL_MutexUnlock(g_registry_mutex);
+        OSAL_pthread_mutex_unlock(&g_registry_mutex);
         LOG_ERROR("PCL", "Registry full");
         return OSAL_ERR_GENERIC;
     }
@@ -116,7 +116,7 @@ int32_t PCONFIG_Register(const pconfig_platform_config_t *config)
         existing = g_registry.configs[i];
         if (0 == OSAL_strcmp(existing->platform_name, config->platform_name) &&
             0 == OSAL_strcmp(existing->product_name, config->product_name)) {
-            OSAL_MutexUnlock(g_registry_mutex);
+            OSAL_pthread_mutex_unlock(&g_registry_mutex);
             LOG_WARN("PCL", "Config already registered: %s/%s",
                      config->platform_name, config->product_name);
             return OSAL_ERR_GENERIC;
@@ -127,7 +127,7 @@ int32_t PCONFIG_Register(const pconfig_platform_config_t *config)
     g_registry.configs[g_registry.count++] = config;
 
     /* 解锁 */
-    OSAL_MutexUnlock(g_registry_mutex);
+    OSAL_pthread_mutex_unlock(&g_registry_mutex);
 
     LOG_INFO("PCL", "Registered config: %s/%s",
              config->platform_name, config->product_name);
@@ -144,14 +144,14 @@ const pconfig_platform_config_t* PCONFIG_GetBoard(void)
     }
 
     /* 加锁保护全局注册表 */
-    if (OSAL_SUCCESS != OSAL_MutexLock(g_registry_mutex)) {
+    if (OSAL_SUCCESS != OSAL_pthread_mutex_lock(&g_registry_mutex)) {
         return NULL;
     }
 
     config = g_registry.current;
 
     /* 解锁 */
-    OSAL_MutexUnlock(g_registry_mutex);
+    OSAL_pthread_mutex_unlock(&g_registry_mutex);
 
     return config;
 }
@@ -169,7 +169,7 @@ const pconfig_platform_config_t* PCONFIG_Find(const char *platform,
     }
 
     /* 加锁保护全局注册表 */
-    if (OSAL_SUCCESS != OSAL_MutexLock(g_registry_mutex)) {
+    if (OSAL_SUCCESS != OSAL_pthread_mutex_lock(&g_registry_mutex)) {
         return NULL;
     }
 
@@ -189,7 +189,7 @@ const pconfig_platform_config_t* PCONFIG_Find(const char *platform,
     }
 
     /* 解锁 */
-    OSAL_MutexUnlock(g_registry_mutex);
+    OSAL_pthread_mutex_unlock(&g_registry_mutex);
 
     return found;
 }
@@ -206,7 +206,7 @@ int32_t PCONFIG_List(const pconfig_platform_config_t **configs, uint32_t *count)
     }
 
     /* 加锁保护全局注册表 */
-    ret = OSAL_MutexLock(g_registry_mutex);
+    ret = OSAL_pthread_mutex_lock(&g_registry_mutex);
     if (OSAL_SUCCESS != ret) {
         return ret;
     }
@@ -221,7 +221,7 @@ int32_t PCONFIG_List(const pconfig_platform_config_t **configs, uint32_t *count)
     *count = actual_count;
 
     /* 解锁 */
-    OSAL_MutexUnlock(g_registry_mutex);
+    OSAL_pthread_mutex_unlock(&g_registry_mutex);
 
     return OSAL_SUCCESS;
 }
@@ -476,7 +476,7 @@ const pconfig_platform_config_t* PCONFIG_FindByHWID(const pdl_hwid_t *hwid)
     }
 
     /* 加锁保护 */
-    OSAL_MutexLock(g_registry_mutex);
+    OSAL_pthread_mutex_lock(&g_registry_mutex);
 
     /* 遍历所有已注册的配置 */
     for (i = 0; i < g_registry.count; i++) {
@@ -489,7 +489,7 @@ const pconfig_platform_config_t* PCONFIG_FindByHWID(const pdl_hwid_t *hwid)
         }
     }
 
-    OSAL_MutexUnlock(g_registry_mutex);
+    OSAL_pthread_mutex_unlock(&g_registry_mutex);
 
     if (config == NULL) {
         LOG_WARN("PCL", "No config found for HWID: product=0x%04X, project=0x%04X, board=0x%02X, hw_rev=0x%02X",

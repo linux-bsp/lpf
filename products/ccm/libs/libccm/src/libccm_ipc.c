@@ -35,7 +35,7 @@ int32_t CCM_TM_Cache_Init(ccm_tm_cache_t **cache)
         entry->freshness = CCM_TM_INVALID;
 
         /* 创建读写锁 */
-        ret = OSAL_MutexCreate(&entry->rwlock);
+        ret = OSAL_pthread_mutex_init(&entry->rwlock, NULL);
         if (ret != OSAL_SUCCESS) {
             LOG_ERROR("LIBCCM", "创建遥测锁失败: %d", ret);
             return ret;
@@ -75,7 +75,7 @@ int32_t CCM_TM_Cache_Write(ccm_tm_cache_t *cache, uint32_t tm_id,
     entry = &cache->entries[tm_id];
 
     /* 写锁 */
-    ret = OSAL_MutexLock(entry->rwlock);
+    ret = OSAL_pthread_mutex_lock(&entry->rwlock);
     if (ret != OSAL_SUCCESS) {
         return ret;
     }
@@ -88,7 +88,7 @@ int32_t CCM_TM_Cache_Write(ccm_tm_cache_t *cache, uint32_t tm_id,
     entry->freshness = CCM_TM_FRESH;
 
     /* 解锁 */
-    OSAL_MutexUnlock(entry->rwlock);
+    OSAL_pthread_mutex_unlock(&entry->rwlock);
 
     return OSAL_SUCCESS;
 }
@@ -107,7 +107,7 @@ int32_t CCM_TM_Cache_Read(ccm_tm_cache_t *cache, uint32_t tm_id,
     entry = &cache->entries[tm_id];
 
     /* 读锁 */
-    ret = OSAL_MutexLock(entry->rwlock);
+    ret = OSAL_pthread_mutex_lock(&entry->rwlock);
     if (ret != OSAL_SUCCESS) {
         return ret;
     }
@@ -128,7 +128,7 @@ int32_t CCM_TM_Cache_Read(ccm_tm_cache_t *cache, uint32_t tm_id,
     }
 
     /* 解锁 */
-    OSAL_MutexUnlock(entry->rwlock);
+    OSAL_pthread_mutex_unlock(&entry->rwlock);
 
     return ret;
 }
@@ -174,7 +174,7 @@ int32_t CCM_Status_Init(ccm_system_status_t **status)
     (*status)->voltage_12v = 0;
 
     /* 创建互斥锁 */
-    ret = OSAL_MutexCreate(&(*status)->mutex);
+    ret = OSAL_pthread_mutex_init(&(*status)->mutex, NULL);
     if (ret != OSAL_SUCCESS) {
         LOG_ERROR("LIBCCM", "创建状态锁失败: %d", ret);
         return ret;
@@ -193,7 +193,7 @@ int32_t CCM_Status_Write(ccm_system_status_t *status, const ccm_system_status_t 
         return OSAL_ERR_INVALID_POINTER;
     }
 
-    ret = OSAL_MutexLock(status->mutex);
+    ret = OSAL_pthread_mutex_lock(&status->mutex);
     if (ret != OSAL_SUCCESS) {
         return ret;
     }
@@ -207,7 +207,7 @@ int32_t CCM_Status_Write(ccm_system_status_t *status, const ccm_system_status_t 
     status->voltage_54v = new_status->voltage_54v;
     status->voltage_12v = new_status->voltage_12v;
 
-    OSAL_MutexUnlock(status->mutex);
+    OSAL_pthread_mutex_unlock(&status->mutex);
     return OSAL_SUCCESS;
 }
 
@@ -220,7 +220,7 @@ int32_t CCM_Status_Read(ccm_system_status_t *status, ccm_system_status_t *out_st
         return OSAL_ERR_INVALID_POINTER;
     }
 
-    ret = OSAL_MutexLock(status->mutex);
+    ret = OSAL_pthread_mutex_lock(&status->mutex);
     if (ret != OSAL_SUCCESS) {
         return ret;
     }
@@ -234,7 +234,7 @@ int32_t CCM_Status_Read(ccm_system_status_t *status, ccm_system_status_t *out_st
     out_status->voltage_54v = status->voltage_54v;
     out_status->voltage_12v = status->voltage_12v;
 
-    OSAL_MutexUnlock(status->mutex);
+    OSAL_pthread_mutex_unlock(&status->mutex);
     return OSAL_SUCCESS;
 }
 

@@ -121,7 +121,7 @@ void test_multiprocess_concurrent(void)
 typedef struct {
     int thread_id;
     osal_flock_t *flock;
-    osal_mutex_t *mutex;
+    pthread_mutex_t mutex;
 } thread_data_t;
 
 void* thread_worker(void *arg)
@@ -136,14 +136,14 @@ void* thread_worker(void *arg)
             continue;
         }
 
-        OSAL_MutexLock(data->mutex);
+        OSAL_pthread_mutex_lock(&data->mutex);
 
         /* 临界区 */
         LOG_INFO("TEST", "线程 %d: 进入临界区 (迭代 %d/%d)\n", data->thread_id, i+1, iterations);
         OSAL_usleep(50000);  /* 50ms */
 
         /* 释放锁（逆序） */
-        OSAL_MutexUnlock(data->mutex);
+        OSAL_pthread_mutex_unlock(&data->mutex);
         OSAL_flock_unlock(data->flock);
     }
 
@@ -167,7 +167,7 @@ void test_multithread_concurrent(void)
         return;
     }
 
-    if (OSAL_MutexCreate(&mutex) != OSAL_SUCCESS) {
+    if (OSAL_pthread_mutex_init(&mutex, NULL) != OSAL_SUCCESS) {
         LOG_INFO("TEST", "❌ 创建互斥锁失败\n");
         OSAL_flock_destroy(flock);
         return;
@@ -190,7 +190,7 @@ void test_multithread_concurrent(void)
     }
 
     /* 清理 */
-    OSAL_MutexDelete(mutex);
+    OSAL_pthread_mutex_destroy(&mutex);
     OSAL_flock_destroy(flock);
 
     LOG_INFO("TEST", "✅ 多线程并发测试完成\n");

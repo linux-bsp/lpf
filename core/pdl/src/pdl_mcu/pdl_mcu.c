@@ -22,7 +22,7 @@ typedef struct
     void *comm_handle;                /* 通信句柄（CAN/串口） */
     bool initialized;
     pdl_mcu_state_t state;            /* 设备状态 */
-    osal_mutex_t *mutex;
+    pthread_mutex_t mutex;
     pdl_mcu_version_t version;
     pdl_mcu_status_t status;
 } mcu_context_t;
@@ -51,7 +51,7 @@ int32_t PDL_MCU_Init(const pdl_mcu_config_t *config, pdl_mcu_handle_t *handle)
     ctx->interface = config->interface;
 
     /* 创建互斥锁 */
-    if (OSAL_SUCCESS != OSAL_MutexCreate(&ctx->mutex))
+    if (OSAL_SUCCESS != OSAL_pthread_mutex_init(&ctx->mutex, NULL))
     {
         OSAL_free(ctx);
         return OSAL_ERR_GENERIC;
@@ -79,7 +79,7 @@ int32_t PDL_MCU_Init(const pdl_mcu_config_t *config, pdl_mcu_handle_t *handle)
 
     if (OSAL_SUCCESS != ret)
     {
-        OSAL_MutexDelete(ctx->mutex);
+        OSAL_pthread_mutex_destroy(&ctx->mutex);
         OSAL_free(ctx);
         return ret;
     }
@@ -118,7 +118,7 @@ int32_t PDL_MCU_Deinit(pdl_mcu_handle_t handle)
             break;
     }
 
-    OSAL_MutexDelete(ctx->mutex);
+    OSAL_pthread_mutex_destroy(&ctx->mutex);
     OSAL_free(ctx);
 
     return OSAL_SUCCESS;
@@ -141,14 +141,14 @@ static int32_t mcu_send_command_internal(mcu_context_t *ctx,
     uint32_t timeout_ms;
 
     /* 缩小锁范围：只在读取上下文时加锁 */
-    OSAL_MutexLock(ctx->mutex);
+    OSAL_pthread_mutex_lock(&ctx->mutex);
     interface = ctx->interface;
     comm_handle = ctx->comm_handle;
     timeout_ms = ctx->config.cmd_timeout_ms;
 
     /* 进入 BUSY 状态 */
     ctx->state = PDL_MCU_STATE_BUSY;
-    OSAL_MutexUnlock(ctx->mutex);
+    OSAL_pthread_mutex_unlock(&ctx->mutex);
 
     /* 发送命令时不持有锁，由 HAL 层提供线程安全保护 */
     switch (interface)
@@ -169,7 +169,7 @@ static int32_t mcu_send_command_internal(mcu_context_t *ctx,
     }
 
     /* 根据结果更新状态 */
-    OSAL_MutexLock(ctx->mutex);
+    OSAL_pthread_mutex_lock(&ctx->mutex);
     if (OSAL_SUCCESS == ret) {
         ctx->state = PDL_MCU_STATE_READY;  /* 命令成功，设备就绪 */
     } else if (OSAL_ERR_TIMEOUT == ret) {
@@ -177,7 +177,7 @@ static int32_t mcu_send_command_internal(mcu_context_t *ctx,
     } else {
         ctx->state = PDL_MCU_STATE_ERROR;  /* 其他错误 */
     }
-    OSAL_MutexUnlock(ctx->mutex);
+    OSAL_pthread_mutex_unlock(&ctx->mutex);
 
     return ret;
 }
@@ -259,18 +259,18 @@ int32_t PDL_MCU_GetStatus(pdl_mcu_handle_t handle, pdl_mcu_status_t *status)
         {
             status->timestamp_us = OSAL_get_monotonic_time();
             /* 同步设备状态 */
-            OSAL_MutexLock(ctx->mutex);
+            OSAL_pthread_mutex_lock(&ctx->mutex);
             status->state = ctx->state;
-            OSAL_MutexUnlock(ctx->mutex);
+            OSAL_pthread_mutex_unlock(&ctx->mutex);
         }
     }
     else
     {
         status->online = false;
         /* 同步设备状态 */
-        OSAL_MutexLock(ctx->mutex);
+        OSAL_pthread_mutex_lock(&ctx->mutex);
         status->state = ctx->state;
-        OSAL_MutexUnlock(ctx->mutex);
+        OSAL_pthread_mutex_unlock(&ctx->mutex);
     }
 
     return ret;
@@ -452,9 +452,9 @@ pdl_mcu_state_t PDL_MCU_GetDeviceState(pdl_mcu_handle_t handle)
 
     ctx = (mcu_context_t *)handle;
 
-    OSAL_MutexLock(ctx->mutex);
+    OSAL_pthread_mutex_lock(&ctx->mutex);
     state = ctx->state;
-    OSAL_MutexUnlock(ctx->mutex);
+    OSAL_pthread_mutex_unlock(&ctx->mutex);
 
     return state;
 }

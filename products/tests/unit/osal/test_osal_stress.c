@@ -17,7 +17,7 @@
 
 /* 共享数据 */
 static int32_t stress_counter = 0;
-static osal_mutex_t *stress_mutex = NULL;
+static pthread_mutex_t stress_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 /* 互斥锁压力测试 - 线程函数 */
 static void* mutex_stress_thread(void *arg)
@@ -27,9 +27,9 @@ static void* mutex_stress_thread(void *arg)
     int32_t i;
 
     for (i = 0; i < STRESS_ITERATIONS; i++) {
-        OSAL_MutexLock(stress_mutex);
+        OSAL_pthread_mutex_lock(&stress_mutex);
         stress_counter++;
-        OSAL_MutexUnlock(stress_mutex);
+        OSAL_pthread_mutex_unlock(&stress_mutex);
     }
 
     return NULL;
@@ -39,7 +39,7 @@ static void* mutex_stress_thread(void *arg)
 static void test_mutex_stress(void)
 {
     stress_counter = 0;
-    OSAL_MutexCreate(&stress_mutex);
+    OSAL_pthread_mutex_init(&stress_mutex, NULL);
 
     osal_thread_t threads[STRESS_THREAD_COUNT];
 
@@ -60,7 +60,7 @@ static void test_mutex_stress(void)
     int32_t expected = STRESS_THREAD_COUNT * STRESS_ITERATIONS;
     TEST_ASSERT_EQUAL(expected, stress_counter);
 
-    OSAL_MutexDelete(stress_mutex);
+    OSAL_pthread_mutex_destroy(&stress_mutex);
 }
 
 /* 信号量压力测试 - 生产者消费者模型 */
@@ -69,7 +69,7 @@ static int32_t sem_write_pos = 0;
 static int32_t sem_read_pos = 0;
 static osal_semaphore_t *sem_empty = NULL;
 static osal_semaphore_t *sem_full = NULL;
-static osal_mutex_t *sem_mutex = NULL;
+static pthread_mutex_t sem_mutex = PTHREAD_MUTEX_INITIALIZER;
 static int32_t sem_produced = 0;
 static int32_t sem_consumed = 0;
 
@@ -81,13 +81,13 @@ static void* sem_producer_thread(void *arg)
 
     for (i = 0; i < STRESS_ITERATIONS; i++) {
         OSAL_SemaphoreWait(sem_empty);
-        OSAL_MutexLock(sem_mutex);
+        OSAL_pthread_mutex_lock(&sem_mutex);
 
         sem_buffer[sem_write_pos] = id * 10000 + i;
         sem_write_pos = (sem_write_pos + 1) % STRESS_BUFFER_SIZE;
         sem_produced++;
 
-        OSAL_MutexUnlock(sem_mutex);
+        OSAL_pthread_mutex_unlock(&sem_mutex);
         OSAL_SemaphorePost(sem_full);
     }
 
@@ -102,14 +102,14 @@ static void* sem_consumer_thread(void *arg)
 
     for (i = 0; i < STRESS_ITERATIONS; i++) {
         OSAL_SemaphoreWait(sem_full);
-        OSAL_MutexLock(sem_mutex);
+        OSAL_pthread_mutex_lock(&sem_mutex);
 
         int32_t data = sem_buffer[sem_read_pos];
         (void)data;  /* 使用数据 */
         sem_read_pos = (sem_read_pos + 1) % STRESS_BUFFER_SIZE;
         sem_consumed++;
 
-        OSAL_MutexUnlock(sem_mutex);
+        OSAL_pthread_mutex_unlock(&sem_mutex);
         OSAL_SemaphorePost(sem_empty);
     }
 
@@ -126,7 +126,7 @@ static void test_semaphore_stress(void)
 
     OSAL_SemaphoreCreate(&sem_empty, STRESS_BUFFER_SIZE);
     OSAL_SemaphoreCreate(&sem_full, 0);
-    OSAL_MutexCreate(&sem_mutex);
+    OSAL_pthread_mutex_init(&sem_mutex, NULL);
 
     osal_thread_t producers[STRESS_PRODUCER_COUNT];
     osal_thread_t consumers[STRESS_CONSUMER_COUNT];
@@ -163,14 +163,14 @@ static void test_semaphore_stress(void)
 
     OSAL_SemaphoreDelete(sem_empty);
     OSAL_SemaphoreDelete(sem_full);
-    OSAL_MutexDelete(sem_mutex);
+    OSAL_pthread_mutex_destroy(&sem_mutex);
 }
 
 /* 条件变量压力测试 */
 static int32_t cond_ready_count = 0;
 static int32_t cond_wait_count = 0;
 static osal_cond_t *cond_stress = NULL;
-static osal_mutex_t *cond_mutex = NULL;
+static pthread_mutex_t cond_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static void* cond_waiter_thread(void *arg)
 {
@@ -179,13 +179,13 @@ static void* cond_waiter_thread(void *arg)
     int32_t i;
 
     for (i = 0; i < STRESS_ITERATIONS / 10; i++) {
-        OSAL_MutexLock(cond_mutex);
+        OSAL_pthread_mutex_lock(&cond_mutex);
         while (cond_ready_count == 0) {
             OSAL_CondWait(cond_stress, cond_mutex);
         }
         cond_ready_count--;
         cond_wait_count++;
-        OSAL_MutexUnlock(cond_mutex);
+        OSAL_pthread_mutex_unlock(&cond_mutex);
     }
 
     return NULL;
@@ -198,10 +198,10 @@ static void* cond_signaler_thread(void *arg)
     int32_t i;
 
     for (i = 0; i < STRESS_ITERATIONS / 10; i++) {
-        OSAL_MutexLock(cond_mutex);
+        OSAL_pthread_mutex_lock(&cond_mutex);
         cond_ready_count++;
         OSAL_CondSignal(cond_stress);
-        OSAL_MutexUnlock(cond_mutex);
+        OSAL_pthread_mutex_unlock(&cond_mutex);
         OSAL_msleep(1);  /* 短暂延时，让等待线程有机会执行 */
     }
 
@@ -215,7 +215,7 @@ static void test_cond_stress(void)
     cond_wait_count = 0;
 
     OSAL_CondCreate(&cond_stress);
-    OSAL_MutexCreate(&cond_mutex);
+    OSAL_pthread_mutex_init(&cond_mutex, NULL);
 
     osal_thread_t waiters[STRESS_THREAD_COUNT / 2];
     osal_thread_t signalers[STRESS_THREAD_COUNT / 2];
@@ -248,13 +248,13 @@ static void test_cond_stress(void)
     TEST_ASSERT_EQUAL(expected, cond_wait_count);
 
     OSAL_CondDelete(cond_stress);
-    OSAL_MutexDelete(cond_mutex);
+    OSAL_pthread_mutex_destroy(&cond_mutex);
 }
 
 /* 混合场景压力测试 */
 static int32_t mixed_data = 0;
 static bool mixed_ready = false;
-static osal_mutex_t *mixed_mutex = NULL;
+static pthread_mutex_t mixed_mutex = PTHREAD_MUTEX_INITIALIZER;
 static osal_semaphore_t *mixed_sem = NULL;
 static osal_cond_t *mixed_cond = NULL;
 
@@ -269,11 +269,11 @@ static void* mixed_worker_thread(void *arg)
         OSAL_SemaphoreWait(mixed_sem);
 
         /* 使用互斥锁保护共享数据 */
-        OSAL_MutexLock(mixed_mutex);
+        OSAL_pthread_mutex_lock(&mixed_mutex);
         mixed_data += id;
         mixed_ready = true;
         OSAL_CondSignal(mixed_cond);
-        OSAL_MutexUnlock(mixed_mutex);
+        OSAL_pthread_mutex_unlock(&mixed_mutex);
 
         /* 释放信号量 */
         OSAL_SemaphorePost(mixed_sem);
@@ -290,7 +290,7 @@ static void test_mixed_stress(void)
     mixed_data = 0;
     mixed_ready = false;
 
-    OSAL_MutexCreate(&mixed_mutex);
+    OSAL_pthread_mutex_init(&mixed_mutex, NULL);
     OSAL_SemaphoreCreate(&mixed_sem, 3);  /* 限制并发数为3 */
     OSAL_CondCreate(&mixed_cond);
 
@@ -320,7 +320,7 @@ static void test_mixed_stress(void)
     int32_t expected = sum_of_ids * (STRESS_ITERATIONS / 100);
     TEST_ASSERT_EQUAL(expected, mixed_data);
 
-    OSAL_MutexDelete(mixed_mutex);
+    OSAL_pthread_mutex_destroy(&mixed_mutex);
     OSAL_SemaphoreDelete(mixed_sem);
     OSAL_CondDelete(mixed_cond);
 }

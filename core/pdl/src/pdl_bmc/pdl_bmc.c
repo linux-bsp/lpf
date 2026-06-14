@@ -39,7 +39,7 @@ typedef struct
     uint32_t protocol_switch_count;
 
     /* 互斥锁 */
-    osal_mutex_t *mutex;
+    pthread_mutex_t mutex;
 } bmc_context_t;
 
 /**
@@ -72,7 +72,7 @@ int32_t PDL_BMC_Init(const pdl_bmc_config_t *config,
     ctx->current_protocol = PDL_BMC_PROTOCOL_REDFISH;
 
     /* 创建互斥锁 */
-    if (OSAL_SUCCESS != OSAL_MutexCreate(&ctx->mutex))
+    if (OSAL_SUCCESS != OSAL_pthread_mutex_init(&ctx->mutex, NULL))
     {
         LOG_ERROR("BMC", "Failed to create mutex");
         OSAL_free(ctx);
@@ -224,7 +224,7 @@ int32_t PDL_BMC_Deinit(pdl_bmc_handle_t handle)
     }
 
     /* 删除互斥锁 */
-    OSAL_MutexDelete(ctx->mutex);
+    OSAL_pthread_mutex_destroy(&ctx->mutex);
 
     OSAL_free(ctx);
     LOG_INFO("BMC", "BMC service deinitialized");
@@ -247,7 +247,7 @@ int32_t PDL_BMC_PowerOn(pdl_bmc_handle_t handle)
 
     ctx = (bmc_context_t *)handle;
 
-    OSAL_MutexLock(ctx->mutex);
+    OSAL_pthread_mutex_lock(&ctx->mutex);
 
     ctx->cmd_count++;
 
@@ -283,7 +283,7 @@ int32_t PDL_BMC_PowerOn(pdl_bmc_handle_t handle)
         LOG_ERROR("BMC", "Failed to send power on command");
     }
 
-    OSAL_MutexUnlock(ctx->mutex);
+    OSAL_pthread_mutex_unlock(&ctx->mutex);
 
     return ret;
 }
@@ -303,7 +303,7 @@ int32_t PDL_BMC_PowerOff(pdl_bmc_handle_t handle)
 
     ctx = (bmc_context_t *)handle;
 
-    OSAL_MutexLock(ctx->mutex);
+    OSAL_pthread_mutex_lock(&ctx->mutex);
 
     ctx->cmd_count++;
 
@@ -339,7 +339,7 @@ int32_t PDL_BMC_PowerOff(pdl_bmc_handle_t handle)
         LOG_ERROR("BMC", "Failed to send power off command");
     }
 
-    OSAL_MutexUnlock(ctx->mutex);
+    OSAL_pthread_mutex_unlock(&ctx->mutex);
 
     return ret;
 }
@@ -359,7 +359,7 @@ int32_t PDL_BMC_PowerReset(pdl_bmc_handle_t handle)
 
     ctx = (bmc_context_t *)handle;
 
-    OSAL_MutexLock(ctx->mutex);
+    OSAL_pthread_mutex_lock(&ctx->mutex);
 
     ctx->cmd_count++;
 
@@ -395,7 +395,7 @@ int32_t PDL_BMC_PowerReset(pdl_bmc_handle_t handle)
         LOG_ERROR("BMC", "Failed to send power reset command");
     }
 
-    OSAL_MutexUnlock(ctx->mutex);
+    OSAL_pthread_mutex_unlock(&ctx->mutex);
 
     return ret;
 }
@@ -416,7 +416,7 @@ int32_t PDL_BMC_GetPowerState(pdl_bmc_handle_t handle,
 
     ctx = (bmc_context_t *)handle;
 
-    OSAL_MutexLock(ctx->mutex);
+    OSAL_pthread_mutex_lock(&ctx->mutex);
 
     ctx->cmd_count++;
 
@@ -449,7 +449,7 @@ int32_t PDL_BMC_GetPowerState(pdl_bmc_handle_t handle,
         ctx->fail_count++;
     }
 
-    OSAL_MutexUnlock(ctx->mutex);
+    OSAL_pthread_mutex_unlock(&ctx->mutex);
 
     return ret;
 }
@@ -473,7 +473,7 @@ int32_t PDL_BMC_ReadSensors(pdl_bmc_handle_t handle,
 
     ctx = (bmc_context_t *)handle;
 
-    OSAL_MutexLock(ctx->mutex);
+    OSAL_pthread_mutex_lock(&ctx->mutex);
 
     ctx->cmd_count++;
 
@@ -506,7 +506,7 @@ int32_t PDL_BMC_ReadSensors(pdl_bmc_handle_t handle,
         ctx->fail_count++;
     }
 
-    OSAL_MutexUnlock(ctx->mutex);
+    OSAL_pthread_mutex_unlock(&ctx->mutex);
 
     return ret;
 }
@@ -544,20 +544,20 @@ int32_t PDL_BMC_SwitchChannel(pdl_bmc_handle_t handle,
 
     ctx = (bmc_context_t *)handle;
 
-    OSAL_MutexLock(ctx->mutex);
+    OSAL_pthread_mutex_lock(&ctx->mutex);
 
     /* 检查通道是否可用 */
     if (PDL_BMC_CHANNEL_NETWORK == channel && NULL == ctx->net_transport_handle)
     {
         LOG_ERROR("BMC", "Network channel not available");
-        OSAL_MutexUnlock(ctx->mutex);
+        OSAL_pthread_mutex_unlock(&ctx->mutex);
         return OSAL_ERR_GENERIC;
     }
 
     if (PDL_BMC_CHANNEL_SERIAL == channel && NULL == ctx->serial_transport_handle)
     {
         LOG_ERROR("BMC", "Serial channel not available");
-        OSAL_MutexUnlock(ctx->mutex);
+        OSAL_pthread_mutex_unlock(&ctx->mutex);
         return OSAL_ERR_GENERIC;
     }
 
@@ -569,7 +569,7 @@ int32_t PDL_BMC_SwitchChannel(pdl_bmc_handle_t handle,
     LOG_INFO("BMC", "Switched to %s channel",
              (channel == PDL_BMC_CHANNEL_NETWORK) ? "network" : "serial");
 
-    OSAL_MutexUnlock(ctx->mutex);
+    OSAL_pthread_mutex_unlock(&ctx->mutex);
 
     return OSAL_SUCCESS;
 }
@@ -589,9 +589,9 @@ pdl_bmc_channel_t PDL_BMC_GetChannel(pdl_bmc_handle_t handle)
 
     ctx = (bmc_context_t *)handle;
 
-    OSAL_MutexLock(ctx->mutex);
+    OSAL_pthread_mutex_lock(&ctx->mutex);
     channel = ctx->current_channel;
-    OSAL_MutexUnlock(ctx->mutex);
+    OSAL_pthread_mutex_unlock(&ctx->mutex);
 
     return channel;
 }
@@ -611,9 +611,9 @@ bool PDL_BMC_IsConnected(pdl_bmc_handle_t handle)
 
     ctx = (bmc_context_t *)handle;
 
-    OSAL_MutexLock(ctx->mutex);
+    OSAL_pthread_mutex_lock(&ctx->mutex);
     connected = ctx->connected;
-    OSAL_MutexUnlock(ctx->mutex);
+    OSAL_pthread_mutex_unlock(&ctx->mutex);
 
     return connected;
 }
@@ -642,14 +642,14 @@ int32_t PDL_BMC_GetStats(pdl_bmc_handle_t handle,
 
     ctx = (bmc_context_t *)handle;
 
-    OSAL_MutexLock(ctx->mutex);
+    OSAL_pthread_mutex_lock(&ctx->mutex);
 
     if (NULL != cmd_count) *cmd_count = ctx->cmd_count;
     if (NULL != success_count) *success_count = ctx->success_count;
     if (NULL != fail_count) *fail_count = ctx->fail_count;
     if (NULL != switch_count) *switch_count = ctx->switch_count;
 
-    OSAL_MutexUnlock(ctx->mutex);
+    OSAL_pthread_mutex_unlock(&ctx->mutex);
 
     return OSAL_SUCCESS;
 }

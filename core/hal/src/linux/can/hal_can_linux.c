@@ -59,7 +59,7 @@ int32_t HAL_CAN_Init(const hal_can_config_t *config, hal_can_handle_t *handle)
     }
 
     /* 创建互斥锁（线程间保护） */
-    ret = OSAL_MutexCreate(&impl->mutex);
+    ret = OSAL_pthread_mutex_init(&impl->mutex, NULL);
     if (ret != OSAL_SUCCESS)
     {
         LOG_ERROR("HAL_CAN", "Failed to create mutex");
@@ -74,7 +74,7 @@ int32_t HAL_CAN_Init(const hal_can_config_t *config, hal_can_handle_t *handle)
         int32_t err = OSAL_get_errno();
         LOG_ERROR("HAL_CAN", "Failed to create socket: %s (%d)",
                   OSAL_strerror(err), err);
-        OSAL_MutexDelete(impl->mutex);
+        OSAL_pthread_mutex_destroy(&impl->mutex);
         OSAL_flock_destroy(impl->flock);
         OSAL_free(impl);
         return err;
@@ -89,7 +89,7 @@ int32_t HAL_CAN_Init(const hal_can_config_t *config, hal_can_handle_t *handle)
         LOG_ERROR("HAL_CAN", "Interface %s not found: %s (%d)",
                   config->interface, OSAL_strerror(err), err);
         OSAL_close(impl->sockfd);
-        OSAL_MutexDelete(impl->mutex);
+        OSAL_pthread_mutex_destroy(&impl->mutex);
         OSAL_flock_destroy(impl->flock);
         OSAL_free(impl);
         return err;
@@ -106,7 +106,7 @@ int32_t HAL_CAN_Init(const hal_can_config_t *config, hal_can_handle_t *handle)
         LOG_ERROR("HAL_CAN", "Failed to bind interface: %s (%d)",
                   OSAL_strerror(err), err);
         OSAL_close(impl->sockfd);
-        OSAL_MutexDelete(impl->mutex);
+        OSAL_pthread_mutex_destroy(&impl->mutex);
         OSAL_flock_destroy(impl->flock);
         OSAL_free(impl);
         return err;
@@ -152,7 +152,7 @@ int32_t HAL_CAN_Deinit(hal_can_handle_t handle)
     /* 销毁锁 */
     if (impl->mutex)
     {
-        OSAL_MutexDelete(impl->mutex);
+        OSAL_pthread_mutex_destroy(&impl->mutex);
     }
 
     if (impl->flock)
@@ -195,7 +195,7 @@ int32_t HAL_CAN_Send(hal_can_handle_t handle, const hal_can_frame_t *frame)
     }
 
     /* 第二层：互斥锁（线程间保护） */
-    ret = OSAL_MutexLock(impl->mutex);
+    ret = OSAL_pthread_mutex_lock(&impl->mutex);
     if (ret != OSAL_SUCCESS)
     {
         LOG_ERROR("HAL_CAN", "Failed to acquire mutex");
@@ -219,7 +219,7 @@ int32_t HAL_CAN_Send(hal_can_handle_t handle, const hal_can_frame_t *frame)
     }
 
     /* 释放锁（逆序） */
-    OSAL_MutexUnlock(impl->mutex);
+    OSAL_pthread_mutex_unlock(&impl->mutex);
     OSAL_flock_unlock(impl->flock);
 
     return result;
@@ -270,7 +270,7 @@ int32_t HAL_CAN_Recv(hal_can_handle_t handle, hal_can_frame_t *frame, int32_t ti
     }
 
     /* 第二层：互斥锁（线程间保护） */
-    ret = OSAL_MutexLock(impl->mutex);
+    ret = OSAL_pthread_mutex_lock(&impl->mutex);
     if (ret != OSAL_SUCCESS)
     {
         LOG_ERROR("HAL_CAN", "Failed to acquire mutex");
@@ -310,7 +310,7 @@ int32_t HAL_CAN_Recv(hal_can_handle_t handle, hal_can_frame_t *frame, int32_t ti
     }
 
     /* 释放锁（逆序） */
-    OSAL_MutexUnlock(impl->mutex);
+    OSAL_pthread_mutex_unlock(&impl->mutex);
     OSAL_flock_unlock(impl->flock);
 
     return result;
@@ -338,7 +338,7 @@ int32_t HAL_CAN_SetFilter(hal_can_handle_t handle, uint32_t filter_id, uint32_t 
     }
 
     /* 第二层：互斥锁（线程间保护） */
-    ret = OSAL_MutexLock(impl->mutex);
+    ret = OSAL_pthread_mutex_lock(&impl->mutex);
     if (ret != OSAL_SUCCESS)
     {
         LOG_ERROR("HAL_CAN", "Failed to acquire mutex");
@@ -363,7 +363,7 @@ int32_t HAL_CAN_SetFilter(hal_can_handle_t handle, uint32_t filter_id, uint32_t 
     }
 
     /* 释放锁（逆序） */
-    OSAL_MutexUnlock(impl->mutex);
+    OSAL_pthread_mutex_unlock(&impl->mutex);
     OSAL_flock_unlock(impl->flock);
 
     return result;

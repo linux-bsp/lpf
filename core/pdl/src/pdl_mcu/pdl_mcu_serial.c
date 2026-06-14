@@ -28,7 +28,7 @@
 typedef struct
 {
     hal_serial_handle_t serial_handle;
-    osal_mutex_t *rx_mutex;
+    pthread_mutex_t rx_mutex;
     /* 注意：CRC 强制启用，不再提供配置选项 */
 } mcu_serial_context_t;
 
@@ -70,7 +70,7 @@ int32_t mcu_serial_init(const void *config, void **handle)
     }
 
     /* 创建接收互斥锁 */
-    if (OSAL_SUCCESS != OSAL_MutexCreate(&ctx->rx_mutex))
+    if (OSAL_SUCCESS != OSAL_pthread_mutex_init(&ctx->rx_mutex, NULL))
     {
         HAL_Serial_Close(ctx->serial_handle);
         OSAL_free(ctx);
@@ -96,7 +96,7 @@ int32_t mcu_serial_deinit(void *handle)
     ctx = (mcu_serial_context_t *)handle;
 
     HAL_Serial_Close(ctx->serial_handle);
-    OSAL_MutexDelete(ctx->rx_mutex);
+    OSAL_pthread_mutex_destroy(&ctx->rx_mutex);
     OSAL_free(ctx);
 
     return OSAL_SUCCESS;
@@ -261,7 +261,7 @@ int32_t mcu_serial_send_command(void *handle,
     remaining_timeout_ms = timeout_ms - (uint32_t)(elapsed_us / 1000);
 
     /* 接收响应，使用剩余超时时间 */
-    OSAL_MutexLock(ctx->rx_mutex);
+    OSAL_pthread_mutex_lock(&ctx->rx_mutex);
 
     rx_len = HAL_Serial_Read(ctx->serial_handle, rx_frame, OSAL_sizeof(rx_frame), remaining_timeout_ms);
 
@@ -270,7 +270,7 @@ int32_t mcu_serial_send_command(void *handle,
         ret = mcu_serial_unpack_frame(rx_frame, rx_len,
                                             &status, response, resp_size, actual_size);
 
-        OSAL_MutexUnlock(ctx->rx_mutex);
+        OSAL_pthread_mutex_unlock(&ctx->rx_mutex);
 
         if (OSAL_SUCCESS != ret || OSAL_SUCCESS != status)
         {
@@ -280,7 +280,7 @@ int32_t mcu_serial_send_command(void *handle,
         return OSAL_SUCCESS;
     }
 
-    OSAL_MutexUnlock(ctx->rx_mutex);
+    OSAL_pthread_mutex_unlock(&ctx->rx_mutex);
 
     return (0 == rx_len) ? OSAL_ERR_TIMEOUT : OSAL_ERR_GENERIC;
 }

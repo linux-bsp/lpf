@@ -38,7 +38,7 @@ typedef struct
     osal_atomic_bool_t running;       /* 使用原子变量保证多线程安全 */
 
     /* 互斥锁保护 */
-    osal_mutex_t *mutex;
+    pthread_mutex_t mutex;
 } ccm_driver_context_t;
 
 /*
@@ -75,9 +75,9 @@ static void *heartbeat_task(void *arg)
         if (ret < 0)
         {
             LOG_ERROR("PDL_CCM", "Failed to encode heartbeat");
-            OSAL_MutexLock(ctx->mutex);
+            OSAL_pthread_mutex_lock(&ctx->mutex);
             ctx->error_count++;
-            OSAL_MutexUnlock(ctx->mutex);
+            OSAL_pthread_mutex_unlock(&ctx->mutex);
             OSAL_msleep(ctx->config.heartbeat_interval_ms);
             continue;
         }
@@ -94,16 +94,16 @@ static void *heartbeat_task(void *arg)
         ret = ccm_eth_send(ctx->eth_handle, &msg, ctx->config.send_timeout_ms);
         if (ret == OSAL_SUCCESS)
         {
-            OSAL_MutexLock(ctx->mutex);
+            OSAL_pthread_mutex_lock(&ctx->mutex);
             ctx->tx_count++;
-            OSAL_MutexUnlock(ctx->mutex);
+            OSAL_pthread_mutex_unlock(&ctx->mutex);
         }
         else
         {
             LOG_ERROR("PDL_CCM", "Failed to send heartbeat");
-            OSAL_MutexLock(ctx->mutex);
+            OSAL_pthread_mutex_lock(&ctx->mutex);
             ctx->error_count++;
-            OSAL_MutexUnlock(ctx->mutex);
+            OSAL_pthread_mutex_unlock(&ctx->mutex);
         }
 
         /* 延迟 */
@@ -132,9 +132,9 @@ static void *eth_rx_task(void *arg)
 
         if (ret == OSAL_SUCCESS)
         {
-            OSAL_MutexLock(ctx->mutex);
+            OSAL_pthread_mutex_lock(&ctx->mutex);
             ctx->rx_count++;
-            OSAL_MutexUnlock(ctx->mutex);
+            OSAL_pthread_mutex_unlock(&ctx->mutex);
 
             /* 处理遥测数据 */
             if (msg.msg_type == 0x02)  /* 遥测消息类型 */
@@ -203,9 +203,9 @@ static void *eth_rx_task(void *arg)
         else
         {
             LOG_ERROR("PDL_CCM", "Ethernet receive error");
-            OSAL_MutexLock(ctx->mutex);
+            OSAL_pthread_mutex_lock(&ctx->mutex);
             ctx->error_count++;
-            OSAL_MutexUnlock(ctx->mutex);
+            OSAL_pthread_mutex_unlock(&ctx->mutex);
         }
     }
 
@@ -242,7 +242,7 @@ int32_t PDL_CCM_Init(const pdl_ccm_config_t *config,
     OSAL_AtomicInitBool(&ctx->running, false);
 
     /* 创建互斥锁 */
-    ret = OSAL_MutexCreate(&ctx->mutex);
+    ret = OSAL_pthread_mutex_init(&ctx->mutex, NULL);
     if (ret != OSAL_SUCCESS)
     {
         LOG_ERROR("PDL_CCM", "Failed to create mutex");
@@ -255,7 +255,7 @@ int32_t PDL_CCM_Init(const pdl_ccm_config_t *config,
     if (ret != OSAL_SUCCESS)
     {
         LOG_ERROR("PDL_CCM", "Failed to init ethernet");
-        OSAL_MutexDelete(ctx->mutex);
+        OSAL_pthread_mutex_destroy(&ctx->mutex);
         OSAL_free(ctx);
         return ret;
     }
@@ -267,7 +267,7 @@ int32_t PDL_CCM_Init(const pdl_ccm_config_t *config,
     {
         LOG_ERROR("PDL_CCM", "Failed to create RX thread");
         ccm_eth_deinit(ctx->eth_handle);
-        OSAL_MutexDelete(ctx->mutex);
+        OSAL_pthread_mutex_destroy(&ctx->mutex);
         OSAL_free(ctx);
         return ret;
     }
@@ -280,7 +280,7 @@ int32_t PDL_CCM_Init(const pdl_ccm_config_t *config,
         OSAL_AtomicStoreBool(\&ctx->running, false);
         OSAL_ThreadJoin(ctx->rx_thread);
         ccm_eth_deinit(ctx->eth_handle);
-        OSAL_MutexDelete(ctx->mutex);
+        OSAL_pthread_mutex_destroy(&ctx->mutex);
         OSAL_free(ctx);
         return ret;
     }
@@ -311,7 +311,7 @@ int32_t PDL_CCM_Deinit(pdl_ccm_handle_t handle)
     ccm_eth_deinit(ctx->eth_handle);
 
     /* 销毁互斥锁 */
-    OSAL_MutexDelete(ctx->mutex);
+    OSAL_pthread_mutex_destroy(&ctx->mutex);
 
     /* 释放上下文 */
     OSAL_free(ctx);
@@ -334,10 +334,10 @@ int32_t PDL_CCM_RegisterTelemetryCallback(pdl_ccm_handle_t handle,
         return OSAL_ERR_INVALID_PARAM;
     }
 
-    OSAL_MutexLock(ctx->mutex);
+    OSAL_pthread_mutex_lock(&ctx->mutex);
     ctx->tm_callback = callback;
     ctx->tm_user_data = user_data;
-    OSAL_MutexUnlock(ctx->mutex);
+    OSAL_pthread_mutex_unlock(&ctx->mutex);
 
     return OSAL_SUCCESS;
 }
@@ -356,10 +356,10 @@ int32_t PDL_CCM_RegisterCommandCallback(pdl_ccm_handle_t handle,
         return OSAL_ERR_INVALID_PARAM;
     }
 
-    OSAL_MutexLock(ctx->mutex);
+    OSAL_pthread_mutex_lock(&ctx->mutex);
     ctx->tc_callback = callback;
     ctx->tc_user_data = user_data;
-    OSAL_MutexUnlock(ctx->mutex);
+    OSAL_pthread_mutex_unlock(&ctx->mutex);
 
     return OSAL_SUCCESS;
 }
@@ -426,15 +426,15 @@ int32_t PDL_CCM_SendTelemetry(pdl_ccm_handle_t handle,
     ret = ccm_eth_send(ctx->eth_handle, &msg, ctx->config.send_timeout_ms);
     if (ret == OSAL_SUCCESS)
     {
-        OSAL_MutexLock(ctx->mutex);
+        OSAL_pthread_mutex_lock(&ctx->mutex);
         ctx->tx_count++;
-        OSAL_MutexUnlock(ctx->mutex);
+        OSAL_pthread_mutex_unlock(&ctx->mutex);
     }
     else
     {
-        OSAL_MutexLock(ctx->mutex);
+        OSAL_pthread_mutex_lock(&ctx->mutex);
         ctx->error_count++;
-        OSAL_MutexUnlock(ctx->mutex);
+        OSAL_pthread_mutex_unlock(&ctx->mutex);
     }
 
     return ret;
@@ -502,15 +502,15 @@ int32_t PDL_CCM_SendCommand(pdl_ccm_handle_t handle,
     ret = ccm_eth_send(ctx->eth_handle, &msg, ctx->config.send_timeout_ms);
     if (ret == OSAL_SUCCESS)
     {
-        OSAL_MutexLock(ctx->mutex);
+        OSAL_pthread_mutex_lock(&ctx->mutex);
         ctx->tx_count++;
-        OSAL_MutexUnlock(ctx->mutex);
+        OSAL_pthread_mutex_unlock(&ctx->mutex);
     }
     else
     {
-        OSAL_MutexLock(ctx->mutex);
+        OSAL_pthread_mutex_lock(&ctx->mutex);
         ctx->error_count++;
-        OSAL_MutexUnlock(ctx->mutex);
+        OSAL_pthread_mutex_unlock(&ctx->mutex);
     }
 
     return ret;
@@ -583,15 +583,15 @@ int32_t PDL_CCM_SendFirmwareUpdate(pdl_ccm_handle_t handle,
     ret = ccm_eth_send(ctx->eth_handle, &msg, ctx->config.send_timeout_ms);
     if (ret == OSAL_SUCCESS)
     {
-        OSAL_MutexLock(ctx->mutex);
+        OSAL_pthread_mutex_lock(&ctx->mutex);
         ctx->tx_count++;
-        OSAL_MutexUnlock(ctx->mutex);
+        OSAL_pthread_mutex_unlock(&ctx->mutex);
     }
     else
     {
-        OSAL_MutexLock(ctx->mutex);
+        OSAL_pthread_mutex_lock(&ctx->mutex);
         ctx->error_count++;
-        OSAL_MutexUnlock(ctx->mutex);
+        OSAL_pthread_mutex_unlock(&ctx->mutex);
     }
 
     return ret;
@@ -642,9 +642,9 @@ int32_t PDL_CCM_NodeManage(pdl_ccm_handle_t handle,
     ret = ccm_eth_send(ctx->eth_handle, &msg, ctx->config.send_timeout_ms);
     if (ret == OSAL_SUCCESS)
     {
-        OSAL_MutexLock(ctx->mutex);
+        OSAL_pthread_mutex_lock(&ctx->mutex);
         ctx->tx_count++;
-        OSAL_MutexUnlock(ctx->mutex);
+        OSAL_pthread_mutex_unlock(&ctx->mutex);
 
         /* TODO: 等待应答并返回节点状态 */
         if (node_status)
@@ -654,9 +654,9 @@ int32_t PDL_CCM_NodeManage(pdl_ccm_handle_t handle,
     }
     else
     {
-        OSAL_MutexLock(ctx->mutex);
+        OSAL_pthread_mutex_lock(&ctx->mutex);
         ctx->error_count++;
-        OSAL_MutexUnlock(ctx->mutex);
+        OSAL_pthread_mutex_unlock(&ctx->mutex);
     }
 
     return ret;
@@ -707,9 +707,9 @@ int32_t PDL_CCM_PowerControl(pdl_ccm_handle_t handle,
     ret = ccm_eth_send(ctx->eth_handle, &msg, ctx->config.send_timeout_ms);
     if (ret == OSAL_SUCCESS)
     {
-        OSAL_MutexLock(ctx->mutex);
+        OSAL_pthread_mutex_lock(&ctx->mutex);
         ctx->tx_count++;
-        OSAL_MutexUnlock(ctx->mutex);
+        OSAL_pthread_mutex_unlock(&ctx->mutex);
 
         /* TODO: 等待应答并返回电源状态 */
         if (power_status)
@@ -719,9 +719,9 @@ int32_t PDL_CCM_PowerControl(pdl_ccm_handle_t handle,
     }
     else
     {
-        OSAL_MutexLock(ctx->mutex);
+        OSAL_pthread_mutex_lock(&ctx->mutex);
         ctx->error_count++;
-        OSAL_MutexUnlock(ctx->mutex);
+        OSAL_pthread_mutex_unlock(&ctx->mutex);
     }
 
     return ret;
@@ -771,9 +771,9 @@ int32_t PDL_CCM_QueryStatus(pdl_ccm_handle_t handle,
     ret = ccm_eth_send(ctx->eth_handle, &msg, ctx->config.send_timeout_ms);
     if (ret == OSAL_SUCCESS)
     {
-        OSAL_MutexLock(ctx->mutex);
+        OSAL_pthread_mutex_lock(&ctx->mutex);
         ctx->tx_count++;
-        OSAL_MutexUnlock(ctx->mutex);
+        OSAL_pthread_mutex_unlock(&ctx->mutex);
 
         /* TODO: 等待应答并返回查询结果 */
         if (result)
@@ -783,9 +783,9 @@ int32_t PDL_CCM_QueryStatus(pdl_ccm_handle_t handle,
     }
     else
     {
-        OSAL_MutexLock(ctx->mutex);
+        OSAL_pthread_mutex_lock(&ctx->mutex);
         ctx->error_count++;
-        OSAL_MutexUnlock(ctx->mutex);
+        OSAL_pthread_mutex_unlock(&ctx->mutex);
     }
 
     return ret;
@@ -833,15 +833,15 @@ int32_t PDL_CCM_SendHeartbeat(pdl_ccm_handle_t handle,
     ret = ccm_eth_send(ctx->eth_handle, &msg, ctx->config.send_timeout_ms);
     if (ret == OSAL_SUCCESS)
     {
-        OSAL_MutexLock(ctx->mutex);
+        OSAL_pthread_mutex_lock(&ctx->mutex);
         ctx->tx_count++;
-        OSAL_MutexUnlock(ctx->mutex);
+        OSAL_pthread_mutex_unlock(&ctx->mutex);
     }
     else
     {
-        OSAL_MutexLock(ctx->mutex);
+        OSAL_pthread_mutex_lock(&ctx->mutex);
         ctx->error_count++;
-        OSAL_MutexUnlock(ctx->mutex);
+        OSAL_pthread_mutex_unlock(&ctx->mutex);
     }
 
     return ret;
@@ -862,11 +862,11 @@ int32_t PDL_CCM_GetStats(pdl_ccm_handle_t handle,
         return OSAL_ERR_INVALID_PARAM;
     }
 
-    OSAL_MutexLock(ctx->mutex);
+    OSAL_pthread_mutex_lock(&ctx->mutex);
     if (rx_count) *rx_count = ctx->rx_count;
     if (tx_count) *tx_count = ctx->tx_count;
     if (error_count) *error_count = ctx->error_count;
-    OSAL_MutexUnlock(ctx->mutex);
+    OSAL_pthread_mutex_unlock(&ctx->mutex);
 
     return OSAL_SUCCESS;
 }
@@ -892,9 +892,9 @@ int32_t PDL_CCM_GetConnectionStatus(pdl_ccm_handle_t handle,
 
     if (link_quality)
     {
-        OSAL_MutexLock(ctx->mutex);
+        OSAL_pthread_mutex_lock(&ctx->mutex);
         *link_quality = ctx->link_quality;
-        OSAL_MutexUnlock(ctx->mutex);
+        OSAL_pthread_mutex_unlock(&ctx->mutex);
     }
 
     return OSAL_SUCCESS;

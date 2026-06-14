@@ -32,7 +32,7 @@ typedef struct
     osal_atomic_bool_t running;       /* 使用原子变量保证多线程安全 */
 
     /* 互斥锁保护 */
-    osal_mutex_t *mutex;
+    pthread_mutex_t mutex;
 } satellite_service_context_t;
 
 /*
@@ -49,15 +49,15 @@ static void *heartbeat_task(void *arg)
         /* 发送心跳 */
         if (OSAL_SUCCESS == satellite_can_send_heartbeat(ctx->can_handle, PDL_SATELLITE_STATUS_OK))
         {
-            OSAL_MutexLock(ctx->mutex);
+            OSAL_pthread_mutex_lock(&ctx->mutex);
             ctx->tx_count++;
-            OSAL_MutexUnlock(ctx->mutex);
+            OSAL_pthread_mutex_unlock(&ctx->mutex);
         }
         else
         {
-            OSAL_MutexLock(ctx->mutex);
+            OSAL_pthread_mutex_lock(&ctx->mutex);
             ctx->error_count++;
-            OSAL_MutexUnlock(ctx->mutex);
+            OSAL_pthread_mutex_unlock(&ctx->mutex);
         }
 
         /* 延迟 */
@@ -86,9 +86,9 @@ static void *can_rx_task(void *arg)
 
         if (OSAL_SUCCESS == ret)
         {
-            OSAL_MutexLock(ctx->mutex);
+            OSAL_pthread_mutex_lock(&ctx->mutex);
             ctx->rx_count++;
-            OSAL_MutexUnlock(ctx->mutex);
+            OSAL_pthread_mutex_unlock(&ctx->mutex);
 
             /* 处理命令请求 */
             if (msg.msg_type == CAN_MSG_TYPE_CMD_REQ)
@@ -96,10 +96,10 @@ static void *can_rx_task(void *arg)
                 pdl_satellite_cmd_callback_t callback;
                 void *user_data;
 
-                OSAL_MutexLock(ctx->mutex);
+                OSAL_pthread_mutex_lock(&ctx->mutex);
                 callback = ctx->callback;
                 user_data = ctx->user_data;
-                OSAL_MutexUnlock(ctx->mutex);
+                OSAL_pthread_mutex_unlock(&ctx->mutex);
 
                 if (NULL != callback)
                 {
@@ -109,9 +109,9 @@ static void *can_rx_task(void *arg)
         }
         else if (OSAL_ERR_TIMEOUT != ret)
         {
-            OSAL_MutexLock(ctx->mutex);
+            OSAL_pthread_mutex_lock(&ctx->mutex);
             ctx->error_count++;
-            OSAL_MutexUnlock(ctx->mutex);
+            OSAL_pthread_mutex_unlock(&ctx->mutex);
             LOG_ERROR("SAT", "CAN receive error: %d", ret);
         }
     }
@@ -147,7 +147,7 @@ int32_t PDL_SATELLITE_Init(const pdl_satellite_config_t *config,
     OSAL_AtomicInitBool(&ctx->running, true);
 
     /* 创建互斥锁 */
-    if (OSAL_SUCCESS != OSAL_MutexCreate(&ctx->mutex))
+    if (OSAL_SUCCESS != OSAL_pthread_mutex_init(&ctx->mutex, NULL))
     {
         LOG_ERROR("SAT", "Failed to create mutex");
         OSAL_free(ctx);
@@ -159,7 +159,7 @@ int32_t PDL_SATELLITE_Init(const pdl_satellite_config_t *config,
     if (OSAL_SUCCESS != ret)
     {
         LOG_ERROR("SAT", "Failed to initialize CAN");
-        OSAL_MutexDelete(ctx->mutex);
+        OSAL_pthread_mutex_destroy(&ctx->mutex);
         OSAL_free(ctx);
         return ret;
     }
@@ -173,7 +173,7 @@ int32_t PDL_SATELLITE_Init(const pdl_satellite_config_t *config,
     {
         LOG_ERROR("SAT", "Failed to create RX thread");
         satellite_can_deinit(ctx->can_handle);
-        OSAL_MutexDelete(ctx->mutex);
+        OSAL_pthread_mutex_destroy(&ctx->mutex);
         OSAL_free(ctx);
         return ret;
     }
@@ -186,7 +186,7 @@ int32_t PDL_SATELLITE_Init(const pdl_satellite_config_t *config,
         OSAL_AtomicStoreBool(&ctx->running, false);
         OSAL_ThreadJoin(ctx->rx_thread);
         satellite_can_deinit(ctx->can_handle);
-        OSAL_MutexDelete(ctx->mutex);
+        OSAL_pthread_mutex_destroy(&ctx->mutex);
         OSAL_free(ctx);
         return ret;
     }
@@ -220,7 +220,7 @@ int32_t PDL_SATELLITE_Deinit(pdl_satellite_handle_t handle)
     satellite_can_deinit(ctx->can_handle);
 
     /* 删除互斥锁 */
-    OSAL_MutexDelete(ctx->mutex);
+    OSAL_pthread_mutex_destroy(&ctx->mutex);
 
     OSAL_free(ctx);
     LOG_INFO("SAT", "Satellite service deinitialized");
@@ -244,10 +244,10 @@ int32_t PDL_SATELLITE_RegisterCallback(pdl_satellite_handle_t handle,
 
     ctx = (satellite_service_context_t *)handle;
 
-    OSAL_MutexLock(ctx->mutex);
+    OSAL_pthread_mutex_lock(&ctx->mutex);
     ctx->callback = callback;
     ctx->user_data = user_data;
-    OSAL_MutexUnlock(ctx->mutex);
+    OSAL_pthread_mutex_unlock(&ctx->mutex);
 
     return OSAL_SUCCESS;
 }
@@ -273,15 +273,15 @@ int32_t PDL_SATELLITE_SendResponse(pdl_satellite_handle_t handle,
     ret = satellite_can_send_response(ctx->can_handle, seq_num, status, result);
     if (OSAL_SUCCESS == ret)
     {
-        OSAL_MutexLock(ctx->mutex);
+        OSAL_pthread_mutex_lock(&ctx->mutex);
         ctx->tx_count++;
-        OSAL_MutexUnlock(ctx->mutex);
+        OSAL_pthread_mutex_unlock(&ctx->mutex);
     }
     else
     {
-        OSAL_MutexLock(ctx->mutex);
+        OSAL_pthread_mutex_lock(&ctx->mutex);
         ctx->error_count++;
-        OSAL_MutexUnlock(ctx->mutex);
+        OSAL_pthread_mutex_unlock(&ctx->mutex);
         LOG_ERROR("SAT", "Failed to send response");
     }
 
@@ -309,15 +309,15 @@ int32_t PDL_SATELLITE_SendHeartbeat(pdl_satellite_handle_t handle,
     /* 加锁保护统计计数器，与其他函数保持一致 */
     if (OSAL_SUCCESS == ret)
     {
-        OSAL_MutexLock(ctx->mutex);
+        OSAL_pthread_mutex_lock(&ctx->mutex);
         ctx->tx_count++;
-        OSAL_MutexUnlock(ctx->mutex);
+        OSAL_pthread_mutex_unlock(&ctx->mutex);
     }
     else
     {
-        OSAL_MutexLock(ctx->mutex);
+        OSAL_pthread_mutex_lock(&ctx->mutex);
         ctx->error_count++;
-        OSAL_MutexUnlock(ctx->mutex);
+        OSAL_pthread_mutex_unlock(&ctx->mutex);
     }
 
     return ret;
@@ -341,11 +341,11 @@ int32_t PDL_SATELLITE_GetStats(pdl_satellite_handle_t handle,
     ctx = (satellite_service_context_t *)handle;
 
     /* 加锁保护统计计数器读取，与写入操作保持一致 */
-    OSAL_MutexLock(ctx->mutex);
+    OSAL_pthread_mutex_lock(&ctx->mutex);
     if (NULL != rx_count) *rx_count = ctx->rx_count;
     if (NULL != tx_count) *tx_count = ctx->tx_count;
     if (NULL != error_count) *error_count = ctx->error_count;
-    OSAL_MutexUnlock(ctx->mutex);
+    OSAL_pthread_mutex_unlock(&ctx->mutex);
 
     return OSAL_SUCCESS;
 }

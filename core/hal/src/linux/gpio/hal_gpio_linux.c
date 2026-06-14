@@ -25,7 +25,7 @@ typedef struct {
 } gpio_isr_context_t;
 
 static gpio_isr_context_t gpio_isr_table[MAX_GPIO_PINS];
-static osal_mutex_t *gpio_isr_mutex = NULL;
+static pthread_mutex_t gpio_isr_mutex = PTHREAD_MUTEX_INITIALIZER;
 static osal_flock_t *g_gpio_flock = NULL;
 
 /*===========================================================================
@@ -60,7 +60,7 @@ static int32_t gpio_module_init(void)
         return ret;
     }
 
-    ret = OSAL_MutexCreate(&gpio_isr_mutex);
+    ret = OSAL_pthread_mutex_init(&gpio_isr_mutex, NULL);
     if (ret != OSAL_SUCCESS) {
         OSAL_flock_destroy(g_gpio_flock);
         g_gpio_flock = NULL;
@@ -76,7 +76,7 @@ static int32_t gpio_module_init(void)
 static void gpio_module_cleanup(void)
 {
     if (gpio_isr_mutex != NULL) {
-        OSAL_MutexDelete(gpio_isr_mutex);
+        OSAL_pthread_mutex_destroy(&gpio_isr_mutex);
         gpio_isr_mutex = NULL;
     }
 
@@ -248,12 +248,12 @@ int32_t HAL_GPIO_Init(uint32_t gpio_num, const hal_gpio_config_t *config)
     }
 
     /* 获取互斥锁 */
-    OSAL_MutexLock(gpio_isr_mutex);
+    OSAL_pthread_mutex_lock(&gpio_isr_mutex);
 
     /* 导出GPIO */
     ret = gpio_export(gpio_num);
     if (ret != OSAL_SUCCESS) {
-        OSAL_MutexUnlock(gpio_isr_mutex);
+        OSAL_pthread_mutex_unlock(&gpio_isr_mutex);
         OSAL_flock_unlock(g_gpio_flock);
         return ret;
     }
@@ -265,7 +265,7 @@ int32_t HAL_GPIO_Init(uint32_t gpio_num, const hal_gpio_config_t *config)
     ret = HAL_GPIO_SetDirection(gpio_num, config->direction);
     if (ret != OSAL_SUCCESS) {
         gpio_unexport(gpio_num);
-        OSAL_MutexUnlock(gpio_isr_mutex);
+        OSAL_pthread_mutex_unlock(&gpio_isr_mutex);
         OSAL_flock_unlock(g_gpio_flock);
         return ret;
     }
@@ -275,7 +275,7 @@ int32_t HAL_GPIO_Init(uint32_t gpio_num, const hal_gpio_config_t *config)
         ret = HAL_GPIO_SetLevel(gpio_num, config->initial_level);
         if (ret != OSAL_SUCCESS) {
             gpio_unexport(gpio_num);
-            OSAL_MutexUnlock(gpio_isr_mutex);
+            OSAL_pthread_mutex_unlock(&gpio_isr_mutex);
             OSAL_flock_unlock(g_gpio_flock);
             return ret;
         }
@@ -286,13 +286,13 @@ int32_t HAL_GPIO_Init(uint32_t gpio_num, const hal_gpio_config_t *config)
         ret = HAL_GPIO_SetInterrupt(gpio_num, config->edge, config->callback, config->user_data);
         if (ret != OSAL_SUCCESS) {
             gpio_unexport(gpio_num);
-            OSAL_MutexUnlock(gpio_isr_mutex);
+            OSAL_pthread_mutex_unlock(&gpio_isr_mutex);
             OSAL_flock_unlock(g_gpio_flock);
             return ret;
         }
     }
 
-    OSAL_MutexUnlock(gpio_isr_mutex);
+    OSAL_pthread_mutex_unlock(&gpio_isr_mutex);
     OSAL_flock_unlock(g_gpio_flock);
 
     return OSAL_SUCCESS;
@@ -313,21 +313,21 @@ int32_t HAL_GPIO_Deinit(uint32_t gpio_num)
     }
 
     /* 停止中断监听线程 */
-    OSAL_MutexLock(gpio_isr_mutex);
+    OSAL_pthread_mutex_lock(&gpio_isr_mutex);
     if (gpio_isr_table[gpio_num].running) {
         gpio_isr_table[gpio_num].running = false;
-        OSAL_MutexUnlock(gpio_isr_mutex);
+        OSAL_pthread_mutex_unlock(&gpio_isr_mutex);
 
         OSAL_ThreadJoin(gpio_isr_table[gpio_num].thread);
 
-        OSAL_MutexLock(gpio_isr_mutex);
+        OSAL_pthread_mutex_lock(&gpio_isr_mutex);
         if (gpio_isr_table[gpio_num].value_fd >= 0) {
             OSAL_close(gpio_isr_table[gpio_num].value_fd);
             gpio_isr_table[gpio_num].value_fd = -1;
         }
         OSAL_memset(&gpio_isr_table[gpio_num], 0, OSAL_sizeof(gpio_isr_context_t));
     }
-    OSAL_MutexUnlock(gpio_isr_mutex);
+    OSAL_pthread_mutex_unlock(&gpio_isr_mutex);
 
     /* 清理GPIO模块 */
     gpio_module_cleanup();
@@ -357,14 +357,14 @@ int32_t HAL_GPIO_SetDirection(uint32_t gpio_num, hal_gpio_direction_t direction)
     }
 
     /* 获取互斥锁 */
-    OSAL_MutexLock(gpio_isr_mutex);
+    OSAL_pthread_mutex_lock(&gpio_isr_mutex);
 
     dir_str = (direction == HAL_GPIO_DIR_INPUT) ? "in" : "out";
     OSAL_snprintf(path, OSAL_sizeof(path), "/sys/class/gpio/gpio%u/direction", gpio_num);
 
     ret = gpio_write_file(path, dir_str);
 
-    OSAL_MutexUnlock(gpio_isr_mutex);
+    OSAL_pthread_mutex_unlock(&gpio_isr_mutex);
     OSAL_flock_unlock(g_gpio_flock);
 
     return ret;
@@ -387,19 +387,19 @@ int32_t HAL_GPIO_GetDirection(uint32_t gpio_num, hal_gpio_direction_t *direction
     }
 
     /* 获取互斥锁 */
-    OSAL_MutexLock(gpio_isr_mutex);
+    OSAL_pthread_mutex_lock(&gpio_isr_mutex);
 
     OSAL_snprintf(path, OSAL_sizeof(path), "/sys/class/gpio/gpio%u/direction", gpio_num);
     ret = gpio_read_file(path, buffer, OSAL_sizeof(buffer));
     if (ret != OSAL_SUCCESS) {
-        OSAL_MutexUnlock(gpio_isr_mutex);
+        OSAL_pthread_mutex_unlock(&gpio_isr_mutex);
         OSAL_flock_unlock(g_gpio_flock);
         return ret;
     }
 
     *direction = (OSAL_strncmp(buffer, "in", 2) == 0) ? HAL_GPIO_DIR_INPUT : HAL_GPIO_DIR_OUTPUT;
 
-    OSAL_MutexUnlock(gpio_isr_mutex);
+    OSAL_pthread_mutex_unlock(&gpio_isr_mutex);
     OSAL_flock_unlock(g_gpio_flock);
 
     return OSAL_SUCCESS;
@@ -422,14 +422,14 @@ int32_t HAL_GPIO_SetLevel(uint32_t gpio_num, hal_gpio_level_t level)
     }
 
     /* 获取互斥锁 */
-    OSAL_MutexLock(gpio_isr_mutex);
+    OSAL_pthread_mutex_lock(&gpio_isr_mutex);
 
     level_str = (level == HAL_GPIO_LEVEL_HIGH) ? "1" : "0";
     OSAL_snprintf(path, OSAL_sizeof(path), "/sys/class/gpio/gpio%u/value", gpio_num);
 
     ret = gpio_write_file(path, level_str);
 
-    OSAL_MutexUnlock(gpio_isr_mutex);
+    OSAL_pthread_mutex_unlock(&gpio_isr_mutex);
     OSAL_flock_unlock(g_gpio_flock);
 
     return ret;
@@ -452,19 +452,19 @@ int32_t HAL_GPIO_GetLevel(uint32_t gpio_num, hal_gpio_level_t *level)
     }
 
     /* 获取互斥锁 */
-    OSAL_MutexLock(gpio_isr_mutex);
+    OSAL_pthread_mutex_lock(&gpio_isr_mutex);
 
     OSAL_snprintf(path, OSAL_sizeof(path), "/sys/class/gpio/gpio%u/value", gpio_num);
     ret = gpio_read_file(path, buffer, OSAL_sizeof(buffer));
     if (ret != OSAL_SUCCESS) {
-        OSAL_MutexUnlock(gpio_isr_mutex);
+        OSAL_pthread_mutex_unlock(&gpio_isr_mutex);
         OSAL_flock_unlock(g_gpio_flock);
         return ret;
     }
 
     *level = (buffer[0] == '1') ? HAL_GPIO_LEVEL_HIGH : HAL_GPIO_LEVEL_LOW;
 
-    OSAL_MutexUnlock(gpio_isr_mutex);
+    OSAL_pthread_mutex_unlock(&gpio_isr_mutex);
     OSAL_flock_unlock(g_gpio_flock);
 
     return OSAL_SUCCESS;
@@ -521,14 +521,14 @@ int32_t HAL_GPIO_SetInterrupt(uint32_t gpio_num, hal_gpio_edge_t edge,
     }
 
     /* 初始化中断上下文 */
-    OSAL_MutexLock(gpio_isr_mutex);
+    OSAL_pthread_mutex_lock(&gpio_isr_mutex);
 
     /* 如果已有线程在运行，先停止 */
     if (gpio_isr_table[gpio_num].running) {
         gpio_isr_table[gpio_num].running = false;
-        OSAL_MutexUnlock(gpio_isr_mutex);
+        OSAL_pthread_mutex_unlock(&gpio_isr_mutex);
         OSAL_ThreadJoin(gpio_isr_table[gpio_num].thread);
-        OSAL_MutexLock(gpio_isr_mutex);
+        OSAL_pthread_mutex_lock(&gpio_isr_mutex);
         if (gpio_isr_table[gpio_num].value_fd >= 0) {
             OSAL_close(gpio_isr_table[gpio_num].value_fd);
         }
@@ -545,7 +545,7 @@ int32_t HAL_GPIO_SetInterrupt(uint32_t gpio_num, hal_gpio_edge_t edge,
     ret = OSAL_ThreadCreate(&gpio_isr_table[gpio_num].thread,
                             gpio_isr_thread, &gpio_isr_table[gpio_num]);
 
-    OSAL_MutexUnlock(gpio_isr_mutex);
+    OSAL_pthread_mutex_unlock(&gpio_isr_mutex);
     OSAL_flock_unlock(g_gpio_flock);
 
     if (ret != OSAL_SUCCESS) {
@@ -571,14 +571,14 @@ int32_t HAL_GPIO_EnableInterrupt(uint32_t gpio_num)
         return ret;
     }
 
-    OSAL_MutexLock(gpio_isr_mutex);
+    OSAL_pthread_mutex_lock(&gpio_isr_mutex);
     if (!gpio_isr_table[gpio_num].running) {
-        OSAL_MutexUnlock(gpio_isr_mutex);
+        OSAL_pthread_mutex_unlock(&gpio_isr_mutex);
         OSAL_flock_unlock(g_gpio_flock);
         return OSAL_ERR_INVALID_PARAM;
     }
     gpio_isr_table[gpio_num].enabled = true;
-    OSAL_MutexUnlock(gpio_isr_mutex);
+    OSAL_pthread_mutex_unlock(&gpio_isr_mutex);
 
     OSAL_flock_unlock(g_gpio_flock);
 
@@ -599,14 +599,14 @@ int32_t HAL_GPIO_DisableInterrupt(uint32_t gpio_num)
         return ret;
     }
 
-    OSAL_MutexLock(gpio_isr_mutex);
+    OSAL_pthread_mutex_lock(&gpio_isr_mutex);
     if (!gpio_isr_table[gpio_num].running) {
-        OSAL_MutexUnlock(gpio_isr_mutex);
+        OSAL_pthread_mutex_unlock(&gpio_isr_mutex);
         OSAL_flock_unlock(g_gpio_flock);
         return OSAL_ERR_INVALID_PARAM;
     }
     gpio_isr_table[gpio_num].enabled = false;
-    OSAL_MutexUnlock(gpio_isr_mutex);
+    OSAL_pthread_mutex_unlock(&gpio_isr_mutex);
 
     OSAL_flock_unlock(g_gpio_flock);
 

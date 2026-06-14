@@ -9,7 +9,7 @@
 
 /* 性能基准定义 */
 static const perf_baseline_t mutex_lock_baseline = {
-    .name = "OSAL_MutexLock",
+    .name = "OSAL_pthread_mutex_lock",
     .type = PERF_METRIC_LATENCY,
     .baseline_value = 5.0,      /* 基准：5微秒 */
     .tolerance_percent = 50.0   /* 容差：50% */
@@ -23,11 +23,11 @@ static void test_perf_mutex_lock_unlock(void) {
     osal_mutex_t *mutex = NULL;
 
     /* 创建互斥锁 */
-    TEST_ASSERT_EQUAL(OSAL_MutexCreate(&mutex), OSAL_SUCCESS);
+    TEST_ASSERT_EQUAL(OSAL_pthread_mutex_init(&mutex, NULL), OSAL_SUCCESS);
     TEST_ASSERT_NOT_NULL(mutex);
 
     /* 创建性能测量上下文 */
-    perf_context_t *ctx = perf_context_create("OSAL_MutexLock",
+    perf_context_t *ctx = perf_context_create("OSAL_pthread_mutex_lock",
                                                PERF_METRIC_LATENCY,
                                                iterations);
     TEST_ASSERT_NOT_NULL(ctx);
@@ -37,8 +37,8 @@ static void test_perf_mutex_lock_unlock(void) {
 
     for (i = 0; i < iterations; i++) {
         perf_begin(ctx);
-        OSAL_MutexLock(mutex);
-        OSAL_MutexUnlock(mutex);
+        OSAL_pthread_mutex_lock(&mutex);
+        OSAL_pthread_mutex_unlock(&mutex);
         perf_end(ctx);
     }
 
@@ -52,7 +52,7 @@ static void test_perf_mutex_lock_unlock(void) {
 
     /* 清理 */
     perf_context_destroy(ctx);
-    OSAL_MutexDelete(mutex);
+    OSAL_pthread_mutex_destroy(&mutex);
 }
 
 /**
