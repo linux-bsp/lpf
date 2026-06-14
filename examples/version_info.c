@@ -1,56 +1,42 @@
 /*
  * Example program demonstrating ES-Middleware version information usage
- * Similar to Linux kernel's version display
+ * Shows how to use OSAL version APIs and convenience macros
  */
 
 #include "osal.h"
-#include "version.h"
-#include "autoconf.h"
 
 int main(void)
 {
-    OSAL_printf("=====================================================\n");
-    OSAL_printf("ES-Middleware Version Information\n");
-    OSAL_printf("=====================================================\n\n");
+    /* Method 1: Use the high-level print function */
+    OSAL_Printf("\n=== Method 1: Using OSAL_PrintVersionInfo() ===\n\n");
+    OSAL_PrintVersionInfo();
 
-    /* Display full version banner (like Linux kernel) */
-    OSAL_printf("Banner:\n");
-    OSAL_printf("  %s\n\n", ES_MIDDLEWARE_BANNER);
+    /* Method 2: Query individual version fields */
+    OSAL_Printf("\n=== Method 2: Using individual query APIs ===\n\n");
+    OSAL_Printf("Version:      %s\n", OSAL_GetVersion());
+    OSAL_Printf("Full Version: %s\n", OSAL_GetVersionFull());
+    OSAL_Printf("Git Commit:   %s\n", OSAL_GetGitCommit());
+    OSAL_Printf("Build Time:   %s\n", OSAL_GetBuildTime());
+    OSAL_Printf("Built by:     %s\n", OSAL_GetBuildBy());
+    OSAL_Printf("Compiler:     %s\n", OSAL_GetCompiler());
+    OSAL_Printf("Architecture: %s\n", OSAL_GetArch());
+    OSAL_Printf("Kernel:       %s\n", OSAL_GetKernel());
 
-    /* Display detailed version information */
-    OSAL_printf("Version Details:\n");
-    OSAL_printf("  Version:           %s\n", ES_MIDDLEWARE_VERSION);
-    OSAL_printf("  Version String:    %s\n", ES_MIDDLEWARE_VERSION_STRING);
-    OSAL_printf("  Git Commit:        %s\n\n", ES_MIDDLEWARE_GIT_COMMIT);
+    /* Method 3: Use convenience macros (kernel-style) */
+    OSAL_Printf("\n=== Method 3: Using convenience macros ===\n\n");
+    OSAL_Printf("OSAL_VERSION:      %s\n", OSAL_VERSION);
+    OSAL_Printf("OSAL_VERSION_FULL: %s\n", OSAL_VERSION_FULL);
+    OSAL_Printf("OSAL_GIT_COMMIT:   %s\n", OSAL_GIT_COMMIT);
+    OSAL_Printf("OSAL_BUILD_TIME:   %s\n", OSAL_BUILD_TIME);
 
-    /* Display build information */
-    OSAL_printf("Build Information:\n");
-    OSAL_printf("  Built by:          %s@%s\n",
-           ES_MIDDLEWARE_COMPILE_BY, ES_MIDDLEWARE_COMPILE_HOST);
-    OSAL_printf("  Compiler:          %s\n", ES_MIDDLEWARE_COMPILER);
-    OSAL_printf("  Build time:        %s\n", ES_MIDDLEWARE_COMPILE_TIME);
-    OSAL_printf("  Build timestamp:   %ld\n\n", ES_MIDDLEWARE_COMPILE_TIMESTAMP);
+    /* Method 4: Use location macros (useful for logging) */
+    OSAL_Printf("\n=== Method 4: Location and debug macros ===\n\n");
+    OSAL_Printf("Current file:     %s\n", OSAL_FILE);
+    OSAL_Printf("Current line:     %d\n", OSAL_LINE);
+    OSAL_Printf("Current function: %s\n", OSAL_FUNC);
+    OSAL_Printf("Location string:  %s\n", OSAL_LOCATION);
+    OSAL_Printf("Version+Location: %s\n", OSAL_VERSION_LOCATION);
 
-    /* Display platform information */
-    OSAL_printf("Platform Information:\n");
-    OSAL_printf("  Architecture:      %s\n", ES_MIDDLEWARE_BUILD_ARCH);
-    OSAL_printf("  Kernel:            %s\n\n", ES_MIDDLEWARE_BUILD_KERNEL);
-
-    /* Display some configuration from autoconf.h */
-    OSAL_printf("Configuration:\n");
-#ifdef CONFIG_OSAL_POSIX
-    OSAL_printf("  OSAL:              POSIX\n");
-#endif
-#ifdef CONFIG_HAL_X86
-    OSAL_printf("  HAL:               x86\n");
-#endif
-#ifdef CONFIG_DEBUG
-    OSAL_printf("  Debug:             Enabled\n");
-#else
-    OSAL_printf("  Debug:             Disabled\n");
-#endif
-
-    OSAL_printf("\n=====================================================\n");
-
+    OSAL_Printf("\n");
     return 0;
 }

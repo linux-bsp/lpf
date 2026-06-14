@@ -8,7 +8,8 @@
 # ============================================================================
 # Common source files (always included)
 # ============================================================================
-# (Removed osal_version.c - now implemented in platform-specific directories)
+# Version information API - always included as part of OSAL core
+list(APPEND ADD_SRCS "src/posix/util/osal_version.c")
 
 # ============================================================================
 # Platform-specific source files
@@ -118,9 +119,7 @@ if(CONFIG_OSAL_OS_POSIX)
         list(APPEND ADD_SRCS "src/posix/util/osal_log.c")
     endif()
 
-    if(CONFIG_OSAL_UTIL_VERSION)
-        list(APPEND ADD_SRCS "src/posix/util/osal_version.c")
-    endif()
+    # Note: osal_version.c is now always included (see Common section above)
 
     # CRC algorithm (platform-independent)
     if(CONFIG_OSAL_UTIL_CRC)
