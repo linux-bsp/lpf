@@ -1,99 +1,139 @@
 /************************************************************************
- * 信号处理API
+ * OSAL Signal API - POSIX 薄封装
+ *
+ * 直接暴露 POSIX signal API
  ************************************************************************/
 
 #ifndef OSAL_SIGNAL_H
 #define OSAL_SIGNAL_H
 
-/*
- * 信号类型
- */
-#define OS_SIGNAL_INT       0x2   /* SIGINT - 中断信号 (Ctrl+C) */
-#define OS_SIGNAL_TERM      0xF  /* SIGTERM - 终止信号 */
-#define OS_SIGNAL_HUP       0x1   /* SIGHUP - 挂起信号 */
-#define OS_SIGNAL_QUIT      0x3   /* SIGQUIT - 退出信号 */
-#define OS_SIGNAL_KILL      0x9   /* SIGKILL - 强制终止信号 */
-#define OS_SIGNAL_USR1      0xA  /* SIGUSR1 - 用户自定义信号1 */
-#define OS_SIGNAL_USR2      0xC  /* SIGUSR2 - 用户自定义信号2 */
+#include <signal.h>
 
-/* POSIX标准信号常量（用于兼容性） - 仅在未定义时定义 */
-#ifndef SIGINT
-#define SIGINT      OS_SIGNAL_INT
-#endif
-#ifndef SIGTERM
-#define SIGTERM     OS_SIGNAL_TERM
-#endif
-#ifndef SIGHUP
-#define SIGHUP      OS_SIGNAL_HUP
-#endif
-#ifndef SIGQUIT
-#define SIGQUIT     OS_SIGNAL_QUIT
-#endif
-#ifndef SIGKILL
-#define SIGKILL     OS_SIGNAL_KILL
-#endif
-#ifndef SIGUSR1
-#define SIGUSR1     OS_SIGNAL_USR1
-#endif
-#ifndef SIGUSR2
-#define SIGUSR2     OS_SIGNAL_USR2
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-/*
- * 信号处理函数类型
- */
-typedef void (*os_signal_handler_t)(int32_t signum);
+/*===========================================================================
+ * POSIX 信号薄封装
+ *===========================================================================*/
 
 /**
- * @brief 注册信号处理函数
- *
- * @param[in] signum  信号编号 (OS_SIGNAL_*)
- * @param[in] handler 信号处理函数，NULL表示使用默认处理
- *
- * @return OSAL_SUCCESS 成功
- * @return OSAL_ERR_INVALID_POINTER handler为NULL
- * @return OSAL_ERR_GENERIC 注册失败
+ * @brief 信号处理函数类型
  */
-int32_t OSAL_SignalRegister(int32_t signum, os_signal_handler_t handler);
+typedef void (*osal_sighandler_t)(int);
 
 /**
- * @brief 忽略信号
+ * @brief 设置信号处理函数
  *
- * @param[in] signum 信号编号 (OS_SIGNAL_*)
- *
- * @return OSAL_SUCCESS 成功
- * @return OSAL_ERR_GENERIC 设置失败
+ * @param[in] signum 信号编号（SIGINT/SIGTERM/etc）
+ * @param[in] handler 处理函数（SIG_IGN/SIG_DFL 或自定义函数）
+ * @return 0 成功
+ * @return -1 失败
  */
-int32_t OSAL_SignalIgnore(int32_t signum);
+int32_t OSAL_signal(int32_t signum, osal_sighandler_t handler);
 
 /**
- * @brief 恢复信号的默认处理
+ * @brief 发送信号到进程
  *
- * @param[in] signum 信号编号 (OS_SIGNAL_*)
- *
- * @return OSAL_SUCCESS 成功
- * @return OSAL_ERR_GENERIC 恢复失败
+ * @param[in] pid 进程 ID
+ * @param[in] sig 信号编号
+ * @return 0 成功
+ * @return -1 失败
  */
-int32_t OSAL_SignalDefault(int32_t signum);
+int32_t OSAL_kill(pid_t pid, int32_t sig);
 
 /**
- * @brief 阻塞信号
+ * @brief 发送信号到当前进程
  *
- * @param[in] signum 信号编号 (OS_SIGNAL_*)
- *
- * @return OSAL_SUCCESS 成功
- * @return OSAL_ERR_GENERIC 阻塞失败
+ * @param[in] sig 信号编号
+ * @return 0 成功
+ * @return -1 失败
  */
-int32_t OSAL_SignalBlock(int32_t signum);
+int32_t OSAL_raise(int32_t sig);
 
 /**
- * @brief 解除信号阻塞
+ * @brief 阻塞信号集操作
  *
- * @param[in] signum 信号编号 (OS_SIGNAL_*)
- *
- * @return OSAL_SUCCESS 成功
- * @return OSAL_ERR_GENERIC 解除失败
+ * @param[in] how 操作方式（SIG_BLOCK/SIG_UNBLOCK/SIG_SETMASK）
+ * @param[in] set 信号集（可为 NULL）
+ * @param[out] oldset 旧信号集（可为 NULL）
+ * @return 0 成功
+ * @return -1 失败
  */
-int32_t OSAL_SignalUnblock(int32_t signum);
+int32_t OSAL_sigprocmask(int32_t how, const sigset_t *set, sigset_t *oldset);
+
+/**
+ * @brief 初始化信号集为空
+ *
+ * @param[out] set 信号集指针
+ * @return 0 成功
+ * @return -1 失败
+ */
+int32_t OSAL_sigemptyset(sigset_t *set);
+
+/**
+ * @brief 初始化信号集为全集
+ *
+ * @param[out] set 信号集指针
+ * @return 0 成功
+ * @return -1 失败
+ */
+int32_t OSAL_sigfillset(sigset_t *set);
+
+/**
+ * @brief 添加信号到信号集
+ *
+ * @param[in] set 信号集指针
+ * @param[in] signum 信号编号
+ * @return 0 成功
+ * @return -1 失败
+ */
+int32_t OSAL_sigaddset(sigset_t *set, int32_t signum);
+
+/**
+ * @brief 从信号集删除信号
+ *
+ * @param[in] set 信号集指针
+ * @param[in] signum 信号编号
+ * @return 0 成功
+ * @return -1 失败
+ */
+int32_t OSAL_sigdelset(sigset_t *set, int32_t signum);
+
+/**
+ * @brief 测试信号是否在信号集中
+ *
+ * @param[in] set 信号集指针
+ * @param[in] signum 信号编号
+ * @return 1 信号在集合中
+ * @return 0 信号不在集合中
+ * @return -1 失败
+ */
+int32_t OSAL_sigismember(const sigset_t *set, int32_t signum);
+
+/**
+ * @brief 等待信号
+ *
+ * @param[in] set 等待的信号集
+ * @param[out] sig 接收到的信号编号（可为 NULL）
+ * @return 0 成功
+ * @return -1 失败
+ */
+int32_t OSAL_sigwait(const sigset_t *set, int32_t *sig);
+
+/**
+ * @brief 高级信号处理（sigaction）
+ *
+ * @param[in] signum 信号编号
+ * @param[in] act 新的信号动作（可为 NULL）
+ * @param[out] oldact 旧的信号动作（可为 NULL）
+ * @return 0 成功
+ * @return -1 失败
+ */
+int32_t OSAL_sigaction(int32_t signum, const struct sigaction *act, struct sigaction *oldact);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* OSAL_SIGNAL_H */

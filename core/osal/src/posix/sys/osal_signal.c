@@ -1,104 +1,89 @@
 /************************************************************************
- * 信号处理实现 (Linux)
+ * OSAL - POSIX信号薄封装实现
  ************************************************************************/
 
 #include "osal.h"
 #include <signal.h>
-#include <string.h>
 #include <errno.h>
 
-int32_t OSAL_SignalRegister(int32_t signum, os_signal_handler_t handler)
+int32_t OSAL_signal(int32_t signum, osal_sighandler_t handler)
 {
-    struct sigaction sa;
-    union {
-        os_signal_handler_t osal_handler;
-        void (*posix_handler)(int);
-    } handler_union;
-
-    if (NULL == handler)
-        return OSAL_ERR_INVALID_POINTER;
-
-    memset(&sa, 0, OSAL_sizeof(sa));
-
-    handler_union.osal_handler = handler;
-    sa.sa_handler = handler_union.posix_handler;
-
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;
-
-    if (sigaction(signum, &sa, NULL) < 0)
-    {
-        OSAL_printf("[OSAL] sigaction失败, signum=%d, errno=%d\n", signum, errno);
-        return OSAL_ERR_GENERIC;
+    if (signal(signum, handler) == SIG_ERR) {
+        return -1;
     }
-
-    return OSAL_SUCCESS;
+    return 0;
 }
 
-int32_t OSAL_SignalIgnore(int32_t signum)
+int32_t OSAL_kill(pid_t pid, int32_t sig)
 {
-    struct sigaction sa;
-
-    memset(&sa, 0, OSAL_sizeof(sa));
-    sa.sa_handler = SIG_IGN;
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;
-
-    if (sigaction(signum, &sa, NULL) < 0)
-    {
-        OSAL_printf("[OSAL] sigaction(SIG_IGN)失败, signum=%d, errno=%d\n", signum, errno);
-        return OSAL_ERR_GENERIC;
-    }
-
-    return OSAL_SUCCESS;
+    return kill(pid, sig);
 }
 
-int32_t OSAL_SignalDefault(int32_t signum)
+int32_t OSAL_raise(int32_t sig)
 {
-    struct sigaction sa;
-
-    memset(&sa, 0, OSAL_sizeof(sa));
-    sa.sa_handler = SIG_DFL;
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;
-
-    if (sigaction(signum, &sa, NULL) < 0)
-    {
-        OSAL_printf("[OSAL] sigaction(SIG_DFL)失败, signum=%d, errno=%d\n", signum, errno);
-        return OSAL_ERR_GENERIC;
-    }
-
-    return OSAL_SUCCESS;
+    return raise(sig);
 }
 
-int32_t OSAL_SignalBlock(int32_t signum)
+int32_t OSAL_sigprocmask(int32_t how, const sigset_t *set, sigset_t *oldset)
 {
-    sigset_t set;
-
-    sigemptyset(&set);
-    sigaddset(&set, signum);
-
-    if (sigprocmask(SIG_BLOCK, &set, NULL) < 0)
-    {
-        OSAL_printf("[OSAL] sigprocmask(SIG_BLOCK)失败, signum=%d, errno=%d\n", signum, errno);
-        return OSAL_ERR_GENERIC;
-    }
-
-    return OSAL_SUCCESS;
+    return sigprocmask(how, set, oldset);
 }
 
-int32_t OSAL_SignalUnblock(int32_t signum)
+int32_t OSAL_sigemptyset(sigset_t *set)
 {
-    sigset_t set;
-
-    sigemptyset(&set);
-    sigaddset(&set, signum);
-
-    if (sigprocmask(SIG_UNBLOCK, &set, NULL) < 0)
-    {
-        OSAL_printf("[OSAL] sigprocmask(SIG_UNBLOCK)失败, signum=%d, errno=%d\n", signum, errno);
-        return OSAL_ERR_GENERIC;
+    if (set == NULL) {
+        errno = EINVAL;
+        return -1;
     }
+    return sigemptyset(set);
+}
 
-    return OSAL_SUCCESS;
+int32_t OSAL_sigfillset(sigset_t *set)
+{
+    if (set == NULL) {
+        errno = EINVAL;
+        return -1;
+    }
+    return sigfillset(set);
+}
+
+int32_t OSAL_sigaddset(sigset_t *set, int32_t signum)
+{
+    if (set == NULL) {
+        errno = EINVAL;
+        return -1;
+    }
+    return sigaddset(set, signum);
+}
+
+int32_t OSAL_sigdelset(sigset_t *set, int32_t signum)
+{
+    if (set == NULL) {
+        errno = EINVAL;
+        return -1;
+    }
+    return sigdelset(set, signum);
+}
+
+int32_t OSAL_sigismember(const sigset_t *set, int32_t signum)
+{
+    if (set == NULL) {
+        errno = EINVAL;
+        return -1;
+    }
+    return sigismember(set, signum);
+}
+
+int32_t OSAL_sigwait(const sigset_t *set, int32_t *sig)
+{
+    if (set == NULL) {
+        errno = EINVAL;
+        return -1;
+    }
+    return sigwait(set, sig);
+}
+
+int32_t OSAL_sigaction(int32_t signum, const struct sigaction *act, struct sigaction *oldact)
+{
+    return sigaction(signum, act, oldact);
 }
