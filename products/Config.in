@@ -11,6 +11,6 @@ menu "Products"
 # Each product defines its own menuconfig entry for a collapsible submenu
 
 source "products/ccm/Config.in"
-source "products/samples/Config.in"
+# source "products/samples/Config.in"  # Not yet implemented
 
 endmenu

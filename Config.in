@@ -140,35 +140,59 @@ endmenu
 # ============================================================================
 # Product Selection
 # ============================================================================
-# Select which products to build. Multiple products can be enabled
-# simultaneously for parallel development and testing.
+# Select which product to build. Only one product can be selected at a time
+# for exclusive development and testing.
 # ============================================================================
 
-menu "Product Selection"
+choice
+	prompt "Select product"
+	default PRODUCT_NONE
+	help
+	  Select which product to build.
+
+	  Only one product can be selected at a time to ensure clean
+	  separation of product-specific code and configurations.
+
+	  If you want to run tests without building any product, select "None".
+
+config PRODUCT_NONE
+	bool "None - Testing only"
+	help
+	  Do not build any product.
+
+	  Select this option when you want to:
+	  - Run unit tests for core components only
+	  - Build and test the SDK framework without product code
+	  - Develop core components independently
+
+	  This is the default for test configurations.
 
 config PRODUCT_CCM
 	bool "CCM Product"
-	default n
 	help
-	  Enable CCM (Central Control Module) product.
+	  Build CCM (Central Control Module) product.
 
 	  CCM is a satellite payload control and data management system
 	  designed for H200 platform with AM625 SoC.
 
-	  If unsure, say N.
+	  This will build:
+	  - CCM libraries (libccm)
+	  - CCM applications (collector, comm, health, logger, supervisor)
+	  - Platform-specific configurations for AM625
 
 # config PRODUCT_SAMPLE
 # 	bool "Sample Product"
-# 	default n
 # 	help
-# 	  Enable Sample product (demonstration and template).
+# 	  Build Sample product (demonstration and template).
 #
 # 	  Sample product provides a minimal working example showing
 # 	  how to structure a product using the ES-Middleware SDK framework.
 #
 # 	  Useful for learning and as a starting point for new products.
+#
+# 	  Note: Not yet implemented.
 
-endmenu
+endchoice
 
 # ============================================================================
 # Build System Configuration
