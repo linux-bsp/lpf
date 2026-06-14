@@ -3,53 +3,93 @@
 ## 目标
 将 OSAL 从高层封装改为薄封装层，遵循 OSAL_xxx 命名规范（xxx 为小写）
 
-## 已完成工作（本次会话）
+## 已完成工作
 
-### 1. 命名规范化
+### 阶段 1: 命名规范化和基础重构（会话 1）
+
+#### 1. 命名规范化
 - ✅ **util 模块**（26 API）：版本、日志 API 全部小写化
 - ✅ **lib 模块**（18 API）：errno、stdio、heap、flock API 小写化
 - ✅ **sys 模块**（15 API）：时间、进程相关 API 小写化
 
-### 2. 架构重构
+#### 2. 架构重构
 - ✅ **sys/Process 模块**：删除 6 个高层 API，添加 4 个 POSIX 薄封装
   - 删除：ProcessCreate/Kill/Wait/Exists/GetId/GetParentId
   - 添加：getppid, execvp, fork, waitpid
   - 更新 supervisor 代码使用标准 POSIX 接口
 
-### 3. 提交记录
+#### 3. 提交记录（会话 1）
 ```
 fce656d - refactor: rename OSAL_Printf to OSAL_printf
 214ae12 - refactor(osal/util): rename util module APIs to lowercase
 2c70e86 - refactor(osal/lib): rename lib module APIs to lowercase
 5bbf10a - refactor(osal/sys): rename sys module APIs to lowercase (part 1)
 4858508 - refactor(osal/sys): remove Process high-level API, use POSIX directly
+3f9d6c8 - docs: add OSAL refactoring roadmap
 ```
 
-## 下一步工作
+### 阶段 2: IPC 模块重构（会话 2）
 
-### 阶段 2：IPC 模块重构（最大工作量）
+#### 1. 完成的 IPC 模块
+- ✅ **Semaphore 模块**（51 uses）- POSIX sem_t 薄封装
+- ✅ **Cond 模块**（42 uses）- pthread_cond_t 薄封装  
+- ✅ **Rwlock 模块**（32 uses）- pthread_rwlock_t 薄封装
+- ✅ **Mutex 模块**（366 uses）- pthread_mutex_t 薄封装（仅 API）
 
-#### 优先级 1：简单模块（先易后难）
-1. **Cond 模块**（42 uses）
-   - 改为 pthread_cond_* 薄封装
-   - API: init, destroy, wait, timedwait, signal, broadcast
+#### 2. 提交记录（会话 2）
+```
+436c42c - refactor(osal/ipc): refactor Semaphore to POSIX thin wrapper
+e162daf - refactor(osal/ipc): refactor Cond to POSIX thin wrapper
+4313188 - refactor(osal/ipc): refactor Rwlock to POSIX thin wrapper
+138ef0f - refactor(osal/ipc): refactor Mutex to POSIX thin wrapper (API only)
+```
 
-2. **Rwlock 模块**（32 uses）
-   - 改为 pthread_rwlock_* 薄封装
-   - API: init, destroy, rdlock, wrlock, tryrdlock, trywrlock, unlock
+## 当前状态
 
-3. **Semaphore 模块**（51 uses）
-   - 改为 sem_* 薄封装
-   - API: init, destroy, wait, trywait, timedwait, post
+### 已完成（约 40%）
+- 命名规范化：59 个 API
+- 架构重构：Process + 4 个 IPC 模块（API 层面）
+- 总共提交：10 个 commits
 
-#### 优先级 2：核心模块
-4. **Mutex 模块**（366 uses）⚠️ 最多使用
-   - 改为 pthread_mutex_* 薄封装
-   - API: init, destroy, lock, trylock, unlock
-   - 考虑：是否保留 MutexAttr* API（设置类型、协议等）
+### 待完成工作
+
+#### 关键任务：Mutex 迁移（高优先级）⚠️
+Mutex API 已重构，但 366 处调用点需要迁移：
+
+**迁移策略**：
+1. **测试代码**（~100 uses）：
+   - test_osal_mutex.c - 直接更新为新 API
+   - test_osal_cond.c - 依赖 Mutex，需要同步更新
+   - 其他测试 - 逐个更新
+
+2. **应用代码**（~266 uses）：
+   - libccm IPC 代码（~50 uses）
+   - PDL 驱动代码（~100 uses）
+   - CCM 应用代码（~116 uses）
+
+**迁移模式**：
+```c
+// 旧代码
+osal_mutex_t *mutex;
+OSAL_MutexCreate(&mutex);
+OSAL_MutexLock(mutex);
+OSAL_MutexUnlock(mutex);
+OSAL_MutexDelete(mutex);
+
+// 新代码
+pthread_mutex_t mutex;
+OSAL_pthread_mutex_init(&mutex, NULL);
+OSAL_pthread_mutex_lock(&mutex);
+OSAL_pthread_mutex_unlock(&mutex);
+OSAL_pthread_mutex_destroy(&mutex);
+```
+
+**预计工作量**：8-12 小时
+
+#### 剩余 IPC 模块
 
 5. **Thread 模块**（120 uses）
-   - 合并 sys/osal_thread.h 和 ipc 相关
+   - 需要合并 sys/osal_thread.h 和 ipc 相关
    - 改为 pthread_* 薄封装
    - API: create, join, detach, self, exit
    - ThreadAttr: init, destroy, set* (栈大小、调度等)
@@ -58,7 +98,6 @@ fce656d - refactor: rename OSAL_Printf to OSAL_printf
    - 评估是否完全移除，直接用 C11 _Atomic 或 GCC __sync_*
    - 或者提供极薄的封装用于跨平台
 
-#### 优先级 3：特殊模块
 7. **Shm 模块**（80 uses）
    - 改为 shm_open/mmap/munmap 薄封装
    - API: open, close, map, unmap, unlink
@@ -67,7 +106,7 @@ fce656d - refactor: rename OSAL_Printf to OSAL_printf
    - 评估是否为应用层逻辑
    - 可能移到 HAL 或 PDL 层，或完全删除
 
-### 阶段 3：sys 模块剩余部分
+#### 阶段 3: sys 模块剩余部分
 
 9. **Signal 模块**（35 uses）
    - 改为 sigaction/sigprocmask/sigwait 薄封装
@@ -79,7 +118,7 @@ fce656d - refactor: rename OSAL_Printf to OSAL_printf
     - 删除：SchedGetPolicy/SetPolicy/GetPriority/SetPriority 等
     - 添加：sched_getscheduler, sched_setscheduler, sched_getparam 等
 
-### 阶段 4：验证和测试
+#### 阶段 4: 验证和测试
 11. 更新所有测试用例
 12. 验证 CCM 应用功能
 13. 性能基准测试
@@ -87,13 +126,15 @@ fce656d - refactor: rename OSAL_Printf to OSAL_printf
 
 ## 预计工作量
 
-| 阶段 | 模块数 | API 数 | 使用次数 | 预计时间 |
-|------|--------|--------|----------|----------|
-| 已完成 | 3 | 59 | ~200 | ✅ 完成 |
-| 阶段 2 (IPC) | 6 | ~60 | ~900 | 15-20 小时 |
-| 阶段 3 (sys) | 2 | ~20 | ~95 | 3-5 小时 |
-| 阶段 4 (验证) | - | - | - | 2-3 小时 |
-| **总计** | **11** | **~139** | **~1195** | **20-28 小时** |
+| 阶段 | 模块数 | API 数 | 使用次数 | 状态 | 预计剩余时间 |
+|------|--------|--------|----------|------|-------------|
+| 阶段 1 | 3 | 59 | ~200 | ✅ 完成 | - |
+| 阶段 2 (IPC API) | 4 | ~30 | ~491 | ✅ 完成 | - |
+| **Mutex 迁移** | - | - | **366** | ⚠️ 待迁移 | **8-12 小时** |
+| 阶段 2 (剩余) | 4 | ~40 | ~437 | 待开始 | 8-12 小时 |
+| 阶段 3 (sys) | 2 | ~20 | ~95 | 待开始 | 3-5 小时 |
+| 阶段 4 (验证) | - | - | - | 待开始 | 2-3 小时 |
+| **总计** | **13** | **~149** | **~1589** | **40% 完成** | **21-32 小时** |
 
 ## 技术决策
 
@@ -164,7 +205,8 @@ atomic_load(&counter);
 
 ## 后续行动
 
-下次会话从 **Semaphore 模块**开始，理由：
-1. 使用量适中（51 uses）
-2. API 简单，容易理解
-3. 可以作为其他 IPC 模块的模板
+**下次会话优先级**：
+1. **Mutex 迁移**（最关键）- 更新 366 处调用点
+2. Thread 模块重构
+3. Atomic 模块评估和重构
+4. 完成剩余 IPC 模块
