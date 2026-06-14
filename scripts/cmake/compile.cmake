@@ -189,21 +189,21 @@ function(register_component)
         )
     endif()
 
-    # Install public headers (only when explicitly requested)
-    # Controlled by INSTALL_DEVELOPMENT_HEADERS CMake variable
-    # Set by Buildroot package or by make install_headers
-    if(INSTALL_DEVELOPMENT_HEADERS)
-        foreach(include_dir ${ADD_INCLUDE})
-            get_filename_component(abs_dir ${include_dir} ABSOLUTE BASE_DIR ${component_dir})
-            if(IS_DIRECTORY ${abs_dir})
-                install(DIRECTORY ${abs_dir}/
-                    DESTINATION ${INSTALL_INCLUDEDIR}/${component_name}
-                    COMPONENT development
-                    FILES_MATCHING PATTERN "*.h"
-                )
-            endif()
-        endforeach()
-    endif()
+    # Install public headers as a separate component
+    # Use: cmake --install . --component headers
+    # Or via Buildroot: make install_headers
+    # Headers are NOT installed by default 'make install'
+    foreach(include_dir ${ADD_INCLUDE})
+        get_filename_component(abs_dir ${include_dir} ABSOLUTE BASE_DIR ${component_dir})
+        if(IS_DIRECTORY ${abs_dir})
+            install(DIRECTORY ${abs_dir}/
+                DESTINATION ${INSTALL_INCLUDEDIR}/${component_name}
+                COMPONENT headers
+                EXCLUDE_FROM_ALL
+                FILES_MATCHING PATTERN "*.h"
+            )
+        endif()
+    endforeach()
 endfunction()
 
 function(is_path_component ret param_path)

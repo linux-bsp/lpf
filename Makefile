@@ -428,7 +428,9 @@ install:
 		exit 1;\
 	fi
 	@echo "  INSTALL $(if $(DESTDIR),$(DESTDIR))$(CMAKE_INSTALL_PREFIX)"
-	$(Q)$(MAKE) -C $(BUILD_DIR) install $(if $(DESTDIR),DESTDIR=$(DESTDIR))
+	$(Q)$(MAKE) -C $(BUILD_DIR) install \
+		$(if $(DESTDIR),DESTDIR=$(DESTDIR)) \
+		$(if $(INSTALL_DEVELOPMENT_HEADERS),INSTALL_DEVELOPMENT_HEADERS=$(INSTALL_DEVELOPMENT_HEADERS))
 	@echo ""
 	@echo "==================================================================="
 	@echo "Installation completed!"
