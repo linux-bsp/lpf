@@ -92,40 +92,6 @@ static void test_osal_get_tick_count_multiple_calls(void)
 }
 
 /*===========================================================================
- * OSAL_Milli2Ticks 测试
- *===========================================================================*/
-
-/* 测试用例: Milli2Ticks - 成功转换 */
-static void test_osal_milli2ticks_success(void)
-{
-    uint32_t ticks;
-    int32_t ret;
-
-    ret = OSAL_Milli2Ticks(100, &ticks);
-    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
-    TEST_ASSERT_EQUAL(100, ticks);
-
-    ret = OSAL_Milli2Ticks(0, &ticks);
-    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
-    TEST_ASSERT_EQUAL(0, ticks);
-
-    ret = OSAL_Milli2Ticks(1000, &ticks);
-    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
-    TEST_ASSERT_EQUAL(1000, ticks);
-
-    ret = OSAL_Milli2Ticks(0xFFFFFFFF, &ticks);
-    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
-    TEST_ASSERT_EQUAL(0xFFFFFFFF, ticks);
-}
-
-/* 测试用例: Milli2Ticks - 空指针 */
-static void test_osal_milli2ticks_null_pointer(void)
-{
-    int32_t ret = OSAL_Milli2Ticks(100, NULL);
-    TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_POINTER, ret);
-}
-
-/*===========================================================================
  * 综合测试
  *===========================================================================*/
 
@@ -161,7 +127,6 @@ static void test_osal_time_precision(void)
 /* OSAL_get_local_time 测试 */
     /* OSAL_set_local_time 测试 */
     /* OSAL_get_tick_count 测试 */
-    /* OSAL_Milli2Ticks 测试 */
     /* 综合测试 */
 
 /* 测试用例数组 - 使用函数指针数组 */
@@ -193,18 +158,6 @@ static const test_case_t test_cases[] = {
 	{
 		.name = "test_osal_get_tick_count_multiple_calls",
 		.func = test_osal_get_tick_count_multiple_calls,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_osal_milli2ticks_success",
-		.func = test_osal_milli2ticks_success,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_osal_milli2ticks_null_pointer",
-		.func = test_osal_milli2ticks_null_pointer,
 		.setup = NULL,
 		.teardown = NULL
 	},

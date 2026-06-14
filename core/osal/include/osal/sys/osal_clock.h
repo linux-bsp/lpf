@@ -45,13 +45,4 @@ int32_t OSAL_set_local_time(const OS_time_t *time_struct);
  */
 uint32_t OSAL_get_tick_count(void);
 
-/**
- * @brief 毫秒延时
- *
- * @param[in] milliseconds 延时时间(毫秒)
- *
- * @return OSAL_SUCCESS 成功
- */
-int32_t OSAL_Milli2Ticks(uint32_t milliseconds, uint32_t *ticks);
-
 #endif /* OSAL_CLOCK_H */

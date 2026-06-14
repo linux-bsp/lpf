@@ -48,12 +48,3 @@ uint32_t OSAL_get_tick_count(void)
     result = total_ms;
     return result;
 }
-
-int32_t OSAL_Milli2Ticks(uint32_t milliseconds, uint32_t *ticks)
-{
-    if (NULL == ticks)
-        return OSAL_ERR_INVALID_POINTER;
-
-    *ticks = milliseconds;
-    return OSAL_SUCCESS;
-}
