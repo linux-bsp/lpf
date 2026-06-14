@@ -438,25 +438,27 @@ install:
 	@echo "Install prefix: $(if $(DESTDIR),$(DESTDIR))$(CMAKE_INSTALL_PREFIX)"
 	@echo ""
 
-# Install headers only (similar to kernel's make headers_install)
+# Install headers only (using CMake component installation)
 PHONY += install_headers
 install_headers:
-	@if [ ! -f ".config" ]; then \
+	@if [ ! -d "$(BUILD_DIR)" ] || [ ! -f "$(BUILD_DIR)/Makefile" ]; then \
 		echo ""; \
 		echo "===================================================================";\
-		echo "ERROR: Configuration file not found!";\
+		echo "ERROR: Build directory not found or not configured!";\
 		echo "===================================================================";\
+		echo "Build directory: $(BUILD_DIR)";\
 		echo "";\
-		echo "Please run 'make <config>_defconfig' first to configure the project.";\
+		echo "Please run 'make all' first to build the project.";\
 		echo "===================================================================";\
 		echo "";\
 		exit 1;\
 	fi
 	@echo "  INSTALL_HEADERS $(if $(DESTDIR),$(DESTDIR))$(CMAKE_INSTALL_PREFIX)/include"
-	$(Q)$(CMAKE) -DSDK_PATH=$(CURDIR) \
-		$(if $(DESTDIR),-DDESTDIR=$(DESTDIR)) \
-		$(if $(CMAKE_INSTALL_PREFIX),-DCMAKE_INSTALL_PREFIX=$(CMAKE_INSTALL_PREFIX)) \
-		-P scripts/cmake/install_headers.cmake
+	$(Q)cd $(BUILD_DIR) && $(CMAKE) \
+		-DCMAKE_INSTALL_PREFIX=$(CMAKE_INSTALL_PREFIX) \
+		-DCMAKE_INSTALL_COMPONENT=headers \
+		$(if $(DESTDIR),-DCMAKE_INSTALL_DO_STRIP=0) \
+		-P cmake_install.cmake
 	@echo ""
 	@echo "==================================================================="
 	@echo "Headers installed successfully!"
