@@ -123,15 +123,15 @@ static void test_mutex_multithread(void)
 	pthread_mutex_t mutex;
 	OSAL_pthread_mutex_init(&mutex, NULL);
 
-	osal_thread_t producer, consumer;
+	pthread_t producer, consumer;
 
 	/* 创建生产者和消费者线程 */
-	OSAL_ThreadCreate(&producer, producer_thread, &mutex);
-	OSAL_ThreadCreate(&consumer, consumer_thread, &mutex);
+	OSAL_pthread_create(&producer, NULL, producer_thread, &mutex);
+	OSAL_pthread_create(&consumer, NULL, consumer_thread, &mutex);
 
 	/* 等待线程完成 */
-	OSAL_ThreadJoin(producer);
-	OSAL_ThreadJoin(consumer);
+	OSAL_pthread_join(producer, NULL);
+	OSAL_pthread_join(consumer, NULL);
 
 	/* 验证计数器归零（如果互斥锁工作正常）*/
 	TEST_ASSERT_EQUAL(0, shared_counter);

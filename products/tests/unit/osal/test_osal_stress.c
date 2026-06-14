@@ -41,19 +41,19 @@ static void test_mutex_stress(void)
     stress_counter = 0;
     OSAL_pthread_mutex_init(&stress_mutex, NULL);
 
-    osal_thread_t threads[STRESS_THREAD_COUNT];
+    pthread_t threads[STRESS_THREAD_COUNT];
 
     /* 创建多个线程同时增加计数器 */
     int32_t i;
 
     for (i = 0; i < STRESS_THREAD_COUNT; i++) {
-        OSAL_ThreadCreate(&threads[i], mutex_stress_thread, NULL);
+        OSAL_pthread_create(&threads[i], NULL, mutex_stress_thread, NULL);
     }
 
     /* 等待所有线程完成 */
 
     for (i = 0; i < STRESS_THREAD_COUNT; i++) {
-        OSAL_ThreadJoin(threads[i]);
+        OSAL_pthread_join(threads[i], NULL);
     }
 
     /* 验证计数器正确 */
@@ -128,8 +128,8 @@ static void test_semaphore_stress(void)
     OSAL_SemaphoreCreate(&sem_full, 0);
     OSAL_pthread_mutex_init(&sem_mutex, NULL);
 
-    osal_thread_t producers[STRESS_PRODUCER_COUNT];
-    osal_thread_t consumers[STRESS_CONSUMER_COUNT];
+    pthread_t producers[STRESS_PRODUCER_COUNT];
+    pthread_t consumers[STRESS_CONSUMER_COUNT];
     int32_t producer_ids[STRESS_PRODUCER_COUNT];
 
     /* 创建生产者线程 */
@@ -137,23 +137,23 @@ static void test_semaphore_stress(void)
 
     for (i = 0; i < STRESS_PRODUCER_COUNT; i++) {
         producer_ids[i] = i;
-        OSAL_ThreadCreate(&producers[i], sem_producer_thread, &producer_ids[i]);
+        OSAL_pthread_create(&producers[i], NULL, sem_producer_thread, &producer_ids[i]);
     }
 
     /* 创建消费者线程 */
 
     for (i = 0; i < STRESS_CONSUMER_COUNT; i++) {
-        OSAL_ThreadCreate(&consumers[i], sem_consumer_thread, NULL);
+        OSAL_pthread_create(&consumers[i], NULL, sem_consumer_thread, NULL);
     }
 
     /* 等待所有线程完成 */
 
     for (i = 0; i < STRESS_PRODUCER_COUNT; i++) {
-        OSAL_ThreadJoin(producers[i]);
+        OSAL_pthread_join(producers[i], NULL);
     }
 
     for (i = 0; i < STRESS_CONSUMER_COUNT; i++) {
-        OSAL_ThreadJoin(consumers[i]);
+        OSAL_pthread_join(consumers[i], NULL);
     }
 
     /* 验证生产和消费数量相等 */
@@ -217,30 +217,30 @@ static void test_cond_stress(void)
     OSAL_CondCreate(&cond_stress);
     OSAL_pthread_mutex_init(&cond_mutex, NULL);
 
-    osal_thread_t waiters[STRESS_THREAD_COUNT / 2];
-    osal_thread_t signalers[STRESS_THREAD_COUNT / 2];
+    pthread_t waiters[STRESS_THREAD_COUNT / 2];
+    pthread_t signalers[STRESS_THREAD_COUNT / 2];
 
     /* 创建等待线程 */
     int32_t i;
 
     for (i = 0; i < STRESS_THREAD_COUNT / 2; i++) {
-        OSAL_ThreadCreate(&waiters[i], cond_waiter_thread, NULL);
+        OSAL_pthread_create(&waiters[i], NULL, cond_waiter_thread, NULL);
     }
 
     /* 创建信号线程 */
 
     for (i = 0; i < STRESS_THREAD_COUNT / 2; i++) {
-        OSAL_ThreadCreate(&signalers[i], cond_signaler_thread, NULL);
+        OSAL_pthread_create(&signalers[i], NULL, cond_signaler_thread, NULL);
     }
 
     /* 等待所有线程完成 */
 
     for (i = 0; i < STRESS_THREAD_COUNT / 2; i++) {
-        OSAL_ThreadJoin(signalers[i]);
+        OSAL_pthread_join(signalers[i], NULL);
     }
 
     for (i = 0; i < STRESS_THREAD_COUNT / 2; i++) {
-        OSAL_ThreadJoin(waiters[i]);
+        OSAL_pthread_join(waiters[i], NULL);
     }
 
     /* 验证等待次数 */
@@ -294,7 +294,7 @@ static void test_mixed_stress(void)
     OSAL_SemaphoreCreate(&mixed_sem, 3);  /* 限制并发数为3 */
     OSAL_CondCreate(&mixed_cond);
 
-    osal_thread_t threads[STRESS_THREAD_COUNT];
+    pthread_t threads[STRESS_THREAD_COUNT];
     int32_t thread_ids[STRESS_THREAD_COUNT];
 
     /* 创建工作线程 */
@@ -302,13 +302,13 @@ static void test_mixed_stress(void)
 
     for (i = 0; i < STRESS_THREAD_COUNT; i++) {
         thread_ids[i] = i + 1;
-        OSAL_ThreadCreate(&threads[i], mixed_worker_thread, &thread_ids[i]);
+        OSAL_pthread_create(&threads[i], NULL, mixed_worker_thread, &thread_ids[i]);
     }
 
     /* 等待所有线程完成 */
 
     for (i = 0; i < STRESS_THREAD_COUNT; i++) {
-        OSAL_ThreadJoin(threads[i]);
+        OSAL_pthread_join(threads[i], NULL);
     }
 
     /* 验证数据正确性（所有线程ID之和 * 迭代次数） */

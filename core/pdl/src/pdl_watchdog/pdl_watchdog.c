@@ -15,7 +15,7 @@ typedef struct
     bool enabled;
 
     /* 自动模式相关 */
-    osal_thread_t kick_thread;
+    pthread_t kick_thread;
     osal_atomic_bool_t running;       /* 使用原子变量保证多线程安全 */
     osal_atomic_uint32_t kick_count;
     osal_atomic_uint64_t last_kick_time;  /* 上次喂狗时间戳（微秒） */
@@ -171,7 +171,7 @@ int32_t PDL_WATCHDOG_Start(pdl_watchdog_handle_t handle)
 
     /* 启动喂狗线程 */
     OSAL_AtomicStoreBool(&ctx->running, true);
-    ret = OSAL_ThreadCreate(&ctx->kick_thread, watchdog_kick_thread, ctx);
+    ret = OSAL_pthread_create(&ctx->kick_thread, NULL, watchdog_kick_thread, ctx);
     if (ret != OSAL_SUCCESS)
     {
         LOG_ERROR("PDL_WDT", "[%s] Failed to create kick thread", ctx->name);
@@ -205,7 +205,7 @@ int32_t PDL_WATCHDOG_Stop(pdl_watchdog_handle_t handle)
 
     /* 停止线程 */
     OSAL_AtomicStoreBool(&ctx->running, false);
-    OSAL_ThreadJoin(ctx->kick_thread);
+    OSAL_pthread_join(ctx->kick_thread, NULL);
 
     LOG_INFO("PDL_WDT", "[%s] Auto-kick service stopped", ctx->name);
     return OSAL_SUCCESS;

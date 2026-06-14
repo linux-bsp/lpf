@@ -45,13 +45,13 @@ int32_t CCM_Comm_Init(void)
     }
 
     /* 设置实时调度策略 */
-    ret = OSAL_SchedSetPolicy(OSAL_ThreadSelf(), OSAL_SCHED_FIFO, 99);
+    ret = OSAL_SchedSetPolicy(OSAL_pthread_self(), OSAL_SCHED_FIFO, 99);
     if (ret != OSAL_SUCCESS) {
         LOG_WARN("COMM", "设置实时调度失败: %d (需要root权限)", ret);
     }
 
     /* 绑定到CPU0 */
-    ret = OSAL_SchedSetAffinity(OSAL_ThreadSelf(), 0);
+    ret = OSAL_SchedSetAffinity(OSAL_pthread_self(), 0);
     if (ret != OSAL_SUCCESS) {
         LOG_WARN("COMM", "绑定CPU0失败: %d", ret);
     }

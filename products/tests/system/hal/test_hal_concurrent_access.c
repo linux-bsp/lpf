@@ -155,7 +155,7 @@ void test_multithread_concurrent(void)
     LOG_INFO("TEST", "\n=== 测试 3: 多线程并发访问 ===\n");
 
     const int num_threads = 3;
-    osal_thread_t threads[num_threads];
+    pthread_t threads[num_threads];
     thread_data_t thread_data[num_threads];
 
     /* 创建共享的锁 */
@@ -179,14 +179,14 @@ void test_multithread_concurrent(void)
         thread_data[i].flock = flock;
         thread_data[i].mutex = mutex;
 
-        if (OSAL_ThreadCreate(&threads[i], thread_worker, &thread_data[i]) != OSAL_SUCCESS) {
+        if (OSAL_pthread_create(&threads[i], NULL, thread_worker, &thread_data[i]) != OSAL_SUCCESS) {
             LOG_INFO("TEST", "❌ 创建线程 %d 失败\n", i);
         }
     }
 
     /* 等待所有线程完成 */
     for (int i = 0; i < num_threads; i++) {
-        OSAL_ThreadJoin(threads[i]);
+        OSAL_pthread_join(threads[i], NULL);
     }
 
     /* 清理 */

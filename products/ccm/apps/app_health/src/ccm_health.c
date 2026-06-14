@@ -8,10 +8,10 @@ static ccm_system_status_t *g_status = NULL;
 static volatile bool g_running = true;
 
 /* 线程ID */
-static osal_thread_t g_satellite_hb_thread = 0;
-static osal_thread_t g_mcu_fpga_hb_thread = 0;
-static osal_thread_t g_cpld_hb_thread = 0;
-static osal_thread_t g_watchdog_thread = 0;
+static pthread_t g_satellite_hb_thread = 0;
+static pthread_t g_mcu_fpga_hb_thread = 0;
+static pthread_t g_cpld_hb_thread = 0;
+static pthread_t g_watchdog_thread = 0;
 
 /* 信号处理 */
 static void signal_handler(int32_t sig)
@@ -165,28 +165,28 @@ int32_t CCM_Health_Run(void)
     LOG_INFO("HEALTH", "Health进程开始运行");
 
     /* 创建线程1: 卫星心跳 */
-    ret = OSAL_ThreadCreate(&g_satellite_hb_thread, satellite_heartbeat_thread, NULL);
+    ret = OSAL_pthread_create(&g_satellite_hb_thread, NULL, satellite_heartbeat_thread, NULL);
     if (ret != OSAL_SUCCESS) {
         LOG_ERROR("HEALTH", "创建卫星心跳线程失败: %d", ret);
         return ret;
     }
 
     /* 创建线程2: MCU/FPGA心跳 */
-    ret = OSAL_ThreadCreate(&g_mcu_fpga_hb_thread, mcu_fpga_heartbeat_thread, NULL);
+    ret = OSAL_pthread_create(&g_mcu_fpga_hb_thread, NULL, mcu_fpga_heartbeat_thread, NULL);
     if (ret != OSAL_SUCCESS) {
         LOG_ERROR("HEALTH", "创建MCU/FPGA心跳线程失败: %d", ret);
         return ret;
     }
 
     /* 创建线程3: CPLD心跳 */
-    ret = OSAL_ThreadCreate(&g_cpld_hb_thread, cpld_heartbeat_thread, NULL);
+    ret = OSAL_pthread_create(&g_cpld_hb_thread, NULL, cpld_heartbeat_thread, NULL);
     if (ret != OSAL_SUCCESS) {
         LOG_ERROR("HEALTH", "创建CPLD心跳线程失败: %d", ret);
         return ret;
     }
 
     /* 创建线程4: 看门狗 */
-    ret = OSAL_ThreadCreate(&g_watchdog_thread, watchdog_thread, NULL);
+    ret = OSAL_pthread_create(&g_watchdog_thread, NULL, watchdog_thread, NULL);
     if (ret != OSAL_SUCCESS) {
         LOG_ERROR("HEALTH", "创建看门狗线程失败: %d", ret);
         return ret;
@@ -201,7 +201,7 @@ int32_t CCM_Health_Run(void)
     LOG_INFO("HEALTH", "等待线程退出...");
 
     if (g_satellite_hb_thread != 0) {
-        ret = OSAL_ThreadJoin(g_satellite_hb_thread);
+        ret = OSAL_pthread_join(g_satellite_hb_thread, NULL);
         if (ret != OSAL_SUCCESS) {
             LOG_ERROR("HEALTH", "等待卫星心跳线程退出失败: %d", ret);
         }
@@ -209,7 +209,7 @@ int32_t CCM_Health_Run(void)
     }
 
     if (g_mcu_fpga_hb_thread != 0) {
-        ret = OSAL_ThreadJoin(g_mcu_fpga_hb_thread);
+        ret = OSAL_pthread_join(g_mcu_fpga_hb_thread, NULL);
         if (ret != OSAL_SUCCESS) {
             LOG_ERROR("HEALTH", "等待MCU/FPGA心跳线程退出失败: %d", ret);
         }
@@ -217,7 +217,7 @@ int32_t CCM_Health_Run(void)
     }
 
     if (g_cpld_hb_thread != 0) {
-        ret = OSAL_ThreadJoin(g_cpld_hb_thread);
+        ret = OSAL_pthread_join(g_cpld_hb_thread, NULL);
         if (ret != OSAL_SUCCESS) {
             LOG_ERROR("HEALTH", "等待CPLD心跳线程退出失败: %d", ret);
         }
@@ -225,7 +225,7 @@ int32_t CCM_Health_Run(void)
     }
 
     if (g_watchdog_thread != 0) {
-        ret = OSAL_ThreadJoin(g_watchdog_thread);
+        ret = OSAL_pthread_join(g_watchdog_thread, NULL);
         if (ret != OSAL_SUCCESS) {
             LOG_ERROR("HEALTH", "等待看门狗线程退出失败: %d", ret);
         }

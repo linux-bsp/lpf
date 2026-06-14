@@ -55,7 +55,7 @@ int32_t CCM_Collector_Init(void)
     }
 
     /* 绑定到CPU1（建议） */
-    ret = OSAL_SchedSetAffinity(OSAL_ThreadSelf(), 1);
+    ret = OSAL_SchedSetAffinity(OSAL_pthread_self(), 1);
     if (ret != OSAL_SUCCESS) {
         LOG_WARN("COLLECTOR", "绑定CPU1失败: %d", ret);
     }

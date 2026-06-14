@@ -19,7 +19,7 @@ typedef struct {
     int value_fd;
     hal_gpio_isr_callback_t callback;
     void *user_data;
-    osal_thread_t thread;
+    pthread_t thread;
     bool enabled;
     bool running;
 } gpio_isr_context_t;
@@ -318,7 +318,7 @@ int32_t HAL_GPIO_Deinit(uint32_t gpio_num)
         gpio_isr_table[gpio_num].running = false;
         OSAL_pthread_mutex_unlock(&gpio_isr_mutex);
 
-        OSAL_ThreadJoin(gpio_isr_table[gpio_num].thread);
+        OSAL_pthread_join(gpio_isr_table[gpio_num].thread, NULL);
 
         OSAL_pthread_mutex_lock(&gpio_isr_mutex);
         if (gpio_isr_table[gpio_num].value_fd >= 0) {
@@ -527,7 +527,7 @@ int32_t HAL_GPIO_SetInterrupt(uint32_t gpio_num, hal_gpio_edge_t edge,
     if (gpio_isr_table[gpio_num].running) {
         gpio_isr_table[gpio_num].running = false;
         OSAL_pthread_mutex_unlock(&gpio_isr_mutex);
-        OSAL_ThreadJoin(gpio_isr_table[gpio_num].thread);
+        OSAL_pthread_join(gpio_isr_table[gpio_num].thread, NULL);
         OSAL_pthread_mutex_lock(&gpio_isr_mutex);
         if (gpio_isr_table[gpio_num].value_fd >= 0) {
             OSAL_close(gpio_isr_table[gpio_num].value_fd);
@@ -542,7 +542,7 @@ int32_t HAL_GPIO_SetInterrupt(uint32_t gpio_num, hal_gpio_edge_t edge,
     gpio_isr_table[gpio_num].running = true;
 
     /* 创建监听线程 */
-    ret = OSAL_ThreadCreate(&gpio_isr_table[gpio_num].thread,
+    ret = OSAL_pthread_create(&gpio_isr_table[gpio_num].thread, NULL,
                             gpio_isr_thread, &gpio_isr_table[gpio_num]);
 
     OSAL_pthread_mutex_unlock(&gpio_isr_mutex);

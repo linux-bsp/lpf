@@ -149,16 +149,16 @@ static void test_cond_signal_wakeup(void)
     OSAL_pthread_cond_init(&cond, NULL);
     OSAL_pthread_mutex_init(&mutex, NULL);
 
-    osal_thread_t producer, consumer;
+    pthread_t producer, consumer;
     void *args[] = {&cond, &mutex};
 
     /* 创建生产者和消费者线程 */
-    OSAL_ThreadCreate(&consumer, consumer_thread, args);
-    OSAL_ThreadCreate(&producer, producer_thread, args);
+    OSAL_pthread_create(&consumer, NULL, consumer_thread, args);
+    OSAL_pthread_create(&producer, NULL, producer_thread, args);
 
     /* 等待线程完成 */
-    OSAL_ThreadJoin(producer);
-    OSAL_ThreadJoin(consumer);
+    OSAL_pthread_join(producer, NULL);
+    OSAL_pthread_join(consumer, NULL);
 
     /* 验证数据已传递 */
     TEST_ASSERT_EQUAL(42, shared_data);
@@ -211,21 +211,21 @@ static void test_cond_broadcast_wakeup(void)
     OSAL_pthread_cond_init(&cond, NULL);
     OSAL_pthread_mutex_init(&mutex, NULL);
 
-    osal_thread_t threads[5];
+    pthread_t threads[5];
     void *args[] = {&cond, &mutex};
     int32_t i;
 
     /* 创建多个等待线程 */
     for (i = 0; i < 4; i++) {
-        OSAL_ThreadCreate(&threads[i], wait_thread, args);
+        OSAL_pthread_create(&threads[i], NULL, wait_thread, args);
     }
 
     /* 创建广播线程 */
-    OSAL_ThreadCreate(&threads[4], broadcast_thread, args);
+    OSAL_pthread_create(&threads[4], NULL, broadcast_thread, args);
 
     /* 等待所有线程完成 */
     for (i = 0; i < 5; i++) {
-        OSAL_ThreadJoin(threads[i]);
+        OSAL_pthread_join(threads[i], NULL);
     }
 
     /* 验证所有等待线程都被唤醒 */

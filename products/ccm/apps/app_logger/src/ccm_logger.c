@@ -8,7 +8,7 @@ static ccm_process_heartbeat_t *g_heartbeat = NULL;
 static volatile bool g_running = true;
 
 /* 线程ID */
-static osal_thread_t g_log_thread = 0;
+static pthread_t g_log_thread = 0;
 
 /* 信号处理 */
 static void signal_handler(int32_t sig)
@@ -90,7 +90,7 @@ int32_t CCM_Logger_Run(void)
     LOG_INFO("LOGGER", "Logger进程开始运行");
 
     /* 创建日志收集线程 */
-    ret = OSAL_ThreadCreate(&g_log_thread, log_collector_thread, NULL);
+    ret = OSAL_pthread_create(&g_log_thread, NULL, log_collector_thread, NULL);
     if (ret != OSAL_SUCCESS) {
         LOG_ERROR("LOGGER", "创建日志收集线程失败: %d", ret);
         return ret;
@@ -104,7 +104,7 @@ int32_t CCM_Logger_Run(void)
     /* 等待线程退出 */
     LOG_INFO("LOGGER", "等待线程退出...");
     if (g_log_thread != 0) {
-        ret = OSAL_ThreadJoin(g_log_thread);
+        ret = OSAL_pthread_join(g_log_thread, NULL);
         if (ret != OSAL_SUCCESS) {
             LOG_ERROR("LOGGER", "等待线程退出失败: %d", ret);
         }

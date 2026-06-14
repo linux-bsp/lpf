@@ -37,7 +37,6 @@
 #include "ipc/osal_rwlock.h"
 #include "ipc/osal_semaphore.h"
 #include "ipc/osal_shm.h"
-#include "ipc/osal_shm_compat.h"  /* 临时兼容层 */
 #include "ipc/osal_shm_cache.h"
 
 /* LIB - 标准库封装 */
@@ -58,7 +57,6 @@
 #include "sys/osal_poll.h"
 #include "sys/osal_process.h"
 #include "sys/osal_thread.h"
-#include "sys/osal_thread_compat.h"  /* 临时兼容层 */
 #include "sys/osal_sched.h"
 #include "sys/osal_select.h"
 #include "sys/osal_signal.h"

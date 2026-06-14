@@ -157,7 +157,7 @@ int32_t stress_run(stress_context_t *ctx,
     ctx->start_time_ms = OSAL_get_monotonic_time() / 1000;
 
     /* 创建工作线程 */
-    osal_thread_t *threads = (osal_thread_t*)OSAL_malloc(
+    pthread_t *threads = (osal_thread_t*)OSAL_malloc(
         OSAL_sizeof(osal_thread_t) * ctx->config.thread_count);
     worker_thread_args_t *args = (worker_thread_args_t*)OSAL_malloc(
         OSAL_sizeof(worker_thread_args_t) * ctx->config.thread_count);
@@ -180,13 +180,13 @@ int32_t stress_run(stress_context_t *ctx,
         char thread_name[32];
         OSAL_snprintf(thread_name, OSAL_sizeof(thread_name), "stress_worker_%u", i);
 
-        if (OSAL_ThreadCreate(&threads[i], worker_thread_func, &args[i]) != 0) {
+        if (OSAL_pthread_create(&threads[i], NULL, worker_thread_func, &args[i]) != 0) {
             /* 创建失败，停止已启动的线程 */
             ctx->should_stop = true;
             uint32_t j;
 
             for (j = 0; j < i; j++) {
-                OSAL_ThreadJoin(threads[j]);
+                OSAL_pthread_join(threads[j], NULL);
             }
             OSAL_free(threads);
             OSAL_free(args);
@@ -213,7 +213,7 @@ int32_t stress_run(stress_context_t *ctx,
     /* 等待所有线程结束 */
 
     for (i = 0; i < ctx->config.thread_count; i++) {
-        OSAL_ThreadJoin(threads[i]);
+        OSAL_pthread_join(threads[i], NULL);
     }
 
     ctx->running = false;

@@ -167,7 +167,7 @@ static void test_concurrent_scenario(void) {
     OSAL_printf("[ TEST     ] Testing concurrent scenario\n");
 
     const uint32_t num_threads = 5;
-    osal_thread_t threads[5];
+    pthread_t threads[5];
     osal_mutex_t *mutex = NULL;
     osal_atomic_uint32_t counter;
 
@@ -184,7 +184,7 @@ static void test_concurrent_scenario(void) {
     uint32_t i;
 
     for (i = 0; i < num_threads; i++) {
-        ret = OSAL_ThreadCreate(&threads[i], concurrent_thread_func, &thread_data);
+        ret = OSAL_pthread_create(&threads[i], NULL, concurrent_thread_func, &thread_data);
         if (ret != 0) {
             all_created = 0;
             break;
@@ -195,7 +195,7 @@ static void test_concurrent_scenario(void) {
     /* 检查点3：等待所有线程完成 */
 
     for (i = 0; i < num_threads; i++) {
-        OSAL_ThreadJoin(threads[i]);
+        OSAL_pthread_join(threads[i], NULL);
     }
     TEST_ASSERT_TRUE(1);
 

@@ -46,14 +46,14 @@ static void* sleep_thread_func(void *arg)
 
 static void test_thread_create_join(void)
 {
-    osal_thread_t thread;
+    pthread_t thread;
     int32_t value = 0;
     void *retval = NULL;
 
-    int32_t ret = OSAL_ThreadCreate(&thread, simple_thread_func, &value);
+    int32_t ret = OSAL_pthread_create(&thread, NULL, simple_thread_func, &value);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-    ret = OSAL_ThreadJoin(thread);
+    ret = OSAL_pthread_join(thread, NULL);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_EQUAL(42, value);
     TEST_ASSERT_EQUAL(123, (int32_t)(intptr_t)retval);
@@ -61,13 +61,13 @@ static void test_thread_create_join(void)
 
 static void test_thread_create_simplified(void)
 {
-    osal_thread_t thread;
+    pthread_t thread;
     int32_t value = 0;
 
-    int32_t ret = OSAL_ThreadCreate(&thread, simple_thread_func, &value);
+    int32_t ret = OSAL_pthread_create(&thread, NULL, simple_thread_func, &value);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-    ret = OSAL_ThreadJoin(thread);
+    ret = OSAL_pthread_join(thread, NULL);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_EQUAL(42, value);
 }
@@ -75,20 +75,20 @@ static void test_thread_create_simplified(void)
 static void test_thread_multiple_threads(void)
 {
     uint32_t i;
-    osal_thread_t threads[5];
+    pthread_t threads[5];
     int32_t values[5] = {0};
 
     /* 创建多个线程 */
 
     for (i = 0; i < 5; i++) {
-        int32_t ret = OSAL_ThreadCreate(&threads[i], simple_thread_func, &values[i]);
+        int32_t ret = OSAL_pthread_create(&threads[i], NULL, simple_thread_func, &values[i]);
         TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     }
 
     /* 等待所有线程完成 */
 
     for (i = 0; i < 5; i++) {
-        int32_t ret = OSAL_ThreadJoin(threads[i]);
+        int32_t ret = OSAL_pthread_join(threads[i], NULL);
         TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
         TEST_ASSERT_EQUAL(42, values[i]);
     }
@@ -96,14 +96,14 @@ static void test_thread_multiple_threads(void)
 
 static void test_thread_counter(void)
 {
-    osal_thread_t thread;
+    pthread_t thread;
     thread_counter = 0;
 
-    int32_t ret = OSAL_ThreadCreate(&thread, counter_thread_func, NULL);
+    int32_t ret = OSAL_pthread_create(&thread, NULL, counter_thread_func, NULL);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 等待线程完成 */
-    ret = OSAL_ThreadJoin(thread);
+    ret = OSAL_pthread_join(thread, NULL);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_EQUAL(2, thread_counter);
 }
@@ -111,20 +111,20 @@ static void test_thread_counter(void)
 static void test_thread_concurrent_counter(void)
 {
     uint32_t i;
-    osal_thread_t threads[10];
+    pthread_t threads[10];
     thread_counter = 0;
 
     /* 创建10个线程，每个增加计数器2次 */
 
     for (i = 0; i < 10; i++) {
-        int32_t ret = OSAL_ThreadCreate(&threads[i], counter_thread_func, NULL);
+        int32_t ret = OSAL_pthread_create(&threads[i], NULL, counter_thread_func, NULL);
         TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     }
 
     /* 等待所有线程完成 */
 
     for (i = 0; i < 10; i++) {
-        int32_t ret = OSAL_ThreadJoin(threads[i]);
+        int32_t ret = OSAL_pthread_join(threads[i], NULL);
         TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     }
 
@@ -134,33 +134,33 @@ static void test_thread_concurrent_counter(void)
 
 static void test_thread_null_params(void)
 {
-    osal_thread_t thread;
+    pthread_t thread;
 
     /* NULL线程指针 */
-    int32_t ret = OSAL_ThreadCreate(NULL, simple_thread_func, NULL);
+    int32_t ret = OSAL_pthread_create(NULL, NULL, simple_thread_func, NULL);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 
     /* NULL函数指针 */
-    ret = OSAL_ThreadCreate(&thread, NULL, NULL);
+    ret = OSAL_pthread_create(&thread, NULL, NULL, NULL);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
 static void test_thread_with_null_arg(void)
 {
-    osal_thread_t thread;
+    pthread_t thread;
 
     /* 线程函数可以接受NULL参数 */
-    int32_t ret = OSAL_ThreadCreate(&thread, simple_thread_func, NULL);
+    int32_t ret = OSAL_pthread_create(&thread, NULL, simple_thread_func, NULL);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-    ret = OSAL_ThreadJoin(thread);
+    ret = OSAL_pthread_join(thread, NULL);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 }
 
 static void test_thread_timing(void)
 {
     uint32_t i;
-    osal_thread_t threads[3];
+    pthread_t threads[3];
     int32_t sleep_times[3] = {50, 100, 150};
     uint64_t start_time, end_time;
 
@@ -169,14 +169,14 @@ static void test_thread_timing(void)
     /* 创建3个不同睡眠时间的线程 */
 
     for (i = 0; i < 3; i++) {
-        int32_t ret = OSAL_ThreadCreate(&threads[i], sleep_thread_func, &sleep_times[i]);
+        int32_t ret = OSAL_pthread_create(&threads[i], NULL, sleep_thread_func, &sleep_times[i]);
         TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     }
 
     /* 等待所有线程完成 */
 
     for (i = 0; i < 3; i++) {
-        int32_t ret = OSAL_ThreadJoin(threads[i]);
+        int32_t ret = OSAL_pthread_join(threads[i], NULL);
         TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     }
 
@@ -189,21 +189,21 @@ static void test_thread_timing(void)
 
 static void test_thread_sequential_execution(void)
 {
-    osal_thread_t thread1, thread2;
+    pthread_t thread1, thread2;
     int32_t value1 = 0, value2 = 0;
 
     /* 顺序创建和等待线程 */
-    int32_t ret = OSAL_ThreadCreate(&thread1, simple_thread_func, &value1);
+    int32_t ret = OSAL_pthread_create(&thread1, NULL, simple_thread_func, &value1);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-    ret = OSAL_ThreadJoin(thread1);
+    ret = OSAL_pthread_join(thread1, NULL);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_EQUAL(42, value1);
 
-    ret = OSAL_ThreadCreate(&thread2, simple_thread_func, &value2);
+    ret = OSAL_pthread_create(&thread2, NULL, simple_thread_func, &value2);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-    ret = OSAL_ThreadJoin(thread2);
+    ret = OSAL_pthread_join(thread2, NULL);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_EQUAL(42, value2);
 }

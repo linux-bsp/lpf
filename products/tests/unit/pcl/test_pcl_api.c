@@ -543,7 +543,7 @@ static void* thread_getboard_func(void *arg)
 
 static void test_pcl_concurrent_register(void)
 {
-    osal_thread_t threads[NUM_THREADS];
+    pthread_t threads[NUM_THREADS];
     thread_test_data_t thread_data[NUM_THREADS];
     int i;
     int32_t ret;
@@ -561,13 +561,13 @@ static void test_pcl_concurrent_register(void)
         thread_data[i].success_count = 0;
         thread_data[i].error_count = 0;
 
-        ret = OSAL_ThreadCreate(&threads[i], thread_register_func, &thread_data[i]);
+        ret = OSAL_pthread_create(&threads[i], NULL, thread_register_func, &thread_data[i]);
         TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     }
 
     /* 等待所有线程完成 */
     for (i = 0; i < NUM_THREADS; i++) {
-        OSAL_ThreadJoin(threads[i]);
+        OSAL_pthread_join(threads[i], NULL);
     }
 
     /* 验证结果：每个配置应该只被成功注册一次 */
@@ -588,7 +588,7 @@ static void test_pcl_concurrent_register(void)
 
 static void test_pcl_concurrent_find(void)
 {
-    osal_thread_t threads[NUM_THREADS];
+    pthread_t threads[NUM_THREADS];
     thread_test_data_t thread_data[NUM_THREADS];
     int i;
     int32_t ret;
@@ -611,13 +611,13 @@ static void test_pcl_concurrent_find(void)
         thread_data[i].success_count = 0;
         thread_data[i].error_count = 0;
 
-        ret = OSAL_ThreadCreate(&threads[i], thread_find_func, &thread_data[i]);
+        ret = OSAL_pthread_create(&threads[i], NULL, thread_find_func, &thread_data[i]);
         TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     }
 
     /* 等待所有线程完成 */
     for (i = 0; i < NUM_THREADS; i++) {
-        OSAL_ThreadJoin(threads[i]);
+        OSAL_pthread_join(threads[i], NULL);
     }
 
     /* 验证结果：所有查询都应该成功 */
@@ -631,7 +631,7 @@ static void test_pcl_concurrent_find(void)
 
 static void test_pcl_concurrent_mixed_operations(void)
 {
-    osal_thread_t threads[NUM_THREADS * 3];
+    pthread_t threads[NUM_THREADS * 3];
     thread_test_data_t thread_data[NUM_THREADS * 3];
     int i;
     int32_t ret;
@@ -655,14 +655,14 @@ static void test_pcl_concurrent_mixed_operations(void)
         thread_data[i].error_count = 0;
 
         /* 线程组1：查询操作 */
-        ret = OSAL_ThreadCreate(&threads[i], thread_find_func, &thread_data[i]);
+        ret = OSAL_pthread_create(&threads[i], NULL, thread_find_func, &thread_data[i]);
         TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
         /* 线程组2：列举操作 */
         thread_data[NUM_THREADS + i].thread_id = i;
         thread_data[NUM_THREADS + i].success_count = 0;
         thread_data[NUM_THREADS + i].error_count = 0;
-        ret = OSAL_ThreadCreate(&threads[NUM_THREADS + i], thread_list_func,
+        ret = OSAL_pthread_create(&threads[NUM_THREADS + i], NULL, thread_list_func,
                                 &thread_data[NUM_THREADS + i]);
         TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
@@ -670,14 +670,14 @@ static void test_pcl_concurrent_mixed_operations(void)
         thread_data[NUM_THREADS * 2 + i].thread_id = i;
         thread_data[NUM_THREADS * 2 + i].success_count = 0;
         thread_data[NUM_THREADS * 2 + i].error_count = 0;
-        ret = OSAL_ThreadCreate(&threads[NUM_THREADS * 2 + i], thread_getboard_func,
+        ret = OSAL_pthread_create(&threads[NUM_THREADS * 2 + i], NULL, thread_getboard_func,
                                 &thread_data[NUM_THREADS * 2 + i]);
         TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     }
 
     /* 等待所有线程完成 */
     for (i = 0; i < NUM_THREADS * 3; i++) {
-        OSAL_ThreadJoin(threads[i]);
+        OSAL_pthread_join(threads[i], NULL);
     }
 
     /* 验证没有发生崩溃或死锁 */

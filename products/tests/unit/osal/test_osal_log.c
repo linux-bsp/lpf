@@ -245,7 +245,7 @@ static void* log_test_task(void *arg)
 static void test_osal_log_multithread(void)
 {
     int32_t ret;
-    osal_thread_t task_ids[3];
+    pthread_t task_ids[3];
     int32_t task_args[3] = {1, 2, 3};
 
     /* 初始化日志 */
@@ -258,7 +258,7 @@ static void test_osal_log_multithread(void)
     int32_t i;
 
     for (i = 0; i < 3; i++) {
-        ret = OSAL_ThreadCreate(&task_ids[i],
+        ret = OSAL_pthread_create(&task_ids[i], NULL,
                                log_test_task, &task_args[i]);
         TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     }
@@ -269,7 +269,7 @@ static void test_osal_log_multithread(void)
     /* 等待线程退出 */
 
     for (i = 0; i < 3; i++) {
-        OSAL_ThreadJoin(task_ids[i]);
+        OSAL_pthread_join(task_ids[i], NULL);
     }
 
     /* 清理 */

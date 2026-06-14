@@ -314,7 +314,7 @@ static void *sched_test_thread(void *arg)
 /* 测试用例: 为新线程设置调度策略 */
 static void test_osal_sched_thread_policy(void)
 {
-    osal_thread_t thread;
+    pthread_t thread;
     int32_t ret;
     int32_t max_priority;
     int32_t test_priority;
@@ -325,7 +325,7 @@ static void test_osal_sched_thread_policy(void)
     test_priority = (OSAL_SchedGetPriorityMin(OSAL_SCHED_FIFO) + max_priority) / 2;
 
     /* 创建线程 */
-    ret = OSAL_ThreadCreate(&thread, sched_test_thread, NULL);
+    ret = OSAL_pthread_create(&thread, NULL, sched_test_thread, NULL);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 等待线程启动 */
@@ -335,14 +335,14 @@ static void test_osal_sched_thread_policy(void)
     ret = OSAL_SchedSetPolicy(thread, OSAL_SCHED_FIFO, test_priority);
     if (ret == OSAL_ERR_PERMISSION) {
         /* 没有权限，等待线程结束 */
-        OSAL_ThreadJoin(thread);
+        OSAL_pthread_join(thread, NULL);
         TEST_MESSAGE("SKIPPED: Need root permission");
         return;
     }
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 等待线程结束 */
-    ret = OSAL_ThreadJoin(thread);
+    ret = OSAL_pthread_join(thread, NULL);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 验证线程获取到的优先级 */

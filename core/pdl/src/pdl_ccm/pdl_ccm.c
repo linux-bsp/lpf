@@ -33,8 +33,8 @@ typedef struct
     uint32_t link_quality;
 
     /* 线程控制 */
-    osal_thread_t rx_thread;
-    osal_thread_t heartbeat_thread;
+    pthread_t rx_thread;
+    pthread_t heartbeat_thread;
     osal_atomic_bool_t running;       /* 使用原子变量保证多线程安全 */
 
     /* 互斥锁保护 */
@@ -262,7 +262,7 @@ int32_t PDL_CCM_Init(const pdl_ccm_config_t *config,
 
     /* 启动接收线程 */
     OSAL_AtomicStoreBool(\&ctx->running, true);
-    ret = OSAL_ThreadCreate(&ctx->rx_thread, eth_rx_task, ctx);
+    ret = OSAL_pthread_create(&ctx->rx_thread, NULL, eth_rx_task, ctx);
     if (ret != OSAL_SUCCESS)
     {
         LOG_ERROR("PDL_CCM", "Failed to create RX thread");
@@ -273,12 +273,12 @@ int32_t PDL_CCM_Init(const pdl_ccm_config_t *config,
     }
 
     /* 启动心跳线程 */
-    ret = OSAL_ThreadCreate(&ctx->heartbeat_thread, heartbeat_task, ctx);
+    ret = OSAL_pthread_create(&ctx->heartbeat_thread, NULL, heartbeat_task, ctx);
     if (ret != OSAL_SUCCESS)
     {
         LOG_ERROR("PDL_CCM", "Failed to create heartbeat thread");
         OSAL_AtomicStoreBool(\&ctx->running, false);
-        OSAL_ThreadJoin(ctx->rx_thread);
+        OSAL_pthread_join(ctx->rx_thread, NULL);
         ccm_eth_deinit(ctx->eth_handle);
         OSAL_pthread_mutex_destroy(&ctx->mutex);
         OSAL_free(ctx);
@@ -304,8 +304,8 @@ int32_t PDL_CCM_Deinit(pdl_ccm_handle_t handle)
 
     /* 停止线程 */
     OSAL_AtomicStoreBool(\&ctx->running, false);
-    OSAL_ThreadJoin(ctx->rx_thread);
-    OSAL_ThreadJoin(ctx->heartbeat_thread);
+    OSAL_pthread_join(ctx->rx_thread, NULL);
+    OSAL_pthread_join(ctx->heartbeat_thread, NULL);
 
     /* 清理以太网通信 */
     ccm_eth_deinit(ctx->eth_handle);
