@@ -63,7 +63,7 @@ typedef struct {
     int32_t board_temp;                     /* 板卡温度(℃) */
     uint32_t voltage_54v;                   /* 54V电压(mV) */
     uint32_t voltage_12v;                   /* 12V电压(mV) */
-    pthread_mutex_t mutex;                    /* 互斥锁 */
+    osal_mutex_t mutex;                    /* 互斥锁 */
 } ccm_system_status_t;
 
 /* 进程心跳 */

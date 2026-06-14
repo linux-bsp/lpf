@@ -314,7 +314,7 @@ static void *sched_test_thread(void *arg)
 /* 测试用例: 为新线程设置调度策略 */
 static void test_osal_sched_thread_policy(void)
 {
-    pthread_t thread;
+    osal_thread_t thread;
     int32_t ret;
     int32_t max_priority;
     int32_t test_priority;

@@ -245,7 +245,7 @@ static void* log_test_task(void *arg)
 static void test_osal_log_multithread(void)
 {
     int32_t ret;
-    pthread_t task_ids[3];
+    osal_thread_t task_ids[3];
     int32_t task_args[3] = {1, 2, 3};
 
     /* 初始化日志 */

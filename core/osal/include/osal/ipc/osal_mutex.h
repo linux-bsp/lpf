@@ -1,7 +1,7 @@
 /************************************************************************
  * OSAL Mutex API - POSIX 薄封装
  *
- * 直接暴露 POSIX pthread_mutex_t 类型
+ * 直接暴露 POSIX osal_mutex_t 类型
  ************************************************************************/
 
 #ifndef OSAL_MUTEX_H
@@ -25,7 +25,7 @@ extern "C" {
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr);
+int32_t OSAL_pthread_mutex_init(osal_mutex_t *mutex, const osal_mutexattr_t *attr);
 
 /**
  * @brief 销毁互斥锁
@@ -34,7 +34,7 @@ int32_t OSAL_pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_mutex_destroy(pthread_mutex_t *mutex);
+int32_t OSAL_pthread_mutex_destroy(osal_mutex_t *mutex);
 
 /**
  * @brief 获取互斥锁（阻塞）
@@ -43,7 +43,7 @@ int32_t OSAL_pthread_mutex_destroy(pthread_mutex_t *mutex);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_mutex_lock(pthread_mutex_t *mutex);
+int32_t OSAL_pthread_mutex_lock(osal_mutex_t *mutex);
 
 /**
  * @brief 尝试获取互斥锁（非阻塞）
@@ -52,7 +52,7 @@ int32_t OSAL_pthread_mutex_lock(pthread_mutex_t *mutex);
  * @return 0 成功获取锁
  * @return -1 失败（EBUSY 表示锁已被占用）
  */
-int32_t OSAL_pthread_mutex_trylock(pthread_mutex_t *mutex);
+int32_t OSAL_pthread_mutex_trylock(osal_mutex_t *mutex);
 
 /**
  * @brief 带超时的获取互斥锁
@@ -62,7 +62,7 @@ int32_t OSAL_pthread_mutex_trylock(pthread_mutex_t *mutex);
  * @return 0 成功获取锁
  * @return -1 失败（ETIMEDOUT 表示超时）
  */
-int32_t OSAL_pthread_mutex_timedlock(pthread_mutex_t *mutex, uint32_t timeout_ms);
+int32_t OSAL_pthread_mutex_timedlock(osal_mutex_t *mutex, uint32_t timeout_ms);
 
 /**
  * @brief 释放互斥锁
@@ -71,7 +71,7 @@ int32_t OSAL_pthread_mutex_timedlock(pthread_mutex_t *mutex, uint32_t timeout_ms
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_mutex_unlock(pthread_mutex_t *mutex);
+int32_t OSAL_pthread_mutex_unlock(osal_mutex_t *mutex);
 
 /*===========================================================================
  * 互斥锁属性管理（可选）
@@ -84,7 +84,7 @@ int32_t OSAL_pthread_mutex_unlock(pthread_mutex_t *mutex);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_mutexattr_init(pthread_mutexattr_t *attr);
+int32_t OSAL_pthread_mutexattr_init(osal_mutexattr_t *attr);
 
 /**
  * @brief 销毁互斥锁属性
@@ -93,7 +93,7 @@ int32_t OSAL_pthread_mutexattr_init(pthread_mutexattr_t *attr);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_mutexattr_destroy(pthread_mutexattr_t *attr);
+int32_t OSAL_pthread_mutexattr_destroy(osal_mutexattr_t *attr);
 
 /**
  * @brief 设置互斥锁类型
@@ -103,7 +103,7 @@ int32_t OSAL_pthread_mutexattr_destroy(pthread_mutexattr_t *attr);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_mutexattr_settype(pthread_mutexattr_t *attr, int32_t type);
+int32_t OSAL_pthread_mutexattr_settype(osal_mutexattr_t *attr, int32_t type);
 
 /**
  * @brief 获取互斥锁类型
@@ -113,7 +113,7 @@ int32_t OSAL_pthread_mutexattr_settype(pthread_mutexattr_t *attr, int32_t type);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_mutexattr_gettype(const pthread_mutexattr_t *attr, int32_t *type);
+int32_t OSAL_pthread_mutexattr_gettype(const osal_mutexattr_t *attr, int32_t *type);
 
 #ifdef __cplusplus
 }

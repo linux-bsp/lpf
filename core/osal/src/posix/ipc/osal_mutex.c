@@ -7,7 +7,7 @@
 #include <errno.h>
 #include <time.h>
 
-int32_t OSAL_pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr)
+int32_t OSAL_pthread_mutex_init(osal_mutex_t *mutex, const osal_mutexattr_t *attr)
 {
     if (mutex == NULL) {
         errno = EINVAL;
@@ -17,7 +17,7 @@ int32_t OSAL_pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_
     return pthread_mutex_init(mutex, attr);
 }
 
-int32_t OSAL_pthread_mutex_destroy(pthread_mutex_t *mutex)
+int32_t OSAL_pthread_mutex_destroy(osal_mutex_t *mutex)
 {
     if (mutex == NULL) {
         errno = EINVAL;
@@ -27,7 +27,7 @@ int32_t OSAL_pthread_mutex_destroy(pthread_mutex_t *mutex)
     return pthread_mutex_destroy(mutex);
 }
 
-int32_t OSAL_pthread_mutex_lock(pthread_mutex_t *mutex)
+int32_t OSAL_pthread_mutex_lock(osal_mutex_t *mutex)
 {
     if (mutex == NULL) {
         errno = EINVAL;
@@ -37,7 +37,7 @@ int32_t OSAL_pthread_mutex_lock(pthread_mutex_t *mutex)
     return pthread_mutex_lock(mutex);
 }
 
-int32_t OSAL_pthread_mutex_trylock(pthread_mutex_t *mutex)
+int32_t OSAL_pthread_mutex_trylock(osal_mutex_t *mutex)
 {
     if (mutex == NULL) {
         errno = EINVAL;
@@ -47,7 +47,7 @@ int32_t OSAL_pthread_mutex_trylock(pthread_mutex_t *mutex)
     return pthread_mutex_trylock(mutex);
 }
 
-int32_t OSAL_pthread_mutex_timedlock(pthread_mutex_t *mutex, uint32_t timeout_ms)
+int32_t OSAL_pthread_mutex_timedlock(osal_mutex_t *mutex, uint32_t timeout_ms)
 {
     struct timespec ts;
 
@@ -70,7 +70,7 @@ int32_t OSAL_pthread_mutex_timedlock(pthread_mutex_t *mutex, uint32_t timeout_ms
     return pthread_mutex_timedlock(mutex, &ts);
 }
 
-int32_t OSAL_pthread_mutex_unlock(pthread_mutex_t *mutex)
+int32_t OSAL_pthread_mutex_unlock(osal_mutex_t *mutex)
 {
     if (mutex == NULL) {
         errno = EINVAL;
@@ -84,7 +84,7 @@ int32_t OSAL_pthread_mutex_unlock(pthread_mutex_t *mutex)
  * 互斥锁属性管理
  *===========================================================================*/
 
-int32_t OSAL_pthread_mutexattr_init(pthread_mutexattr_t *attr)
+int32_t OSAL_pthread_mutexattr_init(osal_mutexattr_t *attr)
 {
     if (attr == NULL) {
         errno = EINVAL;
@@ -94,7 +94,7 @@ int32_t OSAL_pthread_mutexattr_init(pthread_mutexattr_t *attr)
     return pthread_mutexattr_init(attr);
 }
 
-int32_t OSAL_pthread_mutexattr_destroy(pthread_mutexattr_t *attr)
+int32_t OSAL_pthread_mutexattr_destroy(osal_mutexattr_t *attr)
 {
     if (attr == NULL) {
         errno = EINVAL;
@@ -104,7 +104,7 @@ int32_t OSAL_pthread_mutexattr_destroy(pthread_mutexattr_t *attr)
     return pthread_mutexattr_destroy(attr);
 }
 
-int32_t OSAL_pthread_mutexattr_settype(pthread_mutexattr_t *attr, int32_t type)
+int32_t OSAL_pthread_mutexattr_settype(osal_mutexattr_t *attr, int32_t type)
 {
     if (attr == NULL) {
         errno = EINVAL;
@@ -114,7 +114,7 @@ int32_t OSAL_pthread_mutexattr_settype(pthread_mutexattr_t *attr, int32_t type)
     return pthread_mutexattr_settype(attr, type);
 }
 
-int32_t OSAL_pthread_mutexattr_gettype(const pthread_mutexattr_t *attr, int32_t *type)
+int32_t OSAL_pthread_mutexattr_gettype(const osal_mutexattr_t *attr, int32_t *type)
 {
     if (attr == NULL || type == NULL) {
         errno = EINVAL;

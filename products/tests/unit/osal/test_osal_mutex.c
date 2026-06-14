@@ -1,6 +1,6 @@
 /**
  * @file test_osal_mutex.c
- * @brief OSAL Mutex Unit Tests - Updated for pthread_mutex_t thin wrapper
+ * @brief OSAL Mutex Unit Tests - Updated for osal_mutex_t thin wrapper
  *
  * Tests OSAL mutex operations using function pointer array registration.
  *
@@ -20,7 +20,7 @@ static int32_t shared_counter = 0;
 /* 测试用例1: 互斥锁初始化成功 */
 static void test_mutex_init_success(void)
 {
-	pthread_mutex_t mutex;
+	osal_mutex_t mutex;
 
 	int32_t ret = OSAL_pthread_mutex_init(&mutex, NULL);
 
@@ -40,7 +40,7 @@ static void test_mutex_init_nullpointer(void)
 /* 测试用例3: 互斥锁加锁解锁 */
 static void test_mutex_lockunlock_success(void)
 {
-	pthread_mutex_t mutex;
+	osal_mutex_t mutex;
 	OSAL_pthread_mutex_init(&mutex, NULL);
 
 	int32_t ret = OSAL_pthread_mutex_lock(&mutex);
@@ -71,7 +71,7 @@ static void test_mutex_unlock_nullpointer(void)
 /* 测试用例6: 互斥锁销毁成功 */
 static void test_mutex_destroy_success(void)
 {
-	pthread_mutex_t mutex;
+	osal_mutex_t mutex;
 	OSAL_pthread_mutex_init(&mutex, NULL);
 
 	int32_t ret = OSAL_pthread_mutex_destroy(&mutex);
@@ -89,7 +89,7 @@ static void test_mutex_destroy_nullpointer(void)
 /* 生产者线程 */
 static void* producer_thread(void *arg)
 {
-	pthread_mutex_t *mutex = (pthread_mutex_t *)arg;
+	osal_mutex_t *mutex = (osal_mutex_t *)arg;
 	int32_t i;
 
 	for (i = 0; i < 1000; i++) {
@@ -104,7 +104,7 @@ static void* producer_thread(void *arg)
 /* 消费者线程 */
 static void* consumer_thread(void *arg)
 {
-	pthread_mutex_t *mutex = (pthread_mutex_t *)arg;
+	osal_mutex_t *mutex = (osal_mutex_t *)arg;
 	int32_t i;
 
 	for (i = 0; i < 1000; i++) {
@@ -120,10 +120,10 @@ static void* consumer_thread(void *arg)
 static void test_mutex_multithread(void)
 {
 	shared_counter = 0;
-	pthread_mutex_t mutex;
+	osal_mutex_t mutex;
 	OSAL_pthread_mutex_init(&mutex, NULL);
 
-	pthread_t producer, consumer;
+	osal_thread_t producer, consumer;
 
 	/* 创建生产者和消费者线程 */
 	OSAL_pthread_create(&producer, NULL, producer_thread, &mutex);
@@ -142,8 +142,8 @@ static void test_mutex_multithread(void)
 /* 测试用例9: 递归锁 */
 static void test_mutex_recursive(void)
 {
-	pthread_mutex_t mutex;
-	pthread_mutexattr_t attr;
+	osal_mutex_t mutex;
+	osal_mutexattr_t attr;
 
 	/* 设置递归锁属性 */
 	OSAL_pthread_mutexattr_init(&attr);
@@ -171,7 +171,7 @@ static void test_mutex_recursive(void)
 /* 测试用例10: trylock 非阻塞 */
 static void test_mutex_trylock(void)
 {
-	pthread_mutex_t mutex;
+	osal_mutex_t mutex;
 	OSAL_pthread_mutex_init(&mutex, NULL);
 
 	/* 第一次 trylock 应该成功 */
@@ -268,7 +268,7 @@ static const test_suite_t test_suite = {
 		.category = TEST_CATEGORY_UNIT,
 		.tags = TEST_TAG_FAST,
 		.timeout_ms = 100,
-		.description = "OSAL mutex tests (pthread_mutex_t thin wrapper)"
+		.description = "OSAL mutex tests (osal_mutex_t thin wrapper)"
 	}
 };
 

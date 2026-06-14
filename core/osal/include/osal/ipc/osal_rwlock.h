@@ -1,7 +1,7 @@
 /************************************************************************
  * OSAL Reader-Writer Lock API - POSIX 薄封装
  *
- * 直接暴露 POSIX pthread_rwlock_t 类型
+ * 直接暴露 POSIX osal_rwlock_t 类型
  ************************************************************************/
 
 #ifndef OSAL_RWLOCK_H
@@ -25,7 +25,7 @@ extern "C" {
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_rwlock_init(pthread_rwlock_t *rwlock, const pthread_rwlockattr_t *attr);
+int32_t OSAL_pthread_rwlock_init(osal_rwlock_t *rwlock, const osal_rwlockattr_t *attr);
 
 /**
  * @brief 销毁读写锁
@@ -34,7 +34,7 @@ int32_t OSAL_pthread_rwlock_init(pthread_rwlock_t *rwlock, const pthread_rwlocka
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_rwlock_destroy(pthread_rwlock_t *rwlock);
+int32_t OSAL_pthread_rwlock_destroy(osal_rwlock_t *rwlock);
 
 /**
  * @brief 获取读锁（阻塞）
@@ -45,7 +45,7 @@ int32_t OSAL_pthread_rwlock_destroy(pthread_rwlock_t *rwlock);
  *
  * @note 多个线程可以同时持有读锁
  */
-int32_t OSAL_pthread_rwlock_rdlock(pthread_rwlock_t *rwlock);
+int32_t OSAL_pthread_rwlock_rdlock(osal_rwlock_t *rwlock);
 
 /**
  * @brief 获取写锁（阻塞）
@@ -56,7 +56,7 @@ int32_t OSAL_pthread_rwlock_rdlock(pthread_rwlock_t *rwlock);
  *
  * @note 写锁是独占的，持有写锁时其他线程无法获取读锁或写锁
  */
-int32_t OSAL_pthread_rwlock_wrlock(pthread_rwlock_t *rwlock);
+int32_t OSAL_pthread_rwlock_wrlock(osal_rwlock_t *rwlock);
 
 /**
  * @brief 尝试获取读锁（非阻塞）
@@ -65,7 +65,7 @@ int32_t OSAL_pthread_rwlock_wrlock(pthread_rwlock_t *rwlock);
  * @return 0 成功获取锁
  * @return -1 失败（EBUSY 表示锁已被占用）
  */
-int32_t OSAL_pthread_rwlock_tryrdlock(pthread_rwlock_t *rwlock);
+int32_t OSAL_pthread_rwlock_tryrdlock(osal_rwlock_t *rwlock);
 
 /**
  * @brief 尝试获取写锁（非阻塞）
@@ -74,7 +74,7 @@ int32_t OSAL_pthread_rwlock_tryrdlock(pthread_rwlock_t *rwlock);
  * @return 0 成功获取锁
  * @return -1 失败（EBUSY 表示锁已被占用）
  */
-int32_t OSAL_pthread_rwlock_trywrlock(pthread_rwlock_t *rwlock);
+int32_t OSAL_pthread_rwlock_trywrlock(osal_rwlock_t *rwlock);
 
 /**
  * @brief 释放读写锁
@@ -83,7 +83,7 @@ int32_t OSAL_pthread_rwlock_trywrlock(pthread_rwlock_t *rwlock);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_rwlock_unlock(pthread_rwlock_t *rwlock);
+int32_t OSAL_pthread_rwlock_unlock(osal_rwlock_t *rwlock);
 
 #ifdef __cplusplus
 }

@@ -68,10 +68,10 @@ void test_multiprocess_concurrent(void)
     const int iterations = 5;
 
     for (int i = 0; i < num_processes; i++) {
-        osal_id_t pid;
-        int32_t ret = OSAL_fork(&pid);
+        int32_t pid;
+        pid = OSAL_fork();
 
-        if (ret != OSAL_SUCCESS) {
+        if (pid < 0) {
             LOG_INFO("TEST", "❌ fork 失败\n");
             return;
         }
@@ -121,7 +121,7 @@ void test_multiprocess_concurrent(void)
 typedef struct {
     int thread_id;
     osal_flock_t *flock;
-    pthread_mutex_t mutex;
+    osal_mutex_t *mutex;
 } thread_data_t;
 
 void* thread_worker(void *arg)
@@ -136,14 +136,14 @@ void* thread_worker(void *arg)
             continue;
         }
 
-        OSAL_pthread_mutex_lock(&data->mutex);
+        OSAL_pthread_mutex_lock(data->mutex);
 
         /* 临界区 */
         LOG_INFO("TEST", "线程 %d: 进入临界区 (迭代 %d/%d)\n", data->thread_id, i+1, iterations);
         OSAL_usleep(50000);  /* 50ms */
 
         /* 释放锁（逆序） */
-        OSAL_pthread_mutex_unlock(&data->mutex);
+        OSAL_pthread_mutex_unlock(data->mutex);
         OSAL_flock_unlock(data->flock);
     }
 
@@ -155,12 +155,12 @@ void test_multithread_concurrent(void)
     LOG_INFO("TEST", "\n=== 测试 3: 多线程并发访问 ===\n");
 
     const int num_threads = 3;
-    pthread_t threads[num_threads];
+    osal_thread_t threads[num_threads];
     thread_data_t thread_data[num_threads];
 
     /* 创建共享的锁 */
     osal_flock_t *flock = NULL;
-    osal_mutex_t *mutex = NULL;
+    osal_mutex_t mutex;
 
     if (OSAL_flock_create("/tmp/test_multithread.lock", &flock) != OSAL_SUCCESS) {
         LOG_INFO("TEST", "❌ 创建文件锁失败\n");
@@ -177,7 +177,7 @@ void test_multithread_concurrent(void)
     for (int i = 0; i < num_threads; i++) {
         thread_data[i].thread_id = i + 1;
         thread_data[i].flock = flock;
-        thread_data[i].mutex = mutex;
+        thread_data[i].mutex = &mutex;
 
         if (OSAL_pthread_create(&threads[i], NULL, thread_worker, &thread_data[i]) != OSAL_SUCCESS) {
             LOG_INFO("TEST", "❌ 创建线程 %d 失败\n", i);
@@ -204,6 +204,7 @@ void test_timeout_mechanism(void)
 {
     LOG_INFO("TEST", "\n=== 测试 4: 超时机制 ===\n");
 
+    int32_t ret;
     osal_flock_t *flock = NULL;
 
     if (OSAL_flock_create("/tmp/test_timeout.lock", &flock) != OSAL_SUCCESS) {
@@ -212,10 +213,10 @@ void test_timeout_mechanism(void)
     }
 
     /* 第一个进程持有锁 */
-    osal_id_t pid;
-    int32_t ret = OSAL_fork(&pid);
+    int32_t pid;
+    pid = OSAL_fork();
 
-    if (ret != OSAL_SUCCESS) {
+    if (pid < 0) {
         LOG_INFO("TEST", "❌ fork 失败\n");
         OSAL_flock_destroy(flock);
         return;

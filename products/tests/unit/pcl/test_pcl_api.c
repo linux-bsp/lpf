@@ -543,7 +543,7 @@ static void* thread_getboard_func(void *arg)
 
 static void test_pcl_concurrent_register(void)
 {
-    pthread_t threads[NUM_THREADS];
+    osal_thread_t threads[NUM_THREADS];
     thread_test_data_t thread_data[NUM_THREADS];
     int i;
     int32_t ret;
@@ -588,7 +588,7 @@ static void test_pcl_concurrent_register(void)
 
 static void test_pcl_concurrent_find(void)
 {
-    pthread_t threads[NUM_THREADS];
+    osal_thread_t threads[NUM_THREADS];
     thread_test_data_t thread_data[NUM_THREADS];
     int i;
     int32_t ret;
@@ -631,7 +631,7 @@ static void test_pcl_concurrent_find(void)
 
 static void test_pcl_concurrent_mixed_operations(void)
 {
-    pthread_t threads[NUM_THREADS * 3];
+    osal_thread_t threads[NUM_THREADS * 3];
     thread_test_data_t thread_data[NUM_THREADS * 3];
     int i;
     int32_t ret;

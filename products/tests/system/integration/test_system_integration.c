@@ -142,7 +142,7 @@ static void test_full_stack_e2e(void) {
 
 /* 线程数据结构 */
 typedef struct {
-    pthread_mutex_t mutex;
+    osal_mutex_t mutex;
     osal_atomic_uint32_t *counter;
 } concurrent_thread_data_t;
 
@@ -167,7 +167,7 @@ static void test_concurrent_scenario(void) {
     OSAL_printf("[ TEST     ] Testing concurrent scenario\n");
 
     const uint32_t num_threads = 5;
-    pthread_t threads[5];
+    osal_thread_t threads[5];
     osal_mutex_t *mutex = NULL;
     osal_atomic_uint32_t counter;
 

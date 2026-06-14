@@ -6,8 +6,8 @@
 #include <pthread.h>
 #include <errno.h>
 
-int32_t OSAL_pthread_create(pthread_t *thread,
-                            const pthread_attr_t *attr,
+int32_t OSAL_pthread_create(osal_thread_t *thread,
+                            const osal_threadattr_t *attr,
                             void *(*start_routine)(void *),
                             void *arg)
 {
@@ -19,17 +19,17 @@ int32_t OSAL_pthread_create(pthread_t *thread,
     return pthread_create(thread, attr, start_routine, arg);
 }
 
-int32_t OSAL_pthread_join(pthread_t thread, void **retval)
+int32_t OSAL_pthread_join(osal_thread_t thread, void **retval)
 {
     return pthread_join(thread, retval);
 }
 
-int32_t OSAL_pthread_detach(pthread_t thread)
+int32_t OSAL_pthread_detach(osal_thread_t thread)
 {
     return pthread_detach(thread);
 }
 
-pthread_t OSAL_pthread_self(void)
+osal_thread_t OSAL_pthread_self(void)
 {
     return pthread_self();
 }
@@ -39,7 +39,7 @@ void OSAL_pthread_exit(void *retval)
     pthread_exit(retval);
 }
 
-int32_t OSAL_pthread_cancel(pthread_t thread)
+int32_t OSAL_pthread_cancel(osal_thread_t thread)
 {
     return pthread_cancel(thread);
 }
@@ -48,7 +48,7 @@ int32_t OSAL_pthread_cancel(pthread_t thread)
  * 线程属性管理
  *===========================================================================*/
 
-int32_t OSAL_pthread_attr_init(pthread_attr_t *attr)
+int32_t OSAL_pthread_attr_init(osal_threadattr_t *attr)
 {
     if (attr == NULL) {
         errno = EINVAL;
@@ -58,7 +58,7 @@ int32_t OSAL_pthread_attr_init(pthread_attr_t *attr)
     return pthread_attr_init(attr);
 }
 
-int32_t OSAL_pthread_attr_destroy(pthread_attr_t *attr)
+int32_t OSAL_pthread_attr_destroy(osal_threadattr_t *attr)
 {
     if (attr == NULL) {
         errno = EINVAL;
@@ -68,7 +68,7 @@ int32_t OSAL_pthread_attr_destroy(pthread_attr_t *attr)
     return pthread_attr_destroy(attr);
 }
 
-int32_t OSAL_pthread_attr_setstacksize(pthread_attr_t *attr, size_t stacksize)
+int32_t OSAL_pthread_attr_setstacksize(osal_threadattr_t *attr, size_t stacksize)
 {
     if (attr == NULL) {
         errno = EINVAL;
@@ -78,7 +78,7 @@ int32_t OSAL_pthread_attr_setstacksize(pthread_attr_t *attr, size_t stacksize)
     return pthread_attr_setstacksize(attr, stacksize);
 }
 
-int32_t OSAL_pthread_attr_getstacksize(const pthread_attr_t *attr, size_t *stacksize)
+int32_t OSAL_pthread_attr_getstacksize(const osal_threadattr_t *attr, size_t *stacksize)
 {
     if (attr == NULL || stacksize == NULL) {
         errno = EINVAL;
@@ -88,7 +88,7 @@ int32_t OSAL_pthread_attr_getstacksize(const pthread_attr_t *attr, size_t *stack
     return pthread_attr_getstacksize(attr, stacksize);
 }
 
-int32_t OSAL_pthread_attr_setdetachstate(pthread_attr_t *attr, int32_t detachstate)
+int32_t OSAL_pthread_attr_setdetachstate(osal_threadattr_t *attr, int32_t detachstate)
 {
     if (attr == NULL) {
         errno = EINVAL;
@@ -98,7 +98,7 @@ int32_t OSAL_pthread_attr_setdetachstate(pthread_attr_t *attr, int32_t detachsta
     return pthread_attr_setdetachstate(attr, detachstate);
 }
 
-int32_t OSAL_pthread_attr_getdetachstate(const pthread_attr_t *attr, int32_t *detachstate)
+int32_t OSAL_pthread_attr_getdetachstate(const osal_threadattr_t *attr, int32_t *detachstate)
 {
     if (attr == NULL || detachstate == NULL) {
         errno = EINVAL;
@@ -108,7 +108,7 @@ int32_t OSAL_pthread_attr_getdetachstate(const pthread_attr_t *attr, int32_t *de
     return pthread_attr_getdetachstate(attr, detachstate);
 }
 
-int32_t OSAL_pthread_attr_setschedpolicy(pthread_attr_t *attr, int32_t policy)
+int32_t OSAL_pthread_attr_setschedpolicy(osal_threadattr_t *attr, int32_t policy)
 {
     if (attr == NULL) {
         errno = EINVAL;
@@ -118,7 +118,7 @@ int32_t OSAL_pthread_attr_setschedpolicy(pthread_attr_t *attr, int32_t policy)
     return pthread_attr_setschedpolicy(attr, policy);
 }
 
-int32_t OSAL_pthread_attr_setschedparam(pthread_attr_t *attr, const struct sched_param *param)
+int32_t OSAL_pthread_attr_setschedparam(osal_threadattr_t *attr, const struct sched_param *param)
 {
     if (attr == NULL || param == NULL) {
         errno = EINVAL;

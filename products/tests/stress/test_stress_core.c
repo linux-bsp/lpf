@@ -29,12 +29,12 @@ struct stress_context {
     /* 延迟统计 */
     double total_latency_us;
     double max_latency_us;
-    pthread_mutex_t stats_mutex;
+    osal_mutex_t stats_mutex;
 
     /* 错误记录 */
     char error_messages[MAX_ERROR_MESSAGES][128];
     uint32_t error_msg_count;
-    pthread_mutex_t error_mutex;
+    osal_mutex_t error_mutex;
 };
 
 /* 工作线程参数 */
@@ -157,7 +157,7 @@ int32_t stress_run(stress_context_t *ctx,
     ctx->start_time_ms = OSAL_get_monotonic_time() / 1000;
 
     /* 创建工作线程 */
-    pthread_t *threads = (osal_thread_t*)OSAL_malloc(
+    osal_thread_t *threads = (osal_thread_t*)OSAL_malloc(
         OSAL_sizeof(osal_thread_t) * ctx->config.thread_count);
     worker_thread_args_t *args = (worker_thread_args_t*)OSAL_malloc(
         OSAL_sizeof(worker_thread_args_t) * ctx->config.thread_count);

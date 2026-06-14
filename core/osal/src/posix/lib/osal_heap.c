@@ -21,7 +21,7 @@ typedef struct {
     uint32_t peak_usage;
     uint32_t current_usage;
     bool alert_triggered;
-    pthread_mutex_t lock;
+    osal_mutex_t lock;
 } heap_monitor_t;
 
 static heap_monitor_t g_heap_monitor = {

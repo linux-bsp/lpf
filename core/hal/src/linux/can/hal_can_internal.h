@@ -52,7 +52,7 @@ typedef struct
 
 	/* 双重保护机制 */
 	osal_flock_t *flock;           /* 文件锁（进程间保护） */
-	pthread_mutex_t mutex;           /* 互斥锁（线程间保护） */
+	osal_mutex_t mutex;           /* 互斥锁（线程间保护） */
 } hal_can_context_t;
 
 #endif /* HAL_CAN_INTERNAL_H */

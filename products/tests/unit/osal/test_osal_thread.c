@@ -46,7 +46,7 @@ static void* sleep_thread_func(void *arg)
 
 static void test_thread_create_join(void)
 {
-    pthread_t thread;
+    osal_thread_t thread;
     int32_t value = 0;
     void *retval = NULL;
 
@@ -61,7 +61,7 @@ static void test_thread_create_join(void)
 
 static void test_thread_create_simplified(void)
 {
-    pthread_t thread;
+    osal_thread_t thread;
     int32_t value = 0;
 
     int32_t ret = OSAL_pthread_create(&thread, NULL, simple_thread_func, &value);
@@ -75,7 +75,7 @@ static void test_thread_create_simplified(void)
 static void test_thread_multiple_threads(void)
 {
     uint32_t i;
-    pthread_t threads[5];
+    osal_thread_t threads[5];
     int32_t values[5] = {0};
 
     /* 创建多个线程 */
@@ -96,7 +96,7 @@ static void test_thread_multiple_threads(void)
 
 static void test_thread_counter(void)
 {
-    pthread_t thread;
+    osal_thread_t thread;
     thread_counter = 0;
 
     int32_t ret = OSAL_pthread_create(&thread, NULL, counter_thread_func, NULL);
@@ -111,7 +111,7 @@ static void test_thread_counter(void)
 static void test_thread_concurrent_counter(void)
 {
     uint32_t i;
-    pthread_t threads[10];
+    osal_thread_t threads[10];
     thread_counter = 0;
 
     /* 创建10个线程，每个增加计数器2次 */
@@ -134,7 +134,7 @@ static void test_thread_concurrent_counter(void)
 
 static void test_thread_null_params(void)
 {
-    pthread_t thread;
+    osal_thread_t thread;
 
     /* NULL线程指针 */
     int32_t ret = OSAL_pthread_create(NULL, NULL, simple_thread_func, NULL);
@@ -147,7 +147,7 @@ static void test_thread_null_params(void)
 
 static void test_thread_with_null_arg(void)
 {
-    pthread_t thread;
+    osal_thread_t thread;
 
     /* 线程函数可以接受NULL参数 */
     int32_t ret = OSAL_pthread_create(&thread, NULL, simple_thread_func, NULL);
@@ -160,7 +160,7 @@ static void test_thread_with_null_arg(void)
 static void test_thread_timing(void)
 {
     uint32_t i;
-    pthread_t threads[3];
+    osal_thread_t threads[3];
     int32_t sleep_times[3] = {50, 100, 150};
     uint64_t start_time, end_time;
 
@@ -189,7 +189,7 @@ static void test_thread_timing(void)
 
 static void test_thread_sequential_execution(void)
 {
-    pthread_t thread1, thread2;
+    osal_thread_t thread1, thread2;
     int32_t value1 = 0, value2 = 0;
 
     /* 顺序创建和等待线程 */

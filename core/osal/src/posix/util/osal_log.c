@@ -67,8 +67,8 @@ static _Atomic log_level_t g_log_level = LOG_LEVEL_INFO;  /* 使用原子类型 
 static log_level_t g_module_levels[LOG_MODULE_MAX];  /* 模块级日志级别 */
 static bool g_module_level_set[LOG_MODULE_MAX] = {false};  /* 是否设置了模块级别 */
 static FILE *g_log_file = NULL;
-static pthread_mutex_t g_log_mutex = PTHREAD_MUTEX_INITIALIZER;  /* 保护文件操作 */
-static pthread_mutex_t g_config_mutex = PTHREAD_MUTEX_INITIALIZER;  /* 保护配置变量 */
+static osal_mutex_t g_log_mutex = PTHREAD_MUTEX_INITIALIZER;  /* 保护文件操作 */
+static osal_mutex_t g_config_mutex = PTHREAD_MUTEX_INITIALIZER;  /* 保护配置变量 */
 static char g_log_file_path[OSAL_LOG_PATH_SIZE] = {0};
 static uint32_t g_max_log_size = OSAL_LOG_FILE_MAX_SIZE_MB * 1024 * 1024;  /* 10MB */
 static uint32_t g_max_log_files = OSAL_LOG_FILE_BACKUP_COUNT;

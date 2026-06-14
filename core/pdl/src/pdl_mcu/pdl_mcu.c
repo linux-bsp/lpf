@@ -22,7 +22,7 @@ typedef struct
     void *comm_handle;                /* 通信句柄（CAN/串口） */
     bool initialized;
     pdl_mcu_state_t state;            /* 设备状态 */
-    pthread_mutex_t mutex;
+    osal_mutex_t mutex;
     pdl_mcu_version_t version;
     pdl_mcu_status_t status;
 } mcu_context_t;

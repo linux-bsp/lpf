@@ -9,7 +9,7 @@
 
 /* 共享测试数据 */
 typedef struct {
-    pthread_mutex_t mutex;
+    osal_mutex_t mutex;
     osal_atomic_uint32_t counter;
     uint32_t expected_count;
 } mutex_stress_data_t;

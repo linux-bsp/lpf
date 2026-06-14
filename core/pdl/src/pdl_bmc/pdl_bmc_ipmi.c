@@ -19,7 +19,7 @@ typedef struct
     void *transport_handle;
     int32_t (*send_recv)(void*, const uint8_t*, uint32_t, uint8_t*, uint32_t, uint32_t*);
     uint8_t seq_num;
-    pthread_mutex_t mutex;
+    osal_mutex_t mutex;
 } bmc_ipmi_context_t;
 
 /*

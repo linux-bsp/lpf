@@ -20,7 +20,7 @@ typedef struct
     int32_t (*send_recv)(void*, const uint8_t*, uint32_t, uint8_t*, uint32_t, uint32_t*);
     redfish_auth_t auth;
     char base_url[128];
-    pthread_mutex_t mutex;
+    osal_mutex_t mutex;
 } bmc_redfish_context_t;
 
 /*

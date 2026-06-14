@@ -1,7 +1,7 @@
 /************************************************************************
  * OSAL 条件变量接口 - POSIX 薄封装
  *
- * 直接暴露 POSIX pthread_cond_t 类型
+ * 直接暴露 POSIX osal_cond_t 类型
  ************************************************************************/
 
 #ifndef OSAL_COND_H
@@ -25,7 +25,7 @@ extern "C" {
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_cond_init(pthread_cond_t *cond, const pthread_condattr_t *attr);
+int32_t OSAL_pthread_cond_init(osal_cond_t *cond, const osal_condattr_t *attr);
 
 /**
  * @brief 销毁条件变量
@@ -34,7 +34,7 @@ int32_t OSAL_pthread_cond_init(pthread_cond_t *cond, const pthread_condattr_t *a
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_cond_destroy(pthread_cond_t *cond);
+int32_t OSAL_pthread_cond_destroy(osal_cond_t *cond);
 
 /**
  * @brief 等待条件变量（阻塞）
@@ -44,7 +44,7 @@ int32_t OSAL_pthread_cond_destroy(pthread_cond_t *cond);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex);
+int32_t OSAL_pthread_cond_wait(osal_cond_t *cond, osal_mutex_t *mutex);
 
 /**
  * @brief 等待条件变量（超时）
@@ -55,7 +55,7 @@ int32_t OSAL_pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex);
  * @return 0 成功
  * @return -1 失败（ETIMEDOUT 表示超时）
  */
-int32_t OSAL_pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
+int32_t OSAL_pthread_cond_timedwait(osal_cond_t *cond, osal_mutex_t *mutex,
                                      uint32_t timeout_ms);
 
 /**
@@ -65,7 +65,7 @@ int32_t OSAL_pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_cond_signal(pthread_cond_t *cond);
+int32_t OSAL_pthread_cond_signal(osal_cond_t *cond);
 
 /**
  * @brief 唤醒所有等待线程
@@ -74,7 +74,7 @@ int32_t OSAL_pthread_cond_signal(pthread_cond_t *cond);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_cond_broadcast(pthread_cond_t *cond);
+int32_t OSAL_pthread_cond_broadcast(osal_cond_t *cond);
 
 #ifdef __cplusplus
 }

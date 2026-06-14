@@ -39,7 +39,7 @@ typedef struct
     uint32_t protocol_switch_count;
 
     /* 互斥锁 */
-    pthread_mutex_t mutex;
+    osal_mutex_t mutex;
 } bmc_context_t;
 
 /**

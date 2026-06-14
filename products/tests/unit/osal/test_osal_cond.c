@@ -1,7 +1,7 @@
 #include "test_framework.h"
 /**
  * @file test_osal_cond.c
- * @brief OSAL条件变量单元测试 - Updated for pthread_cond_t thin wrapper
+ * @brief OSAL条件变量单元测试 - Updated for osal_cond_t thin wrapper
  */
 
 #include "osal.h"
@@ -13,7 +13,7 @@ static bool data_ready = false;
 /* 测试用例1: 条件变量初始化成功 */
 static void test_cond_init_success(void)
 {
-    pthread_cond_t cond;
+    osal_cond_t cond;
     int32_t ret = OSAL_pthread_cond_init(&cond, NULL);
 
     TEST_ASSERT_EQUAL(0, ret);
@@ -32,7 +32,7 @@ static void test_cond_init_nullpointer(void)
 /* 测试用例3: 条件变量销毁成功 */
 static void test_cond_destroy_success(void)
 {
-    pthread_cond_t cond;
+    osal_cond_t cond;
     OSAL_pthread_cond_init(&cond, NULL);
 
     int32_t ret = OSAL_pthread_cond_destroy(&cond);
@@ -66,8 +66,8 @@ static void test_cond_broadcast_nullpointer(void)
 /* 测试用例7: 条件变量Wait失败 - 空指针 */
 static void test_cond_wait_nullpointer(void)
 {
-    pthread_cond_t cond;
-    pthread_mutex_t mutex;
+    osal_cond_t cond;
+    osal_mutex_t mutex;
 
     OSAL_pthread_cond_init(&cond, NULL);
     OSAL_pthread_mutex_init(&mutex, NULL);
@@ -89,8 +89,8 @@ static void test_cond_wait_nullpointer(void)
 /* 测试用例8: 条件变量超时等待 - 超时 */
 static void test_cond_timedwait_timeout(void)
 {
-    pthread_cond_t cond;
-    pthread_mutex_t mutex;
+    osal_cond_t cond;
+    osal_mutex_t mutex;
 
     OSAL_pthread_cond_init(&cond, NULL);
     OSAL_pthread_mutex_init(&mutex, NULL);
@@ -109,8 +109,8 @@ static void test_cond_timedwait_timeout(void)
 /* 生产者线程 */
 static void* producer_thread(void *arg)
 {
-    pthread_cond_t *cond = ((pthread_cond_t **)arg)[0];
-    pthread_mutex_t *mutex = ((pthread_mutex_t **)arg)[1];
+    osal_cond_t *cond = ((osal_cond_t **)arg)[0];
+    osal_mutex_t *mutex = ((osal_mutex_t **)arg)[1];
 
     OSAL_msleep(50);  /* 等待消费者先运行 */
 
@@ -126,8 +126,8 @@ static void* producer_thread(void *arg)
 /* 消费者线程 */
 static void* consumer_thread(void *arg)
 {
-    pthread_cond_t *cond = ((pthread_cond_t **)arg)[0];
-    pthread_mutex_t *mutex = ((pthread_mutex_t **)arg)[1];
+    osal_cond_t *cond = ((osal_cond_t **)arg)[0];
+    osal_mutex_t *mutex = ((osal_mutex_t **)arg)[1];
 
     OSAL_pthread_mutex_lock(mutex);
     while (!data_ready) {
@@ -144,12 +144,12 @@ static void test_cond_signal_wakeup(void)
     shared_data = 0;
     data_ready = false;
 
-    pthread_cond_t cond;
-    pthread_mutex_t mutex;
+    osal_cond_t cond;
+    osal_mutex_t mutex;
     OSAL_pthread_cond_init(&cond, NULL);
     OSAL_pthread_mutex_init(&mutex, NULL);
 
-    pthread_t producer, consumer;
+    osal_thread_t producer, consumer;
     void *args[] = {&cond, &mutex};
 
     /* 创建生产者和消费者线程 */
@@ -171,8 +171,8 @@ static void test_cond_signal_wakeup(void)
 /* 多个等待线程 */
 static void* wait_thread(void *arg)
 {
-    pthread_cond_t *cond = ((pthread_cond_t **)arg)[0];
-    pthread_mutex_t *mutex = ((pthread_mutex_t **)arg)[1];
+    osal_cond_t *cond = ((osal_cond_t **)arg)[0];
+    osal_mutex_t *mutex = ((osal_mutex_t **)arg)[1];
 
     OSAL_pthread_mutex_lock(mutex);
     while (!data_ready) {
@@ -187,8 +187,8 @@ static void* wait_thread(void *arg)
 /* 广播线程 */
 static void* broadcast_thread(void *arg)
 {
-    pthread_cond_t *cond = ((pthread_cond_t **)arg)[0];
-    pthread_mutex_t *mutex = ((pthread_mutex_t **)arg)[1];
+    osal_cond_t *cond = ((osal_cond_t **)arg)[0];
+    osal_mutex_t *mutex = ((osal_mutex_t **)arg)[1];
 
     OSAL_msleep(100);  /* 等待所有等待线程就绪 */
 
@@ -206,12 +206,12 @@ static void test_cond_broadcast_wakeup(void)
     shared_data = 0;
     data_ready = false;
 
-    pthread_cond_t cond;
-    pthread_mutex_t mutex;
+    osal_cond_t cond;
+    osal_mutex_t mutex;
     OSAL_pthread_cond_init(&cond, NULL);
     OSAL_pthread_mutex_init(&mutex, NULL);
 
-    pthread_t threads[5];
+    osal_thread_t threads[5];
     void *args[] = {&cond, &mutex};
     int32_t i;
 
@@ -314,7 +314,7 @@ static const test_suite_t test_suite = {
 		.category = TEST_CATEGORY_UNIT,
 		.tags = TEST_TAG_FAST,
 		.timeout_ms = 100,
-		.description = "OSAL cond tests (pthread_cond_t thin wrapper)"
+		.description = "OSAL cond tests (osal_cond_t thin wrapper)"
 	}
 };
 

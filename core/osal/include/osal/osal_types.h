@@ -404,4 +404,45 @@ OSAL_STATIC_ASSERT(sizeof(uint64_t) == 0x8, "uint64_must_be_8_bytes");
 #define OSAL_BIT_TEST(val, bit)  (((val) & OSAL_BIT(bit)) != 0)
 #define OSAL_BIT_TOGGLE(val, bit) ((val) ^= OSAL_BIT(bit))
 
+/*===========================================================================
+ * IPC 和线程类型定义（POSIX 平台）
+ *===========================================================================*/
+
+#if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
+    /* POSIX 平台 - 需要包含系统头文件 */
+    #include <pthread.h>
+    #include <semaphore.h>
+
+    /* 线程相关类型 */
+    typedef pthread_t           osal_thread_t;
+    typedef pthread_attr_t      osal_threadattr_t;
+
+    /* 互斥锁类型 */
+    typedef pthread_mutex_t     osal_mutex_t;
+    typedef pthread_mutexattr_t osal_mutexattr_t;
+
+    /* 条件变量类型 */
+    typedef pthread_cond_t      osal_cond_t;
+    typedef pthread_condattr_t  osal_condattr_t;
+
+    /* 读写锁类型 */
+    typedef pthread_rwlock_t      osal_rwlock_t;
+    typedef pthread_rwlockattr_t  osal_rwlockattr_t;
+
+    /* 信号量类型 */
+    typedef sem_t osal_sem_t;
+
+#else
+    /* 其他平台（RTOS 等）- 需要提供对应的类型定义 */
+    #error "Unsupported platform - please define IPC types for your platform"
+#endif
+
+/*
+ * 注意：
+ * 1. OSAL API 使用 osal_xxx_t 类型保持平台独立性
+ * 2. POSIX 平台直接 typedef 到 pthread/sem 类型
+ * 3. RTOS 平台需要提供对应的类型映射
+ * 4. 这样既保持了类型抽象，又避免了额外的转换开销
+ */
+
 #endif /* OSAL_TYPES_H */

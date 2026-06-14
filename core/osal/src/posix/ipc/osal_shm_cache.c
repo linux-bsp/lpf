@@ -24,7 +24,7 @@ typedef struct {
     uint32_t version;               /* 版本号 */
     uint32_t max_entries;           /* 最大条目数 */
     uint32_t entry_size;            /* 条目大小 */
-    pthread_mutex_t mutex;          /* 互斥锁（进程间） */
+    osal_mutex_t mutex;          /* 互斥锁（进程间） */
     osal_cache_entry_t entries[0];  /* 柔性数组：缓存条目 */
 } shm_cache_header_t;
 
@@ -40,7 +40,7 @@ typedef struct {
 
 /* 全局缓存表 */
 static cache_descriptor_t g_cache_table[MAX_CACHES];
-static pthread_mutex_t g_cache_table_mutex = PTHREAD_MUTEX_INITIALIZER;
+static osal_mutex_t g_cache_table_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 /* 魔数和版本 */
 #define SHM_CACHE_MAGIC    0x43414348
@@ -99,7 +99,7 @@ int32_t OSAL_CacheCreate(const char *name, uint32_t max_entries, osal_id_t *cach
     int shm_fd;
     void *shm_ptr;
     shm_cache_header_t *header;
-    pthread_mutexattr_t mutex_attr;
+    osal_mutexattr_t mutex_attr;
     uint32_t i;
 
     if (name == NULL || max_entries == 0 || cache_id == NULL) {

@@ -19,13 +19,13 @@ typedef struct {
     int value_fd;
     hal_gpio_isr_callback_t callback;
     void *user_data;
-    pthread_t thread;
+    osal_thread_t thread;
     bool enabled;
     bool running;
 } gpio_isr_context_t;
 
 static gpio_isr_context_t gpio_isr_table[MAX_GPIO_PINS];
-static pthread_mutex_t gpio_isr_mutex = PTHREAD_MUTEX_INITIALIZER;
+static osal_mutex_t gpio_isr_mutex = PTHREAD_MUTEX_INITIALIZER;
 static bool gpio_module_initialized = false;
 static osal_flock_t *g_gpio_flock = NULL;
 

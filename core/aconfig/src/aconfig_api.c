@@ -11,23 +11,14 @@
 static const aconfig_config_table_t *g_acl_table = NULL;
 
 /* 读写锁保护全局配置表（读多写少场景） */
-static osal_rwlock_t *g_acl_rwlock = NULL;
+static osal_rwlock_t g_acl_rwlock = PTHREAD_RWLOCK_INITIALIZER;
 
 /**
  * @brief 初始化ACL层
  */
 int32_t ACONFIG_Init(void)
 {
-    int32_t ret;
-
     g_acl_table = NULL;
-
-    /* 创建读写锁保护全局配置表 */
-    ret = OSAL_RwlockCreate(&g_acl_rwlock);
-    if (OSAL_SUCCESS != ret) {
-        LOG_ERROR("ACL", "Failed to create rwlock: %d", ret);
-        return ret;
-    }
 
     LOG_INFO("ACL", "Initialized");
     return OSAL_SUCCESS;
@@ -46,7 +37,7 @@ int32_t ACONFIG_RegisterTable(const aconfig_config_table_t *table)
     }
 
     /* 获取写锁（独占访问） */
-    ret = OSAL_RwlockWrlock(g_acl_rwlock);
+    ret = OSAL_pthread_rwlock_wrlock(&g_acl_rwlock);
     if (OSAL_SUCCESS != ret) {
         LOG_ERROR("ACL", "Failed to acquire write lock: %d", ret);
         return ret;
@@ -65,7 +56,7 @@ int32_t ACONFIG_RegisterTable(const aconfig_config_table_t *table)
                table->inv_count);
 
     /* 释放写锁 */
-    OSAL_RwlockUnlock(g_acl_rwlock);
+    OSAL_pthread_rwlock_unlock(&g_acl_rwlock);
 
     return OSAL_SUCCESS;
 }
@@ -79,13 +70,13 @@ const aconfig_tc_config_t* ACONFIG_GetTcConfig(uint32_t function_id)
     uint32_t i;
 
     /* 获取读锁（允许多个读者） */
-    if (OSAL_SUCCESS != OSAL_RwlockRdlock(g_acl_rwlock)) {
+    if (OSAL_SUCCESS != OSAL_pthread_rwlock_rdlock(&g_acl_rwlock)) {
         return NULL;
     }
 
     /* 完整的 NULL 检查和边界检查，都在锁内 */
     if (NULL == g_acl_table || NULL == g_acl_table->tc_table) {
-        OSAL_RwlockUnlock(g_acl_rwlock);
+        OSAL_pthread_rwlock_unlock(&g_acl_rwlock);
         return NULL;
     }
 
@@ -98,7 +89,7 @@ const aconfig_tc_config_t* ACONFIG_GetTcConfig(uint32_t function_id)
     }
 
     /* 释放读锁 */
-    OSAL_RwlockUnlock(g_acl_rwlock);
+    OSAL_pthread_rwlock_unlock(&g_acl_rwlock);
 
     return config;
 }
@@ -112,13 +103,13 @@ const aconfig_tm_config_t* ACONFIG_GetTmConfig(uint32_t function_id)
     uint32_t i;
 
     /* 获取读锁（允许多个读者） */
-    if (OSAL_SUCCESS != OSAL_RwlockRdlock(g_acl_rwlock)) {
+    if (OSAL_SUCCESS != OSAL_pthread_rwlock_rdlock(&g_acl_rwlock)) {
         return NULL;
     }
 
     /* 完整的 NULL 检查和边界检查，都在锁内 */
     if (NULL == g_acl_table || NULL == g_acl_table->tm_table) {
-        OSAL_RwlockUnlock(g_acl_rwlock);
+        OSAL_pthread_rwlock_unlock(&g_acl_rwlock);
         return NULL;
     }
 
@@ -131,7 +122,7 @@ const aconfig_tm_config_t* ACONFIG_GetTmConfig(uint32_t function_id)
     }
 
     /* 释放读锁 */
-    OSAL_RwlockUnlock(g_acl_rwlock);
+    OSAL_pthread_rwlock_unlock(&g_acl_rwlock);
 
     return config;
 }
@@ -172,12 +163,12 @@ int32_t ACONFIG_GetInvalidationMap(uint32_t source_tm_id,
     *actual_count = 0;
 
     /* 获取读锁 */
-    if (OSAL_SUCCESS != OSAL_RwlockRdlock(g_acl_rwlock)) {
+    if (OSAL_SUCCESS != OSAL_pthread_rwlock_rdlock(&g_acl_rwlock)) {
         return OSAL_ERR_GENERIC;
     }
 
     if (NULL == g_acl_table || NULL == g_acl_table->inv_map) {
-        OSAL_RwlockUnlock(g_acl_rwlock);
+        OSAL_pthread_rwlock_unlock(&g_acl_rwlock);
         return OSAL_SUCCESS;
     }
 
@@ -195,7 +186,7 @@ int32_t ACONFIG_GetInvalidationMap(uint32_t source_tm_id,
     }
 
     /* 释放读锁 */
-    OSAL_RwlockUnlock(g_acl_rwlock);
+    OSAL_pthread_rwlock_unlock(&g_acl_rwlock);
 
     return ret;
 }
@@ -212,12 +203,12 @@ int32_t ACONFIG_GetStatistics(aconfig_statistics_t *stats)
     OSAL_memset(stats, 0, OSAL_sizeof(aconfig_statistics_t));
 
     /* 获取读锁 */
-    if (OSAL_SUCCESS != OSAL_RwlockRdlock(g_acl_rwlock)) {
+    if (OSAL_SUCCESS != OSAL_pthread_rwlock_rdlock(&g_acl_rwlock)) {
         return OSAL_ERR_GENERIC;
     }
 
     if (NULL == g_acl_table) {
-        OSAL_RwlockUnlock(g_acl_rwlock);
+        OSAL_pthread_rwlock_unlock(&g_acl_rwlock);
         return OSAL_SUCCESS;
     }
 
@@ -250,7 +241,7 @@ int32_t ACONFIG_GetStatistics(aconfig_statistics_t *stats)
     stats->invalidation_map_count = g_acl_table->inv_count;
 
     /* 释放读锁 */
-    OSAL_RwlockUnlock(g_acl_rwlock);
+    OSAL_pthread_rwlock_unlock(&g_acl_rwlock);
 
     return OSAL_SUCCESS;
 }
@@ -263,14 +254,14 @@ void ACONFIG_PrintConfig(void)
     aconfig_statistics_t stats = {0};
 
     /* 获取读锁 */
-    if (OSAL_SUCCESS != OSAL_RwlockRdlock(g_acl_rwlock)) {
+    if (OSAL_SUCCESS != OSAL_pthread_rwlock_rdlock(&g_acl_rwlock)) {
         LOG_ERROR("ACL", "Failed to acquire read lock");
         return;
     }
 
     if (NULL == g_acl_table) {
         LOG_INFO("ACL", "No table registered");
-        OSAL_RwlockUnlock(g_acl_rwlock);
+        OSAL_pthread_rwlock_unlock(&g_acl_rwlock);
         return;
     }
 
@@ -280,7 +271,7 @@ void ACONFIG_PrintConfig(void)
     LOG_INFO("ACL", "  Invalidation maps: %u", g_acl_table->inv_count);
 
     /* 释放读锁 */
-    OSAL_RwlockUnlock(g_acl_rwlock);
+    OSAL_pthread_rwlock_unlock(&g_acl_rwlock);
 
     if (OSAL_SUCCESS == ACONFIG_GetStatistics(&stats)) {
         LOG_INFO("ACL", "  TC enabled: %u, disabled: %u",

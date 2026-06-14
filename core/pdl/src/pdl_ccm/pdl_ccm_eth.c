@@ -29,7 +29,7 @@ typedef struct
     uint32_t timeout_ms;         /* 超时时间（毫秒） */
     bool connected;              /* 连接状态 */
     uint32_t seq_num;            /* 消息序列号 */
-    pthread_mutex_t mutex;         /* 互斥锁 */
+    osal_mutex_t mutex;         /* 互斥锁 */
 } ccm_eth_context_t;
 
 /*

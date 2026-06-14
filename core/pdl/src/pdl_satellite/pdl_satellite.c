@@ -27,12 +27,12 @@ typedef struct
     uint32_t error_count;
 
     /* 线程控制 */
-    pthread_t rx_thread;
-    pthread_t heartbeat_thread;
+    osal_thread_t rx_thread;
+    osal_thread_t heartbeat_thread;
     osal_atomic_bool_t running;       /* 使用原子变量保证多线程安全 */
 
     /* 互斥锁保护 */
-    pthread_mutex_t mutex;
+    osal_mutex_t mutex;
 } satellite_service_context_t;
 
 /*

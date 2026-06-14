@@ -11,7 +11,7 @@
 #include <sched.h>
 #include <errno.h>
 
-int32_t OSAL_pthread_setschedparam(pthread_t thread, int32_t policy, int32_t priority)
+int32_t OSAL_pthread_setschedparam(osal_thread_t thread, int32_t policy, int32_t priority)
 {
     struct sched_param param;
     param.sched_priority = priority;
@@ -19,7 +19,7 @@ int32_t OSAL_pthread_setschedparam(pthread_t thread, int32_t policy, int32_t pri
     return pthread_setschedparam(thread, policy, &param);
 }
 
-int32_t OSAL_pthread_getschedparam(pthread_t thread, int32_t *policy, int32_t *priority)
+int32_t OSAL_pthread_getschedparam(osal_thread_t thread, int32_t *policy, int32_t *priority)
 {
     struct sched_param param;
     int pol;
@@ -38,7 +38,7 @@ int32_t OSAL_pthread_getschedparam(pthread_t thread, int32_t *policy, int32_t *p
     return ret;
 }
 
-int32_t OSAL_pthread_setaffinity_np(pthread_t thread, int32_t cpu_id)
+int32_t OSAL_pthread_setaffinity_np(osal_thread_t thread, int32_t cpu_id)
 {
 #ifdef __linux__
     cpu_set_t cpuset;
@@ -60,7 +60,7 @@ int32_t OSAL_pthread_setaffinity_np(pthread_t thread, int32_t cpu_id)
 #endif
 }
 
-int32_t OSAL_pthread_getaffinity_np(pthread_t thread, int32_t *cpu_id)
+int32_t OSAL_pthread_getaffinity_np(osal_thread_t thread, int32_t *cpu_id)
 {
 #ifdef __linux__
     cpu_set_t cpuset;

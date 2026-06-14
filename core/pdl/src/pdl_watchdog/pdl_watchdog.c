@@ -15,7 +15,7 @@ typedef struct
     bool enabled;
 
     /* 自动模式相关 */
-    pthread_t kick_thread;
+    osal_thread_t kick_thread;
     osal_atomic_bool_t running;       /* 使用原子变量保证多线程安全 */
     osal_atomic_uint32_t kick_count;
     osal_atomic_uint64_t last_kick_time;  /* 上次喂狗时间戳（微秒） */

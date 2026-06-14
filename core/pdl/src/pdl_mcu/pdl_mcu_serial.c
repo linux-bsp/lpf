@@ -28,7 +28,7 @@
 typedef struct
 {
     hal_serial_handle_t serial_handle;
-    pthread_mutex_t rx_mutex;
+    osal_mutex_t rx_mutex;
     /* 注意：CRC 强制启用，不再提供配置选项 */
 } mcu_serial_context_t;
 

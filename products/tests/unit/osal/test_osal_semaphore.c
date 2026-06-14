@@ -14,7 +14,7 @@ static int32_t shared_counter = 0;
 /* 测试用例1: 信号量初始化成功 */
 static void test_semaphore_init_success(void)
 {
-    sem_t sem;
+    osal_sem_t sem;
 
     int32_t ret = OSAL_sem_init(&sem, 0, 1);
 
@@ -34,7 +34,7 @@ static void test_semaphore_init_nullpointer(void)
 /* 测试用例3: 信号量等待和释放 */
 static void test_semaphore_wait_post_success(void)
 {
-    sem_t sem;
+    osal_sem_t sem;
     OSAL_sem_init(&sem, 0, 1);
 
     int32_t ret = OSAL_sem_wait(&sem);
@@ -65,7 +65,7 @@ static void test_semaphore_post_nullpointer(void)
 /* 测试用例6: 信号量超时等待 - 超时 */
 static void test_semaphore_timedwait_timeout(void)
 {
-    sem_t sem;
+    osal_sem_t sem;
     OSAL_sem_init(&sem, 0, 0);
 
     int32_t ret = OSAL_sem_timedwait(&sem, 100);
@@ -78,7 +78,7 @@ static void test_semaphore_timedwait_timeout(void)
 /* 测试用例7: 信号量超时等待 - 成功 */
 static void test_semaphore_timedwait_success(void)
 {
-    sem_t sem;
+    osal_sem_t sem;
     OSAL_sem_init(&sem, 0, 1);
 
     int32_t ret = OSAL_sem_timedwait(&sem, 100);
@@ -90,7 +90,7 @@ static void test_semaphore_timedwait_success(void)
 /* 测试用例8: 信号量非阻塞等待 - 失败（信号量为0）*/
 static void test_semaphore_trywait_fail(void)
 {
-    sem_t sem;
+    osal_sem_t sem;
     OSAL_sem_init(&sem, 0, 0);
 
     int32_t ret = OSAL_sem_trywait(&sem);
@@ -103,7 +103,7 @@ static void test_semaphore_trywait_fail(void)
 /* 测试用例9: 信号量非阻塞等待 - 成功 */
 static void test_semaphore_trywait_success(void)
 {
-    sem_t sem;
+    osal_sem_t sem;
     OSAL_sem_init(&sem, 0, 1);
 
     int32_t ret = OSAL_sem_trywait(&sem);
@@ -115,7 +115,7 @@ static void test_semaphore_trywait_success(void)
 /* 测试用例10: 信号量获取值 */
 static void test_semaphore_getvalue(void)
 {
-    sem_t sem;
+    osal_sem_t sem;
     int32_t value;
 
     OSAL_sem_init(&sem, 0, 5);
@@ -130,7 +130,7 @@ static void test_semaphore_getvalue(void)
 /* 测试用例11: 信号量销毁 */
 static void test_semaphore_destroy_success(void)
 {
-    sem_t sem;
+    osal_sem_t sem;
     OSAL_sem_init(&sem, 0, 1);
 
     int32_t ret = OSAL_sem_destroy(&sem);
@@ -148,7 +148,7 @@ static void test_semaphore_destroy_nullpointer(void)
 /* 生产者线程 */
 static void* producer_thread(void *arg)
 {
-    sem_t *sem = (sem_t *)arg;
+    osal_sem_t *sem = (osal_sem_t *)arg;
 
     int32_t i;
 
@@ -164,7 +164,7 @@ static void* producer_thread(void *arg)
 /* 消费者线程 */
 static void* consumer_thread(void *arg)
 {
-    sem_t *sem = (sem_t *)arg;
+    osal_sem_t *sem = (osal_sem_t *)arg;
 
     int32_t i;
 
@@ -180,10 +180,10 @@ static void* consumer_thread(void *arg)
 static void test_semaphore_producer_consumer(void)
 {
     shared_counter = 0;
-    sem_t sem;
+    osal_sem_t sem;
     OSAL_sem_init(&sem, 0, 0);
 
-    pthread_t producer, consumer;
+    osal_thread_t producer, consumer;
 
     /* 创建生产者和消费者线程 */
     OSAL_pthread_create(&producer, NULL, producer_thread, &sem);

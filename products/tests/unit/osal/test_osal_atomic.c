@@ -179,7 +179,7 @@ static void* atomic_increment_thread(void *arg)
 static void test_atomic_multithread_increment(void)
 {
     osal_atomic_uint32_t counter;
-    pthread_t threads[THREAD_COUNT];
+    osal_thread_t threads[THREAD_COUNT];
     atomic_thread_data_t thread_data[THREAD_COUNT];
 
     OSAL_atomic_init(&counter, 0);
@@ -234,7 +234,7 @@ static void* atomic_cas_thread(void *arg)
 static void test_atomic_multithread_cas(void)
 {
     osal_atomic_uint32_t counter;
-    pthread_t threads[THREAD_COUNT];
+    osal_thread_t threads[THREAD_COUNT];
     atomic_thread_data_t thread_data[THREAD_COUNT];
 
     OSAL_atomic_init(&counter, 0);
@@ -426,7 +426,7 @@ static void* atomic64_increment_thread(void *arg)
 static void test_atomic64_multithread_timestamp(void)
 {
     osal_atomic_uint64_t timestamp;
-    pthread_t threads[THREAD_COUNT];
+    osal_thread_t threads[THREAD_COUNT];
     atomic64_thread_data_t thread_data[THREAD_COUNT];
 
     OSAL_atomic_init_u64(&timestamp, 0);

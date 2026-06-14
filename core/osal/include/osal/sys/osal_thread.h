@@ -1,7 +1,7 @@
 /************************************************************************
  * OSAL Thread API - POSIX 薄封装
  *
- * 直接暴露 POSIX pthread_t 类型
+ * 直接暴露 POSIX osal_thread_t 类型
  ************************************************************************/
 
 #ifndef OSAL_THREAD_H
@@ -27,8 +27,8 @@ extern "C" {
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_create(pthread_t *thread,
-                            const pthread_attr_t *attr,
+int32_t OSAL_pthread_create(osal_thread_t *thread,
+                            const osal_threadattr_t *attr,
                             void *(*start_routine)(void *),
                             void *arg);
 
@@ -40,7 +40,7 @@ int32_t OSAL_pthread_create(pthread_t *thread,
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_join(pthread_t thread, void **retval);
+int32_t OSAL_pthread_join(osal_thread_t thread, void **retval);
 
 /**
  * @brief 分离线程
@@ -49,14 +49,14 @@ int32_t OSAL_pthread_join(pthread_t thread, void **retval);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_detach(pthread_t thread);
+int32_t OSAL_pthread_detach(osal_thread_t thread);
 
 /**
  * @brief 获取当前线程 ID
  *
  * @return 当前线程 ID
  */
-pthread_t OSAL_pthread_self(void);
+osal_thread_t OSAL_pthread_self(void);
 
 /**
  * @brief 退出当前线程
@@ -72,7 +72,7 @@ void OSAL_pthread_exit(void *retval);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_cancel(pthread_t thread);
+int32_t OSAL_pthread_cancel(osal_thread_t thread);
 
 /*===========================================================================
  * 线程属性管理（可选）
@@ -85,7 +85,7 @@ int32_t OSAL_pthread_cancel(pthread_t thread);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_attr_init(pthread_attr_t *attr);
+int32_t OSAL_pthread_attr_init(osal_threadattr_t *attr);
 
 /**
  * @brief 销毁线程属性
@@ -94,7 +94,7 @@ int32_t OSAL_pthread_attr_init(pthread_attr_t *attr);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_attr_destroy(pthread_attr_t *attr);
+int32_t OSAL_pthread_attr_destroy(osal_threadattr_t *attr);
 
 /**
  * @brief 设置线程栈大小
@@ -104,7 +104,7 @@ int32_t OSAL_pthread_attr_destroy(pthread_attr_t *attr);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_attr_setstacksize(pthread_attr_t *attr, size_t stacksize);
+int32_t OSAL_pthread_attr_setstacksize(osal_threadattr_t *attr, size_t stacksize);
 
 /**
  * @brief 获取线程栈大小
@@ -114,7 +114,7 @@ int32_t OSAL_pthread_attr_setstacksize(pthread_attr_t *attr, size_t stacksize);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_attr_getstacksize(const pthread_attr_t *attr, size_t *stacksize);
+int32_t OSAL_pthread_attr_getstacksize(const osal_threadattr_t *attr, size_t *stacksize);
 
 /**
  * @brief 设置线程分离状态
@@ -124,7 +124,7 @@ int32_t OSAL_pthread_attr_getstacksize(const pthread_attr_t *attr, size_t *stack
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_attr_setdetachstate(pthread_attr_t *attr, int32_t detachstate);
+int32_t OSAL_pthread_attr_setdetachstate(osal_threadattr_t *attr, int32_t detachstate);
 
 /**
  * @brief 获取线程分离状态
@@ -134,7 +134,7 @@ int32_t OSAL_pthread_attr_setdetachstate(pthread_attr_t *attr, int32_t detachsta
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_attr_getdetachstate(const pthread_attr_t *attr, int32_t *detachstate);
+int32_t OSAL_pthread_attr_getdetachstate(const osal_threadattr_t *attr, int32_t *detachstate);
 
 /**
  * @brief 设置线程调度策略
@@ -144,7 +144,7 @@ int32_t OSAL_pthread_attr_getdetachstate(const pthread_attr_t *attr, int32_t *de
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_attr_setschedpolicy(pthread_attr_t *attr, int32_t policy);
+int32_t OSAL_pthread_attr_setschedpolicy(osal_threadattr_t *attr, int32_t policy);
 
 /**
  * @brief 设置线程调度参数
@@ -154,7 +154,7 @@ int32_t OSAL_pthread_attr_setschedpolicy(pthread_attr_t *attr, int32_t policy);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_attr_setschedparam(pthread_attr_t *attr, const struct sched_param *param);
+int32_t OSAL_pthread_attr_setschedparam(osal_threadattr_t *attr, const struct sched_param *param);
 
 #ifdef __cplusplus
 }

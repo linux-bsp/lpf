@@ -8,10 +8,10 @@ static ccm_system_status_t *g_status = NULL;
 static volatile bool g_running = true;
 
 /* 线程ID */
-static pthread_t g_satellite_hb_thread = 0;
-static pthread_t g_mcu_fpga_hb_thread = 0;
-static pthread_t g_cpld_hb_thread = 0;
-static pthread_t g_watchdog_thread = 0;
+static osal_thread_t g_satellite_hb_thread = 0;
+static osal_thread_t g_mcu_fpga_hb_thread = 0;
+static osal_thread_t g_cpld_hb_thread = 0;
+static osal_thread_t g_watchdog_thread = 0;
 
 /* 信号处理 */
 static void signal_handler(int32_t sig)

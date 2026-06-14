@@ -32,17 +32,8 @@ static pthread_mutex_t g_registry_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 int32_t PCONFIG_Init(void)
 {
-    int32_t ret;
-
     if (g_initialized) {
         return OSAL_SUCCESS;
-    }
-
-    /* 创建互斥锁保护全局注册表 */
-    ret = OSAL_pthread_mutex_init(&g_registry_mutex, NULL);
-    if (OSAL_SUCCESS != ret) {
-        LOG_ERROR("PCL", "Failed to create registry mutex");
-        return ret;
     }
 
     OSAL_memset(&g_registry, 0, OSAL_sizeof(g_registry));
@@ -62,10 +53,7 @@ void PCONFIG_Cleanup(void)
     g_initialized = false;
 
     /* 销毁互斥锁 */
-    if (NULL != g_registry_mutex) {
-        OSAL_pthread_mutex_destroy(&g_registry_mutex);
-        g_registry_mutex = NULL;
-    }
+    OSAL_pthread_mutex_destroy(&g_registry_mutex);
 
     LOG_INFO("PCL", "Platform configuration library cleaned up");
 }

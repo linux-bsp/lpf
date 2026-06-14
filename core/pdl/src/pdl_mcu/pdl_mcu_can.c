@@ -20,7 +20,7 @@ typedef struct
     hal_can_handle_t can_handle;
     uint32_t tx_id;
     uint32_t rx_id;
-    pthread_mutex_t rx_mutex;
+    osal_mutex_t rx_mutex;
 } mcu_can_context_t;
 
 /**

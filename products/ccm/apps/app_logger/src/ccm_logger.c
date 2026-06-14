@@ -8,7 +8,7 @@ static ccm_process_heartbeat_t *g_heartbeat = NULL;
 static volatile bool g_running = true;
 
 /* 线程ID */
-static pthread_t g_log_thread = 0;
+static osal_thread_t g_log_thread = 0;
 
 /* 信号处理 */
 static void signal_handler(int32_t sig)

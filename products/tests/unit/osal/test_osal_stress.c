@@ -17,7 +17,7 @@
 
 /* 共享数据 */
 static int32_t stress_counter = 0;
-static pthread_mutex_t stress_mutex = PTHREAD_MUTEX_INITIALIZER;
+static osal_mutex_t stress_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 /* 互斥锁压力测试 - 线程函数 */
 static void* mutex_stress_thread(void *arg)
@@ -41,7 +41,7 @@ static void test_mutex_stress(void)
     stress_counter = 0;
     OSAL_pthread_mutex_init(&stress_mutex, NULL);
 
-    pthread_t threads[STRESS_THREAD_COUNT];
+    osal_thread_t threads[STRESS_THREAD_COUNT];
 
     /* 创建多个线程同时增加计数器 */
     int32_t i;
@@ -69,7 +69,7 @@ static int32_t sem_write_pos = 0;
 static int32_t sem_read_pos = 0;
 static osal_semaphore_t *sem_empty = NULL;
 static osal_semaphore_t *sem_full = NULL;
-static pthread_mutex_t sem_mutex = PTHREAD_MUTEX_INITIALIZER;
+static osal_mutex_t sem_mutex = PTHREAD_MUTEX_INITIALIZER;
 static int32_t sem_produced = 0;
 static int32_t sem_consumed = 0;
 
@@ -128,8 +128,8 @@ static void test_semaphore_stress(void)
     OSAL_SemaphoreCreate(&sem_full, 0);
     OSAL_pthread_mutex_init(&sem_mutex, NULL);
 
-    pthread_t producers[STRESS_PRODUCER_COUNT];
-    pthread_t consumers[STRESS_CONSUMER_COUNT];
+    osal_thread_t producers[STRESS_PRODUCER_COUNT];
+    osal_thread_t consumers[STRESS_CONSUMER_COUNT];
     int32_t producer_ids[STRESS_PRODUCER_COUNT];
 
     /* 创建生产者线程 */
@@ -170,7 +170,7 @@ static void test_semaphore_stress(void)
 static int32_t cond_ready_count = 0;
 static int32_t cond_wait_count = 0;
 static osal_cond_t *cond_stress = NULL;
-static pthread_mutex_t cond_mutex = PTHREAD_MUTEX_INITIALIZER;
+static osal_mutex_t cond_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static void* cond_waiter_thread(void *arg)
 {
@@ -217,8 +217,8 @@ static void test_cond_stress(void)
     OSAL_CondCreate(&cond_stress);
     OSAL_pthread_mutex_init(&cond_mutex, NULL);
 
-    pthread_t waiters[STRESS_THREAD_COUNT / 2];
-    pthread_t signalers[STRESS_THREAD_COUNT / 2];
+    osal_thread_t waiters[STRESS_THREAD_COUNT / 2];
+    osal_thread_t signalers[STRESS_THREAD_COUNT / 2];
 
     /* 创建等待线程 */
     int32_t i;
@@ -254,7 +254,7 @@ static void test_cond_stress(void)
 /* 混合场景压力测试 */
 static int32_t mixed_data = 0;
 static bool mixed_ready = false;
-static pthread_mutex_t mixed_mutex = PTHREAD_MUTEX_INITIALIZER;
+static osal_mutex_t mixed_mutex = PTHREAD_MUTEX_INITIALIZER;
 static osal_semaphore_t *mixed_sem = NULL;
 static osal_cond_t *mixed_cond = NULL;
 
@@ -294,7 +294,7 @@ static void test_mixed_stress(void)
     OSAL_SemaphoreCreate(&mixed_sem, 3);  /* 限制并发数为3 */
     OSAL_CondCreate(&mixed_cond);
 
-    pthread_t threads[STRESS_THREAD_COUNT];
+    osal_thread_t threads[STRESS_THREAD_COUNT];
     int32_t thread_ids[STRESS_THREAD_COUNT];
 
     /* 创建工作线程 */
