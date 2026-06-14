@@ -1,82 +1,54 @@
 /************************************************************************
- * OSAL 条件变量实现（POSIX）
+ * OSAL 条件变量实现（POSIX 薄封装）
  ************************************************************************/
 
 #include "osal.h"
 #include <pthread.h>
-#include <stdlib.h>
 #include <errno.h>
 #include <time.h>
 
-struct osal_cond_s {
-    pthread_cond_t cond;
-};
-
-struct osal_mutex_s {
-    pthread_mutex_t mutex;
-};
-
-int32_t OSAL_CondCreate(osal_cond_t **cond)
+int32_t OSAL_pthread_cond_init(pthread_cond_t *cond, const pthread_condattr_t *attr)
 {
-    osal_cond_t *new_cond;
-    int ret;
-
     if (cond == NULL) {
-        return OSAL_ERR_INVALID_POINTER;
+        errno = EINVAL;
+        return -1;
     }
 
-    new_cond = (osal_cond_t *)malloc(OSAL_sizeof(osal_cond_t));
-    if (new_cond == NULL) {
-        return OSAL_ERR_GENERIC;
-    }
-
-    ret = pthread_cond_init(&new_cond->cond, NULL);
-    if (ret != 0) {
-        free(new_cond);
-        return OSAL_ERR_GENERIC;
-    }
-
-    *cond = new_cond;
-    return OSAL_SUCCESS;
+    return pthread_cond_init(cond, attr);
 }
 
-int32_t OSAL_CondDelete(osal_cond_t *cond)
+int32_t OSAL_pthread_cond_destroy(pthread_cond_t *cond)
 {
-    int ret;
-
     if (cond == NULL) {
-        return OSAL_ERR_INVALID_POINTER;
+        errno = EINVAL;
+        return -1;
     }
 
-    ret = pthread_cond_destroy(&cond->cond);
-    free(cond);
-
-    return (ret == 0) ? OSAL_SUCCESS : OSAL_ERR_GENERIC;
+    return pthread_cond_destroy(cond);
 }
 
-int32_t OSAL_CondWait(osal_cond_t *cond, osal_mutex_t *mutex)
+int32_t OSAL_pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
 {
-    int ret;
-
     if (cond == NULL || mutex == NULL) {
-        return OSAL_ERR_INVALID_POINTER;
+        errno = EINVAL;
+        return -1;
     }
 
-    ret = pthread_cond_wait(&cond->cond, &mutex->mutex);
-    return (ret == 0) ? OSAL_SUCCESS : OSAL_ERR_GENERIC;
+    return pthread_cond_wait(cond, mutex);
 }
 
-int32_t OSAL_CondTimedWait(osal_cond_t *cond, osal_mutex_t *mutex, uint32_t timeout_ms)
+int32_t OSAL_pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
+                                     uint32_t timeout_ms)
 {
     struct timespec ts;
-    int ret;
 
     if (cond == NULL || mutex == NULL) {
-        return OSAL_ERR_INVALID_POINTER;
+        errno = EINVAL;
+        return -1;
     }
 
     if (clock_gettime(CLOCK_REALTIME, &ts) != 0) {
-        return OSAL_ERR_GENERIC;
+        return -1;
     }
 
     ts.tv_sec += timeout_ms / 1000;
@@ -86,36 +58,25 @@ int32_t OSAL_CondTimedWait(osal_cond_t *cond, osal_mutex_t *mutex, uint32_t time
         ts.tv_nsec -= 1000000000;
     }
 
-    ret = pthread_cond_timedwait(&cond->cond, &mutex->mutex, &ts);
-    if (ret == 0) {
-        return OSAL_SUCCESS;
-    } else if (ret == ETIMEDOUT) {
-        return OSAL_ERR_TIMEOUT;
-    } else {
-        return OSAL_ERR_GENERIC;
-    }
+    return pthread_cond_timedwait(cond, mutex, &ts);
 }
 
-int32_t OSAL_CondSignal(osal_cond_t *cond)
+int32_t OSAL_pthread_cond_signal(pthread_cond_t *cond)
 {
-    int ret;
-
     if (cond == NULL) {
-        return OSAL_ERR_INVALID_POINTER;
+        errno = EINVAL;
+        return -1;
     }
 
-    ret = pthread_cond_signal(&cond->cond);
-    return (ret == 0) ? OSAL_SUCCESS : OSAL_ERR_GENERIC;
+    return pthread_cond_signal(cond);
 }
 
-int32_t OSAL_CondBroadcast(osal_cond_t *cond)
+int32_t OSAL_pthread_cond_broadcast(pthread_cond_t *cond)
 {
-    int ret;
-
     if (cond == NULL) {
-        return OSAL_ERR_INVALID_POINTER;
+        errno = EINVAL;
+        return -1;
     }
 
-    ret = pthread_cond_broadcast(&cond->cond);
-    return (ret == 0) ? OSAL_SUCCESS : OSAL_ERR_GENERIC;
+    return pthread_cond_broadcast(cond);
 }
