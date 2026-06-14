@@ -8,19 +8,19 @@
 int main(void)
 {
     /* Method 1: Use the high-level print function */
-    OSAL_printf("\n=== Method 1: Using OSAL_PrintVersionInfo() ===\n\n");
-    OSAL_PrintVersionInfo();
+    OSAL_printf("\n=== Method 1: Using OSAL_print_version_info() ===\n\n");
+    OSAL_print_version_info();
 
     /* Method 2: Query individual version fields */
     OSAL_printf("\n=== Method 2: Using individual query APIs ===\n\n");
-    OSAL_printf("Version:      %s\n", OSAL_GetVersion());
-    OSAL_printf("Full Version: %s\n", OSAL_GetVersionFull());
-    OSAL_printf("Git Commit:   %s\n", OSAL_GetGitCommit());
-    OSAL_printf("Build Time:   %s\n", OSAL_GetBuildTime());
-    OSAL_printf("Built by:     %s\n", OSAL_GetBuildBy());
-    OSAL_printf("Compiler:     %s\n", OSAL_GetCompiler());
-    OSAL_printf("Architecture: %s\n", OSAL_GetArch());
-    OSAL_printf("Kernel:       %s\n", OSAL_GetKernel());
+    OSAL_printf("Version:      %s\n", OSAL_get_version());
+    OSAL_printf("Full Version: %s\n", OSAL_get_version_full());
+    OSAL_printf("Git Commit:   %s\n", OSAL_get_git_commit());
+    OSAL_printf("Build Time:   %s\n", OSAL_get_build_time());
+    OSAL_printf("Built by:     %s\n", OSAL_get_build_by());
+    OSAL_printf("Compiler:     %s\n", OSAL_get_compiler());
+    OSAL_printf("Architecture: %s\n", OSAL_get_arch());
+    OSAL_printf("Kernel:       %s\n", OSAL_get_kernel());
 
     /* Method 3: Use convenience macros (kernel-style) */
     OSAL_printf("\n=== Method 3: Using convenience macros ===\n\n");

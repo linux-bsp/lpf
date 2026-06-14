@@ -67,33 +67,33 @@ typedef struct {
  * @return OSAL_SUCCESS 成功
  * @return OSAL_ERR_GENERIC 失败
  */
-int32_t OSAL_LogInit(const char *log_file_path, int32_t level);
+int32_t OSAL_log_init(const char *log_file_path, int32_t level);
 
 /**
  * @brief 关闭日志系统
  */
-void OSAL_LogShutdown(void);
+void OSAL_log_shutdown(void);
 
 /**
  * @brief 设置日志级别
  *
  * @param[in] level 日志级别
  */
-void OSAL_LogSetLevel(int32_t level);
+void OSAL_log_set_level(int32_t level);
 
 /**
  * @brief 设置日志文件最大大小
  *
  * @param[in] size_bytes 最大文件大小（字节）
  */
-void OSAL_LogSetMaxFileSize(uint32_t size_bytes);
+void OSAL_log_set_max_file_size(uint32_t size_bytes);
 
 /**
  * @brief 设置最大日志文件数
  *
  * @param[in] max_files 最大备份文件数
  */
-void OSAL_LogSetMaxFiles(uint32_t max_files);
+void OSAL_log_set_max_files(uint32_t max_files);
 
 /**
  * @brief 设置模块日志级别
@@ -101,7 +101,7 @@ void OSAL_LogSetMaxFiles(uint32_t max_files);
  * @param[in] module 模块ID
  * @param[in] level 日志级别
  */
-void OSAL_LogSetModuleLevel(log_module_t module, int32_t level);
+void OSAL_log_set_module_level(log_module_t module, int32_t level);
 
 /**
  * @brief 获取模块日志级别
@@ -109,7 +109,7 @@ void OSAL_LogSetModuleLevel(log_module_t module, int32_t level);
  * @param[in] module 模块ID
  * @return 日志级别
  */
-int32_t OSAL_LogGetModuleLevel(log_module_t module);
+int32_t OSAL_log_get_module_level(log_module_t module);
 
 /**
  * @brief 设置日志过滤器（正则表达式）
@@ -117,14 +117,14 @@ int32_t OSAL_LogGetModuleLevel(log_module_t module);
  * @param[in] pattern 过滤模式，NULL表示清除过滤器
  * @return OSAL_SUCCESS 成功
  */
-int32_t OSAL_LogSetFilter(const char *pattern);
+int32_t OSAL_log_set_filter(const char *pattern);
 
 /**
  * @brief 设置日志采样率
  *
  * @param[in] rate 采样率（1表示全部记录，N表示每N条记录1条）
  */
-void OSAL_LogSetSampling(uint32_t rate);
+void OSAL_log_set_sampling(uint32_t rate);
 
 /**
  * @brief 启用远程日志（syslog/UDP）
@@ -133,12 +133,12 @@ void OSAL_LogSetSampling(uint32_t rate);
  * @param[in] port 远程端口
  * @return OSAL_SUCCESS 成功
  */
-int32_t OSAL_LogSetRemote(const char *host, uint16_t port);
+int32_t OSAL_log_set_remote(const char *host, uint16_t port);
 
 /**
  * @brief 禁用远程日志
  */
-void OSAL_LogDisableRemote(void);
+void OSAL_log_disable_remote(void);
 
 /**
  * @brief 通用日志函数
@@ -148,7 +148,7 @@ void OSAL_LogDisableRemote(void);
  * @param[in] format 格式化字符串
  * @param[in] ... 可变参数
  */
-void OSAL_Log(int32_t level, const char *module, const char *format, ...);
+void OSAL_log(int32_t level, const char *module, const char *format, ...);
 
 /**
  * @brief 结构化日志函数
@@ -159,7 +159,7 @@ void OSAL_Log(int32_t level, const char *module, const char *format, ...);
  * @param[in] kv_pairs 键值对数组
  * @param[in] kv_count 键值对数量
  */
-void OSAL_LogStructured(int32_t level, log_module_t module, const char *message,
+void OSAL_log_structured(int32_t level, log_module_t module, const char *message,
                         const log_kv_pair_t *kv_pairs, uint32_t kv_count);
 
 /**
@@ -173,7 +173,7 @@ void OSAL_printf(const char *format, ...);
  * @param[out] total_count 总日志数
  * @param[out] dropped_count 丢弃的日志数（采样）
  */
-void OSAL_LogGetStats(uint64_t *total_count, uint64_t *dropped_count);
+void OSAL_log_get_stats(uint64_t *total_count, uint64_t *dropped_count);
 
 /*
  * 编译时日志级别控制
@@ -188,7 +188,7 @@ void OSAL_LogGetStats(uint64_t *total_count, uint64_t *dropped_count);
  * 统一的底层日志实现函数
  * 所有日志宏最终调用此函数
  */
-void OSAL_LogEmit(int32_t level, const char *module,
+void OSAL_log_emit(int32_t level, const char *module,
                   const char *file, const char *func, int32_t line,
                   const char *format, ...) __attribute__((format(printf, 6, 7)));
 
@@ -206,31 +206,31 @@ void OSAL_LogEmit(int32_t level, const char *module,
 #define LOG_DEBUG(module, ...) \
     do { \
         if (OS_LOG_LEVEL_DEBUG >= OSAL_LOG_COMPILE_LEVEL) \
-            OSAL_LogEmit(OS_LOG_LEVEL_DEBUG, module, __FILE__, __func__, __LINE__, __VA_ARGS__); \
+            OSAL_log_emit(OS_LOG_LEVEL_DEBUG, module, __FILE__, __func__, __LINE__, __VA_ARGS__); \
     } while(0)
 
 #define LOG_INFO(module, ...) \
     do { \
         if (OS_LOG_LEVEL_INFO >= OSAL_LOG_COMPILE_LEVEL) \
-            OSAL_LogEmit(OS_LOG_LEVEL_INFO, module, __FILE__, __func__, __LINE__, __VA_ARGS__); \
+            OSAL_log_emit(OS_LOG_LEVEL_INFO, module, __FILE__, __func__, __LINE__, __VA_ARGS__); \
     } while(0)
 
 #define LOG_WARN(module, ...) \
     do { \
         if (OS_LOG_LEVEL_WARN >= OSAL_LOG_COMPILE_LEVEL) \
-            OSAL_LogEmit(OS_LOG_LEVEL_WARN, module, __FILE__, __func__, __LINE__, __VA_ARGS__); \
+            OSAL_log_emit(OS_LOG_LEVEL_WARN, module, __FILE__, __func__, __LINE__, __VA_ARGS__); \
     } while(0)
 
 #define LOG_ERROR(module, ...) \
     do { \
         if (OS_LOG_LEVEL_ERROR >= OSAL_LOG_COMPILE_LEVEL) \
-            OSAL_LogEmit(OS_LOG_LEVEL_ERROR, module, __FILE__, __func__, __LINE__, __VA_ARGS__); \
+            OSAL_log_emit(OS_LOG_LEVEL_ERROR, module, __FILE__, __func__, __LINE__, __VA_ARGS__); \
     } while(0)
 
 #define LOG_FATAL(module, ...) \
     do { \
         if (OS_LOG_LEVEL_FATAL >= OSAL_LOG_COMPILE_LEVEL) \
-            OSAL_LogEmit(OS_LOG_LEVEL_FATAL, module, __FILE__, __func__, __LINE__, __VA_ARGS__); \
+            OSAL_log_emit(OS_LOG_LEVEL_FATAL, module, __FILE__, __func__, __LINE__, __VA_ARGS__); \
     } while(0)
 
 /*
@@ -242,7 +242,7 @@ void OSAL_LogEmit(int32_t level, const char *module,
         static uint8_t __logged = 0; \
         if (!__logged && OS_LOG_LEVEL_DEBUG >= OSAL_LOG_COMPILE_LEVEL) { \
             __logged = 1; \
-            OSAL_LogEmit(OS_LOG_LEVEL_DEBUG, module, __FILE__, __func__, __LINE__, __VA_ARGS__); \
+            OSAL_log_emit(OS_LOG_LEVEL_DEBUG, module, __FILE__, __func__, __LINE__, __VA_ARGS__); \
         } \
     } while(0)
 
@@ -251,7 +251,7 @@ void OSAL_LogEmit(int32_t level, const char *module,
         static uint8_t __logged = 0; \
         if (!__logged && OS_LOG_LEVEL_WARN >= OSAL_LOG_COMPILE_LEVEL) { \
             __logged = 1; \
-            OSAL_LogEmit(OS_LOG_LEVEL_WARN, module, __FILE__, __func__, __LINE__, __VA_ARGS__); \
+            OSAL_log_emit(OS_LOG_LEVEL_WARN, module, __FILE__, __func__, __LINE__, __VA_ARGS__); \
         } \
     } while(0)
 
@@ -260,7 +260,7 @@ void OSAL_LogEmit(int32_t level, const char *module,
         static uint8_t __logged = 0; \
         if (!__logged && OS_LOG_LEVEL_ERROR >= OSAL_LOG_COMPILE_LEVEL) { \
             __logged = 1; \
-            OSAL_LogEmit(OS_LOG_LEVEL_ERROR, module, __FILE__, __func__, __LINE__, __VA_ARGS__); \
+            OSAL_log_emit(OS_LOG_LEVEL_ERROR, module, __FILE__, __func__, __LINE__, __VA_ARGS__); \
         } \
     } while(0)
 
@@ -275,7 +275,7 @@ void OSAL_LogEmit(int32_t level, const char *module,
 #define LOG_STRUCTURED(module, msg, ...) \
     do { \
         log_kv_pair_t __kv_pairs[] = { __VA_ARGS__ }; \
-        OSAL_LogStructured(OS_LOG_LEVEL_INFO, module, msg, __kv_pairs, \
+        OSAL_log_structured(OS_LOG_LEVEL_INFO, module, msg, __kv_pairs, \
                           OSAL_sizeof(__kv_pairs) / OSAL_sizeof(log_kv_pair_t)); \
     } while(0)
 

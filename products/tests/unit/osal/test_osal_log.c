@@ -19,15 +19,15 @@ static void test_osal_log_init_success(void)
     int32_t ret;
 
     /* 初始化日志系统 */
-    ret = OSAL_LogInit(TEST_LOG_FILE, OS_LOG_LEVEL_DEBUG);
+    ret = OSAL_log_init(TEST_LOG_FILE, OS_LOG_LEVEL_DEBUG);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 设置文件大小和备份数 */
-    OSAL_LogSetMaxFileSize(1024 * 1024);  /* 1MB */
-    OSAL_LogSetMaxFiles(3);
+    OSAL_log_set_max_file_size(1024 * 1024);  /* 1MB */
+    OSAL_log_set_max_files(3);
 
     /* 清理 */
-    OSAL_LogShutdown();
+    OSAL_log_shutdown();
     OSAL_unlink(TEST_LOG_FILE);
 }
 
@@ -37,11 +37,11 @@ static void test_osal_log_init_null_path(void)
     int32_t ret;
 
     /* NULL路径表示只输出到终端 */
-    ret = OSAL_LogInit(NULL, OS_LOG_LEVEL_INFO);
+    ret = OSAL_log_init(NULL, OS_LOG_LEVEL_INFO);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 清理 */
-    OSAL_LogShutdown();
+    OSAL_log_shutdown();
 }
 
 /* 测试用例: 日志初始化 - 不同级别 */
@@ -50,19 +50,19 @@ static void test_osal_log_init_different_levels(void)
     int32_t ret;
 
     /* DEBUG级别 */
-    ret = OSAL_LogInit(TEST_LOG_FILE, OS_LOG_LEVEL_DEBUG);
+    ret = OSAL_log_init(TEST_LOG_FILE, OS_LOG_LEVEL_DEBUG);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
-    OSAL_LogShutdown();
+    OSAL_log_shutdown();
 
     /* INFO级别 */
-    ret = OSAL_LogInit(TEST_LOG_FILE, OS_LOG_LEVEL_INFO);
+    ret = OSAL_log_init(TEST_LOG_FILE, OS_LOG_LEVEL_INFO);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
-    OSAL_LogShutdown();
+    OSAL_log_shutdown();
 
     /* ERROR级别 */
-    ret = OSAL_LogInit(TEST_LOG_FILE, OS_LOG_LEVEL_ERROR);
+    ret = OSAL_log_init(TEST_LOG_FILE, OS_LOG_LEVEL_ERROR);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
-    OSAL_LogShutdown();
+    OSAL_log_shutdown();
 
     OSAL_unlink(TEST_LOG_FILE);
 }
@@ -77,7 +77,7 @@ static void test_osal_log_write_basic(void)
     int32_t ret;
 
     /* 初始化日志 */
-    ret = OSAL_LogInit(TEST_LOG_FILE, OS_LOG_LEVEL_DEBUG);
+    ret = OSAL_log_init(TEST_LOG_FILE, OS_LOG_LEVEL_DEBUG);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 写入不同级别的日志 */
@@ -88,7 +88,7 @@ static void test_osal_log_write_basic(void)
     LOG_FATAL("TEST", "This is a fatal message");
 
     /* 清理 */
-    OSAL_LogShutdown();
+    OSAL_log_shutdown();
     OSAL_unlink(TEST_LOG_FILE);
 }
 
@@ -98,7 +98,7 @@ static void test_osal_log_write_formatted(void)
     int32_t ret;
 
     /* 初始化日志 */
-    ret = OSAL_LogInit(TEST_LOG_FILE, OS_LOG_LEVEL_INFO);
+    ret = OSAL_log_init(TEST_LOG_FILE, OS_LOG_LEVEL_INFO);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 写入格式化日志 */
@@ -106,7 +106,7 @@ static void test_osal_log_write_formatted(void)
     LOG_ERROR("TEST", "Error code: %d, Message: %s", -1, "Failed");
 
     /* 清理 */
-    OSAL_LogShutdown();
+    OSAL_log_shutdown();
     OSAL_unlink(TEST_LOG_FILE);
 }
 
@@ -117,7 +117,7 @@ static void test_osal_log_write_long_message(void)
     char long_msg[512];
 
     /* 初始化日志 */
-    ret = OSAL_LogInit(TEST_LOG_FILE, OS_LOG_LEVEL_INFO);
+    ret = OSAL_log_init(TEST_LOG_FILE, OS_LOG_LEVEL_INFO);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 构造长消息 */
@@ -128,7 +128,7 @@ static void test_osal_log_write_long_message(void)
     LOG_INFO("TEST", "%s", long_msg);
 
     /* 清理 */
-    OSAL_LogShutdown();
+    OSAL_log_shutdown();
     OSAL_unlink(TEST_LOG_FILE);
 }
 
@@ -142,11 +142,11 @@ static void test_osal_log_set_level(void)
     int32_t ret;
 
     /* 初始化日志 */
-    ret = OSAL_LogInit(TEST_LOG_FILE, OS_LOG_LEVEL_DEBUG);
+    ret = OSAL_log_init(TEST_LOG_FILE, OS_LOG_LEVEL_DEBUG);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 设置为ERROR级别 */
-    OSAL_LogSetLevel(OS_LOG_LEVEL_ERROR);
+    OSAL_log_set_level(OS_LOG_LEVEL_ERROR);
 
     /* DEBUG和INFO不应该输出 */
     LOG_DEBUG("TEST", "This should not appear");
@@ -156,7 +156,7 @@ static void test_osal_log_set_level(void)
     LOG_ERROR("TEST", "This should appear");
 
     /* 设置为DEBUG级别 */
-    OSAL_LogSetLevel(OS_LOG_LEVEL_DEBUG);
+    OSAL_log_set_level(OS_LOG_LEVEL_DEBUG);
 
     /* 所有级别都应该输出 */
     LOG_DEBUG("TEST", "Debug message");
@@ -164,7 +164,7 @@ static void test_osal_log_set_level(void)
     LOG_ERROR("TEST", "Error message");
 
     /* 清理 */
-    OSAL_LogShutdown();
+    OSAL_log_shutdown();
     OSAL_unlink(TEST_LOG_FILE);
 }
 
@@ -178,12 +178,12 @@ static void test_osal_log_rotation_basic(void)
     int32_t ret;
 
     /* 初始化日志 */
-    ret = OSAL_LogInit(TEST_LOG_FILE, OS_LOG_LEVEL_INFO);
+    ret = OSAL_log_init(TEST_LOG_FILE, OS_LOG_LEVEL_INFO);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 设置小文件大小，便于触发轮转 */
-    OSAL_LogSetMaxFileSize(1024);  /* 1KB */
-    OSAL_LogSetMaxFiles(3);
+    OSAL_log_set_max_file_size(1024);  /* 1KB */
+    OSAL_log_set_max_files(3);
 
     /* 写入大量日志，触发轮转 */
     int32_t i;
@@ -193,7 +193,7 @@ static void test_osal_log_rotation_basic(void)
     }
 
     /* 清理 */
-    OSAL_LogShutdown();
+    OSAL_log_shutdown();
     OSAL_unlink(TEST_LOG_FILE);
     OSAL_unlink("/tmp/osal_test.log.1");
     OSAL_unlink("/tmp/osal_test.log.2");
@@ -209,7 +209,7 @@ static void test_osal_printf(void)
     int32_t ret;
 
     /* 初始化日志 */
-    ret = OSAL_LogInit(TEST_LOG_FILE, OS_LOG_LEVEL_INFO);
+    ret = OSAL_log_init(TEST_LOG_FILE, OS_LOG_LEVEL_INFO);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 使用Printf（不带日志级别） */
@@ -217,7 +217,7 @@ static void test_osal_printf(void)
     OSAL_printf("Formatted: %d, %s\n", 42, "test");
 
     /* 清理 */
-    OSAL_LogShutdown();
+    OSAL_log_shutdown();
     OSAL_unlink(TEST_LOG_FILE);
 }
 
@@ -249,7 +249,7 @@ static void test_osal_log_multithread(void)
     int32_t task_args[3] = {1, 2, 3};
 
     /* 初始化日志 */
-    ret = OSAL_LogInit(TEST_LOG_FILE, OS_LOG_LEVEL_INFO);
+    ret = OSAL_log_init(TEST_LOG_FILE, OS_LOG_LEVEL_INFO);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     g_log_test_running = true;
@@ -273,7 +273,7 @@ static void test_osal_log_multithread(void)
     }
 
     /* 清理 */
-    OSAL_LogShutdown();
+    OSAL_log_shutdown();
     OSAL_unlink(TEST_LOG_FILE);
 }
 
@@ -323,9 +323,9 @@ static void test_osal_log_performance(void)
     const int32_t iterations = 1000;
 
     // 初始化日志
-    ret = OSAL_LogInit(TEST_LOG_FILE, OS_LOG_LEVEL_INFO);
+    ret = OSAL_log_init(TEST_LOG_FILE, OS_LOG_LEVEL_INFO);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
-    OSAL_LogSetMaxFileSize(10 * 1024 * 1024);  // 10MB
+    OSAL_log_set_max_file_size(10 * 1024 * 1024);  // 10MB
 
     // 测试写入性能
     start_time = OSAL_GetTickCount();
@@ -341,7 +341,7 @@ static void test_osal_log_performance(void)
     TEST_ASSERT_TRUE(elapsed < (uint64_t)iterations);
 
     // 清理
-    OSAL_LogShutdown();
+    OSAL_log_shutdown();
     OSAL_unlink(TEST_LOG_FILE);
 }
 
