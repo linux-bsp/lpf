@@ -20,11 +20,10 @@ static const perf_baseline_t mutex_lock_baseline = {
  */
 static void test_perf_mutex_lock_unlock(void) {
     const uint32_t iterations = 10000;
-    osal_mutex_t *mutex = NULL;
+    osal_mutex_t mutex;
 
     /* 创建互斥锁 */
     TEST_ASSERT_EQUAL(OSAL_pthread_mutex_init(&mutex, NULL), OSAL_SUCCESS);
-    TEST_ASSERT_NOT_NULL(mutex);
 
     /* 创建性能测量上下文 */
     perf_context_t *ctx = perf_context_create("OSAL_pthread_mutex_lock",

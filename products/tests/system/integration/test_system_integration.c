@@ -126,7 +126,7 @@ static void test_full_stack_e2e(void) {
 
     /* 检查点2：基本功能测试 */
     /* 注意：Queue API不存在，简化测试 */
-    osal_mutex_t *mutex = NULL;
+    osal_mutex_t mutex;
     int32_t ret = OSAL_pthread_mutex_init(&mutex, NULL);
     TEST_ASSERT_EQUAL(0, ret);
 
@@ -142,7 +142,7 @@ static void test_full_stack_e2e(void) {
 
 /* 线程数据结构 */
 typedef struct {
-    osal_mutex_t mutex;
+    osal_mutex_t *mutex;
     osal_atomic_uint32_t *counter;
 } concurrent_thread_data_t;
 
@@ -153,9 +153,9 @@ static void* concurrent_thread_func(void *arg) {
     uint32_t i;
 
     for (i = 0; i < 1000; i++) {
-        OSAL_pthread_mutex_lock(&data->mutex);
+        OSAL_pthread_mutex_lock(data->mutex);
         OSAL_atomic_inc(data->counter);
-        OSAL_pthread_mutex_unlock(&data->mutex);
+        OSAL_pthread_mutex_unlock(data->mutex);
     }
     return NULL;
 }
@@ -168,7 +168,7 @@ static void test_concurrent_scenario(void) {
 
     const uint32_t num_threads = 5;
     osal_thread_t threads[5];
-    osal_mutex_t *mutex = NULL;
+    osal_mutex_t mutex;
     osal_atomic_uint32_t counter;
 
     OSAL_atomic_store(&counter, 0);
@@ -178,7 +178,7 @@ static void test_concurrent_scenario(void) {
     TEST_ASSERT_EQUAL(0, ret);
 
     /* 检查点2：创建多个并发线程 */
-    concurrent_thread_data_t thread_data = { mutex, &counter };
+    concurrent_thread_data_t thread_data = { &mutex, &counter };
 
     int32_t all_created = 1;
     uint32_t i;

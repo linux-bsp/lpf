@@ -59,6 +59,7 @@ target_sources(libutest PRIVATE
     core/test_mock.c
     core/test_metadata.c
     core/test_reporter.c
+    core/test_stress.c
 )
 
 # Framework include directories
@@ -273,13 +274,6 @@ endif() # CONFIG_TEST_PERFORMANCE
 if(CONFIG_TEST_STRESS)
     message(STATUS "Enabling stress tests")
 
-    # Core stress test file (always included)
-    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/stress/test_stress_core.c")
-        target_sources(es-middleware-test PRIVATE
-            stress/test_stress_core.c
-        )
-    endif()
-
     # OSAL Stress Tests - Auto-discover all test_stress_osal_*.c files
     if(CONFIG_TEST_STRESS_OSAL)
         test_discover_and_add(
@@ -375,31 +369,8 @@ if(CONFIG_TEST_SYSTEM)
         # Manually add HAL system test files, excluding test_hal_concurrent_access.c
         # which has its own main() and is built separately
         file(GLOB HAL_SYSTEM_TEST_FILES "${CMAKE_CURRENT_SOURCE_DIR}/system/hal/test_*.c")
-        list(REMOVE_ITEM HAL_SYSTEM_TEST_FILES
-            "${CMAKE_CURRENT_SOURCE_DIR}/system/hal/test_hal_concurrent_access.c")
         if(HAL_SYSTEM_TEST_FILES)
             target_sources(es-middleware-test PRIVATE ${HAL_SYSTEM_TEST_FILES})
-        endif()
-
-        # Create separate executable for concurrent access test (has its own main)
-        if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/system/hal/test_hal_concurrent_access.c")
-            add_executable(test-hal-concurrent
-                system/hal/test_hal_concurrent_access.c
-            )
-            target_link_libraries(test-hal-concurrent PRIVATE pthread rt m)
-            if(TARGET osal)
-                target_link_libraries(test-hal-concurrent PRIVATE osal)
-            endif()
-            if(TARGET hal)
-                target_link_libraries(test-hal-concurrent PRIVATE hal)
-            endif()
-            # Link osal again at the end to resolve symbols
-            if(TARGET osal)
-                target_link_libraries(test-hal-concurrent PRIVATE osal)
-            endif()
-            set_target_properties(test-hal-concurrent PROPERTIES
-                RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-            )
         endif()
     endif()
 
