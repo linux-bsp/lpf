@@ -75,8 +75,12 @@ PCL支持三种配置选择方式（优先级从高到低）：
 ### 快速开始
 
 ```bash
-# 在项目根目录使用统一构建脚本
-make ccm_h200_100p_am625_debug_defconfig_defconfig
+# 在项目根目录使用统一构建命令
+make tests_x86_pconfig_defconfig  # 加载 PCONFIG 测试配置
+make
+
+# 或使用其他包含 PCONFIG 的配置
+make ccm_h200_100p_am625_debug_defconfig
 make
 ```
 

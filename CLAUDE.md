@@ -155,19 +155,32 @@ products/ccm/apps/*  →  libccm  →  core/aconfig  →  core/pconfig  →  cor
 
 ### 可用配置
 
-#### 产品配置
+#### 产品配置（configs/ccm/）
 - `ccm_h200_100p_am625_debug_defconfig` - CCM H200-100P-AM625 调试版本（包含所有调试功能）
 - `ccm_h200_100p_am625_release_defconfig` - CCM H200-100P-AM625 发布版本（优化配置，禁用测试）
 
-#### 测试配置
+#### x86_64 测试配置（configs/tests/）
 - `tests_x86_full_defconfig` - 全栈测试（所有模块、所有功能）
+- `tests_x86_minimal_defconfig` - 最小化配置（仅核心功能）
+- `tests_x86_osal_defconfig` - OSAL 单元测试
 - `tests_x86_pdl_defconfig` - PDL 单元测试
 - `tests_x86_prl_defconfig` - PRL 协议层测试
 - `tests_x86_aconfig_defconfig` - ACONFIG 单元测试
 - `tests_x86_pconfig_defconfig` - PCONFIG 单元测试
 - `tests_x86_system_defconfig` - 系统集成测试
 - `tests_x86_stress_defconfig` - 压力测试
-- `tests_x86_minimal_defconfig` - 最小化配置（仅核心功能）
+
+#### ARM64 测试配置（configs/tests/）
+- `tests_arm64_full_defconfig` - 全栈测试
+- `tests_arm64_minimal_defconfig` - 最小化配置
+- `tests_arm64_osal_defconfig` - OSAL 单元测试
+- `tests_arm64_hal_defconfig` - HAL 单元测试
+- `tests_arm64_pdl_defconfig` - PDL 单元测试
+- `tests_arm64_prl_defconfig` - PRL 协议层测试
+- `tests_arm64_aconfig_defconfig` - ACONFIG 单元测试
+- `tests_arm64_pconfig_defconfig` - PCONFIG 单元测试
+- `tests_arm64_system_defconfig` - 系统集成测试
+- `tests_arm64_stress_defconfig` - 压力测试
 
 ### 配置文件
 

@@ -62,33 +62,23 @@ make distclean         # 完全清理
 
 ## 📚 文档导航
 
-### 架构文档
-- 🏛️ [系统架构](docs/ARCHITECTURE.md) - **完整的系统架构说明（含架构图）**
+### 核心文档
+- 🏛️ [系统架构](docs/ARCHITECTURE.md) - 完整的系统架构说明（含架构图）
 - 📊 [架构图集](docs/diagrams/) - 7 张高清架构图（PNG/SVG）
-
-### 新手入门
-- 📖 [新手入门教程](docs/GETTING_STARTED.md) - **从零开始，5分钟上手**
-- 🔧 [安装指南](docs/INSTALL.md) - 环境配置和依赖安装
-- ⚡ [快速参考](docs/QUICK_START.md) - 常用命令速查
-
-### 开发指南
-- 🏗️ [架构概述](docs/ARCHITECTURE.md) - 系统架构和模块设计
-- 👨‍💻 [开发者指南](docs/DEVELOPER_GUIDE.md) - 如何添加新功能
-- 📝 [编码规范](docs/CODING_STANDARDS.md) - 代码风格和规范
 - 📝 [命名规范](docs/NAMING_CONVENTIONS.md) - 命名规范详解
-- 🐛 [故障排除](docs/TROUBLESHOOTING.md) - 常见问题解答
+- 🔌 [PRL 架构设计](docs/PRL_ARCHITECTURE.md) - 协议层架构详解
 
 ### 构建系统
-- 🔨 [构建指南](docs/CMAKE_BUILD_GUIDE.md) - CMake 构建详解
-- ⚙️ [配置指南](docs/CONFIGURATION.md) - Config.in 配置说明
-- 🔗 [Config.in 集成](docs/CMAKE_KCONFIG_INTEGRATION.md) - 构建系统原理
+- 🔨 [构建系统指南](docs/BUILD_SYSTEM_USER_GUIDE.md) - 完整的构建命令和工作流程
+- ⚙️ [配置目录结构](docs/CONFIG_STRUCTURE.md) - 配置文件组织方式
 
-### 协议层文档
-- 🔌 [PRL 架构设计](docs/PRL_ARCHITECTURE.md) - 协议层架构详解
-- 📖 [PRL 使用指南](docs/PRL_USAGE_GUIDE.md) - 协议层 API 使用
+### 设计文档
+- 🔄 [ES-IPC 设计](docs/ES-IPC_DESIGN.md) - 进程间通信设计
+- 📋 [版本信息](docs/VERSION_INFO.md) - 版本管理说明
 
 ### 项目指南
 - 📋 [项目完整指南](CLAUDE.md) - AI 助手使用的项目上下文
+- 📝 [变更日志](CHANGELOG.md) - 项目更新记录
 
 ## 📂 项目结构
 
@@ -112,40 +102,56 @@ ES-Middleware/
 
 ## 🎯 可用配置
 
-### 产品配置
+### 产品配置（位于 configs/ccm/）
 
-| 配置 | 场景 | 平台 | 用途 | 特点 |
-|------|------|------|------|------|
-| `ccm_h200_100p_am625_debug_defconfig` | 开发 | x86_64 | CCM H200-100P-AM625 调试版本 | 包含所有调试功能和测试工具 |
-| `ccm_h200_100p_am625_release_defconfig` | 生产 | ARM64 | CCM H200-100P-AM625 发布版本 | 优化的生产配置，禁用测试 |
+| 配置 | 平台 | 用途 |
+|------|------|------|
+| `ccm_h200_100p_am625_debug_defconfig` | ARM64 | CCM H200-100P-AM625 调试版本，包含所有调试功能 |
+| `ccm_h200_100p_am625_release_defconfig` | ARM64 | CCM H200-100P-AM625 发布版本，优化配置 |
 
-### 测试配置
+### 测试配置（位于 configs/tests/）
 
-| 配置 | 测试范围 | 平台 | 用途 |
-|------|---------|------|------|
-| `tests_x86_full_defconfig` | 全栈测试 | x86_64 | 所有模块、所有功能 |
-| `tests_x86_pdl_defconfig` | PDL 单元测试 | x86_64 | 仅测试 PDL 模块 |
-| `tests_x86_prl_defconfig` | PRL 单元测试 | x86_64 | 仅测试 PRL 协议层 |
-| `tests_x86_aconfig_defconfig` | ACONFIG 单元测试 | x86_64 | 仅测试 ACONFIG 模块 |
-| `tests_x86_pconfig_defconfig` | PCONFIG 单元测试 | x86_64 | 仅测试 PCONFIG 模块 |
-| `tests_x86_system_defconfig` | 系统测试 | x86_64 | 系统级集成测试 |
-| `tests_x86_stress_defconfig` | 压力测试 | x86_64 | 性能和稳定性测试 |
-| `tests_x86_minimal_defconfig` | 最小化配置 | x86_64 | 仅包含核心功能，适合资源受限环境 |
+#### x86_64 测试配置
+
+| 配置 | 测试范围 |
+|------|---------|
+| `tests_x86_full_defconfig` | 全栈测试（所有模块） |
+| `tests_x86_minimal_defconfig` | 最小化配置（核心功能） |
+| `tests_x86_osal_defconfig` | OSAL 单元测试 |
+| `tests_x86_pdl_defconfig` | PDL 单元测试 |
+| `tests_x86_prl_defconfig` | PRL 协议层测试 |
+| `tests_x86_aconfig_defconfig` | ACONFIG 单元测试 |
+| `tests_x86_pconfig_defconfig` | PCONFIG 单元测试 |
+| `tests_x86_system_defconfig` | 系统集成测试 |
+| `tests_x86_stress_defconfig` | 压力测试 |
+
+#### ARM64 测试配置
+
+| 配置 | 测试范围 |
+|------|---------|
+| `tests_arm64_full_defconfig` | 全栈测试（所有模块） |
+| `tests_arm64_minimal_defconfig` | 最小化配置 |
+| `tests_arm64_osal_defconfig` | OSAL 单元测试 |
+| `tests_arm64_hal_defconfig` | HAL 单元测试 |
+| `tests_arm64_pdl_defconfig` | PDL 单元测试 |
+| `tests_arm64_prl_defconfig` | PRL 协议层测试 |
+| `tests_arm64_aconfig_defconfig` | ACONFIG 单元测试 |
+| `tests_arm64_pconfig_defconfig` | PCONFIG 单元测试 |
+| `tests_arm64_system_defconfig` | 系统集成测试 |
+| `tests_arm64_stress_defconfig` | 压力测试 |
 
 ## 🔧 常用命令
 
 ```bash
 # 列出所有可用配置
-ls configs/*_defconfig
+make list
 
-# 加载配置
-make <config_name>_defconfig
+# 加载配置并构建
+make tests_x86_minimal_defconfig
+make
 
 # 图形化配置（高级）
 make menuconfig
-
-# 编译
-make
 
 # 清理
 make clean       # 清理编译产物
@@ -197,9 +203,9 @@ make help
 
 ### 第一步：运行示例
 ```bash
-make ccm_development_defconfig
+make tests_x86_minimal_defconfig
 make
-./_build/bin/collector
+./_build/bin/es-middleware-test
 ```
 
 ### 第二步：理解架构
@@ -211,21 +217,20 @@ make
 ### 第四步：修改配置
 ```bash
 make menuconfig  # 图形化配置
-make       # 重新编译
+make             # 重新编译
 ```
 
 ### 第五步：添加新功能
-参考 [开发者指南](docs/DEVELOPER_GUIDE.md)，添加自己的模块或应用。
+参考 [CLAUDE.md](CLAUDE.md) 中的开发指南，添加自己的模块或应用。
 
 ## 🤝 贡献代码
 
 欢迎贡献！请参考：
-- [编码规范](docs/CODING_STANDARDS.md)
 - [命名规范](docs/NAMING_CONVENTIONS.md)
-- [开发者指南](docs/DEVELOPER_GUIDE.md)
+- [项目指南](CLAUDE.md)
 
 提交 Pull Request 前请确保：
-- ✅ 代码符合编码规范和命名规范
+- ✅ 代码符合命名规范
 - ✅ 所有配置编译通过
 - ✅ 添加了必要的测试
 - ✅ 更新了相关文档
@@ -233,19 +238,20 @@ make       # 重新编译
 ## 📊 项目状态
 
 - ✅ 核心架构稳定
-- ✅ 构建系统完善
-- ✅ 14 个配置全部测试通过
+- ✅ 构建系统完善（Kconfig + CMake）
+- ✅ 22 个配置全部测试通过
 - ✅ 压力测试 100% 通过率
 - ✅ PRL 协议层重构完成（v1.2）
 - ✅ 命名规范统一完成
-- 🚧 API 文档生成中
+- ✅ 配置目录结构优化（子目录组织）
 
 ## 🐛 问题反馈
 
 遇到问题？
-1. 查看 [故障排除指南](docs/TROUBLESHOOTING.md)
-2. 搜索 [Issues](https://github.com/wanguo99/ES-Middleware/issues)
-3. 提交新的 Issue
+1. 查看 [构建系统指南](docs/BUILD_SYSTEM_USER_GUIDE.md)
+2. 查看 [项目指南](CLAUDE.md) 中的故障排除章节
+3. 搜索 [Issues](https://github.com/wanguo99/ES-Middleware/issues)
+4. 提交新的 Issue
 
 ## 📄 许可证
 
@@ -258,10 +264,10 @@ make       # 重新编译
 ---
 
 **提示**: 
-- 首次使用建议从 `ccm_development` 配置开始
-- 单元测试使用对应的 `*_test` 配置
-- 生产部署使用 `ccm_production` 配置
+- 首次使用建议从 `tests_x86_minimal_defconfig` 配置开始
+- 开发和调试使用 `tests_x86_full_defconfig` 或 `ccm_h200_100p_am625_debug_defconfig`
+- 生产部署使用 `ccm_h200_100p_am625_release_defconfig`
 
 **文档**: 完整文档请访问 [docs/](docs/) 目录
 
-**更新日志**: 查看 [Git 提交历史](https://github.com/wanguo99/ES-Middleware/commits/master)
+**更新日志**: 查看 [CHANGELOG.md](CHANGELOG.md) 或 [Git 提交历史](https://github.com/wanguo99/ES-Middleware/commits/master)

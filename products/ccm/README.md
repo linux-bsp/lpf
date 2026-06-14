@@ -1,113 +1,114 @@
-# CCM Product Build Guide
+# CCM Product (通信管理板)
 
-## 产品架构
+## 产品概述
 
-CCM 产品线包含多个型号，每个型号启用不同的应用组合。
+CCM (Communication Control Module) 是通信管理板产品，负责系统内各设备间的通信协调和管理。
 
-### 产品型号
+### 目标平台
 
-| 型号 | 应用组合 | 说明 |
-|------|---------|------|
-| H200-100P V1 | collector + comm | 基础型号 |
-| H200-100P V2 | collector + comm + health | 增强型号 |
-| H200-200P | 全部应用 | 旗舰型号 |
+- **H200-100P-AM625**: 基于 TI AM625 处理器的 H200 平台
 
-### 应用说明
+## 快速开始
 
-- **collector**: 数据采集应用
-- **comm**: 通信应用
-- **health**: 健康监控应用
-- **logger**: 日志管理应用
-- **supervisor**: 监控管理应用
-
-## 构建步骤
-
-### 1. 选择产品配置
+### 1. 编译 CCM 产品
 
 ```bash
-cd /home/wanguo/ES-Middleware/products/ccm_product
+# 调试版本（开发用）
+make ccm_h200_100p_am625_debug_defconfig
+make
 
-# 加载 H200-100P V1 配置
-cp configs/h200_100p_v1_defconfig .config.mk
-
-# 或加载 H200-100P V2 配置
-cp configs/h200_100p_v2_defconfig .config.mk
-
-# 或加载 H200-200P 配置
-cp configs/h200_200p_defconfig .config.mk
+# 发布版本（生产用）
+make ccm_h200_100p_am625_release_defconfig
+make
 ```
 
-### 2. 自定义配置（可选）
+### 2. 运行应用
 
 ```bash
-# 使用 menuconfig 图形界面调整配置
+# 运行 CCM 应用（根据配置编译的应用）
+./_build/bin/ccm_collector
+./_build/bin/ccm_comm
+./_build/bin/ccm_health
+./_build/bin/ccm_logger
+./_build/bin/ccm_supervisor
 ```
 
-### 3. 编译
+## 应用说明
+
+CCM 产品包含以下应用程序：
+
+- **ccm_collector**: 数据采集应用
+- **ccm_comm**: 通信管理应用
+- **ccm_health**: 健康监控应用
+- **ccm_logger**: 日志管理应用
+- **ccm_supervisor**: 系统监控应用
+
+通过 Kconfig 配置可以选择性启用/禁用应用。
+
+## 自定义配置
+
+### 使用 menuconfig
 
 ```bash
-# 编译所有启用的应用
+# 加载基础配置
+make ccm_h200_100p_am625_debug_defconfig
 
-# 编译结果在 build/ 目录
-ls -lh build/collector build/comm build/health build/logger build/supervisor
+# 打开图形化配置界面
+make menuconfig
+
+# 导航到 "Products" -> "CCM Applications"
+# 选择需要的应用
+
+# 保存并编译
+make
 ```
 
-### 4. 清理
+### 保存自定义配置
+
+```bash
+# 保存当前配置为新的 defconfig
+make savedefconfig my_custom_ccm
+
+# 配置文件保存到 configs/ccm/my_custom_ccm_defconfig
+```
+
+## 清理
 
 ```bash
 # 清理构建产物
+make clean
 
 # 完全清理（包括配置）
+make distclean
 ```
 
 ## 目录结构
 
 ```
-ccm_product/
-├── CMakeLists.txt          # 产品构建配置
-├── config_defaults.mk      # 默认配置
-├── .config.mk              # 当前配置（从 configs/ 复制）
-│
-├── configs/                # 产品型号配置
-│   ├── h200_100p_v1_defconfig
-│   ├── h200_100p_v2_defconfig
-│   └── h200_200p_defconfig
-│
-├── components/             # 产品组件（库）
-│   ├── libccm/            # CCM 通用库
-│   └── h200_100p_am625/   # H200 平台库
-│
-└── apps/                   # 应用组件
-    ├── app_collector/
-    ├── app_comm/
-    ├── app_health/
-    ├── app_logger/
-    └── app_supervisor/
+products/ccm/
+├── apps/                   # CCM 应用程序
+│   ├── collector/         # 数据采集应用
+│   ├── comm/              # 通信应用
+│   ├── health/            # 健康监控应用
+│   ├── logger/            # 日志应用
+│   └── supervisor/        # 监控应用
+├── libs/                   # CCM 产品库
+│   └── libccm/            # CCM 通用库
+├── configs/                # 平台配置
+│   └── h200_100p_am625/   # H200-100P-AM625 配置
+├── osal/                   # CCM 特定的 OSAL 实现
+├── hal/                    # CCM 特定的 HAL 实现
+├── pdl/                    # CCM 特定的 PDL 实现
+├── prl/                    # CCM 特定的 PRL 实现
+└── pconfig/                # CCM 特定的 PCONFIG 实现
 ```
 
-## 添加新产品型号
+## 添加新应用
 
-1. 创建新的 defconfig 文件：
-   ```bash
-   cp configs/h200_200p_defconfig configs/new_product_defconfig
-   ```
+参考 [CLAUDE.md](../../CLAUDE.md) 中的"添加新的产品应用程序"章节。
 
-2. 编辑配置，启用/禁用应用：
-   ```
-   CONFIG_APP_COLLECTOR=y
-   CONFIG_APP_COMM=y
-   CONFIG_APP_HEALTH=n
-   ...
-   ```
+## 参考文档
 
-3. 使用新配置：
-   ```bash
-   cp configs/new_product_defconfig .config.mk
-   ```
-
-## 注意事项
-
-- 所有产品型号共享相同的 SDK 组件和产品组件
-- 只有应用组件可以通过配置启用/禁用
-- 修改 `.config.mk` 后需要重新编译
-- 不要直接修改 `config_defaults.mk`，它是默认配置模板
+- [项目指南](../../CLAUDE.md)
+- [系统架构](../../docs/ARCHITECTURE.md)
+- [命名规范](../../docs/NAMING_CONVENTIONS.md)

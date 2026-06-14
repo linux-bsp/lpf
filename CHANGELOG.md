@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed - 2026-06-14
+- **文档全面更新**
+  - 移除所有 `build.sh` 和 `python build.py` 旧构建命令引用
+  - 更新为统一的 Makefile 构建命令（`make <config>_defconfig && make`）
+  - 更新根目录 README.md，移除不存在文档的链接
+  - 更新 CLAUDE.md，补充完整的配置列表（22 个配置）
+  - 更新所有核心模块 README（OSAL, HAL, PConfig, PDL）
+  - 更新产品模块 README（CCM, Tests）
+  - 统一输出目录为 `_build/`
+  - 更新配置列表以反映子目录结构（configs/ccm/, configs/tests/）
+
 ### Planned
 - API 文档生成（Doxygen）
 - 更多示例代码
