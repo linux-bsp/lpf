@@ -336,7 +336,7 @@ else
 scripts_basic:
 	$(Q)$(MAKE) $(build)=scripts/basic
 
-prepare: scripts_basic include/generated/autoconf.h include/generated/version.h
+prepare: scripts_basic include/generated/gen_autoconf.h include/generated/gen_version.h
 
 ifeq ($(dot-config),1)
 # In this section, we need .config
@@ -352,27 +352,27 @@ ifeq ($(dot-config),1)
 # To avoid any implicit rule to kick in, define an empty command
 .config .kconfig.d: ;
 
-# If .config is newer than include/generated/autoconf.h, someone tinkered
+# If .config is newer than include/generated/gen_autoconf.h, someone tinkered
 # with it and forgot to run make oldconfig.
 # If kconfig.d is missing then we are probably in a cleaned tree so
 # we execute the config step to be sure to catch updated Config.in files
-include/generated/autoconf.h: .config $(wildcard .kconfig.d)
+include/generated/gen_autoconf.h: .config $(wildcard .kconfig.d)
 	$(Q)$(MAKE) -f $(srctree)/Makefile syncconfig
 
-# Generate version.h with build information
-include/generated/version.h: .config FORCE
+# Generate gen_version.h with build information
+include/generated/gen_version.h: .config FORCE
 	$(Q)$(srctree)/scripts/gen_version.sh
 
 else
 # Dummy target needed, because used as prerequisite
-include/generated/autoconf.h: ;
-include/generated/version.h: ;
+include/generated/gen_autoconf.h: ;
+include/generated/gen_version.h: ;
 endif
 
 # The all: target is the default when no target is given on the command line.
 # It requires .config to exist, otherwise it will fail with an error message.
 PHONY += all
-all: _check_config _validate_config include/generated/autoconf.h include/generated/version.h _cmake_configure
+all: _check_config _validate_config include/generated/gen_autoconf.h include/generated/gen_version.h _cmake_configure
 	@echo ""
 	@echo "==================================================================="
 	@echo "ES-Middleware Build System"
@@ -442,7 +442,7 @@ _cmake_configure:
 			-DCMAKE_BUILD_TYPE=$(CMAKE_BUILD_TYPE) \
 			-DCMAKE_INSTALL_PREFIX=$(CMAKE_INSTALL_PREFIX) \
 			-DCONFIG_FILE=$(abspath $(CURDIR)/.config) \
-			-DAUTOCONF_H=$(abspath $(CURDIR)/include/generated/autoconf.h) \
+			-DAUTOCONF_H=$(abspath $(CURDIR)/include/generated/gen_autoconf.h) \
 			$(if $(CMAKE_TOOLCHAIN_FILE),-DCMAKE_TOOLCHAIN_FILE=$(CMAKE_TOOLCHAIN_FILE)) \
 			$(if $(INSTALL_DEVELOPMENT_HEADERS),-DINSTALL_DEVELOPMENT_HEADERS=$(INSTALL_DEVELOPMENT_HEADERS)) \
 			$(CMAKE_EXTRA_FLAGS) \

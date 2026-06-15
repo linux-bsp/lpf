@@ -92,7 +92,7 @@ function(_kconfig_validate)
     endif()
 endfunction()
 
-# Setup compiler auto-include for autoconf.h
+# Setup compiler auto-include for gen_autoconf.h
 function(_kconfig_setup_autoinclude autoconf_h)
     if(NOT EXISTS "${autoconf_h}")
         message(WARNING "Configuration header not found: ${autoconf_h}")
@@ -100,7 +100,7 @@ function(_kconfig_setup_autoinclude autoconf_h)
         return()
     endif()
 
-    # Auto-include autoconf.h in all source files
+    # Auto-include gen_autoconf.h in all source files
     add_compile_options(-include "${autoconf_h}")
 
     # Add include directory for generated headers
@@ -188,12 +188,12 @@ function(kconfig_load)
     _kconfig_validate()
 
     # -------------------------------------------------------------------
-    # Step 4: Setup autoconf.h auto-include
+    # Step 4: Setup gen_autoconf.h auto-include
     # -------------------------------------------------------------------
     if(DEFINED AUTOCONF_H)
         set(autoconf_h "${AUTOCONF_H}")
     else()
-        set(autoconf_h "${CMAKE_BINARY_DIR}/include/generated/autoconf.h")
+        set(autoconf_h "${CMAKE_BINARY_DIR}/include/generated/gen_autoconf.h")
     endif()
 
     _kconfig_setup_autoinclude("${autoconf_h}")

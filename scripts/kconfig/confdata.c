@@ -224,7 +224,7 @@ static const char *conf_get_autoheader_name(void)
 {
 	char *name = getenv("KCONFIG_AUTOHEADER");
 
-	return name ? name : "include/generated/autoconf.h";
+	return name ? name : "include/generated/gen_autoconf.h";
 }
 
 static const char *conf_get_rustccfg_name(void)

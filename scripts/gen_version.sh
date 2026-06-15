@@ -1,12 +1,12 @@
 #!/bin/bash
 #
-# Generate include/generated/version.h with build information
+# Generate include/generated/gen_version.h with build information
 # Similar to Linux kernel version information
 #
 
 set -e
 
-OUTPUT_FILE="include/generated/version.h"
+OUTPUT_FILE="include/generated/gen_version.h"
 TEMP_FILE="${OUTPUT_FILE}.tmp"
 
 # Ensure include/generated directory exists
