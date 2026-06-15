@@ -27,8 +27,16 @@ include/version.h
 # Kconfig 工具（编译产物）
 scripts/kconfig/conf
 scripts/kconfig/mconf
+scripts/kconfig/nconf
+scripts/kconfig/gconf
+scripts/kconfig/qconf
 scripts/kconfig/*.o
 scripts/kconfig/lxdialog/*.o
+scripts/kconfig/.*.cmd
+scripts/kconfig/lxdialog/.*.cmd
+scripts/kconfig/*-cflags
+scripts/kconfig/*-libs
+scripts/kconfig/*-bin
 
 # 编辑器临时文件
 *~
