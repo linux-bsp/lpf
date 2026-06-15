@@ -1,17 +1,17 @@
 # ES-Middleware SDK
 
-ES-Middleware (Embedded Software - Middleware) 是一个采用 **Kconfig + CMake** 混合构建系统的嵌入式软件开发框架。
+ES-Middleware (Embedded Software - Middleware) 是一个采用 Kconfig + CMake 混合构建系统的嵌入式软件开发框架。
 
-## ✨ 特性
+## 特性
 
-- 🎯 **模块化架构**: Core/Products 分层设计，核心组件可复用
-- ⚙️ **灵活配置**: Kconfig 图形化配置，支持功能裁剪
-- 🚀 **快速构建**: CMake 构建系统，支持并行编译
-- 📦 **多产品支持**: 一套代码支持多个产品变体
-- 🔧 **跨平台**: 支持 Linux/RTOS/Bare-metal
-- 📋 **场景化配置**: 提供开发、生产、测试等多种预定义配置
+- 模块化架构: Core/Products 分层设计，核心组件可复用
+- 配置系统: Kconfig 图形化配置，支持功能裁剪
+- 构建系统: CMake 构建，支持并行编译
+- 多产品支持: 一套代码支持多个产品变体
+- 跨平台: 支持 Linux/RTOS/Bare-metal
+- 预定义配置: 提供开发、生产、测试等配置
 
-## 🚀 快速开始
+## 快速开始
 
 ### 1. 环境准备
 
@@ -69,18 +69,18 @@ make distclean         # 完全清理
 - 🔌 [PRL 架构设计](docs/PRL_ARCHITECTURE.md) - 协议层架构详解
 
 ### 构建系统
-- 🔨 [构建系统指南](docs/BUILD_SYSTEM_USER_GUIDE.md) - 完整的构建命令和工作流程
-- ⚙️ [配置目录结构](docs/CONFIG_STRUCTURE.md) - 配置文件组织方式
+- [构建系统指南](docs/BUILD_SYSTEM_USER_GUIDE.md) - 完整的构建命令和工作流程
+- [配置目录结构](docs/CONFIG_STRUCTURE.md) - 配置文件组织方式
 
 ### 设计文档
-- 🔄 [ES-IPC 设计](docs/ES-IPC_DESIGN.md) - 进程间通信设计
-- 📋 [版本信息](docs/VERSION_INFO.md) - 版本管理说明
+- [ES-IPC 设计](docs/ES-IPC_DESIGN.md) - 进程间通信设计
+- [版本信息](docs/VERSION_INFO.md) - 版本管理说明
 
 ### 项目指南
-- 📋 [项目完整指南](CLAUDE.md) - AI 助手使用的项目上下文
-- 📝 [变更日志](CHANGELOG.md) - 项目更新记录
+- [项目完整指南](CLAUDE.md) - AI 助手使用的项目上下文
+- [变更日志](CHANGELOG.md) - 项目更新记录
 
-## 📂 项目结构
+## 项目结构
 
 ```
 ES-Middleware/
@@ -100,7 +100,7 @@ ES-Middleware/
 ├── docs/                     # 文档
 ```
 
-## 🎯 可用配置
+## 可用配置
 
 ### 产品配置（位于 configs/ccm/）
 
@@ -140,7 +140,7 @@ ES-Middleware/
 | `tests_arm64_system_defconfig` | 系统集成测试 |
 | `tests_arm64_stress_defconfig` | 压力测试 |
 
-## 🔧 常用命令
+## 常用命令
 
 ```bash
 # 列出所有可用配置
@@ -222,7 +222,7 @@ make help
 
 **内存占用**: ~20KB + 配置表
 
-## 🎓 学习路径
+## 学习路径
 
 ### 第一步：运行示例
 ```bash
@@ -246,29 +246,29 @@ make             # 重新编译
 ### 第五步：添加新功能
 参考 [CLAUDE.md](CLAUDE.md) 中的开发指南，添加自己的模块或应用。
 
-## 🤝 贡献代码
+## 贡献代码
 
 欢迎贡献！请参考：
 - [命名规范](docs/NAMING_CONVENTIONS.md)
 - [项目指南](CLAUDE.md)
 
 提交 Pull Request 前请确保：
-- ✅ 代码符合命名规范
-- ✅ 所有配置编译通过
-- ✅ 添加了必要的测试
-- ✅ 更新了相关文档
+- 代码符合命名规范
+- 所有配置编译通过
+- 添加了必要的测试
+- 更新了相关文档
 
-## 📊 项目状态
+## 项目状态
 
-- ✅ 核心架构稳定
-- ✅ 构建系统完善（Kconfig + CMake）
-- ✅ 22 个配置全部测试通过
-- ✅ 压力测试 100% 通过率
-- ✅ PRL 协议层重构完成（v1.2）
-- ✅ 命名规范统一完成
-- ✅ 配置目录结构优化（子目录组织）
+- 核心架构稳定
+- 构建系统完善（Kconfig + CMake）
+- 22 个配置全部测试通过
+- 压力测试 100% 通过率
+- PRL 协议层重构完成（v1.2）
+- 命名规范统一完成
+- 配置目录结构优化（子目录组织）
 
-## 🐛 问题反馈
+## 问题反馈
 
 遇到问题？
 1. 查看 [构建系统指南](docs/BUILD_SYSTEM_USER_GUIDE.md)
@@ -276,7 +276,7 @@ make             # 重新编译
 3. 搜索 [Issues](https://github.com/wanguo99/ES-Middleware/issues)
 4. 提交新的 Issue
 
-## 📄 许可证
+## 许可证
 
 [MIT License](LICENSE)
 
