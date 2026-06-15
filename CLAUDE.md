@@ -641,21 +641,15 @@ core/prl/
 │   ├── prl.h              # 对外统一头文件（推荐使用）
 │   ├── prl_common.h       # 通用定义（内部）
 │   ├── prl_device.h       # 设备消息定义（内部）
-│   ├── prl_mcu.h          # MCU 设备协议
-│   ├── prl_ccm.h          # CCM 设备协议
-│   ├── prl_pmc.h          # PMC 设备协议
-│   ├── prl_gsc.h          # GSC 设备协议
-│   ├── prl_power.h        # POWER 设备协议
-│   └── prl_pmc_ccm.h      # 兼容层（已废弃）
+│   ├── prl_mcu.h          # MCU 设备协议定义
+│   ├── prl_ccm.h          # CCM 设备协议定义
+│   ├── prl_pmc.h          # PMC 设备协议定义
+│   ├── prl_gsc.h          # GSC 设备协议定义
+│   └── prl_power.h        # POWER 设备协议定义
 └── src/
     ├── prl_api.c          # 对外 API 实现
     ├── prl_common.c       # 通用实现
-    ├── prl_device.c       # 设备消息实现
-    ├── prl_mcu.c          # MCU 协议实现
-    ├── prl_ccm.c          # CCM 协议实现
-    ├── prl_pmc.c          # PMC 协议实现
-    ├── prl_gsc.c          # GSC 协议实现
-    └── prl_power.c        # POWER 协议实现
+    └── prl_device.c       # 设备消息统一实现
 ```
 
 ### PRL API 使用

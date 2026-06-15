@@ -14,30 +14,8 @@ list(APPEND ADD_SRCS
     "src/prl_api.c"
 )
 
-# MCU 协议（按设备类型组织）
-if(CONFIG_PRL_MCU)
-    list(APPEND ADD_SRCS "src/prl_mcu.c")
-endif()
-
-# CCM 协议（按设备类型组织）
-if(CONFIG_PRL_CCM)
-    list(APPEND ADD_SRCS "src/prl_ccm.c")
-endif()
-
-# PMC 协议（按设备类型组织）
-if(CONFIG_PRL_PMC)
-    list(APPEND ADD_SRCS "src/prl_pmc.c")
-endif()
-
-# GSC 协议（按设备类型组织）
-if(CONFIG_PRL_GSC)
-    list(APPEND ADD_SRCS "src/prl_gsc.c")
-endif()
-
-# POWER 协议（按设备类型组织）
-if(CONFIG_PRL_POWER)
-    list(APPEND ADD_SRCS "src/prl_power.c")
-endif()
+# 设备特定协议实现已集成到 prl_device.c
+# 头文件定义了各设备的消息类型和数据结构
 ###############################################
 
 ###### Add required/dependent components ######
