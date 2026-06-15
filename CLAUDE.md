@@ -1516,7 +1516,71 @@ add_custom_target(gen_header DEPENDS file.h)
 add_dependencies(mylib gen_header)  # 确保顺序
 ```
 
+## Buildroot 集成
+
+ES-Middleware 提供完整的 Buildroot 集成支持，可以轻松集成到嵌入式 Linux 系统构建中。
+
+### 集成文档
+
+完整的 Buildroot 集成文档和参考文件已归档到：
+
+📚 **[docs/buildroot/](docs/buildroot/)**
+
+包含文件：
+- **BUILDROOT_INTEGRATION.md** - 完整集成指南
+- **Config.in** - Buildroot menuconfig 选项参考
+- **es-middleware.mk** - Buildroot 包构建规则参考
+- **S90es-middleware** - SysV init 脚本模板
+- **local.mk.example** - 本地开发配置示例
+
+### 快速集成
+
+```bash
+# 1. 将 Buildroot 包文件复制到 buildroot-external
+cp -r docs/buildroot/* /path/to/buildroot-external/package/es-middleware/
+
+# 2. 在 Buildroot 中启用
+cd /path/to/buildroot
+make menuconfig
+# Target packages -> CSPD Packages -> [*] es-middleware
+
+# 3. 选择配置
+# - 开发测试: tests_arm64_full_defconfig
+# - 生产部署: ccm_h200_100p_am625_release_defconfig
+
+# 4. 构建
+make es-middleware
+```
+
+### 本地开发集成
+
+对于频繁修改 ES-Middleware 的开发场景：
+
+```bash
+# 使用 local.mk 指向本地源码（避免 git clone）
+cd buildroot-external/package/es-middleware/
+cp local.mk.example local.mk
+vim local.mk  # 设置 ES_MIDDLEWARE_OVERRIDE_SRCDIR
+
+# 快速迭代
+cd buildroot/
+make es-middleware-rebuild  # 直接使用本地修改
+```
+
+### 详细文档
+
+更多信息请参考：
+- [Buildroot 集成完整指南](docs/buildroot/BUILDROOT_INTEGRATION.md)
+- [构建系统用户指南](docs/BUILD_SYSTEM_USER_GUIDE.md)
+
+---
+
 ## 最近更新
+
+- **2026-06-15**: Buildroot 集成文档归档
+  - 将 Buildroot 集成文档归档到 `docs/buildroot/`
+  - 更新默认 defconfig 为 `tests_arm64_full_defconfig`（开发测试阶段）
+  - 完善集成指南和故障排除文档
 
 - **2026-06-11**: Kconfig + CMake 集成架构完成
   - **重大升级**：使用 CMake 原生集成配置管理系统

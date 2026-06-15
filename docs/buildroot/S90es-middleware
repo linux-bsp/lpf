@@ -1,0 +1,96 @@
+#!/bin/sh
+#
+# ES-Middleware init script
+#
+# Start ES-Middleware CCM services
+#
+
+DAEMON_COLLECTOR=/usr/bin/ccm_collector
+DAEMON_LOGGER=/usr/bin/ccm_logger
+DAEMON_HEALTH=/usr/bin/ccm_health
+DAEMON_SUPERVISOR=/usr/bin/ccm_supervisor
+DAEMON_COMM=/usr/bin/ccm_comm
+
+PIDFILE_DIR=/var/run/es-middleware
+mkdir -p $PIDFILE_DIR
+
+start() {
+	echo "Starting ES-Middleware services..."
+
+	# Start collector
+	if [ -x "$DAEMON_COLLECTOR" ]; then
+		echo -n "  Starting ccm_collector: "
+		start-stop-daemon -S -q -b -m -p $PIDFILE_DIR/collector.pid \
+			--exec $DAEMON_COLLECTOR
+		[ $? = 0 ] && echo "OK" || echo "FAIL"
+	fi
+
+	# Start logger
+	if [ -x "$DAEMON_LOGGER" ]; then
+		echo -n "  Starting ccm_logger: "
+		start-stop-daemon -S -q -b -m -p $PIDFILE_DIR/logger.pid \
+			--exec $DAEMON_LOGGER
+		[ $? = 0 ] && echo "OK" || echo "FAIL"
+	fi
+
+	# Start health monitor
+	if [ -x "$DAEMON_HEALTH" ]; then
+		echo -n "  Starting ccm_health: "
+		start-stop-daemon -S -q -b -m -p $PIDFILE_DIR/health.pid \
+			--exec $DAEMON_HEALTH
+		[ $? = 0 ] && echo "OK" || echo "FAIL"
+	fi
+
+	# Start supervisor
+	if [ -x "$DAEMON_SUPERVISOR" ]; then
+		echo -n "  Starting ccm_supervisor: "
+		start-stop-daemon -S -q -b -m -p $PIDFILE_DIR/supervisor.pid \
+			--exec $DAEMON_SUPERVISOR
+		[ $? = 0 ] && echo "OK" || echo "FAIL"
+	fi
+
+	# Start communication service
+	if [ -x "$DAEMON_COMM" ]; then
+		echo -n "  Starting ccm_comm: "
+		start-stop-daemon -S -q -b -m -p $PIDFILE_DIR/comm.pid \
+			--exec $DAEMON_COMM
+		[ $? = 0 ] && echo "OK" || echo "FAIL"
+	fi
+}
+
+stop() {
+	echo "Stopping ES-Middleware services..."
+
+	# Stop in reverse order
+	for service in comm supervisor health logger collector; do
+		if [ -f $PIDFILE_DIR/${service}.pid ]; then
+			echo -n "  Stopping ccm_${service}: "
+			start-stop-daemon -K -q -p $PIDFILE_DIR/${service}.pid
+			[ $? = 0 ] && echo "OK" || echo "FAIL"
+			rm -f $PIDFILE_DIR/${service}.pid
+		fi
+	done
+}
+
+restart() {
+	stop
+	sleep 1
+	start
+}
+
+case "$1" in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	restart|reload)
+		restart
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
+		exit 1
+esac
+
+exit $?
