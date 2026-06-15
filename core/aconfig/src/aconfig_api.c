@@ -1,19 +1,17 @@
 /**
  * @file aconfig_api.c
- * @brief ACONFIG 层 API 实现（优化版 + 兼容性支持）
+ * @brief ACONFIG 层 API 实现（优化版）
  * @note 优化要点：
  *       1. 适配稀疏数组结构（tc_entries/tm_entries）
  *       2. 失效映射从 TC 配置中内嵌读取
- *       3. 保持对旧版配置表的兼容性支持
  */
 
 #include "osal.h"
 #include "aconfig.h"
 #include "aconfig_internal.h"
 
-/* 全局配置表（支持新旧两种格式） */
+/* 全局配置表 */
 static const aconfig_config_table_t *g_acl_table = NULL;
-static const aconfig_config_table_legacy_t *g_acl_table_legacy = NULL;
 
 /* 读写锁保护全局配置表（读多写少场景） */
 static osal_rwlock_t g_acl_rwlock = PTHREAD_RWLOCK_INITIALIZER;
@@ -24,14 +22,13 @@ static osal_rwlock_t g_acl_rwlock = PTHREAD_RWLOCK_INITIALIZER;
 int32_t ACONFIG_Init(void)
 {
     g_acl_table = NULL;
-    g_acl_table_legacy = NULL;
 
-    LOG_INFO("ACL", "Initialized (optimized version with legacy compatibility)");
+    LOG_INFO("ACL", "Initialized (optimized version)");
     return OSAL_SUCCESS;
 }
 
 /**
- * @brief 注册配置表（优化版）
+ * @brief 注册配置表
  */
 int32_t ACONFIG_RegisterTable(const aconfig_config_table_t *table)
 {
@@ -49,14 +46,13 @@ int32_t ACONFIG_RegisterTable(const aconfig_config_table_t *table)
         return ret;
     }
 
-    if (NULL != g_acl_table || NULL != g_acl_table_legacy) {
+    if (NULL != g_acl_table) {
         LOG_WARN("ACL", "Table already registered, overwriting");
     }
 
     g_acl_table = table;
-    g_acl_table_legacy = NULL;
 
-    LOG_INFO("ACL", "Registered table '%s' (TC:%u entries, TM:%u entries) [NEW FORMAT]",
+    LOG_INFO("ACL", "Registered table '%s' (TC:%u entries, TM:%u entries)",
                table->name,
                table->tc_count,
                table->tm_count);
@@ -68,45 +64,7 @@ int32_t ACONFIG_RegisterTable(const aconfig_config_table_t *table)
 }
 
 /**
- * @brief 注册配置表（旧版兼容性支持）
- */
-int32_t ACONFIG_RegisterTableLegacy(const aconfig_config_table_legacy_t *table)
-{
-    int32_t ret;
-
-    if (NULL == table) {
-        LOG_ERROR("ACL", "Invalid table pointer");
-        return OSAL_ERR_INVALID_POINTER;
-    }
-
-    /* 获取写锁（独占访问） */
-    ret = OSAL_pthread_rwlock_wrlock(&g_acl_rwlock);
-    if (OSAL_SUCCESS != ret) {
-        LOG_ERROR("ACL", "Failed to acquire write lock: %d", ret);
-        return ret;
-    }
-
-    if (NULL != g_acl_table || NULL != g_acl_table_legacy) {
-        LOG_WARN("ACL", "Table already registered, overwriting");
-    }
-
-    g_acl_table = NULL;
-    g_acl_table_legacy = table;
-
-    LOG_INFO("ACL", "Registered table '%s' (TC:%u, TM:%u, INV:%u) [LEGACY FORMAT]",
-               table->name,
-               table->tc_count,
-               table->tm_count,
-               table->inv_count);
-
-    /* 释放写锁 */
-    OSAL_pthread_rwlock_unlock(&g_acl_rwlock);
-
-    return OSAL_SUCCESS;
-}
-
-/**
- * @brief 查询遥控配置（支持新旧两种格式）
+ * @brief 查询遥控配置（稀疏数组查找）
  */
 const aconfig_tc_config_t* ACONFIG_GetTcConfig(uint32_t function_id)
 {
@@ -118,20 +76,17 @@ const aconfig_tc_config_t* ACONFIG_GetTcConfig(uint32_t function_id)
         return NULL;
     }
 
-    /* 新格式：稀疏数组 */
-    if (NULL != g_acl_table && NULL != g_acl_table->tc_entries) {
-        for (i = 0; i < g_acl_table->tc_count; i++) {
-            if (g_acl_table->tc_entries[i].function_id == function_id) {
-                config = &g_acl_table->tc_entries[i].config;
-                break;
-            }
-        }
+    /* NULL 检查 */
+    if (NULL == g_acl_table || NULL == g_acl_table->tc_entries) {
+        OSAL_pthread_rwlock_unlock(&g_acl_rwlock);
+        return NULL;
     }
-    /* 旧格式：密集数组（兼容性支持） */
-    else if (NULL != g_acl_table_legacy && NULL != g_acl_table_legacy->tc_table) {
-        if (function_id < g_acl_table_legacy->tc_count) {
-            /* 旧格式直接索引访问 */
-            config = (const aconfig_tc_config_t *)&g_acl_table_legacy->tc_table[function_id];
+
+    /* 查找匹配的 function_id（稀疏数组线性查找）*/
+    for (i = 0; i < g_acl_table->tc_count; i++) {
+        if (g_acl_table->tc_entries[i].function_id == function_id) {
+            config = &g_acl_table->tc_entries[i].config;
+            break;
         }
     }
 
@@ -142,7 +97,7 @@ const aconfig_tc_config_t* ACONFIG_GetTcConfig(uint32_t function_id)
 }
 
 /**
- * @brief 查询遥测配置（支持新旧两种格式）
+ * @brief 查询遥测配置（稀疏数组查找）
  */
 const aconfig_tm_config_t* ACONFIG_GetTmConfig(uint32_t function_id)
 {
@@ -154,20 +109,17 @@ const aconfig_tm_config_t* ACONFIG_GetTmConfig(uint32_t function_id)
         return NULL;
     }
 
-    /* 新格式：稀疏数组 */
-    if (NULL != g_acl_table && NULL != g_acl_table->tm_entries) {
-        for (i = 0; i < g_acl_table->tm_count; i++) {
-            if (g_acl_table->tm_entries[i].function_id == function_id) {
-                config = &g_acl_table->tm_entries[i].config;
-                break;
-            }
-        }
+    /* NULL 检查 */
+    if (NULL == g_acl_table || NULL == g_acl_table->tm_entries) {
+        OSAL_pthread_rwlock_unlock(&g_acl_rwlock);
+        return NULL;
     }
-    /* 旧格式：密集数组（兼容性支持） */
-    else if (NULL != g_acl_table_legacy && NULL != g_acl_table_legacy->tm_table) {
-        if (function_id < g_acl_table_legacy->tm_count) {
-            /* 旧格式直接索引访问 */
-            config = (const aconfig_tm_config_t *)&g_acl_table_legacy->tm_table[function_id];
+
+    /* 查找匹配的 function_id（稀疏数组线性查找）*/
+    for (i = 0; i < g_acl_table->tm_count; i++) {
+        if (g_acl_table->tm_entries[i].function_id == function_id) {
+            config = &g_acl_table->tm_entries[i].config;
+            break;
         }
     }
 

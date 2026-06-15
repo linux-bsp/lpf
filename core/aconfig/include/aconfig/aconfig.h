@@ -41,14 +41,6 @@ int32_t ACONFIG_Init(void);
 int32_t ACONFIG_RegisterTable(const aconfig_config_table_t *table);
 
 /**
- * @brief 注册配置表（旧版兼容性支持）
- * @param table 配置表指针（旧格式）
- * @return OSAL_SUCCESS 成功，OSAL_ERR_* 失败
- * @deprecated 新代码应使用 ACONFIG_RegisterTable()
- */
-int32_t ACONFIG_RegisterTableLegacy(const aconfig_config_table_legacy_t *table);
-
-/**
  * @brief 查询遥控配置（O(1)）
  * @param function_id 功能 ID
  * @return 配置指针（只读），失败返回 NULL
