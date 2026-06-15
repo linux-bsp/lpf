@@ -1,4 +1,20 @@
-# Test Configuration
+# ============================================================================
+# Core Modules Test Suite Configuration
+# ============================================================================
+# This test product provides comprehensive testing for all core SDK modules:
+#   - OSAL (Operating System Abstraction Layer)
+#   - HAL (Hardware Abstraction Layer)
+#   - PDL (Peripheral Driver Library)
+#   - PRL (Peripheral Resource Library)
+#   - PCONFIG (Platform Configuration)
+#   - ACONFIG (Application Configuration)
+#
+# Test categories:
+#   - Unit: Individual component/function testing
+#   - Performance: Benchmarking and profiling
+#   - Stress: Stability and resource exhaustion testing
+#   - System: Integration and end-to-end testing
+# ============================================================================
 
 config TEST_UNIT
 	bool "Build unit tests"
@@ -93,7 +109,7 @@ config TEST_PCONFIG
 	  in the PCONFIG Unit Tests submenu.
 
 # Source fine-grained unit test configurations
-source "products/tests/unit/Config.in"
+source "products/core-tests/unit/Config.in"
 
 endif # TEST_UNIT
 
@@ -143,7 +159,7 @@ config TEST_PERFORMANCE_ACL
 	  Build ACL layer performance tests.
 
 # Source fine-grained performance test configurations
-source "products/tests/performance/Config.in"
+source "products/core-tests/performance/Config.in"
 
 endif # TEST_PERFORMANCE
 
@@ -193,7 +209,7 @@ config TEST_STRESS_ACL
 	  Build ACL layer stress tests.
 
 # Source fine-grained stress test configurations
-source "products/tests/stress/Config.in"
+source "products/core-tests/stress/Config.in"
 
 endif # TEST_STRESS
 
@@ -263,6 +279,6 @@ config TEST_INTEGRATION
 	  Build integration tests verifying interactions between modules.
 
 # Source fine-grained system and integration test configurations
-source "products/tests/system/Config.in"
+source "products/core-tests/system/Config.in"
 
 endif # TEST_SYSTEM

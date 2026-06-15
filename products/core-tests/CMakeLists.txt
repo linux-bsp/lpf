@@ -1,8 +1,16 @@
 # ============================================================================
-# ES-Middleware Test Suite CMakeLists.txt
+# Core Modules Test Suite CMakeLists.txt
 # ============================================================================
-# This builds the test suite as a special "product".
-# Tests are conditionally compiled based on Config.in configuration.
+# This is a special "product" dedicated to testing ES-Middleware core modules.
+# Unlike regular products (e.g., CCM), this product's sole purpose is to
+# provide comprehensive testing coverage for:
+#   - OSAL, HAL, PDL, PRL, PCONFIG, ACONFIG
+#
+# Test categories:
+#   - Unit: Component-level testing
+#   - Performance: Benchmarking and profiling
+#   - Stress: Stability and resource testing
+#   - System: Integration testing
 #
 # Test Discovery System:
 # - Test files are automatically discovered and matched to Kconfig options

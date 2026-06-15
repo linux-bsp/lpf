@@ -827,6 +827,6 @@ config BUILD_TESTING
 
 if BUILD_TESTING
 	menu "Test Configuration"
-		source "products/tests/Config.in"
+		source "products/core-tests/Config.in"
 	endmenu
 endif
