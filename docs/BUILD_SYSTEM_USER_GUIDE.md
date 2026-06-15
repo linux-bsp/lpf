@@ -477,7 +477,7 @@ make
    - Validation messages
    - Configuration statistics
    - Next-step suggestions
-   - ✓ Success indicators
+   - [Success] Success indicators
 
 5. **Better error handling**
    - Invalid configuration detection

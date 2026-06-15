@@ -244,16 +244,16 @@ int32 PDL_Sensor_Read(pdl_sensor_handle_t *handle,
 ### 编码规范（重要）
 
 **必须遵守**：
-- ✅ 使用HAL层接口访问硬件：`HAL_CAN_*()`, `HAL_Serial_*()`
-- ❌ 禁止直接调用OSAL系统调用：`OSAL_socket()`, `OSAL_open()`
-- ✅ 使用OSAL日志：`LOG_INFO()`, `LOG_ERROR()`
-- ❌ 禁止使用：`printf()`, `fprintf()`
-- ✅ 使用PCL配置：`PCONFIG_GetMCUConfig()`
-- ❌ 禁止硬编码配置
+- [正确] 使用HAL层接口访问硬件：`HAL_CAN_*()`, `HAL_Serial_*()`
+- [错误] 禁止直接调用OSAL系统调用：`OSAL_socket()`, `OSAL_open()`
+- [正确] 使用OSAL日志：`LOG_INFO()`, `LOG_ERROR()`
+- [错误] 禁止使用：`printf()`, `fprintf()`
+- [正确] 使用PCL配置：`PCONFIG_GetMCUConfig()`
+- [错误] 禁止硬编码配置
 
 **示例**：
 ```c
-/* ✅ 正确 */
+/* [正确] 正确 */
 hal_can_config_t can_cfg = {
     .interface = "can0",
     .baudrate = 500000
@@ -261,7 +261,7 @@ hal_can_config_t can_cfg = {
 HAL_CAN_Init(&can_cfg, &handle->can_handle);
 LOG_INFO("PDL_MCU", "MCU initialized");
 
-/* ❌ 错误 */
+/* [错误] 错误 */
 int sockfd = OSAL_socket(PF_CAN, SOCK_RAW, CAN_RAW);  // 禁止
 printf("MCU initialized\n");                           // 禁止
 ```
@@ -312,10 +312,10 @@ if (mcu_cfg != NULL) {
 
 **Q: PDL可以直接调用OSAL系统调用吗？**
 ```c
-/* ❌ 禁止 - PDL必须通过HAL层访问硬件 */
+/* [错误] 禁止 - PDL必须通过HAL层访问硬件 */
 int sockfd = OSAL_socket(...);  // 禁止
 
-/* ✅ 正确 - 使用HAL层接口 */
+/* [正确] 正确 - 使用HAL层接口 */
 HAL_CAN_Init(&can_cfg, &handle);  // 正确
 ```
 

@@ -256,19 +256,19 @@ ip link show vcan0
 ### 编码规范（重要）
 
 **必须遵守**：
-- ✅ 使用OSAL封装的系统调用：`OSAL_socket()`, `OSAL_open()`, `OSAL_close()`
-- ❌ 禁止直接调用：`socket()`, `open()`, `close()`, `memcpy()`, `strlen()`（应使用 OSAL 封装）
-- ✅ 使用OSAL日志：`LOG_INFO()`, `LOG_ERROR()`
-- ❌ 禁止使用：`printf()`, `fprintf()`
+- [正确] 使用OSAL封装的系统调用：`OSAL_socket()`, `OSAL_open()`, `OSAL_close()`
+- [错误] 禁止直接调用：`socket()`, `open()`, `close()`, `memcpy()`, `strlen()`（应使用 OSAL 封装）
+- [正确] 使用OSAL日志：`LOG_INFO()`, `LOG_ERROR()`
+- [错误] 禁止使用：`printf()`, `fprintf()`
 
 **示例**：
 ```c
-/* ✅ 正确 */
+/* [正确] 正确 */
 int32 sockfd = OSAL_socket(PF_CAN, SOCK_RAW, CAN_RAW);
 OSAL_bind(sockfd, (struct sockaddr *)&addr, OSAL_sizeof(addr));
 LOG_INFO("HAL_CAN", "CAN initialized");
 
-/* ❌ 错误 */
+/* [错误] 错误 */
 int sockfd = socket(PF_CAN, SOCK_RAW, CAN_RAW);  // 禁止
 bind(sockfd, ...);                                // 禁止
 printf("CAN initialized\n");                      // 禁止

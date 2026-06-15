@@ -51,13 +51,13 @@
 头文件保护宏必须包含模块前缀，避免冲突：
 
 ```c
-// ✅ 正确：包含模块前缀
+// [正确] 正确：包含模块前缀
 #ifndef HAL_CAN_TYPES_H
 #define HAL_CAN_TYPES_H
 ...
 #endif /* HAL_CAN_TYPES_H */
 
-// ❌ 错误：缺少模块前缀
+// [错误] 错误：缺少模块前缀
 #ifndef CAN_TYPES_H
 #define CAN_TYPES_H
 ...
@@ -81,7 +81,7 @@ typedef enum {
 **规则**: 枚举值必须包含模块前缀，避免全局命名空间污染。
 
 ```c
-// ✅ 正确：包含模块前缀
+// [正确] 正确：包含模块前缀
 typedef enum {
     ACONFIG_TC_POWER_ON = 0,
     ACONFIG_TC_POWER_OFF = 1,
@@ -89,7 +89,7 @@ typedef enum {
     ACONFIG_TC_FUNC_MAX = 1000
 } aconfig_tc_function_t;
 
-// ❌ 错误：缺少模块前缀
+// [错误] 错误：缺少模块前缀
 typedef enum {
     TC_POWER_ON = 0,      // 可能与其他模块冲突
     TC_POWER_OFF = 1,
@@ -135,13 +135,13 @@ typedef struct {
 #### 4.2.1 时间相关成员
 
 ```c
-// ✅ 推荐：明确表达含义
+// [正确] 推荐：明确表达含义
 typedef struct {
     uint32_t data_validity_ms;           /* 数据有效期（毫秒） */
     uint32_t background_update_period_ms; /* 后台更新周期（毫秒） */
 } aconfig_tm_config_t;
 
-// ❌ 避免：含义不明确
+// [错误] 避免：含义不明确
 typedef struct {
     uint32_t validity_ms;      /* 什么的有效期？ */
     uint32_t update_period_ms; /* 什么的更新周期？ */
@@ -151,13 +151,13 @@ typedef struct {
 #### 4.2.2 指针成员
 
 ```c
-// ✅ 推荐：明确表达用途
+// [正确] 推荐：明确表达用途
 typedef struct {
     void *user_context;        /* 用户上下文（项目特定） */
     void *private_data;        /* 私有数据（内部使用） */
 } module_config_t;
 
-// ❌ 避免：含义模糊
+// [错误] 避免：含义模糊
 typedef struct {
     void *extra_data;          /* 什么额外数据？ */
     void *data;                /* 什么数据？ */
@@ -301,9 +301,9 @@ hal_can_frame_t frame;
 指针变量名称应体现其指向的类型：
 
 ```c
-osal_thread_t *thread;          // ✅ 清晰
-hal_can_frame_t *frame_ptr;     // ✅ 可接受
-void *ptr;                      // ❌ 避免（除非必要）
+osal_thread_t *thread;          // [正确] 清晰
+hal_can_frame_t *frame_ptr;     // [正确] 可接受
+void *ptr;                      // [错误] 避免（除非必要）
 ```
 
 ## 9. 常见命名模式
@@ -349,21 +349,21 @@ int32_t MODULE_SetConfig(module_handle_t handle, const module_config_t *config);
 ### 10.1 避免的命名
 
 ```c
-// ❌ 避免：匈牙利命名法
+// [错误] 避免：匈牙利命名法
 int32_t iCount;
 uint32_t u32DataLen;
 
-// ❌ 避免：过度缩写
+// [错误] 避免：过度缩写
 int32_t cnt;
 int32_t tmp;
 int32_t buf_sz;
 
-// ❌ 避免：无意义的名称
+// [错误] 避免：无意义的名称
 int32_t data;
 void *ptr;
 int32_t value;
 
-// ❌ 避免：拼音命名
+// [错误] 避免：拼音命名
 int32_t shuju_len;
 void *huancun;
 ```
@@ -371,7 +371,7 @@ void *huancun;
 ### 10.2 推荐的命名
 
 ```c
-// ✅ 推荐：清晰的英文命名
+// [正确] 推荐：清晰的英文命名
 int32_t count;
 uint32_t data_len;
 int32_t buffer_size;

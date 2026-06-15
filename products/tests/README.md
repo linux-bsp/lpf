@@ -491,7 +491,7 @@ tests/
 
 ### 添加新的测试模块
 
-**⚡ 快速开始：** 查看 [如何添加测试完整指南](examples/HOWTO_ADD_TEST.md)
+**[提示] 快速开始：** 查看 [如何添加测试完整指南](examples/HOWTO_ADD_TEST.md)
 
 ### 简化流程（推荐）
 
@@ -658,15 +658,15 @@ TEST_ASSERT_MEM_EQUAL(expected, actual, size)
 ### 编码规范（重要）
 
 **必须遵守**：
-- ✅ 使用测试框架宏：`TEST_MODULE_BEGIN/END`, `TEST_CASE`, `TEST_ASSERT_*`
-- ✅ 使用OSAL日志：`LOG_INFO()`, `LOG_ERROR()`
-- ❌ 禁止使用：`printf()`, `fprintf()`
-- ✅ 测试用例必须独立，不依赖执行顺序
-- ✅ 测试后清理资源（任务、队列、互斥锁等）
+- [正确] 使用测试框架宏：`TEST_MODULE_BEGIN/END`, `TEST_CASE`, `TEST_ASSERT_*`
+- [正确] 使用OSAL日志：`LOG_INFO()`, `LOG_ERROR()`
+- [错误] 禁止使用：`printf()`, `fprintf()`
+- [正确] 测试用例必须独立，不依赖执行顺序
+- [正确] 测试后清理资源（任务、队列、互斥锁等）
 
 **示例**：
 ```c
-/* ✅ 正确 */
+/* [正确] 正确 */
 TEST_CASE(test_example)
 {
     osal_id_t task_id;
@@ -678,7 +678,7 @@ TEST_CASE(test_example)
     OSAL_TaskDelete(task_id);
 }
 
-/* ❌ 错误 */
+/* [错误] 错误 */
 TEST_CASE(test_example)
 {
     osal_id_t task_id;
@@ -696,7 +696,7 @@ TEST_CASE(test_example)
 每个测试用例必须独立，不依赖其他测试的执行结果：
 
 ```c
-/* ✅ 正确 - 每个测试独立创建资源 */
+/* [正确] 正确 - 每个测试独立创建资源 */
 TEST_CASE(test_queue_send)
 {
     osal_id_t queue_id;
@@ -709,7 +709,7 @@ TEST_CASE(test_queue_send)
     OSAL_QueueDelete(queue_id);
 }
 
-/* ❌ 错误 - 依赖全局变量 */
+/* [错误] 错误 - 依赖全局变量 */
 static osal_id_t g_queue_id;  // 全局变量
 
 TEST_CASE(test_queue_send)
@@ -748,7 +748,7 @@ TEST_CASE(test_with_cleanup)
 涉及阻塞操作的测试必须设置合理的超时：
 
 ```c
-/* ✅ 正确 - 设置超时 */
+/* [正确] 正确 - 设置超时 */
 TEST_CASE(test_queue_receive)
 {
     osal_id_t queue_id;
@@ -761,7 +761,7 @@ TEST_CASE(test_queue_receive)
     OSAL_QueueDelete(queue_id);
 }
 
-/* ❌ 错误 - 无超时，可能永久阻塞 */
+/* [错误] 错误 - 无超时，可能永久阻塞 */
 TEST_CASE(test_queue_receive)
 {
     osal_id_t queue_id;

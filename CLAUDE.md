@@ -565,7 +565,7 @@ EOF
 **所有头文件引用不使用命名空间前缀**，直接使用文件名：
 
 ```c
-/* 正确 ✓ */
+/* 正确 */
 #include "osal.h"
 #include "hal_can.h"
 #include "pdl.h"
@@ -573,7 +573,7 @@ EOF
 #include "pconfig.h"
 #include "aconfig.h"
 
-/* 错误 ✗ - 不要使用命名空间前缀 */
+/* 错误 - 不要使用命名空间前缀 */
 #include "osal/osal.h"
 #include "hal/hal_can.h"
 #include "pdl/pdl.h"

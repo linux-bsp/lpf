@@ -375,16 +375,16 @@ const pconfig_bmc_t* PCONFIG_GetBMCConfigs(uint32 *count)
 ### 编码规范（重要）
 
 **必须遵守**：
-- ✅ PCL必须保持完全平台无关
-- ❌ 禁止包含任何系统头文件（`<unistd.h>`, `<sys/socket.h>` 等）
-- ❌ 禁止调用任何系统API或OSAL接口
-- ✅ 只能使用OSAL类型定义（`osal_types.h`）
-- ✅ 配置数据必须使用 `const` 修饰
-- ✅ 使用 `static` 限制配置数据的作用域
+- [正确] PCL必须保持完全平台无关
+- [错误] 禁止包含任何系统头文件（`<unistd.h>`, `<sys/socket.h>` 等）
+- [错误] 禁止调用任何系统API或OSAL接口
+- [正确] 只能使用OSAL类型定义（`osal_types.h`）
+- [正确] 配置数据必须使用 `const` 修饰
+- [正确] 使用 `static` 限制配置数据的作用域
 
 **示例**：
 ```c
-/* ✅ 正确 - 纯配置数据 */
+/* [正确] 正确 - 纯配置数据 */
 static const pconfig_mcu_t mcu_configs[] = {
     {
         .name = "mcu0",
@@ -396,7 +396,7 @@ static const pconfig_mcu_t mcu_configs[] = {
     }
 };
 
-/* ❌ 错误 - 包含系统调用 */
+/* [错误] 错误 - 包含系统调用 */
 const pconfig_mcu_t* PCONFIG_GetMCUConfigs(uint32 *count)
 {
     int fd = open("/dev/can0", O_RDWR);  // 禁止

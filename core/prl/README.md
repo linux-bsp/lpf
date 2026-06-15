@@ -92,13 +92,13 @@ if (ret == PRL_OK) {
 
 | 设备类型 | 枚举值 | 头文件 | 说明 | 是否使用 PRL |
 |---------|--------|--------|------|-------------|
-| MCU | `PRL_DEV_TYPE_MCU` | `prl_mcu.h` | 微控制器 | ✅ 是 |
-| CCM | `PRL_DEV_TYPE_CCM` | `prl_ccm.h` | 通信管理板 | ✅ 是 |
-| PMC | `PRL_DEV_TYPE_PMC` | `prl_pmc.h` | 载荷管理器 | ✅ 是 |
-| GSC | `PRL_DEV_TYPE_GSC` | `prl_gsc.h` | 地面站控制器 | ✅ 是 |
-| POWER | `PRL_DEV_TYPE_POWER` | `prl_power.h` | 电源板 | ✅ 是 |
-| SATELLITE | `PRL_DEV_TYPE_SATELLITE` | - | 卫星平台 | ❌ 否（使用卫星专用协议） |
-| BMC | `PRL_DEV_TYPE_BMC` | - | 基板管理控制器 | ❌ 否（使用 IPMI/Redfish） |
+| MCU | `PRL_DEV_TYPE_MCU` | `prl_mcu.h` | 微控制器 | 是 是 |
+| CCM | `PRL_DEV_TYPE_CCM` | `prl_ccm.h` | 通信管理板 | 是 是 |
+| PMC | `PRL_DEV_TYPE_PMC` | `prl_pmc.h` | 载荷管理器 | 是 是 |
+| GSC | `PRL_DEV_TYPE_GSC` | `prl_gsc.h` | 地面站控制器 | 是 是 |
+| POWER | `PRL_DEV_TYPE_POWER` | `prl_power.h` | 电源板 | 是 是 |
+| SATELLITE | `PRL_DEV_TYPE_SATELLITE` | - | 卫星平台 | 否 否（使用卫星专用协议） |
+| BMC | `PRL_DEV_TYPE_BMC` | - | 基板管理控制器 | 否 否（使用 IPMI/Redfish） |
 
 **注意**：协议是统一的，任何设备都可以与任何设备通信，只需指定正确的设备类型和消息类型。
 
