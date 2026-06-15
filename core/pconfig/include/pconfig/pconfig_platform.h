@@ -15,7 +15,6 @@
 #include "pconfig_bmc.h"
 #include "pconfig_fpga.h"
 #include "pconfig_switch.h"
-#include "pdl_misc.h"
 
 /*===========================================================================
  * 板级配置（顶层）
@@ -38,10 +37,6 @@ typedef struct {
 	const char *chip_name;		/* 芯片名称（如"am6254"） */
 	const char *project_name;	/* 项目名称（如"H200_100P"） */
 	const char *product_name;	/* 产品名称（如"h200_100p"） */
-
-	/* 硬件ID支持 */
-	uint32_t hwid_count;		/* 支持的HWID数量，0表示支持所有HWID */
-	const pdl_hwid_t *hwid_list;	/* 支持的HWID列表，NULL表示支持所有HWID */
 
 	/* 硬件外设配置数组（直接数组指针） */
 	uint32_t mcu_count;		/* MCU外设数量 */

@@ -71,7 +71,7 @@ config TEST_PDL
 	  Build PDL layer unit tests.
 	  This will automatically enable the PDL module.
 
-	  Note: PDL requires OSAL, HAL, PCONFIG, and TYPES. Enable these first.
+	  Note: PDL requires OSAL, HAL, PCONFIG, and TYPES.
 
 	  Fine-grained control over individual PDL test files is available
 	  in the PDL Unit Tests submenu.
