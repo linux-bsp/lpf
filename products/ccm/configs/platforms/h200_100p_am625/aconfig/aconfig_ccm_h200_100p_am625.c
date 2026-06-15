@@ -1,8 +1,8 @@
 /**
- * @file ccm_aconfig_config.c
- * @brief CCM 项目 AConfig 配置实现（新格式）
- * @note 项目层：提供 CCM 特定的配置表
- *       已迁移到优化格式：稀疏数组 + 设备索引 + 失效映射内嵌
+ * @file aconfig_ccm_h200_100p_am625.c
+ * @brief CCM H200-100P-AM625 Platform AConfig Configuration
+ * @note Product layer: CCM-specific configuration tables
+ *       Migrated to optimized format: sparse array + device index + embedded invalidation maps
  */
 
 #include "osal.h"

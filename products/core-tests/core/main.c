@@ -6,7 +6,7 @@
  * (osal-test, hal-test, pcl-test, pdl-test)
  */
 
-#include "test_core.h"
+#include "test_framework.h"
 #include "osal.h"
 
 /**
