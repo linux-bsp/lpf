@@ -271,14 +271,14 @@ config: scripts_basic FORCE
 		*) \
 			if [ "$(KBUILD_VERBOSE)" = "1" ]; then \
 				if echo "$$target" | grep -q "_defconfig$$"; then \
-					yes "" | $(MAKE) $(build)=scripts/kconfig $$target; \
+					$(MAKE) $(build)=scripts/kconfig $$target; \
 				else \
 					$(MAKE) $(build)=scripts/kconfig $$target; \
 				fi; \
 			else \
 				logfile=/tmp/kconfig.$$$$.log; \
 				if echo "$$target" | grep -q "_defconfig$$"; then \
-					yes "" | $(MAKE) --no-print-directory $(build)=scripts/kconfig $$target 2>&1 | \
+					$(MAKE) --no-print-directory $(build)=scripts/kconfig $$target 2>&1 | \
 					while IFS= read -r line; do \
 						case "$$line" in \
 							"  HOSTCC  "*|"  HOSTLD  "*|"  SHIPPED "*) \

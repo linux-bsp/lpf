@@ -99,7 +99,20 @@ else
 endif
 
 %_defconfig: $(obj)/conf
-	$(Q)$< $(silent) --defconfig=configs/tests/$@ $(Kconfig)
+	@defconfig_file=""; \
+	if [ -f "$(srctree)/configs/tests/$@" ]; then \
+		defconfig_file="$(srctree)/configs/tests/$@"; \
+	elif [ -f "$(srctree)/configs/ccm/$@" ]; then \
+		defconfig_file="$(srctree)/configs/ccm/$@"; \
+	elif [ -f "$(srctree)/configs/products/$@" ]; then \
+		defconfig_file="$(srctree)/configs/products/$@"; \
+	elif [ -f "$(srctree)/arch/$(SRCARCH)/configs/$@" ]; then \
+		defconfig_file="arch/$(SRCARCH)/configs/$@"; \
+	else \
+		echo "Error: defconfig file '$@' not found"; \
+		exit 1; \
+	fi; \
+	$< $(silent) --defconfig=$$defconfig_file $(Kconfig)
 
 configfiles = $(wildcard $(srctree)/kernel/configs/$(1) $(srctree)/arch/$(SRCARCH)/configs/$(1))
 all-config-fragments = $(call configfiles,*.config)
