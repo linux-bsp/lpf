@@ -25,7 +25,6 @@
 
 /* CAN 总线 */
 #ifdef CONFIG_HAL_CAN
-#include "config/hal_can_config.h"
 #include "config/hal_can_types.h"
 #include "hal_can.h"
 #endif /* CONFIG_HAL_CAN */
