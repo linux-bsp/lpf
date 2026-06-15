@@ -49,6 +49,7 @@ if(CONFIG_OSAL_IPC)
 
     if(CONFIG_OSAL_IPC_SHM)
         list(APPEND OSAL_SRCS "src/${OSAL_OS_DIR}/ipc/osal_shm.c")
+        list(APPEND OSAL_SRCS "src/${OSAL_OS_DIR}/ipc/osal_shm_highlevel.c")
         message(STATUS "  [OSAL] IPC: Shared memory enabled")
     endif()
 

@@ -38,6 +38,7 @@
 #include "ipc/osal_semaphore.h"
 #include "ipc/osal_shm.h"
 #include "ipc/osal_shm_cache.h"
+#include "ipc/osal_shm_highlevel.h"
 
 /* LIB - 标准库封装 */
 #include "lib/osal_errno.h"

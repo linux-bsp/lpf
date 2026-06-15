@@ -44,7 +44,7 @@ typedef struct {
     uint64_t timestamp_us;                  /* 时间戳(微秒) */
     uint32_t validity_ms;                   /* 有效期(毫秒) */
     ccm_tm_freshness_t freshness;           /* 新鲜度 */
-    osal_mutex_t *rwlock;                   /* 读写锁 */
+    osal_mutex_t rwlock;                    /* 读写锁 */
 } ccm_tm_cache_entry_t;
 
 /* 遥测缓存共享内存 */
