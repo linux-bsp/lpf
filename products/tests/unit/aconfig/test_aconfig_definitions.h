@@ -7,7 +7,7 @@
 #ifndef TEST_ACONFIG_DEFINITIONS_H
 #define TEST_ACONFIG_DEFINITIONS_H
 
-#include <stdint.h>
+#include "osal.h"
 
 /* ========================================================================
  * 测试用遥控功能枚举（独立于产品）
