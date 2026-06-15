@@ -529,19 +529,83 @@ config COMPILER_LTO
 
 	  Note: Increases build time significantly.
 
-config COMPILER_OPTIMIZATION_LEVEL
-	string "Custom optimization level"
-	default ""
+choice
+	prompt "Optimization level"
+	default COMPILER_OPT_DEFAULT
 	help
-	  Override default optimization level.
+	  Select compiler optimization level.
 
-	  Leave empty to use build type default:
-	    Debug: -O0
-	    Release: -O2
-	    RelWithDebInfo: -O2
-	    MinSizeRel: -Os
+	  Different optimization levels trade off between code size,
+	  compilation time, and runtime performance.
 
-	  Examples: -O0, -O1, -O2, -O3, -Os, -Ofast
+config COMPILER_OPT_DEFAULT
+	bool "Default (based on build type)"
+	help
+	  Use optimization level based on build type:
+	    Debug: -O0 (no optimization, best for debugging)
+	    Release: -O2 (recommended for production)
+	    RelWithDebInfo: -O2 (optimized with debug info)
+	    MinSizeRel: -Os (optimize for size)
+
+config COMPILER_OPT_O0
+	bool "-O0: No optimization"
+	help
+	  Disable all optimization. Best for debugging.
+	  Fastest compilation time.
+
+	  Note: Requires CONFIG_COMPILER_DISABLE_FORTIFY_WITH_O0
+	  in Buildroot/Yocto environments.
+
+config COMPILER_OPT_O1
+	bool "-O1: Basic optimization"
+	help
+	  Enable basic optimization that doesn't increase
+	  compilation time significantly. Good balance for
+	  debugging with some performance.
+
+config COMPILER_OPT_O2
+	bool "-O2: Recommended optimization"
+	help
+	  Enable most optimizations that don't involve a
+	  space-speed tradeoff. Recommended for production.
+
+config COMPILER_OPT_O3
+	bool "-O3: Aggressive optimization"
+	help
+	  Enable all optimizations including those that may
+	  increase code size. Maximum performance.
+
+config COMPILER_OPT_OS
+	bool "-Os: Optimize for size"
+	help
+	  Optimize for small code size. Good for embedded
+	  systems with limited flash/ROM.
+
+config COMPILER_OPT_OFAST
+	bool "-Ofast: Maximum speed (non-standard)"
+	help
+	  Enable all -O3 optimizations plus fast math.
+	  May not conform to standards (e.g., IEEE 754).
+
+config COMPILER_OPT_OG
+	bool "-Og: Optimize for debugging"
+	help
+	  Optimize while maintaining good debugging experience.
+	  Better than -O0 performance, better than -O1 debugging.
+	  Requires GCC 4.8+ or Clang 4.0+.
+
+endchoice
+
+config COMPILER_OPTIMIZATION_LEVEL
+	string
+	default "" if COMPILER_OPT_DEFAULT
+	default "-O0" if COMPILER_OPT_O0
+	default "-O1" if COMPILER_OPT_O1
+	default "-O2" if COMPILER_OPT_O2
+	default "-O3" if COMPILER_OPT_O3
+	default "-Os" if COMPILER_OPT_OS
+	default "-Ofast" if COMPILER_OPT_OFAST
+	default "-Og" if COMPILER_OPT_OG
 
 config COMPILER_DEBUG_LEVEL
 	string "Debug information level"
