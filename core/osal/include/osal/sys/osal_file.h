@@ -87,19 +87,19 @@ int32_t OSAL_close(int32_t fd);
  * @brief 读取数据
  * @param fd 文件描述符
  * @param buf 缓冲区
- * @param count 字节数（最大4GB）
+ * @param count 字节数
  * @return 实际读取字节数(>=0)，0表示EOF，-1失败
  */
-int32_t OSAL_read(int32_t fd, void *buf, uint32_t count);
+osal_ssize_t OSAL_read(int32_t fd, void *buf, osal_size_t count);
 
 /**
  * @brief 写入数据
  * @param fd 文件描述符
  * @param buf 缓冲区
- * @param count 字节数（最大4GB）
+ * @param count 字节数
  * @return 实际写入字节数(>=0)，-1失败
  */
-int32_t OSAL_write(int32_t fd, const void *buf, uint32_t count);
+osal_ssize_t OSAL_write(int32_t fd, const void *buf, osal_size_t count);
 
 /**
  * @brief 移动文件读写位置
@@ -108,7 +108,7 @@ int32_t OSAL_write(int32_t fd, const void *buf, uint32_t count);
  * @param whence 起始位置（OSAL_SEEK_SET/CUR/END）
  * @return 新的文件位置(>=0)，-1失败
  */
-int64_t OSAL_lseek(int32_t fd, int64_t offset, int32_t whence);
+osal_off_t OSAL_lseek(int32_t fd, osal_off_t offset, int32_t whence);
 
 /**
  * @brief 文件控制操作

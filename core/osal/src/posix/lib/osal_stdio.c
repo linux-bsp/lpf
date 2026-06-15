@@ -32,7 +32,7 @@ int32_t OSAL_getchar(void)
     return getchar();
 }
 
-char* OSAL_fgets(char *str, int32_t size, void *stream)
+char* OSAL_fgets(char *str, osal_size_t size, void *stream)
 {
     union {
         void *osal_stream;
@@ -40,7 +40,7 @@ char* OSAL_fgets(char *str, int32_t size, void *stream)
     } stream_union;
 
     stream_union.osal_stream = stream;
-    return fgets(str, size, stream_union.posix_stream);
+    return fgets(str, (int)size, stream_union.posix_stream);
 }
 
 int32_t OSAL_fflush(void *stream)

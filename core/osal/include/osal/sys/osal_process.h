@@ -18,13 +18,13 @@
 
 /* 基础进程控制函数（保持兼容） */
 void OSAL_exit(int32_t status);
-int32_t OSAL_getpid(void);
-int32_t OSAL_getppid(void);
-int32_t OSAL_kill(int32_t pid, int32_t sig);
+osal_pid_t OSAL_getpid(void);
+osal_pid_t OSAL_getppid(void);
+int32_t OSAL_kill(osal_pid_t pid, int32_t sig);
 void OSAL_abort(void);
-int32_t OSAL_fork(void);
+osal_pid_t OSAL_fork(void);
 int32_t OSAL_execvp(const char *file, char *const argv[]);
-int32_t OSAL_waitpid(int32_t pid, int32_t *status, int32_t options);
+int32_t OSAL_waitpid(osal_pid_t pid, int32_t *status, int32_t options);
 
 /* 等待选项 */
 #define OSAL_WNOHANG  0x01  /* 非阻塞等待 */

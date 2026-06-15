@@ -102,63 +102,32 @@ int32_t OSAL_close(int32_t fd)
     return result;
 }
 
-int32_t OSAL_read(int32_t fd, void *buf, uint32_t count)
+osal_ssize_t OSAL_read(int32_t fd, void *buf, osal_size_t count)
 {
     osal_ssize_t result;
-    int32_t safe_result;
 
-    result = read(fd, buf, (osal_size_t)count);
+    result = read(fd, buf, count);
 
-    /* 错误情况直接返回 */
-    if (result < 0) {
-        return -1;
-    }
-
-    /* 检查返回值是否超出 int32_t 范围 */
-    if (result > INT32_MAX) {
-        errno = EOVERFLOW;
-        return -1;
-    }
-
-    /* 安全转换：已验证 result 在 [0, INT32_MAX] 范围内 */
-    safe_result = (int32_t)result;
-    return safe_result;
+    /* 直接返回系统调用结果（成功返回读取字节数，失败返回-1） */
+    return result;
 }
 
-int32_t OSAL_write(int32_t fd, const void *buf, uint32_t count)
+osal_ssize_t OSAL_write(int32_t fd, const void *buf, osal_size_t count)
 {
     osal_ssize_t result;
-    int32_t safe_result;
 
-    result = write(fd, buf, (osal_size_t)count);
+    result = write(fd, buf, count);
 
-    /* 错误情况直接返回 */
-    if (result < 0) {
-        return -1;
-    }
-
-    /* 检查返回值是否超出 int32_t 范围 */
-    if (result > INT32_MAX) {
-        errno = EOVERFLOW;
-        return -1;
-    }
-
-    /* 安全转换：已验证 result 在 [0, INT32_MAX] 范围内 */
-    safe_result = (int32_t)result;
-    return safe_result;
+    /* 直接返回系统调用结果（成功返回写入字节数，失败返回-1） */
+    return result;
 }
 
-int64_t OSAL_lseek(int32_t fd, int64_t offset, int32_t whence)
+osal_off_t OSAL_lseek(int32_t fd, osal_off_t offset, int32_t whence)
 {
-    osal_off_t result = lseek(fd, (osal_off_t)offset, whence);
+    osal_off_t result = lseek(fd, offset, whence);
 
-    /* 错误情况直接返回 */
-    if (result == (osal_off_t)-1) {
-        return -1;
-    }
-
-    /* osal_off_t 在 64 位系统上是 int64_t，直接返回 */
-    return (int64_t)result;
+    /* 直接返回系统调用结果（成功返回新位置，失败返回-1） */
+    return result;
 }
 
 /*===========================================================================

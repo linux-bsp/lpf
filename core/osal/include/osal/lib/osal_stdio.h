@@ -20,7 +20,7 @@
  * 标准输入输出
  */
 int32_t OSAL_getchar(void);
-char* OSAL_fgets(char *str, int32_t size, void *stream);
+char* OSAL_fgets(char *str, osal_size_t size, void *stream);
 int32_t OSAL_fflush(void *stream);
 
 /*

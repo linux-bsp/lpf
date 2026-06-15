@@ -19,12 +19,12 @@ void OSAL_exit(int32_t status)
     exit(status);
 }
 
-int32_t OSAL_getpid(void)
+osal_pid_t OSAL_getpid(void)
 {
     return getpid();
 }
 
-int32_t OSAL_getppid(void)
+osal_pid_t OSAL_getppid(void)
 {
     return getppid();
 }
@@ -34,10 +34,9 @@ void OSAL_abort(void)
     abort();
 }
 
-int32_t OSAL_fork(void)
+osal_pid_t OSAL_fork(void)
 {
-    osal_pid_t pid = fork();
-    return (pid < 0) ? -1 : (int32_t)pid;
+    return fork();
 }
 
 int32_t OSAL_execvp(const char *file, char *const argv[])
@@ -45,7 +44,7 @@ int32_t OSAL_execvp(const char *file, char *const argv[])
     return execvp(file, argv);
 }
 
-int32_t OSAL_waitpid(int32_t pid, int32_t *status, int32_t options)
+int32_t OSAL_waitpid(osal_pid_t pid, int32_t *status, int32_t options)
 {
     int wait_status;
     int posix_options = 0;
@@ -56,7 +55,7 @@ int32_t OSAL_waitpid(int32_t pid, int32_t *status, int32_t options)
         posix_options |= WNOHANG;
     }
 
-    result = waitpid((osal_pid_t)pid, &wait_status, posix_options);
+    result = waitpid(pid, &wait_status, posix_options);
 
     if (result > 0) {
         /* 子进程退出 */
