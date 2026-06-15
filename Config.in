@@ -556,6 +556,28 @@ config COMPILER_DEBUG_LEVEL
 	    -ggdb: GDB-specific debug info
 	    (empty): No debug info
 
+config COMPILER_DISABLE_FORTIFY_WITH_O0
+	bool "Disable _FORTIFY_SOURCE when using -O0"
+	default y
+	help
+	  Automatically disable _FORTIFY_SOURCE macro when compiling
+	  with -O0 optimization level.
+
+	  _FORTIFY_SOURCE is a glibc feature that adds compile-time and
+	  runtime checks for buffer overflows. However, it requires
+	  optimization (-O1 or higher) to work properly.
+
+	  This option is essential for Buildroot/Yocto/embedded toolchains
+	  that automatically add -D_FORTIFY_SOURCE=2, which conflicts with
+	  debug builds using -O0.
+
+	  When enabled, adds -U_FORTIFY_SOURCE flag automatically when
+	  CONFIG_BUILD_TYPE_DEBUG uses -O0.
+
+	  Recommended: Keep enabled for cross-compilation environments.
+	  Disable only if you're sure your toolchain doesn't add
+	  _FORTIFY_SOURCE automatically.
+
 config COMPILER_CUSTOM_C_FLAGS
 	string "Custom C flags"
 	default ""
