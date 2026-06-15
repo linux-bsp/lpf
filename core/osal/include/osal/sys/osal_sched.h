@@ -11,9 +11,25 @@
 #define OSAL_SCHED_H
 
 #include <pthread.h>
+#include <sched.h>
 
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+/*===========================================================================
+ * 调度类型定义
+ *===========================================================================*/
+
+#if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
+    /* POSIX 平台 */
+    #ifndef OSAL_SCHED_PARAM_T_DEFINED
+        #define OSAL_SCHED_PARAM_T_DEFINED
+        typedef struct sched_param osal_sched_param_t;
+    #endif
+#else
+    /* 其他平台（RTOS 等）- 需要提供对应的类型定义 */
+    #error "Unsupported platform - please define sched types for your platform"
 #endif
 
 /*===========================================================================

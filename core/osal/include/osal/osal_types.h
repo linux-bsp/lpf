@@ -404,55 +404,19 @@ OSAL_STATIC_ASSERT(sizeof(uint64_t) == 0x8, "uint64_must_be_8_bytes");
 #define OSAL_BIT_TEST(val, bit)  (((val) & OSAL_BIT(bit)) != 0)
 #define OSAL_BIT_TOGGLE(val, bit) ((val) ^= OSAL_BIT(bit))
 
-/*===========================================================================
- * IPC 和线程类型定义（POSIX 平台）
- *===========================================================================*/
-
-#if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
-    /* POSIX 平台 - 需要包含系统头文件 */
-    #include <pthread.h>
-    #include <semaphore.h>
-    #include <sys/types.h>
-
-    /* 线程相关类型 */
-    typedef pthread_t           osal_thread_t;
-    typedef pthread_attr_t      osal_threadattr_t;
-
-    /* 互斥锁类型 */
-    typedef pthread_mutex_t     osal_mutex_t;
-    typedef pthread_mutexattr_t osal_mutexattr_t;
-
-    /* 条件变量类型 */
-    typedef pthread_cond_t      osal_cond_t;
-    typedef pthread_condattr_t  osal_condattr_t;
-
-    /* 读写锁类型 */
-    typedef pthread_rwlock_t      osal_rwlock_t;
-    typedef pthread_rwlockattr_t  osal_rwlockattr_t;
-
-    /* 信号量类型 */
-    typedef sem_t osal_sem_t;
-
-    /* 系统类型封装 */
-    typedef mode_t osal_mode_t;     /* 文件权限模式 */
-    typedef pid_t  osal_pid_t;      /* 进程ID */
-    typedef uid_t  osal_uid_t;      /* 用户ID */
-    typedef gid_t  osal_gid_t;      /* 组ID */
-
-    /* 调度参数类型 */
-    typedef struct sched_param osal_sched_param_t;
-
-#else
-    /* 其他平台（RTOS 等）- 需要提供对应的类型定义 */
-    #error "Unsupported platform - please define IPC types for your platform"
-#endif
-
 /*
  * 注意：
- * 1. OSAL API 使用 osal_xxx_t 类型保持平台独立性
- * 2. POSIX 平台直接 typedef 到 pthread/sem 类型
- * 3. RTOS 平台需要提供对应的类型映射
- * 4. 这样既保持了类型抽象，又避免了额外的转换开销
+ * 1. IPC和线程类型（osal_mutex_t, osal_thread_t等）定义在各自的模块头文件中
+ *    - osal_thread_t, osal_threadattr_t -> osal/sys/osal_thread.h
+ *    - osal_mutex_t, osal_mutexattr_t -> osal/ipc/osal_mutex.h
+ *    - osal_cond_t, osal_condattr_t -> osal/ipc/osal_cond.h
+ *    - osal_rwlock_t, osal_rwlockattr_t -> osal/ipc/osal_rwlock.h
+ *    - osal_sem_t -> osal/ipc/osal_semaphore.h
+ * 2. 系统类型定义在各自的模块头文件中
+ *    - osal_pid_t, osal_uid_t, osal_gid_t -> osal/sys/osal_process.h
+ *    - osal_mode_t -> osal/sys/osal_file.h
+ *    - osal_sched_param_t -> osal/sys/osal_sched.h
+ * 3. 这样保持了模块的独立性和封装性
  */
 
 #endif /* OSAL_TYPES_H */

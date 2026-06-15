@@ -14,6 +14,19 @@ extern "C" {
 #endif
 
 /*===========================================================================
+ * 读写锁类型定义
+ *===========================================================================*/
+
+#if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
+    /* POSIX 平台 */
+    typedef pthread_rwlock_t     osal_rwlock_t;
+    typedef pthread_rwlockattr_t osal_rwlockattr_t;
+#else
+    /* 其他平台（RTOS 等）- 需要提供对应的类型定义 */
+    #error "Unsupported platform - please define rwlock types for your platform"
+#endif
+
+/*===========================================================================
  * POSIX 读写锁薄封装
  *===========================================================================*/
 

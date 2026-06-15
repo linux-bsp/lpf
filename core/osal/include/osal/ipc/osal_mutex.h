@@ -14,6 +14,19 @@ extern "C" {
 #endif
 
 /*===========================================================================
+ * 互斥锁类型定义
+ *===========================================================================*/
+
+#if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
+    /* POSIX 平台 */
+    typedef pthread_mutex_t     osal_mutex_t;
+    typedef pthread_mutexattr_t osal_mutexattr_t;
+#else
+    /* 其他平台（RTOS 等）- 需要提供对应的类型定义 */
+    #error "Unsupported platform - please define mutex types for your platform"
+#endif
+
+/*===========================================================================
  * POSIX 互斥锁薄封装
  *===========================================================================*/
 

@@ -15,7 +15,25 @@
 #ifndef OSAL_PROCESS_H
 #define OSAL_PROCESS_H
 
+#include <sys/types.h>
 
+/*===========================================================================
+ * 进程类型定义
+ *===========================================================================*/
+
+#if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
+    /* POSIX 平台 */
+    typedef pid_t osal_pid_t;      /* 进程ID */
+    typedef uid_t osal_uid_t;      /* 用户ID */
+    typedef gid_t osal_gid_t;      /* 组ID */
+#else
+    /* 其他平台（RTOS 等）- 需要提供对应的类型定义 */
+    #error "Unsupported platform - please define process types for your platform"
+#endif
+
+/*===========================================================================
+ * 进程管理接口
+ *===========================================================================*/
 /* 基础进程控制函数（保持兼容） */
 void OSAL_exit(int32_t status);
 osal_pid_t OSAL_getpid(void);

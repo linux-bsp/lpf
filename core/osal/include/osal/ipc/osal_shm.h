@@ -8,11 +8,26 @@
 #define OSAL_SHM_H
 
 #include <sys/mman.h>
+#include <sys/types.h>
 #include <fcntl.h>
 #include <unistd.h>
 
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+/*===========================================================================
+ * 文件权限类型定义（与 osal_file.h 共享）
+ *===========================================================================*/
+
+#if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
+    /* POSIX 平台 */
+    #ifndef OSAL_MODE_T_DEFINED
+        #define OSAL_MODE_T_DEFINED
+        typedef mode_t osal_mode_t;
+    #endif
+#else
+    #error "Unsupported platform - please define mode_t type for your platform"
 #endif
 
 /*===========================================================================

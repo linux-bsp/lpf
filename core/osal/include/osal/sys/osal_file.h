@@ -7,8 +7,25 @@
 #ifndef OSAL_FILE_H
 #define OSAL_FILE_H
 
+#include <sys/types.h>
+
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+/*===========================================================================
+ * 文件类型定义
+ *===========================================================================*/
+
+#if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
+    /* POSIX 平台 */
+    #ifndef OSAL_MODE_T_DEFINED
+        #define OSAL_MODE_T_DEFINED
+        typedef mode_t osal_mode_t;
+    #endif
+#else
+    /* 其他平台（RTOS 等）- 需要提供对应的类型定义 */
+    #error "Unsupported platform - please define file types for your platform"
 #endif
 
 /*===========================================================================
