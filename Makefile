@@ -1,5 +1,22 @@
+# ==============================================================================
 # ES-Middleware Makefile
-# Based on busybox configuration system
+# ==============================================================================
+# This Makefile provides a clean wrapper layer between user commands and the
+# CMake build system, inspired by Linux kernel and Buildroot architecture.
+#
+# Responsibilities:
+#   - Kconfig configuration management (menuconfig, defconfig, etc.)
+#   - Build Kconfig tools (conf, mconf, nconf)
+#   - Generate autoconf.h from .config
+#   - Invoke CMake for compilation
+#   - Provide user-friendly interface
+#
+# Design principles:
+#   - Configuration and compilation are separate phases
+#   - CMake handles compilation only (no config management)
+#   - Clear error messages and validation
+#   - Compatible with Buildroot/Yocto integration
+# ==============================================================================
 
 VERSION = 1
 PATCHLEVEL = 0
@@ -339,16 +356,16 @@ endif
 # The all: target is the default when no target is given on the command line.
 # It requires .config to exist, otherwise it will fail with an error message.
 PHONY += all
-all: _check_config include/autoconf.h include/version.h _cmake_configure
+all: _check_config _validate_config include/autoconf.h include/version.h _cmake_configure
 	@echo ""
 	@echo "==================================================================="
 	@echo "ES-Middleware Build System"
 	@echo "==================================================================="
 	@echo ""
-	@echo "Configuration loaded from: $(CURDIR)/.config"
+	@echo "Configuration: $(CURDIR)/.config"
 	@echo "Building with CMake..."
 	@echo ""
-	@echo "  BUILD    ES-Middleware"
+	@echo "  BUILD    ES-Middleware SDK"
 	$(Q)$(MAKE) -C $(BUILD_DIR) $(PARALLEL_BUILD)
 	@echo ""
 	@echo "==================================================================="
@@ -357,6 +374,10 @@ all: _check_config include/autoconf.h include/version.h _cmake_configure
 	@echo "Output directory: $(BUILD_DIR)"
 	@echo "Binaries: $(BUILD_DIR)/bin/"
 	@echo "Libraries: $(BUILD_DIR)/lib/"
+	@echo ""
+	@echo "Next steps:"
+	@echo "  make install              - Install to system"
+	@echo "  make install DESTDIR=/tmp - Stage installation"
 	@echo ""
 
 PHONY += _check_config
@@ -378,10 +399,28 @@ _check_config:
 		exit 1; \
 	fi
 
+PHONY += _validate_config
+_validate_config:
+	@if ! grep -q "CONFIG_PROJECT_NAME=" .config 2>/dev/null; then \
+		echo ""; \
+		echo "==================================================================="; \
+		echo "WARNING: Configuration may be incomplete"; \
+		echo "==================================================================="; \
+		echo ""; \
+		echo "CONFIG_PROJECT_NAME not found in .config"; \
+		echo "This may indicate the configuration was not properly generated."; \
+		echo ""; \
+		echo "Try running:"; \
+		echo "  make silentoldconfig     - Regenerate configuration"; \
+		echo "  make <name>_defconfig    - Load a fresh configuration"; \
+		echo "==================================================================="; \
+		echo ""; \
+	fi
+
 PHONY += _cmake_configure
 _cmake_configure:
 	$(Q)if [ ! -f "$(BUILD_DIR)/Makefile" ]; then \
-		echo "  CMAKE    $(BUILD_DIR)"; \
+		echo "  CMAKE    Configuring build system"; \
 		mkdir -p $(BUILD_DIR); \
 		cd $(BUILD_DIR) && $(CMAKE) \
 			-DCMAKE_BUILD_TYPE=$(CMAKE_BUILD_TYPE) \
@@ -391,7 +430,22 @@ _cmake_configure:
 			$(if $(CMAKE_TOOLCHAIN_FILE),-DCMAKE_TOOLCHAIN_FILE=$(CMAKE_TOOLCHAIN_FILE)) \
 			$(if $(INSTALL_DEVELOPMENT_HEADERS),-DINSTALL_DEVELOPMENT_HEADERS=$(INSTALL_DEVELOPMENT_HEADERS)) \
 			$(CMAKE_EXTRA_FLAGS) \
-			$(CURDIR); \
+			$(CURDIR) || { \
+				echo ""; \
+				echo "==================================================================="; \
+				echo "ERROR: CMake configuration failed!"; \
+				echo "==================================================================="; \
+				echo ""; \
+				echo "This usually means:"; \
+				echo "  - Missing dependencies (cmake, gcc, etc.)"; \
+				echo "  - Invalid .config file"; \
+				echo "  - Toolchain issues"; \
+				echo ""; \
+				echo "Check the error messages above for details."; \
+				echo "==================================================================="; \
+				echo ""; \
+				exit 1; \
+			}; \
 	fi
 
 endif # ifeq ($(config-targets),1)
@@ -480,7 +534,7 @@ install_headers:
 PHONY += help list
 
 help:
-	@echo 'ES-Middleware Configuration System'
+	@echo 'ES-Middleware Build System'
 	@echo '===================================='
 	@echo ''
 	@echo 'Configuration targets:'
@@ -503,18 +557,23 @@ help:
 	@echo '  distclean       - Remove build artifacts and configuration'
 	@echo '  mrproper        - Same as distclean'
 	@echo ''
-	@echo 'Options:'
+	@echo 'Information targets:'
+	@echo '  help            - Display this help message'
+	@echo '  list            - List all available defconfigs'
+	@echo '  version         - Display version information'
+	@echo ''
+	@echo 'Build options:'
 	@echo '  V=0|1           - 0: quiet build (default), 1: verbose'
 	@echo '  BUILD_DIR=<dir> - Use custom build directory (default: _build)'
 	@echo '  CMAKE_BUILD_TYPE=<type>'
 	@echo '                  - Set build type: Debug, Release, RelWithDebInfo, MinSizeRel'
 	@echo '  CMAKE_INSTALL_PREFIX=<path>'
-	@echo '                  - Set installation prefix (default: /usr)'
+	@echo '                  - Set installation prefix (default: /usr/local)'
 	@echo '  DESTDIR=<path>  - Stage installation to alternate root'
 	@echo '  CMAKE_TOOLCHAIN_FILE=<file>'
 	@echo '                  - Specify CMake toolchain for cross-compilation'
 	@echo ''
-	@echo 'Available defconfigs (make list):'
+	@echo 'Available defconfigs:'
 	@for subdir in $(sort $(notdir $(wildcard $(srctree)/configs/*/))); do \
 		echo ""; \
 		echo "  $$subdir configurations:"; \
@@ -540,6 +599,8 @@ help:
 	@echo '  make ccm_h200_100p_am625_release_defconfig'
 	@echo '  make CMAKE_TOOLCHAIN_FILE=$$BUILDROOT/host/share/buildroot/toolchainfile.cmake'
 	@echo '  make install DESTDIR=$$BUILDROOT/target'
+	@echo ''
+	@echo 'For more information, see docs/BUILD_SYSTEM.md'
 
 list:
 	@echo 'Available defconfigs:'
@@ -553,6 +614,15 @@ list:
 		done; \
 		echo ""; \
 	done
+
+PHONY += version
+version:
+	@echo "ES-Middleware SDK"
+	@echo "Version: $(VERSION_STRING)"
+	@if [ -d .git ]; then \
+		echo "Git commit: $$(git rev-parse --short HEAD 2>/dev/null || echo 'unknown')"; \
+		echo "Git branch: $$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo 'unknown')"; \
+	fi
 
 # ===========================================================================
 

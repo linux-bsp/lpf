@@ -1,144 +1,52 @@
-# ============================================================================
+# ==============================================================================
 # ES-Middleware SDK Root CMakeLists.txt
-# ============================================================================
-# This CMakeLists.txt handles ONLY compilation and installation.
-# All Config.in configuration management is handled by the root Makefile.
+# ==============================================================================
+# Clean separation of concerns:
+#   - Makefile:        Configuration management (Kconfig)
+#   - CMakeLists.txt:  Compilation and installation
 #
-# The Makefile:
-#   - Builds Config.in tools (conf, mconf, nconf)
-#   - Handles all config targets (menuconfig, defconfig, etc.)
-#   - Generates autoconf.h from .config
-#   - Invokes CMake for compilation only
+# The wrapper layer provides:
+#   - kconfig_loader.cmake:   Configuration loading and validation
+#   - build_wrapper.cmake:    Build environment setup
 #
-# This CMakeLists.txt:
-#   - Loads configuration from autoconf.h
-#   - Compiles enabled products/modules
-#   - Handles installation
-# ============================================================================
+# This keeps CMakeLists.txt focused on compilation logic only.
+# ==============================================================================
 
 cmake_minimum_required(VERSION 3.16)
 
-# ============================================================================
-# Configuration Loading
-# ============================================================================
-
-# Expect CONFIG_FILE and AUTOCONF_H to be passed from Makefile
-# If not provided, use defaults (for standalone CMake usage)
-if(NOT DEFINED CONFIG_FILE)
-    set(CONFIG_FILE "${CMAKE_CURRENT_SOURCE_DIR}/.config")
-endif()
-
-if(NOT DEFINED AUTOCONF_H)
-    set(AUTOCONF_H "${CMAKE_CURRENT_BINARY_DIR}/include/generated/autoconf.h")
-endif()
-
-# Validate that configuration exists
-if(NOT EXISTS "${CONFIG_FILE}")
-    message(FATAL_ERROR
-        "Configuration file not found: ${CONFIG_FILE}\n"
-        "Please run 'make <board>_defconfig' first.\n"
-        "Run 'make list' to see available configurations.")
-endif()
+# ==============================================================================
+# Load Build System Wrapper Layer
+# ==============================================================================
 
 # Set SDK path
 set(SDK_PATH ${CMAKE_CURRENT_LIST_DIR})
 
-# ============================================================================
-# Load Config.in Configuration into CMake Variables
-# ============================================================================
+# Load wrapper modules (must be before project())
+include(${SDK_PATH}/scripts/cmake/kconfig_loader.cmake)
+include(${SDK_PATH}/scripts/cmake/build_wrapper.cmake)
 
-# Parse .config and load CONFIG_* variables into CMake
-if(EXISTS "${CONFIG_FILE}")
-    file(STRINGS "${CONFIG_FILE}" config_lines)
-    set(config_count 0)
+# Initialize build wrapper (environment detection, version info, etc.)
+build_wrapper_init()
 
-    foreach(line ${config_lines})
-        # Skip comments and empty lines
-        if(line MATCHES "^[ \t]*#" OR line STREQUAL "")
-            continue()
-        endif()
+# Load Kconfig configuration
+kconfig_load()
 
-        # Parse CONFIG_XXX=value
-        if(line MATCHES "^CONFIG_([A-Za-z0-9_]+)=(.*)$")
-            set(config_name ${CMAKE_MATCH_1})
-            set(config_value ${CMAKE_MATCH_2})
-
-            # Remove quotes from string values
-            string(REGEX REPLACE "^\"(.*)\"$" "\\1" config_value "${config_value}")
-
-            # Convert y/n to ON/OFF for CMake
-            if(config_value STREQUAL "y")
-                set(config_value ON)
-            elseif(config_value STREQUAL "n")
-                set(config_value OFF)
-            endif()
-
-            # Export to CMake cache
-            set(CONFIG_${config_name} ${config_value} CACHE INTERNAL "Config.in: ${config_name}")
-            math(EXPR config_count "${config_count} + 1")
-
-        # Parse # CONFIG_XXX is not set
-        elseif(line MATCHES "^# CONFIG_([A-Za-z0-9_]+) is not set$")
-            set(config_name ${CMAKE_MATCH_1})
-            set(CONFIG_${config_name} OFF CACHE INTERNAL "Config.in: ${config_name}")
-            math(EXPR config_count "${config_count} + 1")
-        endif()
-    endforeach()
-else()
-    message(FATAL_ERROR "Configuration file not found: ${CONFIG_FILE}")
-endif()
-
-# ============================================================================
+# ==============================================================================
 # Project Declaration
-# ============================================================================
+# ==============================================================================
 
 project(es_middleware_sdk C CXX ASM)
 
-# ============================================================================
-# Global Build Settings
-# ============================================================================
+# ==============================================================================
+# Build Environment Validation
+# ==============================================================================
 
-# Set global output directories
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+build_wrapper_validate()
 
-# ============================================================================
-# Installation Configuration
-# ============================================================================
-
-# Installation prefix (overridable via -DCMAKE_INSTALL_PREFIX=...)
-# Buildroot will override this via toolchainfile.cmake or command line
-# Standalone builds default to /usr/local
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    # Detect Buildroot environment
-    if(DEFINED ENV{BR2_EXTERNAL} OR DEFINED ENV{BR_BUILDING})
-        set(CMAKE_INSTALL_PREFIX "/usr" CACHE PATH "Installation prefix" FORCE)
-    else()
-        set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE PATH "Installation prefix" FORCE)
-    endif()
-endif()
-
-# Use GNUInstallDirs for standard directory variables
-include(GNUInstallDirs)
-
-# Define installation directories
-set(INSTALL_BINDIR ${CMAKE_INSTALL_BINDIR})
-set(INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR})
-set(INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR}/es-middleware)
-
-# ============================================================================
-# Include Build System
-# ============================================================================
-
-include(${SDK_PATH}/scripts/cmake/compile.cmake)
-include(${SDK_PATH}/scripts/cmake/ComponentAPI.cmake)
-
-# ============================================================================
+# ==============================================================================
 # Apply Compiler Flags from Kconfig
-# ============================================================================
+# ==============================================================================
 
-# Include compile flags configured via Kconfig
 include(${SDK_PATH}/scripts/cmake/compile_flags.cmake)
 
 # Add build type definitions
@@ -158,147 +66,77 @@ if(CONFIG_FORTIFY_SOURCE)
     add_definitions(-D_FORTIFY_SOURCE=2)
 endif()
 
-# ============================================================================
-# Auto-include Configuration Header
-# ============================================================================
+# ==============================================================================
+# Auto-include Version Headers
+# ==============================================================================
 
-# Check if autoconf.h exists
-if(EXISTS ${AUTOCONF_H})
-    add_compile_options(-include ${AUTOCONF_H})
-else()
-    message(WARNING "Configuration header not found: ${AUTOCONF_H}")
-    message(WARNING "This should have been generated by Makefile")
-    message(WARNING "Run 'make syncconfig' or re-run 'make <board>_defconfig'")
-endif()
-
-# Auto-include version.h (generated by gen_version.sh)
+# Version header is generated by build_wrapper.cmake or Makefile
 set(VERSION_H "${CMAKE_SOURCE_DIR}/include/version.h")
 if(EXISTS ${VERSION_H})
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -include ${VERSION_H}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -include ${VERSION_H}")
-else()
-    message(WARNING "Version header not found: ${VERSION_H}")
-    message(WARNING "This should have been generated by Makefile")
+    # Use add_compile_options with the full flag as a single string
+    # Note: Must use SHELL: prefix to prevent CMake from splitting the argument
+    add_compile_options("SHELL:-include ${VERSION_H}")
 endif()
 
-# Add include directory for generated headers
-get_filename_component(AUTOCONF_DIR ${AUTOCONF_H} DIRECTORY)
-include_directories(${AUTOCONF_DIR}/..)
+# ==============================================================================
+# Include Build System Modules
+# ==============================================================================
 
-# ============================================================================
-# Generate Build Info Headers
-# ============================================================================
+include(${SDK_PATH}/scripts/cmake/compile.cmake)
+include(${SDK_PATH}/scripts/cmake/ComponentAPI.cmake)
 
-set(BUILD_TIME_HEADER "${CMAKE_CURRENT_BINARY_DIR}/config/global_build_info_time.h")
-set(BUILD_VERSION_HEADER "${CMAKE_CURRENT_BINARY_DIR}/config/global_build_info_version.h")
-
-# Generate build time header
-string(TIMESTAMP BUILD_TIME "%Y-%m-%d %H:%M:%S" UTC)
-string(TIMESTAMP BUILD_DATE "%Y-%m-%d" UTC)
-file(WRITE "${BUILD_TIME_HEADER}"
-"/* Auto-generated by CMake at configure time */\n"
-"#ifndef GLOBAL_BUILD_INFO_TIME_H\n"
-"#define GLOBAL_BUILD_INFO_TIME_H\n"
-"\n"
-"#define BUILD_TIME \"${BUILD_TIME}\"\n"
-"#define BUILD_DATE \"${BUILD_DATE}\"\n"
-"\n"
-"#endif /* GLOBAL_BUILD_INFO_TIME_H */\n"
-)
-
-# Generate build version header
-set(SDK_VERSION "1.0.0")
-set(SDK_VERSION_MAJOR 1)
-set(SDK_VERSION_MINOR 0)
-set(SDK_VERSION_PATCH 0)
-
-# Get Git commit hash if available
-find_package(Git QUIET)
-if(GIT_FOUND)
-    execute_process(
-        COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        OUTPUT_VARIABLE GIT_COMMIT_HASH
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        ERROR_QUIET
-    )
-endif()
-
-if(NOT GIT_COMMIT_HASH)
-    set(GIT_COMMIT_HASH "unknown")
-endif()
-
-file(WRITE "${BUILD_VERSION_HEADER}"
-"/* Auto-generated by CMake at configure time */\n"
-"#ifndef GLOBAL_BUILD_INFO_VERSION_H\n"
-"#define GLOBAL_BUILD_INFO_VERSION_H\n"
-"\n"
-"#define SDK_VERSION \"${SDK_VERSION}\"\n"
-"#define SDK_VERSION_MAJOR ${SDK_VERSION_MAJOR}\n"
-"#define SDK_VERSION_MINOR ${SDK_VERSION_MINOR}\n"
-"#define SDK_VERSION_PATCH ${SDK_VERSION_PATCH}\n"
-"#define BUILD_GIT_COMMIT_ID \"${GIT_COMMIT_HASH}\"\n"
-"\n"
-"#endif /* GLOBAL_BUILD_INFO_VERSION_H */\n"
-)
-
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/config)
-
-# ============================================================================
+# ==============================================================================
 # Build Products Based on Configuration
-# ============================================================================
+# ==============================================================================
 
 if(CONFIG_PRODUCT_CCM)
-    message(STATUS "Building CCM product (CONFIG_PRODUCT_CCM=ON)")
+    message(STATUS "Building CCM product")
     add_subdirectory(products/ccm)
-else()
-    message(STATUS "Skipping CCM product (CONFIG_PRODUCT_CCM=OFF)")
 endif()
 
 if(CONFIG_PRODUCT_SAMPLE)
-    message(STATUS "Building Sample product (CONFIG_PRODUCT_SAMPLE=ON)")
+    message(STATUS "Building Sample product")
     add_subdirectory(products/sample)
-else()
-    message(STATUS "Skipping Sample product (CONFIG_PRODUCT_SAMPLE not set)")
 endif()
 
-# ============================================================================
+# ==============================================================================
 # Build Tests
-# ============================================================================
+# ==============================================================================
 
 if(CONFIG_BUILD_TESTING)
-    message(STATUS "Building test suite (CONFIG_BUILD_TESTING=ON)")
+    message(STATUS "Building test suite")
     add_subdirectory(products/tests)
-else()
-    message(STATUS "Skipping tests (CONFIG_BUILD_TESTING=OFF)")
 endif()
 
-# ============================================================================
+# ==============================================================================
 # Configuration Summary
-# ============================================================================
+# ==============================================================================
 
 message(STATUS "")
-message(STATUS "========================================")
+message(STATUS "========================================================================")
 message(STATUS "ES-Middleware Configuration Summary")
-message(STATUS "========================================")
-message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
-message(STATUS "Install prefix: ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "========================================================================")
+message(STATUS "SDK Version:    ${SDK_VERSION}")
+message(STATUS "Git Commit:     ${GIT_COMMIT_HASH}")
+message(STATUS "Build Type:     ${CMAKE_BUILD_TYPE}")
+message(STATUS "Install Prefix: ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "")
 message(STATUS "Products:")
-if(CONFIG_PRODUCT_CCM)
-    message(STATUS "  CCM: YES")
-else()
-    message(STATUS "  CCM: NO")
-endif()
-if(CONFIG_PRODUCT_SAMPLE)
-    message(STATUS "  Sample: YES")
-else()
-    message(STATUS "  Sample: NO")
-endif()
-if(CONFIG_BUILD_TESTING)
-    message(STATUS "  Tests: YES")
-else()
-    message(STATUS "  Tests: NO")
-endif()
-message(STATUS "========================================")
+message(STATUS "  CCM:          ${CONFIG_PRODUCT_CCM}")
+message(STATUS "  Sample:       ${CONFIG_PRODUCT_SAMPLE}")
+message(STATUS "  Tests:        ${CONFIG_BUILD_TESTING}")
 message(STATUS "")
+message(STATUS "Core Modules:")
+message(STATUS "  OSAL:         ${CONFIG_OSAL}")
+message(STATUS "  HAL:          ${CONFIG_HAL}")
+message(STATUS "  PDL:          ${CONFIG_PDL}")
+message(STATUS "  PRL:          ${CONFIG_PRL}")
+message(STATUS "  PCONFIG:      ${CONFIG_PCONFIG}")
+message(STATUS "  ACONFIG:      ${CONFIG_ACONFIG}")
+message(STATUS "========================================================================")
+message(STATUS "")
+
+# Optional: Print detailed Kconfig summary (for debugging)
+if(DEFINED ENV{VERBOSE_CONFIG})
+    kconfig_print_summary()
+endif()
