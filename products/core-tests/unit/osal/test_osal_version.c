@@ -3,7 +3,7 @@
  * @brief OSAL版本信息单元测试
  */
 
-#include <test/test_framework.h>
+#include <test_framework/test_framework.h>
 #include "osal.h"
 
 /*===========================================================================

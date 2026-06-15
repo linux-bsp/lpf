@@ -12,10 +12,10 @@ endif()
 # Library Definition
 # ============================================================================
 
-add_library(test STATIC)
+add_library(test_framework STATIC)
 
 # Source files
-target_sources(test PRIVATE
+target_sources(test_framework PRIVATE
     src/test_registry.c
     src/test_runner.c
     src/test_menu.c
@@ -30,14 +30,14 @@ target_sources(test PRIVATE
 # ============================================================================
 
 # Public headers (accessible to test users)
-target_include_directories(test PUBLIC
+target_include_directories(test_framework PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
 
 # Private headers (for building utest itself)
-target_include_directories(test PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/test
+target_include_directories(test_framework PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/test_framework
 )
 
 # ============================================================================
@@ -46,11 +46,11 @@ target_include_directories(test PRIVATE
 
 # TEST requires OSAL for basic OS abstractions
 if(CONFIG_OSAL)
-    target_link_libraries(test PUBLIC osal)
+    target_link_libraries(test_framework PUBLIC osal)
 endif()
 
 # Link standard libraries
-target_link_libraries(test PUBLIC
+target_link_libraries(test_framework PUBLIC
     pthread
     rt
     m
@@ -61,7 +61,7 @@ target_link_libraries(test PUBLIC
 # ============================================================================
 
 # Enable warnings for test framework code
-target_compile_options(test PRIVATE
+target_compile_options(test_framework PRIVATE
     -Wall
     -Wextra
     -Wno-unused-parameter
@@ -73,7 +73,7 @@ target_compile_options(test PRIVATE
 
 # Install library and headers (optional, mainly for development)
 if(FALSE)  # Disabled by default - utest is primarily for internal testing
-install(TARGETS test
+install(TARGETS test_framework
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
     RUNTIME DESTINATION bin

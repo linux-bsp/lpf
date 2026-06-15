@@ -11,7 +11,7 @@
  * - Multi-threaded synchronization
  */
 
-#include <test/test_framework.h>
+#include <test_framework/test_framework.h>
 #include "osal.h"
 #include <errno.h>
 

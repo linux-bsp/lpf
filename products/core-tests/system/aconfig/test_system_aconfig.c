@@ -3,8 +3,8 @@
  * @brief ACL层系统测试
  */
 
-#include <test/test_framework.h>
-#include <test/test_system.h>
+#include <test_framework/test_framework.h>
+#include <test_framework/test_system.h>
 #include "aconfig.h"
 #include <aconfig/aconfig.h>
 

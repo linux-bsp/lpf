@@ -3,8 +3,8 @@
  * @brief 系统集成测试示例
  */
 
-#include <test/test_framework.h>
-#include <test/test_system.h>
+#include <test_framework/test_framework.h>
+#include <test_framework/test_system.h>
 #include "osal.h"
 #include "hal.h"
 #include "pdl.h"

@@ -3,8 +3,8 @@
  * @brief 系统测试框架核心实现（仅使用OSAL接口）
  */
 
-#include <test/test_system.h>
-#include <test/test_assert.h>
+#include <test_framework/test_system.h>
+#include <test_framework/test_assert.h>
 #include "osal.h"
 
 #define MAX_CHECKPOINTS 100
