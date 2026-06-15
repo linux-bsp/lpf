@@ -135,8 +135,8 @@ int32_t CCM_Health_Init(void)
     LOG_INFO("HEALTH", "Health进程初始化...");
 
     /* 注册信号处理 */
-    OSAL_SignalRegister(SIGTERM, signal_handler);
-    OSAL_SignalRegister(SIGINT, signal_handler);
+    OSAL_signal(SIGTERM, signal_handler);
+    OSAL_signal(SIGINT, signal_handler);
 
     /* 初始化心跳 */
     ret = CCM_Heartbeat_Init(&g_heartbeat);

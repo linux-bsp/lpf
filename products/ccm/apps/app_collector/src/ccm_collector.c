@@ -27,8 +27,8 @@ int32_t CCM_Collector_Init(void)
     LOG_INFO("COLLECTOR", "Collector进程初始化...");
 
     /* 注册信号处理 */
-    OSAL_SignalRegister(SIGTERM, signal_handler);
-    OSAL_SignalRegister(SIGINT, signal_handler);
+    OSAL_signal(SIGTERM, signal_handler);
+    OSAL_signal(SIGINT, signal_handler);
 
     /* 初始化遥测缓存 */
     ret = CCM_TM_Cache_Init(&g_tm_cache);
@@ -54,11 +54,12 @@ int32_t CCM_Collector_Init(void)
         return ret;
     }
 
-    /* 绑定到CPU1（建议） */
-    ret = OSAL_SchedSetAffinity(OSAL_pthread_self(), 1);
-    if (ret != OSAL_SUCCESS) {
-        LOG_WARN("COLLECTOR", "绑定CPU1失败: %d", ret);
-    }
+    /* CPU 亲和性绑定（可选优化，失败不影响功能） */
+    /* 注释掉，避免使用不存在的 API */
+    /* ret = OSAL_SchedSetAffinity(OSAL_pthread_self(), 1); */
+    /* if (ret != OSAL_SUCCESS) { */
+    /*     LOG_WARN("COLLECTOR", "绑定CPU1失败: %d", ret); */
+    /* } */
 
     LOG_INFO("COLLECTOR", "Collector进程初始化完成");
     return OSAL_SUCCESS;

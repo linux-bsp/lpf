@@ -26,8 +26,8 @@ int32_t CCM_Comm_Init(void)
     LOG_INFO("COMM", "Communication进程初始化...");
 
     /* 注册信号处理 */
-    OSAL_SignalRegister(SIGTERM, signal_handler);
-    OSAL_SignalRegister(SIGINT, signal_handler);
+    OSAL_signal(SIGTERM, signal_handler);
+    OSAL_signal(SIGINT, signal_handler);
 
     /* 初始化遥测缓存 */
     ret = CCM_TM_Cache_Init(&g_tm_cache);
@@ -44,23 +44,23 @@ int32_t CCM_Comm_Init(void)
         return ret;
     }
 
-    /* 设置实时调度策略 */
-    ret = OSAL_SchedSetPolicy(OSAL_pthread_self(), OSAL_SCHED_FIFO, 99);
-    if (ret != OSAL_SUCCESS) {
-        LOG_WARN("COMM", "设置实时调度失败: %d (需要root权限)", ret);
-    }
+    /* 实时调度优化（可选，需要 root 权限，API 暂未实现） */
+    /* ret = OSAL_SchedSetPolicy(OSAL_pthread_self(), OSAL_SCHED_FIFO, 99); */
+    /* if (ret != OSAL_SUCCESS) { */
+    /*     LOG_WARN("COMM", "设置实时调度失败: %d (需要root权限)", ret); */
+    /* } */
 
-    /* 绑定到CPU0 */
-    ret = OSAL_SchedSetAffinity(OSAL_pthread_self(), 0);
-    if (ret != OSAL_SUCCESS) {
-        LOG_WARN("COMM", "绑定CPU0失败: %d", ret);
-    }
+    /* CPU 亲和性绑定（可选优化，API 暂未实现） */
+    /* ret = OSAL_SchedSetAffinity(OSAL_pthread_self(), 0); */
+    /* if (ret != OSAL_SUCCESS) { */
+    /*     LOG_WARN("COMM", "绑定CPU0失败: %d", ret); */
+    /* } */
 
-    /* 锁定内存 */
-    ret = OSAL_mlock(true);
-    if (ret != OSAL_SUCCESS) {
-        LOG_WARN("COMM", "锁定内存失败: %d (需要root权限)", ret);
-    }
+    /* 内存锁定优化（可选，需要 root 权限，API 暂未实现） */
+    /* ret = OSAL_mlock(true); */
+    /* if (ret != OSAL_SUCCESS) { */
+    /*     LOG_WARN("COMM", "锁定内存失败: %d (需要root权限)", ret); */
+    /* } */
 
     LOG_INFO("COMM", "Communication进程初始化完成");
     return OSAL_SUCCESS;

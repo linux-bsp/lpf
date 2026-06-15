@@ -39,6 +39,7 @@ if(CONFIG_OSAL_OS_POSIX)
 
     if(CONFIG_OSAL_IPC_SHM)
         list(APPEND ADD_SRCS "src/posix/ipc/osal_shm.c")
+        list(APPEND ADD_SRCS "src/posix/ipc/osal_shm_highlevel.c")
     endif()
 
     if(CONFIG_OSAL_IPC_SHM_CACHE)

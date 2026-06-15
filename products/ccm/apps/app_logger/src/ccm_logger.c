@@ -59,8 +59,8 @@ int32_t CCM_Logger_Init(void)
     LOG_INFO("LOGGER", "Logger进程初始化...");
 
     /* 注册信号处理 */
-    OSAL_SignalRegister(SIGTERM, signal_handler);
-    OSAL_SignalRegister(SIGINT, signal_handler);
+    OSAL_signal(SIGTERM, signal_handler);
+    OSAL_signal(SIGINT, signal_handler);
 
     /* 初始化日志环形缓冲区 */
     ret = CCM_Log_Init(&g_log_ring);
