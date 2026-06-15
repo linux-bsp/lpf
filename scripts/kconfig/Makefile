@@ -99,7 +99,15 @@ else
 endif
 
 %_defconfig: $(obj)/conf
-	$(Q)$< $(silent) --defconfig=arch/$(SRCARCH)/configs/$@ $(Kconfig)
+	@if [ -f $(srctree)/configs/$@ ]; then \
+		$(Q)$< $(silent) --defconfig=$(srctree)/configs/$@ $(Kconfig); \
+	elif [ -f $(srctree)/configs/ccm/$@ ]; then \
+		$(Q)$< $(silent) --defconfig=$(srctree)/configs/ccm/$@ $(Kconfig); \
+	elif [ -f $(srctree)/configs/tests/$@ ]; then \
+		$(Q)$< $(silent) --defconfig=$(srctree)/configs/tests/$@ $(Kconfig); \
+	else \
+		$(Q)$< $(silent) --defconfig=arch/$(SRCARCH)/configs/$@ $(Kconfig); \
+	fi
 
 configfiles = $(wildcard $(srctree)/kernel/configs/$(1) $(srctree)/arch/$(SRCARCH)/configs/$(1))
 all-config-fragments = $(call configfiles,*.config)

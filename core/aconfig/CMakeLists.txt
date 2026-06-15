@@ -29,10 +29,21 @@ endif()
 ###############################################
 
 ###### Add required/dependent components ######
-# ACONFIG 依赖 OSAL 和 PDL（用于 HWID 支持）
+# ACONFIG 依赖 OSAL（必须）和 PDL（用于 HWID 支持，可选）
 # ACONFIG 提供通用的遥测遥控配置管理框架
 # PDL_MISC 提供 HWID 读取接口
-list(APPEND ADD_REQUIREMENTS osal pdl)
+
+# OSAL 是必须的（Kconfig: select OSAL）
+if(CONFIG_OSAL)
+    list(APPEND ADD_REQUIREMENTS osal)
+else()
+    message(FATAL_ERROR "ACONFIG requires OSAL but CONFIG_OSAL is not enabled")
+endif()
+
+# PDL 是可选的（用于 HWID 支持）
+if(CONFIG_PDL)
+    list(APPEND ADD_REQUIREMENTS pdl)
+endif()
 ###############################################
 
 #### Add compile option for this component ####

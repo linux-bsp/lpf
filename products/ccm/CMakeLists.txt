@@ -30,6 +30,14 @@ if(PLATFORM_PCL_SRCS OR PLATFORM_ACL_SRCS)
         ${SDK_PATH}/core/osal/include/osal
     )
 
+    # Add configuration macros from Kconfig
+    get_cmake_property(all_vars VARIABLES)
+    foreach(var ${all_vars})
+        if(var MATCHES "^CONFIG_" AND ${var})
+            target_compile_definitions(platform_config_obj PRIVATE ${var}=${${var}})
+        endif()
+    endforeach()
+
     if(PLATFORM_PCL_SRCS)
         target_sources(platform_config_obj PRIVATE ${PLATFORM_PCL_SRCS})
     endif()

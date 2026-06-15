@@ -26,11 +26,27 @@ endif()
 ###############################################
 
 ###### Add required/dependent components ######
-# PCL 依赖 OSAL 和 PDL
-# PCL 使用 PDL 的配置类型定义（pdl_types.h）
-# 依赖关系：PCL→PDL（头文件），PDL→PCL（配置数据）
+# PCONFIG 根据 Kconfig select 语句依赖 OSAL、HAL、TYPES
+# PCONFIG 使用 PDL 的配置类型定义（pdl_types.h）
+# 依赖关系：PCONFIG→PDL（头文件），PDL→PCONFIG（配置数据）
 # 这不是循环依赖，因为是不同层面的依赖
-list(APPEND ADD_REQUIREMENTS osal pdl)
+
+# OSAL 是必须的（Kconfig: select OSAL）
+if(CONFIG_OSAL)
+    list(APPEND ADD_REQUIREMENTS osal)
+else()
+    message(FATAL_ERROR "PCONFIG requires OSAL but CONFIG_OSAL is not enabled")
+endif()
+
+# HAL 是 Kconfig 强制依赖的（Kconfig: select HAL）
+if(CONFIG_HAL)
+    list(APPEND ADD_REQUIREMENTS hal)
+endif()
+
+# PDL 提供 TYPES 类型定义（Kconfig: select PDL -> select TYPES）
+if(CONFIG_PDL)
+    list(APPEND ADD_REQUIREMENTS pdl)
+endif()
 ###############################################
 
 #### Add compile option for this component ####
