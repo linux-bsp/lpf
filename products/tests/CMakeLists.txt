@@ -64,9 +64,9 @@ add_executable(es-middleware-test
 )
 
 # Link test framework
-target_link_libraries(es-middleware-test PRIVATE
-    utest
-)
+if(CONFIG_UTEST)
+    target_link_libraries(es-middleware-test PRIVATE utest)
+endif()
 
 # Link OSAL (required by test framework)
 if(CONFIG_OSAL)
@@ -75,7 +75,6 @@ endif()
 
 # Add include directories for test cases
 target_include_directories(es-middleware-test PRIVATE
-    ${SDK_PATH}/core/utest/include/utest   # UTEST framework headers
     ${SDK_PATH}/core/osal/include/osal
     ${SDK_PATH}/core/hal/include/hal
     ${SDK_PATH}/core/pconfig/include/pconfig
@@ -85,6 +84,13 @@ target_include_directories(es-middleware-test PRIVATE
     ${SDK_PATH}/products/ccm/include
     ${SDK_PATH}/products/ccm/include/ccm
 )
+
+# Add UTEST framework headers if enabled
+if(CONFIG_UTEST)
+    target_include_directories(es-middleware-test PRIVATE
+        ${SDK_PATH}/core/utest/include/utest
+    )
+endif()
 
 # ============================================================================
 # Unit Tests - Auto-discovery based on Config.in

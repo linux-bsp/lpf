@@ -16,6 +16,7 @@ CONFIG_PLATFORM_LINUX=y
 CONFIG_OSAL=y
 CONFIG_TYPES=y
 CONFIG_HAL=y
+CONFIG_UTEST=y
 
 # Build Configuration - Shared Libraries for Testing
 CONFIG_OSAL_BUILD_SHARED=y
