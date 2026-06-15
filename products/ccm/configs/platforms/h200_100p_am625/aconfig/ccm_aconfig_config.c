@@ -1,7 +1,8 @@
 /**
- * @file ccm_acl_config.c
- * @brief CCM项目ACL配置实现
+ * @file ccm_aconfig_config.c
+ * @brief CCM项目 AConfig 配置实现
  * @note 项目层：提供CCM特定的配置表
+ *       当前使用旧版格式（逐步迁移到新格式）
  */
 
 #include "osal.h"
@@ -9,8 +10,8 @@
 #include "aconfig_tc.h"
 #include "aconfig_tm.h"
 
-/* 遥控配置表 */
-static const aconfig_tc_config_t g_ccm_tc_table[ACONFIG_TC_FUNC_MAX] = {
+/* 遥控配置表（旧版格式） */
+static const aconfig_tc_config_legacy_t g_ccm_tc_table[ACONFIG_TC_FUNC_MAX] = {
     /* 电源控制 */
     [ACONFIG_TC_POWER_ON] = {
         .function_id = ACONFIG_TC_POWER_ON,
@@ -53,8 +54,8 @@ static const aconfig_tc_config_t g_ccm_tc_table[ACONFIG_TC_FUNC_MAX] = {
     }
 };
 
-/* 遥测配置表 */
-static const aconfig_tm_config_t g_ccm_tm_table[ACONFIG_TM_FUNC_MAX] = {
+/* 遥测配置表（旧版格式） */
+static const aconfig_tm_config_legacy_t g_ccm_tm_table[ACONFIG_TM_FUNC_MAX] = {
     /* 温度遥测 */
     [ACONFIG_TM_CPU_TEMP] = {
         .function_id = ACONFIG_TM_CPU_TEMP,
@@ -101,9 +102,11 @@ static const aconfig_invalidation_map_t g_ccm_inv_map[] = {
     }
 };
 
-/* CCM配置表 */
-static const aconfig_config_table_t g_ccm_acl_table = {
+/* CCM配置表（旧版格式） */
+static const aconfig_config_table_legacy_t g_ccm_acl_table = {
     .name = "CCM_H200",
+    .hwid_count = 0,
+    .hwid_list = NULL,
     .tc_table = g_ccm_tc_table,
     .tc_count = ACONFIG_TC_FUNC_MAX,
     .tm_table = g_ccm_tm_table,
@@ -127,13 +130,13 @@ int32_t CCM_ACL_Init(void)
         return ret;
     }
 
-    /* 注册CCM配置表 */
-    ret = ACONFIG_RegisterTable(&g_ccm_acl_table);
+    /* 注册CCM配置表（使用兼容性API） */
+    ret = ACONFIG_RegisterTableLegacy(&g_ccm_acl_table);
     if (OSAL_SUCCESS != ret) {
-        LOG_ERROR("CCM_ACL", "ACONFIG_RegisterTable failed, ret=%d", ret);
+        LOG_ERROR("CCM_ACL", "ACONFIG_RegisterTableLegacy failed, ret=%d", ret);
         return ret;
     }
 
-    LOG_INFO("CCM_ACL", "Initialized");
+    LOG_INFO("CCM_ACL", "Initialized (legacy format)");
     return OSAL_SUCCESS;
 }

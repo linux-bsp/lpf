@@ -176,6 +176,8 @@ if(CONFIG_TEST_UNIT)
             DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/unit/aconfig
             MODULE aconfig
             LIBRARY aconfig
+            INCLUDE_DIRS
+                ${SDK_PATH}/products/ccm/include
         )
     endif()
 

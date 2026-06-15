@@ -1,404 +1,271 @@
 /**
  * @file test_aconfig_api.c
- * @brief ACONFIG API单元测试
+ * @brief ACONFIG API 单元测试（优化版）
+ * @note 适配优化后的 ACONFIG 数据结构
  */
 
 #include "test_framework.h"
 #include "aconfig.h"
-#include "aconfig_tc.h"
-#include "aconfig_tm.h"
+#include "ccm_tc_functions.h"
+#include "ccm_tm_functions.h"
 
-/* 测试用的配置表 */
-static const aconfig_tc_config_t test_tc_table[] = {
+/* 失效映射数据 */
+static const uint32_t power_on_affected[] = {CCM_TM_POWER_STATUS};
+static const uint32_t power_off_affected[] = {CCM_TM_POWER_STATUS};
+
+/* 测试用的遥控配置（稀疏数组） */
+static const aconfig_tc_entry_t test_tc_entries[] = {
     {
-        .function_id = ACONFIG_TC_POWER_ON,
-        .device_type = ACONFIG_DEVICE_MCU,
-        .device_name = "power_mcu",
-        .enabled = true,
-        .user_context = NULL
+        .function_id = CCM_TC_POWER_ON,
+        .config = {
+            .function_id = CCM_TC_POWER_ON,
+            .device = {.type = PCONFIG_DEVICE_MCU, .index = 0},
+            .invalidated_tm_ids = power_on_affected,
+            .invalidated_tm_count = 1,
+            .enabled = true,
+            .user_context = NULL
+        }
     },
     {
-        .function_id = ACONFIG_TC_POWER_OFF,
-        .device_type = ACONFIG_DEVICE_MCU,
-        .device_name = "power_mcu",
-        .enabled = true,
-        .user_context = NULL
+        .function_id = CCM_TC_POWER_OFF,
+        .config = {
+            .function_id = CCM_TC_POWER_OFF,
+            .device = {.type = PCONFIG_DEVICE_MCU, .index = 0},
+            .invalidated_tm_ids = power_off_affected,
+            .invalidated_tm_count = 1,
+            .enabled = true,
+            .user_context = NULL
+        }
     },
     {
-        .function_id = ACONFIG_TC_MCU_RESET,
-        .device_type = ACONFIG_DEVICE_MCU,
-        .device_name = "power_mcu",
-        .enabled = false,  /* 禁用 */
-        .user_context = NULL
+        .function_id = CCM_TC_MCU_RESET,
+        .config = {
+            .function_id = CCM_TC_MCU_RESET,
+            .device = {.type = PCONFIG_DEVICE_MCU, .index = 0},
+            .invalidated_tm_ids = NULL,
+            .invalidated_tm_count = 0,
+            .enabled = false,  /* 禁用 */
+            .user_context = NULL
+        }
     }
 };
 
-static const aconfig_tm_config_t test_tm_table[] = {
+/* 测试用的遥测配置（稀疏数组） */
+static const aconfig_tm_entry_t test_tm_entries[] = {
     {
-        .function_id = ACONFIG_TM_VOLTAGE_5V,
-        .device_type = ACONFIG_DEVICE_MCU,
-        .device_name = "power_mcu",
-        .data_validity_ms = 1000,
-        .background_update_period_ms = 500,
-        .enabled = true,
-        .user_context = NULL
+        .function_id = CCM_TM_VOLTAGE_5V,
+        .config = {
+            .function_id = CCM_TM_VOLTAGE_5V,
+            .device = {.type = PCONFIG_DEVICE_MCU, .index = 0},
+            .poll_period_ms = 500,
+            .validity_period_ms = 1000,
+            .enabled = true,
+            .user_context = NULL
+        }
     },
     {
-        .function_id = ACONFIG_TM_CURRENT,
-        .device_type = ACONFIG_DEVICE_MCU,
-        .device_name = "power_mcu",
-        .data_validity_ms = 1000,
-        .background_update_period_ms = 500,
-        .enabled = true,
-        .user_context = NULL
+        .function_id = CCM_TM_CURRENT,
+        .config = {
+            .function_id = CCM_TM_CURRENT,
+            .device = {.type = PCONFIG_DEVICE_MCU, .index = 0},
+            .poll_period_ms = 500,
+            .validity_period_ms = 1000,
+            .enabled = true,
+            .user_context = NULL
+        }
     },
     {
-        .function_id = ACONFIG_TM_CPU_TEMP,
-        .device_type = ACONFIG_DEVICE_SENSOR,
-        .device_name = "temp_sensor",
-        .data_validity_ms = 2000,
-        .background_update_period_ms = 1000,
-        .enabled = false,  /* 禁用 */
-        .user_context = NULL
+        .function_id = CCM_TM_CPU_TEMP,
+        .config = {
+            .function_id = CCM_TM_CPU_TEMP,
+            .device = {.type = PCONFIG_DEVICE_SENSOR, .index = 0},
+            .poll_period_ms = 1000,
+            .validity_period_ms = 2000,
+            .enabled = false,  /* 禁用 */
+            .user_context = NULL
+        }
     }
 };
 
-static uint32_t voltage_affected[] = {ACONFIG_TM_CURRENT};
-static const aconfig_invalidation_map_t test_inv_map[] = {
-    {
-        .source_tm_id = ACONFIG_TM_VOLTAGE_5V,
-        .affected_tm_ids = voltage_affected,
-        .affected_count = 1
-    }
-};
-
+/* 测试配置表 */
 static const aconfig_config_table_t test_config_table = {
     .name = "test_config",
-    .tc_table = test_tc_table,
-    .tc_count = OSAL_sizeof(test_tc_table) / OSAL_sizeof(test_tc_table[0]),
-    .tm_table = test_tm_table,
-    .tm_count = OSAL_sizeof(test_tm_table) / OSAL_sizeof(test_tm_table[0]),
-    .inv_map = test_inv_map,
-    .inv_count = OSAL_sizeof(test_inv_map) / OSAL_sizeof(test_inv_map[0])
+    .hwid_count = 0,
+    .hwid_list = NULL,
+    .tc_entries = test_tc_entries,
+    .tc_count = sizeof(test_tc_entries) / sizeof(test_tc_entries[0]),
+    .tm_entries = test_tm_entries,
+    .tm_count = sizeof(test_tm_entries) / sizeof(test_tm_entries[0])
 };
 
-/*===========================================================================
- * 初始化和注册测试
- *===========================================================================*/
-
-static void test_aconfig_init_success(void)
+/**
+ * @brief 测试初始化和注册
+ */
+static void test_aconfig_init_register(void)
 {
-    int32_t ret = ACONFIG_Init();
+    int32_t ret;
+
+    /* 初始化 */
+    ret = ACONFIG_Init();
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
-}
 
-static void test_aconfig_register_table_success(void)
-{
-    ACONFIG_Init();
-    int32_t ret = ACONFIG_RegisterTable(&test_config_table);
+    /* 注册配置表 */
+    ret = ACONFIG_RegisterTable(&test_config_table);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
-}
 
-static void test_aconfig_register_table_null(void)
-{
-    ACONFIG_Init();
-    int32_t ret = ACONFIG_RegisterTable(NULL);
+    /* 重复注册应该给出警告但成功 */
+    ret = ACONFIG_RegisterTable(&test_config_table);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    /* NULL 指针应该失败 */
+    ret = ACONFIG_RegisterTable(NULL);
     TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_POINTER, ret);
 }
 
-/*===========================================================================
- * 遥控配置查询测试
- *===========================================================================*/
-
-static void test_aconfig_get_tc_config_valid(void)
+/**
+ * @brief 测试遥控配置查询
+ */
+static void test_aconfig_tc_query(void)
 {
-    const aconfig_tc_config_t *cfg = ACONFIG_GetTcConfig(ACONFIG_TC_POWER_ON);
-    TEST_ASSERT_NOT_EQUAL(NULL, cfg);
-    TEST_ASSERT_EQUAL(ACONFIG_TC_POWER_ON, cfg->function_id);
-    TEST_ASSERT_EQUAL(ACONFIG_DEVICE_MCU, cfg->device_type);
-    TEST_ASSERT_TRUE(cfg->enabled);
+    const aconfig_tc_config_t *config;
+
+    /* 查询启用的遥控功能 */
+    config = ACONFIG_GetTcConfig(CCM_TC_POWER_ON);
+    TEST_ASSERT_NOT_NULL(config);
+    TEST_ASSERT_EQUAL(CCM_TC_POWER_ON, config->function_id);
+    TEST_ASSERT_EQUAL(PCONFIG_DEVICE_MCU, config->device.type);
+    TEST_ASSERT_EQUAL(0, config->device.index);
+    TEST_ASSERT_TRUE(config->enabled);
+
+    /* 查询禁用的遥控功能 */
+    config = ACONFIG_GetTcConfig(CCM_TC_MCU_RESET);
+    TEST_ASSERT_NOT_NULL(config);
+    TEST_ASSERT_FALSE(config->enabled);
+
+    /* 查询不存在的功能 */
+    config = ACONFIG_GetTcConfig(0xFFFF);
+    TEST_ASSERT_NULL(config);
 }
 
-static void test_aconfig_get_tc_config_invalid(void)
+/**
+ * @brief 测试遥测配置查询
+ */
+static void test_aconfig_tm_query(void)
 {
-    const aconfig_tc_config_t *cfg = ACONFIG_GetTcConfig(9999);
-    TEST_ASSERT_EQUAL(NULL, cfg);
+    const aconfig_tm_config_t *config;
+
+    /* 查询启用的遥测功能 */
+    config = ACONFIG_GetTmConfig(CCM_TM_VOLTAGE_5V);
+    TEST_ASSERT_NOT_NULL(config);
+    TEST_ASSERT_EQUAL(CCM_TM_VOLTAGE_5V, config->function_id);
+    TEST_ASSERT_EQUAL(PCONFIG_DEVICE_MCU, config->device.type);
+    TEST_ASSERT_EQUAL(0, config->device.index);
+    TEST_ASSERT_EQUAL(500, config->poll_period_ms);
+    TEST_ASSERT_EQUAL(1000, config->validity_period_ms);
+    TEST_ASSERT_TRUE(config->enabled);
+
+    /* 查询禁用的遥测功能 */
+    config = ACONFIG_GetTmConfig(CCM_TM_CPU_TEMP);
+    TEST_ASSERT_NOT_NULL(config);
+    TEST_ASSERT_FALSE(config->enabled);
+
+    /* 查询不存在的功能 */
+    config = ACONFIG_GetTmConfig(0xFFFF);
+    TEST_ASSERT_NULL(config);
 }
 
-static void test_aconfig_is_tc_enabled_true(void)
+/**
+ * @brief 测试功能使能检查
+ */
+static void test_aconfig_enabled_check(void)
 {
-    bool enabled = ACONFIG_IsTcEnabled(ACONFIG_TC_POWER_ON);
-    TEST_ASSERT_TRUE(enabled);
+    /* 遥控功能使能检查 */
+    TEST_ASSERT_TRUE(ACONFIG_IsTcEnabled(CCM_TC_POWER_ON));
+    TEST_ASSERT_TRUE(ACONFIG_IsTcEnabled(CCM_TC_POWER_OFF));
+    TEST_ASSERT_FALSE(ACONFIG_IsTcEnabled(CCM_TC_MCU_RESET));
+    TEST_ASSERT_FALSE(ACONFIG_IsTcEnabled(0xFFFF));
+
+    /* 遥测功能使能检查 */
+    TEST_ASSERT_TRUE(ACONFIG_IsTmEnabled(CCM_TM_VOLTAGE_5V));
+    TEST_ASSERT_TRUE(ACONFIG_IsTmEnabled(CCM_TM_CURRENT));
+    TEST_ASSERT_FALSE(ACONFIG_IsTmEnabled(CCM_TM_CPU_TEMP));
+    TEST_ASSERT_FALSE(ACONFIG_IsTmEnabled(0xFFFF));
 }
 
-static void test_aconfig_is_tc_enabled_false(void)
+/**
+ * @brief 测试失效映射（内嵌版）
+ */
+static void test_aconfig_invalidation_map(void)
 {
-    bool enabled = ACONFIG_IsTcEnabled(ACONFIG_TC_MCU_RESET);
-    TEST_ASSERT_FALSE(enabled);
-}
+    uint32_t affected_ids[16];
+    uint32_t actual_count;
+    int32_t ret;
 
-static void test_aconfig_is_tc_enabled_invalid(void)
-{
-    bool enabled = ACONFIG_IsTcEnabled(9999);
-    TEST_ASSERT_FALSE(enabled);
-}
-
-/*===========================================================================
- * 遥测配置查询测试
- *===========================================================================*/
-
-static void test_aconfig_get_tm_config_valid(void)
-{
-    const aconfig_tm_config_t *cfg = ACONFIG_GetTmConfig(ACONFIG_TM_VOLTAGE_5V);
-    TEST_ASSERT_NOT_EQUAL(NULL, cfg);
-    TEST_ASSERT_EQUAL(ACONFIG_TM_VOLTAGE_5V, cfg->function_id);
-    TEST_ASSERT_EQUAL(ACONFIG_DEVICE_MCU, cfg->device_type);
-    TEST_ASSERT_EQUAL(1000, cfg->data_validity_ms);
-    TEST_ASSERT_EQUAL(500, cfg->background_update_period_ms);
-    TEST_ASSERT_TRUE(cfg->enabled);
-}
-
-static void test_aconfig_get_tm_config_invalid(void)
-{
-    const aconfig_tm_config_t *cfg = ACONFIG_GetTmConfig(9999);
-    TEST_ASSERT_EQUAL(NULL, cfg);
-}
-
-static void test_aconfig_is_tm_enabled_true(void)
-{
-    bool enabled = ACONFIG_IsTmEnabled(ACONFIG_TM_VOLTAGE_5V);
-    TEST_ASSERT_TRUE(enabled);
-}
-
-static void test_aconfig_is_tm_enabled_false(void)
-{
-    bool enabled = ACONFIG_IsTmEnabled(ACONFIG_TM_CPU_TEMP);
-    TEST_ASSERT_FALSE(enabled);
-}
-
-static void test_aconfig_is_tm_enabled_invalid(void)
-{
-    bool enabled = ACONFIG_IsTmEnabled(9999);
-    TEST_ASSERT_FALSE(enabled);
-}
-
-/*===========================================================================
- * 失效映射测试
- *===========================================================================*/
-
-static void test_aconfig_get_invalidation_map_valid(void)
-{
-    uint32_t affected_ids[10];
-    uint32_t actual_count = 0;
-
-    int32_t ret = ACONFIG_GetInvalidationMap(ACONFIG_TM_VOLTAGE_5V,
-                                             affected_ids,
-                                             10,
-                                             &actual_count);
-
+    /* 查询 POWER_ON 的失效映射 */
+    ret = ACONFIG_GetInvalidationMap(CCM_TC_POWER_ON, affected_ids, 16, &actual_count);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_EQUAL(1, actual_count);
-    TEST_ASSERT_EQUAL(ACONFIG_TM_CURRENT, affected_ids[0]);
-}
+    TEST_ASSERT_EQUAL(CCM_TM_POWER_STATUS, affected_ids[0]);
 
-static void test_aconfig_get_invalidation_map_invalid(void)
-{
-    uint32_t affected_ids[10];
-    uint32_t actual_count = 0;
-
-    int32_t ret = ACONFIG_GetInvalidationMap(9999,
-                                             affected_ids,
-                                             10,
-                                             &actual_count);
-
-    TEST_ASSERT_EQUAL(OSAL_ERR_GENERIC, ret);
+    /* 查询没有失效映射的遥控功能 */
+    ret = ACONFIG_GetInvalidationMap(CCM_TC_MCU_RESET, affected_ids, 16, &actual_count);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_EQUAL(0, actual_count);
-}
 
-static void test_aconfig_get_invalidation_map_null_pointer(void)
-{
-    uint32_t actual_count = 0;
+    /* 查询不存在的功能 */
+    ret = ACONFIG_GetInvalidationMap(0xFFFF, affected_ids, 16, &actual_count);
+    TEST_ASSERT_EQUAL(OSAL_ERR_NAME_NOT_FOUND, ret);
 
-    int32_t ret = ACONFIG_GetInvalidationMap(ACONFIG_TM_VOLTAGE_5V,
-                                             NULL,
-                                             10,
-                                             &actual_count);
+    /* NULL 指针测试 */
+    ret = ACONFIG_GetInvalidationMap(CCM_TC_POWER_ON, NULL, 16, &actual_count);
+    TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_POINTER, ret);
 
+    ret = ACONFIG_GetInvalidationMap(CCM_TC_POWER_ON, affected_ids, 16, NULL);
     TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_POINTER, ret);
 }
 
-/*===========================================================================
- * 统计信息测试
- *===========================================================================*/
-
-static void test_aconfig_get_statistics(void)
+/**
+ * @brief 测试统计信息
+ */
+static void test_aconfig_statistics(void)
 {
     aconfig_statistics_t stats;
-    int32_t ret = ACONFIG_GetStatistics(&stats);
+    int32_t ret;
 
+    ret = ACONFIG_GetStatistics(&stats);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
-    TEST_ASSERT_EQUAL(2, stats.tc_enabled_count);   /* POWER_ON, POWER_OFF */
-    TEST_ASSERT_EQUAL(1, stats.tc_disabled_count);  /* RESET */
-    TEST_ASSERT_EQUAL(2, stats.tm_enabled_count);   /* VOLTAGE, CURRENT */
-    TEST_ASSERT_EQUAL(1, stats.tm_disabled_count);  /* TEMPERATURE */
-    TEST_ASSERT_EQUAL(1, stats.invalidation_map_count);
-}
 
-static void test_aconfig_get_statistics_null(void)
-{
-    int32_t ret = ACONFIG_GetStatistics(NULL);
+    /* 验证统计信息 */
+    TEST_ASSERT_EQUAL(2, stats.tc_enabled_count);   /* POWER_ON, POWER_OFF */
+    TEST_ASSERT_EQUAL(1, stats.tc_disabled_count);  /* MCU_RESET */
+    TEST_ASSERT_EQUAL(2, stats.tm_enabled_count);   /* VOLTAGE_5V, CURRENT */
+    TEST_ASSERT_EQUAL(1, stats.tm_disabled_count);  /* CPU_TEMP */
+    TEST_ASSERT_EQUAL(2, stats.total_invalidation_maps);  /* POWER_ON, POWER_OFF */
+
+    /* NULL 指针测试 */
+    ret = ACONFIG_GetStatistics(NULL);
     TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_POINTER, ret);
 }
 
-/*===========================================================================
- * 打印配置测试（仅验证不崩溃）
- *===========================================================================*/
-
-static void test_aconfig_print_config(void)
+/**
+ * @brief 测试配置打印
+ */
+static void test_aconfig_print(void)
 {
-    /* 仅验证函数不崩溃 */
+    /* 只测试不崩溃 */
     ACONFIG_PrintConfig();
-    TEST_ASSERT_TRUE(true);
 }
 
-/* 测试用例数组 - 使用函数指针数组 */
-static const test_case_t test_cases[] = {
-	{
-		.name = "test_aconfig_init_success",
-		.func = test_aconfig_init_success,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_aconfig_register_table_success",
-		.func = test_aconfig_register_table_success,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_aconfig_register_table_null",
-		.func = test_aconfig_register_table_null,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_aconfig_get_tc_config_valid",
-		.func = test_aconfig_get_tc_config_valid,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_aconfig_get_tc_config_invalid",
-		.func = test_aconfig_get_tc_config_invalid,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_aconfig_is_tc_enabled_true",
-		.func = test_aconfig_is_tc_enabled_true,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_aconfig_is_tc_enabled_false",
-		.func = test_aconfig_is_tc_enabled_false,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_aconfig_is_tc_enabled_invalid",
-		.func = test_aconfig_is_tc_enabled_invalid,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_aconfig_get_tm_config_valid",
-		.func = test_aconfig_get_tm_config_valid,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_aconfig_get_tm_config_invalid",
-		.func = test_aconfig_get_tm_config_invalid,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_aconfig_is_tm_enabled_true",
-		.func = test_aconfig_is_tm_enabled_true,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_aconfig_is_tm_enabled_false",
-		.func = test_aconfig_is_tm_enabled_false,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_aconfig_is_tm_enabled_invalid",
-		.func = test_aconfig_is_tm_enabled_invalid,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_aconfig_get_invalidation_map_valid",
-		.func = test_aconfig_get_invalidation_map_valid,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_aconfig_get_invalidation_map_invalid",
-		.func = test_aconfig_get_invalidation_map_invalid,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_aconfig_get_invalidation_map_null_pointer",
-		.func = test_aconfig_get_invalidation_map_null_pointer,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_aconfig_get_statistics",
-		.func = test_aconfig_get_statistics,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_aconfig_get_statistics_null",
-		.func = test_aconfig_get_statistics_null,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_aconfig_print_config",
-		.func = test_aconfig_print_config,
-		.setup = NULL,
-		.teardown = NULL
-	},
-};
-
-/* 测试套件定义 */
-static const test_suite_t test_suite = {
-	.suite_name = "aconfig_api",
-	.module_name = "aconfig_api",
-	.layer_name = "ACONFIG",
-	.cases = test_cases,
-	.case_count = OSAL_sizeof(test_cases) / OSAL_sizeof(test_case_t),
-	.suite_setup = NULL,
-	.suite_teardown = NULL,
-	.metadata = {
-		.category = TEST_CATEGORY_UNIT,
-		.tags = TEST_TAG_FAST,
-		.timeout_ms = 100,
-		.description = "ACONFIG aconfig_api tests"
-	}
-};
-
-/* 测试套件注册函数 */
-__attribute__((constructor))
-static void register_aconfig_api_tests(void)
+/**
+ * @brief ACONFIG 测试套件
+ */
+void run_aconfig_tests(void)
 {
-	libutest_register_suite(&test_suite);
+    TEST_RUN(test_aconfig_init_register);
+    TEST_RUN(test_aconfig_tc_query);
+    TEST_RUN(test_aconfig_tm_query);
+    TEST_RUN(test_aconfig_enabled_check);
+    TEST_RUN(test_aconfig_invalidation_map);
+    TEST_RUN(test_aconfig_statistics);
+    TEST_RUN(test_aconfig_print);
 }

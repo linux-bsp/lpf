@@ -23,6 +23,8 @@ if(PLATFORM_PCL_SRCS OR PLATFORM_ACL_SRCS)
 
     # Add include directories from core modules
     target_include_directories(platform_config_obj PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include         # CCM 产品层头文件（新增）
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/ccm     # CCM 产品层头文件子目录
         ${SDK_PATH}/core/pconfig/include/pconfig
         ${SDK_PATH}/core/aconfig/include/aconfig
         ${SDK_PATH}/core/pdl/include/pdl

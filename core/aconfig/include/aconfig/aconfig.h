@@ -1,13 +1,13 @@
 /**
  * @file aconfig.h
- * @brief ACONFIG 对外 API - 核心配置管理接口
+ * @brief ACONFIG 对外 API - 核心配置管理接口（优化版）
  * @note 本文件为 ACONFIG 模块的对外 API，提供配置注册和查询功能
  *
- * ACONFIG 提供稳定的应用配置层 API，将业务功能映射到硬件设备。
- * 所有 include 都是无条件编译的核心依赖，因为：
- * - ACONFIG 必须提供一致的 API 表面，无论底层硬件配置如何
- * - 条件编译发生在实现层（aconfig.c）和底层（HAL/PDL/PRL）
- * - 这确保了 API 的稳定性和向后兼容性
+ * 优化要点：
+ * 1. 核心层只提供框架和通用数据结构，不包含业务功能定义
+ * 2. 业务功能枚举（TC/TM）移到产品层（products/ccm/include/ccm/）
+ * 3. 采用设备索引引用替代字符串查找
+ * 4. 使用稀疏数组替代密集数组，节省内存
  */
 
 #ifndef ACONFIG_H
@@ -15,20 +15,16 @@
 
 /* Core dependencies - always required */
 #include "osal.h"              /* OSAL 基础类型和返回值 */
-#include "aconfig_types.h"     /* ACONFIG 核心数据结构 */
-#include "aconfig_tc.h"        /* 遥控功能 ID 枚举 */
-#include "aconfig_tm.h"        /* 遥测功能 ID 枚举 */
+#include "aconfig_types.h"     /* ACONFIG 核心数据结构（优化版） */
 
-/**
- * @brief ACONFIG 配置统计信息
+/* 产品层功能定义（项目特定）
+ * 注意：这些头文件应该在产品构建时提供
+ * 核心层不应该依赖具体产品的功能定义
  */
-typedef struct {
-	uint32_t tc_enabled_count;	/* 使能的遥控功能数量 */
-	uint32_t tc_disabled_count;	/* 禁用的遥控功能数量 */
-	uint32_t tm_enabled_count;	/* 使能的遥测功能数量 */
-	uint32_t tm_disabled_count;	/* 禁用的遥测功能数量 */
-	uint32_t invalidation_map_count; /* 失效映射数量 */
-} aconfig_statistics_t;
+#ifdef CONFIG_CCM
+#include "ccm_tc_functions.h"  /* CCM 遥控功能枚举 */
+#include "ccm_tm_functions.h"  /* CCM 遥测功能枚举 */
+#endif
 
 /**
  * @brief 初始化 ACONFIG 层
@@ -43,6 +39,14 @@ int32_t ACONFIG_Init(void);
  * @note 通常在项目初始化时调用，注册项目特定的配置
  */
 int32_t ACONFIG_RegisterTable(const aconfig_config_table_t *table);
+
+/**
+ * @brief 注册配置表（旧版兼容性支持）
+ * @param table 配置表指针（旧格式）
+ * @return OSAL_SUCCESS 成功，OSAL_ERR_* 失败
+ * @deprecated 新代码应使用 ACONFIG_RegisterTable()
+ */
+int32_t ACONFIG_RegisterTableLegacy(const aconfig_config_table_legacy_t *table);
 
 /**
  * @brief 查询遥控配置（O(1)）
