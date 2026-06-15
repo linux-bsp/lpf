@@ -119,92 +119,72 @@ int32_t PCONFIG_LoadByHWID(void);
  *===========================================================================*/
 
 /**
- * @brief 根据名称查找MCU外设配置
+ * @brief 根据索引获取MCU外设配置
  *
  * @param[in] platform 平台配置
- * @param[in] name MCU名称
+ * @param[in] index MCU索引（数组下标）
  *
  * @return MCU配置条目指针，失败返回NULL
  */
-const pconfig_mcu_entry_t* PCONFIG_HW_FindMCU(const pconfig_platform_config_t *platform,
-				      const char *name);
+static inline const pconfig_mcu_entry_t*
+PCONFIG_HW_GetMCU(const pconfig_platform_config_t *platform, uint32_t index)
+{
+	if (!platform || !platform->mcu_array || index >= platform->mcu_count) {
+		return NULL;
+	}
+	return &platform->mcu_array[index];
+}
 
 /**
- * @brief 根据编号获取MCU外设配置
+ * @brief 根据索引获取BMC外设配置
  *
  * @param[in] platform 平台配置
- * @param[in] id MCU编号（第几个）
- *
- * @return MCU配置条目指针，失败返回NULL
- */
-const pconfig_mcu_entry_t* PCONFIG_HW_GetMCU(const pconfig_platform_config_t *platform,
-				     uint32_t id);
-
-/**
- * @brief 根据名称查找BMC外设配置
- *
- * @param[in] platform 平台配置
- * @param[in] name BMC名称
+ * @param[in] index BMC索引（数组下标）
  *
  * @return BMC配置条目指针，失败返回NULL
  */
-const pconfig_bmc_entry_t* PCONFIG_HW_FindBMC(const pconfig_platform_config_t *platform,
-				      const char *name);
+static inline const pconfig_bmc_entry_t*
+PCONFIG_HW_GetBMC(const pconfig_platform_config_t *platform, uint32_t index)
+{
+	if (!platform || !platform->bmc_array || index >= platform->bmc_count) {
+		return NULL;
+	}
+	return &platform->bmc_array[index];
+}
 
 /**
- * @brief 根据编号获取BMC外设配置
+ * @brief 根据索引获取FPGA外设配置
  *
  * @param[in] platform 平台配置
- * @param[in] id BMC编号（第几个）
- *
- * @return BMC配置条目指针，失败返回NULL
- */
-const pconfig_bmc_entry_t* PCONFIG_HW_GetBMC(const pconfig_platform_config_t *platform,
-				     uint32_t id);
-
-/**
- * @brief 根据名称查找FPGA外设配置
- *
- * @param[in] platform 平台配置
- * @param[in] name FPGA名称
+ * @param[in] index FPGA索引（数组下标）
  *
  * @return FPGA配置指针，失败返回NULL
  */
-const pconfig_fpga_cfg_t* PCONFIG_HW_FindFPGA(const pconfig_platform_config_t *platform,
-					      const char *name);
+static inline const pconfig_fpga_cfg_t*
+PCONFIG_HW_GetFPGA(const pconfig_platform_config_t *platform, uint32_t index)
+{
+	if (!platform || !platform->fpga_array || index >= platform->fpga_count) {
+		return NULL;
+	}
+	return &platform->fpga_array[index];
+}
 
 /**
- * @brief 根据编号获取FPGA外设配置
+ * @brief 根据索引获取Switch外设配置
  *
  * @param[in] platform 平台配置
- * @param[in] id FPGA编号（第几个）
- *
- * @return FPGA配置指针，失败返回NULL
- */
-const pconfig_fpga_cfg_t* PCONFIG_HW_GetFPGA(const pconfig_platform_config_t *platform,
-					     uint32_t id);
-
-/**
- * @brief 根据名称查找Switch外设配置
- *
- * @param[in] platform 平台配置
- * @param[in] name Switch名称
+ * @param[in] index Switch索引（数组下标）
  *
  * @return Switch配置指针，失败返回NULL
  */
-const pconfig_switch_cfg_t* PCONFIG_HW_FindSwitch(const pconfig_platform_config_t *platform,
-						  const char *name);
-
-/**
- * @brief 根据编号获取Switch外设配置
- *
- * @param[in] platform 平台配置
- * @param[in] id Switch编号（第几个）
- *
- * @return Switch配置指针，失败返回NULL
- */
-const pconfig_switch_cfg_t* PCONFIG_HW_GetSwitch(const pconfig_platform_config_t *platform,
-						 uint32_t id);
+static inline const pconfig_switch_cfg_t*
+PCONFIG_HW_GetSwitch(const pconfig_platform_config_t *platform, uint32_t index)
+{
+	if (!platform || !platform->switch_array || index >= platform->switch_count) {
+		return NULL;
+	}
+	return &platform->switch_array[index];
+}
 
 /*===========================================================================
  * 配置验证

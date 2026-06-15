@@ -22,8 +22,7 @@
  */
 typedef struct {
 	/* 外设基本信息 */
-	const char *name;		/* 外设名称 */
-	const char *description;	/* 描述信息 */
+	const char *description;	/* 描述信息（用于日志和调试） */
 	bool enabled;			/* 是否启用 */
 
 	/* Switch特定配置 */

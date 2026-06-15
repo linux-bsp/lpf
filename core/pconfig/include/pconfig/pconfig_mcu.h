@@ -25,8 +25,7 @@
  */
 typedef struct {
 	/* PCONFIG 配置管理字段 */
-	const char *name;		/* MCU名称（用于查询，如"power_mcu"） */
-	const char *description;	/* 描述信息 */
+	const char *description;	/* 描述信息（用于日志和调试） */
 	bool	enabled;		/* 是否启用此MCU */
 
 	/* PDL 配置（来自 PDL 层） */

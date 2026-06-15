@@ -28,8 +28,9 @@
  * 只包含纯硬件外设：MCU、BMC、FPGA、Switch
  *
  * 设计说明：
- * - 使用计数器+指针数组模式，避免NULL结尾导致的越界风险
- * - 数组大小明确，便于边界检查和快速获取数量
+ * - 使用计数器+直接数组指针模式
+ * - 配置数组直接定义，不使用指针数组
+ * - 通过数组索引访问，业务层通过索引映射到具体硬件
  */
 typedef struct {
 	/* 板级信息 */
@@ -42,18 +43,18 @@ typedef struct {
 	uint32_t hwid_count;		/* 支持的HWID数量，0表示支持所有HWID */
 	const pdl_hwid_t *hwid_list;	/* 支持的HWID列表，NULL表示支持所有HWID */
 
-	/* 硬件外设配置数组（使用计数器模式） */
-	uint32_t mcu_count;			/* MCU外设数量 */
-	pconfig_mcu_entry_t	**mcu_arr;	/* MCU外设数组 */
+	/* 硬件外设配置数组（直接数组指针） */
+	uint32_t mcu_count;		/* MCU外设数量 */
+	pconfig_mcu_entry_t *mcu_array;	/* MCU外设数组（直接指向数组首元素） */
 
-	uint32_t bmc_count;			/* BMC外设数量 */
-	pconfig_bmc_entry_t	**bmc_arr;	/* BMC外设数组 */
+	uint32_t bmc_count;		/* BMC外设数量 */
+	pconfig_bmc_entry_t *bmc_array;	/* BMC外设数组 */
 
-	uint32_t fpga_count;			/* FPGA外设数量 */
-	pconfig_fpga_cfg_t	**fpga_arr;	/* FPGA外设数组 */
+	uint32_t fpga_count;		/* FPGA外设数量 */
+	pconfig_fpga_cfg_t *fpga_array;	/* FPGA外设数组 */
 
-	uint32_t switch_count;			/* Switch外设数量 */
-	pconfig_switch_cfg_t	**switch_arr;	/* Switch外设数组 */
+	uint32_t switch_count;		/* Switch外设数量 */
+	pconfig_switch_cfg_t *switch_array; /* Switch外设数组 */
 } pconfig_platform_config_t;
 
 #endif /* PCONFIG_PLATFORM_H */

@@ -216,151 +216,9 @@ int32_t PCONFIG_List(const pconfig_platform_config_t **configs, uint32_t *count)
 
 /*===========================================================================
  * 硬件外设配置查询接口（PCONFIG_HW_*）
+ *
+ * 说明：所有 Get 函数已改为 inline 函数，在头文件中实现
  *===========================================================================*/
-
-const pconfig_mcu_entry_t* PCONFIG_HW_FindMCU(const pconfig_platform_config_t *platform,
-                                      const char *name)
-{
-    uint32_t i;
-
-    if (NULL == platform || NULL == name || NULL == platform->mcu_arr) {
-        return NULL;
-    }
-
-    for (i = 0; i < platform->mcu_count; i++) {
-        if (OSAL_strcmp(platform->mcu_arr[i]->name, name) == 0) {
-            return platform->mcu_arr[i];
-        }
-    }
-
-    return NULL;
-}
-
-const pconfig_mcu_entry_t* PCONFIG_HW_GetMCU(const pconfig_platform_config_t *platform,
-                                     uint32_t id)
-{
-    uint32_t i;
-
-    if (NULL == platform || NULL == platform->mcu_arr) {
-        return NULL;
-    }
-
-    for (i = 0; i < platform->mcu_count; i++) {
-        if (i == id) {
-            return platform->mcu_arr[i];
-        }
-    }
-
-    return NULL;
-}
-
-const pconfig_bmc_entry_t* PCONFIG_HW_FindBMC(const pconfig_platform_config_t *platform,
-                                      const char *name)
-{
-    uint32_t i;
-
-    if (NULL == platform || NULL == name || NULL == platform->bmc_arr) {
-        return NULL;
-    }
-
-    for (i = 0; i < platform->bmc_count; i++) {
-        if (OSAL_strcmp(platform->bmc_arr[i]->name, name) == 0) {
-            return platform->bmc_arr[i];
-        }
-    }
-
-    return NULL;
-}
-
-const pconfig_bmc_entry_t* PCONFIG_HW_GetBMC(const pconfig_platform_config_t *platform,
-                                     uint32_t id)
-{
-    uint32_t i;
-
-    if (NULL == platform || NULL == platform->bmc_arr) {
-        return NULL;
-    }
-
-    for (i = 0; i < platform->bmc_count; i++) {
-        if (i == id) {
-            return platform->bmc_arr[i];
-        }
-    }
-
-    return NULL;
-}
-
-const pconfig_fpga_cfg_t* PCONFIG_HW_FindFPGA(const pconfig_platform_config_t *platform,
-                                          const char *name)
-{
-    uint32_t i;
-
-    if (NULL == platform || NULL == name || NULL == platform->fpga_arr) {
-        return NULL;
-    }
-
-    for (i = 0; i < platform->fpga_count; i++) {
-        if (OSAL_strcmp(platform->fpga_arr[i]->name, name) == 0) {
-            return platform->fpga_arr[i];
-        }
-    }
-
-    return NULL;
-}
-
-const pconfig_fpga_cfg_t* PCONFIG_HW_GetFPGA(const pconfig_platform_config_t *platform,
-                                         uint32_t id)
-{
-    uint32_t i;
-
-    if (NULL == platform || NULL == platform->fpga_arr) {
-        return NULL;
-    }
-
-    for (i = 0; i < platform->fpga_count; i++) {
-        if (i == id) {
-            return platform->fpga_arr[i];
-        }
-    }
-
-    return NULL;
-}
-
-const pconfig_switch_cfg_t* PCONFIG_HW_FindSwitch(const pconfig_platform_config_t *platform,
-                                              const char *name)
-{
-    uint32_t i;
-
-    if (NULL == platform || NULL == name || NULL == platform->switch_arr) {
-        return NULL;
-    }
-
-    for (i = 0; i < platform->switch_count; i++) {
-        if (OSAL_strcmp(platform->switch_arr[i]->name, name) == 0) {
-            return platform->switch_arr[i];
-        }
-    }
-
-    return NULL;
-}
-
-const pconfig_switch_cfg_t* PCONFIG_HW_GetSwitch(const pconfig_platform_config_t *platform,
-                                             uint32_t id)
-{
-    uint32_t i;
-
-    if (NULL == platform || NULL == platform->switch_arr) {
-        return NULL;
-    }
-
-    for (i = 0; i < platform->switch_count; i++) {
-        if (i == id) {
-            return platform->switch_arr[i];
-        }
-    }
-
-    return NULL;
-}
 
 /*===========================================================================
  * 配置验证
@@ -392,16 +250,34 @@ void PCONFIG_Print(const pconfig_platform_config_t *config)
     LOG_INFO("PCL", "Product: %s", config->product_name);
 
     /* 打印MCU配置 */
-    if (config->mcu_arr) {
+    if (config->mcu_array) {
         for (i = 0; i < config->mcu_count; i++) {
-            LOG_INFO("PCL", "  MCU[%u]: %s", i, config->mcu_arr[i]->name);
+            LOG_INFO("PCL", "  MCU[%u]: %s", i,
+                     config->mcu_array[i].description ? config->mcu_array[i].description : "N/A");
         }
     }
 
     /* 打印BMC配置 */
-    if (config->bmc_arr) {
-        for (i = 0; config->bmc_arr[i] != NULL; i++) {
-            LOG_INFO("PCL", "  BMC[%u]: %s", i, config->bmc_arr[i]->name);
+    if (config->bmc_array) {
+        for (i = 0; i < config->bmc_count; i++) {
+            LOG_INFO("PCL", "  BMC[%u]: %s", i,
+                     config->bmc_array[i].description ? config->bmc_array[i].description : "N/A");
+        }
+    }
+
+    /* 打印FPGA配置 */
+    if (config->fpga_array) {
+        for (i = 0; i < config->fpga_count; i++) {
+            LOG_INFO("PCL", "  FPGA[%u]: %s", i,
+                     config->fpga_array[i].description ? config->fpga_array[i].description : "N/A");
+        }
+    }
+
+    /* 打印Switch配置 */
+    if (config->switch_array) {
+        for (i = 0; i < config->switch_count; i++) {
+            LOG_INFO("PCL", "  Switch[%u]: %s", i,
+                     config->switch_array[i].description ? config->switch_array[i].description : "N/A");
         }
     }
 }

@@ -25,8 +25,7 @@
  */
 typedef struct {
 	/* PCONFIG 配置管理字段 */
-	const char *name;		/* BMC名称（用于查询，如"payload_bmc"） */
-	const char *description;	/* 描述信息 */
+	const char *description;	/* 描述信息（用于日志和调试） */
 	bool	enabled;		/* 是否启用此BMC */
 
 	/* PDL 配置（来自 PDL 层） */
