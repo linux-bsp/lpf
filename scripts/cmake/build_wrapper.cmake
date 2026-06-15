@@ -313,14 +313,11 @@ function(build_wrapper_init)
     # Step 3: Configure build type
     _configure_build_type()
 
-    # Step 4: Configure installation paths
-    _configure_install_paths()
-
-    # Step 5: Configure output directories
+    # Step 4: Configure output directories
     _configure_output_directories()
 
-    # Step 6: Validate toolchain
-    _validate_toolchain()
+    # Note: Installation paths (_configure_install_paths) are configured
+    # after project() to avoid GNUInstallDirs warning about unknown architecture
 
     # Export initialization state
     set(BUILD_WRAPPER_INITIALIZED TRUE PARENT_SCOPE)
@@ -333,11 +330,6 @@ function(build_wrapper_init)
     set(GIT_COMMIT_HASH ${GIT_COMMIT_HASH} PARENT_SCOPE)
     set(GIT_BRANCH ${GIT_BRANCH} PARENT_SCOPE)
     set(BUILD_TIME ${BUILD_TIME} PARENT_SCOPE)
-
-    # Export installation dirs to parent
-    set(INSTALL_BINDIR ${INSTALL_BINDIR} PARENT_SCOPE)
-    set(INSTALL_LIBDIR ${INSTALL_LIBDIR} PARENT_SCOPE)
-    set(INSTALL_INCLUDEDIR ${INSTALL_INCLUDEDIR} PARENT_SCOPE)
 
     # Export output dirs to parent
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin PARENT_SCOPE)
@@ -355,7 +347,18 @@ function(build_wrapper_init)
     endif()
 endfunction()
 
-# Validate build environment (called before actual build)
+# Configure installation paths (must be called after project())
+function(build_wrapper_configure_install)
+    # Configure installation paths now that architecture is known
+    _configure_install_paths()
+
+    # Export installation dirs to parent
+    set(INSTALL_BINDIR ${INSTALL_BINDIR} PARENT_SCOPE)
+    set(INSTALL_LIBDIR ${INSTALL_LIBDIR} PARENT_SCOPE)
+    set(INSTALL_INCLUDEDIR ${INSTALL_INCLUDEDIR} PARENT_SCOPE)
+endfunction()
+
+# Validate build environment (called after project())
 function(build_wrapper_validate)
     if(NOT BUILD_WRAPPER_INITIALIZED)
         message(FATAL_ERROR "Build wrapper not initialized - call build_wrapper_init() first")
