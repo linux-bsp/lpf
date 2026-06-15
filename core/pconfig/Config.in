@@ -1,14 +1,14 @@
-# PCL (Peripheral Configuration Library) Configuration
+# PCONFIG (Peripheral Configuration Library) Configuration
 
-menuconfig PCL
-	bool "PCL (Peripheral Configuration Library)"
+menuconfig PCONFIG
+	bool "PCONFIG (Peripheral Configuration Library)"
 	default n
 	depends on OSAL && HAL && TYPES
 	help
 	  Peripheral Configuration Library provides device-tree-like hardware
 	  configuration management.
 
-	  PCL acts as a hardware abstraction layer that describes the physical
+	  PCONFIG acts as a hardware abstraction layer that describes the physical
 	  hardware configuration of a platform (board variant, peripheral
 	  connections, pin mappings, etc.) in a structured, data-driven way.
 
@@ -35,15 +35,15 @@ menuconfig PCL
 
 	  If unsure, say Y.
 
-if PCL
+if PCONFIG
 
-menu "PCL Build Configuration"
+menu "PCONFIG Build Configuration"
 
 config PCONFIG_BUILD_STATIC
 	bool "Build static library (.a)"
 	default n
 	help
-	  Build PCL as a static library (libpcl.a).
+	  Build PCONFIG as a static library (libpconfig.a).
 
 	  Static linking advantages:
 	  - No runtime dependencies
@@ -56,7 +56,7 @@ config PCONFIG_BUILD_SHARED
 	bool "Build shared library (.so)"
 	default n
 	help
-	  Build PCL as a shared library (libpcl.so).
+	  Build PCONFIG as a shared library (libpconfig.so).
 
 	  Shared library advantages:
 	  - Can update hardware configurations without recompiling apps
@@ -64,11 +64,11 @@ config PCONFIG_BUILD_SHARED
 	  - Code sharing between processes
 
 	  Use cases:
-	  - Systems with multiple applications using PCL
+	  - Systems with multiple applications using PCONFIG
 	  - Field-updatable hardware configurations
 
 	  Recommended: Enable for multi-application systems
 
 endmenu
 
-endif # PCL
+endif # PCONFIG

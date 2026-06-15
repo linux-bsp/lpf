@@ -3,7 +3,7 @@ config APP_HEALTH
     default n
     select OSAL
     select HAL
-    select PCL
+    select PCONFIG
     select PDL
     select ACL
     select H200_AM625

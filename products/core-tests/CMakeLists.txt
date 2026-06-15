@@ -36,7 +36,7 @@ if(CONFIG_HAL AND NOT TARGET hal)
     add_subdirectory(${SDK_PATH}/core/hal ${CMAKE_CURRENT_BINARY_DIR}/hal)
 endif()
 
-if(CONFIG_PCL AND NOT TARGET pconfig)
+if(CONFIG_PCONFIG AND NOT TARGET pconfig)
     add_subdirectory(${SDK_PATH}/core/pconfig ${CMAKE_CURRENT_BINARY_DIR}/pconfig)
 endif()
 

@@ -3,7 +3,7 @@
 menuconfig PDL
 	bool "PDL (Peripheral Driver Layer)"
 	default n
-	depends on OSAL && HAL && PCL && TYPES
+	depends on OSAL && HAL && PCONFIG && TYPES
 	help
 	  Peripheral Driver Layer provides high-level peripheral management
 	  and protocol handling.
@@ -15,7 +15,7 @@ menuconfig PDL
 	  - Unified API for complex peripherals
 
 	  Architecture:
-	  PDL uses HAL for low-level hardware access and PCL for
+	  PDL uses HAL for low-level hardware access and PCONFIG for
 	  hardware configuration, providing application-level APIs
 	  for managing complex peripheral subsystems.
 
@@ -27,9 +27,9 @@ menuconfig PDL
 	  - MCU modules (microcontroller peripherals)
 	  - Watchdog management
 
-	  Dependencies: OSAL, HAL, PCL, TYPES
+	  Dependencies: OSAL, HAL, PCONFIG, TYPES
 
-	  Note: Enable OSAL, HAL, PCL, and TYPES first in "Core Modules" menu.
+	  Note: Enable OSAL, HAL, PCONFIG, and TYPES first in "Core Modules" menu.
 
 	  Recommended: Enable for systems with complex peripheral management
 
