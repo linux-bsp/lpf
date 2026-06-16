@@ -7,156 +7,180 @@ if TEST_STRESS_PDL
 
 menu "PDL Stress Tests"
 
-config TEST_STRESS_PDL_MCU
-	bool "MCU device stress tests"
-	default n
+config TEST_STRESS_PDL_BMC_CONCURRENT
+	bool "BMC concurrent sensor read stress"
+	default y
+	depends on PDL_BMC_SUPPORT
 	help
-	  MCU communication stress tests.
+	  BMC sensor concurrent reading stress test.
 
 	  Tests:
-	    - Rapid command submission (1000s/sec)
-	    - Response timeout handling
-	    - Command queue overflow
-	    - Concurrent commands from many threads
-	    - Large data transfer stress
-	    - Malformed response handling
+	    - 8 threads concurrently reading sensors
+	    - 5 second duration
+	    - Network/Serial channel operations
+	    - Sensor data integrity under load
 
 	  Verifies:
-	    - Command serialization correctness
-	    - Timeout recovery mechanisms
-	    - Queue management under pressure
-	    - No command loss or corruption
+	    - Thread-safe sensor access
+	    - No data corruption under concurrent reads
+	    - Success rate > 95%
+	    - Connection stability
 
-	  Runtime: 15-30 seconds
-	  Hardware: Mock MCU device
-	  Dependencies: CONFIG_PDL_MCU
-	  Tags: stress, pdl
-	  Test file: test_stress_pdl_mcu.c
+	  Runtime: ~5 seconds
+	  Hardware: BMC device or mock
+	  Dependencies: CONFIG_PDL_BMC_SUPPORT
+	  Tags: stress, pdl, concurrency
+	  Test function: test_stress_bmc_concurrent_read
 
-config TEST_STRESS_PDL_BMC
-	bool "BMC device stress tests"
-	default n
+config TEST_STRESS_PDL_MCU_LONG_RUNNING
+	bool "MCU long-running query stress"
+	default y
+	depends on PDL_MCU_SUPPORT
 	help
-	  BMC communication stress tests.
+	  MCU status query stress test over extended duration.
 
 	  Tests:
-	    - Rapid health check polling
-	    - Sensor data flooding
-	    - Configuration update storm
-	    - Concurrent access from many threads
-	    - Error response handling
+	    - Single thread continuous status queries
+	    - 30 second duration
+	    - Query every 10ms
+	    - Timeout handling
 
 	  Verifies:
-	    - Polling stability under high frequency
-	    - Buffer management correctness
-	    - Thread-safe device access
-	    - Error recovery mechanisms
-
-	  Runtime: 15-30 seconds
-	  Hardware: Mock BMC device
-	  Dependencies: CONFIG_PDL_BMC
-	  Tags: stress, pdl
-	  Test file: test_stress_pdl_bmc.c
-
-config TEST_STRESS_PDL_SATELLITE
-	bool "Satellite device stress tests"
-	default n
-	help
-	  Satellite platform communication stress tests.
-
-	  Tests:
-	    - Telecommand flooding
-	    - Telemetry burst handling
-	    - Large data transfer stress (MB range)
-	    - Protocol timeout scenarios
-	    - State machine rapid transitions
-	    - Error frame injection
-
-	  Verifies:
-	    - Protocol state machine stability
-	    - Large transfer integrity
-	    - Timeout handling correctness
-	    - Buffer overflow protection
-
-	  Runtime: 20-40 seconds
-	  Hardware: Mock satellite interface
-	  Dependencies: CONFIG_PDL_SATELLITE
-	  Tags: stress, pdl, heavy
-	  Test file: test_stress_pdl_satellite.c
-
-config TEST_STRESS_PDL_WATCHDOG
-	bool "Watchdog device stress tests"
-	default n
-	help
-	  Watchdog device stress tests.
-
-	  Tests:
-	    - Rapid kick operations (1000s/sec)
-	    - Concurrent configuration changes
-	    - Timeout edge cases
-	    - Error response handling
-
-	  Verifies:
-	    - Operation serialization correctness
-	    - Thread-safe access
-	    - Configuration consistency
-
-	  Runtime: 10-20 seconds
-	  Hardware: Mock watchdog device
-	  Dependencies: CONFIG_PDL_WATCHDOG
-	  Tags: stress, pdl
-	  Test file: test_stress_pdl_watchdog.c
-
-config TEST_STRESS_PDL_PROTOCOL
-	bool "Protocol layer stress tests"
-	default n
-	help
-	  PDL protocol encoding/decoding stress tests.
-
-	  Tests:
-	    - Rapid encode/decode cycles (millions)
-	    - Malformed message parsing
-	    - Buffer exhaustion scenarios
-	    - CRC collision detection
-	    - Maximum message size handling
-	    - Concurrent encoding from many threads
-
-	  Verifies:
-	    - Parser robustness against malformed data
-	    - No buffer overflows
-	    - Thread-safe buffer management
+	    - Long-running operation stability
 	    - Memory leak freedom
+	    - Success rate > 90%
+	    - Timeout recovery
 
-	  Runtime: 15-30 seconds
-	  Hardware: None
-	  Dependencies: CONFIG_PDL
-	  Tags: stress, protocol
-	  Test file: test_stress_pdl_protocol.c
+	  Runtime: ~30 seconds
+	  Hardware: MCU device (CAN/Serial)
+	  Dependencies: CONFIG_PDL_MCU_SUPPORT
+	  Tags: stress, pdl, duration
+	  Test function: test_stress_mcu_long_running_query
+
+config TEST_STRESS_PDL_WATCHDOG_HIGH_FREQ
+	bool "Watchdog high-frequency kick stress"
+	default y
+	depends on PDL_WATCHDOG_SUPPORT
+	help
+	  Watchdog high-frequency kicking stress test.
+
+	  Tests:
+	    - Single thread rapid watchdog kicks
+	    - 10 second duration
+	    - Kick every 1ms (1000 Hz)
+	    - Manual mode operation
+
+	  Verifies:
+	    - High-frequency operation stability
+	    - No missed kicks
+	    - Device driver robustness
+	    - No errors under rapid operations
+
+	  Runtime: ~10 seconds
+	  Hardware: Watchdog device
+	  Dependencies: CONFIG_PDL_WATCHDOG_SUPPORT
+	  Tags: stress, pdl, high-frequency
+	  Test function: test_stress_watchdog_high_frequency_kick
+
+config TEST_STRESS_PDL_SATELLITE_CONCURRENT
+	bool "Satellite concurrent telemetry stress"
+	default y
+	depends on PDL_SATELLITE_SUPPORT
+	help
+	  Satellite telemetry concurrent sending stress test.
+
+	  Tests:
+	    - 4 threads concurrently sending telemetry
+	    - 15 second duration
+	    - Send every 100ms per thread
+	    - CAN bus protocol
+
+	  Verifies:
+	    - Thread-safe telemetry sending
+	    - CAN bus message integrity
+	    - Success rate > 95%
+	    - No message corruption
+
+	  Runtime: ~15 seconds
+	  Hardware: Satellite CAN interface
+	  Dependencies: CONFIG_PDL_SATELLITE_SUPPORT
+	  Tags: stress, pdl, concurrency
+	  Test function: test_stress_satellite_concurrent_telemetry
+
+config TEST_STRESS_PDL_CCM_CONCURRENT
+	bool "CCM concurrent communication stress"
+	default y
+	depends on PDL_CCM_SUPPORT
+	help
+	  CCM communication concurrent stress test.
+
+	  Tests:
+	    - 6 threads concurrently sending commands
+	    - 10 second duration
+	    - Send every 50ms per thread
+	    - Ethernet protocol
+
+	  Verifies:
+	    - Thread-safe command sending
+	    - Network protocol stability
+	    - Success rate > 90%
+	    - Connection management under load
+
+	  Runtime: ~10 seconds
+	  Hardware: CCM Ethernet interface
+	  Dependencies: CONFIG_PDL_CCM_SUPPORT
+	  Tags: stress, pdl, concurrency, network
+	  Test function: test_stress_ccm_concurrent_communication
 
 config TEST_STRESS_PDL_MULTIDEVICE
-	bool "Multi-device concurrent stress tests"
-	default n
+	bool "Multi-device mixed operations stress"
+	default y
+	depends on PDL_MCU_SUPPORT && PDL_WATCHDOG_SUPPORT
 	help
-	  Concurrent operations across multiple PDL devices.
+	  Multi-device concurrent mixed operations stress test.
 
 	  Tests:
-	    - Simultaneous operations on MCU, BMC, Satellite
-	    - Shared bus contention (CAN, Serial)
-	    - Device handle exhaustion
-	    - Cross-device timing interactions
-	    - System-wide error propagation
+	    - 4 threads alternating MCU and Watchdog operations
+	    - 20 second duration
+	    - Interleaved device access
+	    - Shared resource management
 
 	  Verifies:
-	    - Device independence (no cross-talk)
-	    - Bus arbitration correctness
-	    - Resource management under load
-	    - System stability with all devices active
+	    - Device independence (no interference)
+	    - Thread-safe multi-device access
+	    - Success rate > 85%
+	    - Resource management correctness
 
-	  Runtime: 20-40 seconds
-	  Hardware: Multiple mock devices
-	  Dependencies: CONFIG_PDL
-	  Tags: stress, pdl, integration, heavy
-	  Test file: test_stress_pdl_multidevice.c
+	  Runtime: ~20 seconds
+	  Hardware: MCU + Watchdog devices
+	  Dependencies: CONFIG_PDL_MCU_SUPPORT, CONFIG_PDL_WATCHDOG_SUPPORT
+	  Tags: stress, pdl, multidevice, integration
+	  Test function: test_stress_multidevice_mixed
+
+config TEST_STRESS_PDL_RESOURCE_EXHAUSTION
+	bool "Resource exhaustion and memory leak detection"
+	default y
+	depends on PDL_MCU_SUPPORT
+	help
+	  Resource exhaustion and memory leak detection test.
+
+	  Tests:
+	    - 1000 iterations of init/deinit cycles
+	    - Memory allocation/deallocation
+	    - File descriptor management
+	    - Resource cleanup verification
+
+	  Verifies:
+	    - No memory leaks
+	    - Proper resource cleanup
+	    - No file descriptor leaks
+	    - Stable repeated init/deinit
+
+	  Runtime: ~10-20 seconds
+	  Hardware: MCU device (any interface)
+	  Dependencies: CONFIG_PDL_MCU_SUPPORT
+	  Tags: stress, pdl, memory, resource
+	  Test function: test_stress_resource_exhaustion
 
 endmenu
 

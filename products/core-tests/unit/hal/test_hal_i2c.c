@@ -255,6 +255,245 @@ static void test_hal_i2c_transfer_null_msgs(void)
 }
 
 /*===========================================================================
+ * 边界值和功能测试
+ *===========================================================================*/
+
+/* 测试用例: I2C最小从机地址 */
+static void test_hal_i2c_min_slave_address(void)
+{
+    hal_i2c_handle_t handle = NULL;
+    hal_i2c_config_t config = {
+        .device = "/dev/i2c-0",
+        .timeout = 1000
+    };
+
+    int32_t ret = HAL_I2C_Open(&config, &handle);
+    if (OSAL_SUCCESS != ret) {
+        TEST_ASSERT_FALSE(true);
+    }
+
+    /* 地址0x08是最小有效从机地址 */
+    uint8_t data = 0xAA;
+    ret = HAL_I2C_Write(handle, 0x08, &data, 1);
+    /* 可能失败（设备不存在），但不应该崩溃 */
+
+    HAL_I2C_Close(handle);
+}
+
+/* 测试用例: I2C最大从机地址 */
+static void test_hal_i2c_max_slave_address(void)
+{
+    hal_i2c_handle_t handle = NULL;
+    hal_i2c_config_t config = {
+        .device = "/dev/i2c-0",
+        .timeout = 1000
+    };
+
+    int32_t ret = HAL_I2C_Open(&config, &handle);
+    if (OSAL_SUCCESS != ret) {
+        TEST_ASSERT_FALSE(true);
+    }
+
+    /* 地址0x77是最大7位从机地址 */
+    uint8_t data = 0x55;
+    ret = HAL_I2C_Write(handle, 0x77, &data, 1);
+    /* 可能失败（设备不存在），但不应该崩溃 */
+
+    HAL_I2C_Close(handle);
+}
+
+/* 测试用例: I2C大数据写入 */
+static void test_hal_i2c_large_write(void)
+{
+    hal_i2c_handle_t handle = NULL;
+    hal_i2c_config_t config = {
+        .device = "/dev/i2c-0",
+        .timeout = 5000
+    };
+
+    int32_t ret = HAL_I2C_Open(&config, &handle);
+    if (OSAL_SUCCESS != ret) {
+        TEST_ASSERT_FALSE(true);
+    }
+
+    /* 写入256字节数据 */
+    uint8_t large_data[256];
+    for (uint32_t i = 0; i < sizeof(large_data); i++) {
+        large_data[i] = (uint8_t)(i & 0xFF);
+    }
+
+    ret = HAL_I2C_Write(handle, 0x50, large_data, sizeof(large_data));
+    /* 可能失败（设备不存在或不支持），但不应该崩溃 */
+
+    HAL_I2C_Close(handle);
+}
+
+/* 测试用例: I2C大数据读取 */
+static void test_hal_i2c_large_read(void)
+{
+    hal_i2c_handle_t handle = NULL;
+    hal_i2c_config_t config = {
+        .device = "/dev/i2c-0",
+        .timeout = 5000
+    };
+
+    int32_t ret = HAL_I2C_Open(&config, &handle);
+    if (OSAL_SUCCESS != ret) {
+        TEST_ASSERT_FALSE(true);
+    }
+
+    /* 读取256字节数据 */
+    uint8_t rx_buffer[256];
+    ret = HAL_I2C_Read(handle, 0x50, rx_buffer, sizeof(rx_buffer));
+    /* 可能失败（设备不存在），但不应该崩溃 */
+
+    HAL_I2C_Close(handle);
+}
+
+/* 测试用例: I2C零长度传输 */
+static void test_hal_i2c_zero_length_transfer(void)
+{
+    hal_i2c_handle_t handle = NULL;
+    hal_i2c_config_t config = {
+        .device = "/dev/i2c-0",
+        .timeout = 1000
+    };
+
+    int32_t ret = HAL_I2C_Open(&config, &handle);
+    if (OSAL_SUCCESS != ret) {
+        TEST_ASSERT_FALSE(true);
+    }
+
+    uint8_t buffer[4];
+
+    /* 零长度写入 */
+    ret = HAL_I2C_Write(handle, 0x50, buffer, 0);
+    TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
+
+    /* 零长度读取 */
+    ret = HAL_I2C_Read(handle, 0x50, buffer, 0);
+    TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
+
+    HAL_I2C_Close(handle);
+}
+
+/* 测试用例: I2C寄存器连续写入 */
+static void test_hal_i2c_register_burst_write(void)
+{
+    hal_i2c_handle_t handle = NULL;
+    hal_i2c_config_t config = {
+        .device = "/dev/i2c-0",
+        .timeout = 1000
+    };
+
+    int32_t ret = HAL_I2C_Open(&config, &handle);
+    if (OSAL_SUCCESS != ret) {
+        TEST_ASSERT_FALSE(true);
+    }
+
+    /* 连续写入多个寄存器 */
+    for (uint8_t reg = 0x00; reg < 0x10; reg++) {
+        uint8_t data = reg * 2;
+        ret = HAL_I2C_WriteReg(handle, 0x50, reg, &data, 1);
+        /* 可能失败，但不应该崩溃 */
+    }
+
+    HAL_I2C_Close(handle);
+}
+
+/* 测试用例: I2C寄存器连续读取 */
+static void test_hal_i2c_register_burst_read(void)
+{
+    hal_i2c_handle_t handle = NULL;
+    hal_i2c_config_t config = {
+        .device = "/dev/i2c-0",
+        .timeout = 1000
+    };
+
+    int32_t ret = HAL_I2C_Open(&config, &handle);
+    if (OSAL_SUCCESS != ret) {
+        TEST_ASSERT_FALSE(true);
+    }
+
+    /* 连续读取多个寄存器 */
+    for (uint8_t reg = 0x00; reg < 0x10; reg++) {
+        uint8_t data;
+        ret = HAL_I2C_ReadReg(handle, 0x50, reg, &data, 1);
+        /* 可能失败，但不应该崩溃 */
+    }
+
+    HAL_I2C_Close(handle);
+}
+
+/* 测试用例: I2C多消息传输 */
+static void test_hal_i2c_multi_message_transfer(void)
+{
+    hal_i2c_handle_t handle = NULL;
+    hal_i2c_config_t config = {
+        .device = "/dev/i2c-0",
+        .timeout = 1000
+    };
+
+    int32_t ret = HAL_I2C_Open(&config, &handle);
+    if (OSAL_SUCCESS != ret) {
+        TEST_ASSERT_FALSE(true);
+    }
+
+    /* 准备多个消息 */
+    uint8_t tx_buf[4] = {0x01, 0x02, 0x03, 0x04};
+    uint8_t rx_buf[4];
+
+    hal_i2c_msg_t msgs[2] = {
+        {
+            .addr = 0x50,
+            .flags = 0,  /* 写 */
+            .len = 1,
+            .buf = tx_buf
+        },
+        {
+            .addr = 0x50,
+            .flags = I2C_M_RD,  /* 读 */
+            .len = sizeof(rx_buf),
+            .buf = rx_buf
+        }
+    };
+
+    ret = HAL_I2C_Transfer(handle, msgs, 2);
+    /* 可能失败（设备不存在），但不应该崩溃 */
+
+    HAL_I2C_Close(handle);
+}
+
+/* 测试用例: I2C不同超时值 */
+static void test_hal_i2c_different_timeouts(void)
+{
+    hal_i2c_handle_t handle = NULL;
+    hal_i2c_config_t config = {
+        .device = "/dev/i2c-0",
+        .timeout = 100  /* 短超时 */
+    };
+
+    int32_t ret = HAL_I2C_Open(&config, &handle);
+    if (ret == OSAL_SUCCESS) {
+        HAL_I2C_Close(handle);
+    }
+
+    /* 长超时 */
+    config.timeout = 10000;
+    ret = HAL_I2C_Open(&config, &handle);
+    if (ret == OSAL_SUCCESS) {
+        HAL_I2C_Close(handle);
+    }
+
+    /* 零超时 */
+    config.timeout = 0;
+    ret = HAL_I2C_Open(&config, &handle);
+    if (ret == OSAL_SUCCESS) {
+        HAL_I2C_Close(handle);
+    }
+}
+
+/*===========================================================================
  * 测试套件注册
  *===========================================================================*/
 
@@ -358,6 +597,60 @@ static const test_case_t test_cases[] = {
 	{
 		.name = "test_hal_i2c_transfer_null_msgs",
 		.func = test_hal_i2c_transfer_null_msgs,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_i2c_min_slave_address",
+		.func = test_hal_i2c_min_slave_address,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_i2c_max_slave_address",
+		.func = test_hal_i2c_max_slave_address,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_i2c_large_write",
+		.func = test_hal_i2c_large_write,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_i2c_large_read",
+		.func = test_hal_i2c_large_read,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_i2c_zero_length_transfer",
+		.func = test_hal_i2c_zero_length_transfer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_i2c_register_burst_write",
+		.func = test_hal_i2c_register_burst_write,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_i2c_register_burst_read",
+		.func = test_hal_i2c_register_burst_read,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_i2c_multi_message_transfer",
+		.func = test_hal_i2c_multi_message_transfer,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_i2c_different_timeouts",
+		.func = test_hal_i2c_different_timeouts,
 		.setup = NULL,
 		.teardown = NULL
 	},

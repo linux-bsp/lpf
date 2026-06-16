@@ -18,5 +18,6 @@
 #include "test_parameterized.h"
 #include "test_mock.h"
 #include "test_metadata.h"
+#include "test_compat.h"
 
 #endif /* TEST_FRAMEWORK_H */

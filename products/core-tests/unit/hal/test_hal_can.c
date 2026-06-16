@@ -463,6 +463,240 @@ static void test_can_receive_only(void)
 }
 
 /*===========================================================================
+ * 边界值和扩展测试
+ *===========================================================================*/
+
+/* 测试用例: CAN最大数据长度 */
+static void test_hal_can_max_data_length(void)
+{
+    hal_can_handle_t handle = NULL;
+    hal_can_config_t config = {
+        .interface = "can0",
+        .baudrate = 500000,
+        .rx_timeout = 1000,
+        .tx_timeout = 1000
+    };
+
+    int32_t ret = HAL_CAN_Init(&config, &handle);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    /* 发送最大长度帧 (DLC=8) */
+    hal_can_frame_t frame = {
+        .can_id = 0x123,
+        .dlc = 8,
+        .data = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88}
+    };
+
+    ret = HAL_CAN_Send(handle, &frame);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    HAL_CAN_Deinit(handle);
+}
+
+/* 测试用例: CAN最小数据长度 */
+static void test_hal_can_min_data_length(void)
+{
+    hal_can_handle_t handle = NULL;
+    hal_can_config_t config = {
+        .interface = "can0",
+        .baudrate = 500000,
+        .rx_timeout = 1000,
+        .tx_timeout = 1000
+    };
+
+    int32_t ret = HAL_CAN_Init(&config, &handle);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    /* 发送零长度帧 (DLC=0) */
+    hal_can_frame_t frame = {
+        .can_id = 0x456,
+        .dlc = 0,
+        .data = {0}
+    };
+
+    ret = HAL_CAN_Send(handle, &frame);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    HAL_CAN_Deinit(handle);
+}
+
+/* 测试用例: CAN扩展帧ID */
+static void test_hal_can_extended_id(void)
+{
+    hal_can_handle_t handle = NULL;
+    hal_can_config_t config = {
+        .interface = "can0",
+        .baudrate = 500000,
+        .rx_timeout = 1000,
+        .tx_timeout = 1000
+    };
+
+    int32_t ret = HAL_CAN_Init(&config, &handle);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    /* 发送扩展帧 (29位ID, 扩展帧标志 0x80000000) */
+    hal_can_frame_t frame = {
+        .can_id = 0x12345678 | 0x80000000U,  /* CAN_EFF_FLAG = 0x80000000 */
+        .dlc = 4,
+        .data = {0xAA, 0xBB, 0xCC, 0xDD}
+    };
+
+    ret = HAL_CAN_Send(handle, &frame);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    HAL_CAN_Deinit(handle);
+}
+
+/* 测试用例: CAN标准帧ID边界 */
+static void test_hal_can_standard_id_boundary(void)
+{
+    hal_can_handle_t handle = NULL;
+    hal_can_config_t config = {
+        .interface = "can0",
+        .baudrate = 500000,
+        .rx_timeout = 1000,
+        .tx_timeout = 1000
+    };
+
+    int32_t ret = HAL_CAN_Init(&config, &handle);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    /* 最小标准ID (0x000) */
+    hal_can_frame_t frame1 = {
+        .can_id = 0x000,
+        .dlc = 1,
+        .data = {0x01}
+    };
+    ret = HAL_CAN_Send(handle, &frame1);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    /* 最大标准ID (0x7FF) */
+    hal_can_frame_t frame2 = {
+        .can_id = 0x7FF,
+        .dlc = 1,
+        .data = {0x02}
+    };
+    ret = HAL_CAN_Send(handle, &frame2);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    HAL_CAN_Deinit(handle);
+}
+
+/* 测试用例: CAN不同波特率 */
+static void test_hal_can_various_baudrates(void)
+{
+    hal_can_handle_t handle = NULL;
+    hal_can_config_t config = {
+        .interface = "can0",
+        .baudrate = 250000,
+        .rx_timeout = 1000,
+        .tx_timeout = 1000
+    };
+
+    /* 测试250kbps */
+    int32_t ret = HAL_CAN_Init(&config, &handle);
+    if (ret == OSAL_SUCCESS) {
+        HAL_CAN_Deinit(handle);
+    }
+
+    /* 测试1Mbps */
+    config.baudrate = 1000000;
+    ret = HAL_CAN_Init(&config, &handle);
+    if (ret == OSAL_SUCCESS) {
+        HAL_CAN_Deinit(handle);
+    }
+
+    /* 测试125kbps */
+    config.baudrate = 125000;
+    ret = HAL_CAN_Init(&config, &handle);
+    if (ret == OSAL_SUCCESS) {
+        HAL_CAN_Deinit(handle);
+    }
+}
+
+/* 测试用例: CAN连续发送多帧 */
+static void test_hal_can_burst_send(void)
+{
+    hal_can_handle_t handle = NULL;
+    hal_can_config_t config = {
+        .interface = "can0",
+        .baudrate = 500000,
+        .rx_timeout = 1000,
+        .tx_timeout = 1000
+    };
+
+    int32_t ret = HAL_CAN_Init(&config, &handle);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    /* 连续发送100帧 */
+    for (uint32_t i = 0; i < 100; i++) {
+        hal_can_frame_t frame = {
+            .can_id = 0x200 + (i % 10),
+            .dlc = 8,
+            .data = {(uint8_t)i, (uint8_t)(i+1), (uint8_t)(i+2), (uint8_t)(i+3),
+                     (uint8_t)(i+4), (uint8_t)(i+5), (uint8_t)(i+6), (uint8_t)(i+7)}
+        };
+
+        ret = HAL_CAN_Send(handle, &frame);
+        TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+    }
+
+    HAL_CAN_Deinit(handle);
+}
+
+/* 测试用例: CAN过滤器边界值 */
+static void test_hal_can_filter_boundary(void)
+{
+    hal_can_handle_t handle = NULL;
+    hal_can_config_t config = {
+        .interface = "can0",
+        .baudrate = 500000,
+        .rx_timeout = 1000,
+        .tx_timeout = 1000
+    };
+
+    int32_t ret = HAL_CAN_Init(&config, &handle);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    /* 测试接收所有帧 (mask=0x000) */
+    ret = HAL_CAN_SetFilter(handle, 0x000, 0x000);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    /* 测试仅接收精确ID (mask=0x7FF) */
+    ret = HAL_CAN_SetFilter(handle, 0x123, 0x7FF);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    HAL_CAN_Deinit(handle);
+}
+
+/* 测试用例: CAN零超时发送 */
+static void test_hal_can_zero_timeout_send(void)
+{
+    hal_can_handle_t handle = NULL;
+    hal_can_config_t config = {
+        .interface = "can0",
+        .baudrate = 500000,
+        .rx_timeout = 1000,
+        .tx_timeout = 0  /* 零超时 */
+    };
+
+    int32_t ret = HAL_CAN_Init(&config, &handle);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    hal_can_frame_t frame = {
+        .can_id = 0x555,
+        .dlc = 4,
+        .data = {0x12, 0x34, 0x56, 0x78}
+    };
+
+    ret = HAL_CAN_Send(handle, &frame);
+    /* 零超时可能成功或超时 */
+    TEST_ASSERT_TRUE(ret == OSAL_SUCCESS || ret == OSAL_ERR_TIMEOUT);
+
+    HAL_CAN_Deinit(handle);
+}
+
+/*===========================================================================
  * 测试模块注册
  *===========================================================================*/
 
@@ -580,6 +814,54 @@ static const test_case_t test_cases[] = {
 	{
 		.name = "test_can_receive_only",
 		.func = test_can_receive_only,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_can_max_data_length",
+		.func = test_hal_can_max_data_length,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_can_min_data_length",
+		.func = test_hal_can_min_data_length,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_can_extended_id",
+		.func = test_hal_can_extended_id,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_can_standard_id_boundary",
+		.func = test_hal_can_standard_id_boundary,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_can_various_baudrates",
+		.func = test_hal_can_various_baudrates,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_can_burst_send",
+		.func = test_hal_can_burst_send,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_can_filter_boundary",
+		.func = test_hal_can_filter_boundary,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_can_zero_timeout_send",
+		.func = test_hal_can_zero_timeout_send,
 		.setup = NULL,
 		.teardown = NULL
 	},

@@ -205,6 +205,9 @@ extern const char *g_current_test;
         } \
     } while(0)
 
+/* Legacy alias */
+#define TEST_ASSERT_EQUAL_STRING TEST_ASSERT_STRING_EQUAL
+
 /* Floating point assertions - using simple integer-based comparison */
 #define TEST_ASSERT_FLOAT_EQUAL(expected, actual, tolerance) \
     do { \

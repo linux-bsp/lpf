@@ -13,19 +13,25 @@ config TEST_OSAL_ALL
 	select TEST_OSAL_ATOMIC
 	select TEST_OSAL_CLOCK
 	select TEST_OSAL_COND
+	select TEST_OSAL_CRC
 	select TEST_OSAL_ENV
 	select TEST_OSAL_ERRNO
 	select TEST_OSAL_FILE
+	select TEST_OSAL_FLOCK
 	select TEST_OSAL_HEAP
 	select TEST_OSAL_LOG
 	select TEST_OSAL_MUTEX
+	select TEST_OSAL_POLL_SELECT
 	select TEST_OSAL_PROCESS
+	select TEST_OSAL_RWLOCK
 	select TEST_OSAL_SCHED
 	select TEST_OSAL_SEMAPHORE
 	select TEST_OSAL_SHM
 	select TEST_OSAL_SIGNAL
+	select TEST_OSAL_SOCKET
 	select TEST_OSAL_STRESS
 	select TEST_OSAL_STRING
+	select TEST_OSAL_TERMIOS
 	select TEST_OSAL_THREAD
 	select TEST_OSAL_TIME
 	select TEST_OSAL_VERSION
@@ -419,6 +425,138 @@ config TEST_OSAL_VERSION
 	  Dependencies: CONFIG_OSAL
 	  Tags: fast
 	  Test file: test_osal_version.c
+
+config TEST_OSAL_RWLOCK
+	bool "Read-write lock tests"
+	default y
+	help
+	  Test OSAL read-write lock operations (rdlock, wrlock, trylock, unlock).
+
+	  Coverage:
+	    - Read-write lock creation and destruction
+	    - Read lock operations (multiple readers)
+	    - Write lock operations (exclusive)
+	    - Try-lock operations (non-blocking)
+	    - Lock upgrade/downgrade scenarios
+	    - Thread-safety verification
+	    - Reader-writer fairness
+
+	  Runtime: <200ms
+	  Hardware: None
+	  Dependencies: CONFIG_OSAL
+	  Tags: fast
+	  Test file: test_osal_rwlock.c
+
+config TEST_OSAL_SOCKET
+	bool "Socket operations tests"
+	default y
+	help
+	  Test OSAL socket operations (create, bind, connect, send, recv).
+
+	  Coverage:
+	    - Socket creation (TCP, UDP)
+	    - Bind and listen operations
+	    - Accept and connect operations
+	    - Send and receive data
+	    - Socket options (setsockopt, getsockopt)
+	    - Byte order conversion (htons, htonl, ntohs, ntohl)
+	    - IP address conversion (inet_pton, inet_ntop)
+	    - Network interface operations
+	    - TCP client-server communication
+	    - UDP datagram communication
+
+	  Runtime: <500ms
+	  Hardware: Requires network stack
+	  Dependencies: CONFIG_OSAL
+	  Tags: network
+	  Test file: test_osal_socket.c
+
+config TEST_OSAL_TERMIOS
+	bool "Terminal control tests"
+	default y
+	help
+	  Test OSAL termios operations (serial port configuration).
+
+	  Coverage:
+	    - Get/set terminal attributes
+	    - Baud rate configuration
+	    - Data bits, parity, stop bits configuration
+	    - Flow control settings
+	    - Raw mode and canonical mode
+	    - Queue control (flush, drain)
+	    - Break signal operations
+	    - Common serial port configurations (115200 8N1, etc.)
+
+	  Runtime: <200ms
+	  Hardware: Requires pseudo-terminal support
+	  Dependencies: CONFIG_OSAL
+	  Tags: fast
+	  Test file: test_osal_termios.c
+
+config TEST_OSAL_CRC
+	bool "CRC checksum tests"
+	default y
+	help
+	  Test OSAL CRC calculation operations.
+
+	  Coverage:
+	    - CRC16-CCITT calculation
+	    - CRC16-CCITT incremental update
+	    - CRC32 calculation (reserved)
+	    - Data integrity validation
+	    - Known test vectors verification
+	    - Packet checksum scenarios
+	    - Stream processing scenarios
+
+	  Runtime: <50ms
+	  Hardware: None
+	  Dependencies: CONFIG_OSAL
+	  Tags: fast
+	  Test file: test_osal_crc.c
+
+config TEST_OSAL_FLOCK
+	bool "File lock tests"
+	default y
+	help
+	  Test OSAL file lock operations (inter-process synchronization).
+
+	  Coverage:
+	    - File lock creation and destruction
+	    - Exclusive lock (write lock)
+	    - Shared lock (read lock)
+	    - Try-lock (non-blocking)
+	    - Timed lock with timeout
+	    - Lock contention scenarios
+	    - Multiple readers support
+	    - Lock upgrade/downgrade
+
+	  Runtime: <300ms
+	  Hardware: Requires writable filesystem
+	  Dependencies: CONFIG_OSAL
+	  Tags: filesystem
+	  Test file: test_osal_flock.c
+
+config TEST_OSAL_POLL_SELECT
+	bool "Poll and Select I/O multiplexing tests"
+	default y
+	help
+	  Test OSAL poll and select operations.
+
+	  Coverage:
+	    - poll() with single/multiple file descriptors
+	    - poll() timeout handling
+	    - poll() event detection (POLLIN, POLLOUT, POLLHUP, POLLERR)
+	    - select() with read/write/exception sets
+	    - select() timeout handling
+	    - pselect() with nanosecond precision
+	    - FD_SET operations (ZERO, SET, CLR, ISSET)
+	    - I/O readiness detection
+
+	  Runtime: <300ms
+	  Hardware: None
+	  Dependencies: CONFIG_OSAL
+	  Tags: fast
+	  Test file: test_osal_poll_select.c
 
 endmenu
 

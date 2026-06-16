@@ -260,6 +260,158 @@ static void test_gpio_input_mode(void)
     HAL_GPIO_Deinit(test_gpio);
 }
 
+static void test_gpio_interrupt_enable_disable_edge_cases(void)
+{
+    uint32_t test_gpio = 206;
+
+    /* 测试未初始化GPIO的中断操作 */
+    int32_t ret = HAL_GPIO_EnableInterrupt(test_gpio);
+    TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
+
+    ret = HAL_GPIO_DisableInterrupt(test_gpio);
+    TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
+
+    /* 初始化GPIO但不设置中断 */
+    hal_gpio_config_t config = {
+        .direction = HAL_GPIO_DIR_INPUT,
+        .initial_level = HAL_GPIO_LEVEL_LOW,
+        .edge = HAL_GPIO_EDGE_NONE,
+        .callback = NULL,
+        .user_data = NULL
+    };
+
+    ret = HAL_GPIO_Init(test_gpio, &config);
+#ifdef __linux__
+    if (ret == OSAL_ERR_PERMISSION) {
+        TEST_MESSAGE("SKIPPED: Need permission to access GPIO");
+        return;
+    }
+#endif
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    /* 尝试使能未配置的中断 */
+    ret = HAL_GPIO_EnableInterrupt(test_gpio);
+    TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
+
+    HAL_GPIO_Deinit(test_gpio);
+}
+
+static void test_gpio_interrupt_callback_verification(void)
+{
+    interrupt_count = 0;
+    last_level = HAL_GPIO_LEVEL_LOW;
+    int32_t user_counter = 0;
+
+    hal_gpio_config_t config = {
+        .direction = HAL_GPIO_DIR_INPUT,
+        .initial_level = HAL_GPIO_LEVEL_LOW,
+        .edge = HAL_GPIO_EDGE_BOTH,
+        .callback = test_gpio_isr_callback,
+        .user_data = &user_counter
+    };
+
+    uint32_t test_gpio = 207;
+    int32_t ret = HAL_GPIO_Init(test_gpio, &config);
+
+#ifdef __linux__
+    if (ret == OSAL_ERR_PERMISSION) {
+        TEST_MESSAGE("SKIPPED: Need permission to access GPIO");
+        return;
+    }
+#endif
+
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    /* 使能中断 */
+    ret = HAL_GPIO_EnableInterrupt(test_gpio);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    /* 验证中断状态 - 初始应为0 */
+    TEST_ASSERT_EQUAL(0, interrupt_count);
+    TEST_ASSERT_EQUAL(0, user_counter);
+
+    /* 禁用中断 */
+    ret = HAL_GPIO_DisableInterrupt(test_gpio);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    /* 再次禁用应该成功（幂等操作） */
+    ret = HAL_GPIO_DisableInterrupt(test_gpio);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    HAL_GPIO_Deinit(test_gpio);
+}
+
+static void test_gpio_set_interrupt_different_edges(void)
+{
+    uint32_t test_gpio = 208;
+
+    hal_gpio_config_t config = {
+        .direction = HAL_GPIO_DIR_INPUT,
+        .initial_level = HAL_GPIO_LEVEL_LOW,
+        .edge = HAL_GPIO_EDGE_NONE,
+        .callback = NULL,
+        .user_data = NULL
+    };
+
+    int32_t ret = HAL_GPIO_Init(test_gpio, &config);
+
+#ifdef __linux__
+    if (ret == OSAL_ERR_PERMISSION) {
+        TEST_MESSAGE("SKIPPED: Need permission to access GPIO");
+        return;
+    }
+#endif
+
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    /* 测试上升沿 */
+    ret = HAL_GPIO_SetInterrupt(test_gpio, HAL_GPIO_EDGE_RISING, test_gpio_isr_callback, NULL);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    /* 测试下降沿 */
+    ret = HAL_GPIO_SetInterrupt(test_gpio, HAL_GPIO_EDGE_FALLING, test_gpio_isr_callback, NULL);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    /* 测试双边沿 */
+    ret = HAL_GPIO_SetInterrupt(test_gpio, HAL_GPIO_EDGE_BOTH, test_gpio_isr_callback, NULL);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    /* 测试禁用中断（callback为NULL） */
+    ret = HAL_GPIO_SetInterrupt(test_gpio, HAL_GPIO_EDGE_NONE, NULL, NULL);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    HAL_GPIO_Deinit(test_gpio);
+}
+
+static void test_gpio_boundary_values(void)
+{
+    hal_gpio_config_t config = {
+        .direction = HAL_GPIO_DIR_OUTPUT,
+        .initial_level = HAL_GPIO_LEVEL_LOW,
+        .edge = HAL_GPIO_EDGE_NONE,
+        .callback = NULL,
+        .user_data = NULL
+    };
+
+    /* 测试GPIO号边界值 */
+    int32_t ret = HAL_GPIO_Init(0, &config);
+    if (ret != OSAL_ERR_PERMISSION && ret != OSAL_EINVAL) {
+        HAL_GPIO_Deinit(0);
+    }
+
+    /* 测试无效的大GPIO号 */
+    ret = HAL_GPIO_Init(999999, &config);
+    TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
+
+    /* 测试无效方向值 */
+    ret = HAL_GPIO_GetDirection(100, NULL);
+    TEST_ASSERT_EQUAL(OSAL_EINVAL, ret);
+
+    /* 测试无效电平值 */
+    ret = HAL_GPIO_GetLevel(100, NULL);
+    TEST_ASSERT_EQUAL(OSAL_EINVAL, ret);
+}
+
 /*===========================================================================
  * 测试模块注册
  *===========================================================================*/
@@ -305,6 +457,30 @@ static const test_case_t test_cases[] = {
 	{
 		.name = "test_gpio_input_mode",
 		.func = test_gpio_input_mode,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_gpio_interrupt_enable_disable_edge_cases",
+		.func = test_gpio_interrupt_enable_disable_edge_cases,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_gpio_interrupt_callback_verification",
+		.func = test_gpio_interrupt_callback_verification,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_gpio_set_interrupt_different_edges",
+		.func = test_gpio_set_interrupt_different_edges,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_gpio_boundary_values",
+		.func = test_gpio_boundary_values,
 		.setup = NULL,
 		.teardown = NULL
 	},

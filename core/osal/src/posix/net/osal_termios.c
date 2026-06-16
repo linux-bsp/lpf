@@ -74,3 +74,28 @@ int32_t OSAL_cfsetospeed(osal_termios_t *termios_p, uint32_t speed)
     termios_union.osal_termios = termios_p;
     return cfsetospeed(termios_union.posix_termios, speed);
 }
+
+uint32_t OSAL_cfgetispeed(const osal_termios_t *termios_p)
+{
+    return termios_p->c_ispeed;
+}
+
+uint32_t OSAL_cfgetospeed(const osal_termios_t *termios_p)
+{
+    return termios_p->c_ospeed;
+}
+
+int32_t OSAL_tcdrain(int32_t fd)
+{
+    return tcdrain(fd);
+}
+
+int32_t OSAL_tcsendbreak(int32_t fd, int32_t duration)
+{
+    return tcsendbreak(fd, duration);
+}
+
+int32_t OSAL_tcflow(int32_t fd, int32_t action)
+{
+    return tcflow(fd, action);
+}

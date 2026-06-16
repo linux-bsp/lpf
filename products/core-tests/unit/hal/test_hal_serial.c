@@ -431,6 +431,192 @@ static void test_hal_serial_different_databits(void)
     HAL_Serial_Close(handle);
 }
 
+/* 测试用例: 不同停止位 */
+static void test_hal_serial_different_stopbits(void)
+{
+    hal_serial_handle_t handle = NULL;
+    hal_serial_config_t config = {
+        .baud_rate = 115200,
+        .data_bits = 8,
+        .stop_bits = 2,
+        .parity = HAL_SERIAL_PARITY_NONE,
+        .flow_control = HAL_SERIAL_FLOW_NONE
+    };
+
+    int32_t ret = HAL_Serial_Open("/dev/ttyS0", &config, &handle);
+    if (OSAL_SUCCESS != ret) {
+        TEST_ASSERT_FALSE(true); // /dev/ttyS0 not available
+    }
+
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+    HAL_Serial_Close(handle);
+
+    /* 测试1个停止位 */
+    config.stop_bits = 1;
+    ret = HAL_Serial_Open("/dev/ttyS0", &config, &handle);
+    if (OSAL_SUCCESS != ret) {
+        TEST_ASSERT_FALSE(true); // /dev/ttyS0 not available
+    }
+
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+    HAL_Serial_Close(handle);
+}
+
+/* 测试用例: 硬件流控 */
+static void test_hal_serial_hardware_flow_control(void)
+{
+    hal_serial_handle_t handle = NULL;
+    hal_serial_config_t config = {
+        .baud_rate = 115200,
+        .data_bits = 8,
+        .stop_bits = 1,
+        .parity = HAL_SERIAL_PARITY_NONE,
+        .flow_control = HAL_SERIAL_FLOW_HW
+    };
+
+    int32_t ret = HAL_Serial_Open("/dev/ttyS0", &config, &handle);
+    if (OSAL_SUCCESS != ret) {
+        TEST_MESSAGE("SKIPPED: Hardware flow control not available");
+        return;
+    }
+
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    /* 尝试写入数据 */
+    uint8_t data[] = "Test HW Flow";
+    ret = HAL_Serial_Write(handle, data, sizeof(data), 1000);
+    TEST_ASSERT_TRUE(ret >= 0);
+
+    HAL_Serial_Close(handle);
+}
+
+/* 测试用例: 软件流控 */
+static void test_hal_serial_software_flow_control(void)
+{
+    hal_serial_handle_t handle = NULL;
+    hal_serial_config_t config = {
+        .baud_rate = 115200,
+        .data_bits = 8,
+        .stop_bits = 1,
+        .parity = HAL_SERIAL_PARITY_NONE,
+        .flow_control = HAL_SERIAL_FLOW_SW
+    };
+
+    int32_t ret = HAL_Serial_Open("/dev/ttyS0", &config, &handle);
+    if (OSAL_SUCCESS != ret) {
+        TEST_MESSAGE("SKIPPED: Software flow control not available");
+        return;
+    }
+
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    /* 尝试写入数据 */
+    uint8_t data[] = "Test SW Flow";
+    ret = HAL_Serial_Write(handle, data, sizeof(data), 1000);
+    TEST_ASSERT_TRUE(ret >= 0);
+
+    HAL_Serial_Close(handle);
+}
+
+/* 测试用例: 边界值测试 - 最大波特率 */
+static void test_hal_serial_max_baudrate(void)
+{
+    hal_serial_handle_t handle = NULL;
+    hal_serial_config_t config = {
+        .baud_rate = 921600,
+        .data_bits = 8,
+        .stop_bits = 1,
+        .parity = HAL_SERIAL_PARITY_NONE,
+        .flow_control = HAL_SERIAL_FLOW_NONE
+    };
+
+    int32_t ret = HAL_Serial_Open("/dev/ttyS0", &config, &handle);
+    if (OSAL_SUCCESS != ret) {
+        TEST_MESSAGE("SKIPPED: Max baud rate not supported");
+        return;
+    }
+
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+    HAL_Serial_Close(handle);
+}
+
+/* 测试用例: 边界值测试 - 最小波特率 */
+static void test_hal_serial_min_baudrate(void)
+{
+    hal_serial_handle_t handle = NULL;
+    hal_serial_config_t config = {
+        .baud_rate = 300,
+        .data_bits = 8,
+        .stop_bits = 1,
+        .parity = HAL_SERIAL_PARITY_NONE,
+        .flow_control = HAL_SERIAL_FLOW_NONE
+    };
+
+    int32_t ret = HAL_Serial_Open("/dev/ttyS0", &config, &handle);
+    if (OSAL_SUCCESS != ret) {
+        TEST_MESSAGE("SKIPPED: Min baud rate not supported");
+        return;
+    }
+
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+    HAL_Serial_Close(handle);
+}
+
+/* 测试用例: 大数据写入 */
+static void test_hal_serial_large_write(void)
+{
+    hal_serial_handle_t handle = NULL;
+    hal_serial_config_t config = {
+        .baud_rate = 115200,
+        .data_bits = 8,
+        .stop_bits = 1,
+        .parity = HAL_SERIAL_PARITY_NONE,
+        .flow_control = HAL_SERIAL_FLOW_NONE
+    };
+
+    int32_t ret = HAL_Serial_Open("/dev/ttyS0", &config, &handle);
+    if (OSAL_SUCCESS != ret) {
+        TEST_ASSERT_FALSE(true); // /dev/ttyS0 not available
+    }
+
+    /* 写入1KB数据 */
+    uint8_t large_data[1024];
+    for (uint32_t i = 0; i < sizeof(large_data); i++) {
+        large_data[i] = (uint8_t)(i & 0xFF);
+    }
+
+    ret = HAL_Serial_Write(handle, large_data, sizeof(large_data), 5000);
+    TEST_ASSERT_TRUE(ret > 0);
+
+    HAL_Serial_Close(handle);
+}
+
+/* 测试用例: 非阻塞读取 */
+static void test_hal_serial_nonblocking_read(void)
+{
+    hal_serial_handle_t handle = NULL;
+    hal_serial_config_t config = {
+        .baud_rate = 115200,
+        .data_bits = 8,
+        .stop_bits = 1,
+        .parity = HAL_SERIAL_PARITY_NONE,
+        .flow_control = HAL_SERIAL_FLOW_NONE
+    };
+    uint8_t buffer[64];
+
+    int32_t ret = HAL_Serial_Open("/dev/ttyS0", &config, &handle);
+    if (OSAL_SUCCESS != ret) {
+        TEST_ASSERT_FALSE(true); // /dev/ttyS0 not available
+    }
+
+    /* 非阻塞读取 (timeout = 0) */
+    ret = HAL_Serial_Read(handle, buffer, sizeof(buffer), 0);
+    /* 应该立即返回，可能返回0或负数 */
+    TEST_ASSERT_TRUE(ret >= 0 || ret == OSAL_ERR_TIMEOUT);
+
+    HAL_Serial_Close(handle);
+}
+
 /*===========================================================================
  * 测试模块注册
  *===========================================================================*/
@@ -566,6 +752,48 @@ static const test_case_t test_cases[] = {
 	{
 		.name = "test_hal_serial_different_databits",
 		.func = test_hal_serial_different_databits,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_serial_different_stopbits",
+		.func = test_hal_serial_different_stopbits,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_serial_hardware_flow_control",
+		.func = test_hal_serial_hardware_flow_control,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_serial_software_flow_control",
+		.func = test_hal_serial_software_flow_control,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_serial_max_baudrate",
+		.func = test_hal_serial_max_baudrate,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_serial_min_baudrate",
+		.func = test_hal_serial_min_baudrate,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_serial_large_write",
+		.func = test_hal_serial_large_write,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_serial_nonblocking_read",
+		.func = test_hal_serial_nonblocking_read,
 		.setup = NULL,
 		.teardown = NULL
 	},

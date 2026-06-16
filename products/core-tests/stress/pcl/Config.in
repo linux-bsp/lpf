@@ -3,6 +3,31 @@
 # Tests platform configuration layer under extreme conditions.
 # Verifies configuration handling under load and error scenarios.
 
+config TEST_STRESS_PCL
+	bool "PCL stress tests"
+	depends on TEST_STRESS && TEST_PCONFIG
+	default y if TEST_STRESS_ALL
+	help
+	  Stress tests for Platform Configuration Layer (PCONFIG).
+
+	  Tests:
+	    - Concurrent query stress (16 threads, 10 seconds)
+	    - Massive config load (up to 32 platform configs)
+	    - Long-running stability (4 threads, 30 seconds)
+	    - Performance benchmarks (query latency/throughput)
+
+	  Verifies:
+	    - Thread-safe concurrent access
+	    - Registry capacity limits
+	    - No memory leaks or crashes
+	    - Query performance metrics
+
+	  Runtime: ~60 seconds total
+	  Hardware: None
+	  Dependencies: CONFIG_PCONFIG
+	  Tags: stress, config, concurrency
+	  Test file: test_stress_pcl.c
+
 if TEST_STRESS_PCL
 
 menu "PCL Stress Tests"

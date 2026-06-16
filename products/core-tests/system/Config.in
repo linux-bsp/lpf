@@ -22,6 +22,7 @@ config TEST_SYSTEM_ALL
 	select TEST_SYSTEM_OSAL if TEST_OSAL
 	select TEST_SYSTEM_HAL if TEST_HAL
 	select TEST_SYSTEM_PDL if TEST_PDL
+	select TEST_SYSTEM_PRL if TEST_PRL
 	select TEST_SYSTEM_PCL if TEST_PCL
 	select TEST_SYSTEM_ACL if TEST_ACL
 	select TEST_SYSTEM_ACONFIG if CONFIG_ACL
@@ -52,6 +53,10 @@ endif
 
 if TEST_PDL
 	source "products/core-tests/system/pdl/Config.in"
+endif
+
+if TEST_PRL
+	source "products/core-tests/system/prl/Config.in"
 endif
 
 if CONFIG_PCL

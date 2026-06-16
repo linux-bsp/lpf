@@ -296,6 +296,16 @@ if(CONFIG_TEST_STRESS)
         )
     endif()
 
+    # PRL Stress Tests - Auto-discover all test_stress_prl_*.c files
+    if(CONFIG_TEST_STRESS_PRL)
+        test_discover_and_add(
+            TARGET es-middleware-test
+            DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/stress/prl
+            MODULE stress_prl
+            LIBRARY prl
+        )
+    endif()
+
     # PCL Stress Tests - Auto-discover all test_stress_pcl_*.c files
     if(CONFIG_TEST_STRESS_PCL)
         test_discover_and_add(
@@ -372,6 +382,16 @@ if(CONFIG_TEST_SYSTEM)
             TARGET es-middleware-test
             DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/system/pdl
             MODULE system_pdl
+            # Library already linked at system test level
+        )
+    endif()
+
+    # PRL System Tests - Auto-discover all test_system_prl_*.c files
+    if(CONFIG_TEST_SYSTEM_PRL)
+        test_discover_and_add(
+            TARGET es-middleware-test
+            DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/system/prl
+            MODULE system_prl
             # Library already linked at system test level
         )
     endif()

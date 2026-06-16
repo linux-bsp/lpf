@@ -222,6 +222,144 @@ static void test_hal_watchdog_invalid_handle(void)
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
+/**
+ * @brief 测试：GetStats详细验证
+ */
+static void test_hal_watchdog_getstats_verification(void)
+{
+    hal_watchdog_handle_t handle = NULL;
+    hal_watchdog_config_t config = {
+        .device = "/dev/watchdog",
+        .timeout_sec = 30,
+        .enable_on_init = false
+    };
+
+    int32_t ret = HAL_WATCHDOG_Init(&config, &handle);
+    TEST_ASSERT_FALSE(ret != OSAL_SUCCESS);
+
+    /* 初始统计应为0 */
+    uint32_t kick_count = 999;
+    ret = HAL_WATCHDOG_GetStats(handle, &kick_count);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+    TEST_ASSERT_EQUAL(0, kick_count);
+
+    /* 喂狗后统计应递增 */
+    for (uint32_t i = 1; i <= 10; i++) {
+        ret = HAL_WATCHDOG_Kick(handle);
+        TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+        ret = HAL_WATCHDOG_GetStats(handle, &kick_count);
+        TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+        TEST_ASSERT_EQUAL(i, kick_count);
+    }
+
+    /* NULL参数测试 */
+    ret = HAL_WATCHDOG_GetStats(NULL, &kick_count);
+    TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
+
+    ret = HAL_WATCHDOG_GetStats(handle, NULL);
+    TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
+
+    HAL_WATCHDOG_Deinit(handle);
+}
+
+/**
+ * @brief 测试：边界值 - 最小超时时间
+ */
+static void test_hal_watchdog_min_timeout(void)
+{
+    hal_watchdog_handle_t handle = NULL;
+    hal_watchdog_config_t config = {
+        .device = "/dev/watchdog",
+        .timeout_sec = 1,  /* 最小超时 */
+        .enable_on_init = false
+    };
+
+    int32_t ret = HAL_WATCHDOG_Init(&config, &handle);
+    TEST_ASSERT_FALSE(ret != OSAL_SUCCESS);
+
+    uint32_t timeout = 0;
+    ret = HAL_WATCHDOG_GetTimeout(handle, &timeout);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+    TEST_ASSERT(timeout >= 1);
+
+    HAL_WATCHDOG_Deinit(handle);
+}
+
+/**
+ * @brief 测试：边界值 - 最大超时时间
+ */
+static void test_hal_watchdog_max_timeout(void)
+{
+    hal_watchdog_handle_t handle = NULL;
+    hal_watchdog_config_t config = {
+        .device = "/dev/watchdog",
+        .timeout_sec = 300,  /* 较大超时 */
+        .enable_on_init = false
+    };
+
+    int32_t ret = HAL_WATCHDOG_Init(&config, &handle);
+    if (ret != OSAL_SUCCESS) {
+        TEST_MESSAGE("SKIPPED: Max timeout not supported");
+        return;
+    }
+
+    uint32_t timeout = 0;
+    ret = HAL_WATCHDOG_GetTimeout(handle, &timeout);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    HAL_WATCHDOG_Deinit(handle);
+}
+
+/**
+ * @brief 测试：重复初始化
+ */
+static void test_hal_watchdog_double_init(void)
+{
+    hal_watchdog_handle_t handle1 = NULL;
+    hal_watchdog_handle_t handle2 = NULL;
+    hal_watchdog_config_t config = {
+        .device = "/dev/watchdog",
+        .timeout_sec = 30,
+        .enable_on_init = false
+    };
+
+    int32_t ret = HAL_WATCHDOG_Init(&config, &handle1);
+    TEST_ASSERT_FALSE(ret != OSAL_SUCCESS);
+
+    /* 尝试再次初始化同一设备 */
+    ret = HAL_WATCHDOG_Init(&config, &handle2);
+    /* 某些实现可能允许，某些可能拒绝 */
+    if (ret == OSAL_SUCCESS) {
+        HAL_WATCHDOG_Deinit(handle2);
+    }
+
+    HAL_WATCHDOG_Deinit(handle1);
+}
+
+/**
+ * @brief 测试：重复反初始化
+ */
+static void test_hal_watchdog_double_deinit(void)
+{
+    hal_watchdog_handle_t handle = NULL;
+    hal_watchdog_config_t config = {
+        .device = "/dev/watchdog",
+        .timeout_sec = 30,
+        .enable_on_init = false
+    };
+
+    int32_t ret = HAL_WATCHDOG_Init(&config, &handle);
+    TEST_ASSERT_FALSE(ret != OSAL_SUCCESS);
+
+    ret = HAL_WATCHDOG_Deinit(handle);
+    TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+    /* 再次反初始化应失败 */
+    ret = HAL_WATCHDOG_Deinit(handle);
+    TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
+}
+
 /* 测试用例数组 - 使用函数指针数组 */
 static const test_case_t test_cases[] = {
 	{
@@ -263,6 +401,36 @@ static const test_case_t test_cases[] = {
 	{
 		.name = "test_hal_watchdog_invalid_handle",
 		.func = test_hal_watchdog_invalid_handle,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_watchdog_getstats_verification",
+		.func = test_hal_watchdog_getstats_verification,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_watchdog_min_timeout",
+		.func = test_hal_watchdog_min_timeout,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_watchdog_max_timeout",
+		.func = test_hal_watchdog_max_timeout,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_watchdog_double_init",
+		.func = test_hal_watchdog_double_init,
+		.setup = NULL,
+		.teardown = NULL
+	},
+	{
+		.name = "test_hal_watchdog_double_deinit",
+		.func = test_hal_watchdog_double_deinit,
 		.setup = NULL,
 		.teardown = NULL
 	},

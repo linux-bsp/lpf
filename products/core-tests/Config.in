@@ -211,23 +211,30 @@ config TEST_STRESS_HAL
 
 config TEST_STRESS_PCONFIG
 	bool "Build PCONFIG stress tests"
-	depends on OSAL && HAL && TYPES  # PCONFIG dependencies
+	depends on OSAL && HAL  # PCONFIG dependencies
 	select PCONFIG
 	default n
 	help
 	  Build PCONFIG layer stress tests.
 
-	  Note: PCONFIG requires OSAL, HAL, and TYPES.
+	  Note: PCONFIG requires OSAL and HAL.
 
 config TEST_STRESS_PDL
 	bool "Build PDL stress tests"
-	depends on OSAL && HAL && PCONFIG && TYPES  # PDL dependencies
+	depends on OSAL && HAL && PCONFIG  # PDL dependencies
 	select PDL
 	default n
 	help
 	  Build PDL layer stress tests.
 
-	  Note: PDL requires OSAL, HAL, PCONFIG, and TYPES.
+	  Note: PDL requires OSAL, HAL, and PCONFIG.
+
+config TEST_STRESS_PRL
+	bool "Build PRL stress tests"
+	select PRL
+	default n
+	help
+	  Build PRL layer stress tests.
 
 config TEST_STRESS_ACL
 	bool "Build ACL stress tests"

@@ -1,111 +1,128 @@
-# ACL Stress Test Configuration
+# ACONFIG Stress Test Configuration
 #
 # Tests application configuration layer under extreme conditions.
-# Verifies TC/TM handling under load and error scenarios.
+# Verifies concurrent access, performance baselines, and stability.
 
 if TEST_STRESS_ACL
 
-menu "ACL Stress Tests"
+menu "ACONFIG Stress Tests"
 
-config TEST_STRESS_ACL_TC
-	bool "Telecommand stress tests"
-	default n
+config TEST_STRESS_ACONFIG
+	bool "ACONFIG comprehensive stress tests"
+	default y
 	help
-	  High-frequency telecommand processing.
+	  Comprehensive stress testing for ACONFIG module.
+
+	  Includes:
+	    - Concurrent query operations (TC/TM)
+	    - Large table performance baseline
+	    - Long-running stability tests
+	    - High-frequency throughput tests
+
+	  Tests thread-safety, performance, and memory stability
+	  under various stress conditions.
+
+	  Runtime: 30-60 seconds total
+	  Hardware: None (in-memory only)
+	  Dependencies: CONFIG_ACONFIG
+	  Tags: stress, concurrency, performance
+	  Test file: test_stress_aconfig.c
+
+config TEST_STRESS_ACONFIG_CONCURRENT
+	bool "Concurrent query stress tests"
+	default y
+	help
+	  Multi-threaded concurrent query operations.
 
 	  Tests:
-	    - Process 10000+ TCs rapidly
-	    - TC queue overflow handling
-	    - Concurrent TC submission from threads
-	    - Invalid TC rejection under load
-	    - TC execution timeout scenarios
+	    - TC query from 10+ concurrent threads
+	    - TM query from 10+ concurrent threads
+	    - Mixed TC/TM queries (16 threads)
+	    - Statistics query from 8 threads
+	    - 10000+ iterations per thread
 
 	  Verifies:
-	    - No TC loss (within queue limits)
-	    - Correct queue overflow behavior
-	    - Thread-safe TC processing
-	    - Proper error reporting
+	    - Thread-safe read operations
+	    - rwlock correctness
+	    - No race conditions
+	    - 99.9%+ success rate
+	    - Zero errors under load
 
-	  Runtime: 15-30 seconds
-	  Hardware: Mock devices
-	  Dependencies: CONFIG_ACL
-	  Tags: stress, telecommand
-	  Test file: test_stress_acl_tc.c
+	  Runtime: 5-15 seconds
+	  Hardware: None (in-memory only)
+	  Dependencies: CONFIG_ACONFIG
+	  Tags: stress, concurrency, thread-safety
+	  Test file: test_stress_aconfig.c
 
-config TEST_STRESS_ACL_TM
-	bool "Telemetry stress tests"
-	default n
+config TEST_STRESS_ACONFIG_PERFORMANCE
+	bool "Large table performance tests"
+	default y
 	help
-	  High-throughput telemetry collection.
+	  Performance baseline for O(n) sparse array lookup.
 
 	  Tests:
-	    - Collect 100000+ TM samples
-	    - TM buffer overflow scenarios
-	    - Concurrent TM collection from threads
-	    - High-frequency sampling (kHz range)
-	    - TM aggregation under load
+	    - 100 TC entries, 200 TM entries
+	    - Random access patterns
+	    - 4 threads, 1000 iterations
+	    - Latency measurement per query
 
 	  Verifies:
-	    - Acceptable data loss rate
-	    - Buffer overflow protection
-	    - Thread-safe TM collection
-	    - Memory management correctness
-
-	  Runtime: 15-30 seconds
-	  Hardware: Mock devices
-	  Dependencies: CONFIG_ACL
-	  Tags: stress, telemetry
-	  Test file: test_stress_acl_tm.c
-
-config TEST_STRESS_ACL_MAPPING
-	bool "Mapping table stress tests"
-	default n
-	help
-	  Mapping table lookup under extreme load.
-
-	  Tests:
-	    - Millions of TC/TM lookups
-	    - Very large mapping tables (1000+ entries)
-	    - Concurrent lookup from many threads
-	    - Mapping cache thrashing
-	    - Lookup performance degradation
-
-	  Verifies:
-	    - Acceptable lookup latency
+	    - O(n) lookup behavior
+	    - Acceptable average latency
+	    - Performance consistency
 	    - No performance cliffs
-	    - Thread-safe lookups
-	    - Cache effectiveness
+
+	  Runtime: 5-10 seconds
+	  Hardware: None
+	  Dependencies: CONFIG_ACONFIG
+	  Tags: stress, performance, baseline
+	  Test file: test_stress_aconfig.c
+
+config TEST_STRESS_ACONFIG_STABILITY
+	bool "Long-running stability tests"
+	default y
+	help
+	  Extended duration operation for leak detection.
+
+	  Tests:
+	    - 10 second continuous operation
+	    - 8 threads mixed queries
+	    - Memory stability monitoring
+	    - Resource leak detection
+
+	  Verifies:
+	    - No memory leaks
+	    - Consistent performance over time
+	    - 99.9%+ success rate
+	    - System stability
+
+	  Runtime: 10-15 seconds
+	  Hardware: None
+	  Dependencies: CONFIG_ACONFIG
+	  Tags: stress, stability, leak-detection
+	  Test file: test_stress_aconfig.c
+
+config TEST_STRESS_ACONFIG_THROUGHPUT
+	bool "High-frequency throughput tests"
+	default y
+	help
+	  Maximum query throughput measurement.
+
+	  Tests:
+	    - 20 threads, 50000 iterations
+	    - High-frequency mixed queries
+	    - Operations per second measurement
+
+	  Verifies:
+	    - Sustained high throughput
+	    - 99.9%+ success rate
+	    - Throughput baseline established
 
 	  Runtime: 10-20 seconds
 	  Hardware: None
-	  Dependencies: CONFIG_ACL
-	  Tags: stress, performance, lookup
-	  Test file: test_stress_acl_mapping.c
-
-config TEST_STRESS_ACL_INVALID
-	bool "Invalid TC/TM handling stress tests"
-	default n
-	help
-	  Robustness against invalid TC/TM data.
-
-	  Tests:
-	    - Unknown TC IDs
-	    - Malformed TC parameters
-	    - Out-of-range TM values
-	    - Invalid device references
-	    - Random corruption injection
-
-	  Verifies:
-	    - Robust error detection
-	    - No crashes on invalid data
-	    - Correct error reporting
-	    - System stability after errors
-
-	  Runtime: 10-20 seconds
-	  Hardware: Mock devices
-	  Dependencies: CONFIG_ACL
-	  Tags: stress, robustness
-	  Test file: test_stress_acl_invalid.c
+	  Dependencies: CONFIG_ACONFIG
+	  Tags: stress, performance, throughput
+	  Test file: test_stress_aconfig.c
 
 endmenu
 

@@ -12,6 +12,9 @@ config TEST_PRL_ALL
 	default y
 	select TEST_PRL_COMMON
 	select TEST_PRL_DEVICE
+	select TEST_PRL_API
+	select TEST_PRL_FAST_EXTRACTION
+	select TEST_PRL_RESPONSE
 	help
 	  Enable all PRL unit tests at once.
 	  Disabling this allows individual test selection below.
@@ -58,6 +61,69 @@ config TEST_PRL_DEVICE
 	  Dependencies: CONFIG_PRL
 	  Tags: fast
 	  Test file: test_prl_device.c
+
+config TEST_PRL_API
+	bool "PRL core API tests"
+	default y
+	help
+	  Test PRL core API functions (Init, Version, Sequence, Flags).
+
+	  Coverage:
+	    - PRL_Init/PRL_Deinit lifecycle
+	    - PRL_GetVersion protocol version retrieval
+	    - PRL_GetErrorString error code descriptions
+	    - PRL_ResetSequence/PRL_GetCurrentSequence sequence management
+	    - Sequence number increment tracking
+	    - Timestamp population and validation
+	    - Flag handling (NEED_ACK, IS_ACK, combinations)
+	    - Edge cases (exact buffer size, oversized payload)
+
+	  Runtime: <100ms
+	  Hardware: None
+	  Dependencies: CONFIG_PRL
+	  Tags: fast
+	  Test file: test_prl_api.c
+
+config TEST_PRL_FAST_EXTRACTION
+	bool "PRL fast extraction API tests"
+	default y
+	help
+	  Test PRL fast extraction APIs for routing and deduplication.
+
+	  Coverage:
+	    - PRL_ValidatePacket fast packet validation
+	    - PRL_GetDeviceType device type extraction without CRC check
+	    - PRL_GetMessageType message type extraction without CRC check
+	    - PRL_GetSequence sequence number extraction for deduplication
+	    - Fast routing scenarios (no full decode)
+	    - Performance-critical path validation
+
+	  Runtime: <100ms
+	  Hardware: None
+	  Dependencies: CONFIG_PRL
+	  Tags: fast, routing
+	  Test file: test_prl_fast_extraction.c
+
+config TEST_PRL_RESPONSE
+	bool "PRL response building tests"
+	default y
+	help
+	  Test PRL_BuildResponse API for request-response patterns.
+
+	  Coverage:
+	    - PRL_BuildResponse basic response building
+	    - Sequence number preservation from request
+	    - IS_ACK flag automatic setting
+	    - Device type and message type preservation
+	    - Empty and large response payloads
+	    - Error response building
+	    - Request-response pattern validation
+
+	  Runtime: <100ms
+	  Hardware: None
+	  Dependencies: CONFIG_PRL
+	  Tags: fast
+	  Test file: test_prl_response.c
 
 endmenu
 

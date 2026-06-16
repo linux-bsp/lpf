@@ -57,6 +57,8 @@ const char* test_tags_to_string(uint32_t tags, char *buf, uint32_t buf_size)
     APPEND_TAG(TEST_TAG_PRIVILEGED, "privileged");
     APPEND_TAG(TEST_TAG_UNSTABLE, "unstable");
     APPEND_TAG(TEST_TAG_DEPRECATED, "deprecated");
+    APPEND_TAG(TEST_TAG_IPC, "ipc");
+    APPEND_TAG(TEST_TAG_INTEGRATION, "integration");
 
 #undef APPEND_TAG
 

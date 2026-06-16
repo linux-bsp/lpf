@@ -38,7 +38,9 @@ typedef enum {
 	TEST_TAG_CPU_INTENSIVE = (1 << 6),    /**< High CPU usage */
 	TEST_TAG_PRIVILEGED = (1 << 7),       /**< Requires elevated privileges */
 	TEST_TAG_UNSTABLE = (1 << 8),         /**< Known to be flaky/unstable */
-	TEST_TAG_DEPRECATED = (1 << 9)        /**< Deprecated, to be removed */
+	TEST_TAG_DEPRECATED = (1 << 9),       /**< Deprecated, to be removed */
+	TEST_TAG_IPC = (1 << 10),            /**< Tests inter-process communication */
+	TEST_TAG_INTEGRATION = (1 << 11)     /**< Integration tests across modules */
 } test_tag_t;
 
 /**

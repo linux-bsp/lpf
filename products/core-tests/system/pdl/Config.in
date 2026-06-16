@@ -9,7 +9,7 @@ menu "PDL System Tests"
 
 config TEST_SYSTEM_PDL_MULTIDEVICE
 	bool "Multi-device concurrent operations"
-	default n
+	default y
 	help
 	  Concurrent operations across multiple PDL devices.
 
@@ -34,7 +34,7 @@ config TEST_SYSTEM_PDL_MULTIDEVICE
 
 config TEST_SYSTEM_PDL_PROTOCOL_STACK
 	bool "Full protocol stack integration tests"
-	default n
+	default y
 	help
 	  End-to-end protocol stack tests (PRL + PDL + HAL).
 
@@ -131,6 +131,39 @@ config TEST_SYSTEM_PDL_TELEMETRY
 	  Dependencies: CONFIG_PDL
 	  Tags: integration, telemetry
 	  Test file: test_system_pdl_telemetry.c
+
+config TEST_SYSTEM_PDL_CCM
+	bool "CCM device integration tests"
+	default y
+	depends on CONFIG_PDL_CCM_SUPPORT
+	help
+	  Comprehensive CCM communication driver integration tests.
+
+	  Tests:
+	    - CCM initialization and basic communication
+	    - Telemetry data transmission
+	    - Telecommand handling
+	    - Node management operations
+	    - Power domain control
+	    - Status query operations
+	    - Connection status and statistics
+	    - Callback registration and invocation
+
+	  Verifies:
+	    - CCM driver initialization with Ethernet interface
+	    - Telemetry/command callback mechanism
+	    - Node start/stop/restart operations
+	    - Power on/off/query commands
+	    - Heartbeat transmission
+	    - Connection status monitoring
+	    - Communication statistics tracking
+	    - Proper cleanup and deinitialization
+
+	  Runtime: 5-10 seconds
+	  Hardware: CCM device or mock interface
+	  Dependencies: CONFIG_PDL_CCM_SUPPORT
+	  Tags: integration, ccm, telemetry, command
+	  Test file: test_system_pdl_ccm.c
 
 endmenu
 
