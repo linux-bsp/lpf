@@ -9,6 +9,7 @@
 
 #include "osal.h"
 #include "prl.h"
+#include "prl/prl_pmc.h"  /* Explicit include for PMC protocol definitions */
 #include "pdl.h"
 #include "pdl_ccm_internal.h"
 
