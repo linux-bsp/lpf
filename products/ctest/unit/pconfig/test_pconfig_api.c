@@ -77,9 +77,7 @@ static pconfig_bmc_entry_t test_bmc_entries[] = {
             .auto_switch = false,
             .retry_count = 3,
             .health_check_interval = 5000
-        },
-        .power_gpio = NULL,
-        .reset_gpio = NULL
+        }
     }
 };
 
