@@ -21,9 +21,6 @@ menu "Configuration Profile"
 
 choice
 	prompt "OSAL Configuration Profile"
-	default OSAL_PROFILE_STANDARD if TEMPLATE_LINUX_STANDARD
-	default OSAL_PROFILE_MINIMAL if TEMPLATE_LINUX_MINIMAL || TEMPLATE_RTOS_MINIMAL
-	default OSAL_PROFILE_FULL if TEMPLATE_LINUX_FULL
 	default OSAL_PROFILE_STANDARD
 	help
 	  Select a predefined OSAL configuration profile.
