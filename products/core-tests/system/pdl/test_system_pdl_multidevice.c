@@ -61,7 +61,7 @@ static void* mcu_operation_thread(void *arg)
 			}
 		}
 
-		OSAL_Sleep(100);
+		OSAL_usleep(100000);
 	}
 
 	OSAL_printf("[MCU Thread] Stopped (operations: %u)\n", ctx->mcu_operation_count);
@@ -80,8 +80,8 @@ static void* bmc_operation_thread(void *arg)
 	while (ctx->test_running) {
 		if (ctx->bmc_handle) {
 			/* 查询BMC统计 */
-			pdl_bmc_stats_t stats;
-			int32_t ret = PDL_BMC_GetStats(ctx->bmc_handle, &stats);
+			uint32_t cmd_count, success_count, fail_count, switch_count;
+			int32_t ret = PDL_BMC_GetStats(ctx->bmc_handle, &cmd_count, &success_count, &fail_count, &switch_count);
 			if (ret == OSAL_SUCCESS) {
 				__sync_fetch_and_add(&ctx->bmc_operation_count, 1);
 			} else {
@@ -89,7 +89,7 @@ static void* bmc_operation_thread(void *arg)
 			}
 		}
 
-		OSAL_Sleep(150);
+		OSAL_usleep(150000);
 	}
 
 	OSAL_printf("[BMC Thread] Stopped (operations: %u)\n", ctx->bmc_operation_count);
@@ -121,11 +121,10 @@ static void test_multidevice_concurrent_init(void)
 
 	pdl_bmc_config_t bmc_config;
 	OSAL_memset(&bmc_config, 0, sizeof(bmc_config));
-	bmc_config.channel = PDL_BMC_CHANNEL_NETWORK;
-	bmc_config.network.host = "192.168.1.100";
-	bmc_config.network.username = "admin";
-	bmc_config.network.password = "admin";
-	bmc_config.cmd_timeout_ms = 5000;
+	bmc_config.primary_channel = PDL_BMC_CHANNEL_NETWORK;
+	bmc_config.primary_config.network.ip_addr = "192.168.1.100";
+	bmc_config.primary_config.network.username = "admin";
+	bmc_config.primary_config.network.password = "admin";
 	bmc_config.retry_count = 3;
 
 	int32_t mcu_ret = PDL_MCU_Init(&mcu_config, &g_context.mcu_handle);
@@ -196,11 +195,10 @@ static void test_multidevice_concurrent_operations(void)
 
 	pdl_bmc_config_t bmc_config;
 	OSAL_memset(&bmc_config, 0, sizeof(bmc_config));
-	bmc_config.channel = PDL_BMC_CHANNEL_NETWORK;
-	bmc_config.network.host = "192.168.1.100";
-	bmc_config.network.username = "admin";
-	bmc_config.network.password = "admin";
-	bmc_config.cmd_timeout_ms = 5000;
+	bmc_config.primary_channel = PDL_BMC_CHANNEL_NETWORK;
+	bmc_config.primary_config.network.ip_addr = "192.168.1.100";
+	bmc_config.primary_config.network.username = "admin";
+	bmc_config.primary_config.network.password = "admin";
 	bmc_config.retry_count = 3;
 
 	int32_t mcu_ret = PDL_MCU_Init(&mcu_config, &g_context.mcu_handle);
@@ -215,29 +213,29 @@ static void test_multidevice_concurrent_operations(void)
 	OSAL_printf("[Step 1] Starting concurrent operation threads...\n");
 	g_context.test_running = true;
 
-	osal_thread_t mcu_thread = NULL;
-	osal_thread_t bmc_thread = NULL;
+	osal_thread_t mcu_thread = 0;
+	osal_thread_t bmc_thread = 0;
 
 	if (g_context.mcu_handle) {
-		OSAL_ThreadCreate(&mcu_thread, mcu_operation_thread, &g_context, "mcu_ops");
+		OSAL_pthread_create(&mcu_thread, NULL, mcu_operation_thread, &g_context);
 	}
 
 	if (g_context.bmc_handle) {
-		OSAL_ThreadCreate(&bmc_thread, bmc_operation_thread, &g_context, "bmc_ops");
+		OSAL_pthread_create(&bmc_thread, NULL, bmc_operation_thread, &g_context);
 	}
 
 	/* 运行5秒 */
 	OSAL_printf("[Step 2] Running concurrent operations (5s)...\n");
-	OSAL_Sleep(5000);
+	OSAL_sleep(5);
 
 	/* 停止线程 */
 	g_context.test_running = false;
 
 	if (mcu_thread) {
-		OSAL_ThreadJoin(mcu_thread, NULL);
+		OSAL_pthread_join(mcu_thread, NULL);
 	}
 	if (bmc_thread) {
-		OSAL_ThreadJoin(bmc_thread, NULL);
+		OSAL_pthread_join(bmc_thread, NULL);
 	}
 
 	/* 验证结果 */
@@ -287,11 +285,12 @@ static void test_multidevice_independence(void)
 	OSAL_memset(&wdt_config, 0, sizeof(wdt_config));
 	wdt_config.device = "/dev/watchdog";
 	wdt_config.mode = PDL_WATCHDOG_MODE_MANUAL;
-	wdt_config.timeout_ms = 10000;
+	wdt_config.timeout_sec = 10;
 
 	pdl_mcu_handle_t mcu_handle = NULL;
+	pdl_watchdog_handle_t wdt_handle = NULL;
 	int32_t mcu_ret = PDL_MCU_Init(&mcu_config, &mcu_handle);
-	int32_t wdt_ret = PDL_WATCHDOG_Init(&wdt_config);
+	int32_t wdt_ret = PDL_WATCHDOG_Init(&wdt_config, &wdt_handle);
 
 	OSAL_printf("[Init] MCU: %s, Watchdog: %s\n",
 		mcu_ret == OSAL_SUCCESS ? "OK" : "SKIP",
@@ -299,8 +298,8 @@ static void test_multidevice_independence(void)
 
 	/* 交替操作两个设备 */
 	for (int i = 0; i < 5; i++) {
-		if (wdt_ret == OSAL_SUCCESS) {
-			PDL_WATCHDOG_Kick();
+		if (wdt_handle) {
+			PDL_WATCHDOG_Kick(wdt_handle);
 		}
 
 		if (mcu_handle) {
@@ -308,7 +307,7 @@ static void test_multidevice_independence(void)
 			PDL_MCU_GetStatus(mcu_handle, &status);
 		}
 
-		OSAL_Sleep(100);
+		OSAL_usleep(100000);
 	}
 
 	OSAL_printf("[OK] Devices operated independently without interference\n");
@@ -317,8 +316,8 @@ static void test_multidevice_independence(void)
 	if (mcu_handle) {
 		PDL_MCU_Deinit(mcu_handle);
 	}
-	if (wdt_ret == OSAL_SUCCESS) {
-		PDL_WATCHDOG_Deinit();
+	if (wdt_handle) {
+		PDL_WATCHDOG_Deinit(wdt_handle);
 	}
 
 	OSAL_printf("=== Test Completed: Device Independence ===\n");
