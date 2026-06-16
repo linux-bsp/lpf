@@ -15,6 +15,28 @@ config ES_MIDDLEWARE_VERSION
 	default "1.0.0"
 
 # ============================================================================
+# Project Identification
+# ============================================================================
+
+config PROJECT_NAME
+	string "Project name"
+	default "unknown"
+	help
+	  Project name, typically extracted from defconfig filename.
+
+	  Naming convention: <product>_<project>_defconfig
+	  - ctest_x86_full_defconfig → project name: x86_full
+	  - ccm_h200_100p_am625_debug_defconfig → project name: h200_100p_am625_debug
+
+	  Can be overridden in defconfig file by setting CONFIG_PROJECT_NAME.
+
+config PROJECT_VERSION
+	string "Project version"
+	default ES_MIDDLEWARE_VERSION
+	help
+	  Project version string.
+
+# ============================================================================
 # Product Selection
 # ============================================================================
 # Select which product to build. Only one product can be selected at a time
@@ -64,28 +86,6 @@ config PRODUCT_CCM
 	  - Platform-specific configurations for AM625
 
 endchoice
-
-# ============================================================================
-# Project Identification (Global)
-# ============================================================================
-
-config PROJECT_NAME
-	string "Project name"
-	default "unknown"
-	help
-	  Project name, typically extracted from defconfig filename.
-
-	  Naming convention: <product>_<project>_defconfig
-	  - ctest_x86_full_defconfig → project name: x86_full
-	  - ccm_h200_100p_am625_debug_defconfig → project name: h200_100p_am625_debug
-
-	  Can be overridden in defconfig file by setting CONFIG_PROJECT_NAME.
-
-config PROJECT_VERSION
-	string "Project version"
-	default ES_MIDDLEWARE_VERSION
-	help
-	  Project version string.
 
 # ============================================================================
 # Build System Configuration
