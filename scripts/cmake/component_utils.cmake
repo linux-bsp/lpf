@@ -42,7 +42,7 @@ endfunction()
 
 # Load platform configuration for products
 # Usage: load_platform_config(CONFIG_VAR_NAME BASE_DIR)
-# Example: load_platform_config(CONFIG_PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR}/configs/platforms)
+# Example: load_platform_config(CONFIG_PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR}/configs/projects)
 function(load_platform_config config_var base_dir)
     # Check if platform is configured
     if(NOT ${config_var})

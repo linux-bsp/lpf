@@ -52,8 +52,7 @@ config PDL_MCU_UART_SUPPORT
 
 	  Recommended: Enable for UART-based systems
 
-menu "MCU Driver Configuration (Expert)"
-	visible if EXPERT
+menu "MCU Driver Configuration"
 
 config PDL_MCU
 	bool "MCU core driver"

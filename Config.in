@@ -94,12 +94,8 @@ config PROJECT_VERSION
 menu "Build System Configuration"
 
 # ============================================================================
-# Platform Configuration
+# Platform Configuration (Top Level)
 # ============================================================================
-# Platform and architecture configuration
-# ============================================================================
-
-menu "Platform Configuration"
 
 choice
 	prompt "Target operating system"
@@ -264,14 +260,9 @@ config ARCH
 	default "arm64" if ARCH_ARM64
 	default "riscv64" if ARCH_RISCV64
 
-endmenu
 # ============================================================================
-# Build Configuration
+# Build Type and Optimization (Top Level)
 # ============================================================================
-# Build type and runtime configuration
-# ============================================================================
-
-menu "Build Configuration"
 
 choice
 	prompt "Build type"
@@ -337,173 +328,6 @@ config BUILD_TYPE
 	default "Release" if BUILD_TYPE_RELEASE
 	default "RelWithDebInfo" if BUILD_TYPE_RELWITHDEBINFO
 	default "MinSizeRel" if BUILD_TYPE_MINSIZEREL
-
-menu "Runtime Configuration"
-
-config ENABLE_ASSERT
-	bool "Enable assertions"
-	default y if BUILD_TYPE_DEBUG
-	default n
-	help
-	  Enable runtime assertions.
-
-	  When disabled, defines NDEBUG macro to remove assert() checks.
-
-config STACK_PROTECTOR
-	bool "Enable stack protector"
-	default y if BUILD_TYPE_DEBUG || BUILD_TYPE_RELEASE
-	default n
-	help
-	  Enable stack overflow protection.
-
-	  Adds -fstack-protector-strong flag.
-
-config POSITION_INDEPENDENT_CODE
-	bool "Generate position independent code (PIC)"
-	default y
-	help
-	  Generate position independent code for shared libraries.
-
-	  Adds -fPIC flag.
-
-config FORTIFY_SOURCE
-	bool "Enable FORTIFY_SOURCE"
-	default y if BUILD_TYPE_RELEASE
-	default n
-	help
-	  Enable compile-time and runtime buffer overflow protection.
-
-	  Defines _FORTIFY_SOURCE=2.
-
-	  Only effective with optimization level >= -O1.
-
-endmenu
-
-menu "Toolchain"
-
-config TOOLCHAIN_PATH
-	string "Toolchain path"
-	default ""
-	help
-	  Absolute path to the cross-compilation toolchain.
-	  Leave empty to use system default compiler.
-
-	  Example: /opt/toolchains/gcc-arm-11.2/bin
-
-config TOOLCHAIN_PREFIX
-	string "Toolchain prefix"
-	default "aarch64-linux-gnu-" if ARCH_ARM64
-	default "arm-linux-gnueabihf-" if ARCH_ARM32
-	default ""
-	help
-	  Toolchain prefix for cross-compilation.
-
-	  Examples:
-	    ARM64: aarch64-linux-gnu- or aarch64-none-linux-gnu-
-	    ARM32: arm-linux-gnueabihf-
-	    x86_64: Leave empty for native compilation
-
-endmenu
-
-endmenu
-# ============================================================================
-# Compiler Configuration
-# ============================================================================
-# Compiler flags, optimization, and instrumentation options
-# ============================================================================
-
-menu "Compiler Configuration"
-
-menu "Compiler Warnings"
-
-config COMPILER_WARNINGS_AS_ERRORS
-	bool "Treat warnings as errors (-Werror)"
-	default y
-	help
-	  Enable -Werror flag to treat all compiler warnings as errors.
-
-	  This ensures code quality by preventing compilation when
-	  warnings are present.
-
-	  Recommended for production code.
-
-config COMPILER_WALL
-	bool "Enable all warnings (-Wall)"
-	default y
-	help
-	  Enable -Wall flag to show all common compiler warnings.
-
-config COMPILER_WEXTRA
-	bool "Enable extra warnings (-Wextra)"
-	default n
-	help
-	  Enable -Wextra flag for additional compiler warnings.
-
-config COMPILER_PEDANTIC
-	bool "Enable pedantic warnings (-Wpedantic)"
-	default n
-	help
-	  Enable -Wpedantic flag for strict ISO C compliance warnings.
-
-endmenu
-
-menu "Compiler Instrumentation"
-
-config COMPILER_SANITIZER_ADDRESS
-	bool "Enable AddressSanitizer"
-	default n
-	depends on BUILD_TYPE_DEBUG
-	help
-	  Enable AddressSanitizer for detecting memory errors.
-
-	  Adds -fsanitize=address flag.
-
-	  Note: This adds significant runtime overhead.
-	  Only use for debugging and testing.
-
-config COMPILER_SANITIZER_THREAD
-	bool "Enable ThreadSanitizer"
-	default n
-	depends on BUILD_TYPE_DEBUG
-	help
-	  Enable ThreadSanitizer for detecting data races.
-
-	  Adds -fsanitize=thread flag.
-
-	  Note: Cannot be used with AddressSanitizer.
-
-config COMPILER_SANITIZER_UNDEFINED
-	bool "Enable UndefinedBehaviorSanitizer"
-	default n
-	depends on BUILD_TYPE_DEBUG
-	help
-	  Enable UndefinedBehaviorSanitizer for detecting undefined behavior.
-
-	  Adds -fsanitize=undefined flag.
-
-config COMPILER_COVERAGE
-	bool "Enable code coverage (-fprofile-arcs -ftest-coverage)"
-	default n
-	depends on BUILD_TYPE_DEBUG
-	help
-	  Enable code coverage instrumentation for gcov/lcov.
-
-	  Adds -fprofile-arcs -ftest-coverage flags.
-
-endmenu
-
-menu "Compiler Optimization"
-
-config COMPILER_LTO
-	bool "Enable Link Time Optimization (LTO)"
-	default n
-	depends on BUILD_TYPE_RELEASE || BUILD_TYPE_MINSIZEREL
-	help
-	  Enable Link Time Optimization for better performance.
-
-	  Adds -flto flag.
-
-	  Note: Increases build time significantly.
 
 choice
 	prompt "Optimization level"
@@ -596,6 +420,47 @@ config COMPILER_DEBUG_LEVEL
 	    -ggdb: GDB-specific debug info
 	    (empty): No debug info
 
+# ============================================================================
+# Runtime Options (Top Level)
+# ============================================================================
+
+config ENABLE_ASSERT
+	bool "Enable assertions"
+	default y if BUILD_TYPE_DEBUG
+	default n
+	help
+	  Enable runtime assertions.
+
+	  When disabled, defines NDEBUG macro to remove assert() checks.
+
+config STACK_PROTECTOR
+	bool "Enable stack protector"
+	default y if BUILD_TYPE_DEBUG || BUILD_TYPE_RELEASE
+	default n
+	help
+	  Enable stack overflow protection.
+
+	  Adds -fstack-protector-strong flag.
+
+config POSITION_INDEPENDENT_CODE
+	bool "Generate position independent code (PIC)"
+	default y
+	help
+	  Generate position independent code for shared libraries.
+
+	  Adds -fPIC flag.
+
+config FORTIFY_SOURCE
+	bool "Enable FORTIFY_SOURCE"
+	default y if BUILD_TYPE_RELEASE
+	default n
+	help
+	  Enable compile-time and runtime buffer overflow protection.
+
+	  Defines _FORTIFY_SOURCE=2.
+
+	  Only effective with optimization level >= -O1.
+
 config COMPILER_DISABLE_FORTIFY_WITH_O0
 	bool "Disable _FORTIFY_SOURCE when using -O0"
 	default y
@@ -618,9 +483,126 @@ config COMPILER_DISABLE_FORTIFY_WITH_O0
 	  Disable only if you're sure your toolchain doesn't add
 	  _FORTIFY_SOURCE automatically.
 
-endmenu
+# ============================================================================
+# Compiler Warnings (Top Level)
+# ============================================================================
 
-menu "Custom Flags"
+config COMPILER_WARNINGS_AS_ERRORS
+	bool "Treat warnings as errors (-Werror)"
+	default y
+	help
+	  Enable -Werror flag to treat all compiler warnings as errors.
+
+	  This ensures code quality by preventing compilation when
+	  warnings are present.
+
+	  Recommended for production code.
+
+config COMPILER_WALL
+	bool "Enable all warnings (-Wall)"
+	default y
+	help
+	  Enable -Wall flag to show all common compiler warnings.
+
+config COMPILER_WEXTRA
+	bool "Enable extra warnings (-Wextra)"
+	default n
+	help
+	  Enable -Wextra flag for additional compiler warnings.
+
+config COMPILER_PEDANTIC
+	bool "Enable pedantic warnings (-Wpedantic)"
+	default n
+	help
+	  Enable -Wpedantic flag for strict ISO C compliance warnings.
+
+# ============================================================================
+# Toolchain Configuration (Top Level)
+# ============================================================================
+
+# ============================================================================
+# Toolchain Configuration (Top Level)
+# ============================================================================
+
+config TOOLCHAIN_PATH
+	string "Toolchain path"
+	default ""
+	help
+	  Absolute path to the cross-compilation toolchain.
+	  Leave empty to use system default compiler.
+
+	  Example: /opt/toolchains/gcc-arm-11.2/bin
+
+config TOOLCHAIN_PREFIX
+	string "Toolchain prefix"
+	default "aarch64-linux-gnu-" if ARCH_ARM64
+	default "arm-linux-gnueabihf-" if ARCH_ARM32
+	default ""
+	help
+	  Toolchain prefix for cross-compilation.
+
+	  Examples:
+	    ARM64: aarch64-linux-gnu- or aarch64-none-linux-gnu-
+	    ARM32: arm-linux-gnueabihf-
+	    x86_64: Leave empty for native compilation
+
+# ============================================================================
+# Advanced Options (Collapsed by default)
+# ============================================================================
+
+menu "Advanced Compiler Options"
+
+config COMPILER_LTO
+	bool "Enable Link Time Optimization (LTO)"
+	default n
+	depends on BUILD_TYPE_RELEASE || BUILD_TYPE_MINSIZEREL
+	help
+	  Enable Link Time Optimization for better performance.
+
+	  Adds -flto flag.
+
+	  Note: Increases build time significantly.
+
+config COMPILER_SANITIZER_ADDRESS
+	bool "Enable AddressSanitizer"
+	default n
+	depends on BUILD_TYPE_DEBUG
+	help
+	  Enable AddressSanitizer for detecting memory errors.
+
+	  Adds -fsanitize=address flag.
+
+	  Note: This adds significant runtime overhead.
+	  Only use for debugging and testing.
+
+config COMPILER_SANITIZER_THREAD
+	bool "Enable ThreadSanitizer"
+	default n
+	depends on BUILD_TYPE_DEBUG
+	help
+	  Enable ThreadSanitizer for detecting data races.
+
+	  Adds -fsanitize=thread flag.
+
+	  Note: Cannot be used with AddressSanitizer.
+
+config COMPILER_SANITIZER_UNDEFINED
+	bool "Enable UndefinedBehaviorSanitizer"
+	default n
+	depends on BUILD_TYPE_DEBUG
+	help
+	  Enable UndefinedBehaviorSanitizer for detecting undefined behavior.
+
+	  Adds -fsanitize=undefined flag.
+
+config COMPILER_COVERAGE
+	bool "Enable code coverage (-fprofile-arcs -ftest-coverage)"
+	default n
+	depends on BUILD_TYPE_DEBUG
+	help
+	  Enable code coverage instrumentation for gcov/lcov.
+
+	  Adds -fprofile-arcs -ftest-coverage flags.
 
 config COMPILER_CUSTOM_C_FLAGS
 	string "Custom C flags"
@@ -650,31 +632,10 @@ config COMPILER_CUSTOM_LINK_FLAGS
 
 endmenu
 
-# ============================================================================
-# Advanced Options
-# ============================================================================
-
-config EXPERT
-	bool "Expert mode - Show advanced options"
-	default n
-	help
-	  Enable expert mode to access advanced configuration options.
-
-	  When enabled, you can:
-	  - View configuration validation details
-	  - Access fine-grained file-level compilation options
-	  - Configure advanced debug and diagnostic options
-
-	  Warning: Incorrect advanced settings may result in build failures
-	  or runtime errors. Only enable if you know what you're doing.
-
-	  If unsure, say N.
-
 endmenu
+
 # ============================================================================
 # Security Configuration
-# ============================================================================
-# Security hardening options for production systems
 # ============================================================================
 
 menu "Security Configuration"
@@ -840,18 +801,8 @@ config SECURITY_ASLR_ENFORCE
 
 endmenu
 
-endmenu
-
 # ============================================================================
 # Debug Configuration
-# ============================================================================
-# Debugging and diagnostic features
-# ============================================================================
-
-# ============================================================================
-# Debug Configuration
-# ============================================================================
-# Debugging and diagnostic features
 # ============================================================================
 
 menu "Debug Configuration"
@@ -1227,7 +1178,6 @@ endmenu
 # ============================================================================
 
 menu "Configuration Validation"
-	visible if EXPERT
 
 # ============================================================================
 # Dependency Checks

@@ -15,7 +15,7 @@ if(CONFIG_HAL)
 endif()
 
 # Automatically load platform config based on CONFIG_PROJECT_NAME
-load_platform_config(CONFIG_PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR}/configs/platforms)
+load_platform_config(CONFIG_PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR}/configs/projects)
 
 # Create platform config object library to avoid path duplication
 if(PLATFORM_PCONFIG_SRCS OR PLATFORM_ACONFIG_SRCS)
