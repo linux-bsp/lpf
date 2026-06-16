@@ -100,8 +100,8 @@ endif
 
 %_defconfig: $(obj)/conf
 	@defconfig_file=""; \
-	if [ -f "$(srctree)/configs/tests/$@" ]; then \
-		defconfig_file="$(srctree)/configs/tests/$@"; \
+	if [ -f "$(srctree)/configs/ctest/$@" ]; then \
+		defconfig_file="$(srctree)/configs/ctest/$@"; \
 	elif [ -f "$(srctree)/configs/ccm/$@" ]; then \
 		defconfig_file="$(srctree)/configs/ccm/$@"; \
 	elif [ -f "$(srctree)/configs/products/$@" ]; then \
