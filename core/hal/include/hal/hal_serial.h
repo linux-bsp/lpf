@@ -166,6 +166,18 @@ int32_t HAL_Serial_Flush(hal_serial_handle_t handle);
 int32_t HAL_Serial_SetConfig(hal_serial_handle_t handle,
                               const hal_serial_config_t *config);
 
+/**
+ * @brief 串口测试调用（调试接口）
+ *
+ * @param[in] handle 串口句柄
+ *
+ * @return OSAL_SUCCESS 成功
+ * @return OSAL_ERR_GENERIC 失败
+ *
+ * @note 预留的调试接口，用于验证 HAL 层调用链
+ */
+int32_t HAL_Serial_TestCall(hal_serial_handle_t handle);
+
 #ifdef __cplusplus
 }
 #endif

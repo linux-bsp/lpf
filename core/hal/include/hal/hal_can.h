@@ -125,6 +125,18 @@ int32_t HAL_CAN_Recv(hal_can_handle_t handle, hal_can_frame_t *frame, int32_t ti
  */
 int32_t HAL_CAN_SetFilter(hal_can_handle_t handle, uint32_t filter_id, uint32_t filter_mask);
 
+/**
+ * @brief CAN 测试调用（调试接口）
+ *
+ * @param[in] handle CAN句柄
+ *
+ * @return OSAL_SUCCESS 成功
+ * @return OSAL_ERR_GENERIC 失败
+ *
+ * @note 预留的调试接口，用于验证 HAL 层调用链
+ */
+int32_t HAL_CAN_TestCall(hal_can_handle_t handle);
+
 #ifdef __cplusplus
 }
 #endif

@@ -683,3 +683,50 @@ int32_t PDL_BMC_GetStats(pdl_bmc_handle_t handle,
 
     return OSAL_SUCCESS;
 }
+
+/**
+ * @brief BMC 测试调用链实现（调试接口）
+ */
+int32_t PDL_BMC_TestCall(uint32_t index)
+{
+	const pconfig_platform_config_t *platform;
+	const pconfig_bmc_entry_t *bmc_entry;
+	const pconfig_bmc_config_t *config;
+
+	LOG_INFO("PDL_BMC", "========================================");
+	LOG_INFO("PDL_BMC", "PDL Layer: BMC TestCall");
+	LOG_INFO("PDL_BMC", "Device Index: %u", index);
+
+	/* 从 PCONFIG 获取平台配置 */
+	platform = PCONFIG_GetBoard();
+	if (NULL == platform) {
+		LOG_ERROR("PDL_BMC", "No platform config registered");
+		return OSAL_ERR_NAME_NOT_FOUND;
+	}
+
+	/* 从 PCONFIG 获取 BMC 配置 */
+	bmc_entry = PCONFIG_HW_GetBMC(platform, index);
+	if (NULL == bmc_entry) {
+		LOG_ERROR("PDL_BMC", "BMC config not found for index %u", index);
+		return OSAL_ERR_NAME_NOT_FOUND;
+	}
+
+	config = &bmc_entry->config;
+
+	LOG_INFO("PDL_BMC", "Primary Channel: %d", config->primary_channel);
+	LOG_INFO("PDL_BMC", "Auto Switch: %s", config->auto_switch ? "Yes" : "No");
+
+	if (config->primary_channel == PCONFIG_BMC_CHANNEL_NETWORK) {
+		LOG_INFO("PDL_BMC", "Network IP: %s", config->primary_config.network.ip_addr);
+		LOG_INFO("PDL_BMC", "Network Port: %u", config->primary_config.network.port);
+	} else if (config->primary_channel == PCONFIG_BMC_CHANNEL_SERIAL) {
+		LOG_INFO("PDL_BMC", "Serial Device: %s", config->primary_config.serial.device);
+		LOG_INFO("PDL_BMC", "Serial Baudrate: %u", config->primary_config.serial.baudrate);
+	}
+
+	LOG_INFO("PDL_BMC", "PDL_BMC_TestCall() completed successfully");
+	LOG_INFO("PDL_BMC", "========================================");
+
+	return OSAL_SUCCESS;
+}
+

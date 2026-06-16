@@ -153,4 +153,16 @@ int32_t PDL_BMC_ReadSensor(pdl_bmc_handle_t handle,
 			uint32_t sensor_id,
 			pdl_bmc_sensor_reading_t *reading);
 
+/**
+ * @brief BMC 测试调用链（调试接口）
+ *
+ * @param[in] index BMC设备索引
+ *
+ * @return OSAL_SUCCESS 成功
+ * @return OSAL_ERR_GENERIC 失败
+ *
+ * @note 预留的调试接口，验证完整调用链
+ */
+int32_t PDL_BMC_TestCall(uint32_t index);
+
 #endif /* PDL_BMC_H */

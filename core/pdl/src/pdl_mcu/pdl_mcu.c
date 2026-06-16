@@ -9,6 +9,7 @@
 
 #include "osal.h"
 #include "pconfig.h"
+#include "hal.h"
 #include "pdl.h"
 #include "pdl_mcu_internal.h"
 #include "pdl_mcu_protocol.h"
@@ -515,3 +516,70 @@ const char* PDL_MCU_GetStateName(pdl_mcu_state_t state)
 
     return "UNKNOWN";
 }
+
+/**
+ * @brief MCU 测试调用链实现（调试接口）
+ */
+int32_t PDL_MCU_TestCall(uint32_t index)
+{
+	const pconfig_platform_config_t *platform;
+	const pconfig_mcu_entry_t *mcu_entry;
+	const pconfig_mcu_config_t *config;
+	int32_t ret;
+
+	LOG_INFO("PDL_MCU", "========================================");
+	LOG_INFO("PDL_MCU", "PDL Layer: MCU TestCall");
+	LOG_INFO("PDL_MCU", "Device Index: %u", index);
+
+	/* 从 PCONFIG 获取平台配置 */
+	platform = PCONFIG_GetBoard();
+	if (NULL == platform) {
+		LOG_ERROR("PDL_MCU", "No platform config registered");
+		return OSAL_ERR_NAME_NOT_FOUND;
+	}
+
+	/* 从 PCONFIG 获取 MCU 配置 */
+	mcu_entry = PCONFIG_HW_GetMCU(platform, index);
+	if (NULL == mcu_entry) {
+		LOG_ERROR("PDL_MCU", "MCU config not found for index %u", index);
+		return OSAL_ERR_NAME_NOT_FOUND;
+	}
+
+	config = &mcu_entry->config;
+
+	LOG_INFO("PDL_MCU", "MCU Name: %s", config->name);
+	LOG_INFO("PDL_MCU", "Interface: %d", config->interface);
+
+	/* 根据接口类型调用 HAL 层测试 */
+	switch (config->interface) {
+	case PCONFIG_MCU_INTERFACE_CAN:
+		LOG_INFO("PDL_MCU", "Calling HAL_CAN_TestCall...");
+		LOG_INFO("PDL_MCU", "CAN Device: %s", config->hw.can.device);
+		LOG_INFO("PDL_MCU", "CAN Bitrate: %u", config->hw.can.bitrate);
+		ret = HAL_CAN_TestCall(NULL);
+		break;
+
+	case PCONFIG_MCU_INTERFACE_SERIAL:
+		LOG_INFO("PDL_MCU", "Calling HAL_Serial_TestCall...");
+		LOG_INFO("PDL_MCU", "Serial Device: %s", config->hw.serial.device);
+		LOG_INFO("PDL_MCU", "Serial Baudrate: %u", config->hw.serial.baudrate);
+		ret = HAL_Serial_TestCall(NULL);
+		break;
+
+	default:
+		LOG_ERROR("PDL_MCU", "Unsupported interface type: %d", config->interface);
+		ret = OSAL_ERR_NOT_SUPPORTED;
+		break;
+	}
+
+	if (OSAL_SUCCESS == ret) {
+		LOG_INFO("PDL_MCU", "PDL_MCU_TestCall() completed successfully");
+	} else {
+		LOG_ERROR("PDL_MCU", "PDL_MCU_TestCall() failed: %d", ret);
+	}
+
+	LOG_INFO("PDL_MCU", "========================================");
+
+	return ret;
+}
+

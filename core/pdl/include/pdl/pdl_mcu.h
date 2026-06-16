@@ -146,4 +146,17 @@ int32_t PDL_MCU_SendCommand(pdl_mcu_handle_t handle,
  */
 int32_t PDL_MCU_Reset(pdl_mcu_handle_t handle);
 
+/**
+ * @brief MCU 测试调用链（调试接口）
+ *
+ * @param[in] index MCU设备索引
+ *
+ * @return OSAL_SUCCESS 成功
+ * @return OSAL_ERR_GENERIC 失败
+ *
+ * @note 预留的调试接口，验证完整调用链：
+ *       APP → PDL_MCU_TestCall → PCONFIG → HAL_XXX_TestCall
+ */
+int32_t PDL_MCU_TestCall(uint32_t index);
+
 #endif /* PDL_MCU_H */
