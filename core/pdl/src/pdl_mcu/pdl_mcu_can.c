@@ -204,3 +204,12 @@ int32_t mcu_can_send_command(void *handle,
 
     return ret;
 }
+
+/*
+ * CAN接口的ops结构定义（导出供pdl_mcu.c使用）
+ */
+const pdl_mcu_ops_t mcu_can_ops = {
+    .init = mcu_can_init,
+    .deinit = mcu_can_deinit,
+    .send_command = mcu_can_send_command,
+};

@@ -22,6 +22,7 @@ typedef struct
     pconfig_mcu_config_t config;     /* 使用 PCONFIG 配置类型 */
     pconfig_mcu_interface_t interface;
     void *comm_handle;                /* 通信句柄（CAN/串口） */
+    const pdl_mcu_ops_t *ops;         /* 操作函数表（初始化时注册） */
     bool initialized;
     pdl_mcu_state_t state;            /* 设备状态 */
     osal_mutex_t mutex;
@@ -43,38 +44,25 @@ static int32_t mcu_send_command_internal(mcu_context_t *ctx,
                                       uint32_t resp_size,
                                       uint32_t *actual_size)
 {
-    int32_t ret = OSAL_ERR_GENERIC;
-    pconfig_mcu_interface_t interface;
-    void *comm_handle;
+    int32_t ret;
     uint32_t timeout_ms;
+
+    /* 参数检查 */
+    if (!ctx || !ctx->ops || !ctx->ops->send_command) {
+        return OSAL_ERR_INVALID_PARAM;
+    }
 
     /* 缩小锁范围：只在读取上下文时加锁 */
     OSAL_pthread_mutex_lock(&ctx->mutex);
-    interface = ctx->interface;
-    comm_handle = ctx->comm_handle;
     timeout_ms = ctx->config.cmd_timeout_ms;
 
     /* 进入 BUSY 状态 */
     ctx->state = PDL_MCU_STATE_BUSY;
     OSAL_pthread_mutex_unlock(&ctx->mutex);
 
-    /* 发送命令时不持有锁，由 HAL 层提供线程安全保护 */
-    switch (interface)
-    {
-        case PCONFIG_MCU_INTERFACE_CAN:
-            ret = mcu_can_send_command(comm_handle, cmd_code, data, data_len,
-                                      response, resp_size, actual_size,
-                                      timeout_ms);
-            break;
-        case PCONFIG_MCU_INTERFACE_SERIAL:
-            ret = mcu_serial_send_command(comm_handle, cmd_code, data, data_len,
-                                         response, resp_size, actual_size,
-                                         timeout_ms);
-            break;
-        default:
-            ret = OSAL_ERR_GENERIC;
-            break;
-    }
+    /* 直接通过函数指针调用，无需switch判断（由HAL层提供线程安全保护） */
+    ret = ctx->ops->send_command(ctx->comm_handle, cmd_code, data, data_len,
+                                 response, resp_size, actual_size, timeout_ms);
 
     /* 根据结果更新状态 */
     OSAL_pthread_mutex_lock(&ctx->mutex);
@@ -398,15 +386,17 @@ int32_t PDL_MCU_init(uint32_t index, pdl_mcu_handle_t *handle)
         return OSAL_ERR_GENERIC;
     }
 
-    /* 初始化通信接口（转换 PCONFIG 配置到 HAL 配置） */
+    /* 根据接口类型注册ops（switch只执行一次） */
     ret = OSAL_ERR_GENERIC;
     switch (config->interface)
     {
         case PCONFIG_MCU_INTERFACE_CAN:
-            ret = mcu_can_init(&config->hw.can, &ctx->comm_handle);
+            ctx->ops = &mcu_can_ops;
+            ret = ctx->ops->init(&config->hw.can, &ctx->comm_handle);
             break;
         case PCONFIG_MCU_INTERFACE_SERIAL:
-            ret = mcu_serial_init(&config->hw.serial, &ctx->comm_handle);
+            ctx->ops = &mcu_serial_ops;
+            ret = ctx->ops->init(&config->hw.serial, &ctx->comm_handle);
             break;
         case PCONFIG_MCU_INTERFACE_I2C:
         case PCONFIG_MCU_INTERFACE_SPI:
@@ -450,17 +440,9 @@ int32_t PDL_MCU_deinit(pdl_mcu_handle_t handle)
 
     ctx = (mcu_context_t *)handle;
 
-    /* 关闭通信接口 */
-    switch (ctx->interface)
-    {
-        case PCONFIG_MCU_INTERFACE_CAN:
-            mcu_can_deinit(ctx->comm_handle);
-            break;
-        case PCONFIG_MCU_INTERFACE_SERIAL:
-            mcu_serial_deinit(ctx->comm_handle);
-            break;
-        default:
-            break;
+    /* 通过ops调用反初始化（无需switch判断） */
+    if (ctx->ops && ctx->ops->deinit) {
+        ctx->ops->deinit(ctx->comm_handle);
     }
 
     OSAL_pthread_mutex_destroy(&ctx->mutex);

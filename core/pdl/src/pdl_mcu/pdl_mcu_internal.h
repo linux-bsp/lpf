@@ -23,6 +23,52 @@
 #define MCU_CMD_CUSTOM         0xFF   /* 自定义命令 */
 
 /*
+ * MCU通信接口操作函数表（类似Linux驱动的ops结构）
+ *
+ * 设计理念：
+ * - 在初始化时根据接口类型注册ops（只执行一次switch判断）
+ * - 运行时直接通过函数指针调用，无需重复判断接口类型
+ * - 符合Linux内核驱动设计模式（如file_operations、platform_driver）
+ */
+typedef struct pdl_mcu_ops {
+	/**
+	 * @brief 初始化通信接口
+	 * @param[in] config 接口配置（pconfig_can_config_t* 或 pconfig_serial_config_t*）
+	 * @param[out] handle 返回通信句柄
+	 * @return OSAL_SUCCESS 成功
+	 */
+	int32_t (*init)(const void *config, void **handle);
+
+	/**
+	 * @brief 反初始化通信接口
+	 * @param[in] handle 通信句柄
+	 * @return OSAL_SUCCESS 成功
+	 */
+	int32_t (*deinit)(void *handle);
+
+	/**
+	 * @brief 发送命令并接收响应
+	 * @param[in] handle 通信句柄
+	 * @param[in] cmd_code 命令码
+	 * @param[in] data 命令数据
+	 * @param[in] data_len 数据长度
+	 * @param[out] response 响应缓冲区
+	 * @param[in] resp_size 响应缓冲区大小
+	 * @param[out] actual_size 实际响应长度
+	 * @param[in] timeout_ms 超时时间（毫秒）
+	 * @return OSAL_SUCCESS 成功
+	 */
+	int32_t (*send_command)(void *handle,
+	                        uint8_t cmd_code,
+	                        const uint8_t *data,
+	                        uint32_t data_len,
+	                        uint8_t *response,
+	                        uint32_t resp_size,
+	                        uint32_t *actual_size,
+	                        uint32_t timeout_ms);
+} pdl_mcu_ops_t;
+
+/*
  * CAN通信接口（pdl_mcu_can.c实现）
  */
 int32_t mcu_can_init(const void *config, void **handle);
@@ -35,6 +81,9 @@ int32_t mcu_can_send_command(void *handle,
                           uint32_t resp_size,
                           uint32_t *actual_size,
                           uint32_t timeout_ms);
+
+/* CAN接口的ops结构（在pdl_mcu_can.c中定义） */
+extern const pdl_mcu_ops_t mcu_can_ops;
 
 /*
  * 串口通信接口（pdl_mcu_serial.c实现）
@@ -49,6 +98,9 @@ int32_t mcu_serial_send_command(void *handle,
                              uint32_t resp_size,
                              uint32_t *actual_size,
                              uint32_t timeout_ms);
+
+/* Serial接口的ops结构（在pdl_mcu_serial.c中定义） */
+extern const pdl_mcu_ops_t mcu_serial_ops;
 
 /*
  * 协议封装/解析接口（pdl_mcu_protocol.c实现）

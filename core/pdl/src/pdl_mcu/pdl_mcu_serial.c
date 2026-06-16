@@ -327,3 +327,12 @@ int32_t mcu_serial_send_command(void *handle,
 
     return (0 == rx_len) ? OSAL_ERR_TIMEOUT : OSAL_ERR_GENERIC;
 }
+
+/*
+ * Serial接口的ops结构定义（导出供pdl_mcu.c使用）
+ */
+const pdl_mcu_ops_t mcu_serial_ops = {
+    .init = mcu_serial_init,
+    .deinit = mcu_serial_deinit,
+    .send_command = mcu_serial_send_command,
+};
