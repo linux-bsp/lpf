@@ -260,6 +260,28 @@ config ARCH
 	default "arm64" if ARCH_ARM64
 	default "riscv64" if ARCH_RISCV64
 
+config TOOLCHAIN_PREFIX
+	string "Toolchain prefix"
+	default "aarch64-linux-gnu-" if ARCH_ARM64
+	default "arm-linux-gnueabihf-" if ARCH_ARM32
+	default ""
+	help
+	  Toolchain prefix for cross-compilation.
+
+	  Examples:
+	    ARM64: aarch64-linux-gnu- or aarch64-none-linux-gnu-
+	    ARM32: arm-linux-gnueabihf-
+	    x86_64: Leave empty for native compilation
+
+config TOOLCHAIN_PATH
+	string "Toolchain path"
+	default ""
+	help
+	  Absolute path to the cross-compilation toolchain.
+	  Leave empty to use system default compiler.
+
+	  Example: /opt/toolchains/gcc-arm-11.2/bin
+
 # ============================================================================
 # Build Type and Optimization (Top Level)
 # ============================================================================
@@ -515,36 +537,6 @@ config COMPILER_PEDANTIC
 	default n
 	help
 	  Enable -Wpedantic flag for strict ISO C compliance warnings.
-
-# ============================================================================
-# Toolchain Configuration (Top Level)
-# ============================================================================
-
-# ============================================================================
-# Toolchain Configuration (Top Level)
-# ============================================================================
-
-config TOOLCHAIN_PATH
-	string "Toolchain path"
-	default ""
-	help
-	  Absolute path to the cross-compilation toolchain.
-	  Leave empty to use system default compiler.
-
-	  Example: /opt/toolchains/gcc-arm-11.2/bin
-
-config TOOLCHAIN_PREFIX
-	string "Toolchain prefix"
-	default "aarch64-linux-gnu-" if ARCH_ARM64
-	default "arm-linux-gnueabihf-" if ARCH_ARM32
-	default ""
-	help
-	  Toolchain prefix for cross-compilation.
-
-	  Examples:
-	    ARM64: aarch64-linux-gnu- or aarch64-none-linux-gnu-
-	    ARM32: arm-linux-gnueabihf-
-	    x86_64: Leave empty for native compilation
 
 # ============================================================================
 # Advanced Options (Collapsed by default)
