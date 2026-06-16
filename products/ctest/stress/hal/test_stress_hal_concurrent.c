@@ -55,7 +55,7 @@ static void* can_worker_thread(void *arg)
 			frame.data[i] = (uint8_t)(iteration + i);
 		}
 
-		ret = HAL_CAN_Send(ctx->can_handle, &frame);
+		ret = HAL_CAN_send(ctx->can_handle, &frame);
 		if (ret == OSAL_SUCCESS) {
 			OSAL_atomic_inc(&ctx->can_counter);
 		}
@@ -238,7 +238,7 @@ static void test_stress_hal_all_drivers_concurrent(void)
 		.rx_timeout = 1000,
 		.tx_timeout = 1000
 	};
-	ret = HAL_CAN_Init(&can_config, &ctx.can_handle);
+	ret = HAL_CAN_init(&can_config, &ctx.can_handle);
 	if (ret == OSAL_SUCCESS) {
 		active_drivers++;
 		OSAL_printf("[ INFO ] CAN driver initialized\n");
@@ -420,7 +420,7 @@ cleanup:
 		HAL_Serial_Close(ctx.serial_handle);
 	}
 	if (ctx.can_handle) {
-		HAL_CAN_Deinit(ctx.can_handle);
+		HAL_CAN_deinit(ctx.can_handle);
 	}
 
 	OSAL_printf("[ PASS ] Concurrent multi-driver stress test completed\n");

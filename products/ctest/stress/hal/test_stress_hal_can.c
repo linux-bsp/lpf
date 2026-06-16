@@ -58,7 +58,7 @@ static int32_t can_concurrent_send_worker(void *user_data, uint32_t iteration)
 	frame.data[7] = 0xCC;
 
 	/* Send frame */
-	ret = HAL_CAN_Send(ctx->handle, &frame);
+	ret = HAL_CAN_send(ctx->handle, &frame);
 	if (ret == OSAL_SUCCESS) {
 		OSAL_atomic_inc(ctx->shared_counter);
 	}
@@ -91,7 +91,7 @@ static void test_stress_can_concurrent_send(void)
 	           CAN_STRESS_THREAD_COUNT, CAN_STRESS_DURATION_SEC);
 
 	/* Initialize CAN */
-	ret = HAL_CAN_Init(&config, &handle);
+	ret = HAL_CAN_init(&config, &handle);
 	if (ret != OSAL_SUCCESS) {
 		OSAL_printf("[ SKIP ] CAN interface not available\n");
 		TEST_SKIP("CAN interface not available");
@@ -138,7 +138,7 @@ static void test_stress_can_concurrent_send(void)
 	/* Cleanup */
 	stress_context_destroy(stress_ctx);
 	OSAL_free(worker_contexts);
-	HAL_CAN_Deinit(handle);
+	HAL_CAN_deinit(handle);
 
 	OSAL_printf("[ PASS ] CAN concurrent send stress test completed\n");
 }
@@ -169,7 +169,7 @@ static int32_t can_flood_tx_worker(void *user_data, uint32_t iteration)
 		frame.data[6] = 0xEE;
 		frame.data[7] = 0xFF;
 
-		ret = HAL_CAN_Send(ctx->tx_handle, &frame);
+		ret = HAL_CAN_send(ctx->tx_handle, &frame);
 		if (ret != OSAL_SUCCESS) {
 			return ret;
 		}
@@ -188,7 +188,7 @@ static int32_t can_flood_rx_worker(void *user_data, uint32_t iteration)
 	int32_t ret;
 
 	/* Try to receive frame */
-	ret = HAL_CAN_Recv(ctx->rx_handle, &frame, 100);
+	ret = HAL_CAN_recv(ctx->rx_handle, &frame, 100);
 	if (ret == OSAL_SUCCESS) {
 		OSAL_atomic_inc(ctx->rx_count);
 	} else if (ret == OSAL_ERR_TIMEOUT) {
@@ -224,16 +224,16 @@ static void test_stress_can_rx_flooding(void)
 	OSAL_printf("[ INFO ] Starting CAN RX flooding stress test\n");
 
 	/* Initialize CAN interfaces */
-	ret = HAL_CAN_Init(&config, &tx_handle);
+	ret = HAL_CAN_init(&config, &tx_handle);
 	if (ret != OSAL_SUCCESS) {
 		OSAL_printf("[ SKIP ] CAN TX interface not available\n");
 		TEST_SKIP("CAN interface not available");
 		return;
 	}
 
-	ret = HAL_CAN_Init(&config, &rx_handle);
+	ret = HAL_CAN_init(&config, &rx_handle);
 	if (ret != OSAL_SUCCESS) {
-		HAL_CAN_Deinit(tx_handle);
+		HAL_CAN_deinit(tx_handle);
 		OSAL_printf("[ SKIP ] CAN RX interface not available\n");
 		TEST_SKIP("CAN interface not available");
 		return;
@@ -276,8 +276,8 @@ static void test_stress_can_rx_flooding(void)
 	/* Cleanup */
 	stress_context_destroy(tx_stress_ctx);
 	stress_context_destroy(rx_stress_ctx);
-	HAL_CAN_Deinit(rx_handle);
-	HAL_CAN_Deinit(tx_handle);
+	HAL_CAN_deinit(rx_handle);
+	HAL_CAN_deinit(tx_handle);
 
 	OSAL_printf("[ PASS ] CAN RX flooding stress test completed\n");
 }
@@ -307,7 +307,7 @@ static void test_stress_can_resource_exhaustion(void)
 
 	/* Try to open maximum handles */
 	for (uint32_t i = 0; i < CAN_STRESS_MAX_HANDLES; i++) {
-		ret = HAL_CAN_Init(&config, &handles[i]);
+		ret = HAL_CAN_init(&config, &handles[i]);
 		if (ret == OSAL_SUCCESS) {
 			opened_count++;
 		} else {
@@ -328,21 +328,21 @@ static void test_stress_can_resource_exhaustion(void)
 	};
 
 	for (uint32_t i = 0; i < opened_count; i++) {
-		ret = HAL_CAN_Send(handles[i], &test_frame);
+		ret = HAL_CAN_send(handles[i], &test_frame);
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	}
 
 	/* Cleanup all handles */
 	for (uint32_t i = 0; i < opened_count; i++) {
-		ret = HAL_CAN_Deinit(handles[i]);
+		ret = HAL_CAN_deinit(handles[i]);
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	}
 
 	/* Verify we can open again after cleanup */
 	hal_can_handle_t new_handle = NULL;
-	ret = HAL_CAN_Init(&config, &new_handle);
+	ret = HAL_CAN_init(&config, &new_handle);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
-	HAL_CAN_Deinit(new_handle);
+	HAL_CAN_deinit(new_handle);
 
 	OSAL_printf("[ PASS ] CAN resource exhaustion test completed\n");
 }
@@ -372,7 +372,7 @@ static void test_stress_can_filter_reconfiguration(void)
 	OSAL_printf("         Iterations: %u\n", iterations);
 
 	/* Initialize CAN */
-	ret = HAL_CAN_Init(&config, &handle);
+	ret = HAL_CAN_init(&config, &handle);
 	if (ret != OSAL_SUCCESS) {
 		OSAL_printf("[ SKIP ] CAN interface not available\n");
 		TEST_SKIP("CAN interface not available");
@@ -384,7 +384,7 @@ static void test_stress_can_filter_reconfiguration(void)
 		filter_id = 0x100 + (i % 256);
 		filter_mask = 0x7FF;
 
-		ret = HAL_CAN_SetFilter(handle, filter_id, filter_mask);
+		ret = HAL_CAN_set_filter(handle, filter_id, filter_mask);
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 		/* Send test frame */
@@ -394,7 +394,7 @@ static void test_stress_can_filter_reconfiguration(void)
 			.data = {(i >> 8) & 0xFF, i & 0xFF}
 		};
 
-		ret = HAL_CAN_Send(handle, &frame);
+		ret = HAL_CAN_send(handle, &frame);
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 		/* Brief sleep to allow filter to take effect */
@@ -404,7 +404,7 @@ static void test_stress_can_filter_reconfiguration(void)
 	}
 
 	/* Cleanup */
-	HAL_CAN_Deinit(handle);
+	HAL_CAN_deinit(handle);
 
 	OSAL_printf("[ PASS ] CAN filter reconfiguration stress test completed\n");
 }

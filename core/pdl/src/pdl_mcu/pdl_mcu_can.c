@@ -55,7 +55,7 @@ int32_t mcu_can_init(const void *config, void **handle)
     can_config.rx_timeout = 1000;
     can_config.tx_timeout = 1000;
 
-    if (OSAL_SUCCESS != HAL_CAN_Init(&can_config, &ctx->can_handle))
+    if (OSAL_SUCCESS != HAL_CAN_init(&can_config, &ctx->can_handle))
     {
         OSAL_free(ctx);
         return OSAL_ERR_GENERIC;
@@ -64,7 +64,7 @@ int32_t mcu_can_init(const void *config, void **handle)
     /* 创建接收互斥锁 */
     if (OSAL_SUCCESS != OSAL_pthread_mutex_init(&ctx->rx_mutex, NULL))
     {
-        HAL_CAN_Deinit(ctx->can_handle);
+        HAL_CAN_deinit(ctx->can_handle);
         OSAL_free(ctx);
         return OSAL_ERR_GENERIC;
     }
@@ -87,7 +87,7 @@ int32_t mcu_can_deinit(void *handle)
 
     ctx = (mcu_can_context_t *)handle;
 
-    HAL_CAN_Deinit(ctx->can_handle);
+    HAL_CAN_deinit(ctx->can_handle);
     OSAL_pthread_mutex_destroy(&ctx->rx_mutex);
     OSAL_free(ctx);
 
@@ -147,7 +147,7 @@ int32_t mcu_can_send_command(void *handle,
     can_frame.dlc = tx_len;
     OSAL_memcpy(can_frame.data, tx_frame, tx_len);
 
-    if (OSAL_SUCCESS != HAL_CAN_Send(ctx->can_handle, &can_frame))
+    if (OSAL_SUCCESS != HAL_CAN_send(ctx->can_handle, &can_frame))
     {
         return OSAL_ERR_GENERIC;
     }
@@ -163,7 +163,7 @@ int32_t mcu_can_send_command(void *handle,
     /* 接收响应，使用剩余超时时间 */
     OSAL_pthread_mutex_lock(&ctx->rx_mutex);
 
-    ret = HAL_CAN_Recv(ctx->can_handle, &rx_frame, remaining_timeout_ms);
+    ret = HAL_CAN_recv(ctx->can_handle, &rx_frame, remaining_timeout_ms);
 
     if (OSAL_SUCCESS == ret)
     {

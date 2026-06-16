@@ -553,10 +553,10 @@ int32_t PDL_MCU_TestCall(uint32_t index)
 	/* 根据接口类型调用 HAL 层测试 */
 	switch (config->interface) {
 	case PCONFIG_MCU_INTERFACE_CAN:
-		LOG_INFO("PDL_MCU", "Calling HAL_CAN_TestCall...");
+		LOG_INFO("PDL_MCU", "Calling HAL_CAN_test_call...");
 		LOG_INFO("PDL_MCU", "CAN Device: %s", config->hw.can.device);
 		LOG_INFO("PDL_MCU", "CAN Bitrate: %u", config->hw.can.bitrate);
-		ret = HAL_CAN_TestCall(NULL);
+		ret = HAL_CAN_test_call(NULL);
 		break;
 
 	case PCONFIG_MCU_INTERFACE_SERIAL:

@@ -18,7 +18,7 @@
 #define IFNAMSIZ IF_NAMESIZE
 #endif
 
-int32_t HAL_CAN_Init(const hal_can_config_t *config, hal_can_handle_t *handle)
+int32_t HAL_CAN_init(const hal_can_config_t *config, hal_can_handle_t *handle)
 {
     hal_can_context_t *impl;
     struct sockaddr_can addr;
@@ -136,7 +136,7 @@ int32_t HAL_CAN_Init(const hal_can_config_t *config, hal_can_handle_t *handle)
     return OSAL_SUCCESS;
 }
 
-int32_t HAL_CAN_Deinit(hal_can_handle_t handle)
+int32_t HAL_CAN_deinit(hal_can_handle_t handle)
 {
     hal_can_context_t *impl = (hal_can_context_t *)handle;
 
@@ -164,7 +164,7 @@ int32_t HAL_CAN_Deinit(hal_can_handle_t handle)
     return OSAL_SUCCESS;
 }
 
-int32_t HAL_CAN_Send(hal_can_handle_t handle, const hal_can_frame_t *frame)
+int32_t HAL_CAN_send(hal_can_handle_t handle, const hal_can_frame_t *frame)
 {
     hal_can_context_t *impl = (hal_can_context_t *)handle;
     struct can_frame can_frame;
@@ -222,7 +222,7 @@ int32_t HAL_CAN_Send(hal_can_handle_t handle, const hal_can_frame_t *frame)
     return result;
 }
 
-int32_t HAL_CAN_Recv(hal_can_handle_t handle, hal_can_frame_t *frame, int32_t timeout)
+int32_t HAL_CAN_recv(hal_can_handle_t handle, hal_can_frame_t *frame, int32_t timeout)
 {
     hal_can_context_t *impl = (hal_can_context_t *)handle;
     struct can_frame can_frame;
@@ -313,7 +313,7 @@ int32_t HAL_CAN_Recv(hal_can_handle_t handle, hal_can_frame_t *frame, int32_t ti
     return result;
 }
 
-int32_t HAL_CAN_SetFilter(hal_can_handle_t handle, uint32_t filter_id, uint32_t filter_mask)
+int32_t HAL_CAN_set_filter(hal_can_handle_t handle, uint32_t filter_id, uint32_t filter_mask)
 {
     hal_can_context_t *impl = (hal_can_context_t *)handle;
     struct can_filter rfilter;
@@ -369,12 +369,12 @@ int32_t HAL_CAN_SetFilter(hal_can_handle_t handle, uint32_t filter_id, uint32_t 
 /**
  * @brief CAN 测试调用实现（调试接口）
  */
-int32_t HAL_CAN_TestCall(hal_can_handle_t handle)
+int32_t HAL_CAN_test_call(hal_can_handle_t handle)
 {
 	LOG_INFO("HAL_CAN", "========================================");
 	LOG_INFO("HAL_CAN", "HAL Layer: CAN TestCall");
 	LOG_INFO("HAL_CAN", "Handle: %p", handle);
-	LOG_INFO("HAL_CAN", "HAL_CAN_TestCall() executed successfully");
+	LOG_INFO("HAL_CAN", "HAL_CAN_test_call() executed successfully");
 	LOG_INFO("HAL_CAN", "========================================");
 
 	return OSAL_SUCCESS;

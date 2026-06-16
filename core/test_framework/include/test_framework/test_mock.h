@@ -18,7 +18,7 @@
  * 使用示例：
  * @code
  * // 1. 定义 mock 函数
- * int32_t mock_HAL_CAN_Init(const hal_can_config_t *cfg, hal_can_handle_t *hdl) {
+ * int32_t mock_HAL_CAN_init(const hal_can_config_t *cfg, hal_can_handle_t *hdl) {
  *     TEST_MOCK_CALLED();  // 记录被调用
  *     *hdl = (hal_can_handle_t)0x12345678;  // 返回假句柄
  *     return TEST_MOCK_RETURN_INT();  // 返回预设值
@@ -255,7 +255,7 @@ test_mock_state_t* test_mock_get(const char *func_name);
  * @code
  * // 在 HAL 实现文件中
  * TEST_MOCKABLE
- * int32_t HAL_CAN_Init(const hal_can_config_t *cfg, hal_can_handle_t *hdl) {
+ * int32_t HAL_CAN_init(const hal_can_config_t *cfg, hal_can_handle_t *hdl) {
  *     // 真实实现...
  * }
  * @endcode

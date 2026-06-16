@@ -10,27 +10,27 @@
 #include "hal.h"
 #include "osal.h"
 
-int32_t HAL_CAN_Init(const hal_can_config_t *config, hal_can_handle_t *handle)
+int32_t HAL_CAN_init(const hal_can_config_t *config, hal_can_handle_t *handle)
 {
     (void)config;
     (void)handle;
     return OSAL_ERR_NOT_IMPLEMENTED;
 }
 
-int32_t HAL_CAN_Deinit(hal_can_handle_t handle)
+int32_t HAL_CAN_deinit(hal_can_handle_t handle)
 {
     (void)handle;
     return OSAL_ERR_NOT_IMPLEMENTED;
 }
 
-int32_t HAL_CAN_Send(hal_can_handle_t handle, const can_frame_t *frame)
+int32_t HAL_CAN_send(hal_can_handle_t handle, const can_frame_t *frame)
 {
     (void)handle;
     (void)frame;
     return OSAL_ERR_NOT_IMPLEMENTED;
 }
 
-int32_t HAL_CAN_Recv(hal_can_handle_t handle, can_frame_t *frame, int32_t timeout)
+int32_t HAL_CAN_recv(hal_can_handle_t handle, can_frame_t *frame, int32_t timeout)
 {
     (void)handle;
     (void)frame;
@@ -38,7 +38,7 @@ int32_t HAL_CAN_Recv(hal_can_handle_t handle, can_frame_t *frame, int32_t timeou
     return OSAL_ERR_NOT_IMPLEMENTED;
 }
 
-int32_t HAL_CAN_SetFilter(hal_can_handle_t handle, uint32_t filter_id, uint32_t filter_mask)
+int32_t HAL_CAN_set_filter(hal_can_handle_t handle, uint32_t filter_id, uint32_t filter_mask)
 {
     (void)handle;
     (void)filter_id;
@@ -46,7 +46,7 @@ int32_t HAL_CAN_SetFilter(hal_can_handle_t handle, uint32_t filter_id, uint32_t 
     return OSAL_ERR_NOT_IMPLEMENTED;
 }
 
-int32_t HAL_CAN_GetStats(hal_can_handle_t handle,
+int32_t HAL_CAN_get_stats(hal_can_handle_t handle,
                        uint32_t *tx_count,
                        uint32_t *rx_count,
                        uint32_t *err_count)
@@ -58,7 +58,7 @@ int32_t HAL_CAN_GetStats(hal_can_handle_t handle,
     return OSAL_ERR_NOT_IMPLEMENTED;
 }
 
-int32_t HAL_CAN_SetErrorCallback(hal_can_handle_t handle,
+int32_t HAL_CAN_set_error_callback(hal_can_handle_t handle,
                                   void (*callback)(hal_can_handle_t handle, int32_t error_code))
 {
     (void)handle;
@@ -66,14 +66,14 @@ int32_t HAL_CAN_SetErrorCallback(hal_can_handle_t handle,
     return OSAL_ERR_NOT_IMPLEMENTED;
 }
 
-int32_t HAL_CAN_SetErrorThreshold(hal_can_handle_t handle, uint32_t threshold)
+int32_t HAL_CAN_set_error_threshold(hal_can_handle_t handle, uint32_t threshold)
 {
     (void)handle;
     (void)threshold;
     return OSAL_ERR_NOT_IMPLEMENTED;
 }
 
-int32_t HAL_CAN_GetErrorInfo(hal_can_handle_t handle, hal_can_error_info_t *info)
+int32_t HAL_CAN_get_error_info(hal_can_handle_t handle, hal_can_error_info_t *info)
 {
     (void)handle;
     (void)info;

@@ -56,7 +56,7 @@ static void test_system_can_lifecycle(void)
 	};
 
 	/* 阶段1: 初始化 */
-	int32_t ret = HAL_CAN_Init(&config, &handle);
+	int32_t ret = HAL_CAN_init(&config, &handle);
 	if (ret != OSAL_SUCCESS) {
 		OSAL_printf("[ SKIP ] CAN interface not available\n");
 		TEST_ASSERT_FALSE(ret != OSAL_SUCCESS);
@@ -65,7 +65,7 @@ static void test_system_can_lifecycle(void)
 	TEST_ASSERT_NOT_NULL(handle);
 
 	/* 阶段2: 配置过滤器 */
-	ret = HAL_CAN_SetFilter(handle, 0x100, 0x700);
+	ret = HAL_CAN_set_filter(handle, 0x100, 0x700);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* 阶段3: 发送测试帧 */
@@ -74,21 +74,21 @@ static void test_system_can_lifecycle(void)
 		.dlc = 8,
 		.data = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08}
 	};
-	ret = HAL_CAN_Send(handle, &tx_frame);
+	ret = HAL_CAN_send(handle, &tx_frame);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* 阶段4: 尝试接收（可能超时，这是正常的） */
 	hal_can_frame_t rx_frame;
 	OSAL_memset(&rx_frame, 0, sizeof(rx_frame));
-	ret = HAL_CAN_Recv(handle, &rx_frame, 500);
+	ret = HAL_CAN_recv(handle, &rx_frame, 500);
 	/* 接收可能超时，不强制要求成功 */
 
 	/* 阶段5: 再次发送验证稳定性 */
-	ret = HAL_CAN_Send(handle, &tx_frame);
+	ret = HAL_CAN_send(handle, &tx_frame);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* 阶段6: 清理 */
-	ret = HAL_CAN_Deinit(handle);
+	ret = HAL_CAN_deinit(handle);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	OSAL_printf("[ PASS ] CAN lifecycle test completed\n");
@@ -109,7 +109,7 @@ static void test_system_can_loopback(void)
 	};
 
 	/* 初始化CAN */
-	int32_t ret = HAL_CAN_Init(&config, &handle);
+	int32_t ret = HAL_CAN_init(&config, &handle);
 	if (ret != OSAL_SUCCESS) {
 		OSAL_printf("[ SKIP ] CAN interface not available\n");
 		TEST_ASSERT_FALSE(ret != OSAL_SUCCESS);
@@ -124,14 +124,14 @@ static void test_system_can_loopback(void)
 			.data = {i, i+1, i+2, i+3}
 		};
 
-		ret = HAL_CAN_Send(handle, &tx_frame);
+		ret = HAL_CAN_send(handle, &tx_frame);
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 		OSAL_msleep(10); /* 10ms */
 	}
 
 	/* 清理 */
-	HAL_CAN_Deinit(handle);
+	HAL_CAN_deinit(handle);
 
 	OSAL_printf("[ PASS ] CAN loopback test completed\n");
 }
@@ -358,7 +358,7 @@ static void test_system_multi_peripheral_coordination(void)
 		.rx_timeout = 500,
 		.tx_timeout = 500
 	};
-	ret = HAL_CAN_Init(&can_config, &can_handle);
+	ret = HAL_CAN_init(&can_config, &can_handle);
 	if (ret != OSAL_SUCCESS) {
 		OSAL_printf("[ WARN ] CAN init failed, continuing without CAN\n");
 		can_handle = NULL;
@@ -398,7 +398,7 @@ static void test_system_multi_peripheral_coordination(void)
 				.dlc = 2,
 				.data = {i, i+1}
 			};
-			ret = HAL_CAN_Send(can_handle, &frame);
+			ret = HAL_CAN_send(can_handle, &frame);
 			if (ret != OSAL_SUCCESS) {
 				OSAL_printf("[ WARN ] CAN send failed at iteration %d\n", i);
 			}
@@ -425,7 +425,7 @@ static void test_system_multi_peripheral_coordination(void)
 
 	/* 清理所有资源 */
 	if (can_handle) {
-		HAL_CAN_Deinit(can_handle);
+		HAL_CAN_deinit(can_handle);
 	}
 	HAL_GPIO_Deinit(TEST_GPIO_PIN);
 	if (wdt_handle) {
@@ -462,16 +462,16 @@ static void test_system_hardware_fault_recovery(void)
 		};
 
 		/* 第一次尝试（应该失败） */
-		ret = HAL_CAN_Init(&config, &handle);
+		ret = HAL_CAN_init(&config, &handle);
 		TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 		TEST_ASSERT_NULL(handle);
 
 		/* 使用正确配置重试 */
 		config.interface = TEST_CAN_INTERFACE;
-		ret = HAL_CAN_Init(&config, &handle);
+		ret = HAL_CAN_init(&config, &handle);
 		if (ret == OSAL_SUCCESS) {
 			recovery_count++;
-			HAL_CAN_Deinit(handle);
+			HAL_CAN_deinit(handle);
 			OSAL_printf("[ PASS ] CAN recovery successful\n");
 		} else {
 			OSAL_printf("[ SKIP ] CAN device not available for recovery test\n");
