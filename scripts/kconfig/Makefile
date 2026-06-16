@@ -100,16 +100,14 @@ endif
 
 %_defconfig: $(obj)/conf
 	@defconfig_file=""; \
-	if [ -f "$(srctree)/configs/ctest/$@" ]; then \
-		defconfig_file="$(srctree)/configs/ctest/$@"; \
-	elif [ -f "$(srctree)/configs/ccm/$@" ]; then \
-		defconfig_file="$(srctree)/configs/ccm/$@"; \
-	elif [ -f "$(srctree)/configs/products/$@" ]; then \
-		defconfig_file="$(srctree)/configs/products/$@"; \
+	product_name=$$(echo "$@" | cut -d'_' -f1); \
+	if [ -f "$(srctree)/configs/$$product_name/$@" ]; then \
+		defconfig_file="$(srctree)/configs/$$product_name/$@"; \
 	elif [ -f "$(srctree)/arch/$(SRCARCH)/configs/$@" ]; then \
 		defconfig_file="arch/$(SRCARCH)/configs/$@"; \
 	else \
 		echo "Error: defconfig file '$@' not found"; \
+		echo "  Expected: $(srctree)/configs/$$product_name/$@"; \
 		exit 1; \
 	fi; \
 	$< $(silent) --defconfig=$$defconfig_file $(Kconfig)
