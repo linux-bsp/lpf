@@ -406,8 +406,8 @@ if(CONFIG_TEST_SYSTEM)
     if(CONFIG_TEST_SYSTEM_PCONFIG)
         test_discover_and_add(
             TARGET es-middleware-test
-            DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/system/pcl
-            MODULE system_pcl
+            DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/system/pconfig
+            MODULE system_pconfig
             LIBRARY pconfig
         )
     endif()
