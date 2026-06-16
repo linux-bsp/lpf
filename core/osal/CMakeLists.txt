@@ -16,7 +16,7 @@ list(APPEND ADD_SRCS "src/posix/util/osal_version.c")
 # ============================================================================
 
 if(CONFIG_OSAL_OS_POSIX)
-    # POSIX platform (Linux/macOS)
+    # POSIX platform (Linux)
 
     # IPC module
     # CONFIG_OSAL_IPC_ATOMIC: static inline implementation in header

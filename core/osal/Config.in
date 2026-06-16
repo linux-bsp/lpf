@@ -110,7 +110,7 @@ endmenu
 # Auto-detect OS implementation based on platform choice
 config OSAL_OS_POSIX
 	bool
-	default y if OS_LINUX || OS_MACOS
+	default y if OS_LINUX
 
 config OSAL_OS_WIN32
 	bool

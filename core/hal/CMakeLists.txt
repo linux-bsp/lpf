@@ -38,33 +38,6 @@ if(CONFIG_PLATFORM_LINUX)
         list(APPEND ADD_SRCS "src/linux/watchdog/hal_watchdog_linux.c")
     endif()
 
-elseif(CONFIG_OS_MACOS)
-    # macOS platform drivers
-
-    if(CONFIG_HAL_CAN_MACOS)
-        list(APPEND ADD_SRCS "src/macos/can/hal_can_macos.c")
-    endif()
-
-    if(CONFIG_HAL_GPIO_MACOS)
-        list(APPEND ADD_SRCS "src/macos/gpio/hal_gpio_macos.c")
-    endif()
-
-    if(CONFIG_HAL_I2C_MACOS)
-        list(APPEND ADD_SRCS "src/macos/i2c/hal_i2c_macos.c")
-    endif()
-
-    if(CONFIG_HAL_SPI_MACOS)
-        list(APPEND ADD_SRCS "src/macos/spi/hal_spi_macos.c")
-    endif()
-
-    if(CONFIG_HAL_UART_MACOS)
-        list(APPEND ADD_SRCS "src/macos/serial/hal_serial_macos.c")
-    endif()
-
-    if(CONFIG_HAL_WATCHDOG_MACOS)
-        list(APPEND ADD_SRCS "src/macos/watchdog/hal_watchdog_macos.c")
-    endif()
-
 else()
     message(WARNING "No HAL platform selected or platform not supported")
 endif()

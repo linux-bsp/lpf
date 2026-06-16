@@ -18,9 +18,6 @@ ES-Middleware (Embedded Software - Middleware) 是一个采用 Kconfig + CMake �
 ```bash
 # Ubuntu/Debian
 sudo apt-get install build-essential cmake libncurses-dev
-
-# macOS
-brew install cmake ncurses
 ```
 
 ### 编译示例

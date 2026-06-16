@@ -151,19 +151,6 @@ config OS_RTOS
 	  Note: Feature availability depends on RTOS capabilities.
 	  Some OSAL features may be unavailable or limited.
 
-config OS_MACOS
-	bool "macOS"
-	help
-	  Target macOS operating system (POSIX-compliant).
-
-	  Provides:
-	  - Full POSIX API support
-	  - BSD-style networking
-	  - Mach kernel primitives
-
-	  Suitable for: macOS desktop, development/testing
-	  Memory: Requires 128MB+ RAM
-
 config OS_BARE
 	bool "Bare Metal"
 	help
@@ -187,7 +174,6 @@ config OS
 	default "linux" if OS_LINUX
 	default "windows" if OS_WINDOWS
 	default "rtos" if OS_RTOS
-	default "macos" if OS_MACOS
 	default "bare" if OS_BARE
 
 choice
