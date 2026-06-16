@@ -38,7 +38,7 @@ int32_t PCONFIG_Init(void)
     OSAL_memset(&g_registry, 0, OSAL_sizeof(g_registry));
     g_initialized = true;
 
-    LOG_INFO("PCL", "Platform configuration library initialized");
+    LOG_INFO("PCONFIG", "Platform configuration library initialized");
     return OSAL_SUCCESS;
 }
 
@@ -54,7 +54,7 @@ void PCONFIG_Cleanup(void)
     /* 销毁互斥锁 */
     OSAL_pthread_mutex_destroy(&g_registry_mutex);
 
-    LOG_INFO("PCL", "Platform configuration library cleaned up");
+    LOG_INFO("PCONFIG", "Platform configuration library cleaned up");
 }
 
 /*===========================================================================
@@ -68,18 +68,18 @@ int32_t PCONFIG_Register(const pconfig_platform_config_t *config)
     int32_t ret;
 
     if (!g_initialized) {
-        LOG_ERROR("PCL", "Library not initialized");
+        LOG_ERROR("PCONFIG", "Library not initialized");
         return OSAL_ERR_GENERIC;
     }
 
     if (NULL == config) {
-        LOG_ERROR("PCL", "Invalid config pointer");
+        LOG_ERROR("PCONFIG", "Invalid config pointer");
         return OSAL_ERR_GENERIC;
     }
 
     /* 验证配置（在加锁前进行，减少临界区时间） */
     if (OSAL_SUCCESS != PCONFIG_Validate(config)) {
-        LOG_ERROR("PCL", "Config validation failed: %s/%s",
+        LOG_ERROR("PCONFIG", "Config validation failed: %s/%s",
                   config->platform_name, config->product_name);
         return OSAL_ERR_GENERIC;
     }
@@ -87,14 +87,14 @@ int32_t PCONFIG_Register(const pconfig_platform_config_t *config)
     /* 加锁保护全局注册表 */
     ret = OSAL_pthread_mutex_lock(&g_registry_mutex);
     if (OSAL_SUCCESS != ret) {
-        LOG_ERROR("PCL", "Failed to lock registry mutex");
+        LOG_ERROR("PCONFIG", "Failed to lock registry mutex");
         return ret;
     }
 
     /* 检查注册表是否已满 */
     if (g_registry.count >= MAX_PLATFORM_CONFIGS) {
         OSAL_pthread_mutex_unlock(&g_registry_mutex);
-        LOG_ERROR("PCL", "Registry full");
+        LOG_ERROR("PCONFIG", "Registry full");
         return OSAL_ERR_GENERIC;
     }
 
@@ -104,7 +104,7 @@ int32_t PCONFIG_Register(const pconfig_platform_config_t *config)
         if (0 == OSAL_strcmp(existing->platform_name, config->platform_name) &&
             0 == OSAL_strcmp(existing->product_name, config->product_name)) {
             OSAL_pthread_mutex_unlock(&g_registry_mutex);
-            LOG_WARN("PCL", "Config already registered: %s/%s",
+            LOG_WARN("PCONFIG", "Config already registered: %s/%s",
                      config->platform_name, config->product_name);
             return OSAL_ERR_GENERIC;
         }
@@ -116,7 +116,7 @@ int32_t PCONFIG_Register(const pconfig_platform_config_t *config)
     /* 解锁 */
     OSAL_pthread_mutex_unlock(&g_registry_mutex);
 
-    LOG_INFO("PCL", "Registered config: %s/%s",
+    LOG_INFO("PCONFIG", "Registered config: %s/%s",
              config->platform_name, config->product_name);
 
     return OSAL_SUCCESS;
@@ -230,7 +230,7 @@ int32_t PCONFIG_Validate(const pconfig_platform_config_t *config)
     }
 
     if (NULL == config->platform_name || NULL == config->product_name) {
-        LOG_ERROR("PCL", "Missing platform or product name");
+        LOG_ERROR("PCONFIG", "Missing platform or product name");
         return OSAL_ERR_GENERIC;
     }
 
@@ -245,13 +245,13 @@ void PCONFIG_Print(const pconfig_platform_config_t *config)
         return;
     }
 
-    LOG_INFO("PCL", "Platform: %s", config->platform_name);
-    LOG_INFO("PCL", "Product: %s", config->product_name);
+    LOG_INFO("PCONFIG", "Platform: %s", config->platform_name);
+    LOG_INFO("PCONFIG", "Product: %s", config->product_name);
 
     /* 打印MCU配置 */
     if (config->mcu_array) {
         for (i = 0; i < config->mcu_count; i++) {
-            LOG_INFO("PCL", "  MCU[%u]: %s", i,
+            LOG_INFO("PCONFIG", "  MCU[%u]: %s", i,
                      config->mcu_array[i].description ? config->mcu_array[i].description : "N/A");
         }
     }
@@ -259,7 +259,7 @@ void PCONFIG_Print(const pconfig_platform_config_t *config)
     /* 打印BMC配置 */
     if (config->bmc_array) {
         for (i = 0; i < config->bmc_count; i++) {
-            LOG_INFO("PCL", "  BMC[%u]: %s", i,
+            LOG_INFO("PCONFIG", "  BMC[%u]: %s", i,
                      config->bmc_array[i].description ? config->bmc_array[i].description : "N/A");
         }
     }
@@ -267,7 +267,7 @@ void PCONFIG_Print(const pconfig_platform_config_t *config)
     /* 打印FPGA配置 */
     if (config->fpga_array) {
         for (i = 0; i < config->fpga_count; i++) {
-            LOG_INFO("PCL", "  FPGA[%u]: %s", i,
+            LOG_INFO("PCONFIG", "  FPGA[%u]: %s", i,
                      config->fpga_array[i].description ? config->fpga_array[i].description : "N/A");
         }
     }
@@ -275,7 +275,7 @@ void PCONFIG_Print(const pconfig_platform_config_t *config)
     /* 打印Switch配置 */
     if (config->switch_array) {
         for (i = 0; i < config->switch_count; i++) {
-            LOG_INFO("PCL", "  Switch[%u]: %s", i,
+            LOG_INFO("PCONFIG", "  Switch[%u]: %s", i,
                      config->switch_array[i].description ? config->switch_array[i].description : "N/A");
         }
     }

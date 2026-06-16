@@ -105,7 +105,7 @@ const pconfig_platform_config_t* PCONFIG_SelectDefault(void)
     /* 3. 使用第一个配置作为默认 */
     if (CONFIG_COUNT > 0) {
         config = g_all_configs[0];
-        LOG_INFO("PCL", "Using first config as default: %s/%s",
+        LOG_INFO("PCONFIG", "Using first config as default: %s/%s",
                  config->platform_name, config->product_name);
         return config;
     }

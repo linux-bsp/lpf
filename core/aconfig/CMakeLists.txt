@@ -52,13 +52,13 @@ endif()
 ###############################################
 
 #### Add compile option for this component ####
-if(CONFIG_ACL_MAX_DEVICES)
-    list(APPEND ADD_DEFINITIONS -DACONFIG_MAX_DEVICES=${CONFIG_ACL_MAX_DEVICES})
+if(CONFIG_ACONFIG_MAX_DEVICES)
+    list(APPEND ADD_DEFINITIONS -DACONFIG_MAX_DEVICES=${CONFIG_ACONFIG_MAX_DEVICES})
 endif()
 ###############################################
 
 # 注册组件
-if(CONFIG_ACL_BUILD_SHARED)
+if(CONFIG_ACONFIG_BUILD_SHARED)
     register_component(SHARED)
 else()
     register_component()

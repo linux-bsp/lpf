@@ -48,7 +48,7 @@ if(CONFIG_PRL AND NOT TARGET prl)
     add_subdirectory(${SDK_PATH}/core/prl ${CMAKE_CURRENT_BINARY_DIR}/prl)
 endif()
 
-if(CONFIG_ACL AND NOT TARGET aconfig)
+if(CONFIG_ACONFIG AND NOT TARGET aconfig)
     add_subdirectory(${SDK_PATH}/core/aconfig ${CMAKE_CURRENT_BINARY_DIR}/aconfig)
 endif()
 
@@ -354,6 +354,12 @@ if(CONFIG_TEST_SYSTEM)
     endif()
     if(TARGET prl)
         target_link_libraries(es-middleware-test PRIVATE prl)
+    endif()
+    if(TARGET aconfig)
+        target_link_libraries(es-middleware-test PRIVATE aconfig)
+    endif()
+    if(TARGET pconfig)
+        target_link_libraries(es-middleware-test PRIVATE pconfig)
     endif()
 
     # OSAL System Tests - Auto-discover all test_system_osal_*.c files

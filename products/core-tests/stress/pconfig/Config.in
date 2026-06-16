@@ -1,10 +1,10 @@
-# PCL Stress Test Configuration
+# PCONFIG Stress Test Configuration
 #
 # Tests platform configuration layer under extreme conditions.
 # Verifies configuration handling under load and error scenarios.
 
 config TEST_STRESS_PCL
-	bool "PCL stress tests"
+	bool "PCONFIG stress tests"
 	depends on TEST_STRESS && TEST_PCONFIG
 	default y if TEST_STRESS_ALL
 	help
@@ -30,7 +30,7 @@ config TEST_STRESS_PCL
 
 if TEST_STRESS_PCL
 
-menu "PCL Stress Tests"
+menu "PCONFIG Stress Tests"
 
 config TEST_STRESS_PCL_LARGE_CONFIG
 	bool "Large configuration file stress tests"

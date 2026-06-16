@@ -1,11 +1,11 @@
-# ACL Performance Test Configuration
+# ACONFIG Performance Test Configuration
 #
 # Measures application configuration layer performance.
 # Tests telecommand/telemetry mapping and processing speed.
 
 if TEST_PERFORMANCE_ACL
 
-menu "ACL Performance Tests"
+menu "ACONFIG Performance Tests"
 
 config TEST_PERF_ACL_TC
 	bool "Telecommand processing performance tests"

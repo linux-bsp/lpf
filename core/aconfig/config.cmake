@@ -9,25 +9,21 @@
 message(STATUS "Configuring ACONFIG module...")
 
 # 初始化源文件列表
-set(ACL_SRCS "")
+set(ACONFIG_SRCS "")
 
 # =============================================================================
 # 核心源文件（总是需要）
 # =============================================================================
-list(APPEND ACL_SRCS
-    "src/acl_api.c"
-    "src/acl_api_v2.c"
-    "src/acl_telemetry_cache.c"
+list(APPEND ACONFIG_SRCS
+    "src/aconfig_api.c"
 )
 
 message(STATUS "  [ACONFIG] Core API enabled")
-message(STATUS "  [ACONFIG] API v2 enabled")
-message(STATUS "  [ACONFIG] Telemetry cache enabled")
 
 # 验证源文件
-if(NOT ACL_SRCS)
+if(NOT ACONFIG_SRCS)
     message(FATAL_ERROR "ACONFIG: No source files selected.")
 endif()
 
-list(LENGTH ACL_SRCS ACL_FILE_COUNT)
-message(STATUS "  [ACONFIG] Total ${ACL_FILE_COUNT} source files selected")
+list(LENGTH ACONFIG_SRCS ACONFIG_FILE_COUNT)
+message(STATUS "  [ACONFIG] Total ${ACONFIG_FILE_COUNT} source files selected")

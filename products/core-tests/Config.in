@@ -66,15 +66,15 @@ config TEST_PDL
 	  in the PDL Unit Tests submenu.
 
 config TEST_ACL
-	bool "Build ACL unit tests"
-	depends on OSAL  # ACL dependency
-	select ACL
+	bool "Build ACONFIG unit tests"
+	depends on OSAL  # ACONFIG dependency
+	select ACONFIG
 	default n
 	help
-	  Build ACL layer unit tests.
-	  This will automatically enable the ACL module.
+	  Build ACONFIG layer unit tests.
+	  This will automatically enable the ACONFIG module.
 
-	  Note: ACL requires OSAL, so enable OSAL first.
+	  Note: ACONFIG requires OSAL, so enable OSAL first.
 
 config TEST_PRL
 	bool "Build PRL unit tests"
@@ -163,11 +163,11 @@ config TEST_PERFORMANCE_PDL
 	  Note: PDL requires OSAL, HAL, and PCONFIG.
 
 config TEST_PERFORMANCE_ACL
-	bool "Build ACL performance tests"
-	select ACL
+	bool "Build ACONFIG performance tests"
+	select ACONFIG
 	default n
 	help
-	  Build ACL layer performance tests.
+	  Build ACONFIG layer performance tests.
 
 # Source fine-grained performance test configurations
 source "products/core-tests/performance/Config.in"
@@ -226,11 +226,11 @@ config TEST_STRESS_PRL
 	  Build PRL layer stress tests.
 
 config TEST_STRESS_ACL
-	bool "Build ACL stress tests"
-	select ACL
+	bool "Build ACONFIG stress tests"
+	select ACONFIG
 	default n
 	help
-	  Build ACL layer stress tests.
+	  Build ACONFIG layer stress tests.
 
 # Source fine-grained stress test configurations
 source "products/core-tests/stress/Config.in"
@@ -282,11 +282,11 @@ config TEST_SYSTEM_PDL
 	  Note: PDL requires OSAL, HAL, and PCONFIG.
 
 config TEST_SYSTEM_ACL
-	bool "Build ACL system tests"
-	select ACL
+	bool "Build ACONFIG system tests"
+	select ACONFIG
 	default n
 	help
-	  Build ACL layer system tests.
+	  Build ACONFIG layer system tests.
 
 config TEST_SYSTEM_ACONFIG
 	bool "Build ACONFIG system tests"

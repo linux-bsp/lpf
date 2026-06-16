@@ -8,8 +8,8 @@
 #   - stress/osal/Config.in - OSAL stress tests
 #   - stress/hal/Config.in - HAL stress tests
 #   - stress/pdl/Config.in - PDL stress tests
-#   - stress/pconfig/Config.in - PCL stress tests
-#   - stress/aconfig/Config.in - ACL stress tests
+#   - stress/pconfig/Config.in - PCONFIG stress tests
+#   - stress/aconfig/Config.in - ACONFIG stress tests
 
 if TEST_STRESS
 

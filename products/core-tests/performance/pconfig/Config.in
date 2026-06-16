@@ -1,11 +1,11 @@
-# PCL Performance Test Configuration
+# PCONFIG Performance Test Configuration
 #
 # Measures platform configuration layer performance.
 # Tests configuration loading, parsing, and device mapping speed.
 
 if TEST_PERFORMANCE_PCL
 
-menu "PCL Performance Tests"
+menu "PCONFIG Performance Tests"
 
 config TEST_PERF_PCL_PARSE
 	bool "Configuration parsing performance tests"

@@ -34,7 +34,7 @@ config TEST_SYSTEM_INTEGRATION
 	  Core full-stack integration tests.
 
 	  Tests:
-	    - Complete protocol stack (OSAL→HAL→PRL→PDL→PCL→ACL)
+	    - Complete protocol stack (OSAL→HAL→PRL→PDL→PCONFIG→ACONFIG)
 	    - Multi-device coordination
 	    - Concurrent operations across all layers
 	    - System initialization and shutdown
@@ -172,8 +172,8 @@ config TEST_INTEGRATION_ROBUSTNESS
 	    - HAL: Device errors, timeouts, bus failures
 	    - PRL: Malformed packets, CRC errors
 	    - PDL: Protocol violations, unexpected responses
-	    - PCL: Invalid configurations
-	    - ACL: Invalid telecommands
+	    - PCONFIG: Invalid configurations
+	    - ACONFIG: Invalid telecommands
 
 	  Tests:
 	    - Error isolation (faults don't propagate)

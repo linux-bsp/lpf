@@ -8,8 +8,8 @@
 #   - performance/osal/Config.in - OSAL performance tests
 #   - performance/hal/Config.in - HAL performance tests
 #   - performance/pdl/Config.in - PDL performance tests
-#   - performance/pconfig/Config.in - PCL performance tests
-#   - performance/aconfig/Config.in - ACL performance tests
+#   - performance/pconfig/Config.in - PCONFIG performance tests
+#   - performance/aconfig/Config.in - ACONFIG performance tests
 
 if TEST_PERFORMANCE
 

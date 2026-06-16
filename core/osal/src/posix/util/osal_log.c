@@ -105,9 +105,9 @@ static const char *log_level_names[] = {
 static const char *log_module_names[] = {
     "OSAL",
     "HAL",
-    "PCL",
+    "PCONFIG",
     "PDL",
-    "ACL",
+    "ACONFIG",
     "APP",
     "TEST"
 };

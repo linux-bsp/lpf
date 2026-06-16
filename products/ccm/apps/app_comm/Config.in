@@ -5,7 +5,7 @@ config APP_COMM
     select HAL
     select PCONFIG
     select PDL
-    select ACL
+    select ACONFIG
     select H200_AM625
     select LIBCCM
     help

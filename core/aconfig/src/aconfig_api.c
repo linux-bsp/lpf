@@ -23,7 +23,7 @@ int32_t ACONFIG_Init(void)
 {
     g_acl_table = NULL;
 
-    LOG_INFO("ACL", "Initialized (optimized version)");
+    LOG_INFO("ACONFIG", "Initialized (optimized version)");
     return OSAL_SUCCESS;
 }
 
@@ -35,24 +35,24 @@ int32_t ACONFIG_RegisterTable(const aconfig_config_table_t *table)
     int32_t ret;
 
     if (NULL == table) {
-        LOG_ERROR("ACL", "Invalid table pointer");
+        LOG_ERROR("ACONFIG", "Invalid table pointer");
         return OSAL_ERR_INVALID_POINTER;
     }
 
     /* 获取写锁（独占访问） */
     ret = OSAL_pthread_rwlock_wrlock(&g_acl_rwlock);
     if (OSAL_SUCCESS != ret) {
-        LOG_ERROR("ACL", "Failed to acquire write lock: %d", ret);
+        LOG_ERROR("ACONFIG", "Failed to acquire write lock: %d", ret);
         return ret;
     }
 
     if (NULL != g_acl_table) {
-        LOG_WARN("ACL", "Table already registered, overwriting");
+        LOG_WARN("ACONFIG", "Table already registered, overwriting");
     }
 
     g_acl_table = table;
 
-    LOG_INFO("ACL", "Registered table '%s' (TC:%u entries, TM:%u entries)",
+    LOG_INFO("ACONFIG", "Registered table '%s' (TC:%u entries, TM:%u entries)",
                table->name,
                table->tc_count,
                table->tm_count);
@@ -254,29 +254,29 @@ void ACONFIG_PrintConfig(void)
 
     /* 获取读锁 */
     if (OSAL_SUCCESS != OSAL_pthread_rwlock_rdlock(&g_acl_rwlock)) {
-        LOG_ERROR("ACL", "Failed to acquire read lock");
+        LOG_ERROR("ACONFIG", "Failed to acquire read lock");
         return;
     }
 
     if (NULL == g_acl_table) {
-        LOG_INFO("ACL", "No table registered");
+        LOG_INFO("ACONFIG", "No table registered");
         OSAL_pthread_rwlock_unlock(&g_acl_rwlock);
         return;
     }
 
-    LOG_INFO("ACL", "Configuration: %s", g_acl_table->name);
-    LOG_INFO("ACL", "  TC entries: %u (sparse array)", g_acl_table->tc_count);
-    LOG_INFO("ACL", "  TM entries: %u (sparse array)", g_acl_table->tm_count);
+    LOG_INFO("ACONFIG", "Configuration: %s", g_acl_table->name);
+    LOG_INFO("ACONFIG", "  TC entries: %u (sparse array)", g_acl_table->tc_count);
+    LOG_INFO("ACONFIG", "  TM entries: %u (sparse array)", g_acl_table->tm_count);
 
     /* 释放读锁 */
     OSAL_pthread_rwlock_unlock(&g_acl_rwlock);
 
     if (OSAL_SUCCESS == ACONFIG_GetStatistics(&stats)) {
-        LOG_INFO("ACL", "  TC enabled: %u, disabled: %u",
+        LOG_INFO("ACONFIG", "  TC enabled: %u, disabled: %u",
                    stats.tc_enabled_count, stats.tc_disabled_count);
-        LOG_INFO("ACL", "  TM enabled: %u, disabled: %u",
+        LOG_INFO("ACONFIG", "  TM enabled: %u, disabled: %u",
                    stats.tm_enabled_count, stats.tm_disabled_count);
-        LOG_INFO("ACL", "  Invalidation maps: %u (embedded in TC)",
+        LOG_INFO("ACONFIG", "  Invalidation maps: %u (embedded in TC)",
                    stats.total_invalidation_maps);
     }
 }
@@ -294,7 +294,7 @@ const aconfig_config_table_t* ACONFIG_FindTableByHWID(const pdl_hwid_t *hwid)
     /* 当前简化实现：直接返回已注册的表（假设匹配） */
 
     if (hwid == NULL) {
-        LOG_ERROR("ACL", "Invalid HWID pointer");
+        LOG_ERROR("ACONFIG", "Invalid HWID pointer");
         return NULL;
     }
 
@@ -308,17 +308,17 @@ const aconfig_config_table_t* ACONFIG_FindTableByHWID(const pdl_hwid_t *hwid)
         /* 如果配置表的 hwid_count == 0，表示支持所有 HWID */
         if (g_acl_table->hwid_count == 0 || g_acl_table->hwid_list == NULL) {
             OSAL_pthread_rwlock_unlock(&g_acl_rwlock);
-            LOG_INFO("ACL", "Current table '%s' supports all HWIDs", g_acl_table->name);
+            LOG_INFO("ACONFIG", "Current table '%s' supports all HWIDs", g_acl_table->name);
             return g_acl_table;
         }
 
         /* TODO: 实现精确的 HWID 匹配 */
-        LOG_WARN("ACL", "HWID matching not fully implemented yet");
+        LOG_WARN("ACONFIG", "HWID matching not fully implemented yet");
     }
 
     OSAL_pthread_rwlock_unlock(&g_acl_rwlock);
 
-    LOG_INFO("ACL", "HWID: product=0x%04X, project=0x%04X",
+    LOG_INFO("ACONFIG", "HWID: product=0x%04X, project=0x%04X",
              hwid->product_id, hwid->project_id);
 
     return g_acl_table;  /* 简化实现：返回当前表 */
@@ -333,28 +333,28 @@ int32_t ACONFIG_LoadByHWID(void)
     /* 从 PDL_MISC 读取 HWID */
     ret = PDL_MISC_GetHWID(&hwid);
     if (ret != OSAL_SUCCESS) {
-        LOG_ERROR("ACL", "Failed to read HWID: %d", ret);
+        LOG_ERROR("ACONFIG", "Failed to read HWID: %d", ret);
         return ret;
     }
 
-    LOG_INFO("ACL", "Read HWID: product=0x%04X, project=0x%04X, board=0x%02X, hw_rev=0x%02X",
+    LOG_INFO("ACONFIG", "Read HWID: product=0x%04X, project=0x%04X, board=0x%02X, hw_rev=0x%02X",
              hwid.product_id, hwid.project_id, hwid.board_type, hwid.hw_revision);
 
     /* 根据 HWID 查找配置表 */
     table = ACONFIG_FindTableByHWID(&hwid);
     if (table == NULL) {
-        LOG_ERROR("ACL", "No matching config table for HWID");
+        LOG_ERROR("ACONFIG", "No matching config table for HWID");
         return OSAL_ERR_NAME_NOT_FOUND;
     }
 
     /* 注册配置表 */
     ret = ACONFIG_RegisterTable(table);
     if (ret != OSAL_SUCCESS) {
-        LOG_ERROR("ACL", "Failed to register config table: %d", ret);
+        LOG_ERROR("ACONFIG", "Failed to register config table: %d", ret);
         return ret;
     }
 
-    LOG_INFO("ACL", "Successfully loaded config for HWID");
+    LOG_INFO("ACONFIG", "Successfully loaded config for HWID");
     return OSAL_SUCCESS;
 }
 
@@ -363,13 +363,13 @@ int32_t ACONFIG_LoadByHWID(void)
 const aconfig_config_table_t* ACONFIG_FindTableByHWID(const pdl_hwid_t *hwid)
 {
     (void)hwid;
-    LOG_ERROR("ACL", "HWID support requires CONFIG_PDL=y");
+    LOG_ERROR("ACONFIG", "HWID support requires CONFIG_PDL=y");
     return NULL;
 }
 
 int32_t ACONFIG_LoadByHWID(void)
 {
-    LOG_ERROR("ACL", "HWID support requires CONFIG_PDL=y");
+    LOG_ERROR("ACONFIG", "HWID support requires CONFIG_PDL=y");
     return OSAL_ERR_NOT_SUPPORTED;
 }
 #endif /* CONFIG_PDL */
