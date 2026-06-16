@@ -1,8 +1,8 @@
 # ============================================================================
-# ARM64 Full Test Configuration
+# Full Test Configuration
 # ============================================================================
 # All modules, all features, all products, all applications enabled.
-# Used for comprehensive full-stack testing on ARM64 platform.
+# Used for comprehensive full-stack testing.
 # ============================================================================
 
 # Product Selection - Disabled for testing
@@ -10,19 +10,16 @@
 
 # Core Components - Full Stack
 CONFIG_OSAL=y
-CONFIG_TEST_FRAMEWORK=y
 CONFIG_HAL=y
 CONFIG_PCL=y
 CONFIG_PDL=y
 CONFIG_PRL=y
 CONFIG_ACL=y
+CONFIG_TEST_FRAMEWORK=y
 
 # Architecture and OS
 CONFIG_OS_LINUX=y
 CONFIG_ARCH_ARM64=y
-
-# OSAL OS Abstraction - POSIX (derived from OS_LINUX)
-CONFIG_OSAL_OS_POSIX=y
 
 # Platform
 CONFIG_PLATFORM_LINUX=y
@@ -58,6 +55,7 @@ CONFIG_HAL_WATCHDOG_LINUX=y
 CONFIG_PDL_SATELLITE_SUPPORT=y
 CONFIG_PDL_BMC_SUPPORT=y
 CONFIG_PDL_MCU_SUPPORT=y
+CONFIG_PDL_CCM_SUPPORT=y
 CONFIG_PDL_WATCHDOG_SUPPORT=y
 CONFIG_PDL_MISC_SUPPORT=y
 
@@ -209,9 +207,7 @@ CONFIG_TEST_ACONFIG_API=y
 # ============================================================================
 
 # OSAL Performance Tests
-# Performance Tests - Module Level
 CONFIG_TEST_PERFORMANCE_OSAL=y
-CONFIG_TEST_PERF_OSAL=y
 CONFIG_TEST_PERFORMANCE_OSAL_MUTEX=y
 CONFIG_TEST_PERFORMANCE_OSAL_THREAD=y
 CONFIG_TEST_PERFORMANCE_OSAL_SEMAPHORE=y
@@ -220,7 +216,6 @@ CONFIG_TEST_PERFORMANCE_OSAL_FILE=y
 
 # HAL Performance Tests
 CONFIG_TEST_PERFORMANCE_HAL=y
-CONFIG_TEST_PERF_HAL=y
 CONFIG_TEST_PERFORMANCE_HAL_CAN=y
 CONFIG_TEST_PERFORMANCE_HAL_GPIO=y
 CONFIG_TEST_PERFORMANCE_HAL_I2C=y
@@ -228,7 +223,6 @@ CONFIG_TEST_PERFORMANCE_HAL_SPI=y
 
 # PDL Performance Tests
 CONFIG_TEST_PERFORMANCE_PDL=y
-CONFIG_TEST_PERF_PDL=y
 CONFIG_TEST_PERFORMANCE_PDL_MCU=y
 CONFIG_TEST_PERFORMANCE_PDL_BMC=y
 
@@ -247,9 +241,15 @@ CONFIG_TEST_STRESS_HAL=y
 CONFIG_TEST_STRESS_HAL_CONCURRENT=y
 CONFIG_TEST_STRESS_HAL_HIGH_LOAD=y
 
-# PDL Stress Tests
+# PDL Stress Tests - All Enabled
 CONFIG_TEST_STRESS_PDL=y
-CONFIG_TEST_STRESS_PDL_DEVICE=y
+CONFIG_TEST_STRESS_PDL_BMC_CONCURRENT=y
+CONFIG_TEST_STRESS_PDL_MCU_LONG_RUNNING=y
+CONFIG_TEST_STRESS_PDL_WATCHDOG_HIGH_FREQ=y
+CONFIG_TEST_STRESS_PDL_SATELLITE_CONCURRENT=y
+CONFIG_TEST_STRESS_PDL_CCM_CONCURRENT=y
+CONFIG_TEST_STRESS_PDL_MULTIDEVICE=y
+CONFIG_TEST_STRESS_PDL_RESOURCE_EXHAUSTION=y
 
 # ============================================================================
 # System Tests - All Enabled
@@ -269,6 +269,115 @@ CONFIG_TEST_SYSTEM_PDL_PROTOCOL_STACK=y
 
 # Integration Tests
 CONFIG_TEST_INTEGRATION=y
-CONFIG_TEST_SYSTEM_INTEGRATION=y
 CONFIG_TEST_INTEGRATION_FULL_STACK=y
 CONFIG_OSAL_UTIL_CRC=y
+
+# ============================================================================
+# Debug Features - All Enabled
+# ============================================================================
+CONFIG_DEBUG_MEMORY_TRACKING=y
+CONFIG_DEBUG_BUFFER_OVERFLOW=y
+CONFIG_DEBUG_USE_AFTER_FREE=y
+CONFIG_DEBUG_DOUBLE_FREE=y
+CONFIG_DEBUG_UNINITIALIZED_MEMORY=y
+CONFIG_DEBUG_POSTCONDITION_CHECKS=y
+CONFIG_DEBUG_INVARIANT_CHECKS=y
+CONFIG_DEBUG_PERFORMANCE_COUNTERS=y
+CONFIG_DEBUG_CALL_TRACING=y
+CONFIG_DEBUG_RESOURCE_TRACKING=y
+CONFIG_DEBUG_DUMP_STACK_ON_ERROR=y
+CONFIG_DEBUG_CORE_DUMP_ON_FATAL=y
+CONFIG_DEBUG_DUMP_ON_SIGNAL=y
+
+# ============================================================================
+# Logging Enhancements
+# ============================================================================
+CONFIG_LOG_FUNCTION_NAME=y
+CONFIG_LOG_FILE_LINE=y
+CONFIG_LOG_THREAD_ID=y
+CONFIG_LOG_TIMESTAMP=y
+
+# ============================================================================
+# HAL Debug and Statistics
+# ============================================================================
+CONFIG_HAL_DEBUG=y
+CONFIG_HAL_STATISTICS=y
+
+# ============================================================================
+# Additional Performance Tests
+# ============================================================================
+CONFIG_TEST_PERFORMANCE_PCONFIG=y
+CONFIG_TEST_PERFORMANCE_ACL=y
+CONFIG_TEST_PERF_OSAL_MUTEX=y
+CONFIG_TEST_PERF_OSAL_THREAD=y
+CONFIG_TEST_PERF_OSAL_SEMAPHORE=y
+CONFIG_TEST_PERF_OSAL_COND=y
+CONFIG_TEST_PERF_OSAL_HEAP=y
+CONFIG_TEST_PERF_OSAL_FILE=y
+CONFIG_TEST_PERF_OSAL_ATOMIC=y
+CONFIG_TEST_PERF_OSAL_TIME=y
+CONFIG_TEST_PERF_HAL_CAN=y
+CONFIG_TEST_PERF_HAL_SERIAL=y
+CONFIG_TEST_PERF_HAL_SPI=y
+CONFIG_TEST_PERF_HAL_I2C=y
+CONFIG_TEST_PERF_HAL_GPIO=y
+CONFIG_TEST_PERF_HAL_WATCHDOG=y
+CONFIG_TEST_PERF_PDL_MCU=y
+CONFIG_TEST_PERF_PDL_BMC=y
+CONFIG_TEST_PERF_PDL_SATELLITE=y
+CONFIG_TEST_PERF_PDL_WATCHDOG=y
+CONFIG_TEST_PERF_PDL_PROTOCOL=y
+
+# ============================================================================
+# Additional Stress Tests
+# ============================================================================
+CONFIG_TEST_STRESS_PCONFIG=y
+CONFIG_TEST_STRESS_OSAL_VERBOSE=y
+CONFIG_TEST_STRESS_HAL_CAN=y
+CONFIG_TEST_STRESS_HAL_SERIAL=y
+CONFIG_TEST_STRESS_HAL_SPI=y
+CONFIG_TEST_STRESS_HAL_I2C=y
+CONFIG_TEST_STRESS_HAL_GPIO=y
+CONFIG_TEST_STRESS_HAL_WATCHDOG=y
+CONFIG_TEST_STRESS_PRL_LONG_RUNNING=y
+CONFIG_TEST_STRESS_PCL_LARGE_CONFIG=y
+CONFIG_TEST_STRESS_PCL_RELOAD=y
+CONFIG_TEST_STRESS_PCL_MALFORMED=y
+
+# ============================================================================
+# Additional System Tests
+# ============================================================================
+CONFIG_TEST_SYSTEM_PCONFIG=y
+CONFIG_TEST_SYSTEM_ACL=y
+CONFIG_TEST_SYSTEM_ACONFIG=y
+CONFIG_TEST_SYSTEM_OSAL_PROCESS_IPC=y
+CONFIG_TEST_SYSTEM_OSAL_REALTIME=y
+CONFIG_TEST_SYSTEM_HAL_CAN_SERIAL=y
+CONFIG_TEST_SYSTEM_HAL_SPI_I2C=y
+CONFIG_TEST_SYSTEM_HAL_GPIO_INTERRUPT=y
+CONFIG_TEST_SYSTEM_HAL_DMA_SHARING=y
+CONFIG_TEST_SYSTEM_PDL_BUS_SHARING=y
+CONFIG_TEST_SYSTEM_PDL_ERROR_PROPAGATION=y
+CONFIG_TEST_SYSTEM_PDL_TELEMETRY=y
+
+# ============================================================================
+# Additional Integration Tests
+# ============================================================================
+CONFIG_TEST_INTEGRATION_PERFORMANCE=y
+CONFIG_TEST_INTEGRATION_ROBUSTNESS=y
+
+# ============================================================================
+# Test Framework Verbose Output
+# ============================================================================
+CONFIG_TEST_FRAMEWORK_VERBOSE=y
+
+# ============================================================================
+# ACL Tests
+# ============================================================================
+CONFIG_TEST_ACL=y
+
+# ============================================================================
+# ACL Performance Tests
+# ============================================================================
+CONFIG_TEST_PERF_ACL_TC=y
+CONFIG_TEST_PERF_ACL_TM=y
