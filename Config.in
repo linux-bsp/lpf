@@ -23,26 +23,32 @@ config ES_MIDDLEWARE_VERSION
 
 choice
 	prompt "Select product"
-	default PRODUCT_NONE
+	default PRODUCT_CTEST
 	help
 	  Select which product to build.
 
 	  Only one product can be selected at a time to ensure clean
 	  separation of product-specific code and configurations.
 
-	  If you want to run tests without building any product, select "None".
-
-config PRODUCT_NONE
-	bool "None - Testing only"
+config PRODUCT_CTEST
+	bool "CTEST - Core Tests"
 	help
-	  Do not build any product.
+	  Build core modules test suite.
 
-	  Select this option when you want to:
-	  - Run unit tests for core components only
-	  - Build and test the SDK framework without product code
-	  - Develop core components independently
+	  CTEST is a comprehensive test product for validating all core
+	  components (OSAL, HAL, PDL, PRL, PCONFIG, ACONFIG).
 
-	  This is the default for test configurations.
+	  This will build:
+	  - Unit tests for individual modules
+	  - Performance benchmarks
+	  - Stress tests for stability validation
+	  - System integration tests
+
+	  Use this for:
+	  - Core components development and validation
+	  - Regression testing
+	  - Performance analysis
+	  - Quality assurance
 
 config PRODUCT_CCM
 	bool "CCM Product"
@@ -67,7 +73,7 @@ config PROJECT_NAME
 	string "Project name"
 	default "h200_100p_am625" if PRODUCT_CCM && PROJECT_H200_100P_AM625
 	default "h200_200p" if PRODUCT_CCM && PROJECT_H200_200P
-	default "tests" if PRODUCT_NONE
+	default "ctest" if PRODUCT_CTEST
 	default "unknown"
 	help
 	  Project name derived from product and platform selection.
