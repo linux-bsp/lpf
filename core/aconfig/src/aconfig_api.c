@@ -16,7 +16,7 @@ static osal_rwlock_t g_aconfig_rwlock = PTHREAD_RWLOCK_INITIALIZER;
 /**
  * @brief 初始化 ACONFIG 层
  */
-int32_t ACONFIG_Init(void)
+int32_t ACONFIG_init(void)
 {
 	g_aconfig_table = NULL;
 	LOG_INFO("ACONFIG", "Initialized (generic version)");
@@ -26,7 +26,7 @@ int32_t ACONFIG_Init(void)
 /**
  * @brief 清理 ACONFIG 层
  */
-void ACONFIG_Cleanup(void)
+void ACONFIG_cleanup(void)
 {
 	int32_t ret;
 
@@ -42,7 +42,7 @@ void ACONFIG_Cleanup(void)
 /**
  * @brief 注册配置表
  */
-int32_t ACONFIG_RegisterTable(const aconfig_config_table_t *table)
+int32_t ACONFIG_register_table(const aconfig_config_table_t *table)
 {
 	int32_t ret;
 
@@ -80,7 +80,7 @@ int32_t ACONFIG_RegisterTable(const aconfig_config_table_t *table)
 /**
  * @brief 注销配置表
  */
-int32_t ACONFIG_UnregisterTable(void)
+int32_t ACONFIG_unregister_table(void)
 {
 	int32_t ret;
 
@@ -162,7 +162,7 @@ bool ACONFIG_IsFunctionEnabled(uint32_t function_id)
 /**
  * @brief 获取配置统计信息
  */
-int32_t ACONFIG_GetStatistics(aconfig_statistics_t *stats)
+int32_t ACONFIG_get_statistics(aconfig_statistics_t *stats)
 {
 	if (NULL == stats) {
 		LOG_ERROR("ACONFIG", "Invalid stats pointer");
@@ -193,7 +193,7 @@ int32_t ACONFIG_GetStatistics(aconfig_statistics_t *stats)
 /**
  * @brief 打印配置信息
  */
-void ACONFIG_PrintConfig(void)
+void ACONFIG_print_config(void)
 {
 	/* 获取读锁 */
 	if (OSAL_SUCCESS != OSAL_pthread_rwlock_rdlock(&g_aconfig_rwlock)) {

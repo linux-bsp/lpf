@@ -170,16 +170,16 @@ int32_t CCM_ACONFIG_Init(void)
     int32_t ret;
 
     /* 初始化 AConfig 框架 */
-    ret = ACONFIG_Init();
+    ret = ACONFIG_init();
     if (OSAL_SUCCESS != ret) {
-        LOG_ERROR("CCM_ACONFIG", "ACONFIG_Init failed, ret=%d", ret);
+        LOG_ERROR("CCM_ACONFIG", "ACONFIG_init failed, ret=%d", ret);
         return ret;
     }
 
     /* 注册 CCM 配置表（新格式） */
-    ret = ACONFIG_RegisterTable(&g_ccm_aconfig_table);
+    ret = ACONFIG_register_table(&g_ccm_aconfig_table);
     if (OSAL_SUCCESS != ret) {
-        LOG_ERROR("CCM_ACONFIG", "ACONFIG_RegisterTable failed, ret=%d", ret);
+        LOG_ERROR("CCM_ACONFIG", "ACONFIG_register_table failed, ret=%d", ret);
         return ret;
     }
 
@@ -219,7 +219,7 @@ int32_t CCM_ACONFIG_Init(void)
  *
  * 5. 注册 API 变化：
  *    旧：ACONFIG_RegisterTableLegacy(&g_ccm_aconfig_table)
- *    新：ACONFIG_RegisterTable(&g_ccm_aconfig_table)
+ *    新：ACONFIG_register_table(&g_ccm_aconfig_table)
  *
  * 内存占用对比：
  *   旧格式：~40KB (1000个TC + 1000个TM的密集数组)

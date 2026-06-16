@@ -1,7 +1,7 @@
 /************************************************************************
  * PRL测试 - 核心API测试
- * 测试 PRL_Init, PRL_Deinit, PRL_GetVersion, PRL_GetErrorString,
- * PRL_ResetSequence, PRL_GetCurrentSequence
+ * 测试 PRL_init, PRL_deinit, PRL_get_version, PRL_GetErrorString,
+ * PRL_reset_sequence, PRL_GetCurrentSequence
  ************************************************************************/
 
 #include "osal.h"
@@ -18,11 +18,11 @@ static void test_prl_init_success(void)
     int ret;
 
     /* 初始化应该成功 */
-    ret = PRL_Init();
+    ret = PRL_init();
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 清理 */
-    PRL_Deinit();
+    PRL_deinit();
 }
 
 static void test_prl_deinit_success(void)
@@ -30,10 +30,10 @@ static void test_prl_deinit_success(void)
     int ret;
 
     /* 初始化 */
-    PRL_Init();
+    PRL_init();
 
     /* 反初始化应该成功 */
-    ret = PRL_Deinit();
+    ret = PRL_deinit();
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -43,10 +43,10 @@ static void test_prl_init_deinit_multiple(void)
 
     /* 多次初始化和反初始化 */
     for (int i = 0; i < 3; i++) {
-        ret = PRL_Init();
+        ret = PRL_init();
         TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-        ret = PRL_Deinit();
+        ret = PRL_deinit();
         TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     }
 }
@@ -60,7 +60,7 @@ static void test_prl_getversion_valid(void)
     uint8_t major, minor;
 
     /* 获取版本信息 */
-    PRL_GetVersion(&major, &minor);
+    PRL_get_version(&major, &minor);
 
     /* 验证版本号 */
     TEST_ASSERT_EQUAL(PRL_VERSION_MAJOR, major);
@@ -72,12 +72,12 @@ static void test_prl_getversion_null_params(void)
     uint8_t major, minor;
 
     /* NULL 参数应该安全处理（不崩溃） */
-    PRL_GetVersion(NULL, &minor);
-    PRL_GetVersion(&major, NULL);
-    PRL_GetVersion(NULL, NULL);
+    PRL_get_version(NULL, &minor);
+    PRL_get_version(&major, NULL);
+    PRL_get_version(NULL, NULL);
 
     /* 正常调用验证 */
-    PRL_GetVersion(&major, &minor);
+    PRL_get_version(&major, &minor);
     TEST_ASSERT_EQUAL(PRL_VERSION_MAJOR, major);
     TEST_ASSERT_EQUAL(PRL_VERSION_MINOR, minor);
 }
@@ -128,7 +128,7 @@ static void test_prl_resetsequence_basic(void)
     uint32_t seq;
 
     /* 重置序列号为特定值 */
-    PRL_ResetSequence(100);
+    PRL_reset_sequence(100);
 
     /* 获取当前序列号 */
     seq = PRL_GetCurrentSequence();
@@ -143,14 +143,14 @@ static void test_prl_getcurrentsequence_increment(void)
     int ret;
 
     /* 重置序列号 */
-    PRL_ResetSequence(1000);
+    PRL_reset_sequence(1000);
 
     /* 第一次获取 */
     seq1 = PRL_GetCurrentSequence();
     TEST_ASSERT_EQUAL(1000, seq1);
 
     /* 编码一次消息（会递增序列号） */
-    ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                      payload, OSAL_sizeof(payload), buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
@@ -159,7 +159,7 @@ static void test_prl_getcurrentsequence_increment(void)
     TEST_ASSERT_EQUAL(1001, seq2);
 
     /* 再编码一次 */
-    ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                      payload, OSAL_sizeof(payload), buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
@@ -173,7 +173,7 @@ static void test_prl_resetsequence_zero(void)
     uint32_t seq;
 
     /* 重置为 0 */
-    PRL_ResetSequence(0);
+    PRL_reset_sequence(0);
 
     seq = PRL_GetCurrentSequence();
     TEST_ASSERT_EQUAL(0, seq);
@@ -184,7 +184,7 @@ static void test_prl_resetsequence_max_value(void)
     uint32_t seq;
 
     /* 重置为最大值 */
-    PRL_ResetSequence(UINT32_MAX);
+    PRL_reset_sequence(UINT32_MAX);
 
     seq = PRL_GetCurrentSequence();
     TEST_ASSERT_EQUAL(UINT32_MAX, seq);
@@ -199,11 +199,11 @@ static void test_prl_sequence_in_encoded_packet(void)
     int ret;
 
     /* 重置序列号 */
-    PRL_ResetSequence(5000);
+    PRL_reset_sequence(5000);
     expected_seq = PRL_GetCurrentSequence();
 
     /* 编码消息 */
-    ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
+    ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
                      payload, OSAL_sizeof(payload), buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
@@ -224,7 +224,7 @@ static void test_prl_timestamp_populated(void)
     int ret;
 
     /* 编码消息 */
-    ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                      payload, OSAL_sizeof(payload), buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
@@ -241,7 +241,7 @@ static void test_prl_timestamp_reasonable(void)
     int ret;
 
     /* 编码消息 */
-    ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                      NULL, 0, buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
@@ -264,7 +264,7 @@ static void test_prl_encode_flag_none(void)
     prl_header_t *hdr = (prl_header_t *)buffer;
     int ret;
 
-    ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                      NULL, 0, buffer, OSAL_sizeof(buffer), PRL_FLAG_NONE);
     TEST_ASSERT_TRUE(ret > 0);
 
@@ -277,7 +277,7 @@ static void test_prl_encode_flag_need_ack(void)
     prl_header_t *hdr = (prl_header_t *)buffer;
     int ret;
 
-    ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_SET_CONFIG,
+    ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_SET_CONFIG,
                      NULL, 0, buffer, OSAL_sizeof(buffer), PRL_FLAG_NEED_ACK);
     TEST_ASSERT_TRUE(ret > 0);
 
@@ -290,7 +290,7 @@ static void test_prl_encode_flag_is_ack(void)
     prl_header_t *hdr = (prl_header_t *)buffer;
     int ret;
 
-    ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_STATUS,
+    ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_STATUS,
                      NULL, 0, buffer, OSAL_sizeof(buffer), PRL_FLAG_IS_ACK);
     TEST_ASSERT_TRUE(ret > 0);
 
@@ -304,7 +304,7 @@ static void test_prl_encode_flag_combination(void)
     uint8_t flags = PRL_FLAG_NEED_ACK | PRL_FLAG_IS_ACK;
     int ret;
 
-    ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                      NULL, 0, buffer, OSAL_sizeof(buffer), flags);
     TEST_ASSERT_TRUE(ret > 0);
 
@@ -322,7 +322,7 @@ static void test_prl_encode_exact_buffer_size(void)
     int ret;
 
     /* 缓冲区大小恰好等于所需大小 */
-    ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                      payload, OSAL_sizeof(payload),
                      buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_EQUAL(PRL_HEADER_SIZE + 10, ret);
@@ -335,7 +335,7 @@ static void test_prl_encode_oversized_payload(void)
     int ret;
 
     /* 负载超过最大值 */
-    ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                      large_payload, OSAL_sizeof(large_payload),
                      buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_EQUAL(OSAL_EINVAL, ret);
@@ -350,12 +350,12 @@ static void test_prl_decode_exact_minimum_size(void)
     int ret;
 
     /* 先编码空负载消息 */
-    ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                      NULL, 0, buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_EQUAL(PRL_HEADER_SIZE, ret);
 
     /* 解码最小报文 */
-    ret = PRL_Decode(buffer, PRL_HEADER_SIZE, &dev_type, &msg_type,
+    ret = PRL_decode(buffer, PRL_HEADER_SIZE, &dev_type, &msg_type,
                      &payload, &payload_len);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_EQUAL(0, payload_len);

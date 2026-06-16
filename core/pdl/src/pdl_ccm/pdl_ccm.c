@@ -71,7 +71,7 @@ static void *heartbeat_task(void *arg)
             .packet_loss = 0,
             .rtt_ms = 0
         };
-        ret = PRL_Encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_HEARTBEAT,
+        ret = PRL_encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_HEARTBEAT,
                         &hb, OSAL_sizeof(hb), buf, OSAL_sizeof(buf), 0);
         if (ret < 0)
         {
@@ -82,7 +82,7 @@ static void *heartbeat_task(void *arg)
             OSAL_msleep(ctx->config.heartbeat_interval_ms);
             continue;
         }
-        len = ret;  /* PRL_Encode 返回编码后的长度 */
+        len = ret;  /* PRL_encode 返回编码后的长度 */
 
         /* 发送心跳 */
         ccm_eth_msg_t msg = {
@@ -144,7 +144,7 @@ static void *eth_rx_task(void *arg)
                 const uint8_t *payload;
                 uint16_t payload_len;
 
-                ret = PRL_Decode(msg.payload, msg.payload_len,
+                ret = PRL_decode(msg.payload, msg.payload_len,
                                 &dev_type, &msg_type, &payload, &payload_len);
                 if (ret == OSAL_SUCCESS && payload_len >= OSAL_sizeof(prl_pmc_telemetry_t))
                 {
@@ -165,7 +165,7 @@ static void *eth_rx_task(void *arg)
                 const uint8_t *payload;
                 uint16_t payload_len;
 
-                ret = PRL_Decode(msg.payload, msg.payload_len,
+                ret = PRL_decode(msg.payload, msg.payload_len,
                                 &dev_type, &msg_type, &payload, &payload_len);
                 if (ret == OSAL_SUCCESS && payload_len >= OSAL_sizeof(prl_pmc_command_t))
                 {
@@ -186,7 +186,7 @@ static void *eth_rx_task(void *arg)
                 const uint8_t *payload;
                 uint16_t payload_len;
 
-                ret = PRL_Decode(msg.payload, msg.payload_len,
+                ret = PRL_decode(msg.payload, msg.payload_len,
                                 &dev_type, &msg_type, &payload, &payload_len);
                 if (ret == OSAL_SUCCESS && payload_len >= OSAL_sizeof(prl_pmc_ack_t))
                 {
@@ -406,7 +406,7 @@ int32_t PDL_CCM_send_telemetry(pdl_ccm_handle_t handle,
         return OSAL_ERR_INVALID_PARAM;
     }
 
-    ret = PRL_Encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_TELEMETRY,
+    ret = PRL_encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_TELEMETRY,
                     prl_buf, OSAL_sizeof(prl_pmc_telemetry_t) + len,
                     buf, OSAL_sizeof(buf), 0);
     if (ret < 0)
@@ -482,7 +482,7 @@ int32_t PDL_CCM_send_command(pdl_ccm_handle_t handle,
         return OSAL_ERR_INVALID_PARAM;
     }
 
-    ret = PRL_Encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_COMMAND,
+    ret = PRL_encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_COMMAND,
                     prl_buf, OSAL_sizeof(prl_pmc_command_t) + params_len,
                     buf, OSAL_sizeof(buf), 0);
     if (ret < 0)
@@ -563,7 +563,7 @@ int32_t PDL_CCM_send_firmware_update(pdl_ccm_handle_t handle,
         return OSAL_ERR_INVALID_PARAM;
     }
 
-    ret = PRL_Encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_FIRMWARE_UPDATE,
+    ret = PRL_encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_FIRMWARE_UPDATE,
                     prl_buf, OSAL_sizeof(prl_pmc_firmware_update_t) + len,
                     buf, OSAL_sizeof(buf), 0);
     if (ret < 0)
@@ -623,7 +623,7 @@ int32_t PDL_CCM_node_manage(pdl_ccm_handle_t handle,
         .node_type = 0,
         .node_status = 0
     };
-    ret = PRL_Encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_NODE_MANAGE,
+    ret = PRL_encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_NODE_MANAGE,
                     &nm, OSAL_sizeof(nm), buf, OSAL_sizeof(buf), 0);
     if (ret < 0)
     {
@@ -688,7 +688,7 @@ int32_t PDL_CCM_power_control(pdl_ccm_handle_t handle,
         .power_domain = power_domain,
         .delay_ms = 0
     };
-    ret = PRL_Encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_POWER_CONTROL,
+    ret = PRL_encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_POWER_CONTROL,
                     &pc, OSAL_sizeof(pc), buf, OSAL_sizeof(buf), 0);
     if (ret < 0)
     {
@@ -752,7 +752,7 @@ int32_t PDL_CCM_QueryStatus(pdl_ccm_handle_t handle,
         .target_device = query_target,
         .param_count = 0
     };
-    ret = PRL_Encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_STATUS_QUERY,
+    ret = PRL_encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_STATUS_QUERY,
                     &sq, OSAL_sizeof(sq), buf, OSAL_sizeof(buf), 0);
     if (ret < 0)
     {
@@ -815,7 +815,7 @@ int32_t PDL_CCM_SendHeartbeat(pdl_ccm_handle_t handle,
         .packet_loss = 0,
         .rtt_ms = 0
     };
-    ret = PRL_Encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_HEARTBEAT,
+    ret = PRL_encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_HEARTBEAT,
                     &hb, OSAL_sizeof(hb), buf, OSAL_sizeof(buf), 0);
     if (ret < 0)
     {

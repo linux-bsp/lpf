@@ -26,7 +26,7 @@ static void test_prl_buildresponse_basic(void)
     int ret, request_len, response_len;
 
     /* 编码请求消息 */
-    request_len = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
+    request_len = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
                              request_payload, OSAL_sizeof(request_payload),
                              request_buffer, OSAL_sizeof(request_buffer),
                              PRL_FLAG_NEED_ACK);
@@ -39,7 +39,7 @@ static void test_prl_buildresponse_basic(void)
     TEST_ASSERT_TRUE(response_len > 0);
 
     /* 解码应答消息 */
-    ret = PRL_Decode(response_buffer, response_len, &dev_type, &msg_type,
+    ret = PRL_decode(response_buffer, response_len, &dev_type, &msg_type,
                      &decoded_payload, &payload_len);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
@@ -66,7 +66,7 @@ static void test_prl_buildresponse_empty_payload(void)
     int ret, request_len, response_len;
 
     /* 编码请求消息 */
-    request_len = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    request_len = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                              NULL, 0, request_buffer, OSAL_sizeof(request_buffer), 0);
     TEST_ASSERT_TRUE(request_len > 0);
 
@@ -77,7 +77,7 @@ static void test_prl_buildresponse_empty_payload(void)
     TEST_ASSERT_TRUE(response_len > 0);
 
     /* 解码应答 */
-    ret = PRL_Decode(response_buffer, response_len, &dev_type, &msg_type,
+    ret = PRL_decode(response_buffer, response_len, &dev_type, &msg_type,
                      &decoded_payload, &payload_len);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_EQUAL(PRL_DEV_TYPE_MCU, dev_type);
@@ -95,10 +95,10 @@ static void test_prl_buildresponse_preserves_sequence(void)
     int request_len, response_len;
 
     /* 重置序列号 */
-    PRL_ResetSequence(7777);
+    PRL_reset_sequence(7777);
 
     /* 编码请求 */
-    request_len = PRL_Encode(PRL_DEV_TYPE_CCM, PRL_CCM_MSG_TELEMETRY,
+    request_len = PRL_encode(PRL_DEV_TYPE_CCM, PRL_CCM_MSG_TELEMETRY,
                              NULL, 0, request_buffer, OSAL_sizeof(request_buffer), 0);
     TEST_ASSERT_TRUE(request_len > 0);
 
@@ -124,7 +124,7 @@ static void test_prl_buildresponse_sets_ack_flag(void)
     int request_len, response_len;
 
     /* 编码不带 ACK 标志的请求 */
-    request_len = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_SET_CONFIG,
+    request_len = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_SET_CONFIG,
                              NULL, 0, request_buffer, OSAL_sizeof(request_buffer),
                              PRL_FLAG_NONE);
     TEST_ASSERT_TRUE(request_len > 0);
@@ -159,7 +159,7 @@ static void test_prl_buildresponse_preserves_device_type(void)
 
     for (size_t i = 0; i < OSAL_sizeof(types); i++) {
         /* 编码请求 */
-        request_len = PRL_Encode(types[i], 0x01,
+        request_len = PRL_encode(types[i], 0x01,
                                  NULL, 0, request_buffer, OSAL_sizeof(request_buffer), 0);
         TEST_ASSERT_TRUE(request_len > 0);
 
@@ -170,7 +170,7 @@ static void test_prl_buildresponse_preserves_device_type(void)
         TEST_ASSERT_TRUE(response_len > 0);
 
         /* 验证设备类型 */
-        ret = PRL_Decode(response_buffer, response_len, &dev_type, &msg_type,
+        ret = PRL_decode(response_buffer, response_len, &dev_type, &msg_type,
                          &payload, &payload_len);
         TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
         TEST_ASSERT_EQUAL(types[i], dev_type);
@@ -201,7 +201,7 @@ static void test_prl_buildresponse_null_response_buffer(void)
     int request_len, ret;
 
     /* 编码请求 */
-    request_len = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
+    request_len = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
                              NULL, 0, request_buffer, OSAL_sizeof(request_buffer), 0);
     TEST_ASSERT_TRUE(request_len > 0);
 
@@ -220,7 +220,7 @@ static void test_prl_buildresponse_invalid_request(void)
     int request_len, ret;
 
     /* 编码请求 */
-    request_len = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
+    request_len = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
                              NULL, 0, request_buffer, OSAL_sizeof(request_buffer), 0);
     TEST_ASSERT_TRUE(request_len > 0);
 
@@ -241,7 +241,7 @@ static void test_prl_buildresponse_request_too_short(void)
     int ret;
 
     /* 编码请求 */
-    PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
+    PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
                NULL, 0, request_buffer, OSAL_sizeof(request_buffer), 0);
 
     /* 使用过短的请求长度 */
@@ -259,7 +259,7 @@ static void test_prl_buildresponse_buffer_too_small(void)
     int request_len, ret;
 
     /* 编码请求 */
-    request_len = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
+    request_len = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
                              NULL, 0, request_buffer, OSAL_sizeof(request_buffer), 0);
     TEST_ASSERT_TRUE(request_len > 0);
 
@@ -287,15 +287,15 @@ static void test_prl_buildresponse_request_response_pattern(void)
     int ret, request_len, response_len;
 
     /* 步骤1: 客户端发送请求 */
-    PRL_ResetSequence(1234);
-    request_len = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_STATUS,
+    PRL_reset_sequence(1234);
+    request_len = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_STATUS,
                              request_payload, OSAL_sizeof(request_payload),
                              request_buffer, OSAL_sizeof(request_buffer),
                              PRL_FLAG_NEED_ACK);
     TEST_ASSERT_TRUE(request_len > 0);
 
     /* 步骤2: 服务端接收并解析请求 */
-    ret = PRL_Decode(request_buffer, request_len, &dev_type, &msg_type,
+    ret = PRL_decode(request_buffer, request_len, &dev_type, &msg_type,
                      &decoded_payload, &payload_len);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_EQUAL(PRL_DEV_TYPE_MCU, dev_type);
@@ -312,7 +312,7 @@ static void test_prl_buildresponse_request_response_pattern(void)
     TEST_ASSERT_TRUE(response_len > 0);
 
     /* 步骤4: 客户端接收并验证应答 */
-    ret = PRL_Decode(response_buffer, response_len, &dev_type, &msg_type,
+    ret = PRL_decode(response_buffer, response_len, &dev_type, &msg_type,
                      &decoded_payload, &payload_len);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
@@ -338,7 +338,7 @@ static void test_prl_buildresponse_error_response(void)
     int ret, request_len, response_len;
 
     /* 编码请求 */
-    request_len = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_SET_CONFIG,
+    request_len = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_SET_CONFIG,
                              NULL, 0, request_buffer, OSAL_sizeof(request_buffer),
                              PRL_FLAG_NEED_ACK);
     TEST_ASSERT_TRUE(request_len > 0);
@@ -350,7 +350,7 @@ static void test_prl_buildresponse_error_response(void)
     TEST_ASSERT_TRUE(response_len > 0);
 
     /* 验证错误应答 */
-    ret = PRL_Decode(response_buffer, response_len, &dev_type, &msg_type,
+    ret = PRL_decode(response_buffer, response_len, &dev_type, &msg_type,
                      &decoded_payload, &payload_len);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_EQUAL(1, payload_len);
@@ -373,7 +373,7 @@ static void test_prl_buildresponse_large_response_payload(void)
     }
 
     /* 编码请求 */
-    request_len = PRL_Encode(PRL_DEV_TYPE_CCM, PRL_CCM_MSG_TELEMETRY,
+    request_len = PRL_encode(PRL_DEV_TYPE_CCM, PRL_CCM_MSG_TELEMETRY,
                              NULL, 0, request_buffer, OSAL_sizeof(request_buffer), 0);
     TEST_ASSERT_TRUE(request_len > 0);
 
@@ -384,7 +384,7 @@ static void test_prl_buildresponse_large_response_payload(void)
     TEST_ASSERT_TRUE(response_len > 0);
 
     /* 验证应答 */
-    ret = PRL_Decode(response_buffer, response_len, &dev_type, &msg_type,
+    ret = PRL_decode(response_buffer, response_len, &dev_type, &msg_type,
                      &decoded_payload, &payload_len);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_EQUAL(OSAL_sizeof(large_response), payload_len);
@@ -400,7 +400,7 @@ static void test_prl_buildresponse_with_need_ack_request(void)
     int request_len, response_len;
 
     /* 编码带 NEED_ACK 的请求 */
-    request_len = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_SET_CONFIG,
+    request_len = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_SET_CONFIG,
                              NULL, 0, request_buffer, OSAL_sizeof(request_buffer),
                              PRL_FLAG_NEED_ACK);
     TEST_ASSERT_TRUE(request_len > 0);

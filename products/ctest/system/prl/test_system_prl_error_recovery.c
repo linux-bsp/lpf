@@ -17,7 +17,7 @@
  */
 static void setup_prl(void)
 {
-	PRL_Init();
+	PRL_init();
 }
 
 /**
@@ -25,7 +25,7 @@ static void setup_prl(void)
  */
 static void teardown_prl(void)
 {
-	PRL_Deinit();
+	PRL_deinit();
 }
 
 /**
@@ -40,7 +40,7 @@ static void test_corrupted_packet_detection(void)
 	int ret;
 
 	/* Create valid packet */
-	ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
+	ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
 	                 payload, sizeof(payload),
 	                 buffer, sizeof(buffer), 0);
 	TEST_ASSERT_TRUE(ret > 0);
@@ -58,7 +58,7 @@ static void test_corrupted_packet_detection(void)
 	           PRL_GetErrorString(ret));
 
 	/* Restore and corrupt version */
-	ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
+	ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
 	                 payload, sizeof(payload),
 	                 buffer, sizeof(buffer), 0);
 	buffer[2] = 0xFF; /* Invalid version */
@@ -68,7 +68,7 @@ static void test_corrupted_packet_detection(void)
 	           PRL_GetErrorString(ret));
 
 	/* Restore and corrupt CRC */
-	ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
+	ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
 	                 payload, sizeof(payload),
 	                 buffer, sizeof(buffer), 0);
 	prl_header_t *hdr = (prl_header_t *)buffer;
@@ -91,7 +91,7 @@ static void test_invalid_device_type(void)
 	uint8_t buffer[256];
 
 	/* Try to encode with invalid device type */
-	int ret = PRL_Encode(0xFF, 0x01, NULL, 0,
+	int ret = PRL_encode(0xFF, 0x01, NULL, 0,
 	                     buffer, sizeof(buffer), 0);
 	TEST_ASSERT_TRUE(ret < 0);
 	OSAL_printf("[ INFO     ] Invalid device type encoding rejected: %s\n",
@@ -122,7 +122,7 @@ static void test_buffer_overflow_protection(void)
 
 	/* Try to encode large payload into small buffer */
 	OSAL_memset(large_payload, 0xAA, sizeof(large_payload));
-	ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
+	ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
 	                 large_payload, sizeof(large_payload),
 	                 small_buffer, sizeof(small_buffer), 0);
 	TEST_ASSERT_TRUE(ret < 0);
@@ -134,7 +134,7 @@ static void test_buffer_overflow_protection(void)
 	uint8_t huge_payload[PRL_MAX_PAYLOAD_SIZE + 1];
 	OSAL_memset(huge_payload, 0xBB, sizeof(huge_payload));
 
-	ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
+	ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
 	                 huge_payload, sizeof(huge_payload),
 	                 buffer, sizeof(buffer), 0);
 	TEST_ASSERT_TRUE(ret < 0);
@@ -156,7 +156,7 @@ static void test_partial_packet_handling(void)
 	int ret;
 
 	/* Create valid packet */
-	ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
+	ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
 	                 payload, sizeof(payload),
 	                 buffer, sizeof(buffer), 0);
 	TEST_ASSERT_TRUE(ret > 0);
@@ -167,21 +167,21 @@ static void test_partial_packet_handling(void)
 	const uint8_t *decoded_payload;
 	uint16_t payload_len;
 
-	ret = PRL_Decode(buffer, PRL_HEADER_SIZE - 1,
+	ret = PRL_decode(buffer, PRL_HEADER_SIZE - 1,
 	                 &dev_type, &msg_type, &decoded_payload, &payload_len);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 	OSAL_printf("[ INFO     ] Truncated header rejected: %s\n",
 	           PRL_GetErrorString(ret));
 
 	/* Try to decode with truncated payload */
-	ret = PRL_Decode(buffer, PRL_HEADER_SIZE + 1,
+	ret = PRL_decode(buffer, PRL_HEADER_SIZE + 1,
 	                 &dev_type, &msg_type, &decoded_payload, &payload_len);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 	OSAL_printf("[ INFO     ] Truncated payload rejected: %s\n",
 	           PRL_GetErrorString(ret));
 
 	/* Verify full packet decodes successfully */
-	ret = PRL_Decode(buffer, full_len,
+	ret = PRL_decode(buffer, full_len,
 	                 &dev_type, &msg_type, &decoded_payload, &payload_len);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
@@ -199,27 +199,27 @@ static void test_null_pointer_handling(void)
 	uint8_t payload[] = {0x01, 0x02};
 	int ret;
 
-	/* PRL_Encode with NULL buffer */
-	ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
+	/* PRL_encode with NULL buffer */
+	ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
 	                 payload, sizeof(payload),
 	                 NULL, sizeof(buffer), 0);
 	TEST_ASSERT_TRUE(ret < 0);
 
-	/* PRL_Decode with NULL outputs */
-	ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
+	/* PRL_decode with NULL outputs */
+	ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
 	                 payload, sizeof(payload),
 	                 buffer, sizeof(buffer), 0);
 	TEST_ASSERT_TRUE(ret > 0);
 
-	ret = PRL_Decode(buffer, ret, NULL, NULL, NULL, NULL);
+	ret = PRL_decode(buffer, ret, NULL, NULL, NULL, NULL);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* PRL_GetDeviceType with NULL output */
 	ret = PRL_GetDeviceType(buffer, ret, NULL);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 
-	/* PRL_GetVersion with NULL outputs should be safe */
-	PRL_GetVersion(NULL, NULL); /* Should not crash */
+	/* PRL_get_version with NULL outputs should be safe */
+	PRL_get_version(NULL, NULL); /* Should not crash */
 
 	OSAL_printf("[ PASS     ] Null pointer handling test passed\n");
 }
@@ -236,7 +236,7 @@ static void test_protocol_version_mismatch(void)
 	int ret;
 
 	/* Create packet */
-	ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
+	ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
 	                 payload, sizeof(payload),
 	                 buffer, sizeof(buffer), 0);
 	TEST_ASSERT_TRUE(ret > 0);
@@ -278,7 +278,7 @@ static void test_recovery_after_decode_errors(void)
 	int ret;
 
 	/* Create valid packet */
-	ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
+	ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
 	                 payload, sizeof(payload),
 	                 buffer, sizeof(buffer), 0);
 	TEST_ASSERT_TRUE(ret > 0);
@@ -293,20 +293,20 @@ static void test_recovery_after_decode_errors(void)
 	const uint8_t *decoded_payload;
 	uint16_t payload_len;
 
-	ret = PRL_Decode(corrupted, packet_len,
+	ret = PRL_decode(corrupted, packet_len,
 	                 &dev_type, &msg_type, &decoded_payload, &payload_len);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 	OSAL_printf("[ INFO     ] Error detected: %s\n", PRL_GetErrorString(ret));
 
 	/* Verify system can still decode valid packets */
-	ret = PRL_Decode(buffer, packet_len,
+	ret = PRL_decode(buffer, packet_len,
 	                 &dev_type, &msg_type, &decoded_payload, &payload_len);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	TEST_ASSERT_EQUAL(PRL_DEV_TYPE_MCU, dev_type);
 	TEST_ASSERT_EQUAL(PRL_MCU_MSG_COMMAND, msg_type);
 
 	/* Verify we can still encode */
-	ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+	ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
 	                 NULL, 0, buffer, sizeof(buffer), 0);
 	TEST_ASSERT_TRUE(ret > 0);
 
@@ -327,7 +327,7 @@ static void test_multiple_sequential_errors(void)
 	/* Generate multiple error conditions */
 	for (i = 0; i < 10; i++) {
 		/* Invalid device type */
-		int ret = PRL_Encode(0xFF, 0x01, NULL, 0,
+		int ret = PRL_encode(0xFF, 0x01, NULL, 0,
 		                     buffer, sizeof(buffer), 0);
 		if (ret < 0) {
 			error_count++;
@@ -338,7 +338,7 @@ static void test_multiple_sequential_errors(void)
 		uint8_t large_payload[256];
 		OSAL_memset(large_payload, i, sizeof(large_payload));
 
-		ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
+		ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
 		                 large_payload, sizeof(large_payload),
 		                 small, sizeof(small), 0);
 		if (ret < 0) {
@@ -350,7 +350,7 @@ static void test_multiple_sequential_errors(void)
 
 	/* Verify system still works after errors */
 	uint8_t payload[] = {0xAA};
-	int ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+	int ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
 	                     payload, sizeof(payload),
 	                     buffer, sizeof(buffer), 0);
 	TEST_ASSERT_TRUE(ret > 0);
@@ -377,7 +377,7 @@ static void test_stability_under_errors(void)
 	for (i = 0; i < 100; i++) {
 		if (i % 3 == 0) {
 			/* Valid operation */
-			int ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
+			int ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
 			                     payload, sizeof(payload),
 			                     buffer, sizeof(buffer), 0);
 			if (ret > 0) {
@@ -385,7 +385,7 @@ static void test_stability_under_errors(void)
 			}
 		} else {
 			/* Invalid operation */
-			int ret = PRL_Encode(0xFF, 0x01, NULL, 0,
+			int ret = PRL_encode(0xFF, 0x01, NULL, 0,
 			                     buffer, sizeof(buffer), 0);
 			if (ret < 0) {
 				error_count++;

@@ -149,13 +149,13 @@ static pconfig_platform_config_t test_platform_config2 = {
 
 static void suite_setup(void)
 {
-    PCONFIG_Init();
-    PCONFIG_Register(&test_platform_config);
+    PCONFIG_init();
+    PCONFIG_register(&test_platform_config);
 }
 
 static void suite_teardown(void)
 {
-    PCONFIG_Cleanup();
+    PCONFIG_cleanup();
 }
 
 /*===========================================================================
@@ -164,24 +164,24 @@ static void suite_teardown(void)
 
 static void test_pconfig_init_success(void)
 {
-    PCONFIG_Cleanup();  /* Clean first */
-    int32_t ret = PCONFIG_Init();
+    PCONFIG_cleanup();  /* Clean first */
+    int32_t ret = PCONFIG_init();
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 }
 
 static void test_pconfig_init_twice(void)
 {
-    PCONFIG_Cleanup();
-    int32_t ret1 = PCONFIG_Init();
-    int32_t ret2 = PCONFIG_Init();  /* Double init */
+    PCONFIG_cleanup();
+    int32_t ret1 = PCONFIG_init();
+    int32_t ret2 = PCONFIG_init();  /* Double init */
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret1);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret2);  /* Should handle gracefully */
 }
 
 static void test_pconfig_cleanup(void)
 {
-    PCONFIG_Init();
-    PCONFIG_Cleanup();  /* Should not crash */
+    PCONFIG_init();
+    PCONFIG_cleanup();  /* Should not crash */
 
     /* After cleanup, GetBoard should return NULL */
     const pconfig_platform_config_t *cfg = PCONFIG_GetBoard();
@@ -190,16 +190,16 @@ static void test_pconfig_cleanup(void)
 
 static void test_pconfig_operations_after_cleanup(void)
 {
-    PCONFIG_Init();
-    PCONFIG_Register(&test_platform_config);
-    PCONFIG_Cleanup();
+    PCONFIG_init();
+    PCONFIG_register(&test_platform_config);
+    PCONFIG_cleanup();
 
     /* Operations after cleanup should fail gracefully */
     const pconfig_platform_config_t *cfg = PCONFIG_GetBoard();
     TEST_ASSERT_EQUAL(NULL, cfg);
 
     /* Re-init for other tests */
-    PCONFIG_Init();
+    PCONFIG_init();
 }
 
 /*===========================================================================
@@ -208,21 +208,21 @@ static void test_pconfig_operations_after_cleanup(void)
 
 static void test_pconfig_register_success(void)
 {
-    int32_t ret = PCONFIG_Register(&test_platform_config2);
+    int32_t ret = PCONFIG_register(&test_platform_config2);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 }
 
 static void test_pconfig_register_null(void)
 {
-    int32_t ret = PCONFIG_Register(NULL);
+    int32_t ret = PCONFIG_register(NULL);
     TEST_ASSERT_EQUAL(OSAL_ERR_GENERIC, ret);
 }
 
 static void test_pconfig_register_duplicate(void)
 {
     /* Register same config twice */
-    PCONFIG_Register(&test_platform_config2);
-    int32_t ret = PCONFIG_Register(&test_platform_config2);
+    PCONFIG_register(&test_platform_config2);
+    int32_t ret = PCONFIG_register(&test_platform_config2);
     /* Should either succeed or handle gracefully */
     TEST_ASSERT_TRUE(ret == OSAL_SUCCESS || ret == OSAL_ERR_GENERIC);
 }
@@ -241,13 +241,13 @@ static void test_pconfig_get_board(void)
 
 static void test_pconfig_get_board_before_init(void)
 {
-    PCONFIG_Cleanup();
+    PCONFIG_cleanup();
     const pconfig_platform_config_t *cfg = PCONFIG_GetBoard();
     TEST_ASSERT_EQUAL(NULL, cfg);
 
     /* Re-init and register for other tests */
-    PCONFIG_Init();
-    PCONFIG_Register(&test_platform_config);
+    PCONFIG_init();
+    PCONFIG_register(&test_platform_config);
 }
 
 static void test_pconfig_find_by_name(void)
@@ -406,13 +406,13 @@ static void test_pconfig_hw_get_switch_null_platform(void)
 static void test_pconfig_validate_success(void)
 {
     const pconfig_platform_config_t *platform = PCONFIG_GetBoard();
-    int32_t ret = PCONFIG_Validate(platform);
+    int32_t ret = PCONFIG_validate(platform);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 }
 
 static void test_pconfig_validate_null(void)
 {
-    int32_t ret = PCONFIG_Validate(NULL);
+    int32_t ret = PCONFIG_validate(NULL);
     TEST_ASSERT_EQUAL(OSAL_ERR_GENERIC, ret);
 }
 
@@ -421,7 +421,7 @@ static void test_pconfig_validate_missing_platform_name(void)
     pconfig_platform_config_t invalid_config = test_platform_config;
     invalid_config.platform_name = NULL;
 
-    int32_t ret = PCONFIG_Validate(&invalid_config);
+    int32_t ret = PCONFIG_validate(&invalid_config);
     TEST_ASSERT_EQUAL(OSAL_ERR_GENERIC, ret);
 }
 
@@ -430,7 +430,7 @@ static void test_pconfig_validate_missing_product_name(void)
     pconfig_platform_config_t invalid_config = test_platform_config;
     invalid_config.product_name = NULL;
 
-    int32_t ret = PCONFIG_Validate(&invalid_config);
+    int32_t ret = PCONFIG_validate(&invalid_config);
     TEST_ASSERT_EQUAL(OSAL_ERR_GENERIC, ret);
 }
 
@@ -440,7 +440,7 @@ static void test_pconfig_validate_count_array_mismatch(void)
     invalid_config.mcu_count = 5;  /* Count doesn't match array */
     invalid_config.mcu_array = NULL;
 
-    int32_t ret = PCONFIG_Validate(&invalid_config);
+    int32_t ret = PCONFIG_validate(&invalid_config);
     /* Should detect mismatch */
     TEST_ASSERT_TRUE(ret == OSAL_ERR_GENERIC || ret == OSAL_SUCCESS);
 }
@@ -454,7 +454,7 @@ static void test_pconfig_list(void)
     const pconfig_platform_config_t *configs[10];
     uint32_t count = 10;
 
-    int32_t ret = PCONFIG_List(configs, &count);
+    int32_t ret = PCONFIG_list(configs, &count);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_TRUE(count >= 1);  /* At least our registered config */
 }
@@ -462,26 +462,26 @@ static void test_pconfig_list(void)
 static void test_pconfig_list_null_pointer(void)
 {
     uint32_t count = 10;
-    int32_t ret = PCONFIG_List(NULL, &count);
+    int32_t ret = PCONFIG_list(NULL, &count);
     TEST_ASSERT_EQUAL(OSAL_ERR_GENERIC, ret);
 }
 
 static void test_pconfig_list_null_count(void)
 {
     const pconfig_platform_config_t *configs[10];
-    int32_t ret = PCONFIG_List(configs, NULL);
+    int32_t ret = PCONFIG_list(configs, NULL);
     TEST_ASSERT_EQUAL(OSAL_ERR_GENERIC, ret);
 }
 
 static void test_pconfig_list_small_buffer(void)
 {
     /* Register multiple configs */
-    PCONFIG_Register(&test_platform_config2);
+    PCONFIG_register(&test_platform_config2);
 
     const pconfig_platform_config_t *configs[1];  /* Small buffer */
     uint32_t count = 1;
 
-    int32_t ret = PCONFIG_List(configs, &count);
+    int32_t ret = PCONFIG_list(configs, &count);
     /* Should handle gracefully, returning what fits */
     TEST_ASSERT_TRUE(ret == OSAL_SUCCESS || ret == OSAL_ERR_GENERIC);
     TEST_ASSERT_TRUE(count <= 1);
@@ -495,14 +495,14 @@ static void test_pconfig_print(void)
 {
     const pconfig_platform_config_t *platform = PCONFIG_GetBoard();
     /* Just verify function doesn't crash */
-    PCONFIG_Print(platform);
+    PCONFIG_print(platform);
     TEST_ASSERT_TRUE(true);
 }
 
 static void test_pconfig_print_null(void)
 {
     /* Should handle NULL gracefully */
-    PCONFIG_Print(NULL);
+    PCONFIG_print(NULL);
     TEST_ASSERT_TRUE(true);
 }
 

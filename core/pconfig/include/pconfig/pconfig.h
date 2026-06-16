@@ -35,12 +35,12 @@
  *
  * @return OSAL_SUCCESS 成功
  */
-int32_t PCONFIG_Init(void);
+int32_t PCONFIG_init(void);
 
 /**
  * @brief 清理硬件配置库
  */
-void PCONFIG_Cleanup(void);
+void PCONFIG_cleanup(void);
 
 /*===========================================================================
  * 板级配置注册和查询
@@ -54,7 +54,7 @@ void PCONFIG_Cleanup(void);
  * @return OSAL_SUCCESS 成功
  * @return OSAL_ERR_GENERIC 失败
  */
-int32_t PCONFIG_Register(const pconfig_platform_config_t *config);
+int32_t PCONFIG_register(const pconfig_platform_config_t *config);
 
 /**
  * @brief 获取当前平台配置
@@ -84,7 +84,7 @@ const pconfig_platform_config_t* PCONFIG_Find(const char *platform,
  *
  * @return OSAL_SUCCESS 成功
  */
-int32_t PCONFIG_List(const pconfig_platform_config_t **configs, uint32_t *count);
+int32_t PCONFIG_list(const pconfig_platform_config_t **configs, uint32_t *count);
 
 /*===========================================================================
  * 硬件外设配置查询接口（PCONFIG_HW_*）
@@ -170,13 +170,13 @@ PCONFIG_HW_GetSwitch(const pconfig_platform_config_t *platform, uint32_t index)
  * @return OSAL_SUCCESS 验证通过
  * @return OSAL_ERR_GENERIC 验证失败
  */
-int32_t PCONFIG_Validate(const pconfig_platform_config_t *config);
+int32_t PCONFIG_validate(const pconfig_platform_config_t *config);
 
 /**
  * @brief 打印平台配置信息（用于调试）
  *
  * @param[in] config 平台配置
  */
-void PCONFIG_Print(const pconfig_platform_config_t *config);
+void PCONFIG_print(const pconfig_platform_config_t *config);
 
 #endif /* PCONFIG_H */

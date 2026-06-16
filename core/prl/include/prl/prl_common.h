@@ -91,13 +91,13 @@ bool prl_verify_packet_crc(const uint8_t *packet, size_t total_len);
  * @return OSAL_SUCCESS 成功，OSAL_ERR_* 失败
  * @note 可选调用，主要用于初始化全局状态（如序列号）
  */
-int PRL_Init(void);
+int PRL_init(void);
 
 /**
  * @brief 反初始化 PRL 协议层
  * @return OSAL_SUCCESS 成功，OSAL_ERR_* 失败
  */
-int PRL_Deinit(void);
+int PRL_deinit(void);
 
 /**
  * @brief 编码设备消息
@@ -117,7 +117,7 @@ int PRL_Deinit(void);
  * - 函数会自动填充协议头、计算 CRC、管理序列号和时间戳
  * - 编码后的数据可以直接通过 HAL 层发送
  */
-int PRL_Encode(uint8_t dev_type, uint8_t msg_type,
+int PRL_encode(uint8_t dev_type, uint8_t msg_type,
                const void *payload, uint16_t payload_len,
                uint8_t *buffer, size_t buffer_size, uint8_t flags);
 
@@ -138,7 +138,7 @@ int PRL_Encode(uint8_t dev_type, uint8_t msg_type,
  * - payload 的生命周期与 packet 相同
  * - 函数会自动验证魔数、版本、CRC 等
  */
-int PRL_Decode(const uint8_t *packet, size_t packet_len,
+int PRL_decode(const uint8_t *packet, size_t packet_len,
                uint8_t *dev_type, uint8_t *msg_type,
                const uint8_t **payload, uint16_t *payload_len);
 
@@ -174,7 +174,7 @@ const char *PRL_GetErrorString(int error_code);
  * @param[out] major 主版本号
  * @param[out] minor 次版本号
  */
-void PRL_GetVersion(uint8_t *major, uint8_t *minor);
+void PRL_get_version(uint8_t *major, uint8_t *minor);
 
 /**
  * @brief 重置序列号
@@ -182,7 +182,7 @@ void PRL_GetVersion(uint8_t *major, uint8_t *minor);
  * @param[in] seq 新的序列号起始值
  * @note 通常不需要调用，仅用于测试或特殊场景
  */
-void PRL_ResetSequence(uint32_t seq);
+void PRL_reset_sequence(uint32_t seq);
 
 /**
  * @brief 获取当前序列号

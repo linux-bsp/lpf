@@ -29,7 +29,7 @@ static pthread_mutex_t g_registry_mutex = PTHREAD_MUTEX_INITIALIZER;
  * 配置库初始化
  *===========================================================================*/
 
-int32_t PCONFIG_Init(void)
+int32_t PCONFIG_init(void)
 {
     if (g_initialized) {
         return OSAL_SUCCESS;
@@ -42,7 +42,7 @@ int32_t PCONFIG_Init(void)
     return OSAL_SUCCESS;
 }
 
-void PCONFIG_Cleanup(void)
+void PCONFIG_cleanup(void)
 {
     if (!g_initialized) {
         return;
@@ -61,7 +61,7 @@ void PCONFIG_Cleanup(void)
  * 平台配置注册和查询
  *===========================================================================*/
 
-int32_t PCONFIG_Register(const pconfig_platform_config_t *config)
+int32_t PCONFIG_register(const pconfig_platform_config_t *config)
 {
     uint32_t i;
     const pconfig_platform_config_t *existing;
@@ -78,7 +78,7 @@ int32_t PCONFIG_Register(const pconfig_platform_config_t *config)
     }
 
     /* 验证配置（在加锁前进行，减少临界区时间） */
-    if (OSAL_SUCCESS != PCONFIG_Validate(config)) {
+    if (OSAL_SUCCESS != PCONFIG_validate(config)) {
         LOG_ERROR("PCONFIG", "Config validation failed: %s/%s",
                   config->platform_name, config->product_name);
         return OSAL_ERR_GENERIC;
@@ -181,7 +181,7 @@ const pconfig_platform_config_t* PCONFIG_Find(const char *platform,
     return found;
 }
 
-int32_t PCONFIG_List(const pconfig_platform_config_t **configs, uint32_t *count)
+int32_t PCONFIG_list(const pconfig_platform_config_t **configs, uint32_t *count)
 {
     uint32_t max_count;
     uint32_t actual_count;
@@ -223,7 +223,7 @@ int32_t PCONFIG_List(const pconfig_platform_config_t **configs, uint32_t *count)
  * 配置验证
  *===========================================================================*/
 
-int32_t PCONFIG_Validate(const pconfig_platform_config_t *config)
+int32_t PCONFIG_validate(const pconfig_platform_config_t *config)
 {
     if (NULL == config) {
         return OSAL_ERR_GENERIC;
@@ -237,7 +237,7 @@ int32_t PCONFIG_Validate(const pconfig_platform_config_t *config)
     return OSAL_SUCCESS;
 }
 
-void PCONFIG_Print(const pconfig_platform_config_t *config)
+void PCONFIG_print(const pconfig_platform_config_t *config)
 {
     uint32_t i;
 

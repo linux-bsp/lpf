@@ -284,16 +284,16 @@ int32_t H200_AConfig_Init_Optimized(void)
     int32_t ret;
 
     /* 初始化 AConfig 框架 */
-    ret = ACONFIG_Init();
+    ret = ACONFIG_init();
     if (OSAL_SUCCESS != ret) {
-        LOG_ERROR("H200_ACONFIG", "ACONFIG_Init failed, ret=%d", ret);
+        LOG_ERROR("H200_ACONFIG", "ACONFIG_init failed, ret=%d", ret);
         return ret;
     }
 
     /* 注册配置表（新格式） */
-    ret = ACONFIG_RegisterTable(&g_h200_aconfig_optimized);
+    ret = ACONFIG_register_table(&g_h200_aconfig_optimized);
     if (OSAL_SUCCESS != ret) {
-        LOG_ERROR("H200_ACONFIG", "ACONFIG_RegisterTable failed, ret=%d", ret);
+        LOG_ERROR("H200_ACONFIG", "ACONFIG_register_table failed, ret=%d", ret);
         return ret;
     }
 

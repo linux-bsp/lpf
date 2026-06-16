@@ -21,14 +21,14 @@ int main(int argc, char *argv[])
 	OSAL_printf("=== Test Call Chain Application ===\n");
 
 	/* 初始化 PCONFIG */
-	ret = PCONFIG_Init();
+	ret = PCONFIG_init();
 	if (OSAL_SUCCESS != ret) {
 		OSAL_printf("Failed to initialize PCONFIG: %d\n", ret);
 		return -1;
 	}
 
 	/* 注册平台配置 */
-	ret = PCONFIG_Register(&pconfig_h200_100p_am625);
+	ret = PCONFIG_register(&pconfig_h200_100p_am625);
 	if (OSAL_SUCCESS != ret) {
 		OSAL_printf("Failed to register platform config: %d\n", ret);
 		return -1;
@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 	OSAL_printf("Platform config registered: %s\n", pconfig_h200_100p_am625.platform_name);
 
 	/* 初始化 ACONFIG */
-	ret = ACONFIG_Init();
+	ret = ACONFIG_init();
 	if (OSAL_SUCCESS != ret) {
 		OSAL_printf("Failed to initialize ACONFIG: %d\n", ret);
 		return -1;
@@ -49,8 +49,8 @@ int main(int argc, char *argv[])
 	ret = APP_RunAllTests();
 
 	/* 清理 */
-	ACONFIG_Cleanup();
-	PCONFIG_Cleanup();
+	ACONFIG_cleanup();
+	PCONFIG_cleanup();
 
 	if (OSAL_SUCCESS == ret) {
 		OSAL_printf("\nAll tests completed successfully!\n");

@@ -25,12 +25,12 @@ static void test_prl_encode_decode_basic(void)
     int ret;
 
     /* 编码 MCU 版本查询消息 */
-    ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
+    ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
                             payload, OSAL_sizeof(payload), buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
     /* 解码消息 */
-    ret = PRL_Decode(buffer, ret, &dev_type, &msg_type,
+    ret = PRL_decode(buffer, ret, &dev_type, &msg_type,
                             &decoded_payload, &payload_len);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_EQUAL(PRL_DEV_TYPE_MCU, dev_type);
@@ -48,12 +48,12 @@ static void test_prl_encode_empty_payload(void)
     int ret;
 
     /* 编码无负载消息（如心跳） */
-    ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                             NULL, 0, buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
     /* 解码消息 */
-    ret = PRL_Decode(buffer, ret, &dev_type, &msg_type,
+    ret = PRL_decode(buffer, ret, &dev_type, &msg_type,
                             &decoded_payload, &payload_len);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_EQUAL(PRL_DEV_TYPE_MCU, dev_type);
@@ -107,27 +107,27 @@ static void test_prl_encode_all_device_types(void)
     int ret;
 
     /* 测试所有设备类型的编码 */
-    ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                             payload, OSAL_sizeof(payload), buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
-    ret = PRL_Encode(PRL_DEV_TYPE_CCM, PRL_CCM_MSG_HEARTBEAT,
+    ret = PRL_encode(PRL_DEV_TYPE_CCM, PRL_CCM_MSG_HEARTBEAT,
                             payload, OSAL_sizeof(payload), buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
-    ret = PRL_Encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_HEARTBEAT,
+    ret = PRL_encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_HEARTBEAT,
                             payload, OSAL_sizeof(payload), buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
-    ret = PRL_Encode(PRL_DEV_TYPE_GSC, PRL_GSC_MSG_HEARTBEAT,
+    ret = PRL_encode(PRL_DEV_TYPE_GSC, PRL_GSC_MSG_HEARTBEAT,
                             payload, OSAL_sizeof(payload), buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
-    ret = PRL_Encode(PRL_DEV_TYPE_CCM, PRL_CCM_MSG_HEARTBEAT,
+    ret = PRL_encode(PRL_DEV_TYPE_CCM, PRL_CCM_MSG_HEARTBEAT,
                             payload, OSAL_sizeof(payload), buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
-    ret = PRL_Encode(PRL_DEV_TYPE_POWER, PRL_POWER_MSG_HEARTBEAT,
+    ret = PRL_encode(PRL_DEV_TYPE_POWER, PRL_POWER_MSG_HEARTBEAT,
                             payload, OSAL_sizeof(payload), buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 }
@@ -143,17 +143,17 @@ static void test_prl_encode_invalid_params(void)
     int ret;
 
     /* NULL 缓冲区 */
-    ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                             payload, OSAL_sizeof(payload), NULL, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_PARAM, ret);
 
     /* 无效设备类型 */
-    ret = PRL_Encode(0xFF, PRL_MCU_MSG_HEARTBEAT,
+    ret = PRL_encode(0xFF, PRL_MCU_MSG_HEARTBEAT,
                             payload, OSAL_sizeof(payload), buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_EQUAL(OSAL_EINVAL, ret);
 
     /* 缓冲区太小 */
-    ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                             payload, OSAL_sizeof(payload), buffer, 10, 0);
     TEST_ASSERT_EQUAL(OSAL_ENOBUFS, ret);
 }
@@ -167,19 +167,19 @@ static void test_prl_decode_invalid_params(void)
     int ret;
 
     /* 先编码一个有效消息 */
-    ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                             NULL, 0, buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
     /* NULL 参数 */
-    ret = PRL_Decode(NULL, ret, &dev_type, &msg_type, &payload, &payload_len);
+    ret = PRL_decode(NULL, ret, &dev_type, &msg_type, &payload, &payload_len);
     TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_PARAM, ret);
 
-    ret = PRL_Decode(buffer, ret, NULL, &msg_type, &payload, &payload_len);
+    ret = PRL_decode(buffer, ret, NULL, &msg_type, &payload, &payload_len);
     TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_PARAM, ret);
 
     /* 长度太短 */
-    ret = PRL_Decode(buffer, 10, &dev_type, &msg_type, &payload, &payload_len);
+    ret = PRL_decode(buffer, 10, &dev_type, &msg_type, &payload, &payload_len);
     TEST_ASSERT_EQUAL(OSAL_EINVAL, ret);
 }
 
@@ -197,18 +197,18 @@ static void test_prl_device_crc_verification(void)
     int ret, encoded_len;
 
     /* 编码消息 */
-    encoded_len = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_STATUS,
+    encoded_len = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_STATUS,
                                      payload, OSAL_sizeof(payload), buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(encoded_len > 0);
 
     /* 正常解码应该成功 */
-    ret = PRL_Decode(buffer, encoded_len, &dev_type, &msg_type,
+    ret = PRL_decode(buffer, encoded_len, &dev_type, &msg_type,
                             &decoded_payload, &payload_len);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 篡改数据，CRC 校验应该失败 */
     buffer[PRL_HEADER_SIZE] ^= 0xFF;
-    ret = PRL_Decode(buffer, encoded_len, &dev_type, &msg_type,
+    ret = PRL_decode(buffer, encoded_len, &dev_type, &msg_type,
                             &decoded_payload, &payload_len);
     TEST_ASSERT_EQUAL(OSAL_EBADMSG, ret);
 }
@@ -232,13 +232,13 @@ static void test_prl_device_large_payload(void)
     }
 
     /* 编码大负载消息 */
-    ret = PRL_Encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_TELEMETRY,
+    ret = PRL_encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_TELEMETRY,
                             large_payload, OSAL_sizeof(large_payload),
                             buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(ret > 0);
 
     /* 解码并验证 */
-    ret = PRL_Decode(buffer, ret, &dev_type, &msg_type,
+    ret = PRL_decode(buffer, ret, &dev_type, &msg_type,
                             &decoded_payload, &payload_len);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
     TEST_ASSERT_EQUAL(PRL_DEV_TYPE_PMC, dev_type);

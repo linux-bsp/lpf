@@ -62,7 +62,7 @@ static void setup_routing(void)
 {
 	OSAL_printf("[ SETUP    ] Initializing routing table\n");
 
-	PRL_Init();
+	PRL_init();
 
 	g_route_table[0].dev_type = PRL_DEV_TYPE_MCU;
 	g_route_table[0].handler = handle_mcu_packet;
@@ -93,7 +93,7 @@ static void teardown_routing(void)
 {
 	OSAL_printf("[ TEARDOWN ] Cleaning up routing table\n");
 
-	PRL_Deinit();
+	PRL_deinit();
 	OSAL_memset(g_route_table, 0, sizeof(g_route_table));
 	g_route_table_size = 0;
 
@@ -122,7 +122,7 @@ static void test_fast_device_type_extraction(void)
 	int i;
 	for (i = 0; i < (int)(sizeof(device_types) / sizeof(device_types[0])); i++) {
 		/* Encode packet */
-		ret = PRL_Encode(device_types[i], 0x01,
+		ret = PRL_encode(device_types[i], 0x01,
 		                 payload, sizeof(payload),
 		                 buffer, sizeof(buffer), 0);
 		TEST_ASSERT_TRUE(ret > 0);
@@ -161,7 +161,7 @@ static void test_fast_message_type_extraction(void)
 	int i;
 	for (i = 0; i < (int)(sizeof(message_types) / sizeof(message_types[0])); i++) {
 		/* Encode packet */
-		ret = PRL_Encode(PRL_DEV_TYPE_MCU, message_types[i],
+		ret = PRL_encode(PRL_DEV_TYPE_MCU, message_types[i],
 		                 NULL, 0,
 		                 buffer, sizeof(buffer), 0);
 		TEST_ASSERT_TRUE(ret > 0);
@@ -191,7 +191,7 @@ static void test_sequence_deduplication(void)
 	int ret;
 
 	/* Create packet */
-	ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+	ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
 	                 payload, sizeof(payload),
 	                 buffer, sizeof(buffer), 0);
 	TEST_ASSERT_TRUE(ret > 0);
@@ -211,7 +211,7 @@ static void test_sequence_deduplication(void)
 	TEST_ASSERT_EQUAL(seq1, seq2);
 
 	/* Simulate new packet */
-	ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+	ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
 	                 payload, sizeof(payload),
 	                 buffer, sizeof(buffer), 0);
 	TEST_ASSERT_TRUE(ret > 0);
@@ -244,7 +244,7 @@ static void test_routing_table_lookup(void)
 		uint8_t dev_type = g_route_table[i].dev_type;
 
 		/* Encode packet */
-		ret = PRL_Encode(dev_type, 0x01,
+		ret = PRL_encode(dev_type, 0x01,
 		                 payload, sizeof(payload),
 		                 buffer, sizeof(buffer), 0);
 		TEST_ASSERT_TRUE(ret > 0);
@@ -303,7 +303,7 @@ static void test_high_frequency_classification(void)
 	for (i = 0; i < num_packets; i++) {
 		/* Encode packet (round-robin device types) */
 		uint8_t dev_type = (i % 4) + 1; /* MCU, CCM, PMC, GSC */
-		ret = PRL_Encode(dev_type, 0x01,
+		ret = PRL_encode(dev_type, 0x01,
 		                 payload, sizeof(payload),
 		                 buffer, sizeof(buffer), 0);
 		TEST_ASSERT_TRUE(ret > 0);
@@ -339,7 +339,7 @@ static void test_fast_validation(void)
 	int ret;
 
 	/* Create valid packet */
-	ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+	ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
 	                 payload, sizeof(payload),
 	                 buffer, sizeof(buffer), 0);
 	TEST_ASSERT_TRUE(ret > 0);
@@ -380,7 +380,7 @@ static void test_combined_fast_extraction(void)
 	int ret;
 
 	/* Create test packet */
-	ret = PRL_Encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_GET_TELEMETRY,
+	ret = PRL_encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_GET_TELEMETRY,
 	                 payload, sizeof(payload),
 	                 buffer, sizeof(buffer), 0);
 	TEST_ASSERT_TRUE(ret > 0);

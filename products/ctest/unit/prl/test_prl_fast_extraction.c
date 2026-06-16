@@ -22,7 +22,7 @@ static void test_prl_validatepacket_valid(void)
     int ret, encoded_len;
 
     /* 编码有效消息 */
-    encoded_len = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    encoded_len = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                              payload, OSAL_sizeof(payload),
                              buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(encoded_len > 0);
@@ -39,7 +39,7 @@ static void test_prl_validatepacket_invalid_magic(void)
     int ret, encoded_len;
 
     /* 编码消息 */
-    encoded_len = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    encoded_len = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                              NULL, 0, buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(encoded_len > 0);
 
@@ -58,7 +58,7 @@ static void test_prl_validatepacket_invalid_version(void)
     int ret, encoded_len;
 
     /* 编码消息 */
-    encoded_len = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    encoded_len = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                              NULL, 0, buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(encoded_len > 0);
 
@@ -77,7 +77,7 @@ static void test_prl_validatepacket_invalid_crc(void)
     int ret, encoded_len;
 
     /* 编码消息 */
-    encoded_len = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
+    encoded_len = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
                              payload, OSAL_sizeof(payload),
                              buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(encoded_len > 0);
@@ -105,7 +105,7 @@ static void test_prl_validatepacket_too_short(void)
     int ret;
 
     /* 编码消息 */
-    PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                NULL, 0, buffer, OSAL_sizeof(buffer), 0);
 
     /* 长度太短 */
@@ -119,7 +119,7 @@ static void test_prl_validatepacket_zero_payload(void)
     int ret, encoded_len;
 
     /* 编码空负载消息 */
-    encoded_len = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    encoded_len = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                              NULL, 0, buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_EQUAL(PRL_HEADER_SIZE, encoded_len);
 
@@ -139,7 +139,7 @@ static void test_prl_getdevicetype_mcu(void)
     int ret, encoded_len;
 
     /* 编码 MCU 消息 */
-    encoded_len = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    encoded_len = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                              NULL, 0, buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(encoded_len > 0);
 
@@ -168,7 +168,7 @@ static void test_prl_getdevicetype_all_types(void)
 
     for (size_t i = 0; i < OSAL_sizeof(types); i++) {
         /* 编码消息 */
-        encoded_len = PRL_Encode(types[i], 0x01,
+        encoded_len = PRL_encode(types[i], 0x01,
                                  NULL, 0, buffer, OSAL_sizeof(buffer), 0);
         TEST_ASSERT_TRUE(encoded_len > 0);
 
@@ -186,7 +186,7 @@ static void test_prl_getdevicetype_null_params(void)
     int ret;
 
     /* 编码消息 */
-    PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                NULL, 0, buffer, OSAL_sizeof(buffer), 0);
 
     /* NULL 报文 */
@@ -205,7 +205,7 @@ static void test_prl_getdevicetype_too_short(void)
     int ret;
 
     /* 编码消息 */
-    PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                NULL, 0, buffer, OSAL_sizeof(buffer), 0);
 
     /* 长度太短（无法读取协议头） */
@@ -220,7 +220,7 @@ static void test_prl_getdevicetype_no_crc_check(void)
     int ret, encoded_len;
 
     /* 编码消息 */
-    encoded_len = PRL_Encode(PRL_DEV_TYPE_CCM, PRL_CCM_MSG_TELEMETRY,
+    encoded_len = PRL_encode(PRL_DEV_TYPE_CCM, PRL_CCM_MSG_TELEMETRY,
                              NULL, 0, buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(encoded_len > 0);
 
@@ -246,7 +246,7 @@ static void test_prl_getmessagetype_basic(void)
     int ret, encoded_len;
 
     /* 编码消息 */
-    encoded_len = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
+    encoded_len = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
                              NULL, 0, buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(encoded_len > 0);
 
@@ -272,7 +272,7 @@ static void test_prl_getmessagetype_various_types(void)
     };
 
     for (size_t i = 0; i < OSAL_sizeof(test_msg_types); i++) {
-        encoded_len = PRL_Encode(PRL_DEV_TYPE_MCU, test_msg_types[i],
+        encoded_len = PRL_encode(PRL_DEV_TYPE_MCU, test_msg_types[i],
                                  NULL, 0, buffer, OSAL_sizeof(buffer), 0);
         TEST_ASSERT_TRUE(encoded_len > 0);
 
@@ -289,7 +289,7 @@ static void test_prl_getmessagetype_null_params(void)
     int ret;
 
     /* 编码消息 */
-    PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                NULL, 0, buffer, OSAL_sizeof(buffer), 0);
 
     /* NULL 报文 */
@@ -309,7 +309,7 @@ static void test_prl_getmessagetype_no_crc_check(void)
     int ret, encoded_len;
 
     /* 编码消息 */
-    encoded_len = PRL_Encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_COMMAND,
+    encoded_len = PRL_encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_COMMAND,
                              payload, OSAL_sizeof(payload),
                              buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(encoded_len > 0);
@@ -334,11 +334,11 @@ static void test_prl_getsequence_basic(void)
     int ret, encoded_len;
 
     /* 重置序列号 */
-    PRL_ResetSequence(12345);
+    PRL_reset_sequence(12345);
     expected_seq = PRL_GetCurrentSequence();
 
     /* 编码消息 */
-    encoded_len = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    encoded_len = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                              NULL, 0, buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(encoded_len > 0);
 
@@ -355,14 +355,14 @@ static void test_prl_getsequence_multiple_packets(void)
     int ret;
 
     /* 重置序列号 */
-    PRL_ResetSequence(1000);
+    PRL_reset_sequence(1000);
 
     /* 编码三个消息 */
-    PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                NULL, 0, buffer1, OSAL_sizeof(buffer1), 0);
-    PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                NULL, 0, buffer2, OSAL_sizeof(buffer2), 0);
-    PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                NULL, 0, buffer3, OSAL_sizeof(buffer3), 0);
 
     /* 提取序列号 */
@@ -388,7 +388,7 @@ static void test_prl_getsequence_null_params(void)
     int ret;
 
     /* 编码消息 */
-    PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+    PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
                NULL, 0, buffer, OSAL_sizeof(buffer), 0);
 
     /* NULL 报文 */
@@ -408,10 +408,10 @@ static void test_prl_getsequence_no_crc_check(void)
     int ret, encoded_len;
 
     /* 重置序列号 */
-    PRL_ResetSequence(9999);
+    PRL_reset_sequence(9999);
 
     /* 编码消息 */
-    encoded_len = PRL_Encode(PRL_DEV_TYPE_CCM, PRL_CCM_MSG_ORBIT_DATA,
+    encoded_len = PRL_encode(PRL_DEV_TYPE_CCM, PRL_CCM_MSG_ORBIT_DATA,
                              payload, OSAL_sizeof(payload),
                              buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(encoded_len > 0);
@@ -432,10 +432,10 @@ static void test_prl_getsequence_deduplication_scenario(void)
     int ret, encoded_len;
 
     /* 模拟重复接收的场景 */
-    PRL_ResetSequence(5000);
+    PRL_reset_sequence(5000);
 
     /* 编码一次 */
-    encoded_len = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_STATUS,
+    encoded_len = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_STATUS,
                              NULL, 0, buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(encoded_len > 0);
 
@@ -462,7 +462,7 @@ static void test_fast_routing_scenario(void)
     int ret, encoded_len;
 
     /* 模拟快速路由场景：只需要设备类型和消息类型 */
-    encoded_len = PRL_Encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_TELEMETRY,
+    encoded_len = PRL_encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_TELEMETRY,
                              NULL, 0, buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(encoded_len > 0);
 
@@ -491,7 +491,7 @@ static void test_validate_before_decode_scenario(void)
     int ret, encoded_len;
 
     /* 场景：先快速验证，再完整解码 */
-    encoded_len = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
+    encoded_len = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
                              NULL, 0, buffer, OSAL_sizeof(buffer), 0);
     TEST_ASSERT_TRUE(encoded_len > 0);
 
@@ -500,7 +500,7 @@ static void test_validate_before_decode_scenario(void)
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 第二步：完整解码 */
-    ret = PRL_Decode(buffer, encoded_len, &dev_type, &msg_type,
+    ret = PRL_decode(buffer, encoded_len, &dev_type, &msg_type,
                      &payload, &payload_len);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 }

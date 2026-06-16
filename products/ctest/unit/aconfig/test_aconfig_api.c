@@ -16,29 +16,29 @@
 /* 测试用例: 初始化 ACONFIG */
 static void test_aconfig_init(void)
 {
-    int32_t ret = ACONFIG_Init();
+    int32_t ret = ACONFIG_init();
     TEST_ASSERT_EQUAL(0, ret);
-    ACONFIG_Cleanup();
+    ACONFIG_cleanup();
 }
 
 /* 测试用例: 重复初始化 */
 static void test_aconfig_init_twice(void)
 {
-    int32_t ret = ACONFIG_Init();
+    int32_t ret = ACONFIG_init();
     TEST_ASSERT_EQUAL(0, ret);
 
     /* 第二次初始化应该成功或返回已初始化 */
-    ret = ACONFIG_Init();
+    ret = ACONFIG_init();
     /* 允许成功或已初始化 */
 
-    ACONFIG_Cleanup();
+    ACONFIG_cleanup();
 }
 
 /* 测试用例: 清理未初始化的 ACONFIG */
 static void test_aconfig_cleanup_without_init(void)
 {
     /* 清理未初始化的 ACONFIG 不应该崩溃 */
-    ACONFIG_Cleanup();
+    ACONFIG_cleanup();
     TEST_ASSERT_TRUE(true);
 }
 
@@ -49,18 +49,18 @@ static void test_aconfig_cleanup_without_init(void)
 /* 测试用例: 注册空配置表 */
 static void test_aconfig_register_null_table(void)
 {
-    ACONFIG_Init();
+    ACONFIG_init();
 
-    int32_t ret = ACONFIG_RegisterTable(NULL);
+    int32_t ret = ACONFIG_register_table(NULL);
     TEST_ASSERT_NOT_EQUAL(0, ret);
 
-    ACONFIG_Cleanup();
+    ACONFIG_cleanup();
 }
 
 /* 测试用例: 注册有效配置表 */
 static void test_aconfig_register_valid_table(void)
 {
-    ACONFIG_Init();
+    ACONFIG_init();
 
     aconfig_config_table_t table = {
         .name = "test_config",
@@ -68,7 +68,7 @@ static void test_aconfig_register_valid_table(void)
         .user_data = NULL
     };
 
-    int32_t ret = ACONFIG_RegisterTable(&table);
+    int32_t ret = ACONFIG_register_table(&table);
     TEST_ASSERT_EQUAL(0, ret);
 
     /* 验证可以获取配置表 */
@@ -76,13 +76,13 @@ static void test_aconfig_register_valid_table(void)
     TEST_ASSERT_NOT_NULL(retrieved);
     TEST_ASSERT_EQUAL_STRING("test_config", retrieved->name);
 
-    ACONFIG_Cleanup();
+    ACONFIG_cleanup();
 }
 
 /* 测试用例: 注册后注销配置表 */
 static void test_aconfig_unregister_table(void)
 {
-    ACONFIG_Init();
+    ACONFIG_init();
 
     aconfig_config_table_t table = {
         .name = "test_config",
@@ -90,29 +90,29 @@ static void test_aconfig_unregister_table(void)
         .user_data = NULL
     };
 
-    int32_t ret = ACONFIG_RegisterTable(&table);
+    int32_t ret = ACONFIG_register_table(&table);
     TEST_ASSERT_EQUAL(0, ret);
 
     /* 注销配置表 */
-    ret = ACONFIG_UnregisterTable();
+    ret = ACONFIG_unregister_table();
     TEST_ASSERT_EQUAL(0, ret);
 
     /* 验证配置表已被移除 */
     const aconfig_config_table_t *retrieved = ACONFIG_GetTable();
     TEST_ASSERT_NULL(retrieved);
 
-    ACONFIG_Cleanup();
+    ACONFIG_cleanup();
 }
 
 /* 测试用例: 未注册时注销配置表 */
 static void test_aconfig_unregister_without_register(void)
 {
-    ACONFIG_Init();
+    ACONFIG_init();
 
-    (void)ACONFIG_UnregisterTable();
+    (void)ACONFIG_unregister_table();
     /* 应该成功或返回未注册错误 */
 
-    ACONFIG_Cleanup();
+    ACONFIG_cleanup();
 }
 
 /*===========================================================================
@@ -122,43 +122,43 @@ static void test_aconfig_unregister_without_register(void)
 /* 测试用例: 获取未注册的配置表 */
 static void test_aconfig_get_table_not_registered(void)
 {
-    ACONFIG_Init();
+    ACONFIG_init();
 
     const aconfig_config_table_t *table = ACONFIG_GetTable();
     TEST_ASSERT_NULL(table);
 
-    ACONFIG_Cleanup();
+    ACONFIG_cleanup();
 }
 
 /* 测试用例: 查询功能配置（无配置表） */
 static void test_aconfig_get_function_config_no_table(void)
 {
-    ACONFIG_Init();
+    ACONFIG_init();
 
     const void *config = ACONFIG_GetFunctionConfig(1);
     TEST_ASSERT_NULL(config);
 
-    ACONFIG_Cleanup();
+    ACONFIG_cleanup();
 }
 
 /* 测试用例: 检查功能启用状态（无配置表） */
 static void test_aconfig_is_function_enabled_no_table(void)
 {
-    ACONFIG_Init();
+    ACONFIG_init();
 
     bool enabled = ACONFIG_IsFunctionEnabled(1);
     TEST_ASSERT_FALSE(enabled);
 
-    ACONFIG_Cleanup();
+    ACONFIG_cleanup();
 }
 
 /* 测试用例: 获取统计信息（无配置表） */
 static void test_aconfig_get_statistics_no_table(void)
 {
-    ACONFIG_Init();
+    ACONFIG_init();
 
     aconfig_statistics_t stats;
-    int32_t ret = ACONFIG_GetStatistics(&stats);
+    int32_t ret = ACONFIG_get_statistics(&stats);
 
     if (ret == 0) {
         /* 如果成功，应该返回全零 */
@@ -170,18 +170,18 @@ static void test_aconfig_get_statistics_no_table(void)
         TEST_ASSERT_NOT_EQUAL(0, ret);
     }
 
-    ACONFIG_Cleanup();
+    ACONFIG_cleanup();
 }
 
 /* 测试用例: 获取统计信息 - 空指针 */
 static void test_aconfig_get_statistics_null_pointer(void)
 {
-    ACONFIG_Init();
+    ACONFIG_init();
 
-    int32_t ret = ACONFIG_GetStatistics(NULL);
+    int32_t ret = ACONFIG_get_statistics(NULL);
     TEST_ASSERT_NOT_EQUAL(0, ret);
 
-    ACONFIG_Cleanup();
+    ACONFIG_cleanup();
 }
 
 /*===========================================================================

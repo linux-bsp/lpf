@@ -161,8 +161,8 @@ extern const pconfig_platform_config_t pconfig_h200_100p_am625;
 int main(void)
 {
     /* 初始化 */
-    PCONFIG_Init();
-    PCONFIG_Register(&pconfig_h200_100p_am625);
+    PCONFIG_init();
+    PCONFIG_register(&pconfig_h200_100p_am625);
 
     LOG_INFO("EXAMPLE", "=== PCONFIG Usage Examples ===");
 
@@ -179,7 +179,7 @@ int main(void)
     example_dynamic_allocation();
 
     /* 清理 */
-    PCONFIG_Cleanup();
+    PCONFIG_cleanup();
 
     return 0;
 }

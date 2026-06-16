@@ -30,7 +30,7 @@ static void setup_prl(void)
 {
 	OSAL_printf("[ SETUP    ] Initializing PRL module\n");
 
-	int ret = PRL_Init();
+	int ret = PRL_init();
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	g_test_env.prl_initialized = 1;
@@ -48,7 +48,7 @@ static void teardown_prl(void)
 	OSAL_printf("[ TEARDOWN ] Cleaning up PRL module\n");
 
 	if (g_test_env.prl_initialized) {
-		int ret = PRL_Deinit();
+		int ret = PRL_deinit();
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 		g_test_env.prl_initialized = 0;
 	}
@@ -70,7 +70,7 @@ static void test_basic_request_response(void)
 	int ret;
 
 	/* Step 1: CCM encodes request to MCU */
-	ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
+	ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_GET_VERSION,
 	                 req_payload, sizeof(req_payload),
 	                 req_buffer, sizeof(req_buffer),
 	                 PRL_FLAG_NEED_ACK);
@@ -86,7 +86,7 @@ static void test_basic_request_response(void)
 	const uint8_t *payload;
 	uint16_t payload_len;
 
-	ret = PRL_Decode(req_buffer, req_len,
+	ret = PRL_decode(req_buffer, req_len,
 	                 &dev_type, &msg_type, &payload, &payload_len);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	TEST_ASSERT_EQUAL(PRL_DEV_TYPE_MCU, dev_type);
@@ -102,7 +102,7 @@ static void test_basic_request_response(void)
 	int rsp_len = ret;
 
 	/* Step 5: CCM receives and decodes response */
-	ret = PRL_Decode(rsp_buffer, rsp_len,
+	ret = PRL_decode(rsp_buffer, rsp_len,
 	                 &dev_type, &msg_type, &payload, &payload_len);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	TEST_ASSERT_EQUAL(PRL_DEV_TYPE_MCU, dev_type);
@@ -139,7 +139,7 @@ static void test_sequential_request_response(void)
 		OSAL_memset(payload, i, sizeof(payload));
 
 		/* Encode request */
-		int ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
+		int ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
 		                     payload, sizeof(payload),
 		                     req_buffer, sizeof(req_buffer),
 		                     PRL_FLAG_NEED_ACK);
@@ -176,7 +176,7 @@ static void test_pmc_telemetry_request(void)
 	int ret;
 
 	/* CCM requests telemetry from PMC */
-	ret = PRL_Encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_GET_TELEMETRY,
+	ret = PRL_encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_GET_TELEMETRY,
 	                 NULL, 0,
 	                 req_buffer, sizeof(req_buffer),
 	                 PRL_FLAG_NEED_ACK);
@@ -188,7 +188,7 @@ static void test_pmc_telemetry_request(void)
 	const uint8_t *payload;
 	uint16_t payload_len;
 
-	ret = PRL_Decode(req_buffer, req_len,
+	ret = PRL_decode(req_buffer, req_len,
 	                 &dev_type, &msg_type, &payload, &payload_len);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	TEST_ASSERT_EQUAL(PRL_DEV_TYPE_PMC, dev_type);
@@ -219,7 +219,7 @@ static void test_pmc_telemetry_request(void)
 	TEST_ASSERT_TRUE(ret > 0);
 
 	/* CCM receives telemetry response */
-	ret = PRL_Decode(rsp_buffer, ret,
+	ret = PRL_decode(rsp_buffer, ret,
 	                 &dev_type, &msg_type, &payload, &payload_len);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	TEST_ASSERT_EQUAL(sizeof(telemetry), payload_len);
@@ -258,7 +258,7 @@ static void test_gsc_multidevice_query(void)
 		uint8_t dev_type = device_types[i];
 
 		/* GSC sends status query */
-		ret = PRL_Encode(dev_type, 0x01, /* Generic status query */
+		ret = PRL_encode(dev_type, 0x01, /* Generic status query */
 		                 NULL, 0,
 		                 req_buffer, sizeof(req_buffer),
 		                 PRL_FLAG_NEED_ACK);
@@ -277,7 +277,7 @@ static void test_gsc_multidevice_query(void)
 		const uint8_t *payload;
 		uint16_t payload_len;
 
-		ret = PRL_Decode(rsp_buffer, ret,
+		ret = PRL_decode(rsp_buffer, ret,
 		                 &recv_dev_type, &msg_type, &payload, &payload_len);
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 		TEST_ASSERT_EQUAL(dev_type, recv_dev_type);
@@ -303,7 +303,7 @@ static void test_request_no_response(void)
 	int ret;
 
 	/* Send command without NEED_ACK flag */
-	ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
+	ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
 	                 payload, sizeof(payload),
 	                 buffer, sizeof(buffer),
 	                 PRL_FLAG_NONE);
@@ -334,7 +334,7 @@ static void test_sequence_correlation(void)
 	int ret;
 
 	/* Encode request */
-	ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+	ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
 	                 NULL, 0,
 	                 req_buffer, sizeof(req_buffer),
 	                 PRL_FLAG_NEED_ACK);

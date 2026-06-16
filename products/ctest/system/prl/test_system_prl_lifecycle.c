@@ -20,17 +20,17 @@ static void test_basic_init_deinit(void)
 	OSAL_printf("[ TEST     ] Basic init/deinit cycle\n");
 
 	/* Initialize PRL */
-	int ret = PRL_Init();
+	int ret = PRL_init();
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* Verify we can perform operations */
 	uint8_t major, minor;
-	PRL_GetVersion(&major, &minor);
+	PRL_get_version(&major, &minor);
 	TEST_ASSERT_EQUAL(PRL_VERSION_MAJOR, major);
 	TEST_ASSERT_EQUAL(PRL_VERSION_MINOR, minor);
 
 	/* Deinitialize PRL */
-	ret = PRL_Deinit();
+	ret = PRL_deinit();
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	OSAL_printf("[ PASS     ] Basic init/deinit test passed\n");
@@ -48,19 +48,19 @@ static void test_multiple_init_deinit_cycles(void)
 
 	for (i = 0; i < num_cycles; i++) {
 		/* Initialize */
-		int ret = PRL_Init();
+		int ret = PRL_init();
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 		/* Perform some operations */
 		uint8_t buffer[256];
 		uint8_t payload[] = {0x01, 0x02};
-		ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+		ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
 		                 payload, sizeof(payload),
 		                 buffer, sizeof(buffer), 0);
 		TEST_ASSERT_TRUE(ret > 0);
 
 		/* Deinitialize */
-		ret = PRL_Deinit();
+		ret = PRL_deinit();
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	}
 
@@ -80,7 +80,7 @@ static void test_operations_without_init(void)
 	uint8_t payload[] = {0xAA, 0xBB};
 
 	/* Try encoding without init */
-	int ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
+	int ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_COMMAND,
 	                     payload, sizeof(payload),
 	                     buffer, sizeof(buffer), 0);
 	TEST_ASSERT_TRUE(ret > 0);
@@ -90,7 +90,7 @@ static void test_operations_without_init(void)
 	const uint8_t *decoded_payload;
 	uint16_t payload_len;
 
-	ret = PRL_Decode(buffer, ret,
+	ret = PRL_decode(buffer, ret,
 	                 &dev_type, &msg_type, &decoded_payload, &payload_len);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
@@ -104,7 +104,7 @@ static void test_sequence_number_management(void)
 {
 	OSAL_printf("[ TEST     ] Sequence number management\n");
 
-	int ret = PRL_Init();
+	int ret = PRL_init();
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* Get initial sequence */
@@ -112,7 +112,7 @@ static void test_sequence_number_management(void)
 
 	/* Encode a packet (should increment sequence) */
 	uint8_t buffer[256];
-	ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+	ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
 	                 NULL, 0, buffer, sizeof(buffer), 0);
 	TEST_ASSERT_TRUE(ret > 0);
 
@@ -121,7 +121,7 @@ static void test_sequence_number_management(void)
 	TEST_ASSERT_EQUAL(seq1 + 1, seq2);
 
 	/* Encode another packet */
-	ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+	ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
 	                 NULL, 0, buffer, sizeof(buffer), 0);
 	TEST_ASSERT_TRUE(ret > 0);
 
@@ -131,25 +131,25 @@ static void test_sequence_number_management(void)
 	OSAL_printf("[ INFO     ] Sequence progression: %u → %u → %u\n",
 	           seq1, seq2, seq3);
 
-	ret = PRL_Deinit();
+	ret = PRL_deinit();
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	OSAL_printf("[ PASS     ] Sequence management test passed\n");
 }
 
 /**
- * Test: PRL_ResetSequence functionality
+ * Test: PRL_reset_sequence functionality
  */
 static void test_reset_sequence(void)
 {
 	OSAL_printf("[ TEST     ] Reset sequence functionality\n");
 
-	int ret = PRL_Init();
+	int ret = PRL_init();
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* Reset to specific value */
 	const uint32_t reset_value = 1000;
-	PRL_ResetSequence(reset_value);
+	PRL_reset_sequence(reset_value);
 
 	/* Verify sequence was reset */
 	uint32_t seq = PRL_GetCurrentSequence();
@@ -157,7 +157,7 @@ static void test_reset_sequence(void)
 
 	/* Encode a packet and verify sequence increments from reset value */
 	uint8_t buffer[256];
-	ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+	ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
 	                 NULL, 0, buffer, sizeof(buffer), 0);
 	TEST_ASSERT_TRUE(ret > 0);
 
@@ -174,14 +174,14 @@ static void test_reset_sequence(void)
 	OSAL_printf("[ INFO     ] Reset to %u, packet seq=%u, current=%u\n",
 	           reset_value, packet_seq, seq);
 
-	ret = PRL_Deinit();
+	ret = PRL_deinit();
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	OSAL_printf("[ PASS     ] Reset sequence test passed\n");
 }
 
 /**
- * Test: PRL_GetVersion functionality
+ * Test: PRL_get_version functionality
  */
 static void test_get_version(void)
 {
@@ -190,19 +190,19 @@ static void test_get_version(void)
 	uint8_t major, minor;
 
 	/* Can be called without init */
-	PRL_GetVersion(&major, &minor);
+	PRL_get_version(&major, &minor);
 	TEST_ASSERT_EQUAL(PRL_VERSION_MAJOR, major);
 	TEST_ASSERT_EQUAL(PRL_VERSION_MINOR, minor);
 
 	/* Should also work after init */
-	int ret = PRL_Init();
+	int ret = PRL_init();
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-	PRL_GetVersion(&major, &minor);
+	PRL_get_version(&major, &minor);
 	TEST_ASSERT_EQUAL(PRL_VERSION_MAJOR, major);
 	TEST_ASSERT_EQUAL(PRL_VERSION_MINOR, minor);
 
-	ret = PRL_Deinit();
+	ret = PRL_deinit();
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	OSAL_printf("[ INFO     ] Protocol version: %u.%u\n", major, minor);
@@ -246,7 +246,7 @@ static void test_state_consistency(void)
 	OSAL_printf("[ TEST     ] State consistency across lifecycle\n");
 
 	/* First init */
-	int ret = PRL_Init();
+	int ret = PRL_init();
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	uint32_t seq1 = PRL_GetCurrentSequence();
@@ -255,7 +255,7 @@ static void test_state_consistency(void)
 	uint8_t buffer[256];
 	int i;
 	for (i = 0; i < 5; i++) {
-		ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+		ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
 		                 NULL, 0, buffer, sizeof(buffer), 0);
 		TEST_ASSERT_TRUE(ret > 0);
 	}
@@ -264,18 +264,18 @@ static void test_state_consistency(void)
 	TEST_ASSERT_EQUAL(seq1 + 5, seq2);
 
 	/* Deinit */
-	ret = PRL_Deinit();
+	ret = PRL_deinit();
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* Re-init (sequence may or may not reset - implementation dependent) */
-	ret = PRL_Init();
+	ret = PRL_init();
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	uint32_t seq3 = PRL_GetCurrentSequence();
 	/* Just verify it's a valid sequence number */
 	TEST_ASSERT_TRUE(seq3 >= 0);
 
-	ret = PRL_Deinit();
+	ret = PRL_deinit();
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	OSAL_printf("[ INFO     ] Sequence: init=%u, after_ops=%u, reinit=%u\n",
@@ -297,11 +297,11 @@ static void test_rapid_init_deinit_with_ops(void)
 
 	for (i = 0; i < num_iterations; i++) {
 		/* Init */
-		int ret = PRL_Init();
+		int ret = PRL_init();
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 		/* Quick operation */
-		ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+		ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
 		                 payload, sizeof(payload),
 		                 buffer, sizeof(buffer), 0);
 		TEST_ASSERT_TRUE(ret > 0);
@@ -311,7 +311,7 @@ static void test_rapid_init_deinit_with_ops(void)
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 		/* Deinit */
-		ret = PRL_Deinit();
+		ret = PRL_deinit();
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	}
 
@@ -327,25 +327,25 @@ static void test_reinit_safety(void)
 	OSAL_printf("[ TEST     ] Module re-initialization safety\n");
 
 	/* Double init should be safe */
-	int ret = PRL_Init();
+	int ret = PRL_init();
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-	ret = PRL_Init(); /* Second init */
+	ret = PRL_init(); /* Second init */
 	/* Should either succeed or return a specific error */
 	TEST_ASSERT_TRUE(ret == OSAL_SUCCESS || ret < 0);
 
 	/* Operations should still work */
 	uint8_t buffer[256];
-	ret = PRL_Encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
+	ret = PRL_encode(PRL_DEV_TYPE_MCU, PRL_MCU_MSG_HEARTBEAT,
 	                 NULL, 0, buffer, sizeof(buffer), 0);
 	TEST_ASSERT_TRUE(ret > 0);
 
 	/* Deinit once */
-	ret = PRL_Deinit();
+	ret = PRL_deinit();
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* Double deinit should be safe */
-	ret = PRL_Deinit();
+	ret = PRL_deinit();
 	/* Should either succeed or return a specific error */
 	TEST_ASSERT_TRUE(ret == OSAL_SUCCESS || ret < 0);
 

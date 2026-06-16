@@ -47,7 +47,7 @@ static int32_t encode_stress_worker(void *user_data, uint32_t iteration)
     OSAL_memset(payload, (uint8_t)(iteration & 0xFF), sizeof(payload));
 
     /* Encode packet */
-    ret = PRL_Encode(PRL_DEV_TYPE_MCU,
+    ret = PRL_encode(PRL_DEV_TYPE_MCU,
                      0x01,
                      payload,
                      sizeof(payload),
@@ -84,7 +84,7 @@ static int32_t roundtrip_stress_worker(void *user_data, uint32_t iteration)
     }
 
     /* Encode */
-    ret = PRL_Encode(PRL_DEV_TYPE_CCM,
+    ret = PRL_encode(PRL_DEV_TYPE_CCM,
                      0x10,
                      payload,
                      sizeof(payload),
@@ -100,7 +100,7 @@ static int32_t roundtrip_stress_worker(void *user_data, uint32_t iteration)
     OSAL_atomic_inc(&data->encode_count);
 
     /* Decode */
-    ret = PRL_Decode(buffer, ret, &dev_type, &msg_type,
+    ret = PRL_decode(buffer, ret, &dev_type, &msg_type,
                      &decoded_payload, &decoded_len);
 
     if (ret != OSAL_SUCCESS) {
@@ -141,7 +141,7 @@ static int32_t large_payload_worker(void *user_data, uint32_t iteration)
     OSAL_memset(payload, (uint8_t)(iteration & 0xFF), TEST_PAYLOAD_SIZE_LARGE);
 
     /* Encode large packet */
-    ret = PRL_Encode(PRL_DEV_TYPE_PMC,
+    ret = PRL_encode(PRL_DEV_TYPE_PMC,
                      0x20,
                      payload,
                      TEST_PAYLOAD_SIZE_LARGE,
@@ -175,7 +175,7 @@ static int32_t fast_extract_worker(void *user_data, uint32_t iteration)
 
     /* Encode a packet */
     OSAL_memset(payload, 0xAA, sizeof(payload));
-    encoded_len = PRL_Encode(PRL_DEV_TYPE_GSC,
+    encoded_len = PRL_encode(PRL_DEV_TYPE_GSC,
                              0x30,
                              payload,
                              sizeof(payload),
@@ -226,7 +226,7 @@ static int32_t response_build_worker(void *user_data, uint32_t iteration)
 
     /* Build request */
     OSAL_memset(req_payload, 0x11, sizeof(req_payload));
-    req_len = PRL_Encode(PRL_DEV_TYPE_POWER,
+    req_len = PRL_encode(PRL_DEV_TYPE_POWER,
                          0x40,
                          req_payload,
                          sizeof(req_payload),
@@ -267,8 +267,8 @@ static void test_stress_encode_high_frequency(void)
     const uint32_t duration_sec = TEST_DURATION_SEC;
 
     /* Initialize */
-    PRL_Init();
-    PRL_ResetSequence(0);
+    PRL_init();
+    PRL_reset_sequence(0);
     OSAL_atomic_init(&data.encode_count, 0);
     OSAL_atomic_init(&data.decode_count, 0);
     OSAL_atomic_init(&data.error_count, 0);
@@ -297,7 +297,7 @@ static void test_stress_encode_high_frequency(void)
 
     /* Cleanup */
     stress_context_destroy(ctx);
-    PRL_Deinit();
+    PRL_deinit();
 }
 
 /**
@@ -311,8 +311,8 @@ static void test_stress_roundtrip_concurrency(void)
     const uint32_t iterations = 10000;
 
     /* Initialize */
-    PRL_Init();
-    PRL_ResetSequence(0);
+    PRL_init();
+    PRL_reset_sequence(0);
     OSAL_atomic_init(&data.encode_count, 0);
     OSAL_atomic_init(&data.decode_count, 0);
     OSAL_atomic_init(&data.error_count, 0);
@@ -351,7 +351,7 @@ static void test_stress_roundtrip_concurrency(void)
 
     /* Cleanup */
     stress_context_destroy(ctx);
-    PRL_Deinit();
+    PRL_deinit();
 }
 
 /**
@@ -365,7 +365,7 @@ static void test_stress_large_payload(void)
     const uint32_t iterations = 1000;
 
     /* Initialize */
-    PRL_Init();
+    PRL_init();
     OSAL_atomic_init(&data.encode_count, 0);
     OSAL_atomic_init(&data.decode_count, 0);
     OSAL_atomic_init(&data.error_count, 0);
@@ -401,7 +401,7 @@ static void test_stress_large_payload(void)
 
     /* Cleanup */
     stress_context_destroy(ctx);
-    PRL_Deinit();
+    PRL_deinit();
 }
 
 /**
@@ -415,7 +415,7 @@ static void test_stress_fast_extraction(void)
     const uint32_t duration_sec = 5;
 
     /* Initialize */
-    PRL_Init();
+    PRL_init();
     OSAL_atomic_init(&data.encode_count, 0);
     OSAL_atomic_init(&data.decode_count, 0);
     OSAL_atomic_init(&data.error_count, 0);
@@ -444,7 +444,7 @@ static void test_stress_fast_extraction(void)
 
     /* Cleanup */
     stress_context_destroy(ctx);
-    PRL_Deinit();
+    PRL_deinit();
 }
 
 /**
@@ -458,7 +458,7 @@ static void test_stress_response_building(void)
     const uint32_t iterations = 10000;
 
     /* Initialize */
-    PRL_Init();
+    PRL_init();
     OSAL_atomic_init(&data.encode_count, 0);
     OSAL_atomic_init(&data.decode_count, 0);
     OSAL_atomic_init(&data.error_count, 0);
@@ -492,7 +492,7 @@ static void test_stress_response_building(void)
 
     /* Cleanup */
     stress_context_destroy(ctx);
-    PRL_Deinit();
+    PRL_deinit();
 }
 
 /**
@@ -507,11 +507,11 @@ static void test_stress_sequence_rollover(void)
     int ret;
 
     /* Initialize */
-    PRL_Init();
+    PRL_init();
 
     /* Set sequence to near maximum */
     const uint32_t near_max = UINT32_MAX - 100;
-    PRL_ResetSequence(near_max);
+    PRL_reset_sequence(near_max);
 
     OSAL_printf("[ INFO     ] Testing sequence rollover from %u\n", near_max);
 
@@ -519,7 +519,7 @@ static void test_stress_sequence_rollover(void)
     for (uint32_t i = 0; i < 200; i++) {
         OSAL_memset(payload, (uint8_t)i, sizeof(payload));
 
-        ret = PRL_Encode(PRL_DEV_TYPE_MCU, 0x50,
+        ret = PRL_encode(PRL_DEV_TYPE_MCU, 0x50,
                          payload, sizeof(payload),
                          buffer, sizeof(buffer),
                          PRL_FLAG_NONE);
@@ -542,7 +542,7 @@ static void test_stress_sequence_rollover(void)
     OSAL_printf("[ INFO     ] Sequence rollover test completed successfully\n");
 
     /* Cleanup */
-    PRL_Deinit();
+    PRL_deinit();
 }
 
 /**
@@ -556,7 +556,7 @@ static void test_stress_long_running(void)
     const uint32_t duration_sec = 30;  /* 30 seconds sustained test */
 
     /* Initialize */
-    PRL_Init();
+    PRL_init();
     OSAL_atomic_init(&data.encode_count, 0);
     OSAL_atomic_init(&data.decode_count, 0);
     OSAL_atomic_init(&data.error_count, 0);
@@ -590,7 +590,7 @@ static void test_stress_long_running(void)
 
     /* Cleanup */
     stress_context_destroy(ctx);
-    PRL_Deinit();
+    PRL_deinit();
 }
 
 /* ========== Test Registration ========== */

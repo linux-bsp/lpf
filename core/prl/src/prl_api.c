@@ -11,7 +11,7 @@
 /* 全局初始化标志 */
 static bool g_prl_initialized = false;
 
-int PRL_Init(void)
+int PRL_init(void)
 {
     if (g_prl_initialized) {
         return OSAL_SUCCESS;
@@ -24,7 +24,7 @@ int PRL_Init(void)
     return OSAL_SUCCESS;
 }
 
-int PRL_Deinit(void)
+int PRL_deinit(void)
 {
     if (!g_prl_initialized) {
         return OSAL_SUCCESS;
@@ -36,7 +36,7 @@ int PRL_Deinit(void)
     return OSAL_SUCCESS;
 }
 
-int PRL_Encode(uint8_t dev_type, uint8_t msg_type,
+int PRL_encode(uint8_t dev_type, uint8_t msg_type,
                const void *payload, uint16_t payload_len,
                uint8_t *buffer, size_t buffer_size, uint8_t flags)
 {
@@ -45,7 +45,7 @@ int PRL_Encode(uint8_t dev_type, uint8_t msg_type,
                              buffer, buffer_size, flags);
 }
 
-int PRL_Decode(const uint8_t *packet, size_t packet_len,
+int PRL_decode(const uint8_t *packet, size_t packet_len,
                uint8_t *dev_type, uint8_t *msg_type,
                const uint8_t **payload, uint16_t *payload_len)
 {
@@ -70,7 +70,7 @@ const char *PRL_GetErrorString(int error_code)
     return OSAL_get_status_name(error_code);
 }
 
-void PRL_GetVersion(uint8_t *major, uint8_t *minor)
+void PRL_get_version(uint8_t *major, uint8_t *minor)
 {
     if (major) {
         *major = PRL_VERSION_MAJOR;
@@ -80,7 +80,7 @@ void PRL_GetVersion(uint8_t *major, uint8_t *minor)
     }
 }
 
-void PRL_ResetSequence(uint32_t seq)
+void PRL_reset_sequence(uint32_t seq)
 {
     extern osal_atomic_uint32_t g_seq_number;  /* 定义在 prl_common.c */
     OSAL_atomic_store(&g_seq_number, seq);

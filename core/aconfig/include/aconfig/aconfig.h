@@ -56,25 +56,25 @@ typedef struct {
  * @brief 初始化 ACONFIG 层
  * @return 0 成功，负值失败
  */
-int32_t ACONFIG_Init(void);
+int32_t ACONFIG_init(void);
 
 /**
  * @brief 清理 ACONFIG 层
  */
-void ACONFIG_Cleanup(void);
+void ACONFIG_cleanup(void);
 
 /**
  * @brief 注册配置表
  * @param table 配置表指针
  * @return 0 成功，负值失败
  */
-int32_t ACONFIG_RegisterTable(const aconfig_config_table_t *table);
+int32_t ACONFIG_register_table(const aconfig_config_table_t *table);
 
 /**
  * @brief 注销配置表
  * @return 0 成功，负值失败
  */
-int32_t ACONFIG_UnregisterTable(void);
+int32_t ACONFIG_unregister_table(void);
 
 /**
  * @brief 获取当前配置表
@@ -102,11 +102,11 @@ bool ACONFIG_IsFunctionEnabled(uint32_t function_id);
  * @param stats 输出：统计信息
  * @return 0 成功，负值失败
  */
-int32_t ACONFIG_GetStatistics(aconfig_statistics_t *stats);
+int32_t ACONFIG_get_statistics(aconfig_statistics_t *stats);
 
 /**
  * @brief 打印配置信息（调试用）
  */
-void ACONFIG_PrintConfig(void);
+void ACONFIG_print_config(void);
 
 #endif /* ACONFIG_H */
