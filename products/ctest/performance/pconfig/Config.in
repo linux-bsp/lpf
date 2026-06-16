@@ -3,7 +3,24 @@
 # Measures platform configuration layer performance.
 # Tests configuration loading, parsing, and device mapping speed.
 
-if TEST_PERFORMANCE_PCL
+if TEST_PERFORMANCE_PCONFIG
+
+config TEST_PERF_PCONFIG
+	bool "PCONFIG basic performance tests"
+	default y
+	help
+	  Basic PCONFIG performance test suite.
+
+	  Measures:
+	    - Platform config query performance
+	    - Peripheral config query performance
+	    - CAN config query performance
+
+	  Runtime: 1-2 seconds
+	  Hardware: None
+	  Dependencies: CONFIG_PCONFIG
+	  Tags: performance
+	  Test file: test_perf_pconfig.c
 
 menu "PCONFIG Performance Tests"
 
@@ -45,4 +62,4 @@ config TEST_PERF_PCL_LOOKUP
 
 endmenu
 
-endif # TEST_PERFORMANCE_PCL
+endif # TEST_PERFORMANCE_PCONFIG
