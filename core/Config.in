@@ -13,4 +13,32 @@ source "core/prl/Config.in"
 source "core/aconfig/Config.in"
 source "core/test_framework/Config.in"
 
+# ============================================================================
+# Core Modules Testing
+# ============================================================================
+
+config BUILD_TESTING
+	bool "Build test suite"
+	default n
+	help
+	  Enable building of test suite for core modules.
+
+	  This option controls whether the test framework and test cases
+	  are compiled. Tests include:
+	  - Unit tests for individual modules (OSAL, HAL, PDL, PRL, etc.)
+	  - Performance tests for benchmarking
+	  - Stress tests for stability validation
+	  - System tests for integration testing
+
+	  The test suite helps ensure code quality and detect regressions
+	  during development.
+
+	  Recommended: Enable for development, disable for production.
+
+if BUILD_TESTING
+	menu "Test Configuration"
+		source "products/core-tests/Config.in"
+	endmenu
+endif
+
 endmenu
