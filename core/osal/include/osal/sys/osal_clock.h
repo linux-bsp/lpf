@@ -29,16 +29,6 @@ typedef struct
 int32_t OSAL_get_local_time(OS_time_t *time_struct);
 
 /**
- * @brief 设置本地时间
- *
- * @param[in] time_struct 时间结构
- *
- * @return OSAL_SUCCESS 成功
- * @return OSAL_ERR_INVALID_POINTER time_struct为NULL
- */
-int32_t OSAL_set_local_time(const OS_time_t *time_struct);
-
-/**
  * @brief 获取系统滴答计数
  *
  * @return 系统滴答数(毫秒)

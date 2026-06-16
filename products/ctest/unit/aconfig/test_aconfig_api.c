@@ -130,60 +130,6 @@ static void test_aconfig_get_table_not_registered(void)
     ACONFIG_cleanup();
 }
 
-/* 测试用例: 查询功能配置（无配置表） */
-static void test_aconfig_get_function_config_no_table(void)
-{
-    ACONFIG_init();
-
-    const void *config = ACONFIG_GetFunctionConfig(1);
-    TEST_ASSERT_NULL(config);
-
-    ACONFIG_cleanup();
-}
-
-/* 测试用例: 检查功能启用状态（无配置表） */
-static void test_aconfig_is_function_enabled_no_table(void)
-{
-    ACONFIG_init();
-
-    bool enabled = ACONFIG_IsFunctionEnabled(1);
-    TEST_ASSERT_FALSE(enabled);
-
-    ACONFIG_cleanup();
-}
-
-/* 测试用例: 获取统计信息（无配置表） */
-static void test_aconfig_get_statistics_no_table(void)
-{
-    ACONFIG_init();
-
-    aconfig_statistics_t stats;
-    int32_t ret = ACONFIG_get_statistics(&stats);
-
-    if (ret == 0) {
-        /* 如果成功，应该返回全零 */
-        TEST_ASSERT_EQUAL(0, stats.total_functions);
-        TEST_ASSERT_EQUAL(0, stats.enabled_functions);
-        TEST_ASSERT_EQUAL(0, stats.disabled_functions);
-    } else {
-        /* 或者返回错误 */
-        TEST_ASSERT_NOT_EQUAL(0, ret);
-    }
-
-    ACONFIG_cleanup();
-}
-
-/* 测试用例: 获取统计信息 - 空指针 */
-static void test_aconfig_get_statistics_null_pointer(void)
-{
-    ACONFIG_init();
-
-    int32_t ret = ACONFIG_get_statistics(NULL);
-    TEST_ASSERT_NOT_EQUAL(0, ret);
-
-    ACONFIG_cleanup();
-}
-
 /*===========================================================================
  * 测试套件入口
  *===========================================================================*/
@@ -203,8 +149,4 @@ void test_aconfig_api(void)
 
     /* 配置查询 */
     test_aconfig_get_table_not_registered();
-    test_aconfig_get_function_config_no_table();
-    test_aconfig_is_function_enabled_no_table();
-    test_aconfig_get_statistics_no_table();
-    test_aconfig_get_statistics_null_pointer();
 }

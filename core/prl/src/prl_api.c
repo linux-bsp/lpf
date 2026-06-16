@@ -11,48 +11,8 @@
 /* 全局初始化标志 */
 static bool g_prl_initialized = false;
 
-int PRL_init(void)
-{
-    if (g_prl_initialized) {
-        return OSAL_SUCCESS;
-    }
 
-    /* 初始化序列号（可选） */
-    /* 这里可以从持久化存储中恢复序列号 */
-
-    g_prl_initialized = true;
-    return OSAL_SUCCESS;
-}
-
-int PRL_deinit(void)
-{
-    if (!g_prl_initialized) {
-        return OSAL_SUCCESS;
-    }
-
-    /* 清理资源（如果有） */
-
-    g_prl_initialized = false;
-    return OSAL_SUCCESS;
-}
-
-int PRL_encode(uint8_t dev_type, uint8_t msg_type,
-               const void *payload, uint16_t payload_len,
-               uint8_t *buffer, size_t buffer_size, uint8_t flags)
-{
-    /* 直接调用内部实现 */
-    return prl_device_encode(dev_type, msg_type, payload, payload_len,
-                             buffer, buffer_size, flags);
-}
-
-int PRL_decode(const uint8_t *packet, size_t packet_len,
-               uint8_t *dev_type, uint8_t *msg_type,
-               const uint8_t **payload, uint16_t *payload_len)
-{
-    /* 直接调用内部实现 */
-    return prl_device_decode(packet, packet_len, dev_type, msg_type,
-                             payload, payload_len);
-}
+/* Secondary API functions */
 
 bool PRL_IsDeviceTypeValid(uint8_t dev_type)
 {
@@ -201,6 +161,27 @@ int PRL_GetSequence(const uint8_t *packet, size_t packet_len,
     return OSAL_SUCCESS;
 }
 
+
+/* Primary API functions */
+
+int PRL_encode(uint8_t dev_type, uint8_t msg_type,
+               const void *payload, uint16_t payload_len,
+               uint8_t *buffer, size_t buffer_size, uint8_t flags)
+{
+    /* 直接调用内部实现 */
+    return prl_device_encode(dev_type, msg_type, payload, payload_len,
+                             buffer, buffer_size, flags);
+}
+
+int PRL_decode(const uint8_t *packet, size_t packet_len,
+               uint8_t *dev_type, uint8_t *msg_type,
+               const uint8_t **payload, uint16_t *payload_len)
+{
+    /* 直接调用内部实现 */
+    return prl_device_decode(packet, packet_len, dev_type, msg_type,
+                             payload, payload_len);
+}
+
 int PRL_BuildResponse(const uint8_t *request_packet, size_t request_len,
                       const void *response_payload, uint16_t response_payload_len,
                       uint8_t *response_buffer, size_t response_buffer_size)
@@ -251,4 +232,32 @@ int PRL_BuildResponse(const uint8_t *request_packet, size_t request_len,
     prl_set_packet_crc(response_buffer, total_len);
 
     return (int)total_len;
+}
+
+
+/* Initialization and cleanup functions */
+
+int PRL_init(void)
+{
+    if (g_prl_initialized) {
+        return OSAL_SUCCESS;
+    }
+
+    /* 初始化序列号（可选） */
+    /* 这里可以从持久化存储中恢复序列号 */
+
+    g_prl_initialized = true;
+    return OSAL_SUCCESS;
+}
+
+int PRL_deinit(void)
+{
+    if (!g_prl_initialized) {
+        return OSAL_SUCCESS;
+    }
+
+    /* 清理资源（如果有） */
+
+    g_prl_initialized = false;
+    return OSAL_SUCCESS;
 }

@@ -82,31 +82,4 @@ int32_t ACONFIG_unregister_table(void);
  */
 const aconfig_config_table_t* ACONFIG_GetTable(void);
 
-/**
- * @brief 查询功能配置（通用接口）
- * @param function_id 功能 ID
- * @return 配置数据指针（不透明），NULL 表示未找到
- * @note 返回的指针类型由产品层定义
- */
-const void* ACONFIG_GetFunctionConfig(uint32_t function_id);
-
-/**
- * @brief 检查功能是否启用
- * @param function_id 功能 ID
- * @return true 启用，false 禁用
- */
-bool ACONFIG_IsFunctionEnabled(uint32_t function_id);
-
-/**
- * @brief 获取配置统计信息
- * @param stats 输出：统计信息
- * @return 0 成功，负值失败
- */
-int32_t ACONFIG_get_statistics(aconfig_statistics_t *stats);
-
-/**
- * @brief 打印配置信息（调试用）
- */
-void ACONFIG_print_config(void);
-
 #endif /* ACONFIG_H */

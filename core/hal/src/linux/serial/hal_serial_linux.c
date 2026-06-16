@@ -572,17 +572,4 @@ unlock:
     return result;
 }
 
-/**
- * @brief 串口测试调用实现（调试接口）
- */
-int32_t HAL_SERIAL_test_call(hal_serial_handle_t handle)
-{
-	LOG_INFO("HAL_SERIAL", "========================================");
-	LOG_INFO("HAL_SERIAL", "HAL Layer: Serial TestCall");
-	LOG_INFO("HAL_SERIAL", "Handle: %p", handle);
-	LOG_INFO("HAL_SERIAL", "HAL_SERIAL_test_call() executed successfully");
-	LOG_INFO("HAL_SERIAL", "========================================");
-
-	return OSAL_SUCCESS;
-}
 

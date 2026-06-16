@@ -48,8 +48,9 @@ static void test_osal_get_local_time_null_pointer(void)
 static void test_osal_set_local_time_not_implemented(void)
 {
     OS_time_t time = {1234567890, 0};
-    int32_t ret = OSAL_set_local_time(&time);
-    TEST_ASSERT_EQUAL(OSAL_ERR_NOT_IMPLEMENTED, ret);
+    /* Function has been removed from API */
+    (void)time;
+    TEST_SKIP("OSAL_set_local_time has been removed from API");
 }
 
 /*===========================================================================

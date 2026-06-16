@@ -52,7 +52,7 @@ int32_t PDL_MISC_get_hwid(pdl_hwid_t *hwid)
     hwid->manufacture_date = 0x0821; /* 2024-01-01 */
 
     /* 计算 CRC（使用 OSAL CRC16-CCITT） */
-    hwid->crc16 = OSAL_CRC16_CCITT((const uint8_t *)hwid,
+    hwid->crc16 = OSAL_crc16_ccitt((const uint8_t *)hwid,
                                     OSAL_sizeof(pdl_hwid_t) - OSAL_sizeof(uint16_t));
 
     return OSAL_SUCCESS;
@@ -63,22 +63,6 @@ int32_t PDL_MISC_get_hwid(pdl_hwid_t *hwid)
     hwid->magic = PDL_HWID_INVALID;
     return OSAL_ERR_NOT_IMPLEMENTED;
 #endif
-}
-
-/*===========================================================================
- * 分区表查询实现
- *===========================================================================*/
-
-int32_t PDL_MISC_get_partition_info(const char *name, pdl_partition_info_t *info)
-{
-    if (name == NULL || info == NULL) {
-        return OSAL_ERR_INVALID_PARAM;
-    }
-
-    /* TODO: 实际实现时需要从内核或MTD设备读取分区表 */
-
-    /* 打桩：返回未实现 */
-    return OSAL_ERR_NOT_IMPLEMENTED;
 }
 
 /*===========================================================================

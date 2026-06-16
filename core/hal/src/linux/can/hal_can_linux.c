@@ -365,18 +365,3 @@ int32_t HAL_CAN_set_filter(hal_can_handle_t handle, uint32_t filter_id, uint32_t
 
     return result;
 }
-
-/**
- * @brief CAN 测试调用实现（调试接口）
- */
-int32_t HAL_CAN_test_call(hal_can_handle_t handle)
-{
-	LOG_INFO("HAL_CAN", "========================================");
-	LOG_INFO("HAL_CAN", "HAL Layer: CAN TestCall");
-	LOG_INFO("HAL_CAN", "Handle: %p", handle);
-	LOG_INFO("HAL_CAN", "HAL_CAN_test_call() executed successfully");
-	LOG_INFO("HAL_CAN", "========================================");
-
-	return OSAL_SUCCESS;
-}
-

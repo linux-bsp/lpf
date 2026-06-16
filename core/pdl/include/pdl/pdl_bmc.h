@@ -130,39 +130,4 @@ int32_t PDL_BMC_power_off(pdl_bmc_handle_t handle);
  */
 int32_t PDL_BMC_power_reset(pdl_bmc_handle_t handle);
 
-/**
- * @brief 获取BMC状态
- *
- * @param[in] handle 服务句柄
- * @param[out] status 状态信息
- *
- * @return OSAL_SUCCESS 成功
- */
-int32_t PDL_BMC_get_status(pdl_bmc_handle_t handle, pdl_bmc_status_t *status);
-
-/**
- * @brief 读取传感器
- *
- * @param[in] handle 服务句柄
- * @param[in] sensor_id 传感器ID
- * @param[out] reading 传感器读数
- *
- * @return OSAL_SUCCESS 成功
- */
-int32_t PDL_BMC_read_sensor(pdl_bmc_handle_t handle,
-			uint32_t sensor_id,
-			pdl_bmc_sensor_reading_t *reading);
-
-/**
- * @brief BMC 测试调用链（调试接口）
- *
- * @param[in] index BMC设备索引
- *
- * @return OSAL_SUCCESS 成功
- * @return OSAL_ERR_GENERIC 失败
- *
- * @note 预留的调试接口，验证完整调用链
- */
-int32_t PDL_BMC_test_call(uint32_t index);
-
 #endif /* PDL_BMC_H */

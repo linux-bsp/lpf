@@ -554,10 +554,10 @@ static int32_t crc_ops_worker(void *user_data, uint32_t iteration)
 	}
 
 	/* CRC16计算 */
-	uint16_t crc16 = OSAL_CRC16_CCITT(data, sizeof(data));
+	uint16_t crc16 = OSAL_crc16_ccitt(data, sizeof(data));
 
 	/* CRC32计算 */
-	uint32_t crc32 = OSAL_CRC32(data, sizeof(data));
+	uint32_t crc32 = OSAL_crc32(data, sizeof(data));
 
 	/* 验证非零 */
 	if (crc16 == 0 && crc32 == 0) {

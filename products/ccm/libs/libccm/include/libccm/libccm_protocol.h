@@ -69,14 +69,4 @@ typedef struct {
     uint32_t status;                      /* 状态 */
 } ccm_heartbeat_t;
 
-/* 协议解析函数 */
-int32_t CCM_Protocol_ParseTC(const ccm_can_frame_t *frame, ccm_tc_frame_t *tc);
-int32_t CCM_Protocol_ParseTM_Request(const ccm_can_frame_t *frame, ccm_tm_request_t *req);
-int32_t CCM_Protocol_BuildTM_Response(const ccm_tm_response_t *resp, ccm_can_frame_t *frame);
-int32_t CCM_Protocol_BuildHeartbeat(const ccm_heartbeat_t *hb, ccm_can_frame_t *frame);
-
-/* 协议编码函数 */
-int32_t CCM_Protocol_EncodeTC(const ccm_tc_frame_t *tc, ccm_can_frame_t *frame);
-int32_t CCM_Protocol_EncodeTM_Request(const ccm_tm_request_t *req, ccm_can_frame_t *frame);
-
 #endif /* LIBCCM_PROTOCOL_H */

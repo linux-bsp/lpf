@@ -22,12 +22,6 @@ int32_t OSAL_get_local_time(OS_time_t *time_struct)
     return OSAL_SUCCESS;
 }
 
-int32_t OSAL_set_local_time(const OS_time_t *time_struct __attribute__((unused)))
-{
-    /* Linux用户空间通常无权设置系统时间 */
-    return OSAL_ERR_NOT_IMPLEMENTED;
-}
-
 uint32_t OSAL_get_tick_count(void)
 {
     struct timespec ts;

@@ -80,34 +80,6 @@ typedef struct __attribute__((packed)) {
 int32_t PDL_MISC_get_hwid(pdl_hwid_t *hwid);
 
 /*===========================================================================
- * 分区表查询
- *===========================================================================*/
-
-/**
- * @brief 分区信息
- */
-typedef struct {
-    char name[32];          /* 分区名称 */
-    uint64_t offset;        /* 起始偏移 */
-    uint64_t size;          /* 分区大小 */
-    uint32_t flags;         /* 分区标志 */
-} pdl_partition_info_t;
-
-/**
- * @brief 获取分区信息
- *
- * @param[in] name          分区名称
- * @param[out] info         返回分区信息
- *
- * @return 错误码
- * @retval OSAL_OK               成功
- * @retval OSAL_ERR_INVALID_PARAM 参数无效
- * @retval OSAL_ERR_NOT_FOUND    分区不存在
- * @retval OSAL_ERR_NOT_IMPLEMENTED 功能未实现
- */
-int32_t PDL_MISC_get_partition_info(const char *name, pdl_partition_info_t *info);
-
-/*===========================================================================
  * 设备启动信息
  *===========================================================================*/
 

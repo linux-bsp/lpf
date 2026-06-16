@@ -94,7 +94,7 @@ void prl_set_packet_crc(uint8_t *packet, size_t total_len)
     hdr->crc16 = 0;
 
     /* 计算整个报文的 CRC（使用 OSAL CRC16-CCITT） */
-    uint16_t crc = OSAL_CRC16_CCITT(packet, total_len);
+    uint16_t crc = OSAL_crc16_ccitt(packet, total_len);
 
     /* 设置 CRC（转换为网络字节序） */
     hdr->crc16 = OSAL_htons(crc);
@@ -119,14 +119,14 @@ bool prl_verify_packet_crc(const uint8_t *packet, size_t total_len)
 
     /* 使用 OSAL 的增量 CRC 函数 */
     /* 第一段：从报文开始到 CRC 字段之前 */
-    crc = OSAL_CRC16_CCITT_Update(crc, packet, crc_offset);
+    crc = OSAL_crc16_ccitt_update(crc, packet, crc_offset);
 
     /* 第二段：CRC 字段作为 0x0000 处理 */
     uint8_t zeros[2] = {0x00, 0x00};
-    crc = OSAL_CRC16_CCITT_Update(crc, zeros, OSAL_sizeof(zeros));
+    crc = OSAL_crc16_ccitt_update(crc, zeros, OSAL_sizeof(zeros));
 
     /* 第三段：从 CRC 字段之后到报文结束 */
-    crc = OSAL_CRC16_CCITT_Update(crc, packet + crc_offset + 2,
+    crc = OSAL_crc16_ccitt_update(crc, packet + crc_offset + 2,
                                    total_len - crc_offset - 2);
 
     return (crc == received_crc);
