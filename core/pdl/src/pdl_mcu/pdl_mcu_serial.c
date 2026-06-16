@@ -9,6 +9,7 @@
 
 #include "osal.h"
 #include "hal.h"
+#include "pconfig.h"
 #include "pdl.h"
 #include "pdl_mcu_internal.h"
 
@@ -19,14 +20,14 @@
 /**
  * @brief 转换 PDL 校验位类型到 HAL 校验位类型
  */
-static uint8_t pdl_to_hal_parity(pdl_mcu_parity_t pdl_parity)
+static uint8_t pdl_to_hal_parity(pconfig_mcu_parity_t pdl_parity)
 {
 	switch (pdl_parity) {
-	case PDL_MCU_PARITY_NONE:
+	case PCONFIG_MCU_PARITY_NONE:
 		return HAL_SERIAL_PARITY_NONE;
-	case PDL_MCU_PARITY_ODD:
+	case PCONFIG_MCU_PARITY_ODD:
 		return HAL_SERIAL_PARITY_ODD;
-	case PDL_MCU_PARITY_EVEN:
+	case PCONFIG_MCU_PARITY_EVEN:
 		return HAL_SERIAL_PARITY_EVEN;
 	default:
 		return HAL_SERIAL_PARITY_NONE;
@@ -36,14 +37,14 @@ static uint8_t pdl_to_hal_parity(pdl_mcu_parity_t pdl_parity)
 /**
  * @brief 转换 PDL 流控类型到 HAL 流控类型
  */
-static uint8_t pdl_to_hal_flow_control(pdl_mcu_flow_control_t pdl_flow)
+static uint8_t pdl_to_hal_flow_control(pconfig_mcu_flow_control_t pdl_flow)
 {
 	switch (pdl_flow) {
-	case PDL_MCU_FLOW_NONE:
+	case PCONFIG_MCU_FLOW_NONE:
 		return HAL_SERIAL_FLOW_NONE;
-	case PDL_MCU_FLOW_HW:
+	case PCONFIG_MCU_FLOW_HW:
 		return HAL_SERIAL_FLOW_HW;
-	case PDL_MCU_FLOW_SW:
+	case PCONFIG_MCU_FLOW_SW:
 		return HAL_SERIAL_FLOW_SW;
 	default:
 		return HAL_SERIAL_FLOW_NONE;
@@ -79,7 +80,7 @@ typedef struct
  */
 int32_t mcu_serial_init(const void *config, void **handle)
 {
-    const pdl_mcu_config_t *mcu_cfg;
+    const pconfig_mcu_config_t *mcu_cfg;
     mcu_serial_context_t *ctx;
     hal_serial_config_t serial_config;
 
@@ -88,7 +89,7 @@ int32_t mcu_serial_init(const void *config, void **handle)
         return OSAL_ERR_GENERIC;
     }
 
-    mcu_cfg = (const pdl_mcu_config_t *)config;
+    mcu_cfg = (const pconfig_mcu_config_t *)config;
     ctx = (mcu_serial_context_t *)OSAL_malloc(OSAL_sizeof(mcu_serial_context_t));
     if (NULL == ctx)
     {

@@ -8,6 +8,7 @@
  ************************************************************************/
 
 #include "osal.h"
+#include "pconfig.h"
 #include "pdl.h"
 #include "pdl_mcu_internal.h"
 #include "pdl_mcu_protocol.h"
@@ -17,8 +18,8 @@
  */
 typedef struct
 {
-    pdl_mcu_config_t config;
-    pdl_mcu_interface_t interface;
+    pconfig_mcu_config_t config;     /* 使用 PCONFIG 配置类型 */
+    pconfig_mcu_interface_t interface;
     void *comm_handle;                /* 通信句柄（CAN/串口） */
     bool initialized;
     pdl_mcu_state_t state;            /* 设备状态 */
@@ -30,15 +31,45 @@ typedef struct
 /**
  * @brief 初始化MCU驱动
  */
-int32_t PDL_MCU_Init(const pdl_mcu_config_t *config, pdl_mcu_handle_t *handle)
+int32_t PDL_MCU_Init(uint32_t index, pdl_mcu_handle_t *handle)
 {
     mcu_context_t *ctx;
+    const pconfig_platform_config_t *platform;
+    const pconfig_mcu_entry_t *mcu_entry;
+    const pconfig_mcu_config_t *config;
     int32_t ret;
 
-    if (NULL == config || NULL == handle)
+    if (NULL == handle)
     {
+        return OSAL_ERR_INVALID_POINTER;
+    }
+
+    /* 从 PCONFIG 获取平台配置 */
+    platform = PCONFIG_GetBoard();
+    if (NULL == platform)
+    {
+        LOG_ERROR("PDL_MCU", "No platform config registered");
+        return OSAL_ERR_NAME_NOT_FOUND;
+    }
+
+    /* 从 PCONFIG 获取 MCU 配置 */
+    mcu_entry = PCONFIG_HW_GetMCU(platform, index);
+    if (NULL == mcu_entry)
+    {
+        LOG_ERROR("PDL_MCU", "MCU config not found for index %u", index);
+        return OSAL_ERR_NAME_NOT_FOUND;
+    }
+
+    /* 检查是否启用 */
+    if (!mcu_entry->enabled)
+    {
+        LOG_WARN("PDL_MCU", "MCU index %u is disabled in config", index);
         return OSAL_ERR_GENERIC;
     }
+
+    config = &mcu_entry->config;
+
+    LOG_INFO("PDL_MCU", "Initializing MCU index %u: %s", index, mcu_entry->description);
 
     ctx = (mcu_context_t *)OSAL_malloc(OSAL_sizeof(mcu_context_t));
     if (NULL == ctx)
@@ -47,7 +78,7 @@ int32_t PDL_MCU_Init(const pdl_mcu_config_t *config, pdl_mcu_handle_t *handle)
     }
 
     OSAL_memset(ctx, 0, OSAL_sizeof(mcu_context_t));
-    OSAL_memcpy(&ctx->config, config, OSAL_sizeof(pdl_mcu_config_t));
+    OSAL_memcpy(&ctx->config, config, OSAL_sizeof(pconfig_mcu_config_t));
     ctx->interface = config->interface;
 
     /* 创建互斥锁 */
@@ -57,22 +88,24 @@ int32_t PDL_MCU_Init(const pdl_mcu_config_t *config, pdl_mcu_handle_t *handle)
         return OSAL_ERR_GENERIC;
     }
 
-    /* 初始化通信接口 */
+    /* 初始化通信接口（转换 PCONFIG 配置到 HAL 配置） */
     ret = OSAL_ERR_GENERIC;
     switch (config->interface)
     {
-        case PDL_MCU_INTERFACE_CAN:
+        case PCONFIG_MCU_INTERFACE_CAN:
             ret = mcu_can_init(&config->hw.can, &ctx->comm_handle);
             break;
-        case PDL_MCU_INTERFACE_SERIAL:
+        case PCONFIG_MCU_INTERFACE_SERIAL:
             ret = mcu_serial_init(&config->hw.serial, &ctx->comm_handle);
             break;
-        case PDL_MCU_INTERFACE_I2C:
-        case PDL_MCU_INTERFACE_SPI:
+        case PCONFIG_MCU_INTERFACE_I2C:
+        case PCONFIG_MCU_INTERFACE_SPI:
             /* TODO: 实现I2C/SPI接口 */
-            ret = OSAL_ERR_GENERIC;
+            LOG_ERROR("PDL_MCU", "I2C/SPI interface not supported yet");
+            ret = OSAL_ERR_NOT_SUPPORTED;
             break;
         default:
+            LOG_ERROR("PDL_MCU", "Unknown interface type: %d", config->interface);
             ret = OSAL_ERR_GENERIC;
             break;
     }
@@ -87,6 +120,8 @@ int32_t PDL_MCU_Init(const pdl_mcu_config_t *config, pdl_mcu_handle_t *handle)
     ctx->initialized = true;
     ctx->state = PDL_MCU_STATE_INIT;  /* 初始化完成，进入 INIT 状态 */
     *handle = (pdl_mcu_handle_t)ctx;
+
+    LOG_INFO("PDL_MCU", "MCU index %u initialized successfully", index);
 
     return OSAL_SUCCESS;
 }
@@ -108,10 +143,10 @@ int32_t PDL_MCU_Deinit(pdl_mcu_handle_t handle)
     /* 关闭通信接口 */
     switch (ctx->interface)
     {
-        case PDL_MCU_INTERFACE_CAN:
+        case PCONFIG_MCU_INTERFACE_CAN:
             mcu_can_deinit(ctx->comm_handle);
             break;
-        case PDL_MCU_INTERFACE_SERIAL:
+        case PCONFIG_MCU_INTERFACE_SERIAL:
             mcu_serial_deinit(ctx->comm_handle);
             break;
         default:
@@ -136,7 +171,7 @@ static int32_t mcu_send_command_internal(mcu_context_t *ctx,
                                       uint32_t *actual_size)
 {
     int32_t ret = OSAL_ERR_GENERIC;
-    pdl_mcu_interface_t interface;
+    pconfig_mcu_interface_t interface;
     void *comm_handle;
     uint32_t timeout_ms;
 
@@ -153,12 +188,12 @@ static int32_t mcu_send_command_internal(mcu_context_t *ctx,
     /* 发送命令时不持有锁，由 HAL 层提供线程安全保护 */
     switch (interface)
     {
-        case PDL_MCU_INTERFACE_CAN:
+        case PCONFIG_MCU_INTERFACE_CAN:
             ret = mcu_can_send_command(comm_handle, cmd_code, data, data_len,
                                       response, resp_size, actual_size,
                                       timeout_ms);
             break;
-        case PDL_MCU_INTERFACE_SERIAL:
+        case PCONFIG_MCU_INTERFACE_SERIAL:
             ret = mcu_serial_send_command(comm_handle, cmd_code, data, data_len,
                                          response, resp_size, actual_size,
                                          timeout_ms);

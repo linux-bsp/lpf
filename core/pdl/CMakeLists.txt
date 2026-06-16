@@ -40,10 +40,10 @@ endif()
 ###############################################
 
 ###### Add required/dependent components ######
-# PDL 依赖 OSAL 和 HAL
-# PDL 定义配置类型（pdl_types.h），不依赖 PConfig
-# PConfig 使用 PDL 的配置类型（包含 pdl_types.h）
-# 依赖关系：PConfig→PDL（头文件），无循环依赖
+# PDL 依赖 OSAL、HAL 和 PCONFIG
+# PDL 从 PCONFIG 获取配置类型和运行时配置
+# PCONFIG 定义配置类型，PDL 使用
+# 依赖关系：PDL→PCONFIG（单向依赖，无循环）
 # PDL_CCM 和 PDL_MCU 需要 PRL 协议层支持
 
 # OSAL 是必须的（Kconfig: select OSAL）
@@ -58,6 +58,13 @@ if(CONFIG_HAL)
     list(APPEND ADD_REQUIREMENTS hal)
 else()
     message(FATAL_ERROR "PDL requires HAL but CONFIG_HAL is not enabled")
+endif()
+
+# PCONFIG 是必须的（PDL 使用 PCONFIG 的配置类型）
+if(CONFIG_PCONFIG)
+    list(APPEND ADD_REQUIREMENTS pconfig)
+else()
+    message(FATAL_ERROR "PDL requires PCONFIG but CONFIG_PCONFIG is not enabled")
 endif()
 
 # PRL 是条件依赖的（仅 PDL_CCM 和 PDL_MCU 需要）

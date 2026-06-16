@@ -8,6 +8,7 @@
  ************************************************************************/
 
 #include "osal.h"
+#include "pconfig.h"
 #include "pdl.h"
 #include "pdl_bmc_internal.h"
 
@@ -16,7 +17,7 @@
  */
 typedef struct
 {
-    pdl_bmc_config_t config;
+    pconfig_bmc_config_t config;      /* 使用 PCONFIG 配置类型 */
 
     /* 传输层句柄 */
     void *net_transport_handle;
@@ -25,10 +26,10 @@ typedef struct
     /* 协议层句柄（支持双协议） */
     void *redfish_handle;
     void *ipmi_handle;
-    pdl_bmc_protocol_t current_protocol;
+    pconfig_bmc_protocol_t current_protocol;
 
     /* 当前通道 */
-    pdl_bmc_channel_t current_channel;
+    pconfig_bmc_channel_t current_channel;
     bool connected;
 
     /* 统计信息 */
@@ -45,18 +46,47 @@ typedef struct
 /**
  * @brief 初始化BMC服务
  */
-int32_t PDL_BMC_Init(const pdl_bmc_config_t *config,
-                        pdl_bmc_handle_t *handle)
+int32_t PDL_BMC_Init(uint32_t index, pdl_bmc_handle_t *handle)
 {
     bmc_context_t *ctx;
+    const pconfig_platform_config_t *platform;
+    const pconfig_bmc_entry_t *bmc_entry;
+    const pconfig_bmc_config_t *config;
     int32_t ret;
     void *transport_handle;
     int32_t (*send_recv)(void*, const uint8_t*, uint32_t, uint8_t*, uint32_t, uint32_t*);
 
-    if (NULL == config || NULL == handle)
+    if (NULL == handle)
     {
+        return OSAL_ERR_INVALID_POINTER;
+    }
+
+    /* 从 PCONFIG 获取平台配置 */
+    platform = PCONFIG_GetBoard();
+    if (NULL == platform)
+    {
+        LOG_ERROR("PDL_BMC", "No platform config registered");
+        return OSAL_ERR_NAME_NOT_FOUND;
+    }
+
+    /* 从 PCONFIG 获取 BMC 配置 */
+    bmc_entry = PCONFIG_HW_GetBMC(platform, index);
+    if (NULL == bmc_entry)
+    {
+        LOG_ERROR("PDL_BMC", "BMC config not found for index %u", index);
+        return OSAL_ERR_NAME_NOT_FOUND;
+    }
+
+    /* 检查是否启用 */
+    if (!bmc_entry->enabled)
+    {
+        LOG_WARN("PDL_BMC", "BMC index %u is disabled in config", index);
         return OSAL_ERR_GENERIC;
     }
+
+    config = &bmc_entry->config;
+
+    LOG_INFO("PDL_BMC", "Initializing BMC index %u: %s", index, bmc_entry->description);
 
     /* 分配上下文 */
     ctx = (bmc_context_t *)OSAL_malloc(OSAL_sizeof(bmc_context_t));
@@ -67,9 +97,9 @@ int32_t PDL_BMC_Init(const pdl_bmc_config_t *config,
     }
 
     OSAL_memset(ctx, 0, OSAL_sizeof(bmc_context_t));
-    OSAL_memcpy(&ctx->config, config, OSAL_sizeof(pdl_bmc_config_t));
+    OSAL_memcpy(&ctx->config, config, OSAL_sizeof(pconfig_bmc_config_t));
     ctx->current_channel = config->primary_channel;
-    ctx->current_protocol = PDL_BMC_PROTOCOL_REDFISH;
+    ctx->current_protocol = PCONFIG_BMC_PROTOCOL_REDFISH;
 
     /* 创建互斥锁 */
     if (OSAL_SUCCESS != OSAL_pthread_mutex_init(&ctx->mutex, NULL))

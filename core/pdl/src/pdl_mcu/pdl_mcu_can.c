@@ -9,6 +9,7 @@
 
 #include "osal.h"
 #include "hal.h"
+#include "pconfig.h"
 #include "pdl.h"
 #include "pdl_mcu_internal.h"
 
@@ -28,7 +29,7 @@ typedef struct
  */
 int32_t mcu_can_init(const void *config, void **handle)
 {
-    const pdl_mcu_config_t *mcu_cfg;
+    const pconfig_mcu_config_t *mcu_cfg;
     mcu_can_context_t *ctx;
     hal_can_config_t can_config;
 
@@ -37,7 +38,7 @@ int32_t mcu_can_init(const void *config, void **handle)
         return OSAL_ERR_GENERIC;
     }
 
-    mcu_cfg = (const pdl_mcu_config_t *)config;
+    mcu_cfg = (const pconfig_mcu_config_t *)config;
     ctx = (mcu_can_context_t *)OSAL_malloc(OSAL_sizeof(mcu_can_context_t));
     if (NULL == ctx)
     {
