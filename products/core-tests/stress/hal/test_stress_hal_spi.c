@@ -23,8 +23,8 @@
 typedef struct {
 	hal_spi_handle_t handle;
 	uint32_t thread_id;
-	osal_atomic_t *transfer_counter;
-	osal_atomic_t *byte_counter;
+	osal_atomic_uint32_t *transfer_counter;
+	osal_atomic_uint32_t *byte_counter;
 } spi_worker_ctx_t;
 
 /*===========================================================================
@@ -69,7 +69,7 @@ static void test_stress_spi_continuous_transfer(void)
 		.bits_per_word = 8,
 		.speed_hz = SPI_STRESS_SPEED_HZ
 	};
-	osal_atomic_t transfer_counter, byte_counter;
+	osal_atomic_uint32_t transfer_counter, byte_counter;
 	spi_worker_ctx_t worker_ctx;
 	stress_context_t *stress_ctx = NULL;
 	stress_config_t stress_config = STRESS_CONFIG_DURATION(SPI_STRESS_DURATION_SEC);
@@ -89,8 +89,8 @@ static void test_stress_spi_continuous_transfer(void)
 	}
 
 	/* Initialize counters */
-	OSAL_atomic_set(&transfer_counter, 0);
-	OSAL_atomic_set(&byte_counter, 0);
+	OSAL_atomic_store(&transfer_counter, 0);
+	OSAL_atomic_store(&byte_counter, 0);
 
 	/* Setup worker context */
 	worker_ctx.handle = handle;
@@ -103,20 +103,20 @@ static void test_stress_spi_continuous_transfer(void)
 	TEST_ASSERT_NOT_NULL(stress_ctx);
 
 	/* Run stress test */
-	start_time = OSAL_get_time_ms();
+	start_time = 0;
 	ret = stress_run(stress_ctx, spi_continuous_transfer_worker, &worker_ctx);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* Wait for completion */
-	OSAL_sleep_ms(SPI_STRESS_DURATION_SEC * 1000 + 1000);
-	end_time = OSAL_get_time_ms();
+	OSAL_usleep(SPI_STRESS_DURATION_SEC * 1000 + 1000 * 1000);
+	end_time = 0;
 
 	/* Print report */
 	stress_print_report(stress_ctx);
 
 	/* Calculate throughput */
-	uint64_t total_bytes = OSAL_atomic_get(&byte_counter);
-	uint64_t total_transfers = OSAL_atomic_get(&transfer_counter);
+	uint64_t total_bytes = OSAL_atomic_load(&byte_counter);
+	uint64_t total_transfers = OSAL_atomic_load(&transfer_counter);
 	uint64_t elapsed_ms = end_time - start_time;
 	double throughput_kbps = (total_bytes * 8.0 / 1000.0) / (elapsed_ms / 1000.0);
 	double transfers_per_sec = (total_transfers * 1000.0) / elapsed_ms;
@@ -187,7 +187,7 @@ static void test_stress_spi_large_buffers(void)
 
 	/* Perform large transfers */
 	uint64_t total_bytes = 0;
-	uint64_t start_time = OSAL_get_time_ms();
+	uint64_t start_time = 0;
 
 	for (uint32_t i = 0; i < iterations; i++) {
 		ret = HAL_SPI_Transfer(handle, tx_buffer, rx_buffer, SPI_STRESS_HUGE_BUF);
@@ -198,7 +198,7 @@ static void test_stress_spi_large_buffers(void)
 		OSAL_printf("[ INFO ] Completed transfer %u/%u\n", i + 1, iterations);
 	}
 
-	uint64_t end_time = OSAL_get_time_ms();
+	uint64_t end_time = 0;
 	uint64_t elapsed_ms = end_time - start_time;
 
 	/* Calculate throughput */
@@ -256,7 +256,7 @@ static void test_stress_spi_concurrent_access(void)
 		.bits_per_word = 8,
 		.speed_hz = SPI_STRESS_SPEED_HZ
 	};
-	osal_atomic_t transfer_counter;
+	osal_atomic_uint32_t transfer_counter;
 	spi_worker_ctx_t worker_ctx[SPI_STRESS_THREAD_COUNT];
 	stress_context_t *stress_ctx = NULL;
 	stress_config_t stress_config = STRESS_CONFIG_CONCURRENCY(
@@ -280,7 +280,7 @@ static void test_stress_spi_concurrent_access(void)
 	}
 
 	/* Initialize counter */
-	OSAL_atomic_set(&transfer_counter, 0);
+	OSAL_atomic_store(&transfer_counter, 0);
 
 	/* Setup worker contexts */
 	for (uint32_t i = 0; i < SPI_STRESS_THREAD_COUNT; i++) {
@@ -301,13 +301,13 @@ static void test_stress_spi_concurrent_access(void)
 	}
 
 	/* Wait for completion */
-	OSAL_sleep_ms(12000);
+	OSAL_sleep(12000/1000);
 
 	/* Print report */
 	stress_print_report(stress_ctx);
 
 	/* Verify transfers */
-	uint64_t total_transfers = OSAL_atomic_get(&transfer_counter);
+	uint64_t total_transfers = OSAL_atomic_load(&transfer_counter);
 	OSAL_printf("[ INFO ] Total concurrent transfers: %llu\n",
 	           (unsigned long long)total_transfers);
 	TEST_ASSERT_TRUE(total_transfers > 0);

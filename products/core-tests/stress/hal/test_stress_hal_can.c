@@ -22,14 +22,14 @@
 typedef struct {
 	hal_can_handle_t handle;
 	uint32_t thread_id;
-	osal_atomic_t *shared_counter;
+	osal_atomic_uint32_t *shared_counter;
 } can_send_worker_ctx_t;
 
 /* Worker context for receive flooding test */
 typedef struct {
 	hal_can_handle_t tx_handle;
 	hal_can_handle_t rx_handle;
-	osal_atomic_t *rx_count;
+	osal_atomic_uint32_t *rx_count;
 } can_flood_worker_ctx_t;
 
 /*===========================================================================
@@ -79,7 +79,7 @@ static void test_stress_can_concurrent_send(void)
 		.rx_timeout = 1000,
 		.tx_timeout = 1000
 	};
-	osal_atomic_t shared_counter;
+	osal_atomic_uint32_t shared_counter;
 	can_send_worker_ctx_t *worker_contexts = NULL;
 	stress_context_t *stress_ctx = NULL;
 	stress_config_t stress_config = STRESS_CONFIG_CONCURRENCY(
@@ -99,7 +99,7 @@ static void test_stress_can_concurrent_send(void)
 	}
 
 	/* Initialize shared counter */
-	OSAL_atomic_set(&shared_counter, 0);
+	OSAL_atomic_store(&shared_counter, 0);
 
 	/* Allocate worker contexts */
 	worker_contexts = OSAL_malloc(sizeof(can_send_worker_ctx_t) * CAN_STRESS_THREAD_COUNT);
@@ -122,7 +122,7 @@ static void test_stress_can_concurrent_send(void)
 	}
 
 	/* Wait for completion and check results */
-	OSAL_sleep_ms(CAN_STRESS_DURATION_SEC * 1000 + 2000);
+	OSAL_usleep(CAN_STRESS_DURATION_SEC * 1000 + 2000 * 1000);
 
 	/* Print report */
 	stress_print_report(stress_ctx);
@@ -131,7 +131,7 @@ static void test_stress_can_concurrent_send(void)
 	STRESS_ASSERT_SUCCESS_RATE_GT(stress_ctx, 95.0);
 
 	/* Verify sent count */
-	uint32_t sent_count = OSAL_atomic_get(&shared_counter);
+	uint32_t sent_count = OSAL_atomic_load(&shared_counter);
 	OSAL_printf("[ INFO ] Total frames sent: %u\n", sent_count);
 	TEST_ASSERT_TRUE(sent_count > 0);
 
@@ -188,7 +188,7 @@ static int32_t can_flood_rx_worker(void *user_data, uint32_t iteration)
 	int32_t ret;
 
 	/* Try to receive frame */
-	ret = HAL_CAN_Recv(ctx->rx_handle, &frame);
+	ret = HAL_CAN_Recv(ctx->rx_handle, &frame, 100);
 	if (ret == OSAL_SUCCESS) {
 		OSAL_atomic_inc(ctx->rx_count);
 	} else if (ret == OSAL_ERR_TIMEOUT) {
@@ -213,7 +213,7 @@ static void test_stress_can_rx_flooding(void)
 		.rx_timeout = 100,  /* Short timeout for flood test */
 		.tx_timeout = 1000
 	};
-	osal_atomic_t rx_count;
+	osal_atomic_uint32_t rx_count;
 	can_flood_worker_ctx_t worker_ctx;
 	stress_context_t *tx_stress_ctx = NULL;
 	stress_context_t *rx_stress_ctx = NULL;
@@ -240,7 +240,7 @@ static void test_stress_can_rx_flooding(void)
 	}
 
 	/* Initialize context */
-	OSAL_atomic_set(&rx_count, 0);
+	OSAL_atomic_store(&rx_count, 0);
 	worker_ctx.tx_handle = tx_handle;
 	worker_ctx.rx_handle = rx_handle;
 	worker_ctx.rx_count = &rx_count;
@@ -260,7 +260,7 @@ static void test_stress_can_rx_flooding(void)
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* Wait for completion */
-	OSAL_sleep_ms(12000);
+	OSAL_sleep(12000/1000);
 
 	/* Print reports */
 	OSAL_printf("\n--- TX Flood Report ---\n");
@@ -269,7 +269,7 @@ static void test_stress_can_rx_flooding(void)
 	stress_print_report(rx_stress_ctx);
 
 	/* Verify received frames */
-	uint32_t received = OSAL_atomic_get(&rx_count);
+	uint32_t received = OSAL_atomic_load(&rx_count);
 	OSAL_printf("[ INFO ] Total frames received: %u\n", received);
 	TEST_ASSERT_TRUE(received > 0);
 
@@ -364,7 +364,7 @@ static void test_stress_can_filter_reconfiguration(void)
 		.rx_timeout = 1000,
 		.tx_timeout = 1000
 	};
-	hal_can_filter_t filter;
+	uint32_t filter_id, filter_mask;
 	int32_t ret;
 	const uint32_t iterations = 1000;
 
@@ -381,15 +381,15 @@ static void test_stress_can_filter_reconfiguration(void)
 
 	/* Rapidly reconfigure filters */
 	for (uint32_t i = 0; i < iterations; i++) {
-		filter.id = 0x100 + (i % 256);
-		filter.mask = 0x7FF;
+		filter_id = 0x100 + (i % 256);
+		filter_mask = 0x7FF;
 
-		ret = HAL_CAN_SetFilter(handle, &filter);
+		ret = HAL_CAN_SetFilter(handle, filter_id, filter_mask);
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 		/* Send test frame */
 		hal_can_frame_t frame = {
-			.can_id = filter.id,
+			.can_id = filter_id,
 			.dlc = 2,
 			.data = {(i >> 8) & 0xFF, i & 0xFF}
 		};
@@ -399,7 +399,7 @@ static void test_stress_can_filter_reconfiguration(void)
 
 		/* Brief sleep to allow filter to take effect */
 		if (i % 100 == 0) {
-			OSAL_sleep_ms(1);
+			OSAL_usleep(1 * 1000);
 		}
 	}
 

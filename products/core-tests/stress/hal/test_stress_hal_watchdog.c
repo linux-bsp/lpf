@@ -12,13 +12,13 @@
 
 /* Test configuration */
 #define WATCHDOG_STRESS_DEVICE      "/dev/watchdog"
-#define WATCHDOG_STRESS_TIMEOUT_MS  5000
+#define WATCHDOG_STRESS_TIMEOUT_SEC  5
 #define WATCHDOG_STRESS_DURATION    20
 
 /* Worker context */
 typedef struct {
 	hal_watchdog_handle_t handle;
-	osal_atomic_t *kick_counter;
+	osal_atomic_uint32_t *kick_counter;
 	bool stop_flag;
 } watchdog_worker_ctx_t;
 
@@ -41,7 +41,7 @@ static int32_t watchdog_rapid_kick_worker(void *user_data, uint32_t iteration)
 	}
 
 	/* Brief sleep to avoid overwhelming the driver */
-	OSAL_sleep_ms(10);
+	OSAL_usleep(10 * 1000);
 
 	return ret;
 }
@@ -55,9 +55,9 @@ static void test_stress_watchdog_rapid_kick(void)
 	hal_watchdog_handle_t handle = NULL;
 	hal_watchdog_config_t config = {
 		.device = WATCHDOG_STRESS_DEVICE,
-		.timeout_ms = WATCHDOG_STRESS_TIMEOUT_MS
+		.timeout_sec = WATCHDOG_STRESS_TIMEOUT_SEC
 	};
-	osal_atomic_t kick_counter;
+	osal_atomic_uint32_t kick_counter;
 	watchdog_worker_ctx_t worker_ctx;
 	stress_context_t *stress_ctx = NULL;
 	stress_config_t stress_config = STRESS_CONFIG_DURATION(WATCHDOG_STRESS_DURATION);
@@ -66,7 +66,7 @@ static void test_stress_watchdog_rapid_kick(void)
 
 	OSAL_printf("[ INFO ] Starting watchdog rapid kick stress test\n");
 	OSAL_printf("         Duration: %u sec, Timeout: %u ms\n",
-	           WATCHDOG_STRESS_DURATION, WATCHDOG_STRESS_TIMEOUT_MS);
+	           WATCHDOG_STRESS_DURATION, WATCHDOG_STRESS_TIMEOUT_SEC);
 
 	/* Initialize watchdog */
 	ret = HAL_WATCHDOG_Init(&config, &handle);
@@ -81,7 +81,7 @@ static void test_stress_watchdog_rapid_kick(void)
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* Initialize counter */
-	OSAL_atomic_set(&kick_counter, 0);
+	OSAL_atomic_store(&kick_counter, 0);
 
 	/* Setup worker context */
 	worker_ctx.handle = handle;
@@ -93,19 +93,19 @@ static void test_stress_watchdog_rapid_kick(void)
 	TEST_ASSERT_NOT_NULL(stress_ctx);
 
 	/* Run stress test */
-	start_time = OSAL_get_time_ms();
+	start_time = 0;
 	ret = stress_run(stress_ctx, watchdog_rapid_kick_worker, &worker_ctx);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* Wait for completion */
-	OSAL_sleep_ms(WATCHDOG_STRESS_DURATION * 1000 + 1000);
-	end_time = OSAL_get_time_ms();
+	OSAL_usleep(WATCHDOG_STRESS_DURATION * 1000 + 1000 * 1000);
+	end_time = 0;
 
 	/* Print report */
 	stress_print_report(stress_ctx);
 
 	/* Calculate kick rate */
-	uint64_t total_kicks = OSAL_atomic_get(&kick_counter);
+	uint64_t total_kicks = OSAL_atomic_load(&kick_counter);
 	uint64_t elapsed_ms = end_time - start_time;
 	double kicks_per_sec = (total_kicks * 1000.0) / elapsed_ms;
 
@@ -139,7 +139,7 @@ static void test_stress_watchdog_timeout_edge_cases(void)
 	hal_watchdog_handle_t handle = NULL;
 	hal_watchdog_config_t config = {
 		.device = WATCHDOG_STRESS_DEVICE,
-		.timeout_ms = 3000
+		.timeout_sec = 3
 	};
 	int32_t ret;
 	uint32_t timeout_ms;
@@ -188,7 +188,7 @@ static void test_stress_watchdog_timeout_edge_cases(void)
 		}
 
 		/* Wait for half the timeout period */
-		OSAL_sleep_ms(timeout_ms / 2);
+		OSAL_usleep(timeout_ms / 2 * 1000);
 
 		/* Kick again to prevent reset */
 		ret = HAL_WATCHDOG_Kick(handle);
@@ -215,7 +215,7 @@ static void test_stress_watchdog_concurrent_config(void)
 	hal_watchdog_handle_t handle = NULL;
 	hal_watchdog_config_t config = {
 		.device = WATCHDOG_STRESS_DEVICE,
-		.timeout_ms = 5000
+		.timeout_sec = 5
 	};
 	int32_t ret;
 	const uint32_t iterations = 500;
@@ -248,7 +248,7 @@ static void test_stress_watchdog_concurrent_config(void)
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 		/* Small delay */
-		OSAL_sleep_ms(5);
+		OSAL_usleep(5 * 1000);
 
 		/* Progress indicator */
 		if (i % 100 == 0) {
@@ -300,7 +300,7 @@ static void* watchdog_kicker_thread(void *arg)
 		}
 
 		/* Kick every 1 second */
-		OSAL_sleep_ms(1000);
+		OSAL_sleep(1000/1000);
 	}
 
 	return NULL;
@@ -315,10 +315,10 @@ static void test_stress_watchdog_under_load(void)
 	hal_watchdog_handle_t handle = NULL;
 	hal_watchdog_config_t config = {
 		.device = WATCHDOG_STRESS_DEVICE,
-		.timeout_ms = 5000
+		.timeout_sec = 5
 	};
 	watchdog_worker_ctx_t kick_ctx;
-	osal_atomic_t kick_counter;
+	osal_atomic_uint32_t kick_counter;
 	osal_thread_t kick_thread;
 	osal_thread_t load_threads[4];
 	bool load_stop_flag = false;
@@ -341,37 +341,37 @@ static void test_stress_watchdog_under_load(void)
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* Setup kick context */
-	OSAL_atomic_set(&kick_counter, 0);
+	OSAL_atomic_store(&kick_counter, 0);
 	kick_ctx.handle = handle;
 	kick_ctx.kick_counter = &kick_counter;
 	kick_ctx.stop_flag = false;
 
 	/* Start kicker thread */
-	ret = OSAL_thread_create(&kick_thread, watchdog_kicker_thread, &kick_ctx);
+	ret = OSAL_pthread_create(&kick_thread, NULL, watchdog_kicker_thread, &kick_ctx);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* Start CPU load threads */
 	for (int i = 0; i < 4; i++) {
-		ret = OSAL_thread_create(&load_threads[i], watchdog_cpu_load_thread, &load_stop_flag);
+		ret = OSAL_pthread_create(&load_threads[i], NULL, watchdog_cpu_load_thread, &load_stop_flag);
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	}
 
 	OSAL_printf("[ INFO ] Running watchdog under high CPU load...\n");
 
 	/* Let it run */
-	OSAL_sleep_ms(test_duration_sec * 1000);
+	OSAL_sleep(test_duration_sec);
 
 	/* Stop threads */
 	kick_ctx.stop_flag = true;
 	load_stop_flag = true;
 
-	OSAL_thread_join(kick_thread, NULL);
+	OSAL_pthread_join(kick_thread, NULL);
 	for (int i = 0; i < 4; i++) {
-		OSAL_thread_join(load_threads[i], NULL);
+		OSAL_pthread_join(load_threads[i], NULL);
 	}
 
 	/* Check results */
-	uint64_t total_kicks = OSAL_atomic_get(&kick_counter);
+	uint64_t total_kicks = OSAL_atomic_load(&kick_counter);
 	OSAL_printf("[ INFO ] Total kicks under load: %llu\n", (unsigned long long)total_kicks);
 	OSAL_printf("[ INFO ] Expected kicks: ~%u\n", test_duration_sec);
 

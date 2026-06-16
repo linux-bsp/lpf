@@ -22,7 +22,7 @@
 typedef struct {
 	hal_serial_handle_t handle;
 	uint32_t thread_id;
-	osal_atomic_t *byte_counter;
+	osal_atomic_uint32_t *byte_counter;
 	uint8_t *pattern_buffer;
 } serial_worker_ctx_t;
 
@@ -79,7 +79,7 @@ static void test_stress_serial_continuous_transmission(void)
 		.flow_control = HAL_SERIAL_FLOW_CONTROL_NONE,
 		.timeout_ms = 1000
 	};
-	osal_atomic_t byte_counter;
+	osal_atomic_uint32_t byte_counter;
 	serial_worker_ctx_t worker_ctx;
 	stress_context_t *stress_ctx = NULL;
 	stress_config_t stress_config = STRESS_CONFIG_DURATION(SERIAL_STRESS_DURATION_SEC);
@@ -99,7 +99,7 @@ static void test_stress_serial_continuous_transmission(void)
 	}
 
 	/* Initialize context */
-	OSAL_atomic_set(&byte_counter, 0);
+	OSAL_atomic_store(&byte_counter, 0);
 	worker_ctx.handle = handle;
 	worker_ctx.thread_id = 0;
 	worker_ctx.byte_counter = &byte_counter;
@@ -109,19 +109,19 @@ static void test_stress_serial_continuous_transmission(void)
 	TEST_ASSERT_NOT_NULL(stress_ctx);
 
 	/* Start test */
-	start_time = OSAL_get_time_ms();
+	start_time = 0;
 	ret = stress_run(stress_ctx, serial_continuous_tx_worker, &worker_ctx);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* Wait for completion */
-	OSAL_sleep_ms(SERIAL_STRESS_DURATION_SEC * 1000 + 1000);
-	end_time = OSAL_get_time_ms();
+	OSAL_usleep(SERIAL_STRESS_DURATION_SEC * 1000 + 1000 * 1000);
+	end_time = 0;
 
 	/* Print report */
 	stress_print_report(stress_ctx);
 
 	/* Calculate throughput */
-	uint64_t total_bytes = OSAL_atomic_get(&byte_counter);
+	uint64_t total_bytes = OSAL_atomic_load(&byte_counter);
 	uint64_t elapsed_ms = end_time - start_time;
 	double throughput_kbps = (total_bytes * 8.0 / 1000.0) / (elapsed_ms / 1000.0);
 	double expected_kbps = SERIAL_STRESS_BAUDRATE / 1000.0;
@@ -212,7 +212,7 @@ static void test_stress_serial_concurrent_operations(void)
 		.flow_control = HAL_SERIAL_FLOW_CONTROL_NONE,
 		.timeout_ms = 100
 	};
-	osal_atomic_t write_counter, read_counter;
+	osal_atomic_uint32_t write_counter, read_counter;
 	serial_worker_ctx_t write_ctx[SERIAL_STRESS_THREAD_COUNT];
 	serial_worker_ctx_t read_ctx[SERIAL_STRESS_THREAD_COUNT];
 	stress_context_t *write_stress = NULL;
@@ -232,8 +232,8 @@ static void test_stress_serial_concurrent_operations(void)
 	}
 
 	/* Initialize counters */
-	OSAL_atomic_set(&write_counter, 0);
-	OSAL_atomic_set(&read_counter, 0);
+	OSAL_atomic_store(&write_counter, 0);
+	OSAL_atomic_store(&read_counter, 0);
 
 	/* Setup worker contexts */
 	for (uint32_t i = 0; i < SERIAL_STRESS_THREAD_COUNT; i++) {
@@ -265,7 +265,7 @@ static void test_stress_serial_concurrent_operations(void)
 	}
 
 	/* Wait for completion */
-	OSAL_sleep_ms(12000);
+	OSAL_sleep(12000/1000);
 
 	/* Print reports */
 	OSAL_printf("\n--- Write Report ---\n");
@@ -274,8 +274,8 @@ static void test_stress_serial_concurrent_operations(void)
 	stress_print_report(read_stress);
 
 	/* Verify counters */
-	uint64_t written = OSAL_atomic_get(&write_counter);
-	uint64_t read = OSAL_atomic_get(&read_counter);
+	uint64_t written = OSAL_atomic_load(&write_counter);
+	uint64_t read = OSAL_atomic_load(&read_counter);
 	OSAL_printf("[ INFO ] Total written: %llu bytes, read: %llu bytes\n",
 	           (unsigned long long)written, (unsigned long long)read);
 
@@ -335,7 +335,7 @@ static void test_stress_serial_buffer_overflow(void)
 
 		/* Don't read immediately - let buffer fill up */
 		if (i % 10 == 0) {
-			OSAL_sleep_ms(10);
+			OSAL_usleep(10 * 1000);
 		}
 	}
 
@@ -426,7 +426,7 @@ static void* serial_longrun_worker(void *arg)
 		}
 
 		/* Brief sleep to avoid CPU hogging */
-		OSAL_sleep_ms(1);
+		OSAL_usleep(1 * 1000);
 	}
 
 	OSAL_printf("[ INFO ] Long-running worker stopped\n");
@@ -458,7 +458,7 @@ static void test_stress_serial_long_running(void)
 	OSAL_printf("         Duration: %u seconds\n", test_duration_sec);
 
 	/* Open serial port */
-	ret = HAL_Serial_Open(&config, &handle);
+	ret = HAL_Serial_Open(SERIAL_STRESS_PORT, &config, &handle);
 	if (ret != OSAL_SUCCESS) {
 		OSAL_printf("[ SKIP ] Serial port not available\n");
 		TEST_SKIP("Serial port not available");
@@ -471,15 +471,15 @@ static void test_stress_serial_long_running(void)
 	ctx.stop_flag = false;
 
 	/* Create worker thread */
-	ret = OSAL_thread_create(&worker_thread, serial_longrun_worker, &ctx);
+	ret = OSAL_pthread_create(&worker_thread, NULL, serial_longrun_worker, &ctx);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* Let it run */
-	OSAL_sleep_ms(test_duration_sec * 1000);
+	OSAL_sleep(test_duration_sec);
 
 	/* Stop worker */
 	ctx.stop_flag = true;
-	OSAL_thread_join(worker_thread, NULL);
+	OSAL_pthread_join(worker_thread, NULL);
 
 	/* Print final statistics */
 	OSAL_printf("\n[ INFO ] Final Statistics:\n");

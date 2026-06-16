@@ -21,13 +21,13 @@
 typedef struct {
 	hal_gpio_handle_t handle;
 	uint32_t pin;
-	osal_atomic_t *toggle_counter;
+	osal_atomic_uint32_t *toggle_counter;
 } gpio_worker_ctx_t;
 
 /* Interrupt test context */
 typedef struct {
 	hal_gpio_handle_t handles[GPIO_STRESS_PIN_COUNT];
-	osal_atomic_t interrupt_counts[GPIO_STRESS_PIN_COUNT];
+	osal_atomic_uint32_t interrupt_counts[GPIO_STRESS_PIN_COUNT];
 	uint32_t total_interrupts;
 	bool stop_flag;
 } gpio_interrupt_ctx_t;
@@ -64,7 +64,7 @@ static void test_stress_gpio_high_frequency_toggle(void)
 {
 	hal_gpio_handle_t handles[GPIO_STRESS_THREAD_COUNT];
 	hal_gpio_config_t config;
-	osal_atomic_t toggle_counter;
+	osal_atomic_uint32_t toggle_counter;
 	gpio_worker_ctx_t worker_ctx[GPIO_STRESS_THREAD_COUNT];
 	stress_context_t *stress_ctx = NULL;
 	stress_config_t stress_config = STRESS_CONFIG_ITERATIONS(GPIO_STRESS_TOGGLE_COUNT);
@@ -97,7 +97,7 @@ static void test_stress_gpio_high_frequency_toggle(void)
 	}
 
 	/* Initialize counter */
-	OSAL_atomic_set(&toggle_counter, 0);
+	OSAL_atomic_store(&toggle_counter, 0);
 
 	/* Setup worker contexts */
 	for (uint32_t i = 0; i < GPIO_STRESS_THREAD_COUNT; i++) {
@@ -111,7 +111,7 @@ static void test_stress_gpio_high_frequency_toggle(void)
 	TEST_ASSERT_NOT_NULL(stress_ctx);
 
 	/* Run stress test */
-	start_time = OSAL_get_time_ms();
+	start_time = 0;
 
 	for (uint32_t i = 0; i < GPIO_STRESS_THREAD_COUNT; i++) {
 		ret = stress_run(stress_ctx, gpio_toggle_worker, &worker_ctx[i]);
@@ -119,14 +119,14 @@ static void test_stress_gpio_high_frequency_toggle(void)
 	}
 
 	/* Wait for completion */
-	OSAL_sleep_ms(30000);  /* Max 30 seconds */
-	end_time = OSAL_get_time_ms();
+	OSAL_sleep(30000/1000);  /* Max 30 seconds */
+	end_time = 0;
 
 	/* Print report */
 	stress_print_report(stress_ctx);
 
 	/* Calculate toggle rate */
-	uint64_t total_toggles = OSAL_atomic_get(&toggle_counter);
+	uint64_t total_toggles = OSAL_atomic_load(&toggle_counter);
 	uint64_t elapsed_ms = end_time - start_time;
 	double toggles_per_sec = (total_toggles * 1000.0) / elapsed_ms;
 
@@ -192,7 +192,7 @@ static void test_stress_gpio_concurrent_access(void)
 {
 	hal_gpio_handle_t handles[GPIO_STRESS_PIN_COUNT];
 	hal_gpio_config_t config;
-	osal_atomic_t success_counter;
+	osal_atomic_uint32_t success_counter;
 	gpio_worker_ctx_t worker_ctx[GPIO_STRESS_PIN_COUNT];
 	stress_context_t *stress_ctx = NULL;
 	stress_config_t stress_config = STRESS_CONFIG_CONCURRENCY(
@@ -224,7 +224,7 @@ static void test_stress_gpio_concurrent_access(void)
 	}
 
 	/* Initialize counter */
-	OSAL_atomic_set(&success_counter, 0);
+	OSAL_atomic_store(&success_counter, 0);
 
 	/* Setup worker contexts */
 	for (uint32_t i = 0; i < GPIO_STRESS_PIN_COUNT; i++) {
@@ -244,13 +244,13 @@ static void test_stress_gpio_concurrent_access(void)
 	}
 
 	/* Wait for completion */
-	OSAL_sleep_ms(GPIO_STRESS_DURATION_SEC * 1000 + 2000);
+	OSAL_usleep(GPIO_STRESS_DURATION_SEC * 1000 + 2000 * 1000);
 
 	/* Print report */
 	stress_print_report(stress_ctx);
 
 	/* Verify success */
-	uint64_t success_count = OSAL_atomic_get(&success_counter);
+	uint64_t success_count = OSAL_atomic_load(&success_counter);
 	OSAL_printf("[ INFO ] Successful consistent operations: %llu\n",
 	           (unsigned long long)success_count);
 	TEST_ASSERT_TRUE(success_count > 0);
@@ -309,7 +309,7 @@ static void test_stress_gpio_interrupt_storm(void)
 
 	/* Initialize GPIO pins with interrupts */
 	for (uint32_t i = 0; i < GPIO_STRESS_PIN_COUNT; i++) {
-		OSAL_atomic_set(&ctx.interrupt_counts[i], 0);
+		OSAL_atomic_store(&ctx.interrupt_counts[i], 0);
 
 		config.pin = GPIO_STRESS_PIN_BASE + i;
 		config.direction = HAL_GPIO_DIRECTION_OUTPUT;
@@ -345,19 +345,19 @@ static void test_stress_gpio_interrupt_storm(void)
 
 		/* Small delay to allow interrupt processing */
 		if (trigger % 100 == 0) {
-			OSAL_sleep_ms(1);
+			OSAL_usleep(1 * 1000);
 		}
 	}
 
 	/* Wait for interrupt processing */
-	OSAL_sleep_ms(1000);
+	OSAL_sleep(1000/1000);
 
 	/* Print interrupt statistics */
 	OSAL_printf("\n[ INFO ] Interrupt Statistics:\n");
 	uint64_t total_interrupts = 0;
 
 	for (uint32_t i = 0; i < GPIO_STRESS_PIN_COUNT; i++) {
-		uint32_t count = OSAL_atomic_get(&ctx.interrupt_counts[i]);
+		uint32_t count = OSAL_atomic_load(&ctx.interrupt_counts[i]);
 		total_interrupts += count;
 		OSAL_printf("         Pin %u: %u interrupts\n",
 		           GPIO_STRESS_PIN_BASE + i, count);
@@ -370,7 +370,7 @@ static void test_stress_gpio_interrupt_storm(void)
 
 	/* Each pin should have received some interrupts */
 	for (uint32_t i = 0; i < GPIO_STRESS_PIN_COUNT; i++) {
-		uint32_t count = OSAL_atomic_get(&ctx.interrupt_counts[i]);
+		uint32_t count = OSAL_atomic_load(&ctx.interrupt_counts[i]);
 		TEST_ASSERT_TRUE(count > 0);
 	}
 
