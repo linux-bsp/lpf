@@ -74,8 +74,16 @@ static void *heartbeat_task(void *arg)
             .packet_loss = 0,
             .rtt_ms = 0
         };
-        ret = prl_device_encode(PRL_DEV_TYPE_PMC, PRL_PMC_MSG_HEARTBEAT,
-                        &hb, OSAL_sizeof(hb), buf, OSAL_sizeof(buf), 0);
+        prl_encode_ctx_t encode_ctx = {
+            .dev_type = PRL_DEV_TYPE_PMC,
+            .msg_type = PRL_PMC_MSG_HEARTBEAT,
+            .flags = 0,
+            .payload = &hb,
+            .payload_len = OSAL_sizeof(hb),
+            .buffer = buf,
+            .buffer_size = OSAL_sizeof(buf)
+        };
+        ret = prl_device_encode(&encode_ctx);
         if (ret < 0)
         {
             LOG_ERROR("PDL_CCM", "Failed to encode heartbeat");
@@ -151,18 +159,20 @@ static void *rx_task(void *arg)
             /* 处理遥测数据 */
             if (msg.msg_type == 0x02)  /* 遥测消息类型 */
             {
-                uint8_t dev_type, msg_type_val, flags;
                 uint8_t payload_buf[512];
-                uint32_t payload_len;
+                prl_decode_ctx_t decode_ctx = {
+                    .buffer = msg.payload,
+                    .buffer_len = msg.payload_len,
+                    .payload = payload_buf,
+                    .payload_size = sizeof(payload_buf)
+                };
 
-                ret = prl_device_decode(msg.payload, msg.payload_len,
-                                &dev_type, &msg_type_val, &flags,
-                                payload_buf, sizeof(payload_buf), &payload_len);
-                if (ret == OSAL_SUCCESS && payload_len >= OSAL_sizeof(prl_pmc_telemetry_t))
+                ret = prl_device_decode(&decode_ctx);
+                if (ret == OSAL_SUCCESS && decode_ctx.payload_len >= OSAL_sizeof(prl_pmc_telemetry_t))
                 {
                     const prl_pmc_telemetry_t *tm = (const prl_pmc_telemetry_t *)payload_buf;
                     const uint8_t *data = payload_buf + OSAL_sizeof(prl_pmc_telemetry_t);
-                    size_t data_len = payload_len - OSAL_sizeof(prl_pmc_telemetry_t);
+                    size_t data_len = decode_ctx.payload_len - OSAL_sizeof(prl_pmc_telemetry_t);
 
                     if (ctx->tm_callback)
                     {
@@ -173,18 +183,20 @@ static void *rx_task(void *arg)
             /* 处理遥控指令 */
             else if (msg.msg_type == 0x03)  /* 遥控消息类型 */
             {
-                uint8_t dev_type, msg_type_val, flags;
                 uint8_t payload_buf[512];
-                uint32_t payload_len;
+                prl_decode_ctx_t decode_ctx = {
+                    .buffer = msg.payload,
+                    .buffer_len = msg.payload_len,
+                    .payload = payload_buf,
+                    .payload_size = sizeof(payload_buf)
+                };
 
-                ret = prl_device_decode(msg.payload, msg.payload_len,
-                                &dev_type, &msg_type_val, &flags,
-                                payload_buf, sizeof(payload_buf), &payload_len);
-                if (ret == OSAL_SUCCESS && payload_len >= OSAL_sizeof(prl_pmc_command_t))
+                ret = prl_device_decode(&decode_ctx);
+                if (ret == OSAL_SUCCESS && decode_ctx.payload_len >= OSAL_sizeof(prl_pmc_command_t))
                 {
                     const prl_pmc_command_t *tc = (const prl_pmc_command_t *)payload_buf;
                     const uint8_t *params = payload_buf + OSAL_sizeof(prl_pmc_command_t);
-                    size_t params_len = payload_len - OSAL_sizeof(prl_pmc_command_t);
+                    size_t params_len = decode_ctx.payload_len - OSAL_sizeof(prl_pmc_command_t);
 
                     if (ctx->tc_callback)
                     {
@@ -195,14 +207,16 @@ static void *rx_task(void *arg)
             /* 处理应答消息 */
             else if (msg.msg_type == 0xFF)  /* 应答消息类型 */
             {
-                uint8_t dev_type, msg_type_val, flags;
                 uint8_t payload_buf[512];
-                uint32_t payload_len;
+                prl_decode_ctx_t decode_ctx = {
+                    .buffer = msg.payload,
+                    .buffer_len = msg.payload_len,
+                    .payload = payload_buf,
+                    .payload_size = sizeof(payload_buf)
+                };
 
-                ret = prl_device_decode(msg.payload, msg.payload_len,
-                                &dev_type, &msg_type_val, &flags,
-                                payload_buf, sizeof(payload_buf), &payload_len);
-                if (ret == OSAL_SUCCESS && payload_len >= OSAL_sizeof(prl_pmc_ack_t))
+                ret = prl_device_decode(&decode_ctx);
+                if (ret == OSAL_SUCCESS && decode_ctx.payload_len >= OSAL_sizeof(prl_pmc_ack_t))
                 {
                     const prl_pmc_ack_t *ack = (const prl_pmc_ack_t *)payload_buf;
                     LOG_DEBUG("PDL_CCM", "Received ACK seq=%u result=%u",

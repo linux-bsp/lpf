@@ -51,9 +51,16 @@ static int32_t mcu_send_packet(pdl_mcu_context_t *ctx,
 	uint32_t rx_len;
 
 	/* 编码 PRL 报文 */
-	tx_len = prl_device_encode(PRL_DEV_TYPE_MCU, msg_type,
-	                           payload, payload_len,
-	                           tx_buffer, sizeof(tx_buffer), 0);
+	prl_encode_ctx_t encode_ctx = {
+		.dev_type = PRL_DEV_TYPE_MCU,
+		.msg_type = msg_type,
+		.flags = 0,
+		.payload = payload,
+		.payload_len = payload_len,
+		.buffer = tx_buffer,
+		.buffer_size = sizeof(tx_buffer)
+	};
+	tx_len = prl_device_encode(&encode_ctx);
 	if (tx_len < 0) {
 		return tx_len;
 	}
@@ -69,9 +76,16 @@ static int32_t mcu_send_packet(pdl_mcu_context_t *ctx,
 	}
 
 	/* 解码响应报文 */
-	ret = prl_device_decode(rx_buffer, rx_len,
-	                       NULL, NULL, NULL,
-	                       response, resp_size, actual_size);
+	prl_decode_ctx_t decode_ctx = {
+		.buffer = rx_buffer,
+		.buffer_len = rx_len,
+		.payload = response,
+		.payload_size = resp_size
+	};
+	ret = prl_device_decode(&decode_ctx);
+	if (ret == OSAL_SUCCESS && actual_size) {
+		*actual_size = decode_ctx.payload_len;
+	}
 	return ret;
 }
 
