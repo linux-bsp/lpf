@@ -1,6 +1,6 @@
 /**
  * @file test_system_integration.c
- * @brief 系统集成测试示例
+ * @brief Full stack integration tests for the embedded middleware framework
  */
 
 #include <test_framework/test_framework.h>
@@ -8,213 +8,420 @@
 #include "osal.h"
 #include "hal.h"
 #include "pdl.h"
+#include "prl.h"
+#include "pconfig.h"
+#include "aconfig.h"
 
-/* 测试环境 */
-typedef struct {
-    int osal_initialized;
-    int hal_initialized;
-    int pdl_initialized;
-} test_env_t;
+#define TEST_PTY_NAME_MAX         256
+#define TEST_UART_BAUDRATE        115200
+#define TEST_UART_DATA_BITS       8
+#define TEST_UART_STOP_BITS       1
+#define TEST_UART_TIMEOUT_MS      1000
+#define TEST_RESPONSE_TIMEOUT_MS  2000
 
-static test_env_t g_test_env = {0};
+#define TEST_PCONFIG_PLATFORM     "generic"
+#define TEST_PCONFIG_CHIP         "framework"
+#define TEST_PCONFIG_PROJECT      "ctest"
+#define TEST_PCONFIG_PRODUCT      "middleware"
+#define TEST_PCONFIG_MCU_NAME     "mcu0"
 
-/**
- * 环境初始化：OSAL + HAL + PDL
- */
-static void setup_full_stack(void) {
-    OSAL_printf("[ SETUP    ] Initializing full stack environment\n");
+#define TEST_RESPONSE_TAG         0x55
+#define TEST_RESPONSE_PREFIX      0xAA
 
-    /* 注意：OSAL_Init/HAL_Init/PDL_Init不存在，简化初始化 */
-    g_test_env.osal_initialized = 1;
-    g_test_env.hal_initialized = 1;
-    g_test_env.pdl_initialized = 1;
+static int32_t g_pty_master_fd = -1;
+static int32_t g_pty_slave_fd = -1;
+static char g_pty_slave_name[TEST_PTY_NAME_MAX];
+static osal_thread_t g_responder_thread;
+static bool g_responder_running = false;
+static bool g_responder_ready = false;
+static osal_mutex_t g_responder_mutex;
+static osal_cond_t g_responder_cond;
 
-    OSAL_printf("[ SETUP OK ] Full stack initialized\n");
+static pconfig_mcu_entry_t g_mcu_entries[1];
+static pconfig_platform_config_t g_platform_config;
+static aconfig_config_table_t g_aconfig_table;
+
+static const uint8_t g_test_payload[] = {0x10, 0x20, 0x30, 0x40};
+
+static void set_raw_mode(int32_t fd)
+{
+	osal_termios_t term;
+
+	if (OSAL_tcgetattr(fd, &term) != 0) {
+		return;
+	}
+
+	term.c_iflag = 0;
+	term.c_oflag = 0;
+	term.c_lflag = 0;
+	term.c_cflag &= ~(OSAL_PARENB | OSAL_CSTOPB | OSAL_CSIZE);
+	term.c_cflag |= (OSAL_CREAD | OSAL_CLOCAL | OSAL_CS8);
+	term.c_ispeed = OSAL_B115200;
+	term.c_ospeed = OSAL_B115200;
+	(void)OSAL_tcsetattr(fd, OSAL_TCSANOW, &term);
 }
 
-/**
- * 环境清理
- */
-static void teardown_full_stack(void) {
-    OSAL_printf("[ TEARDOWN ] Cleaning up full stack environment\n");
+static int32_t create_pty_pair(void)
+{
+	int32_t ret;
 
-    /* 注意：PDL_Deinit/HAL_Deinit/OSAL_Deinit不存在，简化清理 */
-    g_test_env.pdl_initialized = 0;
-    g_test_env.hal_initialized = 0;
-    g_test_env.osal_initialized = 0;
+	ret = OSAL_openpty(&g_pty_master_fd, &g_pty_slave_fd, g_pty_slave_name, NULL, NULL);
+	if (ret != 0) {
+		return ret;
+	}
 
-    OSAL_printf("[ TEARDOWN OK ] Full stack cleaned up\n");
+	set_raw_mode(g_pty_master_fd);
+	set_raw_mode(g_pty_slave_fd);
+	return OSAL_SUCCESS;
 }
 
-/**
- * 系统测试：OSAL + HAL 集成
- */
-static void test_osal_hal_integration(void) {
-    OSAL_printf("[ TEST     ] Testing OSAL + HAL integration\n");
-
-    /* 检查点1：OSAL初始化 */
-    TEST_ASSERT_TRUE(g_test_env.osal_initialized);
-
-    /* 检查点2：HAL初始化 */
-    TEST_ASSERT_TRUE(g_test_env.hal_initialized);
-
-    /* 检查点3：GPIO操作 */
-    /* 注意：HAL_GPIO API简化，跳过测试 */
-    TEST_ASSERT_TRUE(1);
-
-    /* 检查点4：线程创建 */
-    /* 注意：线程测试已简化，避免使用lambda */
-    TEST_ASSERT_TRUE(1);
-
-    OSAL_printf("[ PASS     ] OSAL + HAL integration test passed\n");
+static void destroy_pty_pair(void)
+{
+	if (g_pty_master_fd >= 0) {
+		OSAL_close(g_pty_master_fd);
+		g_pty_master_fd = -1;
+	}
+	if (g_pty_slave_fd >= 0) {
+		OSAL_close(g_pty_slave_fd);
+		g_pty_slave_fd = -1;
+	}
 }
 
-/**
- * 系统测试：HAL + PDL 集成
- */
-static void test_hal_pdl_integration(void) {
-    OSAL_printf("[ TEST     ] Testing HAL + PDL integration\n");
+static void build_platform_config(void)
+{
+	OSAL_memset(&g_mcu_entries, 0, sizeof(g_mcu_entries));
+	OSAL_memset(&g_platform_config, 0, sizeof(g_platform_config));
 
-    /* 检查点1：HAL初始化 */
-    TEST_ASSERT_TRUE(g_test_env.hal_initialized);
+	g_mcu_entries[0].description = "PTY-backed MCU";
+	g_mcu_entries[0].enabled = true;
+	OSAL_strncpy(g_mcu_entries[0].config.name, TEST_PCONFIG_MCU_NAME,
+			     OSAL_sizeof(g_mcu_entries[0].config.name) - 1);
+	g_mcu_entries[0].config.interface = PCONFIG_MCU_INTERFACE_SERIAL;
+	g_mcu_entries[0].config.hw.serial.device = g_pty_slave_name;
+	g_mcu_entries[0].config.hw.serial.baudrate = TEST_UART_BAUDRATE;
+	g_mcu_entries[0].config.hw.serial.data_bits = TEST_UART_DATA_BITS;
+	g_mcu_entries[0].config.hw.serial.stop_bits = TEST_UART_STOP_BITS;
+	g_mcu_entries[0].config.hw.serial.parity = PCONFIG_MCU_PARITY_NONE;
+	g_mcu_entries[0].config.hw.serial.flow_control = PCONFIG_MCU_FLOW_NONE;
+	g_mcu_entries[0].config.cmd_timeout_ms = TEST_RESPONSE_TIMEOUT_MS;
+	g_mcu_entries[0].config.retry_count = 0;
 
-    /* 检查点2：PDL初始化 */
-    TEST_ASSERT_TRUE(g_test_env.pdl_initialized);
-
-    /* 简化测试：仅验证基本初始化 */
-
-    OSAL_printf("[ PASS     ] HAL + PDL integration test passed\n");
+	g_platform_config.platform_name = TEST_PCONFIG_PLATFORM;
+	g_platform_config.chip_name = TEST_PCONFIG_CHIP;
+	g_platform_config.project_name = TEST_PCONFIG_PROJECT;
+	g_platform_config.product_name = TEST_PCONFIG_PRODUCT;
+	g_platform_config.mcu_count = 1;
+	g_platform_config.mcu_array = g_mcu_entries;
 }
 
-/**
- * 系统测试：完整栈端到端测试
- */
-static void test_full_stack_e2e(void) {
-    OSAL_printf("[ TEST     ] Testing full stack end-to-end\n");
+static void* pty_responder_thread(void *arg)
+{
+	uint8_t rx_buffer[512];
+	uint8_t tx_buffer[512];
+	(void)arg;
 
-    /* 检查点1：所有层初始化 */
-    TEST_ASSERT_TRUE(g_test_env.osal_initialized);
-    TEST_ASSERT_TRUE(g_test_env.hal_initialized);
-    TEST_ASSERT_TRUE(g_test_env.pdl_initialized);
+	OSAL_pthread_mutex_lock(&g_responder_mutex);
+	g_responder_ready = true;
+	OSAL_pthread_cond_signal(&g_responder_cond);
+	OSAL_pthread_mutex_unlock(&g_responder_mutex);
 
-    /* 检查点2：基本功能测试 */
-    /* 注意：Queue API不存在，简化测试 */
-    osal_mutex_t mutex;
-    int32_t ret = OSAL_pthread_mutex_init(&mutex, NULL);
-    TEST_ASSERT_EQUAL(0, ret);
+	while (g_responder_running) {
+		osal_pollfd_t pfd;
+		pfd.fd = g_pty_master_fd;
+		pfd.events = OSAL_POLLIN;
+		pfd.revents = 0;
 
-    if (ret == 0) {
-        OSAL_pthread_mutex_lock(&mutex);
-        OSAL_pthread_mutex_unlock(&mutex);
-        TEST_ASSERT_TRUE(1);
-        OSAL_pthread_mutex_destroy(&mutex);
-    }
+		int32_t pret = OSAL_poll(&pfd, 1, 100);
+		if (!g_responder_running) {
+			break;
+		}
+		if (pret <= 0 || !(pfd.revents & OSAL_POLLIN)) {
+			continue;
+		}
 
-    OSAL_printf("[ PASS     ] Full stack E2E test passed\n");
+		osal_ssize_t rx_len = OSAL_read(g_pty_master_fd, rx_buffer, sizeof(rx_buffer));
+		if (rx_len <= 0) {
+			continue;
+		}
+
+		prl_decode_ctx_t decode_ctx;
+		OSAL_memset(&decode_ctx, 0, sizeof(decode_ctx));
+		decode_ctx.buffer = rx_buffer;
+		decode_ctx.buffer_len = (size_t)rx_len;
+		decode_ctx.payload = tx_buffer;
+		decode_ctx.payload_size = sizeof(tx_buffer);
+		if (prl_device_decode(&decode_ctx) != OSAL_SUCCESS) {
+			continue;
+		}
+
+		uint8_t payload[16];
+		uint32_t payload_len = 0;
+		OSAL_memset(payload, 0, sizeof(payload));
+
+		switch (decode_ctx.msg_type) {
+		case PRL_MCU_MSG_GET_VERSION:
+			payload[0] = 1;
+			payload[1] = 2;
+			payload[2] = 3;
+			payload_len = 3;
+			break;
+		case PRL_MCU_MSG_GET_STATUS:
+			payload[0] = PDL_MCU_STATE_READY;
+			payload[1] = 0x00;
+			payload[2] = 0x00;
+			payload[3] = 0x00;
+			payload[4] = 0x00;
+			payload_len = 5;
+			break;
+		case PRL_MCU_MSG_RESET:
+			payload[0] = TEST_RESPONSE_PREFIX;
+			payload_len = 1;
+			break;
+		case PRL_MCU_MSG_EXECUTE_CMD:
+			payload[0] = TEST_RESPONSE_PREFIX;
+			payload[1] = (decode_ctx.payload_len > 0 && decode_ctx.payload) ? ((const uint8_t *)decode_ctx.payload)[0] : 0x00;
+			payload_len = 2;
+			break;
+		case PRL_MCU_MSG_WRITE_DATA:
+			payload[0] = 0xC1;
+			payload[1] = 0x01;
+			payload_len = 2;
+			break;
+		case PRL_MCU_MSG_READ_DATA:
+			payload[0] = 0xDE;
+			payload[1] = 0xAD;
+			payload[2] = 0xBE;
+			payload[3] = 0xEF;
+			payload_len = 4;
+			break;
+		default:
+			payload[0] = 0x00;
+			payload_len = 1;
+			break;
+		}
+
+		prl_encode_ctx_t encode_ctx;
+		OSAL_memset(&encode_ctx, 0, sizeof(encode_ctx));
+		encode_ctx.dev_type = PRL_DEV_TYPE_MCU;
+		encode_ctx.msg_type = TEST_RESPONSE_TAG;
+		encode_ctx.payload = payload;
+		encode_ctx.payload_len = (uint16_t)payload_len;
+		encode_ctx.buffer = tx_buffer;
+		encode_ctx.buffer_size = sizeof(tx_buffer);
+
+		int encoded_len = prl_device_encode(&encode_ctx);
+		if (encoded_len > 0) {
+			(void)OSAL_write(g_pty_master_fd, tx_buffer, (osal_size_t)encoded_len);
+		}
+	}
+
+	return NULL;
 }
 
-/* 线程数据结构 */
-typedef struct {
-    osal_mutex_t *mutex;
-    osal_atomic_uint32_t *counter;
-} concurrent_thread_data_t;
+static void setup_full_stack(void)
+{
+	int32_t ret;
 
-/* 线程函数 */
-static void* concurrent_thread_func(void *arg) {
-    concurrent_thread_data_t *data = (concurrent_thread_data_t*)arg;
+	OSAL_memset(&g_responder_mutex, 0, sizeof(g_responder_mutex));
+	OSAL_memset(&g_responder_cond, 0, sizeof(g_responder_cond));
 
-    uint32_t i;
+	ret = OSAL_pthread_mutex_init(&g_responder_mutex, NULL);
+	if (ret != OSAL_SUCCESS) {
+		return;
+	}
+	ret = OSAL_pthread_cond_init(&g_responder_cond, NULL);
+	if (ret != OSAL_SUCCESS) {
+		OSAL_pthread_mutex_destroy(&g_responder_mutex);
+		return;
+	}
 
-    for (i = 0; i < 1000; i++) {
-        OSAL_pthread_mutex_lock(data->mutex);
-        OSAL_atomic_inc(data->counter);
-        OSAL_pthread_mutex_unlock(data->mutex);
-    }
-    return NULL;
+	ret = create_pty_pair();
+	if (ret != OSAL_SUCCESS) {
+		OSAL_pthread_cond_destroy(&g_responder_cond);
+		OSAL_pthread_mutex_destroy(&g_responder_mutex);
+		return;
+	}
+
+	build_platform_config();
+
+	ret = PCONFIG_init();
+	if (ret != OSAL_SUCCESS) {
+		destroy_pty_pair();
+		OSAL_pthread_cond_destroy(&g_responder_cond);
+		OSAL_pthread_mutex_destroy(&g_responder_mutex);
+		return;
+	}
+
+	ret = PCONFIG_register(&g_platform_config);
+	if (ret != OSAL_SUCCESS) {
+		PCONFIG_cleanup();
+		destroy_pty_pair();
+		OSAL_pthread_cond_destroy(&g_responder_cond);
+		OSAL_pthread_mutex_destroy(&g_responder_mutex);
+		return;
+	}
+
+	ret = PCONFIG_SetBoard(&g_platform_config);
+	if (ret != OSAL_SUCCESS) {
+		PCONFIG_cleanup();
+		destroy_pty_pair();
+		OSAL_pthread_cond_destroy(&g_responder_cond);
+		OSAL_pthread_mutex_destroy(&g_responder_mutex);
+		return;
+	}
+
+	ret = ACONFIG_init();
+	if (ret != OSAL_SUCCESS) {
+		PCONFIG_cleanup();
+		destroy_pty_pair();
+		OSAL_pthread_cond_destroy(&g_responder_cond);
+		OSAL_pthread_mutex_destroy(&g_responder_mutex);
+		return;
+	}
+
+	g_aconfig_table.name = "system_integration";
+	g_aconfig_table.function_map = NULL;
+	g_aconfig_table.user_data = &g_platform_config;
+	ret = ACONFIG_register_table(&g_aconfig_table);
+	if (ret != OSAL_SUCCESS) {
+		ACONFIG_cleanup();
+		PCONFIG_cleanup();
+		destroy_pty_pair();
+		OSAL_pthread_cond_destroy(&g_responder_cond);
+		OSAL_pthread_mutex_destroy(&g_responder_mutex);
+		return;
+	}
+
+	ret = PRL_init();
+	if (ret != OSAL_SUCCESS) {
+		ACONFIG_cleanup();
+		PCONFIG_cleanup();
+		destroy_pty_pair();
+		OSAL_pthread_cond_destroy(&g_responder_cond);
+		OSAL_pthread_mutex_destroy(&g_responder_mutex);
+		return;
+	}
+
+	g_responder_running = true;
+	ret = OSAL_pthread_create(&g_responder_thread, NULL, pty_responder_thread, NULL);
+	if (ret != OSAL_SUCCESS) {
+		g_responder_running = false;
+		PRL_deinit();
+		ACONFIG_cleanup();
+		PCONFIG_cleanup();
+		destroy_pty_pair();
+		OSAL_pthread_cond_destroy(&g_responder_cond);
+		OSAL_pthread_mutex_destroy(&g_responder_mutex);
+		return;
+	}
+
+	OSAL_pthread_mutex_lock(&g_responder_mutex);
+	while (!g_responder_ready) {
+		OSAL_pthread_cond_wait(&g_responder_cond, &g_responder_mutex);
+	}
+	OSAL_pthread_mutex_unlock(&g_responder_mutex);
 }
 
-/**
- * 系统测试：并发场景测试
- */
-static void test_concurrent_scenario(void) {
-    OSAL_printf("[ TEST     ] Testing concurrent scenario\n");
+static void teardown_full_stack(void)
+{
+	g_responder_running = false;
+	if (g_pty_master_fd >= 0) {
+		(void)OSAL_write(g_pty_master_fd, "\0", 1);
+	}
+	(void)OSAL_pthread_join(g_responder_thread, NULL);
 
-    const uint32_t num_threads = 5;
-    osal_thread_t threads[5];
-    osal_mutex_t mutex;
-    osal_atomic_uint32_t counter;
-
-    OSAL_atomic_store(&counter, 0);
-
-    /* 检查点1：创建互斥锁 */
-    int32_t ret = OSAL_pthread_mutex_init(&mutex, NULL);
-    TEST_ASSERT_EQUAL(0, ret);
-
-    /* 检查点2：创建多个并发线程 */
-    concurrent_thread_data_t thread_data = { &mutex, &counter };
-
-    int32_t all_created = 1;
-    uint32_t i;
-
-    for (i = 0; i < num_threads; i++) {
-        ret = OSAL_pthread_create(&threads[i], NULL, concurrent_thread_func, &thread_data);
-        if (ret != 0) {
-            all_created = 0;
-            break;
-        }
-    }
-    TEST_ASSERT_TRUE(all_created);
-
-    /* 检查点3：等待所有线程完成 */
-
-    for (i = 0; i < num_threads; i++) {
-        OSAL_pthread_join(threads[i], NULL);
-    }
-    TEST_ASSERT_TRUE(1);
-
-    /* 检查点4：验证计数器 */
-    uint32_t final_count = OSAL_atomic_load(&counter);
-    uint32_t expected_count = num_threads * 1000;
-    TEST_ASSERT_EQUAL(expected_count, final_count);
-
-    OSAL_printf("[ INFO     ] Final count: %u (expected: %u)\n",
-               final_count, expected_count);
-
-    /* 清理 */
-    OSAL_pthread_mutex_destroy(&mutex);
-
-    OSAL_printf("[ PASS     ] Concurrent scenario test passed\n");
+	PRL_deinit();
+	ACONFIG_unregister_table();
+	ACONFIG_cleanup();
+	PCONFIG_cleanup();
+	destroy_pty_pair();
+	OSAL_pthread_cond_destroy(&g_responder_cond);
+	OSAL_pthread_mutex_destroy(&g_responder_mutex);
 }
 
-/* 测试用例数组 - 使用函数指针数组 */
+static void test_full_stack_configuration_path(void)
+{
+	const pconfig_platform_config_t *board = PCONFIG_GetBoard();
+	const aconfig_config_table_t *table = ACONFIG_GetTable();
+	pdl_mcu_handle_t handle = NULL;
+	pdl_mcu_version_t version;
+	pdl_mcu_status_t status;
+	uint8_t response[32];
+	uint32_t response_len = 0;
+	int32_t ret;
+
+	TEST_ASSERT_NOT_NULL(table);
+	TEST_ASSERT_NOT_NULL(board);
+	TEST_ASSERT_EQUAL_STRING(TEST_PCONFIG_PLATFORM, board->platform_name);
+	TEST_ASSERT_EQUAL_STRING(TEST_PCONFIG_PRODUCT, board->product_name);
+	TEST_ASSERT_EQUAL(1u, board->mcu_count);
+	TEST_ASSERT_TRUE(table->user_data == &g_platform_config);
+
+	ret = PDL_MCU_init(0, &handle);
+	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+	TEST_ASSERT_NOT_NULL(handle);
+
+	ret = PDL_MCU_get_version(handle, &version);
+	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+	TEST_ASSERT_EQUAL(1, version.major);
+	TEST_ASSERT_EQUAL(2, version.minor);
+	TEST_ASSERT_EQUAL(3, version.patch);
+
+	ret = PDL_MCU_get_status(handle, &status);
+	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+	TEST_ASSERT_TRUE(status.state == PDL_MCU_STATE_READY);
+	TEST_ASSERT_TRUE(status.error_code == 0);
+
+	ret = PDL_MCU_send_command(handle, 0x42, g_test_payload, sizeof(g_test_payload), response, sizeof(response), &response_len);
+	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+	TEST_ASSERT_TRUE(response_len >= 2);
+	TEST_ASSERT_EQUAL(TEST_RESPONSE_PREFIX, response[0]);
+	TEST_ASSERT_EQUAL(0x42, response[1]);
+
+	ret = PDL_MCU_deinit(handle);
+	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+}
+
+static void test_full_stack_repeated_roundtrip(void)
+{
+	pdl_mcu_handle_t handle = NULL;
+	uint8_t response[32];
+	uint32_t response_len = 0;
+	int32_t ret;
+	uint32_t i;
+
+	ret = PDL_MCU_init(0, &handle);
+	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+	TEST_ASSERT_NOT_NULL(handle);
+
+	for (i = 0; i < 3; i++) {
+		ret = PDL_MCU_reset(handle);
+		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+		ret = PDL_MCU_send_command(handle, (uint8_t)(0x21 + i), NULL, 0, response, sizeof(response), &response_len);
+		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+		TEST_ASSERT_TRUE(response_len >= 2);
+	}
+
+	ret = PDL_MCU_deinit(handle);
+	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+}
+
 static const test_case_t test_cases[] = {
 	{
-		.name = "test_osal_hal_integration",
-		.func = test_osal_hal_integration,
+		.name = "test_full_stack_configuration_path",
+		.func = test_full_stack_configuration_path,
 		.setup = setup_full_stack,
 		.teardown = teardown_full_stack
 	},
 	{
-		.name = "test_hal_pdl_integration",
-		.func = test_hal_pdl_integration,
-		.setup = setup_full_stack,
-		.teardown = teardown_full_stack
-	},
-	{
-		.name = "test_full_stack_e2e",
-		.func = test_full_stack_e2e,
-		.setup = setup_full_stack,
-		.teardown = teardown_full_stack
-	},
-	{
-		.name = "test_concurrent_scenario",
-		.func = test_concurrent_scenario,
+		.name = "test_full_stack_repeated_roundtrip",
+		.func = test_full_stack_repeated_roundtrip,
 		.setup = setup_full_stack,
 		.teardown = teardown_full_stack
 	},
 };
 
-/* 测试套件定义 */
 static const test_suite_t test_suite = {
 	.suite_name = "system_integration",
 	.module_name = "system_integration",
@@ -225,13 +432,12 @@ static const test_suite_t test_suite = {
 	.suite_teardown = NULL,
 	.metadata = {
 		.category = TEST_CATEGORY_SYSTEM,
-		.tags = TEST_TAG_SLOW | TEST_TAG_HARDWARE,
-		.timeout_ms = 5000,
-		.description = "System integration tests"
+		.tags = TEST_TAG_SLOW,
+		.timeout_ms = 15000,
+		.description = "Full stack integration tests for ACONFIG -> PDL -> PCONFIG -> HAL"
 	}
 };
 
-/* 测试套件注册函数 */
 __attribute__((constructor))
 static void register_system_integration_tests(void)
 {

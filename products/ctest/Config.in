@@ -288,13 +288,6 @@ config TEST_SYSTEM_ACONFIG
 	help
 	  Build ACONFIG layer system tests.
 
-config TEST_SYSTEM_ACONFIG
-	bool "Build ACONFIG system tests"
-	select ACONFIG
-	default n
-	help
-	  Build ACONFIG layer system tests.
-
 config TEST_INTEGRATION
 	bool "Build integration tests"
 	default n

@@ -50,6 +50,7 @@
 /* NET - 网络相关 */
 #include "net/osal_socket.h"
 #include "net/osal_termios.h"
+#include "net/osal_pty.h"
 
 /* SYS - 系统调用封装 */
 #include "sys/osal_clock.h"

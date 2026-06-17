@@ -418,26 +418,6 @@ if(CONFIG_TEST_SYSTEM)
         )
     endif()
 
-    # ACONFIG System Tests - Auto-discover all test_system_aconfig_*.c files
-    if(CONFIG_TEST_SYSTEM_ACONFIG)
-        test_discover_and_add(
-            TARGET es-middleware-test
-            DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/system/aconfig
-            MODULE system_aconfig
-            LIBRARY aconfig
-        )
-    endif()
-
-    # PCONFIG System Tests - Auto-discover all test_system_pconfig_*.c files
-    if(CONFIG_TEST_SYSTEM_PCONFIG)
-        test_discover_and_add(
-            TARGET es-middleware-test
-            DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/system/pconfig
-            MODULE system_pconfig
-            LIBRARY pconfig
-        )
-    endif()
-
     # Integration Tests - Auto-discover all test_system_integration_*.c files
     if(CONFIG_TEST_INTEGRATION)
         test_discover_and_add(

@@ -113,6 +113,10 @@ if(CONFIG_OSAL_OS_POSIX)
         list(APPEND ADD_SRCS "src/posix/net/osal_termios.c")
     endif()
 
+    if(CONFIG_OSAL_NET_PTY)
+        list(APPEND ADD_SRCS "src/posix/net/osal_pty.c")
+    endif()
+
     # Utility functions
     if(CONFIG_OSAL_UTIL_LOG)
         list(APPEND ADD_SRCS "src/posix/util/osal_log.c")

@@ -211,6 +211,13 @@ config OSAL_NET_TERMIOS
 	  Enable terminal I/O control.
 	  Source: src/posix/net/osal_termios.c
 
+config OSAL_NET_PTY
+	bool "Pseudo-terminal support"
+	default n
+	help
+	  Enable pseudo-terminal creation support.
+	  Source: src/posix/net/osal_pty.c
+
 endif # OSAL_NETWORK
 
 # ============================================================================
