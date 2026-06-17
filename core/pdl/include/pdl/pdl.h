@@ -33,11 +33,7 @@
 #include "osal.h"
 #endif /* CONFIG_OSAL */
 
-/* 设备驱动 - 按字母顺序 */
-#ifdef CONFIG_PDL_PMC_SUPPORT
-#include "pdl_pmc.h"         /* PMC（通信管理板）驱动 */
-#endif /* CONFIG_PDL_PMC_SUPPORT */
-
+/* 设备驱动 - 当前仅保留 MCU 外设类型 */
 #ifdef CONFIG_PDL_MCU_SUPPORT
 #include "pdl_mcu.h"         /* MCU（微控制器）驱动 */
 #endif /* CONFIG_PDL_MCU_SUPPORT */

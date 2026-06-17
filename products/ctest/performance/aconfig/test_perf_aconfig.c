@@ -9,18 +9,18 @@
 #include "aconfig.h"
 
 /**
- * 测试遥控配置查询性能
+ * 测试命令配置查询性能
  */
 static void test_perf_tc_config_query(void) {
-    // TODO: 实现遥控配置查询性能测试
+    // TODO: 实现命令配置查询性能测试
     OSAL_printf("[ INFO ] TC config query performance test - not implemented yet\n");
 }
 
 /**
- * 测试遥测配置查询性能
+ * 测试状态数据配置查询性能
  */
 static void test_perf_tm_config_query(void) {
-    // TODO: 实现遥测配置查询性能测试
+    // TODO: 实现状态数据配置查询性能测试
     OSAL_printf("[ INFO ] TM config query performance test - not implemented yet\n");
 }
 

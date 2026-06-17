@@ -10,26 +10,25 @@ menuconfig PDL
 
 	  PDL sits above HAL and provides:
 	  - Protocol-aware peripheral drivers
-	  - Device abstraction (MCU modules, PMC)
+	  - Device abstraction (current MCU peripheral type)
 	  - State management and error handling
 	  - Unified API for complex peripherals
 
 	  Architecture:
 	  PDL uses HAL for low-level hardware access and PCONFIG for
 	  hardware configuration, providing application-level APIs
-	  for managing complex peripheral subsystems.
+	  for managing peripheral subsystems.
 
 	  Memory footprint: ~15KB base + per-peripheral drivers
 
 	  Supported peripherals:
-	  - MCU modules (microcontroller peripherals)
-	  - PMC (Communication Control Module)
+	  - MCU peripherals
 
 	  Dependencies: OSAL, HAL, PCONFIG
 
 	  Note: Enable OSAL, HAL, PCONFIG, and TYPES first in "Core Modules" menu.
 
-	  Recommended: Enable for systems with complex peripheral management
+	  Recommended: Enable for systems with peripheral management
 
 	  If unsure, say Y.
 
@@ -92,43 +91,5 @@ menuconfig PDL_MCU_SUPPORT
 	  If unsure, say Y.
 
 source "core/pdl/src/pdl_mcu/Config.in"
-
-menuconfig PDL_PMC_SUPPORT
-	bool "PMC (Communication Control Module) support"
-	default n
-	select OSAL_NETWORK
-	help
-	  Enable PMC (Communication Control Module) for PMC communication.
-
-	  PMC provides high-level interface with PMC (Power Management
-	  Controller) over Ethernet, handling:
-	  - TCP/IP socket communication
-	  - Message framing and CRC validation
-	  - Connection management and auto-reconnect
-	  - Command/response protocol
-
-	  Features:
-	  - Reliable TCP-based communication
-	  - Automatic message sequencing
-	  - Configurable timeouts
-	  - Thread-safe operation
-
-	  Memory footprint: ~8KB
-
-	  Communication protocol:
-	  - Frame: [Magic][Type][Rsv][SeqNum][Len][CRC32][Payload]
-	  - Magic number: 0xAA55
-	  - CRC32 validation for data integrity
-
-	  Use cases:
-	  - PMC power management and monitoring
-	  - Remote system control
-	  - Distributed power systems
-
-	  Dependencies: OSAL_NETWORK (for socket API)
-
-	  If unsure, say N.
-
-source "core/pdl/src/pdl_pmc/Config.in"
 
 endif # PDL

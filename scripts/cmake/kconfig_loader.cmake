@@ -238,7 +238,7 @@ function(kconfig_print_summary)
         ARCH_ARM64
         ARCH_ARM
         OS_LINUX
-        PRODUCT_PMC
+        PRODUCT_FRAMEWORK
         PRODUCT_SAMPLE
         BUILD_TESTING
         OSAL

@@ -21,9 +21,6 @@
 /* 类型定义 - 按模块组织 */
 #include "pconfig_common.h"    /* 通用基础类型 */
 #include "pconfig_mcu.h"       /* MCU 配置类型 */
-#include "pconfig_fpga.h"      /* FPGA 配置类型 */
-#include "pconfig_switch.h"    /* Switch 配置类型 */
-#include "pconfig_pmc.h"       /* PMC 配置类型 */
 #include "pconfig_platform.h"  /* 板级配置类型 */
 
 /*===========================================================================
@@ -77,7 +74,7 @@ int32_t PCONFIG_SetBoard(const pconfig_platform_config_t *config);
  * @brief 根据平台和产品名称查找配置
  *
  * @param[in] platform 平台名称（如"ti/am625"）
- * @param[in] product 产品名称（如"h200_payload"）
+ * @param[in] product 产品名称（如"framework"）
  * @param[in] version 版本号（如"v1.0"，可选）
  *
  * @return 平台配置指针，失败返回NULL
@@ -115,57 +112,6 @@ PCONFIG_HW_GetMCU(const pconfig_platform_config_t *platform, uint32_t index)
 		return NULL;
 	}
 	return &platform->mcu_array[index];
-}
-
-/**
- * @brief 根据索引获取FPGA外设配置
- *
- * @param[in] platform 平台配置
- * @param[in] index FPGA索引（数组下标）
- *
- * @return FPGA配置指针，失败返回NULL
- */
-static inline const pconfig_fpga_cfg_t*
-PCONFIG_HW_GetFPGA(const pconfig_platform_config_t *platform, uint32_t index)
-{
-	if (!platform || !platform->fpga_array || index >= platform->fpga_count) {
-		return NULL;
-	}
-	return &platform->fpga_array[index];
-}
-
-/**
- * @brief 根据索引获取Switch外设配置
- *
- * @param[in] platform 平台配置
- * @param[in] index Switch索引（数组下标）
- *
- * @return Switch配置指针，失败返回NULL
- */
-static inline const pconfig_switch_cfg_t*
-PCONFIG_HW_GetSwitch(const pconfig_platform_config_t *platform, uint32_t index)
-{
-	if (!platform || !platform->switch_array || index >= platform->switch_count) {
-		return NULL;
-	}
-	return &platform->switch_array[index];
-}
-
-/**
- * @brief 根据索引获取PMC外设配置
- *
- * @param[in] platform 平台配置
- * @param[in] index PMC索引（数组下标）
- *
- * @return PMC配置条目指针，失败返回NULL
- */
-static inline const pconfig_pmc_entry_t*
-PCONFIG_HW_GetPMC(const pconfig_platform_config_t *platform, uint32_t index)
-{
-	if (!platform || !platform->pmc_array || index >= platform->pmc_count) {
-		return NULL;
-	}
-	return &platform->pmc_array[index];
 }
 
 /*===========================================================================

@@ -32,31 +32,6 @@ config TEST_STRESS_PDL_MCU_LONG_RUNNING
 	  Tags: stress, pdl, duration
 	  Test function: test_stress_mcu_long_running_query
 
-config TEST_STRESS_PDL_PMC_CONCURRENT
-	bool "PMC concurrent communication stress"
-	default y
-	depends on PDL_PMC_SUPPORT
-	help
-	  PMC communication concurrent stress test.
-
-	  Tests:
-	    - 6 threads concurrently sending commands
-	    - 10 second duration
-	    - Send every 50ms per thread
-	    - Ethernet protocol
-
-	  Verifies:
-	    - Thread-safe command sending
-	    - Network protocol stability
-	    - Success rate > 90%
-	    - Connection management under load
-
-	  Runtime: ~10 seconds
-	  Hardware: PMC Ethernet interface
-	  Dependencies: CONFIG_PDL_PMC_SUPPORT
-	  Tags: stress, pdl, concurrency, network
-	  Test function: test_stress_pmc_concurrent_communication
-
 config TEST_STRESS_PDL_MULTIDEVICE
 	bool "Multi-device mixed operations stress"
 	default y

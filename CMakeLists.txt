@@ -99,15 +99,6 @@ include(${SDK_PATH}/scripts/cmake/compile.cmake)
 include(${SDK_PATH}/scripts/cmake/ComponentAPI.cmake)
 
 # ==============================================================================
-# Build Products Based on Configuration
-# ==============================================================================
-
-if(CONFIG_PRODUCT_PMC)
-    message(STATUS "Building PMC product")
-    add_subdirectory(products/pmc)
-endif()
-
-# ==============================================================================
 # Build Tests
 # ==============================================================================
 
@@ -130,7 +121,6 @@ message(STATUS "Build Type:     ${CMAKE_BUILD_TYPE}")
 message(STATUS "Install Prefix: ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "")
 message(STATUS "Products:")
-message(STATUS "  PMC:          ${CONFIG_PRODUCT_PMC}")
 message(STATUS "  Tests:        ${CONFIG_BUILD_TESTING}")
 message(STATUS "")
 message(STATUS "Core Modules:")

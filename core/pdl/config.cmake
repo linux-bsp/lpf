@@ -20,19 +20,9 @@ if(CONFIG_PDL_MCU_SUPPORT)
     message(STATUS "  [PDL] MCU peripheral support enabled")
 endif()
 
-# PMC 外设支持（根据 Kconfig 配置）
-if(CONFIG_PDL_PMC_SUPPORT)
-    list(APPEND PDL_SRCS
-        "src/pdl_pmc/pdl_pmc.c"
-        "src/pdl_pmc/pdl_pmc_can.c"
-        "src/pdl_pmc/pdl_pmc_eth.c"
-    )
-    message(STATUS "  [PDL] PMC peripheral support enabled")
-endif()
-
 if(NOT PDL_SRCS)
     message(WARNING "PDL: No peripheral support enabled. Skipping PDL build.")
-    message(WARNING "  Enable at least one of: PDL_MCU_SUPPORT, PDL_PMC_SUPPORT")
+    message(WARNING "  Enable PDL_MCU_SUPPORT to build the current peripheral layer")
 else()
     list(LENGTH PDL_SRCS PDL_FILE_COUNT)
     message(STATUS "  [PDL] Total ${PDL_FILE_COUNT} source files selected")

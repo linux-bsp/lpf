@@ -1,7 +1,7 @@
 # PDL System Test Configuration
 #
 # Cross-device integration tests for PDL components.
-# Tests multi-device scenarios and protocol interactions.
+# Tests MCU-focused integration scenarios and protocol interactions.
 
 if TEST_SYSTEM_PDL
 
@@ -14,10 +14,10 @@ config TEST_SYSTEM_PDL_MULTIDEVICE
 	  Concurrent operations across multiple PDL devices.
 
 	  Tests:
-	    - Simultaneous MCU and PMC commands
+	    - Simultaneous MCU commands
 	    - Interleaved command/response sequences
 	    - Device priority handling
-	    - Concurrent telemetry collection
+	    - Concurrent status collection
 	    - Cross-device timing interactions
 
 	  Verifies:
@@ -27,7 +27,7 @@ config TEST_SYSTEM_PDL_MULTIDEVICE
 	    - No message cross-contamination
 
 	  Runtime: 5-10 seconds
-	  Hardware: Multiple mock devices
+	  Hardware: Multiple MCU devices
 	  Dependencies: CONFIG_PDL
 	  Tags: integration, pdl, multidevice
 	  Test file: test_system_pdl_multidevice.c
@@ -64,7 +64,7 @@ config TEST_SYSTEM_PDL_BUS_SHARING
 	  Multiple PDL devices sharing same physical bus.
 
 	  Tests:
-	    - CAN/Ethernet buses with MCU + PMC
+	    - CAN/UART buses with multiple MCU devices
 	    - Serial bus with multiple devices
 	    - Bus arbitration fairness
 	    - Collision detection and recovery
@@ -131,39 +131,6 @@ config TEST_SYSTEM_PDL_TELEMETRY
 	  Dependencies: CONFIG_PDL
 	  Tags: integration, telemetry
 	  Test file: test_system_pdl_telemetry.c
-
-config TEST_SYSTEM_PDL_PMC
-	bool "PMC device integration tests"
-	default y
-	depends on PDL_PMC_SUPPORT
-	help
-	  Comprehensive PMC communication driver integration tests.
-
-	  Tests:
-	    - PMC initialization and basic communication
-	    - Telemetry data transmission
-	    - Telecommand handling
-	    - Node management operations
-	    - Power domain control
-	    - Status query operations
-	    - Connection status and statistics
-	    - Callback registration and invocation
-
-	  Verifies:
-	    - PMC driver initialization with Ethernet interface
-	    - Telemetry/command callback mechanism
-	    - Node start/stop/restart operations
-	    - Power on/off/query commands
-	    - Heartbeat transmission
-	    - Connection status monitoring
-	    - Communication statistics tracking
-	    - Proper cleanup and deinitialization
-
-	  Runtime: 5-10 seconds
-	  Hardware: PMC device or mock interface
-	  Dependencies: CONFIG_PDL_PMC_SUPPORT
-	  Tags: integration, pmc, telemetry, command
-	  Test file: test_system_pdl_pmc.c
 
 endmenu
 

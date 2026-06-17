@@ -12,11 +12,6 @@ if(CONFIG_PDL_MCU_SUPPORT)
     file(GLOB PDL_MCU_SRCS "src/pdl_mcu/*.c")
     list(APPEND ADD_SRCS ${PDL_MCU_SRCS})
 endif()
-
-if(CONFIG_PDL_PMC_SUPPORT)
-    file(GLOB PDL_PMC_SRCS "src/pdl_pmc/*.c")
-    list(APPEND ADD_SRCS ${PDL_PMC_SRCS})
-endif()
 ###############################################
 
 ###### Add required/dependent components ######
@@ -24,7 +19,6 @@ endif()
 # PDL 从 PCONFIG 获取配置类型和运行时配置
 # PCONFIG 定义配置类型，PDL 使用
 # 依赖关系：PDL→PCONFIG（单向依赖，无循环）
-# PDL_PMC 和 PDL_MCU 需要 PRL 协议层支持
 
 # OSAL 是必须的（Kconfig: select OSAL）
 if(CONFIG_OSAL)
@@ -47,12 +41,12 @@ else()
     message(FATAL_ERROR "PDL requires PCONFIG but CONFIG_PCONFIG is not enabled")
 endif()
 
-# PRL 是条件依赖的（仅 PDL_PMC 和 PDL_MCU 需要）
-if(CONFIG_PDL_PMC_SUPPORT OR CONFIG_PDL_MCU_SUPPORT)
+# PRL 是条件依赖的（仅 MCU 外设需要）
+if(CONFIG_PDL_MCU_SUPPORT)
     if(CONFIG_PRL)
         list(APPEND ADD_REQUIREMENTS prl)
     else()
-        message(FATAL_ERROR "PDL_PMC/PDL_MCU requires PRL but CONFIG_PRL is not enabled")
+        message(FATAL_ERROR "PDL_MCU requires PRL but CONFIG_PRL is not enabled")
     endif()
 endif()
 ###############################################
@@ -60,10 +54,6 @@ endif()
 #### Add compile option for this component ####
 if(CONFIG_PDL_MCU_SUPPORT)
     list(APPEND ADD_DEFINITIONS -DPDL_MCU_SUPPORT=1)
-endif()
-
-if(CONFIG_PDL_PMC_SUPPORT)
-    list(APPEND ADD_DEFINITIONS -DPDL_PMC_SUPPORT=1)
 endif()
 ###############################################
 

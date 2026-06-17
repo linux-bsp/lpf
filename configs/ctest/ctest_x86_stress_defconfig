@@ -6,7 +6,6 @@
 # ============================================================================
 
 # Product Selection - All Products
-CONFIG_PRODUCT_PMC=y
 
 # Core Components - Full Stack
 CONFIG_OSAL=y

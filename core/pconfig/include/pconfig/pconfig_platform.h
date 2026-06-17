@@ -12,9 +12,6 @@
 #define PCONFIG_PLATFORM_H
 
 #include "pconfig_mcu.h"
-#include "pconfig_fpga.h"
-#include "pconfig_switch.h"
-#include "pconfig_pmc.h"
 
 /*===========================================================================
  * 板级配置（顶层）
@@ -24,7 +21,7 @@
  * @brief 板级硬件配置
  *
  * 这是顶层配置结构，以外设为单位描述整个板子的硬件配置
- * 只包含纯硬件外设：MCU、FPGA、Switch、PMC
+ * 当前只保留 MCU 外设类型，后续可按需继续增加其他外设
  *
  * 设计说明：
  * - 使用计数器+直接数组指针模式
@@ -36,20 +33,11 @@ typedef struct {
 	const char *platform_name;	/* 平台名称（如"ti"） */
 	const char *chip_name;		/* 芯片名称（如"am6254"） */
 	const char *project_name;	/* 项目名称（如"H200_100P"） */
-	const char *product_name;	/* 产品名称（如"h200_100p"） */
+	const char *product_name;	/* 产品名称（如"framework"） */
 
 	/* 硬件外设配置数组（直接数组指针） */
 	uint32_t mcu_count;		/* MCU外设数量 */
 	pconfig_mcu_entry_t *mcu_array;	/* MCU外设数组（直接指向数组首元素） */
-
-	uint32_t fpga_count;		/* FPGA外设数量 */
-	pconfig_fpga_cfg_t *fpga_array;	/* FPGA外设数组 */
-
-	uint32_t switch_count;		/* Switch外设数量 */
-	pconfig_switch_cfg_t *switch_array; /* Switch外设数组 */
-
-	uint32_t pmc_count;		/* PMC外设数量 */
-	pconfig_pmc_entry_t *pmc_array;	/* PMC外设数组 */
 } pconfig_platform_config_t;
 
 #endif /* PCONFIG_PLATFORM_H */

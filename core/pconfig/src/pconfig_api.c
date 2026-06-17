@@ -282,27 +282,4 @@ void PCONFIG_print(const pconfig_platform_config_t *config)
         }
     }
 
-    /* 打印FPGA配置 */
-    if (config->fpga_array) {
-        for (i = 0; i < config->fpga_count; i++) {
-            LOG_INFO("PCONFIG", "  FPGA[%u]: %s", i,
-                     config->fpga_array[i].description ? config->fpga_array[i].description : "N/A");
-        }
-    }
-
-    /* 打印Switch配置 */
-    if (config->switch_array) {
-        for (i = 0; i < config->switch_count; i++) {
-            LOG_INFO("PCONFIG", "  Switch[%u]: %s", i,
-                     config->switch_array[i].description ? config->switch_array[i].description : "N/A");
-        }
-    }
-
-    /* 打印PMC配置 */
-    if (config->pmc_array) {
-        for (i = 0; i < config->pmc_count; i++) {
-            LOG_INFO("PCONFIG", "  PMC[%u]: %s", i,
-                     config->pmc_array[i].description ? config->pmc_array[i].description : "N/A");
-        }
-    }
 }

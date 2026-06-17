@@ -6,7 +6,7 @@ PCONFIG is the platform hardware-configuration registry. It stores platform-leve
 
 - Register platform configurations (`pconfig_platform_config_t`).
 - Track the current board configuration.
-- Provide typed accessors for MCU, FPGA, Switch, and PMC entries.
+- Provide typed accessors for MCU entries.
 - Keep hardware configuration data separate from PDL and application logic.
 
 ## Public API
@@ -27,45 +27,15 @@ void PCONFIG_print(const pconfig_platform_config_t *config);
 
 ## Typed Accessors
 
-The current header provides inline index-based accessors:
+The current header provides an inline index-based MCU accessor:
 
 ```c
 PCONFIG_HW_GetMCU(platform, index);
-PCONFIG_HW_GetFPGA(platform, index);
-PCONFIG_HW_GetSwitch(platform, index);
-PCONFIG_HW_GetPMC(platform, index);
-```
-
-
-## PMC Runtime Flow
-
-PMC applications should use `PMC_Runtime_Init()` rather than directly calling `PCONFIG_init()` and `PCONFIG_register()`.
-
-`pmc_runtime` performs:
-
-1. `PCONFIG_init()`
-2. `PCONFIG_register(&pconfig_${CONFIG_PROJECT_NAME})`
-3. `PCONFIG_SetBoard(&pconfig_${CONFIG_PROJECT_NAME})`
-
-This keeps board symbol knowledge in the product runtime layer.
-
-## Platform Config Location
-
-PMC platform PCONFIG data lives under:
-
-```text
-products/pmc/configs/projects/<CONFIG_PROJECT_NAME>/pconfig/
-```
-
-For H200-100P-AM625, the active table is:
-
-```text
-products/pmc/configs/projects/h200_100p_am625/pconfig/pconfig_h200_100p_am625.c
 ```
 
 ## Layering Rules
 
 - `core/pconfig` defines data structures and registry behavior only.
-- Product CMake chooses the platform table based on `CONFIG_PROJECT_NAME`.
+- Product or board integration code owns concrete platform tables.
 - PDL consumes `PCONFIG_GetBoard()` and typed accessors; it should not know concrete product table symbols.
-- Applications should go through product runtime initialization, not direct board registration.
+- Applications should initialize PCONFIG through their platform runtime/bootstrap code.

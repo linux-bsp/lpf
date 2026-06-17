@@ -72,14 +72,6 @@ test_defconfig() {
     fi
 }
 
-# Test all PMC configs
-echo "Testing PMC Configurations:"
-echo "----------------------------------------"
-while IFS= read -r config; do
-    test_defconfig "$config"
-done < <(find configs/pmc -name "*_defconfig" -type f | sort)
-echo ""
-
 # Test all x86 test configs
 echo "Testing x86 Test Configurations:"
 echo "----------------------------------------"

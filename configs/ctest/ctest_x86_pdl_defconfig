@@ -111,4 +111,3 @@ CONFIG_TEST_PDL_MCU=y
 # CONFIG_TEST_SYSTEM is not set
 
 # Products - All Disabled
-# CONFIG_PRODUCT_PMC is not set

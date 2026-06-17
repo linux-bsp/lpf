@@ -26,17 +26,12 @@ list(APPEND ADD_PRIV_INCLUDE "src")
 if(ACONFIG_EXTRA_INCLUDE)
     list(APPEND ADD_INCLUDE ${ACONFIG_EXTRA_INCLUDE})
 endif()
-
-# 添加产品层头文件路径（用于包含产品特定的功能定义）
-if(CONFIG_PRODUCT_PMC)
-    list(APPEND ADD_INCLUDE "${SDK_PATH}/products/pmc/include")
-endif()
 ###############################################
 
 ###### Add required/dependent components ######
 # ACONFIG 依赖 OSAL（必须）和 PDL（用于 HWID 支持，可选）
-# ACONFIG 提供通用的遥测遥控配置管理框架
-# PDL_MISC 提供 HWID 读取接口
+# ACONFIG 提供通用的应用配置管理框架
+# PDL 提供 HWID 读取接口
 
 # OSAL 是必须的（Kconfig: select OSAL）
 if(CONFIG_OSAL)

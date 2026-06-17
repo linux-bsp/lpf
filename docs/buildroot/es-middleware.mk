@@ -91,13 +91,4 @@ define ES_MIDDLEWARE_INSTALL_STAGING_CMDS
 endef
 endif
 
-# Optional: Install init scripts for PMC applications
-ifeq ($(BR2_PACKAGE_ES_MIDDLEWARE_INSTALL_INIT),y)
-define ES_MIDDLEWARE_INSTALL_INIT_SYSV
-	@echo "ES-Middleware: Installing init scripts"
-	$(INSTALL) -D -m 0755 $(ES_MIDDLEWARE_PKGDIR)/S90es-middleware \
-		$(TARGET_DIR)/etc/init.d/S90es-middleware
-endef
-endif
-
 $(eval $(generic-package))

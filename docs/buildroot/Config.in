@@ -4,38 +4,22 @@ config BR2_PACKAGE_ES_MIDDLEWARE
 	depends on BR2_USE_MMU
 	depends on BR2_INSTALL_LIBSTDCPP
 	help
-	  ES-Middleware is an embedded software middleware framework
-	  with Kconfig+CMake build system. It provides OSAL, HAL, PDL,
+	  ES-Middleware is a generic embedded middleware framework
+	  with a Kconfig+CMake build system. It provides OSAL, HAL, PDL,
 	  PRL, ACONFIG, and PCONFIG layers for embedded systems.
-
-	  Target platforms: TI SITARA AM62x series
-
-	  https://github.com/your-org/ES-Middleware
 
 if BR2_PACKAGE_ES_MIDDLEWARE
 
 config BR2_PACKAGE_ES_MIDDLEWARE_DEFCONFIG
 	string "Kconfig defconfig to use"
-	default "tests_arm64_full_defconfig"
+	default "ctest_arm64_minimal_defconfig"
 	help
 	  Specify which ES-Middleware configuration to use.
-
-	  Test configurations (configs/tests/):
-	  - tests_arm64_full_defconfig            (All modules, recommended for development)
-	  - tests_arm64_hal_defconfig             (HAL development)
-	  - tests_arm64_minimal_defconfig         (Minimal footprint)
-
-	  Production configurations (configs/pmc/):
-	  - pmc_h200_100p_am625_release_defconfig (Production, optimized)
-	  - pmc_h200_100p_am625_debug_defconfig   (Development, with debug)
-
-	  See ES-Middleware/configs/ for all 21 available configurations.
+	  Defconfigs are provided under configs/ctest/.
 
 choice
 	prompt "Build type"
 	default BR2_PACKAGE_ES_MIDDLEWARE_BUILD_TYPE_RELEASE
-	help
-	  Select the CMake build type.
 
 config BR2_PACKAGE_ES_MIDDLEWARE_BUILD_TYPE_RELEASE
 	bool "Release"
@@ -54,18 +38,12 @@ config BR2_PACKAGE_ES_MIDDLEWARE_BUILD_TYPE
 	default "Debug" if BR2_PACKAGE_ES_MIDDLEWARE_BUILD_TYPE_DEBUG
 	default "RelWithDebInfo" if BR2_PACKAGE_ES_MIDDLEWARE_BUILD_TYPE_RELWITHDEBINFO
 
-config BR2_PACKAGE_ES_MIDDLEWARE_INSTALL_INIT
-	bool "Install init scripts"
-	default n
-	help
-	  Install SysV init scripts for PMC applications.
-
 config BR2_PACKAGE_ES_MIDDLEWARE_INSTALL_HEADERS
 	bool "Install development headers"
 	default n
 	help
 	  Install development headers to $(STAGING_DIR)/usr/include/.
-	  Only needed for developing packages that depend on ES-Middleware.
+	  Only needed for packages that depend on ES-Middleware.
 
 config BR2_PACKAGE_ES_MIDDLEWARE_MENUCONFIG
 	bool "Enable interactive menuconfig"
@@ -76,5 +54,4 @@ config BR2_PACKAGE_ES_MIDDLEWARE_MENUCONFIG
 endif # BR2_PACKAGE_ES_MIDDLEWARE
 
 comment "ES-Middleware needs a toolchain w/ threads, C++, MMU"
-	depends on !BR2_TOOLCHAIN_HAS_THREADS || !BR2_USE_MMU || \
-		!BR2_INSTALL_LIBSTDCPP
+	depends on !BR2_TOOLCHAIN_HAS_THREADS || !BR2_USE_MMU || 		!BR2_INSTALL_LIBSTDCPP

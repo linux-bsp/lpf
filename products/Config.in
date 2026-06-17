@@ -1,16 +1,16 @@
 # ============================================================================
 # Products Configuration
 # ============================================================================
-# This file organizes all product configurations in a hierarchical menu
-# structure, similar to Linux kernel's drivers/ subsystem.
+# Generic embedded middleware framework entry point.
 # ============================================================================
 
 menu "Products"
 
-# Source individual product Config.in files
-# Each product defines its own menuconfig entry for a collapsible submenu
-
-source "products/pmc/Config.in"
-# source "products/samples/Config.in"  # Not yet implemented
+config PRODUCT_FRAMEWORK
+	bool "Generic embedded middleware framework"
+	default y
+	help
+	  Build the generic embedded middleware framework without any
+	  product-specific business layer.
 
 endmenu

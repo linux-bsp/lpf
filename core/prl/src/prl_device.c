@@ -13,15 +13,11 @@
 static const char *device_type_names[] = {
 	"UNKNOWN",      /* 0x00 */
 	"MCU",          /* 0x01 */
-	"PMC",          /* 0x02 */
-	"PMC",          /* 0x03 */
-	"GSC",          /* 0x04 */
-	"POWER",        /* 0x05 */
 };
 
 bool prl_device_type_valid(uint8_t dev_type)
 {
-	return (dev_type >= PRL_DEV_TYPE_MCU && dev_type <= PRL_DEV_TYPE_POWER);
+	return (dev_type == PRL_DEV_TYPE_MCU);
 }
 
 const char *prl_device_type_name(uint8_t dev_type)

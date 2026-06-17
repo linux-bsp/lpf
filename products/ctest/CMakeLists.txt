@@ -89,8 +89,6 @@ target_include_directories(es-middleware-test PRIVATE
     ${SDK_PATH}/core/pdl/include/pdl
     ${SDK_PATH}/core/prl/include/prl
     ${SDK_PATH}/core/aconfig/include/aconfig
-    ${SDK_PATH}/products/pmc/include
-    ${SDK_PATH}/products/pmc/include/pmc
 )
 
 # Add test framework headers if enabled
@@ -146,7 +144,6 @@ if(CONFIG_TEST_UNIT)
             LIBRARY pdl
             INCLUDE_DIRS
                 ${SDK_PATH}/core/pdl/src/pdl_mcu
-                ${SDK_PATH}/core/pdl/src/pdl_pmc
         )
     endif()
 

@@ -1,90 +1,57 @@
 config PRL
-    bool "Enable PRL (Protocol Layer)"
-    default y
-    depends on OSAL
-    help
-      Enable Protocol Layer for unified device communication.
-      PRL provides protocol encoding/decoding for all internal devices:
-      - MCU: Microcontroller
-      - PMC: Communication Controller Management
-      - PMC: Payload Management Controller
-      - GSC: Ground Station Controller
-      - POWER: Power Management Board
+	bool "Enable PRL (Protocol Layer)"
+	default y
+	depends on OSAL
+	help
+	  Enable Protocol Layer for unified device communication.
+	  PRL provides protocol encoding/decoding for internal devices.
 
 if PRL
 
 config PRL_BUILD_SHARED
-    bool "Build PRL as shared library"
-    default y
-    help
-      Build PRL as a shared library (.so) instead of static library (.a).
+	bool "Build PRL as shared library"
+	default y
+	help
+	  Build PRL as a shared library (.so) instead of static library (.a).
 
 menu "Device Protocol Selection"
 
 config PRL_MCU
-    bool "Enable MCU Device Protocol"
-    default y
-    help
-      Enable protocol for Microcontroller (MCU) devices.
-      Supports version query, status query, reset, power control, etc.
-
-config PRL_PMC
-    bool "Enable PMC Device Protocol"
-    default y
-    help
-      Enable protocol for Communication Controller Management (PMC) devices.
-      Supports telemetry, telecommand, time sync, orbit/attitude data, etc.
-
-config PRL_PMC
-    bool "Enable PMC Device Protocol"
-    default y
-    help
-      Enable protocol for Payload Management Controller (PMC) devices.
-      Supports telemetry, command, firmware update, node management, etc.
-
-config PRL_GSC
-    bool "Enable GSC Device Protocol"
-    default y
-    help
-      Enable protocol for Ground Station Controller (GSC) devices.
-      Supports telemetry, command, file transfer, database sync, etc.
-
-config PRL_POWER
-    bool "Enable POWER Device Protocol"
-    default y
-    help
-      Enable protocol for Power Management Board (POWER) devices.
-      Supports power on/off, voltage/current query, alarm, etc.
+	bool "Enable MCU Device Protocol"
+	default y
+	help
+	  Enable protocol for Microcontroller (MCU) devices.
+	  Supports version query, status query, reset, power control, etc.
 
 endmenu
 
 menu "Protocol Features"
 
 config PRL_CRC_CHECK
-    bool "Enable CRC16 checksum"
-    default y
-    help
-      Enable CRC16-CCITT checksum for all protocol packets.
+	bool "Enable CRC16 checksum"
+	default y
+	help
+	  Enable CRC16-CCITT checksum for all protocol packets.
 
 config PRL_SEQUENCE_CHECK
-    bool "Enable sequence number check"
-    default y
-    help
-      Enable sequence number validation for packet ordering.
+	bool "Enable sequence number check"
+	default y
+	help
+	  Enable sequence number validation for packet ordering.
 
 config PRL_TIMESTAMP_CHECK
-    bool "Enable timestamp validation"
-    default n
-    help
-      Enable timestamp validation for packet freshness.
+	bool "Enable timestamp validation"
+	default n
+	help
+	  Enable timestamp validation for packet freshness.
 
 config PRL_MAX_PAYLOAD_SIZE
-    int "Maximum payload size (bytes)"
-    default 4096
-    range 256 65536
-    help
-      Maximum payload size for protocol packets.
-      Larger values allow bigger messages but consume more memory.
+	int "Maximum payload size (bytes)"
+	default 4096
+	range 256 65536
+	help
+	  Maximum payload size for protocol packets.
+	  Larger values allow bigger messages but consume more memory.
 
 endmenu
 

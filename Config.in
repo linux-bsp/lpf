@@ -26,7 +26,7 @@ config PROJECT_NAME
 
 	  Naming convention: <product>_<project>_defconfig
 	  - ctest_x86_full_defconfig → project name: x86_full
-	  - pmc_h200_100p_am625_debug_defconfig → project name: h200_100p_am625_debug
+	  - generic_framework_defconfig → project name: generic_framework
 
 	  Can be overridden in defconfig file by setting CONFIG_PROJECT_NAME.
 
@@ -37,55 +37,10 @@ config PROJECT_VERSION
 	  Project version string.
 
 # ============================================================================
-# Product Selection
-# ============================================================================
-# Select which product to build. Only one product can be selected at a time
-# for exclusive development and testing.
+# Product Configuration
 # ============================================================================
 
-choice
-	prompt "Select product"
-	default PRODUCT_CTEST
-	help
-	  Select which product to build.
-
-	  Only one product can be selected at a time to ensure clean
-	  separation of product-specific code and configurations.
-
-config PRODUCT_CTEST
-	bool "CTEST - Core Tests"
-	help
-	  Build core modules test suite.
-
-	  CTEST is a comprehensive test product for validating all core
-	  components (OSAL, HAL, PDL, PRL, PCONFIG, ACONFIG).
-
-	  This will build:
-	  - Unit tests for individual modules
-	  - Performance benchmarks
-	  - Stress tests for stability validation
-	  - System integration tests
-
-	  Use this for:
-	  - Core components development and validation
-	  - Regression testing
-	  - Performance analysis
-	  - Quality assurance
-
-config PRODUCT_PMC
-	bool "PMC Product"
-	help
-	  Build PMC (Central Control Module) product.
-
-	  PMC is a payload control and data management system
-	  designed for H200 platform with AM625 SoC.
-
-	  This will build:
-	  - PMC libraries (libpmc)
-	  - PMC applications (collector, comm, health, logger, supervisor)
-	  - Platform-specific configurations for AM625
-
-endchoice
+source "products/Config.in"
 
 # ============================================================================
 # Build System Configuration
@@ -1136,14 +1091,6 @@ source "core/Config.in"
 # Product-Specific Configuration
 # ============================================================================
 
-menu "Product Configuration"
-
-if PRODUCT_PMC
-	source "products/pmc/Config.in"
-endif
-
-endmenu
-
 # ============================================================================
 # Configuration Validation
 # ============================================================================
@@ -1391,16 +1338,6 @@ config SANITY_ERROR_RTOS_WITH_UNSUPPORTED_FEATURES
 # Product Configuration Checks
 # ============================================================================
 
-config SANITY_ERROR_PMC_NO_DEPS
-	def_bool y
-	depends on PRODUCT_PMC && (!OSAL || !HAL || !PCONFIG || !PDL || !ACONFIG)
-	prompt "ERROR: PMC product requires OSAL, HAL, PCONFIG, PDL, and ACONFIG"
-
-config SANITY_WARN_TEST_PRODUCT_CONFLICT
-	def_bool y
-	depends on PRODUCT_PMC && BUILD_TESTING
-	prompt "WARNING: Building product and tests together (use separate configs)"
-
 # ============================================================================
 # Configuration Summary
 # ============================================================================
@@ -1414,8 +1351,7 @@ config SANITY_CHECK_PASSED
 	           !SANITY_ERROR_FORTIFY_WITH_O0 && \
 	           !SANITY_ERROR_PIE_NO_PIC && \
 	           !SANITY_ERROR_SANITIZER_CONFLICT && \
-	           !SANITY_ERROR_BARE_METAL_WITH_OS_FEATURES && \
-	           !SANITY_ERROR_PMC_NO_DEPS
+	           !SANITY_ERROR_BARE_METAL_WITH_OS_FEATURES
 	help
 	  This symbol is set when all sanity checks pass.
 	  If this is not set, review error messages above.

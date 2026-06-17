@@ -27,10 +27,7 @@
 /* ========== Device Types ========== */
 
 typedef enum {
-	PRL_DEV_TYPE_MCU = 0x01,
-	PRL_DEV_TYPE_PMC = 0x02,
-	PRL_DEV_TYPE_GSC = 0x04,
-	PRL_DEV_TYPE_POWER = 0x05
+	PRL_DEV_TYPE_MCU = 0x01
 } prl_dev_type_t;
 
 /* ========== Protocol Header ========== */
@@ -68,8 +65,6 @@ bool prl_verify_packet_crc(const uint8_t *packet, size_t total_len);
  *
  * @param[in] dev_type 设备类型
  * @return true 有效，false 无效
- *
- * @note 有效的设备类型范围：PRL_DEV_TYPE_MCU ~ PRL_DEV_TYPE_POWER
  */
 bool PRL_IsDeviceTypeValid(uint8_t dev_type);
 
