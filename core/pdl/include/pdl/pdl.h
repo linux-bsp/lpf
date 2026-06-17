@@ -54,8 +54,4 @@
 #include "pdl_satellite.h"   /* Satellite（卫星平台）驱动 */
 #endif /* CONFIG_PDL_SATELLITE_SUPPORT */
 
-#ifdef CONFIG_PDL_WATCHDOG_SUPPORT
-#include "pdl_watchdog.h"    /* Watchdog（看门狗）驱动 */
-#endif /* CONFIG_PDL_WATCHDOG_SUPPORT */
-
 #endif /* PDL_H */

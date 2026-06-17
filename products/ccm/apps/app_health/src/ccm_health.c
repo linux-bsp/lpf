@@ -11,7 +11,6 @@ static volatile bool g_running = true;
 static osal_thread_t g_satellite_hb_thread = 0;
 static osal_thread_t g_mcu_fpga_hb_thread = 0;
 static osal_thread_t g_cpld_hb_thread = 0;
-static osal_thread_t g_watchdog_thread = 0;
 
 /* 信号处理 */
 static void signal_handler(int32_t sig)
@@ -101,32 +100,6 @@ static void *cpld_heartbeat_thread(void *arg)
     return NULL;
 }
 
-/* 线程4: 硬件看门狗喂狗（4秒周期） */
-static void *watchdog_thread(void *arg)
-{
-    (void)arg;
-
-    LOG_INFO("HEALTH", "看门狗线程启动");
-
-    while (g_running) {
-        /* TODO: 检查系统健康状态 */
-        bool system_healthy = true;
-
-        if (system_healthy) {
-            /* TODO: 喂狗 */
-            LOG_DEBUG("HEALTH", "喂狗");
-        } else {
-            LOG_ERROR("HEALTH", "系统异常，停止喂狗");
-            /* 停止喂狗，触发系统复位 */
-        }
-
-        OSAL_msleep(4000);  /* 4秒 */
-    }
-
-    LOG_INFO("HEALTH", "看门狗线程退出");
-    return NULL;
-}
-
 /* 初始化 */
 int32_t CCM_Health_Init(void)
 {
@@ -185,13 +158,6 @@ int32_t CCM_Health_Run(void)
         return ret;
     }
 
-    /* 创建线程4: 看门狗 */
-    ret = OSAL_pthread_create(&g_watchdog_thread, NULL, watchdog_thread, NULL);
-    if (ret != OSAL_SUCCESS) {
-        LOG_ERROR("HEALTH", "创建看门狗线程失败: %d", ret);
-        return ret;
-    }
-
     /* 等待退出信号 */
     while (g_running) {
         OSAL_msleep(1000);
@@ -222,14 +188,6 @@ int32_t CCM_Health_Run(void)
             LOG_ERROR("HEALTH", "等待CPLD心跳线程退出失败: %d", ret);
         }
         g_cpld_hb_thread = 0;
-    }
-
-    if (g_watchdog_thread != 0) {
-        ret = OSAL_pthread_join(g_watchdog_thread, NULL);
-        if (ret != OSAL_SUCCESS) {
-            LOG_ERROR("HEALTH", "等待看门狗线程退出失败: %d", ret);
-        }
-        g_watchdog_thread = 0;
     }
 
     LOG_INFO("HEALTH", "Health进程退出");

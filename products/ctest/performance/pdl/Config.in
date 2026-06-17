@@ -78,23 +78,6 @@ config TEST_PERF_PDL_SATELLITE
 	  Tags: performance, pdl
 	  Test file: test_perf_pdl_satellite.c
 
-config TEST_PERF_PDL_WATCHDOG
-	bool "Watchdog device performance tests"
-	default n
-	help
-	  Watchdog device performance benchmarks.
-
-	  Measures:
-	    - Kick operation latency
-	    - Status query overhead
-	    - Configuration change time
-
-	  Runtime: 1-2 seconds
-	  Hardware: Mock watchdog device
-	  Dependencies: CONFIG_PDL_WATCHDOG
-	  Tags: performance, pdl
-	  Test file: test_perf_pdl_watchdog.c
-
 config TEST_PERF_PDL_PROTOCOL
 	bool "Protocol encoding/decoding performance tests"
 	default n

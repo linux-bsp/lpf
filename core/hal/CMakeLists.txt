@@ -34,10 +34,6 @@ if(CONFIG_PLATFORM_LINUX)
         list(APPEND ADD_SRCS "src/linux/serial/hal_serial_linux.c")
     endif()
 
-    if(CONFIG_HAL_WATCHDOG_LINUX)
-        list(APPEND ADD_SRCS "src/linux/watchdog/hal_watchdog_linux.c")
-    endif()
-
 else()
     message(WARNING "No HAL platform selected or platform not supported")
 endif()

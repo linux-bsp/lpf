@@ -115,23 +115,6 @@ config TEST_PERF_HAL_GPIO
 	  Tags: performance, hardware, gpio
 	  Test file: test_perf_hal_gpio.c
 
-config TEST_PERF_HAL_WATCHDOG
-	bool "Watchdog timer performance tests"
-	default n
-	help
-	  Watchdog timer performance benchmarks.
-
-	  Measures:
-	    - Kick operation overhead
-	    - Timer accuracy
-	    - Configuration latency
-
-	  Runtime: 1-2 seconds
-	  Hardware: Watchdog hardware
-	  Dependencies: CONFIG_HAL_WATCHDOG
-	  Tags: performance, hardware, watchdog
-	  Test file: test_perf_hal_watchdog.c
-
 endmenu
 
 endif # TEST_PERFORMANCE_HAL

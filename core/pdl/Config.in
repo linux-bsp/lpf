@@ -196,40 +196,6 @@ menuconfig PDL_CCM_SUPPORT
 
 source "core/pdl/src/pdl_ccm/Config.in"
 
-menuconfig PDL_WATCHDOG_SUPPORT
-	bool "Watchdog peripheral support"
-	default n
-	select HAL_WATCHDOG
-	select OSAL_THREAD
-	help
-	  Enable watchdog peripheral support for system reliability.
-
-	  Watchdog management provides:
-	  - Automatic system reset on software hang
-	  - Configurable timeout periods
-	  - Periodic "kick" mechanism
-	  - Health monitoring integration
-
-	  Features:
-	  - Background thread for automatic watchdog refresh
-	  - Application health check callbacks
-	  - Graceful shutdown on critical errors
-	  - Watchdog timeout logging
-
-	  Memory footprint: ~4KB + thread stack (typically 8KB)
-
-	  Use cases:
-	  - Unattended operation (satellites, remote systems)
-	  - Safety-critical applications
-	  - High-reliability systems
-
-	  Dependencies: HAL_WATCHDOG, OSAL_THREAD
-
-	  Recommended: Enable for production systems requiring high reliability
-
-	  Note: Improper watchdog configuration can cause unexpected resets.
-	  Ensure all critical tasks can complete within the timeout period.
-
 menuconfig PDL_MISC_SUPPORT
 	bool "MISC (Miscellaneous) support"
 	default n

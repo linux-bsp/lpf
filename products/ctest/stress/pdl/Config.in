@@ -57,31 +57,6 @@ config TEST_STRESS_PDL_MCU_LONG_RUNNING
 	  Tags: stress, pdl, duration
 	  Test function: test_stress_mcu_long_running_query
 
-config TEST_STRESS_PDL_WATCHDOG_HIGH_FREQ
-	bool "Watchdog high-frequency kick stress"
-	default y
-	depends on PDL_WATCHDOG_SUPPORT
-	help
-	  Watchdog high-frequency kicking stress test.
-
-	  Tests:
-	    - Single thread rapid watchdog kicks
-	    - 10 second duration
-	    - Kick every 1ms (1000 Hz)
-	    - Manual mode operation
-
-	  Verifies:
-	    - High-frequency operation stability
-	    - No missed kicks
-	    - Device driver robustness
-	    - No errors under rapid operations
-
-	  Runtime: ~10 seconds
-	  Hardware: Watchdog device
-	  Dependencies: CONFIG_PDL_WATCHDOG_SUPPORT
-	  Tags: stress, pdl, high-frequency
-	  Test function: test_stress_watchdog_high_frequency_kick
-
 config TEST_STRESS_PDL_SATELLITE_CONCURRENT
 	bool "Satellite concurrent telemetry stress"
 	default y
@@ -135,12 +110,12 @@ config TEST_STRESS_PDL_CCM_CONCURRENT
 config TEST_STRESS_PDL_MULTIDEVICE
 	bool "Multi-device mixed operations stress"
 	default y
-	depends on PDL_MCU_SUPPORT && PDL_WATCHDOG_SUPPORT
+	depends on PDL_MCU_SUPPORT
 	help
 	  Multi-device concurrent mixed operations stress test.
 
 	  Tests:
-	    - 4 threads alternating MCU and Watchdog operations
+	    - 4 threads alternating MCU operations
 	    - 20 second duration
 	    - Interleaved device access
 	    - Shared resource management
@@ -152,8 +127,8 @@ config TEST_STRESS_PDL_MULTIDEVICE
 	    - Resource management correctness
 
 	  Runtime: ~20 seconds
-	  Hardware: MCU + Watchdog devices
-	  Dependencies: CONFIG_PDL_MCU_SUPPORT, CONFIG_PDL_WATCHDOG_SUPPORT
+	  Hardware: MCU devices
+	  Dependencies: CONFIG_PDL_MCU_SUPPORT
 	  Tags: stress, pdl, multidevice, integration
 	  Test function: test_stress_multidevice_mixed
 

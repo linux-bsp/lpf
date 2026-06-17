@@ -52,9 +52,4 @@
 #include "hal_serial.h"
 #endif /* CONFIG_HAL_UART */
 
-/* 看门狗 */
-#ifdef CONFIG_HAL_WATCHDOG
-#include "hal_watchdog.h"
-#endif /* CONFIG_HAL_WATCHDOG */
-
 #endif /* HAL_HAL_H */

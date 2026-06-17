@@ -15,7 +15,6 @@
 #define TEST_UART_DEVICE       "/dev/ttyUSB0"
 #define TEST_UART_BAUDRATE     115200
 #define TEST_GPIO_PIN          17
-#define TEST_WATCHDOG_DEVICE   "/dev/watchdog0"
 #define TEST_TIMEOUT_MS        5000
 #define TEST_LONG_TIMEOUT_MS   10000
 
@@ -340,12 +339,11 @@ static void test_system_gpio_toggle(void)
 
 /**
  * @brief 测试多个外设同时工作
- * @details 验证CAN + GPIO + Watchdog同时运行时的稳定性
+ * @details 验证CAN + GPIO同时运行时的稳定性
  */
 static void test_system_multi_peripheral_coordination(void)
 {
 	hal_can_handle_t can_handle = NULL;
-	hal_watchdog_handle_t wdt_handle = NULL;
 	int32_t ret;
 	int test_passed = 0;
 
@@ -377,18 +375,6 @@ static void test_system_multi_peripheral_coordination(void)
 		OSAL_printf("[ WARN ] GPIO init failed, continuing without GPIO\n");
 	}
 
-	/* 初始化Watchdog（仅读取，不启用） */
-	hal_watchdog_config_t wdt_config = {
-		.device = TEST_WATCHDOG_DEVICE,
-		.timeout_sec = 30,
-		.enable_on_init = false
-	};
-	ret = HAL_WATCHDOG_init(&wdt_config, &wdt_handle);
-	if (ret != OSAL_SUCCESS) {
-		OSAL_printf("[ WARN ] Watchdog init failed, continuing without watchdog\n");
-		wdt_handle = NULL;
-	}
-
 	/* 协同操作：循环10次，每次操作所有外设 */
 	for (int i = 0; i < 10; i++) {
 		/* 操作CAN */
@@ -411,13 +397,6 @@ static void test_system_multi_peripheral_coordination(void)
 			OSAL_printf("[ WARN ] GPIO set failed at iteration %d\n", i);
 		}
 
-		/* 读取Watchdog状态 */
-		if (wdt_handle) {
-			uint32_t kick_count = 0;
-			ret = HAL_WATCHDOG_get_stats(wdt_handle, &kick_count);
-			/* Watchdog可能不支持GetStats，这是正常的 */
-		}
-
 		OSAL_msleep(100); /* 100ms */
 	}
 
@@ -428,9 +407,6 @@ static void test_system_multi_peripheral_coordination(void)
 		HAL_CAN_deinit(can_handle);
 	}
 	HAL_GPIO_deinit(TEST_GPIO_PIN);
-	if (wdt_handle) {
-		HAL_WATCHDOG_deinit(wdt_handle);
-	}
 
 	TEST_ASSERT_TRUE(test_passed);
 	OSAL_printf("[ PASS ] Multi-peripheral coordination test completed\n");

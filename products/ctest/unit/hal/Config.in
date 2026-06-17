@@ -15,7 +15,6 @@ config TEST_HAL_ALL
 	select TEST_HAL_I2C
 	select TEST_HAL_SERIAL
 	select TEST_HAL_SPI
-	select TEST_HAL_WATCHDOG
 	help
 	  Enable all HAL unit tests at once.
 	  Disabling this allows individual test selection below.
@@ -127,28 +126,6 @@ config TEST_HAL_SPI
 	  Dependencies: CONFIG_HAL
 	  Tags: hardware
 	  Test file: test_hal_spi.c
-
-config TEST_HAL_WATCHDOG
-	bool "Watchdog timer tests"
-	default y
-	help
-	  Test HAL watchdog timer operations (init, start, stop, feed, timeout).
-
-	  Coverage:
-	    - Watchdog timer initialization
-	    - Watchdog enable/disable
-	    - Watchdog feed (kick) operations
-	    - Timeout configuration
-	    - Timeout event detection
-	    - System reset on timeout
-	    - Pre-timeout warnings (if supported)
-	    - Watchdog status queries
-
-	  Runtime: <500ms (includes watchdog timeout tests)
-	  Hardware: Requires watchdog hardware or simulation
-	  Dependencies: CONFIG_HAL
-	  Tags: hardware, slow
-	  Test file: test_hal_watchdog.c
 
 endmenu
 

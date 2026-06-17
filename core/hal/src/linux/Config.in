@@ -85,15 +85,4 @@ endif # HAL_UART
 # Watchdog Driver
 # ============================================================================
 
-if HAL_WATCHDOG
-
-config HAL_WATCHDOG_LINUX
-	bool "Linux watchdog driver"
-	default y
-	help
-	  Enable Linux watchdog driver (/dev/watchdog).
-	  Source: src/linux/hal_watchdog_linux.c
-
-endif # HAL_WATCHDOG
-
 endif # PLATFORM_LINUX

@@ -22,13 +22,11 @@ typedef struct {
 	hal_spi_handle_t spi_handle;
 	hal_i2c_handle_t i2c_handle;
 	uint32_t gpio_pin;  /* GPIO doesn't use handles, uses pin numbers */
-	hal_watchdog_handle_t watchdog_handle;
 	osal_atomic_uint32_t can_counter;
 	osal_atomic_uint32_t serial_counter;
 	osal_atomic_uint32_t spi_counter;
 	osal_atomic_uint32_t i2c_counter;
 	osal_atomic_uint32_t gpio_counter;
-	osal_atomic_uint32_t watchdog_counter;
 	bool stop_flag;
 } concurrent_test_ctx_t;
 
@@ -186,29 +184,6 @@ static void* gpio_worker_thread(void *arg)
 	return NULL;
 }
 
-/**
- * Watchdog worker thread
- */
-static void* watchdog_worker_thread(void *arg)
-{
-	concurrent_test_ctx_t *ctx = (concurrent_test_ctx_t *)arg;
-	int32_t ret;
-
-	OSAL_printf("[ INFO ] Watchdog worker started\n");
-
-	while (!ctx->stop_flag) {
-		ret = HAL_WATCHDOG_kick(ctx->watchdog_handle);
-		if (ret == OSAL_SUCCESS) {
-			OSAL_atomic_inc(&ctx->watchdog_counter);
-		}
-
-		OSAL_msleep(1000);
-	}
-
-	OSAL_printf("[ INFO ] Watchdog worker stopped\n");
-	return NULL;
-}
-
 /*===========================================================================
  * Test 1: Simultaneous Multi-Driver Operations
  *===========================================================================*/
@@ -220,7 +195,7 @@ static void* watchdog_worker_thread(void *arg)
 static void test_stress_hal_all_drivers_concurrent(void)
 {
 	concurrent_test_ctx_t ctx;
-	osal_thread_t threads[6];
+	osal_thread_t threads[5];
 	int32_t ret;
 	uint32_t active_drivers = 0;
 
@@ -298,20 +273,7 @@ static void test_stress_hal_all_drivers_concurrent(void)
 		OSAL_printf("[ INFO ] GPIO driver initialized\n");
 	}
 
-	/* Initialize Watchdog */
-	hal_watchdog_config_t watchdog_config = {
-		.device = "/dev/watchdog",
-		.timeout_sec = 10,
-		.enable_on_init = false
-	};
-	ret = HAL_WATCHDOG_init(&watchdog_config, &ctx.watchdog_handle);
-	if (ret == OSAL_SUCCESS) {
-		HAL_WATCHDOG_enable(ctx.watchdog_handle);
-		active_drivers++;
-		OSAL_printf("[ INFO ] Watchdog driver initialized\n");
-	}
-
-	OSAL_printf("[ INFO ] Active drivers: %u/6\n", active_drivers);
+	OSAL_printf("[ INFO ] Active drivers: %u/5\n", active_drivers);
 
 	if (active_drivers < 2) {
 		OSAL_printf("[ SKIP ] Need at least 2 drivers available\n");
@@ -336,9 +298,6 @@ static void test_stress_hal_all_drivers_concurrent(void)
 	}
 	if (ctx.gpio_pin) {
 		OSAL_pthread_create(&threads[thread_idx++], NULL, gpio_worker_thread, &ctx);
-	}
-	if (ctx.watchdog_handle) {
-		OSAL_pthread_create(&threads[thread_idx++], NULL, watchdog_worker_thread, &ctx);
 	}
 
 	OSAL_printf("[ INFO ] All worker threads started, running for %u seconds...\n",
@@ -385,10 +344,6 @@ static void test_stress_hal_all_drivers_concurrent(void)
 		OSAL_printf("         GPIO toggles: %llu\n",
 		           (unsigned long long)OSAL_atomic_load(&ctx.gpio_counter));
 	}
-	if (ctx.watchdog_handle) {
-		OSAL_printf("         Watchdog kicks: %llu\n",
-		           (unsigned long long)OSAL_atomic_load(&ctx.watchdog_counter));
-	}
 
 	/* Verify all drivers had activity */
 	if (ctx.can_handle) {
@@ -403,10 +358,6 @@ static void test_stress_hal_all_drivers_concurrent(void)
 
 cleanup:
 	/* Cleanup drivers */
-	if (ctx.watchdog_handle) {
-		HAL_WATCHDOG_disable(ctx.watchdog_handle);
-		HAL_WATCHDOG_deinit(ctx.watchdog_handle);
-	}
 	if (ctx.gpio_pin) {
 		HAL_GPIO_deinit(ctx.gpio_pin);
 	}

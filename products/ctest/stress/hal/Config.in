@@ -133,29 +133,6 @@ config TEST_STRESS_HAL_GPIO
 	  Tags: stress, hardware, gpio
 	  Test file: test_stress_hal_gpio.c
 
-config TEST_STRESS_HAL_WATCHDOG
-	bool "Watchdog stress tests"
-	default n
-	help
-	  Watchdog driver stress and edge case tests.
-
-	  Tests:
-	    - Rapid kick operations
-	    - Timeout edge cases
-	    - Concurrent configuration changes
-	    - Reset during reconfiguration
-
-	  Verifies:
-	    - Timer accuracy under load
-	    - Safe reconfiguration
-	    - No false resets
-
-	  Runtime: 10-20 seconds
-	  Hardware: Watchdog timer
-	  Dependencies: CONFIG_HAL_WATCHDOG
-	  Tags: stress, hardware, watchdog
-	  Test file: test_stress_hal_watchdog.c
-
 config TEST_STRESS_HAL_CONCURRENT
 	bool "Multi-driver concurrent access stress tests"
 	default n

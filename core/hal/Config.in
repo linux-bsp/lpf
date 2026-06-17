@@ -241,35 +241,6 @@ menuconfig HAL_GPIO
 	  - RTOS: GPIO peripheral driver
 	  - Bare-metal: Direct GPIO register access
 
-menuconfig HAL_WATCHDOG
-	bool "Watchdog support"
-	default n
-	help
-	  Enable watchdog timer driver.
-
-	  Watchdog timer automatically resets the system if software
-	  fails to periodically "kick" the watchdog.
-
-	  Features:
-	  - Configurable timeout period
-	  - Enable/disable control
-	  - Periodic refresh (kick)
-	  - System reset on timeout
-
-	  Memory footprint: ~3KB
-
-	  Use cases:
-	  - System reliability (recover from hangs)
-	  - Safety-critical applications
-	  - Unattended operation
-
-	  Platform support:
-	  - Linux: /dev/watchdog device
-	  - RTOS: Watchdog peripheral driver
-	  - Bare-metal: Direct watchdog register access
-
-	  Recommended: Enable for production systems
-
 endmenu
 
 # Platform-specific fine-grained configuration
