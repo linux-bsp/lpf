@@ -395,7 +395,7 @@ int32_t PDL_MCU_write_data(pdl_mcu_handle_t handle,
 /**
  * @brief 执行 MCU 命令
  */
-int32_t PDL_MCU_execute_command(pdl_mcu_handle_t handle,
+int32_t PDL_MCU_send_command(pdl_mcu_handle_t handle,
                                uint8_t cmd_id,
                                const uint8_t *params,
                                uint32_t param_len,
