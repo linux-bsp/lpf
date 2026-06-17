@@ -66,6 +66,30 @@ typedef struct
 	uint64_t timestamp_us;            /* 数据采集时间戳（微秒） */
 } pdl_mcu_status_t;
 
+/**
+ * @brief MCU 简单命令参数（无发送数据）
+ */
+typedef struct
+{
+	uint8_t cmd;                      /* 命令字 */
+	uint8_t *response;                /* 响应缓冲区 */
+	uint32_t response_max;            /* 响应缓冲区大小 */
+	uint32_t response_len;            /* 实际响应长度（输出） */
+} pdl_mcu_cmd_t;
+
+/**
+ * @brief MCU 数据命令参数（带发送数据）
+ */
+typedef struct
+{
+	uint8_t cmd;                      /* 命令字 */
+	const uint8_t *data;              /* 发送数据 */
+	uint32_t data_len;                /* 发送数据长度 */
+	uint8_t *response;                /* 响应缓冲区 */
+	uint32_t response_max;            /* 响应缓冲区大小 */
+	uint32_t response_len;            /* 实际响应长度（输出） */
+} pdl_mcu_data_t;
+
 /*===========================================================================
  * MCU 驱动 API
  *===========================================================================*/
@@ -117,7 +141,33 @@ int32_t PDL_MCU_get_version(pdl_mcu_handle_t handle, pdl_mcu_version_t *version)
 int32_t PDL_MCU_get_status(pdl_mcu_handle_t handle, pdl_mcu_status_t *status);
 
 /**
- * @brief 发送命令到MCU
+ * @brief 发送简单命令到MCU（无发送数据）
+ *
+ * @param[in] handle MCU句柄
+ * @param[in,out] cmd 命令参数
+ *
+ * @return OSAL_SUCCESS 成功
+ *
+ * @note 适用于 GET_VERSION, GET_STATUS, RESET 等无数据命令
+ */
+int32_t PDL_MCU_send_cmd(pdl_mcu_handle_t handle, pdl_mcu_cmd_t *cmd);
+
+/**
+ * @brief 发送数据命令到MCU（带发送数据）
+ *
+ * @param[in] handle MCU句柄
+ * @param[in,out] data 数据命令参数
+ *
+ * @return OSAL_SUCCESS 成功
+ *
+ * @note 适用于 READ_DATA, WRITE_DATA, EXECUTE_CMD 等带数据命令
+ */
+int32_t PDL_MCU_send_data(pdl_mcu_handle_t handle, pdl_mcu_data_t *data);
+
+/**
+ * @brief 发送命令到MCU（兼容旧接口，建议使用 send_cmd/send_data）
+ *
+ * @deprecated 建议使用 PDL_MCU_send_cmd() 或 PDL_MCU_send_data()
  *
  * @param[in] handle MCU句柄
  * @param[in] cmd 命令字

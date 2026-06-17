@@ -90,6 +90,58 @@ static int32_t mcu_send_packet(pdl_mcu_context_t *ctx,
 }
 
 /*===========================================================================
+ * 基础 API 实现
+ *===========================================================================*/
+
+/**
+ * @brief 发送简单命令到MCU（无发送数据）
+ */
+int32_t PDL_MCU_send_cmd(pdl_mcu_handle_t handle, pdl_mcu_cmd_t *cmd)
+{
+	pdl_mcu_context_t *ctx = (pdl_mcu_context_t *)handle;
+	int32_t ret;
+
+	if (!ctx || !cmd) {
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
+	OSAL_pthread_mutex_lock(&ctx->mutex);
+
+	ret = mcu_send_packet(ctx, cmd->cmd,
+	                     NULL, 0,
+	                     cmd->response, cmd->response_max,
+	                     &cmd->response_len);
+
+	OSAL_pthread_mutex_unlock(&ctx->mutex);
+
+	return ret;
+}
+
+/**
+ * @brief 发送数据命令到MCU（带发送数据）
+ */
+int32_t PDL_MCU_send_data(pdl_mcu_handle_t handle, pdl_mcu_data_t *data)
+{
+	pdl_mcu_context_t *ctx = (pdl_mcu_context_t *)handle;
+	int32_t ret;
+
+	if (!ctx || !data) {
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
+	OSAL_pthread_mutex_lock(&ctx->mutex);
+
+	ret = mcu_send_packet(ctx, data->cmd,
+	                     data->data, data->data_len,
+	                     data->response, data->response_max,
+	                     &data->response_len);
+
+	OSAL_pthread_mutex_unlock(&ctx->mutex);
+
+	return ret;
+}
+
+/*===========================================================================
  * 对外API实现
  *===========================================================================*/
 
@@ -209,30 +261,27 @@ int32_t PDL_MCU_deinit(pdl_mcu_handle_t handle)
  */
 int32_t PDL_MCU_get_version(pdl_mcu_handle_t handle, pdl_mcu_version_t *version)
 {
-	pdl_mcu_context_t *ctx = (pdl_mcu_context_t *)handle;
 	uint8_t response[64];
-	uint32_t resp_len;
 	int32_t ret;
 
-	if (!ctx || !version) {
+	if (!handle || !version) {
 		return OSAL_ERR_INVALID_PARAM;
 	}
 
-	OSAL_pthread_mutex_lock(&ctx->mutex);
-
 	/* 发送 GET_VERSION 命令 */
-	ret = mcu_send_packet(ctx, PRL_MCU_MSG_GET_VERSION,
-	                     NULL, 0,
-	                     response, sizeof(response), &resp_len);
+	pdl_mcu_cmd_t cmd = {
+		.cmd = PRL_MCU_MSG_GET_VERSION,
+		.response = response,
+		.response_max = sizeof(response)
+	};
 
-	OSAL_pthread_mutex_unlock(&ctx->mutex);
-
+	ret = PDL_MCU_send_cmd(handle, &cmd);
 	if (ret != OSAL_SUCCESS) {
 		return ret;
 	}
 
 	/* 解析版本信息 */
-	if (resp_len >= 3) {
+	if (cmd.response_len >= 3) {
 		version->major = response[0];
 		version->minor = response[1];
 		version->patch = response[2];
@@ -248,32 +297,29 @@ int32_t PDL_MCU_get_version(pdl_mcu_handle_t handle, pdl_mcu_version_t *version)
  */
 int32_t PDL_MCU_get_status(pdl_mcu_handle_t handle, pdl_mcu_status_t *status)
 {
-	pdl_mcu_context_t *ctx = (pdl_mcu_context_t *)handle;
 	uint8_t response[64];
-	uint32_t resp_len;
 	int32_t ret;
 
-	if (!ctx || !status) {
+	if (!handle || !status) {
 		return OSAL_ERR_INVALID_PARAM;
 	}
 
-	OSAL_pthread_mutex_lock(&ctx->mutex);
-
 	/* 发送 GET_STATUS 命令 */
-	ret = mcu_send_packet(ctx, PRL_MCU_MSG_GET_STATUS,
-	                     NULL, 0,
-	                     response, sizeof(response), &resp_len);
+	pdl_mcu_cmd_t cmd = {
+		.cmd = PRL_MCU_MSG_GET_STATUS,
+		.response = response,
+		.response_max = sizeof(response)
+	};
 
-	OSAL_pthread_mutex_unlock(&ctx->mutex);
-
+	ret = PDL_MCU_send_cmd(handle, &cmd);
 	if (ret != OSAL_SUCCESS) {
 		return ret;
 	}
 
 	/* 解析状态信息 */
-	if (resp_len >= 1) {
+	if (cmd.response_len >= 1) {
 		status->state = response[0];
-		status->error_code = (resp_len >= 5) ?
+		status->error_code = (cmd.response_len >= 5) ?
 		                     ((uint32_t)response[1] << 24 |
 		                      (uint32_t)response[2] << 16 |
 		                      (uint32_t)response[3] << 8 |
@@ -290,25 +336,20 @@ int32_t PDL_MCU_get_status(pdl_mcu_handle_t handle, pdl_mcu_status_t *status)
  */
 int32_t PDL_MCU_reset(pdl_mcu_handle_t handle)
 {
-	pdl_mcu_context_t *ctx = (pdl_mcu_context_t *)handle;
 	uint8_t response[64];
-	uint32_t resp_len;
-	int32_t ret;
 
-	if (!ctx) {
+	if (!handle) {
 		return OSAL_ERR_INVALID_PARAM;
 	}
 
-	OSAL_pthread_mutex_lock(&ctx->mutex);
-
 	/* 发送 RESET 命令 */
-	ret = mcu_send_packet(ctx, PRL_MCU_MSG_RESET,
-	                     NULL, 0,
-	                     response, sizeof(response), &resp_len);
+	pdl_mcu_cmd_t cmd = {
+		.cmd = PRL_MCU_MSG_RESET,
+		.response = response,
+		.response_max = sizeof(response)
+	};
 
-	OSAL_pthread_mutex_unlock(&ctx->mutex);
-
-	return ret;
+	return PDL_MCU_send_cmd(handle, &cmd);
 }
 
 /**
@@ -319,13 +360,10 @@ int32_t PDL_MCU_read_data(pdl_mcu_handle_t handle,
                          uint8_t *data,
                          uint32_t size)
 {
-	pdl_mcu_context_t *ctx = (pdl_mcu_context_t *)handle;
 	uint8_t request[8];
-	uint8_t response[256];
-	uint32_t resp_len;
 	int32_t ret;
 
-	if (!ctx || !data || size == 0) {
+	if (!handle || !data || size == 0) {
 		return OSAL_ERR_INVALID_PARAM;
 	}
 
@@ -339,23 +377,18 @@ int32_t PDL_MCU_read_data(pdl_mcu_handle_t handle,
 	request[6] = (size >> 8) & 0xFF;
 	request[7] = size & 0xFF;
 
-	OSAL_pthread_mutex_lock(&ctx->mutex);
-
 	/* 发送 READ_DATA 命令 */
-	ret = mcu_send_packet(ctx, PRL_MCU_MSG_READ_DATA,
-	                     request, 8,
-	                     response, sizeof(response), &resp_len);
+	pdl_mcu_data_t send_data = {
+		.cmd = PRL_MCU_MSG_READ_DATA,
+		.data = request,
+		.data_len = 8,
+		.response = data,
+		.response_max = size
+	};
 
-	OSAL_pthread_mutex_unlock(&ctx->mutex);
-
+	ret = PDL_MCU_send_data(handle, &send_data);
 	if (ret != OSAL_SUCCESS) {
 		return ret;
-	}
-
-	/* 复制数据 */
-	if (resp_len > 0) {
-		uint32_t copy_len = (resp_len < size) ? resp_len : size;
-		OSAL_memcpy(data, response, copy_len);
 	}
 
 	return OSAL_SUCCESS;
@@ -369,13 +402,10 @@ int32_t PDL_MCU_write_data(pdl_mcu_handle_t handle,
                           const uint8_t *data,
                           uint32_t size)
 {
-	pdl_mcu_context_t *ctx = (pdl_mcu_context_t *)handle;
 	uint8_t request[256];
 	uint8_t response[64];
-	uint32_t resp_len;
-	int32_t ret;
 
-	if (!ctx || !data || size == 0 || size > 248) {
+	if (!handle || !data || size == 0 || size > 248) {
 		return OSAL_ERR_INVALID_PARAM;
 	}
 
@@ -390,16 +420,16 @@ int32_t PDL_MCU_write_data(pdl_mcu_handle_t handle,
 	request[7] = size & 0xFF;
 	OSAL_memcpy(&request[8], data, size);
 
-	OSAL_pthread_mutex_lock(&ctx->mutex);
-
 	/* 发送 WRITE_DATA 命令 */
-	ret = mcu_send_packet(ctx, PRL_MCU_MSG_WRITE_DATA,
-	                     request, 8 + size,
-	                     response, sizeof(response), &resp_len);
+	pdl_mcu_data_t send_data = {
+		.cmd = PRL_MCU_MSG_WRITE_DATA,
+		.data = request,
+		.data_len = 8 + size,
+		.response = response,
+		.response_max = sizeof(response)
+	};
 
-	OSAL_pthread_mutex_unlock(&ctx->mutex);
-
-	return ret;
+	return PDL_MCU_send_data(handle, &send_data);
 }
 
 /**
@@ -413,13 +443,10 @@ int32_t PDL_MCU_send_command(pdl_mcu_handle_t handle,
                                uint32_t result_size,
                                uint32_t *actual_len)
 {
-	pdl_mcu_context_t *ctx = (pdl_mcu_context_t *)handle;
 	uint8_t request[256];
-	uint8_t response[256];
-	uint32_t resp_len;
 	int32_t ret;
 
-	if (!ctx || param_len > 255) {
+	if (!handle || param_len > 255) {
 		return OSAL_ERR_INVALID_PARAM;
 	}
 
@@ -429,27 +456,19 @@ int32_t PDL_MCU_send_command(pdl_mcu_handle_t handle,
 		OSAL_memcpy(&request[1], params, param_len);
 	}
 
-	OSAL_pthread_mutex_lock(&ctx->mutex);
-
 	/* 发送 EXECUTE_CMD 命令 */
-	ret = mcu_send_packet(ctx, PRL_MCU_MSG_EXECUTE_CMD,
-	                     request, 1 + param_len,
-	                     response, sizeof(response), &resp_len);
+	pdl_mcu_data_t send_data = {
+		.cmd = PRL_MCU_MSG_EXECUTE_CMD,
+		.data = request,
+		.data_len = 1 + param_len,
+		.response = result,
+		.response_max = result_size
+	};
 
-	OSAL_pthread_mutex_unlock(&ctx->mutex);
-
-	if (ret != OSAL_SUCCESS) {
-		return ret;
+	ret = PDL_MCU_send_data(handle, &send_data);
+	if (ret == OSAL_SUCCESS && actual_len) {
+		*actual_len = send_data.response_len;
 	}
 
-	/* 复制结果 */
-	if (result && result_size > 0 && resp_len > 0) {
-		uint32_t copy_len = (resp_len < result_size) ? resp_len : result_size;
-		OSAL_memcpy(result, response, copy_len);
-		if (actual_len) {
-			*actual_len = copy_len;
-		}
-	}
-
-	return OSAL_SUCCESS;
+	return ret;
 }
