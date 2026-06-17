@@ -4,10 +4,11 @@
  * 职责：
  * - 实现对外业务接口
  * - 管理心跳和消息处理任务
- * - 调度内部以太网通信模块
+ * - 调度内部通信模块（支持多接口：Ethernet/CAN）
  ************************************************************************/
 
 #include "osal.h"
+#include "pconfig.h"
 #include "prl.h"
 #include "prl_pmc.h"  /* PMC protocol definitions */
 #include "pdl.h"
@@ -18,8 +19,10 @@
  */
 typedef struct
 {
-    pdl_ccm_config_t config;
-    void *eth_handle;                 /* 以太网通信句柄 */
+    pconfig_ccm_config_t config;
+    pconfig_ccm_interface_t interface;
+    void *comm_handle;                    /* 通信句柄（Ethernet/CAN） */
+    const pdl_ccm_ops_t *ops;             /* 操作函数表（初始化时注册） */
 
     /* 回调函数 */
     pdl_ccm_telemetry_callback_t tm_callback;
@@ -56,8 +59,8 @@ static void *heartbeat_task(void *arg)
 
     while (OSAL_atomic_load_bool(&ctx->running))
     {
-        /* 检查连接状态 */
-        if (!ccm_eth_is_connected(ctx->eth_handle))
+        /* 通过 ops 检查连接状态（无需 switch 判断）*/
+        if (ctx->ops && ctx->ops->is_connected && !ctx->ops->is_connected(ctx->comm_handle))
         {
             LOG_WARN("PDL_CCM", "Connection lost, skip heartbeat");
             OSAL_msleep(ctx->config.heartbeat_interval_ms);
@@ -84,27 +87,30 @@ static void *heartbeat_task(void *arg)
         }
         len = ret;  /* PRL_encode 返回编码后的长度 */
 
-        /* 发送心跳 */
-        ccm_eth_msg_t msg = {
+        /* 通过 ops 发送心跳（无需 switch 判断）*/
+        ccm_msg_t msg = {
             .msg_type = 0x01,  /* 心跳消息类型 */
             .seq_num = 0,
             .payload_len = len,
         };
         OSAL_memcpy(msg.payload, buf, len);
 
-        ret = ccm_eth_send(ctx->eth_handle, &msg, ctx->config.send_timeout_ms);
-        if (ret == OSAL_SUCCESS)
+        if (ctx->ops && ctx->ops->send)
         {
-            OSAL_pthread_mutex_lock(&ctx->mutex);
-            ctx->tx_count++;
-            OSAL_pthread_mutex_unlock(&ctx->mutex);
-        }
-        else
-        {
-            LOG_ERROR("PDL_CCM", "Failed to send heartbeat");
-            OSAL_pthread_mutex_lock(&ctx->mutex);
-            ctx->error_count++;
-            OSAL_pthread_mutex_unlock(&ctx->mutex);
+            ret = ctx->ops->send(ctx->comm_handle, &msg, ctx->config.send_timeout_ms);
+            if (ret == OSAL_SUCCESS)
+            {
+                OSAL_pthread_mutex_lock(&ctx->mutex);
+                ctx->tx_count++;
+                OSAL_pthread_mutex_unlock(&ctx->mutex);
+            }
+            else
+            {
+                LOG_ERROR("PDL_CCM", "Failed to send heartbeat");
+                OSAL_pthread_mutex_lock(&ctx->mutex);
+                ctx->error_count++;
+                OSAL_pthread_mutex_unlock(&ctx->mutex);
+            }
         }
 
         /* 延迟 */
@@ -116,20 +122,25 @@ static void *heartbeat_task(void *arg)
 }
 
 /*
- * 以太网接收任务
+ * 接收任务（适用于所有接口）
  */
-static void *eth_rx_task(void *arg)
+static void *rx_task(void *arg)
 {
     ccm_driver_context_t *ctx = (ccm_driver_context_t *)arg;
-    ccm_eth_msg_t msg;
+    ccm_msg_t msg;
     int32_t ret;
 
-    LOG_INFO("PDL_CCM", "Ethernet RX task started");
+    LOG_INFO("PDL_CCM", "RX task started");
 
     while (OSAL_atomic_load_bool(&ctx->running))
     {
-        /* 接收以太网消息 */
-        ret = ccm_eth_recv(ctx->eth_handle, &msg, ctx->config.recv_timeout_ms);
+        /* 通过 ops 接收消息（无需 switch 判断）*/
+        if (!ctx->ops || !ctx->ops->recv)
+        {
+            break;
+        }
+
+        ret = ctx->ops->recv(ctx->comm_handle, &msg, ctx->config.recv_timeout_ms);
 
         if (ret == OSAL_SUCCESS)
         {
@@ -203,19 +214,147 @@ static void *eth_rx_task(void *arg)
         }
         else
         {
-            LOG_ERROR("PDL_CCM", "Ethernet receive error");
+            LOG_ERROR("PDL_CCM", "Receive error");
             OSAL_pthread_mutex_lock(&ctx->mutex);
             ctx->error_count++;
             OSAL_pthread_mutex_unlock(&ctx->mutex);
         }
     }
 
-    LOG_INFO("PDL_CCM", "Ethernet RX task stopped");
+    LOG_INFO("PDL_CCM", "RX task stopped");
     return NULL;
 }
 
+/**
+ * @brief 初始化 CCM 系统驱动（从 PCONFIG 获取配置）
+ */
+int32_t PDL_CCM_init_from_pconfig(uint32_t index, pdl_ccm_handle_t *handle)
+{
+    ccm_driver_context_t *ctx;
+    const pconfig_platform_config_t *platform;
+    const pconfig_ccm_entry_t *ccm_entry;
+    const pconfig_ccm_config_t *config;
+    int32_t ret;
+
+    if (NULL == handle)
+    {
+        return OSAL_ERR_INVALID_POINTER;
+    }
+
+    /* 从 PCONFIG 获取平台配置 */
+    platform = PCONFIG_GetBoard();
+    if (NULL == platform)
+    {
+        LOG_ERROR("PDL_CCM", "No platform config registered");
+        return OSAL_ERR_NAME_NOT_FOUND;
+    }
+
+    /* 从 PCONFIG 获取 CCM 配置 */
+    ccm_entry = PCONFIG_HW_GetCCM(platform, index);
+    if (NULL == ccm_entry)
+    {
+        LOG_ERROR("PDL_CCM", "CCM config not found for index %u", index);
+        return OSAL_ERR_NAME_NOT_FOUND;
+    }
+
+    /* 检查是否启用 */
+    if (!ccm_entry->enabled)
+    {
+        LOG_WARN("PDL_CCM", "CCM index %u is disabled in config", index);
+        return OSAL_ERR_GENERIC;
+    }
+
+    config = &ccm_entry->config;
+
+    LOG_INFO("PDL_CCM", "Initializing CCM index %u: %s", index, ccm_entry->description);
+
+    /* 分配上下文 */
+    ctx = (ccm_driver_context_t *)OSAL_malloc(OSAL_sizeof(ccm_driver_context_t));
+    if (!ctx)
+    {
+        LOG_ERROR("PDL_CCM", "Failed to allocate context");
+        return OSAL_ERR_NO_MEMORY;
+    }
+
+    OSAL_memset(ctx, 0, OSAL_sizeof(ccm_driver_context_t));
+    OSAL_memcpy(&ctx->config, config, OSAL_sizeof(pconfig_ccm_config_t));
+    ctx->interface = config->interface;
+    ctx->link_quality = 100;  /* 初始链路质量 */
+    OSAL_atomic_init_bool(&ctx->running, false);
+
+    /* 创建互斥锁 */
+    ret = OSAL_pthread_mutex_init(&ctx->mutex, NULL);
+    if (ret != OSAL_SUCCESS)
+    {
+        LOG_ERROR("PDL_CCM", "Failed to create mutex");
+        OSAL_free(ctx);
+        return ret;
+    }
+
+    /* 根据接口类型注册 ops（switch 只执行一次）*/
+    ret = OSAL_ERR_GENERIC;
+    switch (config->interface)
+    {
+        case PCONFIG_CCM_INTERFACE_ETHERNET:
+            ctx->ops = &ccm_eth_ops;
+            ret = ctx->ops->init(&config->hw.ethernet, &ctx->comm_handle);
+            break;
+
+        case PCONFIG_CCM_INTERFACE_CAN:
+            ctx->ops = &ccm_can_ops;
+            ret = ctx->ops->init(&config->hw.can, &ctx->comm_handle);
+            break;
+
+        default:
+            LOG_ERROR("PDL_CCM", "Unknown interface type: %d", config->interface);
+            ret = OSAL_ERR_GENERIC;
+            break;
+    }
+
+    if (ret != OSAL_SUCCESS)
+    {
+        LOG_ERROR("PDL_CCM", "Failed to initialize interface");
+        OSAL_pthread_mutex_destroy(&ctx->mutex);
+        OSAL_free(ctx);
+        return ret;
+    }
+
+    /* 启动接收线程 */
+    OSAL_atomic_store_bool(&ctx->running, true);
+    ret = OSAL_pthread_create(&ctx->rx_thread, NULL, rx_task, ctx);
+    if (ret != OSAL_SUCCESS)
+    {
+        LOG_ERROR("PDL_CCM", "Failed to create RX thread");
+        if (ctx->ops && ctx->ops->deinit) {
+            ctx->ops->deinit(ctx->comm_handle);
+        }
+        OSAL_pthread_mutex_destroy(&ctx->mutex);
+        OSAL_free(ctx);
+        return ret;
+    }
+
+    /* 启动心跳线程 */
+    ret = OSAL_pthread_create(&ctx->heartbeat_thread, NULL, heartbeat_task, ctx);
+    if (ret != OSAL_SUCCESS)
+    {
+        LOG_ERROR("PDL_CCM", "Failed to create heartbeat thread");
+        OSAL_atomic_store_bool(&ctx->running, false);
+        OSAL_pthread_join(ctx->rx_thread, NULL);
+        if (ctx->ops && ctx->ops->deinit) {
+            ctx->ops->deinit(ctx->comm_handle);
+        }
+        OSAL_pthread_mutex_destroy(&ctx->mutex);
+        OSAL_free(ctx);
+        return ret;
+    }
+
+    *handle = ctx;
+    LOG_INFO("PDL_CCM", "CCM index %u initialized successfully", index);
+    return OSAL_SUCCESS;
+}
+
 /*
- * 初始化 CCM 系统驱动
+ * 初始化 CCM 系统驱动（旧接口，保持向后兼容）
  */
 int32_t PDL_CCM_init(const pdl_ccm_config_t *config,
                      pdl_ccm_handle_t *handle)
@@ -238,7 +377,6 @@ int32_t PDL_CCM_init(const pdl_ccm_config_t *config,
     }
 
     OSAL_memset(ctx, 0, OSAL_sizeof(ccm_driver_context_t));
-    OSAL_memcpy(&ctx->config, config, OSAL_sizeof(pdl_ccm_config_t));
     ctx->link_quality = 100;  /* 初始链路质量 */
     OSAL_atomic_init_bool(&ctx->running, false);
 
@@ -251,8 +389,9 @@ int32_t PDL_CCM_init(const pdl_ccm_config_t *config,
         return ret;
     }
 
-    /* 初始化以太网通信 */
-    ret = ccm_eth_init(config, &ctx->eth_handle);
+    /* 使用旧的 Ethernet 初始化接口 */
+    ctx->ops = &ccm_eth_ops;
+    ret = ccm_eth_init(config, &ctx->comm_handle);
     if (ret != OSAL_SUCCESS)
     {
         LOG_ERROR("PDL_CCM", "Failed to init ethernet");
@@ -263,11 +402,13 @@ int32_t PDL_CCM_init(const pdl_ccm_config_t *config,
 
     /* 启动接收线程 */
     OSAL_atomic_store_bool(&ctx->running, true);
-    ret = OSAL_pthread_create(&ctx->rx_thread, NULL, eth_rx_task, ctx);
+    ret = OSAL_pthread_create(&ctx->rx_thread, NULL, rx_task, ctx);
     if (ret != OSAL_SUCCESS)
     {
         LOG_ERROR("PDL_CCM", "Failed to create RX thread");
-        ccm_eth_deinit(ctx->eth_handle);
+        if (ctx->ops && ctx->ops->deinit) {
+            ctx->ops->deinit(ctx->comm_handle);
+        }
         OSAL_pthread_mutex_destroy(&ctx->mutex);
         OSAL_free(ctx);
         return ret;
@@ -280,7 +421,9 @@ int32_t PDL_CCM_init(const pdl_ccm_config_t *config,
         LOG_ERROR("PDL_CCM", "Failed to create heartbeat thread");
         OSAL_atomic_store_bool(&ctx->running, false);
         OSAL_pthread_join(ctx->rx_thread, NULL);
-        ccm_eth_deinit(ctx->eth_handle);
+        if (ctx->ops && ctx->ops->deinit) {
+            ctx->ops->deinit(ctx->comm_handle);
+        }
         OSAL_pthread_mutex_destroy(&ctx->mutex);
         OSAL_free(ctx);
         return ret;
@@ -308,8 +451,10 @@ int32_t PDL_CCM_deinit(pdl_ccm_handle_t handle)
     OSAL_pthread_join(ctx->rx_thread, NULL);
     OSAL_pthread_join(ctx->heartbeat_thread, NULL);
 
-    /* 清理以太网通信 */
-    ccm_eth_deinit(ctx->eth_handle);
+    /* 通过 ops 清理通信接口（无需 switch 判断）*/
+    if (ctx->ops && ctx->ops->deinit) {
+        ctx->ops->deinit(ctx->comm_handle);
+    }
 
     /* 销毁互斥锁 */
     OSAL_pthread_mutex_destroy(&ctx->mutex);
@@ -405,7 +550,12 @@ int32_t PDL_CCM_GetConnectionStatus(pdl_ccm_handle_t handle,
 
     if (connected)
     {
-        *connected = ccm_eth_is_connected(ctx->eth_handle);
+        /* 通过 ops 检查连接状态（无需 switch 判断）*/
+        if (ctx->ops && ctx->ops->is_connected) {
+            *connected = ctx->ops->is_connected(ctx->comm_handle);
+        } else {
+            *connected = false;
+        }
     }
 
     if (link_quality)

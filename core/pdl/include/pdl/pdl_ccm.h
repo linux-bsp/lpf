@@ -87,7 +87,7 @@ typedef void (*pdl_ccm_command_callback_t)(uint32_t tc_id,
                                             void *user_data);
 
 /**
- * @brief 初始化 CCM 系统驱动
+ * @brief 初始化 CCM 系统驱动（旧接口，保持向后兼容）
  *
  * @param[in] config 配置参数
  * @param[out] handle 驱动句柄
@@ -97,6 +97,23 @@ typedef void (*pdl_ccm_command_callback_t)(uint32_t tc_id,
  */
 int32_t PDL_CCM_init(const pdl_ccm_config_t *config,
                      pdl_ccm_handle_t *handle);
+
+/**
+ * @brief 初始化 CCM 系统驱动（从 PCONFIG 获取配置）
+ *
+ * @param[in] index CCM设备索引（从 PCONFIG 获取配置）
+ * @param[out] handle 驱动句柄
+ *
+ * @return OSAL_SUCCESS 成功
+ * @return OSAL_ERR_GENERIC 失败
+ *
+ * @note 函数内部会：
+ *       1. 调用 PCONFIG_GetBoard() 获取平台配置
+ *       2. 调用 PCONFIG_HW_GetCCM(platform, index) 获取 CCM 配置
+ *       3. 检查配置是否启用
+ *       4. 根据接口类型初始化通信（Ethernet/CAN）
+ */
+int32_t PDL_CCM_init_from_pconfig(uint32_t index, pdl_ccm_handle_t *handle);
 
 /**
  * @brief 反初始化 CCM 系统驱动

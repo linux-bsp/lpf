@@ -162,7 +162,7 @@ int32_t ccm_eth_deinit(void *handle)
 int32_t ccm_eth_send(void *handle, const ccm_eth_msg_t *msg, uint32_t timeout_ms)
 {
     ccm_eth_context_t *ctx = (ccm_eth_context_t *)handle;
-    uint8_t send_buf[CCM_ETH_MAX_MSG_SIZE + 16];  /* 预留协议头空间 */
+    uint8_t send_buf[CCM_MAX_MSG_SIZE + 16];  /* 预留协议头空间 */
     size_t send_len;
     int32_t ret;
 
@@ -249,7 +249,7 @@ int32_t ccm_eth_send(void *handle, const ccm_eth_msg_t *msg, uint32_t timeout_ms
 int32_t ccm_eth_recv(void *handle, ccm_eth_msg_t *msg, uint32_t timeout_ms)
 {
     ccm_eth_context_t *ctx = (ccm_eth_context_t *)handle;
-    uint8_t recv_buf[CCM_ETH_MAX_MSG_SIZE + 16];
+    uint8_t recv_buf[CCM_MAX_MSG_SIZE + 16];
     int32_t ret;
 
     if (!ctx || !msg)
@@ -304,7 +304,7 @@ int32_t ccm_eth_recv(void *handle, ccm_eth_msg_t *msg, uint32_t timeout_ms)
                        ((uint32_t)recv_buf[11]);
 
     /* 检查负载长度 */
-    if (msg->payload_len > CCM_ETH_MAX_MSG_SIZE)
+    if (msg->payload_len > CCM_MAX_MSG_SIZE)
     {
         LOG_ERROR("PDL_CCM", "Payload too large (%u bytes)", msg->payload_len);
         return OSAL_ERR_INVALID_PARAM;
@@ -361,3 +361,14 @@ int32_t ccm_eth_is_connected(void *handle)
 
     return (ctx->connected && (ctx->sockfd >= 0)) ? 1 : 0;
 }
+
+/*
+ * Ethernet 接口的 ops 结构定义（导出供 pdl_ccm.c 使用）
+ */
+const pdl_ccm_ops_t ccm_eth_ops = {
+	.init = (int32_t (*)(const void *, void **))ccm_eth_init,
+	.deinit = ccm_eth_deinit,
+	.send = ccm_eth_send,
+	.recv = ccm_eth_recv,
+	.is_connected = ccm_eth_is_connected,
+};
