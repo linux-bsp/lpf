@@ -61,7 +61,7 @@ int32_t TestCallChain_MCU_Serial(void)
 	return run_mcu_tc_call(PMC_TC_POWER_OFF, "MCU Serial");
 }
 
-int32_t TestCallChain_BMC(void)
+int32_t TestCallChain_PowerControl(void)
 {
 	return run_mcu_tc_call(PMC_TC_POWER_ON, "Power Control MCU");
 }
@@ -89,7 +89,7 @@ int32_t TestCallChain_RunAll(void)
 
 	LOG_INFO("TEST_CALL_CHAIN", " ");
 
-	ret = TestCallChain_BMC();
+	ret = TestCallChain_PowerControl();
 	if (OSAL_SUCCESS != ret) {
 		failed++;
 	}

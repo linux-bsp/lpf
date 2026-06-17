@@ -65,13 +65,13 @@ int32_t PMC_Collector_Init(void)
     return OSAL_SUCCESS;
 }
 
-/* 采集服务器遥测（BMC） */
+/* 采集平台遥测（当前通过 PMC ACONFIG 映射到已实现设备） */
 static int32_t collect_server_telemetry(void)
 {
-    /* TODO: 通过PDL_BMC接口采集服务器遥测
+    /* TODO: 通过 PMC_ACONFIG 查询遥测源，再通过已实现的 PDL_MCU/HAL 接口采集
      * - CPU温度
      * - 板卡温度
-     * - 服务器状态
+     * - 平台状态
      */
 
     /* 模拟数据 */

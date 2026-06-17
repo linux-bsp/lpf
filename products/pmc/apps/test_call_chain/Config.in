@@ -9,9 +9,9 @@ config TEST_CALL_CHAIN
 	  through ACONFIG, PDL, PCONFIG to HAL layer.
 
 	  Test functions:
-	    - TestCallChain_MCU_CAN() - Test MCU CAN interface
-	    - TestCallChain_MCU_Serial() - Test MCU Serial interface
-	    - TestCallChain_BMC() - Test BMC interface
+	    - TestCallChain_MCU_CAN() - Test a TC mapping resolved through MCU path
+	    - TestCallChain_MCU_Serial() - Test a second MCU-backed TC mapping
+	    - TestCallChain_PowerControl() - Test power-control TC mapping
 	    - TestCallChain_RunAll() - Run all tests
 
 	  This is a debug/verification tool and should not be included

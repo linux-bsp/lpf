@@ -1,6 +1,6 @@
 /**
  * @file test_call_chain.h
- * @brief 完整调用链测试用例头文件
+ * @brief Complete PMC call-chain test declarations.
  */
 
 #ifndef TEST_CALL_CHAIN_H
@@ -8,32 +8,27 @@
 
 #include <stdint.h>
 
-/* 测试功能 ID 定义 */
-#define TEST_FUNCTION_MCU_CAN       0x9001  /* 测试 MCU CAN 接口 */
-#define TEST_FUNCTION_MCU_SERIAL    0x9002  /* 测试 MCU Serial 接口 */
-#define TEST_FUNCTION_BMC           0x9003  /* 测试 BMC */
-
 /**
- * @brief 测试 MCU CAN 调用链
- * @return 0 成功，负值失败
+ * @brief Test a TC mapping that resolves to the CAN MCU path.
+ * @return OSAL_SUCCESS on success, OSAL_ERR_* on failure.
  */
 int32_t TestCallChain_MCU_CAN(void);
 
 /**
- * @brief 测试 MCU Serial 调用链
- * @return 0 成功，负值失败
+ * @brief Test a TC mapping that resolves to the serial MCU path.
+ * @return OSAL_SUCCESS on success, OSAL_ERR_* on failure.
  */
 int32_t TestCallChain_MCU_Serial(void);
 
 /**
- * @brief 测试 BMC 调用链
- * @return 0 成功，负值失败
+ * @brief Test a power-control TC mapping through the current MCU-backed path.
+ * @return OSAL_SUCCESS on success, OSAL_ERR_* on failure.
  */
-int32_t TestCallChain_BMC(void);
+int32_t TestCallChain_PowerControl(void);
 
 /**
- * @brief 运行所有测试
- * @return 0 全部通过，负值有失败
+ * @brief Run all call-chain tests.
+ * @return OSAL_SUCCESS when all tests pass, OSAL_ERR_GENERIC otherwise.
  */
 int32_t TestCallChain_RunAll(void);
 

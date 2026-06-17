@@ -61,26 +61,10 @@ if(CONFIG_PCONFIG)
         set(PCONFIG_EXTRA_INCLUDE ${PLATFORM_CONFIG_INCLUDE})
     endif()
     add_subdirectory(${SDK_PATH}/core/pconfig ${CMAKE_CURRENT_BINARY_DIR}/pconfig)
-    # Link platform config objects after pconfig is created
+    # Link platform config objects after pconfig is created. Registration is
+    # owned by pmc_runtime so global config state changes only via app startup.
     if(TARGET platform_config_obj AND TARGET pconfig)
         target_sources(pconfig PRIVATE $<TARGET_OBJECTS:platform_config_obj>)
-
-        set(PCONFIG_AUTO_REGISTER_C "${CMAKE_CURRENT_BINARY_DIR}/pconfig_auto_register.c")
-        set(PCONFIG_AUTO_REGISTER_SRC [=[
-#include "osal.h"
-#include "pconfig/pconfig.h"
-extern const pconfig_platform_config_t pconfig_@CONFIG_PROJECT_NAME@;
-__attribute__((constructor)) static void pconfig_auto_register(void)
-{
-    if (PCONFIG_init() == OSAL_SUCCESS) {
-        (void)PCONFIG_register(&pconfig_@CONFIG_PROJECT_NAME@);
-    }
-}
-]=])
-        string(REPLACE "@CONFIG_PROJECT_NAME@" "${CONFIG_PROJECT_NAME}"
-               PCONFIG_AUTO_REGISTER_SRC "${PCONFIG_AUTO_REGISTER_SRC}")
-        file(WRITE ${PCONFIG_AUTO_REGISTER_C} "${PCONFIG_AUTO_REGISTER_SRC}")
-        target_sources(pconfig PRIVATE ${PCONFIG_AUTO_REGISTER_C})
     endif()
 endif()
 
