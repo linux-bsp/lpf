@@ -1,452 +1,445 @@
 /************************************************************************
- * MCU外设驱动实现（主文件）
+ * MCU外设驱动实现
  *
  * 职责：
- * - 实现对外业务接口
- * - 管理MCU上下文和状态
- * - 调度内部通信模块（CAN/串口）
+ * - 提供对外API（初始化、命令收发）
+ * - 直接使用 PRL 层进行协议编解码
+ * - 选择通信层（CAN/串口）
  ************************************************************************/
 
 #include "osal.h"
-#include "pconfig.h"
 #include "hal.h"
+#include "pconfig.h"
 #include "pdl.h"
+#include "prl.h"
 #include "pdl_mcu_internal.h"
-#include "pdl_mcu_protocol.h"
 
-/*
- * MCU驱动上下文
- */
-typedef struct
-{
-    pconfig_mcu_config_t config;     /* 使用 PCONFIG 配置类型 */
-    pconfig_mcu_interface_t interface;
-    void *comm_handle;                /* 通信句柄（CAN/串口） */
-    const pdl_mcu_ops_t *ops;         /* 操作函数表（初始化时注册） */
-    bool initialized;
-    pdl_mcu_state_t state;            /* 设备状态 */
-    osal_mutex_t mutex;
-    pdl_mcu_version_t version;
-    pdl_mcu_status_t status;
-} mcu_context_t;
+/*===========================================================================
+ * MCU上下文
+ *===========================================================================*/
 
+typedef struct {
+	const pconfig_mcu_config_t *config;
+	const pdl_mcu_ops_t *ops;
+	void *transport_handle;
+	osal_mutex_t mutex;
+} pdl_mcu_context_t;
 
-/* Private static helper functions */
+static pdl_mcu_context_t *g_mcu_contexts[16] = {NULL};
+static osal_mutex_t g_registry_mutex;
+static bool g_registry_initialized = false;
+
+/*===========================================================================
+ * 内部辅助函数
+ *===========================================================================*/
 
 /**
- * @brief 发送命令到MCU（内部统一接口）
+ * @brief 发送 PRL 报文
  */
-static int32_t mcu_send_command_internal(mcu_context_t *ctx,
-                                      uint8_t cmd_code,
-                                      const uint8_t *data,
-                                      uint32_t data_len,
-                                      uint8_t *response,
-                                      uint32_t resp_size,
-                                      uint32_t *actual_size)
+static int32_t mcu_send_packet(pdl_mcu_context_t *ctx,
+                               uint8_t msg_type,
+                               const void *payload,
+                               uint16_t payload_len,
+                               uint8_t *response,
+                               uint32_t resp_size,
+                               uint32_t *actual_size)
 {
-    int32_t ret;
-    uint32_t timeout_ms;
+	uint8_t tx_buffer[PRL_MAX_PACKET_SIZE];
+	uint8_t rx_buffer[PRL_MAX_PACKET_SIZE];
+	int32_t tx_len;
+	int32_t ret;
+	uint32_t rx_len;
 
-    /* 参数检查 */
-    if (!ctx || !ctx->ops || !ctx->ops->send_command) {
-        return OSAL_ERR_INVALID_PARAM;
-    }
+	/* 编码 PRL 报文 */
+	tx_len = prl_device_encode(PRL_DEV_TYPE_MCU, msg_type,
+	                           payload, payload_len,
+	                           tx_buffer, sizeof(tx_buffer), 0);
+	if (tx_len < 0) {
+		return tx_len;
+	}
 
-    /* 缩小锁范围：只在读取上下文时加锁 */
-    OSAL_pthread_mutex_lock(&ctx->mutex);
-    timeout_ms = ctx->config.cmd_timeout_ms;
+	/* 发送并接收响应 */
+	ret = ctx->ops->send_packet(ctx->transport_handle,
+	                            tx_buffer, tx_len,
+	                            rx_buffer, sizeof(rx_buffer),
+	                            &rx_len,
+	                            ctx->config->cmd_timeout_ms);
+	if (ret != OSAL_SUCCESS) {
+		return ret;
+	}
 
-    /* 进入 BUSY 状态 */
-    ctx->state = PDL_MCU_STATE_BUSY;
-    OSAL_pthread_mutex_unlock(&ctx->mutex);
-
-    /* 直接通过函数指针调用，无需switch判断（由HAL层提供线程安全保护） */
-    ret = ctx->ops->send_command(ctx->comm_handle, cmd_code, data, data_len,
-                                 response, resp_size, actual_size, timeout_ms);
-
-    /* 根据结果更新状态 */
-    OSAL_pthread_mutex_lock(&ctx->mutex);
-    if (OSAL_SUCCESS == ret) {
-        ctx->state = PDL_MCU_STATE_READY;  /* 命令成功，设备就绪 */
-    } else if (OSAL_ERR_TIMEOUT == ret) {
-        ctx->state = PDL_MCU_STATE_OFFLINE;  /* 超时，设备离线 */
-    } else {
-        ctx->state = PDL_MCU_STATE_ERROR;  /* 其他错误 */
-    }
-    OSAL_pthread_mutex_unlock(&ctx->mutex);
-
-    return ret;
+	/* 解码响应报文 */
+	ret = prl_device_decode(rx_buffer, rx_len,
+	                       NULL, NULL, NULL,
+	                       response, resp_size, actual_size);
+	return ret;
 }
 
-
-/* Primary API functions */
-
-/**
- * @brief 获取MCU版本
- */
-int32_t PDL_MCU_get_version(pdl_mcu_handle_t handle, pdl_mcu_version_t *version)
-{
-    mcu_context_t *ctx;
-    uint8_t tx_buf[256];
-    uint8_t rx_buf[256];
-    int32_t tx_len, ret;
-    uint32_t actual_size;
-
-    if (NULL == handle || NULL == version)
-    {
-        return OSAL_ERR_GENERIC;
-    }
-
-    ctx = (mcu_context_t *)handle;
-
-    /* 使用 PRL 协议编码请求 */
-    tx_len = pdl_mcu_encode_get_version(tx_buf, OSAL_sizeof(tx_buf));
-    if (tx_len < 0)
-    {
-        return OSAL_ERR_GENERIC;
-    }
-
-    /* 发送请求并接收响应 */
-    ret = mcu_send_command_internal(ctx, MCU_CMD_GET_VERSION,
-                                    tx_buf, (uint32_t)tx_len,
-                                    rx_buf, OSAL_sizeof(rx_buf), &actual_size);
-
-    if (OSAL_SUCCESS == ret)
-    {
-        /* 使用 PRL 协议解码响应 */
-        ret = pdl_mcu_decode_get_version(rx_buf, actual_size, version);
-    }
-
-    return ret;
-}
+/*===========================================================================
+ * 对外API实现
+ *===========================================================================*/
 
 /**
- * @brief 获取MCU状态
+ * @brief 初始化 MCU 驱动
  */
-int32_t PDL_MCU_get_status(pdl_mcu_handle_t handle, pdl_mcu_status_t *status)
+int32_t PDL_MCU_init(uint32_t mcu_index, pdl_mcu_handle_t *handle)
 {
-    mcu_context_t *ctx;
-    uint8_t tx_buf[256];
-    uint8_t rx_buf[256];
-    int32_t tx_len, ret;
-    uint32_t actual_size;
+	const pconfig_platform_config_t *platform;
+	const pconfig_mcu_entry_t *entry;
+	pdl_mcu_context_t *ctx;
+	const pdl_mcu_ops_t *ops;
+	int32_t ret;
 
-    if (NULL == handle || NULL == status)
-    {
-        return OSAL_ERR_GENERIC;
-    }
+	if (!handle) {
+		return OSAL_ERR_INVALID_PARAM;
+	}
 
-    ctx = (mcu_context_t *)handle;
+	/* 初始化全局注册表互斥锁 */
+	if (!g_registry_initialized) {
+		if (OSAL_SUCCESS != OSAL_pthread_mutex_init(&g_registry_mutex, NULL)) {
+			return OSAL_ERR_GENERIC;
+		}
+		g_registry_initialized = true;
+	}
 
-    /* 使用 PRL 协议编码请求 */
-    tx_len = pdl_mcu_encode_get_status(tx_buf, OSAL_sizeof(tx_buf));
-    if (tx_len < 0)
-    {
-        return OSAL_ERR_GENERIC;
-    }
+	/* 获取配置 */
+	platform = PCONFIG_GetBoard();
+	if (!platform) {
+		return OSAL_ERR_GENERIC;
+	}
 
-    /* 发送请求并接收响应 */
-    ret = mcu_send_command_internal(ctx, MCU_CMD_GET_STATUS,
-                                    tx_buf, (uint32_t)tx_len,
-                                    rx_buf, OSAL_sizeof(rx_buf), &actual_size);
+	entry = PCONFIG_HW_GetMCU(platform, mcu_index);
+	if (!entry || !entry->enabled) {
+		return OSAL_ERR_GENERIC;
+	}
 
-    if (OSAL_SUCCESS == ret)
-    {
-        /* 使用 PRL 协议解码响应 */
-        ret = pdl_mcu_decode_get_status(rx_buf, actual_size, status);
-        if (OSAL_SUCCESS == ret)
-        {
-            status->timestamp_us = OSAL_get_monotonic_time();
-            /* 同步设备状态 */
-            OSAL_pthread_mutex_lock(&ctx->mutex);
-            status->state = ctx->state;
-            OSAL_pthread_mutex_unlock(&ctx->mutex);
-        }
-    }
-    else
-    {
-        status->online = false;
-        /* 同步设备状态 */
-        OSAL_pthread_mutex_lock(&ctx->mutex);
-        status->state = ctx->state;
-        OSAL_pthread_mutex_unlock(&ctx->mutex);
-    }
+	/* 选择通信层 */
+	switch (entry->config.interface) {
+#ifdef PDL_MCU_CAN_SUPPORT
+	case PCONFIG_MCU_INTERFACE_CAN:
+		ops = &mcu_can_ops;
+		break;
+#endif
+#ifdef PDL_MCU_UART_SUPPORT
+	case PCONFIG_MCU_INTERFACE_SERIAL:
+		ops = &mcu_serial_ops;
+		break;
+#endif
+	default:
+		return OSAL_ERR_GENERIC;
+	}
 
-    return ret;
+	/* 分配上下文 */
+	ctx = (pdl_mcu_context_t *)OSAL_malloc(sizeof(pdl_mcu_context_t));
+	if (!ctx) {
+		return OSAL_ERR_NO_MEMORY;
+	}
+
+	OSAL_memset(ctx, 0, sizeof(pdl_mcu_context_t));
+	ctx->config = &entry->config;
+	ctx->ops = ops;
+
+	/* 初始化通信层 */
+	ret = ops->init(&entry->config, &ctx->transport_handle);
+	if (ret != OSAL_SUCCESS) {
+		OSAL_free(ctx);
+		return ret;
+	}
+
+	/* 创建互斥锁 */
+	if (OSAL_SUCCESS != OSAL_pthread_mutex_init(&ctx->mutex, NULL)) {
+		ops->deinit(ctx->transport_handle);
+		OSAL_free(ctx);
+		return OSAL_ERR_GENERIC;
+	}
+
+	/* 注册上下文 */
+	OSAL_pthread_mutex_lock(&g_registry_mutex);
+	if (mcu_index < sizeof(g_mcu_contexts) / sizeof(g_mcu_contexts[0])) {
+		g_mcu_contexts[mcu_index] = ctx;
+	}
+	OSAL_pthread_mutex_unlock(&g_registry_mutex);
+
+	*handle = ctx;
+	return OSAL_SUCCESS;
 }
 
 /**
- * @brief MCU复位
- */
-int32_t PDL_MCU_reset(pdl_mcu_handle_t handle)
-{
-    mcu_context_t *ctx;
-    uint8_t tx_buf[256];
-    uint8_t rx_buf[256];
-    int32_t tx_len;
-    uint32_t actual_size;
-
-    if (NULL == handle)
-    {
-        return OSAL_ERR_GENERIC;
-    }
-
-    ctx = (mcu_context_t *)handle;
-
-    /* 使用 PRL 协议编码请求 */
-    tx_len = pdl_mcu_encode_reset(tx_buf, OSAL_sizeof(tx_buf));
-    if (tx_len < 0)
-    {
-        return OSAL_ERR_GENERIC;
-    }
-
-    /* 发送请求 */
-    return mcu_send_command_internal(ctx, MCU_CMD_RESET,
-                                    tx_buf, (uint32_t)tx_len,
-                                    rx_buf, OSAL_sizeof(rx_buf), &actual_size);
-}
-
-/**
- * @brief 读取MCU寄存器
- */
-int32_t PDL_MCU_ReadRegister(pdl_mcu_handle_t handle, uint8_t reg_addr, uint8_t *value)
-{
-    mcu_context_t *ctx;
-    uint8_t tx_buf[256];
-    uint8_t rx_buf[256];
-    int32_t tx_len, ret;
-    uint32_t actual_size;
-
-    if (NULL == handle || NULL == value)
-    {
-        return OSAL_ERR_GENERIC;
-    }
-
-    ctx = (mcu_context_t *)handle;
-
-    /* 使用 PRL 协议编码请求 */
-    tx_len = pdl_mcu_encode_read_register(reg_addr, tx_buf, OSAL_sizeof(tx_buf));
-    if (tx_len < 0)
-    {
-        return OSAL_ERR_GENERIC;
-    }
-
-    /* 发送请求并接收响应 */
-    ret = mcu_send_command_internal(ctx, MCU_CMD_READ_REG,
-                                    tx_buf, (uint32_t)tx_len,
-                                    rx_buf, OSAL_sizeof(rx_buf), &actual_size);
-
-    if (OSAL_SUCCESS == ret)
-    {
-        /* 使用 PRL 协议解码响应 */
-        ret = pdl_mcu_decode_read_register(rx_buf, actual_size, value);
-    }
-
-    return ret;
-}
-
-/**
- * @brief 写入MCU寄存器
- */
-int32_t PDL_MCU_WriteRegister(pdl_mcu_handle_t handle, uint8_t reg_addr, uint8_t value)
-{
-    mcu_context_t *ctx;
-    uint8_t tx_buf[256];
-    uint8_t rx_buf[256];
-    int32_t tx_len;
-    uint32_t actual_size;
-
-    if (NULL == handle)
-    {
-        return OSAL_ERR_GENERIC;
-    }
-
-    ctx = (mcu_context_t *)handle;
-
-    /* 使用 PRL 协议编码请求 */
-    tx_len = pdl_mcu_encode_write_register(reg_addr, value, tx_buf, OSAL_sizeof(tx_buf));
-    if (tx_len < 0)
-    {
-        return OSAL_ERR_GENERIC;
-    }
-
-    /* 发送请求 */
-    return mcu_send_command_internal(ctx, MCU_CMD_WRITE_REG,
-                                    tx_buf, (uint32_t)tx_len,
-                                    rx_buf, OSAL_sizeof(rx_buf), &actual_size);
-}
-
-/**
- * @brief 发送自定义命令到MCU
- */
-int32_t PDL_MCU_send_command(pdl_mcu_handle_t handle,
-                          uint8_t cmd_code,
-                          const uint8_t *data,
-                          uint32_t data_len,
-                          uint8_t *response,
-                          uint32_t resp_size,
-                          uint32_t *actual_size)
-{
-    mcu_context_t *ctx;
-    uint8_t tx_buf[512];
-    uint8_t rx_buf[512];
-    int32_t tx_len, ret;
-    uint32_t rx_size;
-
-    if (NULL == handle)
-    {
-        return OSAL_ERR_GENERIC;
-    }
-
-    ctx = (mcu_context_t *)handle;
-
-    /* 使用 PRL 协议编码请求 */
-    tx_len = pdl_mcu_encode_custom_command(cmd_code, data, data_len,
-                                           tx_buf, OSAL_sizeof(tx_buf));
-    if (tx_len < 0)
-    {
-        return OSAL_ERR_GENERIC;
-    }
-
-    /* 发送请求并接收响应 */
-    ret = mcu_send_command_internal(ctx, cmd_code,
-                                    tx_buf, (uint32_t)tx_len,
-                                    rx_buf, OSAL_sizeof(rx_buf), &rx_size);
-
-    if (OSAL_SUCCESS == ret)
-    {
-        /* 使用 PRL 协议解码响应 */
-        ret = pdl_mcu_decode_response(rx_buf, rx_size, response, resp_size, actual_size);
-    }
-
-    return ret;
-}
-
-
-
-/* Initialization and cleanup functions */
-
-/**
- * @brief 初始化MCU驱动
- */
-int32_t PDL_MCU_init(uint32_t index, pdl_mcu_handle_t *handle)
-{
-    mcu_context_t *ctx;
-    const pconfig_platform_config_t *platform;
-    const pconfig_mcu_entry_t *mcu_entry;
-    const pconfig_mcu_config_t *config;
-    int32_t ret;
-
-    if (NULL == handle)
-    {
-        return OSAL_ERR_INVALID_POINTER;
-    }
-
-    /* 从 PCONFIG 获取平台配置 */
-    platform = PCONFIG_GetBoard();
-    if (NULL == platform)
-    {
-        LOG_ERROR("PDL_MCU", "No platform config registered");
-        return OSAL_ERR_NAME_NOT_FOUND;
-    }
-
-    /* 从 PCONFIG 获取 MCU 配置 */
-    mcu_entry = PCONFIG_HW_GetMCU(platform, index);
-    if (NULL == mcu_entry)
-    {
-        LOG_ERROR("PDL_MCU", "MCU config not found for index %u", index);
-        return OSAL_ERR_NAME_NOT_FOUND;
-    }
-
-    /* 检查是否启用 */
-    if (!mcu_entry->enabled)
-    {
-        LOG_WARN("PDL_MCU", "MCU index %u is disabled in config", index);
-        return OSAL_ERR_GENERIC;
-    }
-
-    config = &mcu_entry->config;
-
-    LOG_INFO("PDL_MCU", "Initializing MCU index %u: %s", index, mcu_entry->description);
-
-    ctx = (mcu_context_t *)OSAL_malloc(OSAL_sizeof(mcu_context_t));
-    if (NULL == ctx)
-    {
-        return OSAL_ERR_NO_MEMORY;
-    }
-
-    OSAL_memset(ctx, 0, OSAL_sizeof(mcu_context_t));
-    OSAL_memcpy(&ctx->config, config, OSAL_sizeof(pconfig_mcu_config_t));
-    ctx->interface = config->interface;
-
-    /* 创建互斥锁 */
-    if (OSAL_SUCCESS != OSAL_pthread_mutex_init(&ctx->mutex, NULL))
-    {
-        OSAL_free(ctx);
-        return OSAL_ERR_GENERIC;
-    }
-
-    /* 根据接口类型注册ops（switch只执行一次） */
-    ret = OSAL_ERR_GENERIC;
-    switch (config->interface)
-    {
-        case PCONFIG_MCU_INTERFACE_CAN:
-            ctx->ops = &mcu_can_ops;
-            ret = ctx->ops->init(&config->hw.can, &ctx->comm_handle);
-            break;
-        case PCONFIG_MCU_INTERFACE_SERIAL:
-            ctx->ops = &mcu_serial_ops;
-            ret = ctx->ops->init(&config->hw.serial, &ctx->comm_handle);
-            break;
-        case PCONFIG_MCU_INTERFACE_I2C:
-        case PCONFIG_MCU_INTERFACE_SPI:
-            /* TODO: 实现I2C/SPI接口 */
-            LOG_ERROR("PDL_MCU", "I2C/SPI interface not supported yet");
-            ret = OSAL_ERR_NOT_SUPPORTED;
-            break;
-        default:
-            LOG_ERROR("PDL_MCU", "Unknown interface type: %d", config->interface);
-            ret = OSAL_ERR_GENERIC;
-            break;
-    }
-
-    if (OSAL_SUCCESS != ret)
-    {
-        OSAL_pthread_mutex_destroy(&ctx->mutex);
-        OSAL_free(ctx);
-        return ret;
-    }
-
-    ctx->initialized = true;
-    ctx->state = PDL_MCU_STATE_INIT;  /* 初始化完成，进入 INIT 状态 */
-    *handle = (pdl_mcu_handle_t)ctx;
-
-    LOG_INFO("PDL_MCU", "MCU index %u initialized successfully", index);
-
-    return OSAL_SUCCESS;
-}
-
-/**
- * @brief 反初始化MCU驱动
+ * @brief 反初始化 MCU 驱动
  */
 int32_t PDL_MCU_deinit(pdl_mcu_handle_t handle)
 {
-    mcu_context_t *ctx;
+	pdl_mcu_context_t *ctx = (pdl_mcu_context_t *)handle;
+	uint32_t i;
 
-    if (NULL == handle)
-    {
-        return OSAL_ERR_GENERIC;
-    }
+	if (!ctx) {
+		return OSAL_ERR_INVALID_PARAM;
+	}
 
-    ctx = (mcu_context_t *)handle;
+	/* 从注册表移除 */
+	OSAL_pthread_mutex_lock(&g_registry_mutex);
+	for (i = 0; i < sizeof(g_mcu_contexts) / sizeof(g_mcu_contexts[0]); i++) {
+		if (g_mcu_contexts[i] == ctx) {
+			g_mcu_contexts[i] = NULL;
+			break;
+		}
+	}
+	OSAL_pthread_mutex_unlock(&g_registry_mutex);
 
-    /* 通过ops调用反初始化（无需switch判断） */
-    if (ctx->ops && ctx->ops->deinit) {
-        ctx->ops->deinit(ctx->comm_handle);
-    }
+	/* 清理资源 */
+	ctx->ops->deinit(ctx->transport_handle);
+	OSAL_pthread_mutex_destroy(&ctx->mutex);
+	OSAL_free(ctx);
 
-    OSAL_pthread_mutex_destroy(&ctx->mutex);
-    OSAL_free(ctx);
+	return OSAL_SUCCESS;
+}
 
-    return OSAL_SUCCESS;
+/**
+ * @brief 获取 MCU 版本信息
+ */
+int32_t PDL_MCU_get_version(pdl_mcu_handle_t handle, pdl_mcu_version_t *version)
+{
+	pdl_mcu_context_t *ctx = (pdl_mcu_context_t *)handle;
+	uint8_t response[64];
+	uint32_t resp_len;
+	int32_t ret;
+
+	if (!ctx || !version) {
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
+	OSAL_pthread_mutex_lock(&ctx->mutex);
+
+	/* 发送 GET_VERSION 命令 */
+	ret = mcu_send_packet(ctx, PRL_MCU_MSG_GET_VERSION,
+	                     NULL, 0,
+	                     response, sizeof(response), &resp_len);
+
+	OSAL_pthread_mutex_unlock(&ctx->mutex);
+
+	if (ret != OSAL_SUCCESS) {
+		return ret;
+	}
+
+	/* 解析版本信息 */
+	if (resp_len >= 3) {
+		version->major = response[0];
+		version->minor = response[1];
+		version->patch = response[2];
+	} else {
+		return OSAL_ERR_GENERIC;
+	}
+
+	return OSAL_SUCCESS;
+}
+
+/**
+ * @brief 获取 MCU 状态
+ */
+int32_t PDL_MCU_get_status(pdl_mcu_handle_t handle, pdl_mcu_status_t *status)
+{
+	pdl_mcu_context_t *ctx = (pdl_mcu_context_t *)handle;
+	uint8_t response[64];
+	uint32_t resp_len;
+	int32_t ret;
+
+	if (!ctx || !status) {
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
+	OSAL_pthread_mutex_lock(&ctx->mutex);
+
+	/* 发送 GET_STATUS 命令 */
+	ret = mcu_send_packet(ctx, PRL_MCU_MSG_GET_STATUS,
+	                     NULL, 0,
+	                     response, sizeof(response), &resp_len);
+
+	OSAL_pthread_mutex_unlock(&ctx->mutex);
+
+	if (ret != OSAL_SUCCESS) {
+		return ret;
+	}
+
+	/* 解析状态信息 */
+	if (resp_len >= 1) {
+		status->state = response[0];
+		status->error_code = (resp_len >= 5) ?
+		                     ((uint32_t)response[1] << 24 |
+		                      (uint32_t)response[2] << 16 |
+		                      (uint32_t)response[3] << 8 |
+		                      response[4]) : 0;
+	} else {
+		return OSAL_ERR_GENERIC;
+	}
+
+	return OSAL_SUCCESS;
+}
+
+/**
+ * @brief MCU 复位
+ */
+int32_t PDL_MCU_reset(pdl_mcu_handle_t handle)
+{
+	pdl_mcu_context_t *ctx = (pdl_mcu_context_t *)handle;
+	uint8_t response[64];
+	uint32_t resp_len;
+	int32_t ret;
+
+	if (!ctx) {
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
+	OSAL_pthread_mutex_lock(&ctx->mutex);
+
+	/* 发送 RESET 命令 */
+	ret = mcu_send_packet(ctx, PRL_MCU_MSG_RESET,
+	                     NULL, 0,
+	                     response, sizeof(response), &resp_len);
+
+	OSAL_pthread_mutex_unlock(&ctx->mutex);
+
+	return ret;
+}
+
+/**
+ * @brief 读取 MCU 数据
+ */
+int32_t PDL_MCU_read_data(pdl_mcu_handle_t handle,
+                         uint32_t addr,
+                         uint8_t *data,
+                         uint32_t size)
+{
+	pdl_mcu_context_t *ctx = (pdl_mcu_context_t *)handle;
+	uint8_t request[8];
+	uint8_t response[256];
+	uint32_t resp_len;
+	int32_t ret;
+
+	if (!ctx || !data || size == 0) {
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
+	/* 构造请求 */
+	request[0] = (addr >> 24) & 0xFF;
+	request[1] = (addr >> 16) & 0xFF;
+	request[2] = (addr >> 8) & 0xFF;
+	request[3] = addr & 0xFF;
+	request[4] = (size >> 24) & 0xFF;
+	request[5] = (size >> 16) & 0xFF;
+	request[6] = (size >> 8) & 0xFF;
+	request[7] = size & 0xFF;
+
+	OSAL_pthread_mutex_lock(&ctx->mutex);
+
+	/* 发送 READ_DATA 命令 */
+	ret = mcu_send_packet(ctx, PRL_MCU_MSG_READ_DATA,
+	                     request, 8,
+	                     response, sizeof(response), &resp_len);
+
+	OSAL_pthread_mutex_unlock(&ctx->mutex);
+
+	if (ret != OSAL_SUCCESS) {
+		return ret;
+	}
+
+	/* 复制数据 */
+	if (resp_len > 0) {
+		uint32_t copy_len = (resp_len < size) ? resp_len : size;
+		OSAL_memcpy(data, response, copy_len);
+	}
+
+	return OSAL_SUCCESS;
+}
+
+/**
+ * @brief 写入 MCU 数据
+ */
+int32_t PDL_MCU_write_data(pdl_mcu_handle_t handle,
+                          uint32_t addr,
+                          const uint8_t *data,
+                          uint32_t size)
+{
+	pdl_mcu_context_t *ctx = (pdl_mcu_context_t *)handle;
+	uint8_t request[256];
+	uint8_t response[64];
+	uint32_t resp_len;
+	int32_t ret;
+
+	if (!ctx || !data || size == 0 || size > 248) {
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
+	/* 构造请求 */
+	request[0] = (addr >> 24) & 0xFF;
+	request[1] = (addr >> 16) & 0xFF;
+	request[2] = (addr >> 8) & 0xFF;
+	request[3] = addr & 0xFF;
+	request[4] = (size >> 24) & 0xFF;
+	request[5] = (size >> 16) & 0xFF;
+	request[6] = (size >> 8) & 0xFF;
+	request[7] = size & 0xFF;
+	OSAL_memcpy(&request[8], data, size);
+
+	OSAL_pthread_mutex_lock(&ctx->mutex);
+
+	/* 发送 WRITE_DATA 命令 */
+	ret = mcu_send_packet(ctx, PRL_MCU_MSG_WRITE_DATA,
+	                     request, 8 + size,
+	                     response, sizeof(response), &resp_len);
+
+	OSAL_pthread_mutex_unlock(&ctx->mutex);
+
+	return ret;
+}
+
+/**
+ * @brief 执行 MCU 命令
+ */
+int32_t PDL_MCU_execute_command(pdl_mcu_handle_t handle,
+                               uint8_t cmd_id,
+                               const uint8_t *params,
+                               uint32_t param_len,
+                               uint8_t *result,
+                               uint32_t result_size,
+                               uint32_t *actual_len)
+{
+	pdl_mcu_context_t *ctx = (pdl_mcu_context_t *)handle;
+	uint8_t request[256];
+	uint8_t response[256];
+	uint32_t resp_len;
+	int32_t ret;
+
+	if (!ctx || param_len > 255) {
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
+	/* 构造请求 */
+	request[0] = cmd_id;
+	if (params && param_len > 0) {
+		OSAL_memcpy(&request[1], params, param_len);
+	}
+
+	OSAL_pthread_mutex_lock(&ctx->mutex);
+
+	/* 发送 EXECUTE_CMD 命令 */
+	ret = mcu_send_packet(ctx, PRL_MCU_MSG_EXECUTE_CMD,
+	                     request, 1 + param_len,
+	                     response, sizeof(response), &resp_len);
+
+	OSAL_pthread_mutex_unlock(&ctx->mutex);
+
+	if (ret != OSAL_SUCCESS) {
+		return ret;
+	}
+
+	/* 复制结果 */
+	if (result && result_size > 0 && resp_len > 0) {
+		uint32_t copy_len = (resp_len < result_size) ? resp_len : result_size;
+		OSAL_memcpy(result, response, copy_len);
+		if (actual_len) {
+			*actual_len = copy_len;
+		}
+	}
+
+	return OSAL_SUCCESS;
 }

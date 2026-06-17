@@ -2,9 +2,9 @@
  * MCU CAN通信实现
  *
  * 职责：
- * - 封装CAN总线收发
- * - 实现MCU的CAN协议（帧格式、ID映射）
- * - 超时和重试机制
+ * - 封装CAN收发
+ * - 直接转发 PRL 协议报文（透传模式）
+ * - 处理 CAN 分片传输（每帧最多 8 字节）
  ************************************************************************/
 
 #include "osal.h"
@@ -13,15 +13,18 @@
 #include "pdl.h"
 #include "pdl_mcu_internal.h"
 
-/*
- * CAN通信上下文
+/*===========================================================================
+ * CAN通信实现
+ *===========================================================================*/
+
+/**
+ * @brief CAN通信上下文
  */
-typedef struct
-{
-    hal_can_handle_t can_handle;
-    uint32_t tx_id;
-    uint32_t rx_id;
-    osal_mutex_t rx_mutex;
+typedef struct {
+	hal_can_handle_t can_handle;
+	uint32_t tx_id;
+	uint32_t rx_id;
+	osal_mutex_t rx_mutex;
 } mcu_can_context_t;
 
 /**
@@ -29,48 +32,45 @@ typedef struct
  */
 int32_t mcu_can_init(const void *config, void **handle)
 {
-    const pconfig_mcu_config_t *mcu_cfg;
-    mcu_can_context_t *ctx;
-    hal_can_config_t can_config;
+	const pconfig_mcu_config_t *mcu_cfg;
+	mcu_can_context_t *ctx;
+	hal_can_config_t can_config;
 
-    if (NULL == config || NULL == handle)
-    {
-        return OSAL_ERR_GENERIC;
-    }
+	if (!config || !handle) {
+		return OSAL_ERR_INVALID_PARAM;
+	}
 
-    mcu_cfg = (const pconfig_mcu_config_t *)config;
-    ctx = (mcu_can_context_t *)OSAL_malloc(OSAL_sizeof(mcu_can_context_t));
-    if (NULL == ctx)
-    {
-        return OSAL_ERR_NO_MEMORY;
-    }
+	mcu_cfg = (const pconfig_mcu_config_t *)config;
+	ctx = (mcu_can_context_t *)OSAL_malloc(sizeof(mcu_can_context_t));
+	if (!ctx) {
+		return OSAL_ERR_NO_MEMORY;
+	}
 
-    OSAL_memset(ctx, 0, OSAL_sizeof(mcu_can_context_t));
-    ctx->tx_id = mcu_cfg->hw.can.tx_id;
-    ctx->rx_id = mcu_cfg->hw.can.rx_id;
+	OSAL_memset(ctx, 0, sizeof(mcu_can_context_t));
 
-    /* 打开CAN设备 */
-    can_config.interface = mcu_cfg->hw.can.device;
-    can_config.baudrate = mcu_cfg->hw.can.bitrate;
-    can_config.rx_timeout = 1000;
-    can_config.tx_timeout = 1000;
+	/* 配置CAN参数 */
+	can_config.interface = mcu_cfg->hw.can.device;
+	can_config.baudrate = mcu_cfg->hw.can.bitrate;
+	can_config.rx_timeout = mcu_cfg->hw.can.rx_timeout;
+	can_config.tx_timeout = mcu_cfg->hw.can.tx_timeout;
 
-    if (OSAL_SUCCESS != HAL_CAN_init(&can_config, &ctx->can_handle))
-    {
-        OSAL_free(ctx);
-        return OSAL_ERR_GENERIC;
-    }
+	if (OSAL_SUCCESS != HAL_CAN_init(&can_config, &ctx->can_handle)) {
+		OSAL_free(ctx);
+		return OSAL_ERR_GENERIC;
+	}
 
-    /* 创建接收互斥锁 */
-    if (OSAL_SUCCESS != OSAL_pthread_mutex_init(&ctx->rx_mutex, NULL))
-    {
-        HAL_CAN_deinit(ctx->can_handle);
-        OSAL_free(ctx);
-        return OSAL_ERR_GENERIC;
-    }
+	ctx->tx_id = mcu_cfg->hw.can.tx_id;
+	ctx->rx_id = mcu_cfg->hw.can.rx_id;
 
-    *handle = ctx;
-    return OSAL_SUCCESS;
+	/* 创建接收互斥锁 */
+	if (OSAL_SUCCESS != OSAL_pthread_mutex_init(&ctx->rx_mutex, NULL)) {
+		HAL_CAN_deinit(ctx->can_handle);
+		OSAL_free(ctx);
+		return OSAL_ERR_GENERIC;
+	}
+
+	*handle = ctx;
+	return OSAL_SUCCESS;
 }
 
 /**
@@ -78,138 +78,132 @@ int32_t mcu_can_init(const void *config, void **handle)
  */
 int32_t mcu_can_deinit(void *handle)
 {
-    mcu_can_context_t *ctx;
+	mcu_can_context_t *ctx;
 
-    if (NULL == handle)
-    {
-        return OSAL_ERR_GENERIC;
-    }
+	if (!handle) {
+		return OSAL_ERR_INVALID_PARAM;
+	}
 
-    ctx = (mcu_can_context_t *)handle;
+	ctx = (mcu_can_context_t *)handle;
 
-    HAL_CAN_deinit(ctx->can_handle);
-    OSAL_pthread_mutex_destroy(&ctx->rx_mutex);
-    OSAL_free(ctx);
+	HAL_CAN_deinit(ctx->can_handle);
+	OSAL_pthread_mutex_destroy(&ctx->rx_mutex);
+	OSAL_free(ctx);
 
-    return OSAL_SUCCESS;
+	return OSAL_SUCCESS;
 }
 
 /**
- * @brief 发送命令并接收响应
+ * @brief 发送 PRL 报文并接收响应
  */
-int32_t mcu_can_send_command(void *handle,
-                          uint8_t cmd_code,
-                          const uint8_t *data,
-                          uint32_t data_len,
-                          uint8_t *response,
-                          uint32_t resp_size,
-                          uint32_t *actual_size,
-                          uint32_t timeout_ms)
+int32_t mcu_can_send_packet(void *handle,
+                            const uint8_t *packet,
+                            uint32_t packet_len,
+                            uint8_t *response,
+                            uint32_t resp_size,
+                            uint32_t *actual_size,
+                            uint32_t timeout_ms)
 {
-    mcu_can_context_t *ctx;
-    uint8_t tx_frame[8];
-    uint32_t tx_len;
-    uint32_t copy_len;
-    hal_can_frame_t can_frame;
-    hal_can_frame_t rx_frame;
-    int32_t ret;
-    uint8_t status;
-    uint8_t resp_len;
-    uint64_t start_time_us;
-    uint64_t elapsed_us;
-    uint32_t remaining_timeout_ms;
+	mcu_can_context_t *ctx;
+	hal_can_frame_t can_frame;
+	hal_can_frame_t rx_frame;
+	int32_t ret;
+	uint64_t start_time_us;
+	uint64_t elapsed_us;
+	uint32_t remaining_timeout_ms;
+	uint32_t sent_bytes = 0;
+	uint32_t recv_bytes = 0;
 
-    if (NULL == handle)
-    {
-        return OSAL_ERR_GENERIC;
-    }
+	if (!handle || !packet) {
+		return OSAL_ERR_INVALID_PARAM;
+	}
 
-    ctx = (mcu_can_context_t *)handle;
+	ctx = (mcu_can_context_t *)handle;
 
-    /* 记录起始时间，用于总超时控制 */
-    start_time_us = OSAL_get_monotonic_time();
+	/* 记录起始时间 */
+	start_time_us = OSAL_get_monotonic_time();
 
-    /* 封装CAN帧：[cmd_code][data_len][data...] */
-    tx_len = 0;
+	/* 分片发送 PRL 报文（CAN 每帧最多 8 字节） */
+	while (sent_bytes < packet_len) {
+		uint32_t chunk_size = (packet_len - sent_bytes > 8) ? 8 : (packet_len - sent_bytes);
 
-    tx_frame[tx_len++] = cmd_code;
-    tx_frame[tx_len++] = (uint8_t)data_len;
+		can_frame.can_id = ctx->tx_id;
+		can_frame.dlc = chunk_size;
+		OSAL_memcpy(can_frame.data, &packet[sent_bytes], chunk_size);
 
-    if (NULL != data && data_len > 0)
-    {
-        copy_len = (data_len > 6) ? 6 : data_len;  /* CAN最多8字节，留2字节给头 */
-        OSAL_memcpy(&tx_frame[tx_len], data, copy_len);
-        tx_len += copy_len;
-    }
+		ret = HAL_CAN_send(ctx->can_handle, &can_frame);
+		if (ret != OSAL_SUCCESS) {
+			return ret;
+		}
 
-    /* 发送CAN帧 */
-    can_frame.can_id = ctx->tx_id;
-    can_frame.dlc = tx_len;
-    OSAL_memcpy(can_frame.data, tx_frame, tx_len);
+		sent_bytes += chunk_size;
 
-    if (OSAL_SUCCESS != HAL_CAN_send(ctx->can_handle, &can_frame))
-    {
-        return OSAL_ERR_GENERIC;
-    }
+		/* 检查超时 */
+		elapsed_us = OSAL_get_monotonic_time() - start_time_us;
+		if (elapsed_us / 1000 >= timeout_ms) {
+			return OSAL_ERR_TIMEOUT;
+		}
+	}
 
-    /* 计算发送后剩余的超时时间 */
-    elapsed_us = OSAL_get_monotonic_time() - start_time_us;
-    if (elapsed_us / 1000 >= timeout_ms)
-    {
-        return OSAL_ERR_TIMEOUT;  /* 发送阶段已超时 */
-    }
-    remaining_timeout_ms = timeout_ms - (uint32_t)(elapsed_us / 1000);
+	/* 计算剩余超时时间 */
+	elapsed_us = OSAL_get_monotonic_time() - start_time_us;
+	if (elapsed_us / 1000 >= timeout_ms) {
+		return OSAL_ERR_TIMEOUT;
+	}
+	remaining_timeout_ms = timeout_ms - (uint32_t)(elapsed_us / 1000);
 
-    /* 接收响应，使用剩余超时时间 */
-    OSAL_pthread_mutex_lock(&ctx->rx_mutex);
+	/* 接收响应报文（可能多帧） */
+	OSAL_pthread_mutex_lock(&ctx->rx_mutex);
 
-    ret = HAL_CAN_recv(ctx->can_handle, &rx_frame, remaining_timeout_ms);
+	while (recv_bytes < resp_size) {
+		ret = HAL_CAN_recv(ctx->can_handle, &rx_frame, remaining_timeout_ms);
+		if (ret != OSAL_SUCCESS) {
+			OSAL_pthread_mutex_unlock(&ctx->rx_mutex);
+			return ret;
+		}
 
-    if (OSAL_SUCCESS == ret)
-    {
-        /* 检查CAN ID */
-        if (rx_frame.can_id != ctx->rx_id)
-        {
-            OSAL_pthread_mutex_unlock(&ctx->rx_mutex);
-            return OSAL_ERR_GENERIC;
-        }
+		/* 检查 CAN ID */
+		if (rx_frame.can_id != ctx->rx_id) {
+			OSAL_pthread_mutex_unlock(&ctx->rx_mutex);
+			return OSAL_ERR_GENERIC;
+		}
 
-        /* 解析响应：[status][data_len][data...] */
-        if (rx_frame.dlc >= 2)
-        {
-            status = rx_frame.data[0];
-            resp_len = rx_frame.data[1];
+		/* 复制数据 */
+		uint32_t copy_len = (resp_size - recv_bytes > rx_frame.dlc) ?
+		                    rx_frame.dlc : (resp_size - recv_bytes);
+		if (response) {
+			OSAL_memcpy(&response[recv_bytes], rx_frame.data, copy_len);
+		}
+		recv_bytes += copy_len;
 
-            if (OSAL_SUCCESS != status)
-            {
-                OSAL_pthread_mutex_unlock(&ctx->rx_mutex);
-                return OSAL_ERR_GENERIC;
-            }
+		/* 简单判断：如果收到的数据少于 8 字节，说明是最后一帧 */
+		if (rx_frame.dlc < 8) {
+			break;
+		}
 
-            if (NULL != response && resp_len > 0)
-            {
-                copy_len = (resp_len < resp_size) ? resp_len : resp_size;
-                copy_len = (copy_len < ((uint32_t)rx_frame.dlc - 2)) ? copy_len : ((uint32_t)rx_frame.dlc - 2);
-                OSAL_memcpy(response, &rx_frame.data[2], copy_len);
+		/* 更新剩余超时 */
+		elapsed_us = OSAL_get_monotonic_time() - start_time_us;
+		if (elapsed_us / 1000 >= timeout_ms) {
+			OSAL_pthread_mutex_unlock(&ctx->rx_mutex);
+			return OSAL_ERR_TIMEOUT;
+		}
+		remaining_timeout_ms = timeout_ms - (uint32_t)(elapsed_us / 1000);
+	}
 
-                if (NULL != actual_size)
-                {
-                    *actual_size = copy_len;
-                }
-            }
-        }
-    }
+	OSAL_pthread_mutex_unlock(&ctx->rx_mutex);
 
-    OSAL_pthread_mutex_unlock(&ctx->rx_mutex);
+	if (actual_size) {
+		*actual_size = recv_bytes;
+	}
 
-    return ret;
+	return OSAL_SUCCESS;
 }
 
-/*
- * CAN接口的ops结构定义（导出供pdl_mcu.c使用）
+/**
+ * @brief CAN接口的ops结构定义（导出供pdl_mcu.c使用）
  */
 const pdl_mcu_ops_t mcu_can_ops = {
-    .init = mcu_can_init,
-    .deinit = mcu_can_deinit,
-    .send_command = mcu_can_send_command,
+	.init = mcu_can_init,
+	.deinit = mcu_can_deinit,
+	.send_packet = mcu_can_send_packet,
 };
