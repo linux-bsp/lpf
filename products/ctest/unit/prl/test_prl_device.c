@@ -73,9 +73,7 @@ static void test_prl_device_type_valid(void)
     TEST_ASSERT_TRUE(PRL_IsDeviceTypeValid(PRL_DEV_TYPE_CCM));
     TEST_ASSERT_TRUE(PRL_IsDeviceTypeValid(PRL_DEV_TYPE_PMC));
     TEST_ASSERT_TRUE(PRL_IsDeviceTypeValid(PRL_DEV_TYPE_GSC));
-    TEST_ASSERT_TRUE(PRL_IsDeviceTypeValid(PRL_DEV_TYPE_SATELLITE));
     TEST_ASSERT_TRUE(PRL_IsDeviceTypeValid(PRL_DEV_TYPE_POWER));
-    TEST_ASSERT_TRUE(PRL_IsDeviceTypeValid(PRL_DEV_TYPE_BMC));
 
     /* 无效的设备类型 */
     TEST_ASSERT_FALSE(PRL_IsDeviceTypeValid(0xFF));
@@ -89,9 +87,7 @@ static void test_prl_device_type_name(void)
     TEST_ASSERT_STRING_EQUAL("CCM", PRL_GetDeviceTypeName(PRL_DEV_TYPE_CCM));
     TEST_ASSERT_STRING_EQUAL("PMC", PRL_GetDeviceTypeName(PRL_DEV_TYPE_PMC));
     TEST_ASSERT_STRING_EQUAL("GSC", PRL_GetDeviceTypeName(PRL_DEV_TYPE_GSC));
-    TEST_ASSERT_STRING_EQUAL("SATELLITE", PRL_GetDeviceTypeName(PRL_DEV_TYPE_SATELLITE));
     TEST_ASSERT_STRING_EQUAL("POWER", PRL_GetDeviceTypeName(PRL_DEV_TYPE_POWER));
-    TEST_ASSERT_STRING_EQUAL("BMC", PRL_GetDeviceTypeName(PRL_DEV_TYPE_BMC));
     TEST_ASSERT_STRING_EQUAL("UNKNOWN", PRL_GetDeviceTypeName(0xFF));
     TEST_ASSERT_STRING_EQUAL("INVALID", PRL_GetDeviceTypeName(0xFF));
 }

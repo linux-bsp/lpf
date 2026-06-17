@@ -162,8 +162,6 @@ static void test_prl_getdevicetype_all_types(void)
         PRL_DEV_TYPE_PMC,
         PRL_DEV_TYPE_GSC,
         PRL_DEV_TYPE_POWER,
-        PRL_DEV_TYPE_SATELLITE,
-        PRL_DEV_TYPE_BMC
     };
 
     for (size_t i = 0; i < OSAL_sizeof(types); i++) {

@@ -22,6 +22,9 @@ typedef enum {
 	PRL_MCU_MSG_HEARTBEAT       = 0x04,     /* 心跳 */
 	PRL_MCU_MSG_SET_CONFIG      = 0x05,     /* 设置配置 */
 	PRL_MCU_MSG_GET_CONFIG      = 0x06,     /* 获取配置 */
+	PRL_MCU_MSG_READ_DATA       = 0x10,     /* 读取数据 */
+	PRL_MCU_MSG_WRITE_DATA      = 0x11,     /* 写入数据 */
+	PRL_MCU_MSG_EXECUTE_CMD     = 0x12,     /* 执行命令 */
 	PRL_MCU_MSG_POWER_ON        = 0x20,     /* 上电 */
 	PRL_MCU_MSG_POWER_OFF       = 0x21,     /* 下电 */
 	PRL_MCU_MSG_CUSTOM          = 0xFF,     /* 自定义命令 */
