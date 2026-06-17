@@ -17,7 +17,6 @@
 #include "pconfig_switch.h"
 #include "pconfig_satellite.h"
 #include "pconfig_ccm.h"
-#include "pconfig_watchdog.h"
 
 /*===========================================================================
  * 板级配置（顶层）
@@ -59,9 +58,6 @@ typedef struct {
 
 	uint32_t ccm_count;		/* CCM外设数量 */
 	pconfig_ccm_entry_t *ccm_array;	/* CCM外设数组 */
-
-	uint32_t watchdog_count;	/* Watchdog外设数量 */
-	pconfig_watchdog_entry_t *watchdog_array; /* Watchdog外设数组 */
 } pconfig_platform_config_t;
 
 #endif /* PCONFIG_PLATFORM_H */

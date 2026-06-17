@@ -26,7 +26,6 @@
 #include "pconfig_switch.h"    /* Switch 配置类型 */
 #include "pconfig_satellite.h" /* Satellite 配置类型 */
 #include "pconfig_ccm.h"       /* CCM 配置类型 */
-#include "pconfig_watchdog.h"  /* Watchdog 配置类型 */
 #include "pconfig_platform.h"  /* 板级配置类型 */
 
 /*===========================================================================
@@ -193,23 +192,6 @@ PCONFIG_HW_GetCCM(const pconfig_platform_config_t *platform, uint32_t index)
 		return NULL;
 	}
 	return &platform->ccm_array[index];
-}
-
-/**
- * @brief 根据索引获取Watchdog外设配置
- *
- * @param[in] platform 平台配置
- * @param[in] index Watchdog索引（数组下标）
- *
- * @return Watchdog配置条目指针，失败返回NULL
- */
-static inline const pconfig_watchdog_entry_t*
-PCONFIG_HW_GetWatchdog(const pconfig_platform_config_t *platform, uint32_t index)
-{
-	if (!platform || !platform->watchdog_array || index >= platform->watchdog_count) {
-		return NULL;
-	}
-	return &platform->watchdog_array[index];
 }
 
 /*===========================================================================
