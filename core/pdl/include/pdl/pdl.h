@@ -34,10 +34,6 @@
 #endif /* CONFIG_OSAL */
 
 /* 设备驱动 - 按字母顺序 */
-#ifdef CONFIG_PDL_BMC_SUPPORT
-#include "pdl_bmc.h"         /* BMC（基板管理控制器）驱动 */
-#endif /* CONFIG_PDL_BMC_SUPPORT */
-
 #ifdef CONFIG_PDL_CCM_SUPPORT
 #include "pdl_ccm.h"         /* CCM（通信管理板）驱动 */
 #endif /* CONFIG_PDL_CCM_SUPPORT */
@@ -45,9 +41,5 @@
 #ifdef CONFIG_PDL_MCU_SUPPORT
 #include "pdl_mcu.h"         /* MCU（微控制器）驱动 */
 #endif /* CONFIG_PDL_MCU_SUPPORT */
-
-#ifdef CONFIG_PDL_SATELLITE_SUPPORT
-#include "pdl_satellite.h"   /* Satellite（卫星平台）驱动 */
-#endif /* CONFIG_PDL_SATELLITE_SUPPORT */
 
 #endif /* PDL_H */

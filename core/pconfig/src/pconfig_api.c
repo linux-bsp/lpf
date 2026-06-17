@@ -256,14 +256,6 @@ void PCONFIG_print(const pconfig_platform_config_t *config)
         }
     }
 
-    /* 打印BMC配置 */
-    if (config->bmc_array) {
-        for (i = 0; i < config->bmc_count; i++) {
-            LOG_INFO("PCONFIG", "  BMC[%u]: %s", i,
-                     config->bmc_array[i].description ? config->bmc_array[i].description : "N/A");
-        }
-    }
-
     /* 打印FPGA配置 */
     if (config->fpga_array) {
         for (i = 0; i < config->fpga_count; i++) {
@@ -277,6 +269,14 @@ void PCONFIG_print(const pconfig_platform_config_t *config)
         for (i = 0; i < config->switch_count; i++) {
             LOG_INFO("PCONFIG", "  Switch[%u]: %s", i,
                      config->switch_array[i].description ? config->switch_array[i].description : "N/A");
+        }
+    }
+
+    /* 打印CCM配置 */
+    if (config->ccm_array) {
+        for (i = 0; i < config->ccm_count; i++) {
+            LOG_INFO("PCONFIG", "  CCM[%u]: %s", i,
+                     config->ccm_array[i].description ? config->ccm_array[i].description : "N/A");
         }
     }
 }

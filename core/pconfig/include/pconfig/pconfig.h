@@ -21,10 +21,8 @@
 /* 类型定义 - 按模块组织 */
 #include "pconfig_common.h"    /* 通用基础类型 */
 #include "pconfig_mcu.h"       /* MCU 配置类型 */
-#include "pconfig_bmc.h"       /* BMC 配置类型 */
 #include "pconfig_fpga.h"      /* FPGA 配置类型 */
 #include "pconfig_switch.h"    /* Switch 配置类型 */
-#include "pconfig_satellite.h" /* Satellite 配置类型 */
 #include "pconfig_ccm.h"       /* CCM 配置类型 */
 #include "pconfig_platform.h"  /* 板级配置类型 */
 
@@ -110,23 +108,6 @@ PCONFIG_HW_GetMCU(const pconfig_platform_config_t *platform, uint32_t index)
 }
 
 /**
- * @brief 根据索引获取BMC外设配置
- *
- * @param[in] platform 平台配置
- * @param[in] index BMC索引（数组下标）
- *
- * @return BMC配置条目指针，失败返回NULL
- */
-static inline const pconfig_bmc_entry_t*
-PCONFIG_HW_GetBMC(const pconfig_platform_config_t *platform, uint32_t index)
-{
-	if (!platform || !platform->bmc_array || index >= platform->bmc_count) {
-		return NULL;
-	}
-	return &platform->bmc_array[index];
-}
-
-/**
  * @brief 根据索引获取FPGA外设配置
  *
  * @param[in] platform 平台配置
@@ -158,23 +139,6 @@ PCONFIG_HW_GetSwitch(const pconfig_platform_config_t *platform, uint32_t index)
 		return NULL;
 	}
 	return &platform->switch_array[index];
-}
-
-/**
- * @brief 根据索引获取Satellite外设配置
- *
- * @param[in] platform 平台配置
- * @param[in] index Satellite索引（数组下标）
- *
- * @return Satellite配置条目指针，失败返回NULL
- */
-static inline const pconfig_satellite_entry_t*
-PCONFIG_HW_GetSatellite(const pconfig_platform_config_t *platform, uint32_t index)
-{
-	if (!platform || !platform->satellite_array || index >= platform->satellite_count) {
-		return NULL;
-	}
-	return &platform->satellite_array[index];
 }
 
 /**

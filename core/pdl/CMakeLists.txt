@@ -8,16 +8,6 @@ list(APPEND ADD_PRIVATE_INCLUDE "src")
 
 ############## Add source files ###############
 # 根据配置添加子模块源文件
-if(CONFIG_PDL_SATELLITE_SUPPORT)
-    file(GLOB PDL_SATELLITE_SRCS "src/pdl_satellite/*.c")
-    list(APPEND ADD_SRCS ${PDL_SATELLITE_SRCS})
-endif()
-
-if(CONFIG_PDL_BMC_SUPPORT)
-    file(GLOB PDL_BMC_SRCS "src/pdl_bmc/*.c")
-    list(APPEND ADD_SRCS ${PDL_BMC_SRCS})
-endif()
-
 if(CONFIG_PDL_MCU_SUPPORT)
     file(GLOB PDL_MCU_SRCS "src/pdl_mcu/*.c")
     list(APPEND ADD_SRCS ${PDL_MCU_SRCS})
@@ -68,14 +58,6 @@ endif()
 ###############################################
 
 #### Add compile option for this component ####
-if(CONFIG_PDL_SATELLITE_SUPPORT)
-    list(APPEND ADD_DEFINITIONS -DPDL_SATELLITE_SUPPORT=1)
-endif()
-
-if(CONFIG_PDL_BMC_SUPPORT)
-    list(APPEND ADD_DEFINITIONS -DPDL_BMC_SUPPORT=1)
-endif()
-
 if(CONFIG_PDL_MCU_SUPPORT)
     list(APPEND ADD_DEFINITIONS -DPDL_MCU_SUPPORT=1)
 

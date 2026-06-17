@@ -10,7 +10,7 @@ menuconfig PDL
 
 	  PDL sits above HAL and provides:
 	  - Protocol-aware peripheral drivers
-	  - Device abstraction (satellites, BMC, MCU modules)
+	  - Device abstraction (MCU modules, CCM)
 	  - State management and error handling
 	  - Unified API for complex peripherals
 
@@ -22,9 +22,8 @@ menuconfig PDL
 	  Memory footprint: ~15KB base + per-peripheral drivers
 
 	  Supported peripherals:
-	  - Satellite modules (CAN-based distributed I/O)
-	  - BMC (Baseboard Management Controller)
 	  - MCU modules (microcontroller peripherals)
+	  - CCM (Communication Control Module)
 
 	  Dependencies: OSAL, HAL, PCONFIG
 
@@ -65,69 +64,6 @@ config PDL_BUILD_SHARED
 	  Recommended: Enable for multi-application systems
 
 endmenu
-
-menuconfig PDL_SATELLITE_SUPPORT
-	bool "Satellite peripheral support"
-	default n
-	select HAL_CAN
-	select OSAL_NETWORK
-	help
-	  Enable satellite peripheral management via CAN bus.
-
-	  Satellites are remote sensor/actuator modules connected via
-	  CAN bus, providing distributed I/O capabilities for large
-	  systems where centralized I/O is impractical.
-
-	  Features:
-	  - CAN-based communication protocol
-	  - Remote sensor reading
-	  - Remote actuator control
-	  - Health monitoring and diagnostics
-
-	  Memory footprint: ~12KB
-
-	  Use cases:
-	  - Distributed sensor networks
-	  - Large spacecraft with multiple subsystems
-	  - Industrial automation with remote I/O
-
-	  Dependencies: HAL_CAN (for CAN bus), OSAL_NETWORK (for protocol)
-
-	  If unsure, say Y.
-
-source "core/pdl/src/pdl_satellite/Config.in"
-
-menuconfig PDL_BMC_SUPPORT
-	bool "BMC peripheral support"
-	default n
-	select HAL_UART
-	select OSAL_NETWORK
-	help
-	  Enable BMC (Baseboard Management Controller) peripheral support.
-
-	  BMC provides out-of-band server management functions including:
-	  - Power control (on/off/reset)
-	  - Temperature and voltage monitoring
-	  - Fan control
-	  - Remote console access (SOL - Serial Over LAN)
-	  - Event logging
-
-	  Memory footprint: ~10KB
-
-	  Communication interfaces:
-	  - UART (for local management)
-	  - Ethernet (for remote management via IPMI)
-
-	  Use cases:
-	  - Server management
-	  - Remote system monitoring
-	  - Automated recovery from failures
-
-	  Dependencies: HAL_UART, OSAL_NETWORK
-
-	  If unsure, say Y.
-
-source "core/pdl/src/pdl_bmc/Config.in"
 
 menuconfig PDL_MCU_SUPPORT
 	bool "MCU peripheral support"
