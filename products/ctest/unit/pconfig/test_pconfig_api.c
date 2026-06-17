@@ -51,35 +51,6 @@ static pconfig_mcu_entry_t test_mcu_entries[] = {
     }
 };
 
-/* Test BMC configurations */
-static pconfig_bmc_entry_t test_bmc_entries[] = {
-    {
-        .description = "Satellite platform BMC",
-        .enabled = true,
-        .config = {
-            .primary_channel = PCONFIG_BMC_CHANNEL_SERIAL,
-            .primary_config.serial = {
-                .device = "/dev/ttyS1",
-                .baudrate = 115200,
-                .data_bits = 8,
-                .stop_bits = 1,
-                .parity = 0,
-                .timeout_ms = 2000
-            },
-            .backup_channel = PCONFIG_BMC_CHANNEL_NETWORK,
-            .backup_config.network = {
-                .ip_addr = "192.168.1.100",
-                .port = 623,
-                .username = "admin",
-                .password = "admin",
-                .timeout_ms = 5000
-            },
-            .auto_switch = false,
-            .retry_count = 3,
-            .health_check_interval = 5000
-        }
-    }
-};
 
 /* Test FPGA configurations */
 static pconfig_fpga_cfg_t test_fpga_configs[] = {
@@ -113,8 +84,6 @@ static pconfig_platform_config_t test_platform_config = {
     .mcu_count = 2,
     .mcu_array = test_mcu_entries,
 
-    .bmc_count = 1,
-    .bmc_array = test_bmc_entries,
 
     .fpga_count = 1,
     .fpga_array = test_fpga_configs,
@@ -133,8 +102,6 @@ static pconfig_platform_config_t test_platform_config2 = {
     .mcu_count = 0,
     .mcu_array = NULL,
 
-    .bmc_count = 0,
-    .bmc_array = NULL,
 
     .fpga_count = 0,
     .fpga_array = NULL,
@@ -318,30 +285,8 @@ static void test_pconfig_hw_get_mcu_second_entry(void)
  * BMC Configuration Query Tests
  *===========================================================================*/
 
-static void test_pconfig_hw_get_bmc_by_id(void)
-{
-    const pconfig_platform_config_t *platform = PCONFIG_GetBoard();
-    const pconfig_bmc_entry_t *bmc = PCONFIG_HW_GetBMC(platform, 0);
 
-    TEST_ASSERT_NOT_EQUAL(NULL, bmc);
-    TEST_ASSERT_EQUAL(PCONFIG_BMC_CHANNEL_SERIAL, bmc->config.primary_channel);
-    TEST_ASSERT_EQUAL(115200, bmc->config.primary_config.serial.baudrate);
-    TEST_ASSERT_TRUE(bmc->enabled);
-}
 
-static void test_pconfig_hw_get_bmc_invalid_id(void)
-{
-    const pconfig_platform_config_t *platform = PCONFIG_GetBoard();
-    const pconfig_bmc_entry_t *bmc = PCONFIG_HW_GetBMC(platform, 999);
-
-    TEST_ASSERT_EQUAL(NULL, bmc);
-}
-
-static void test_pconfig_hw_get_bmc_null_platform(void)
-{
-    const pconfig_bmc_entry_t *bmc = PCONFIG_HW_GetBMC(NULL, 0);
-    TEST_ASSERT_EQUAL(NULL, bmc);
-}
 
 /*===========================================================================
  * FPGA Configuration Query Tests
@@ -569,9 +514,6 @@ static const test_case_t test_cases[] = {
     { .name = "test_pconfig_hw_get_mcu_second_entry", .func = test_pconfig_hw_get_mcu_second_entry, .setup = NULL, .teardown = NULL },
 
     /* BMC Query */
-    { .name = "test_pconfig_hw_get_bmc_by_id", .func = test_pconfig_hw_get_bmc_by_id, .setup = NULL, .teardown = NULL },
-    { .name = "test_pconfig_hw_get_bmc_invalid_id", .func = test_pconfig_hw_get_bmc_invalid_id, .setup = NULL, .teardown = NULL },
-    { .name = "test_pconfig_hw_get_bmc_null_platform", .func = test_pconfig_hw_get_bmc_null_platform, .setup = NULL, .teardown = NULL },
 
     /* FPGA Query */
     { .name = "test_pconfig_hw_get_fpga_by_id", .func = test_pconfig_hw_get_fpga_by_id, .setup = NULL, .teardown = NULL },
