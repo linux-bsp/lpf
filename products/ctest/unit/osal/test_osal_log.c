@@ -286,33 +286,48 @@ static void _test_osal_log_multithread(void)
 /* 测试用例: 未初始化时写入日志 */
 static void _test_osal_log_write_without_init(void)
 {
-	/* 跳过此测试：当前OSAL日志实现在未初始化时调用LOG_INFO会导致段错误
-	 * 原因：log_internal_ex函数使用互斥锁但没有检查初始化状态
-	 * TODO: 需要在OSAL日志实现中添加初始化状态检查
-	 */
-	TEST_ASSERT_FALSE(
-		true); // OSAL log implementation needs initialization check
+	uint64_t total_count = 0;
+	uint64_t dropped_count = 0;
+
+	osal_log_shutdown();
+	LOG_INFO("TEST", "log before init should be ignored safely");
+	osal_log_get_stats(&total_count, &dropped_count);
+
+	TEST_ASSERT_EQUAL(0, total_count);
+	TEST_ASSERT_EQUAL(0, dropped_count);
 }
 
 /* 测试用例: 重复初始化 */
 static void _test_osal_log_init_twice(void)
 {
-	/* 跳过此测试：重复调用OSAL_LogInit会导致文件描述符泄漏和状态损坏
-     * 原因：OSAL_LogInit不检查是否已初始化，直接打开新文件而不关闭旧文件
-     * TODO: 需要在OSAL_LogInit中添加已初始化检查，或先调用shutdown
-     */
-	TEST_ASSERT_FALSE(true); // Multiple init causes file descriptor leak
+	int32_t ret;
+
+	ret = osal_log_init(TEST_LOG_FILE, OS_LOG_LEVEL_INFO);
+	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+	ret = osal_log_init(TEST_LOG_FILE, OS_LOG_LEVEL_INFO);
+	TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_STATE, ret);
+
+	osal_log_shutdown();
+	osal_unlink(TEST_LOG_FILE);
 }
 
 /* 测试用例: 重复清理 */
 static void _test_osal_log_shutdown_twice(void)
 {
-	/* 跳过此测试：重复调用OSAL_LogShutdown后，后续测试可能因状态不一致导致段错误
-     * 原因：OSAL_LogShutdown只关闭文件但不清理全局状态，可能影响后续测试
-     * TODO: 需要在OSAL日志实现中添加完整的状态重置逻辑
-     */
-	TEST_ASSERT_FALSE(
-		true); // Multiple shutdown may corrupt log state for subsequent tests
+	int32_t ret;
+
+	ret = osal_log_init(TEST_LOG_FILE, OS_LOG_LEVEL_INFO);
+	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+	osal_log_shutdown();
+	osal_log_shutdown();
+
+	ret = osal_log_init(TEST_LOG_FILE, OS_LOG_LEVEL_INFO);
+	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
+
+	osal_log_shutdown();
+	osal_unlink(TEST_LOG_FILE);
 }
 
 /*===========================================================================

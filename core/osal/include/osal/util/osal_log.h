@@ -188,12 +188,13 @@ typedef struct {
  * @param[in] level 日志级别
  *
  * @return OSAL_SUCCESS 成功
+ * @return OSAL_ERR_INVALID_STATE 日志系统已经初始化
  * @return OSAL_ERR_GENERIC 失败
  */
 int32_t osal_log_init(const char *log_file_path, int32_t level);
 
 /**
- * @brief 关闭日志系统
+ * @brief 关闭日志系统，允许重复调用
  */
 void osal_log_shutdown(void);
 
