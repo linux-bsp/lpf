@@ -10,7 +10,7 @@
  * 测试用例
  *===========================================================================*/
 
-static void test_process_getpid(void)
+static void _test_process_getpid(void)
 {
 	osal_pid_t pid1 = osal_getpid();
 	osal_pid_t pid2 = osal_getpid();
@@ -22,14 +22,14 @@ static void test_process_getpid(void)
 	TEST_ASSERT_TRUE(pid1 > 0);
 }
 
-static void test_process_kill_invalid_pid(void)
+static void _test_process_kill_invalid_pid(void)
 {
 	/* 尝试向不存在的大PID发送信号应该失败 */
 	int32_t ret = osal_kill(999999, 0);
 	TEST_ASSERT_NOT_EQUAL(0, ret);
 }
 
-static void test_process_kill_signal_zero(void)
+static void _test_process_kill_signal_zero(void)
 {
 	/* 信号0用于检查进程是否存在，不会实际发送信号 */
 	osal_pid_t pid = osal_getpid();
@@ -46,15 +46,15 @@ static void test_process_kill_signal_zero(void)
 /* 测试用例数组 - 使用函数指针数组 */
 static const test_case_t test_cases[] = {
 	{ .name = "test_process_getpid",
-	  .func = test_process_getpid,
+	  .func = _test_process_getpid,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_process_kill_invalid_pid",
-	  .func = test_process_kill_invalid_pid,
+	  .func = _test_process_kill_invalid_pid,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_process_kill_signal_zero",
-	  .func = test_process_kill_signal_zero,
+	  .func = _test_process_kill_signal_zero,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

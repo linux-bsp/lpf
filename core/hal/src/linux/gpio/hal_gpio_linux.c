@@ -36,7 +36,7 @@ static osal_flock_t *g_gpio_flock = NULL;
 /**
  * @brief 写入字符串到文件
  */
-static int32_t gpio_write_file(const char *path, const char *value)
+static int32_t _gpio_write_file(const char *path, const char *value)
 {
 	int32_t fd;
 	uint32_t len;
@@ -63,7 +63,7 @@ static int32_t gpio_write_file(const char *path, const char *value)
 /**
  * @brief 从文件读取字符串
  */
-static int32_t gpio_read_file(const char *path, char *buffer, size_t size)
+static int32_t _gpio_read_file(const char *path, char *buffer, size_t size)
 {
 	int32_t fd;
 	int32_t len;
@@ -89,7 +89,7 @@ static int32_t gpio_read_file(const char *path, char *buffer, size_t size)
 /**
  * @brief 导出GPIO引脚
  */
-static int32_t gpio_export(uint32_t gpio_num)
+static int32_t _gpio_export(uint32_t gpio_num)
 {
 	char gpio_str[16];
 	char path[256];
@@ -102,23 +102,23 @@ static int32_t gpio_export(uint32_t gpio_num)
 
 	/* 导出GPIO */
 	osal_snprintf(gpio_str, OSAL_sizeof(gpio_str), "%u", gpio_num);
-	return gpio_write_file("/sys/class/gpio/export", gpio_str);
+	return _gpio_write_file("/sys/class/gpio/export", gpio_str);
 }
 
 /**
  * @brief 取消导出GPIO引脚
  */
-static int32_t gpio_unexport(uint32_t gpio_num)
+static int32_t _gpio_unexport(uint32_t gpio_num)
 {
 	char gpio_str[16];
 	osal_snprintf(gpio_str, OSAL_sizeof(gpio_str), "%u", gpio_num);
-	return gpio_write_file("/sys/class/gpio/unexport", gpio_str);
+	return _gpio_write_file("/sys/class/gpio/unexport", gpio_str);
 }
 
 /**
  * @brief GPIO中断监听线程
  */
-static void *gpio_isr_thread(void *arg)
+static void *_gpio_isr_thread(void *arg)
 {
 	gpio_isr_context_t *ctx = (gpio_isr_context_t *)arg;
 	osal_pollfd_t pfd;
@@ -171,7 +171,7 @@ static void *gpio_isr_thread(void *arg)
 /**
  * @brief GPIO模块初始化
  */
-static int32_t gpio_module_init(void)
+static int32_t _gpio_module_init(void)
 {
 	int32_t ret;
 	uint32_t i;
@@ -203,7 +203,7 @@ static int32_t gpio_module_init(void)
 /**
  * @brief GPIO模块清理
  */
-static void gpio_module_cleanup(void)
+static void _gpio_module_cleanup(void)
 {
 	if (gpio_module_initialized) {
 		osal_pthread_mutex_destroy(&gpio_isr_mutex);
@@ -244,7 +244,7 @@ int32_t hal_gpio_set_direction(uint32_t gpio_num,
 	osal_snprintf(path, OSAL_sizeof(path), "/sys/class/gpio/gpio%u/direction",
 				  gpio_num);
 
-	ret = gpio_write_file(path, dir_str);
+	ret = _gpio_write_file(path, dir_str);
 
 	osal_pthread_mutex_unlock(&gpio_isr_mutex);
 	osal_flock_unlock(g_gpio_flock);
@@ -274,7 +274,7 @@ int32_t hal_gpio_get_direction(uint32_t gpio_num,
 
 	osal_snprintf(path, OSAL_sizeof(path), "/sys/class/gpio/gpio%u/direction",
 				  gpio_num);
-	ret = gpio_read_file(path, buffer, OSAL_sizeof(buffer));
+	ret = _gpio_read_file(path, buffer, OSAL_sizeof(buffer));
 	if (ret != OSAL_SUCCESS) {
 		osal_pthread_mutex_unlock(&gpio_isr_mutex);
 		osal_flock_unlock(g_gpio_flock);
@@ -313,7 +313,7 @@ int32_t hal_gpio_set_level(uint32_t gpio_num, hal_gpio_level_t level)
 	osal_snprintf(path, OSAL_sizeof(path), "/sys/class/gpio/gpio%u/value",
 				  gpio_num);
 
-	ret = gpio_write_file(path, level_str);
+	ret = _gpio_write_file(path, level_str);
 
 	osal_pthread_mutex_unlock(&gpio_isr_mutex);
 	osal_flock_unlock(g_gpio_flock);
@@ -342,7 +342,7 @@ int32_t hal_gpio_get_level(uint32_t gpio_num, hal_gpio_level_t *level)
 
 	osal_snprintf(path, OSAL_sizeof(path), "/sys/class/gpio/gpio%u/value",
 				  gpio_num);
-	ret = gpio_read_file(path, buffer, OSAL_sizeof(buffer));
+	ret = _gpio_read_file(path, buffer, OSAL_sizeof(buffer));
 	if (ret != OSAL_SUCCESS) {
 		osal_pthread_mutex_unlock(&gpio_isr_mutex);
 		osal_flock_unlock(g_gpio_flock);
@@ -397,7 +397,7 @@ int32_t hal_gpio_set_interrupt(uint32_t gpio_num, hal_gpio_edge_t edge,
 
 	osal_snprintf(path, OSAL_sizeof(path), "/sys/class/gpio/gpio%u/edge",
 				  gpio_num);
-	ret = gpio_write_file(path, edge_str);
+	ret = _gpio_write_file(path, edge_str);
 	if (ret != OSAL_SUCCESS) {
 		osal_flock_unlock(g_gpio_flock);
 		return ret;
@@ -441,7 +441,7 @@ int32_t hal_gpio_set_interrupt(uint32_t gpio_num, hal_gpio_edge_t edge,
 
 	/* 创建监听线程 */
 	ret = osal_pthread_create(&gpio_isr_table[gpio_num].thread, NULL,
-							  gpio_isr_thread, &gpio_isr_table[gpio_num]);
+							  _gpio_isr_thread, &gpio_isr_table[gpio_num]);
 
 	osal_pthread_mutex_unlock(&gpio_isr_mutex);
 	osal_flock_unlock(g_gpio_flock);
@@ -525,7 +525,7 @@ int32_t hal_gpio_init(uint32_t gpio_num, const hal_gpio_config_t *config)
 	}
 
 	/* 初始化GPIO模块 */
-	ret = gpio_module_init();
+	ret = _gpio_module_init();
 	if (ret != OSAL_SUCCESS) {
 		return ret;
 	}
@@ -540,7 +540,7 @@ int32_t hal_gpio_init(uint32_t gpio_num, const hal_gpio_config_t *config)
 	osal_pthread_mutex_lock(&gpio_isr_mutex);
 
 	/* 导出GPIO */
-	ret = gpio_export(gpio_num);
+	ret = _gpio_export(gpio_num);
 	if (ret != OSAL_SUCCESS) {
 		osal_pthread_mutex_unlock(&gpio_isr_mutex);
 		osal_flock_unlock(g_gpio_flock);
@@ -553,7 +553,7 @@ int32_t hal_gpio_init(uint32_t gpio_num, const hal_gpio_config_t *config)
 	/* 设置方向 */
 	ret = hal_gpio_set_direction(gpio_num, config->direction);
 	if (ret != OSAL_SUCCESS) {
-		gpio_unexport(gpio_num);
+		_gpio_unexport(gpio_num);
 		osal_pthread_mutex_unlock(&gpio_isr_mutex);
 		osal_flock_unlock(g_gpio_flock);
 		return ret;
@@ -563,7 +563,7 @@ int32_t hal_gpio_init(uint32_t gpio_num, const hal_gpio_config_t *config)
 	if (config->direction == HAL_GPIO_DIR_OUTPUT) {
 		ret = hal_gpio_set_level(gpio_num, config->initial_level);
 		if (ret != OSAL_SUCCESS) {
-			gpio_unexport(gpio_num);
+			_gpio_unexport(gpio_num);
 			osal_pthread_mutex_unlock(&gpio_isr_mutex);
 			osal_flock_unlock(g_gpio_flock);
 			return ret;
@@ -575,7 +575,7 @@ int32_t hal_gpio_init(uint32_t gpio_num, const hal_gpio_config_t *config)
 		ret = hal_gpio_set_interrupt(gpio_num, config->edge, config->callback,
 									 config->user_data);
 		if (ret != OSAL_SUCCESS) {
-			gpio_unexport(gpio_num);
+			_gpio_unexport(gpio_num);
 			osal_pthread_mutex_unlock(&gpio_isr_mutex);
 			osal_flock_unlock(g_gpio_flock);
 			return ret;
@@ -621,10 +621,10 @@ int32_t hal_gpio_deinit(uint32_t gpio_num)
 	osal_pthread_mutex_unlock(&gpio_isr_mutex);
 
 	/* 清理GPIO模块 */
-	gpio_module_cleanup();
+	_gpio_module_cleanup();
 
 	/* 取消导出GPIO */
-	ret = gpio_unexport(gpio_num);
+	ret = _gpio_unexport(gpio_num);
 
 	osal_flock_unlock(g_gpio_flock);
 

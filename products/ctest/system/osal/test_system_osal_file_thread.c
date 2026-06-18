@@ -14,7 +14,7 @@ typedef struct {
 	osal_atomic_uint32_t error_count;
 } file_read_ctx_t;
 
-static void *file_reader_func(void *arg)
+static void *_file_reader_func(void *arg)
 {
 	file_read_ctx_t *ctx = (file_read_ctx_t *)arg;
 	int fd;
@@ -42,7 +42,7 @@ static void *file_reader_func(void *arg)
 /**
  * Test multiple threads reading same file
  */
-static void test_concurrent_file_read(void)
+static void _test_concurrent_file_read(void)
 {
 	osal_printf("[ TEST     ] Concurrent file read\n");
 
@@ -72,7 +72,7 @@ static void test_concurrent_file_read(void)
 
 	/* Create reader threads */
 	for (i = 0; i < 5; i++) {
-		ret = osal_pthread_create(&threads[i], NULL, file_reader_func, &ctx);
+		ret = osal_pthread_create(&threads[i], NULL, _file_reader_func, &ctx);
 		TEST_ASSERT_EQUAL(0, ret);
 	}
 
@@ -97,7 +97,7 @@ typedef struct {
 	osal_atomic_uint32_t error_count;
 } file_write_ctx_t;
 
-static void *file_writer_func(void *arg)
+static void *_file_writer_func(void *arg)
 {
 	file_write_ctx_t *ctx = (file_write_ctx_t *)arg;
 	char filename[128];
@@ -136,7 +136,7 @@ static void *file_writer_func(void *arg)
 /**
  * Test multiple threads writing to separate files
  */
-static void test_concurrent_file_write(void)
+static void _test_concurrent_file_write(void)
 {
 	osal_printf("[ TEST     ] Concurrent file write\n");
 
@@ -151,7 +151,7 @@ static void test_concurrent_file_write(void)
 
 	/* Create writer threads */
 	for (i = 0; i < 5; i++) {
-		ret = osal_pthread_create(&threads[i], NULL, file_writer_func, &ctx);
+		ret = osal_pthread_create(&threads[i], NULL, _file_writer_func, &ctx);
 		TEST_ASSERT_EQUAL(0, ret);
 	}
 
@@ -175,7 +175,7 @@ typedef struct {
 	int shared_fd;
 } file_lock_ctx_t;
 
-static void *file_lock_worker_func(void *arg)
+static void *_file_lock_worker_func(void *arg)
 {
 	file_lock_ctx_t *ctx = (file_lock_ctx_t *)arg;
 	uint32_t i;
@@ -205,7 +205,7 @@ static void *file_lock_worker_func(void *arg)
 /**
  * Test file locking coordination
  */
-static void test_file_locking_coordination(void)
+static void _test_file_locking_coordination(void)
 {
 	osal_printf("[ TEST     ] File locking coordination\n");
 
@@ -232,8 +232,8 @@ static void test_file_locking_coordination(void)
 
 	/* Create worker threads */
 	for (i = 0; i < 3; i++) {
-		ret =
-			osal_pthread_create(&threads[i], NULL, file_lock_worker_func, &ctx);
+		ret = osal_pthread_create(&threads[i], NULL, _file_lock_worker_func,
+								  &ctx);
 		TEST_ASSERT_EQUAL(0, ret);
 	}
 
@@ -259,7 +259,7 @@ typedef struct {
 	osal_atomic_uint32_t position_errors;
 } file_position_ctx_t;
 
-static void *file_position_worker_func(void *arg)
+static void *_file_position_worker_func(void *arg)
 {
 	file_position_ctx_t *ctx = (file_position_ctx_t *)arg;
 	int fd;
@@ -300,7 +300,7 @@ static void *file_position_worker_func(void *arg)
 /**
  * Test file position tracking per thread
  */
-static void test_file_position_tracking(void)
+static void _test_file_position_tracking(void)
 {
 	osal_printf("[ TEST     ] File position tracking per thread\n");
 
@@ -329,7 +329,7 @@ static void test_file_position_tracking(void)
 
 	/* Create worker threads */
 	for (i = 0; i < 4; i++) {
-		ret = osal_pthread_create(&threads[i], NULL, file_position_worker_func,
+		ret = osal_pthread_create(&threads[i], NULL, _file_position_worker_func,
 								  &ctx);
 		TEST_ASSERT_EQUAL(0, ret);
 	}
@@ -351,7 +351,7 @@ static void test_file_position_tracking(void)
 /**
  * Test proper file descriptor cleanup
  */
-static void test_fd_cleanup(void)
+static void _test_fd_cleanup(void)
 {
 	osal_printf("[ TEST     ] File descriptor cleanup\n");
 
@@ -382,23 +382,23 @@ static void test_fd_cleanup(void)
 /* Test cases array */
 static const test_case_t test_cases[] = {
 	{ .name = "test_concurrent_file_read",
-	  .func = test_concurrent_file_read,
+	  .func = _test_concurrent_file_read,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_concurrent_file_write",
-	  .func = test_concurrent_file_write,
+	  .func = _test_concurrent_file_write,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_file_locking_coordination",
-	  .func = test_file_locking_coordination,
+	  .func = _test_file_locking_coordination,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_file_position_tracking",
-	  .func = test_file_position_tracking,
+	  .func = _test_file_position_tracking,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_fd_cleanup",
-	  .func = test_fd_cleanup,
+	  .func = _test_fd_cleanup,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

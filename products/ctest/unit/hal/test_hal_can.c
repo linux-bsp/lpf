@@ -12,7 +12,7 @@
  *===========================================================================*/
 
 /* 测试用例: CAN初始化 - 成功 */
-static void test_hal_can_init_success(void)
+static void _test_hal_can_init_success(void)
 {
 	hal_can_handle_t handle = NULL;
 	hal_can_config_t config = { .interface = "can0",
@@ -48,7 +48,7 @@ static void test_hal_can_init_success(void)
 }
 
 /* 测试用例: CAN初始化 - 空配置 */
-static void test_hal_can_init_null_config(void)
+static void _test_hal_can_init_null_config(void)
 {
 	hal_can_handle_t handle = NULL;
 
@@ -57,7 +57,7 @@ static void test_hal_can_init_null_config(void)
 }
 
 /* 测试用例: CAN初始化 - 空句柄 */
-static void test_hal_can_init_null_handle(void)
+static void _test_hal_can_init_null_handle(void)
 {
 	hal_can_config_t config = { .interface = "can0",
 								.baudrate = 500000,
@@ -69,7 +69,7 @@ static void test_hal_can_init_null_handle(void)
 }
 
 /* 测试用例: CAN初始化 - 无效接口 */
-static void test_hal_can_init_invalid_interface(void)
+static void _test_hal_can_init_invalid_interface(void)
 {
 	hal_can_handle_t handle = NULL;
 	hal_can_config_t config = { .interface = "invalid_can999",
@@ -82,7 +82,7 @@ static void test_hal_can_init_invalid_interface(void)
 }
 
 /* 测试用例: CAN清理 */
-static void test_hal_can_deinit(void)
+static void _test_hal_can_deinit(void)
 {
 	hal_can_handle_t handle = NULL;
 	hal_can_config_t config = { .interface = "can0",
@@ -98,7 +98,7 @@ static void test_hal_can_deinit(void)
 }
 
 /* 测试用例: CAN清理 - 空句柄 */
-static void test_hal_can_deinit_null_handle(void)
+static void _test_hal_can_deinit_null_handle(void)
 {
 	int32_t ret = hal_can_deinit(NULL);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
@@ -109,7 +109,7 @@ static void test_hal_can_deinit_null_handle(void)
  *===========================================================================*/
 
 /* 测试用例: CAN发送 - 成功 */
-static void test_hal_can_send_success(void)
+static void _test_hal_can_send_success(void)
 {
 	hal_can_handle_t handle = NULL;
 	hal_can_config_t config = { .interface = "can0",
@@ -131,7 +131,7 @@ static void test_hal_can_send_success(void)
 }
 
 /* 测试用例: CAN发送 - 空句柄 */
-static void test_hal_can_send_null_handle(void)
+static void _test_hal_can_send_null_handle(void)
 {
 	hal_can_frame_t frame = { .can_id = 0x123,
 							  .dlc = 8,
@@ -143,7 +143,7 @@ static void test_hal_can_send_null_handle(void)
 }
 
 /* 测试用例: CAN发送 - 空帧 */
-static void test_hal_can_send_null_frame(void)
+static void _test_hal_can_send_null_frame(void)
 {
 	hal_can_handle_t handle = NULL;
 	hal_can_config_t config = { .interface = "can0",
@@ -161,7 +161,7 @@ static void test_hal_can_send_null_frame(void)
 }
 
 /* 测试用例: CAN接收 - 超时 */
-static void test_hal_can_recv_timeout(void)
+static void _test_hal_can_recv_timeout(void)
 {
 	hal_can_handle_t handle = NULL;
 	hal_can_config_t config = { .interface = "can0",
@@ -180,7 +180,7 @@ static void test_hal_can_recv_timeout(void)
 }
 
 /* 测试用例: CAN接收 - 空句柄 */
-static void test_hal_can_recv_null_handle(void)
+static void _test_hal_can_recv_null_handle(void)
 {
 	hal_can_frame_t frame;
 
@@ -189,7 +189,7 @@ static void test_hal_can_recv_null_handle(void)
 }
 
 /* 测试用例: CAN接收 - 空帧 */
-static void test_hal_can_recv_null_frame(void)
+static void _test_hal_can_recv_null_frame(void)
 {
 	hal_can_handle_t handle = NULL;
 	hal_can_config_t config = { .interface = "can0",
@@ -207,7 +207,7 @@ static void test_hal_can_recv_null_frame(void)
 }
 
 /* 测试用例: CAN发送接收回环 */
-static void test_hal_can_loopback(void)
+static void _test_hal_can_loopback(void)
 {
 	hal_can_handle_t handle = NULL;
 	hal_can_config_t config = { .interface = "can0",
@@ -246,7 +246,7 @@ static void test_hal_can_loopback(void)
  *===========================================================================*/
 
 /* 测试用例: 设置过滤器 - 成功 */
-static void test_hal_can_set_filter_success(void)
+static void _test_hal_can_set_filter_success(void)
 {
 	hal_can_handle_t handle = NULL;
 	hal_can_config_t config = { .interface = "can0",
@@ -264,7 +264,7 @@ static void test_hal_can_set_filter_success(void)
 }
 
 /* 测试用例: 设置过滤器 - 空句柄 */
-static void test_hal_can_set_filter_null_handle(void)
+static void _test_hal_can_set_filter_null_handle(void)
 {
 	int32_t ret = hal_can_set_filter(NULL, 0x100, 0x7FF);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
@@ -281,7 +281,7 @@ static void test_hal_can_set_filter_null_handle(void)
  *===========================================================================*/
 
 /* 测试用例: 不同波特率 */
-static void test_hal_can_different_baudrate(void)
+static void _test_hal_can_different_baudrate(void)
 {
 	hal_can_handle_t handle = NULL;
 	hal_can_config_t config = { .interface = "can0",
@@ -300,7 +300,7 @@ static void test_hal_can_different_baudrate(void)
  *===========================================================================*/
 
 /* 测试用例: CAN仅发送 - 标准帧 */
-static void test_can_send_only(void)
+static void _test_can_send_only(void)
 {
 	hal_can_handle_t handle = NULL;
 	hal_can_config_t config = { .interface = "can0",
@@ -366,7 +366,7 @@ static void test_can_send_only(void)
  *===========================================================================*/
 
 /* 测试用例: CAN仅接收 - 带过滤器 */
-static void test_can_receive_only(void)
+static void _test_can_receive_only(void)
 {
 	hal_can_handle_t handle = NULL;
 	hal_can_config_t config = { .interface = "can0",
@@ -434,7 +434,7 @@ static void test_can_receive_only(void)
  *===========================================================================*/
 
 /* 测试用例: CAN最大数据长度 */
-static void test_hal_can_max_data_length(void)
+static void _test_hal_can_max_data_length(void)
 {
 	hal_can_handle_t handle = NULL;
 	hal_can_config_t config = { .interface = "can0",
@@ -458,7 +458,7 @@ static void test_hal_can_max_data_length(void)
 }
 
 /* 测试用例: CAN最小数据长度 */
-static void test_hal_can_min_data_length(void)
+static void _test_hal_can_min_data_length(void)
 {
 	hal_can_handle_t handle = NULL;
 	hal_can_config_t config = { .interface = "can0",
@@ -479,7 +479,7 @@ static void test_hal_can_min_data_length(void)
 }
 
 /* 测试用例: CAN扩展帧ID */
-static void test_hal_can_extended_id(void)
+static void _test_hal_can_extended_id(void)
 {
 	hal_can_handle_t handle = NULL;
 	hal_can_config_t config = { .interface = "can0",
@@ -504,7 +504,7 @@ static void test_hal_can_extended_id(void)
 }
 
 /* 测试用例: CAN标准帧ID边界 */
-static void test_hal_can_standard_id_boundary(void)
+static void _test_hal_can_standard_id_boundary(void)
 {
 	hal_can_handle_t handle = NULL;
 	hal_can_config_t config = { .interface = "can0",
@@ -529,7 +529,7 @@ static void test_hal_can_standard_id_boundary(void)
 }
 
 /* 测试用例: CAN不同波特率 */
-static void test_hal_can_various_baudrates(void)
+static void _test_hal_can_various_baudrates(void)
 {
 	hal_can_handle_t handle = NULL;
 	hal_can_config_t config = { .interface = "can0",
@@ -559,7 +559,7 @@ static void test_hal_can_various_baudrates(void)
 }
 
 /* 测试用例: CAN连续发送多帧 */
-static void test_hal_can_burst_send(void)
+static void _test_hal_can_burst_send(void)
 {
 	hal_can_handle_t handle = NULL;
 	hal_can_config_t config = { .interface = "can0",
@@ -588,7 +588,7 @@ static void test_hal_can_burst_send(void)
 }
 
 /* 测试用例: CAN过滤器边界值 */
-static void test_hal_can_filter_boundary(void)
+static void _test_hal_can_filter_boundary(void)
 {
 	hal_can_handle_t handle = NULL;
 	hal_can_config_t config = { .interface = "can0",
@@ -611,7 +611,7 @@ static void test_hal_can_filter_boundary(void)
 }
 
 /* 测试用例: CAN零超时发送 */
-static void test_hal_can_zero_timeout_send(void)
+static void _test_hal_can_zero_timeout_send(void)
 {
 	hal_can_handle_t handle = NULL;
 	hal_can_config_t config = {
@@ -649,107 +649,107 @@ static void test_hal_can_zero_timeout_send(void)
 /* 测试用例数组 - 使用函数指针数组 */
 static const test_case_t test_cases[] = {
 	{ .name = "test_hal_can_init_success",
-	  .func = test_hal_can_init_success,
+	  .func = _test_hal_can_init_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_can_init_null_config",
-	  .func = test_hal_can_init_null_config,
+	  .func = _test_hal_can_init_null_config,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_can_init_null_handle",
-	  .func = test_hal_can_init_null_handle,
+	  .func = _test_hal_can_init_null_handle,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_can_init_invalid_interface",
-	  .func = test_hal_can_init_invalid_interface,
+	  .func = _test_hal_can_init_invalid_interface,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_can_deinit",
-	  .func = test_hal_can_deinit,
+	  .func = _test_hal_can_deinit,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_can_deinit_null_handle",
-	  .func = test_hal_can_deinit_null_handle,
+	  .func = _test_hal_can_deinit_null_handle,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_can_send_success",
-	  .func = test_hal_can_send_success,
+	  .func = _test_hal_can_send_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_can_send_null_handle",
-	  .func = test_hal_can_send_null_handle,
+	  .func = _test_hal_can_send_null_handle,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_can_send_null_frame",
-	  .func = test_hal_can_send_null_frame,
+	  .func = _test_hal_can_send_null_frame,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_can_recv_timeout",
-	  .func = test_hal_can_recv_timeout,
+	  .func = _test_hal_can_recv_timeout,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_can_recv_null_handle",
-	  .func = test_hal_can_recv_null_handle,
+	  .func = _test_hal_can_recv_null_handle,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_can_recv_null_frame",
-	  .func = test_hal_can_recv_null_frame,
+	  .func = _test_hal_can_recv_null_frame,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_can_loopback",
-	  .func = test_hal_can_loopback,
+	  .func = _test_hal_can_loopback,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_can_set_filter_success",
-	  .func = test_hal_can_set_filter_success,
+	  .func = _test_hal_can_set_filter_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_can_set_filter_null_handle",
-	  .func = test_hal_can_set_filter_null_handle,
+	  .func = _test_hal_can_set_filter_null_handle,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_can_different_baudrate",
-	  .func = test_hal_can_different_baudrate,
+	  .func = _test_hal_can_different_baudrate,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_can_send_only",
-	  .func = test_can_send_only,
+	  .func = _test_can_send_only,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_can_receive_only",
-	  .func = test_can_receive_only,
+	  .func = _test_can_receive_only,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_can_max_data_length",
-	  .func = test_hal_can_max_data_length,
+	  .func = _test_hal_can_max_data_length,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_can_min_data_length",
-	  .func = test_hal_can_min_data_length,
+	  .func = _test_hal_can_min_data_length,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_can_extended_id",
-	  .func = test_hal_can_extended_id,
+	  .func = _test_hal_can_extended_id,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_can_standard_id_boundary",
-	  .func = test_hal_can_standard_id_boundary,
+	  .func = _test_hal_can_standard_id_boundary,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_can_various_baudrates",
-	  .func = test_hal_can_various_baudrates,
+	  .func = _test_hal_can_various_baudrates,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_can_burst_send",
-	  .func = test_hal_can_burst_send,
+	  .func = _test_hal_can_burst_send,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_can_filter_boundary",
-	  .func = test_hal_can_filter_boundary,
+	  .func = _test_hal_can_filter_boundary,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_can_zero_timeout_send",
-	  .func = test_hal_can_zero_timeout_send,
+	  .func = _test_hal_can_zero_timeout_send,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

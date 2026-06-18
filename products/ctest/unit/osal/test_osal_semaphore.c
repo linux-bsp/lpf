@@ -12,7 +12,7 @@
 static int32_t shared_counter = 0;
 
 /* 测试用例1: 信号量初始化成功 */
-static void test_semaphore_init_success(void)
+static void _test_semaphore_init_success(void)
 {
 	osal_sem_t sem;
 
@@ -24,7 +24,7 @@ static void test_semaphore_init_success(void)
 }
 
 /* 测试用例2: 信号量初始化失败 - 空指针 */
-static void test_semaphore_init_nullpointer(void)
+static void _test_semaphore_init_nullpointer(void)
 {
 	int32_t ret = osal_sem_init(NULL, 0, 1);
 	TEST_ASSERT_EQUAL(-1, ret);
@@ -32,7 +32,7 @@ static void test_semaphore_init_nullpointer(void)
 }
 
 /* 测试用例3: 信号量等待和释放 */
-static void test_semaphore_wait_post_success(void)
+static void _test_semaphore_wait_post_success(void)
 {
 	osal_sem_t sem;
 	osal_sem_init(&sem, 0, 1);
@@ -47,7 +47,7 @@ static void test_semaphore_wait_post_success(void)
 }
 
 /* 测试用例4: 信号量等待失败 - 空指针 */
-static void test_semaphore_wait_nullpointer(void)
+static void _test_semaphore_wait_nullpointer(void)
 {
 	int32_t ret = osal_sem_wait(NULL);
 	TEST_ASSERT_EQUAL(-1, ret);
@@ -55,7 +55,7 @@ static void test_semaphore_wait_nullpointer(void)
 }
 
 /* 测试用例5: 信号量释放失败 - 空指针 */
-static void test_semaphore_post_nullpointer(void)
+static void _test_semaphore_post_nullpointer(void)
 {
 	int32_t ret = osal_sem_post(NULL);
 	TEST_ASSERT_EQUAL(-1, ret);
@@ -63,7 +63,7 @@ static void test_semaphore_post_nullpointer(void)
 }
 
 /* 测试用例6: 信号量超时等待 - 超时 */
-static void test_semaphore_timedwait_timeout(void)
+static void _test_semaphore_timedwait_timeout(void)
 {
 	osal_sem_t sem;
 	osal_sem_init(&sem, 0, 0);
@@ -76,7 +76,7 @@ static void test_semaphore_timedwait_timeout(void)
 }
 
 /* 测试用例7: 信号量超时等待 - 成功 */
-static void test_semaphore_timedwait_success(void)
+static void _test_semaphore_timedwait_success(void)
 {
 	osal_sem_t sem;
 	osal_sem_init(&sem, 0, 1);
@@ -88,7 +88,7 @@ static void test_semaphore_timedwait_success(void)
 }
 
 /* 测试用例8: 信号量非阻塞等待 - 失败（信号量为0）*/
-static void test_semaphore_trywait_fail(void)
+static void _test_semaphore_trywait_fail(void)
 {
 	osal_sem_t sem;
 	osal_sem_init(&sem, 0, 0);
@@ -101,7 +101,7 @@ static void test_semaphore_trywait_fail(void)
 }
 
 /* 测试用例9: 信号量非阻塞等待 - 成功 */
-static void test_semaphore_trywait_success(void)
+static void _test_semaphore_trywait_success(void)
 {
 	osal_sem_t sem;
 	osal_sem_init(&sem, 0, 1);
@@ -113,7 +113,7 @@ static void test_semaphore_trywait_success(void)
 }
 
 /* 测试用例10: 信号量获取值 */
-static void test_semaphore_getvalue(void)
+static void _test_semaphore_getvalue(void)
 {
 	osal_sem_t sem;
 	int32_t value;
@@ -128,7 +128,7 @@ static void test_semaphore_getvalue(void)
 }
 
 /* 测试用例11: 信号量销毁 */
-static void test_semaphore_destroy_success(void)
+static void _test_semaphore_destroy_success(void)
 {
 	osal_sem_t sem;
 	osal_sem_init(&sem, 0, 1);
@@ -138,7 +138,7 @@ static void test_semaphore_destroy_success(void)
 }
 
 /* 测试用例12: 信号量销毁失败 - 空指针 */
-static void test_semaphore_destroy_nullpointer(void)
+static void _test_semaphore_destroy_nullpointer(void)
 {
 	int32_t ret = osal_sem_destroy(NULL);
 	TEST_ASSERT_EQUAL(-1, ret);
@@ -146,7 +146,7 @@ static void test_semaphore_destroy_nullpointer(void)
 }
 
 /* 生产者线程 */
-static void *producer_thread(void *arg)
+static void *_producer_thread(void *arg)
 {
 	osal_sem_t *sem = (osal_sem_t *)arg;
 
@@ -162,7 +162,7 @@ static void *producer_thread(void *arg)
 }
 
 /* 消费者线程 */
-static void *consumer_thread(void *arg)
+static void *_consumer_thread(void *arg)
 {
 	osal_sem_t *sem = (osal_sem_t *)arg;
 
@@ -177,7 +177,7 @@ static void *consumer_thread(void *arg)
 }
 
 /* 测试用例13: 信号量生产者-消费者模式 */
-static void test_semaphore_producer_consumer(void)
+static void _test_semaphore_producer_consumer(void)
 {
 	shared_counter = 0;
 	osal_sem_t sem;
@@ -186,8 +186,8 @@ static void test_semaphore_producer_consumer(void)
 	osal_thread_t producer, consumer;
 
 	/* 创建生产者和消费者线程 */
-	osal_pthread_create(&producer, NULL, producer_thread, &sem);
-	osal_pthread_create(&consumer, NULL, consumer_thread, &sem);
+	osal_pthread_create(&producer, NULL, _producer_thread, &sem);
+	osal_pthread_create(&consumer, NULL, _consumer_thread, &sem);
 
 	/* 等待线程完成 */
 	osal_pthread_join(producer, NULL);
@@ -204,55 +204,55 @@ static void test_semaphore_producer_consumer(void)
 /* 测试用例数组 - 使用函数指针数组 */
 static const test_case_t test_cases[] = {
 	{ .name = "test_semaphore_init_success",
-	  .func = test_semaphore_init_success,
+	  .func = _test_semaphore_init_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_semaphore_init_nullpointer",
-	  .func = test_semaphore_init_nullpointer,
+	  .func = _test_semaphore_init_nullpointer,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_semaphore_wait_post_success",
-	  .func = test_semaphore_wait_post_success,
+	  .func = _test_semaphore_wait_post_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_semaphore_wait_nullpointer",
-	  .func = test_semaphore_wait_nullpointer,
+	  .func = _test_semaphore_wait_nullpointer,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_semaphore_post_nullpointer",
-	  .func = test_semaphore_post_nullpointer,
+	  .func = _test_semaphore_post_nullpointer,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_semaphore_timedwait_timeout",
-	  .func = test_semaphore_timedwait_timeout,
+	  .func = _test_semaphore_timedwait_timeout,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_semaphore_timedwait_success",
-	  .func = test_semaphore_timedwait_success,
+	  .func = _test_semaphore_timedwait_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_semaphore_trywait_fail",
-	  .func = test_semaphore_trywait_fail,
+	  .func = _test_semaphore_trywait_fail,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_semaphore_trywait_success",
-	  .func = test_semaphore_trywait_success,
+	  .func = _test_semaphore_trywait_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_semaphore_getvalue",
-	  .func = test_semaphore_getvalue,
+	  .func = _test_semaphore_getvalue,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_semaphore_destroy_success",
-	  .func = test_semaphore_destroy_success,
+	  .func = _test_semaphore_destroy_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_semaphore_destroy_nullpointer",
-	  .func = test_semaphore_destroy_nullpointer,
+	  .func = _test_semaphore_destroy_nullpointer,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_semaphore_producer_consumer",
-	  .func = test_semaphore_producer_consumer,
+	  .func = _test_semaphore_producer_consumer,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

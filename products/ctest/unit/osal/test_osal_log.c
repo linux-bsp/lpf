@@ -14,7 +14,7 @@
  *===========================================================================*/
 
 /* 测试用例: 日志初始化 - 成功 */
-static void test_osal_log_init_success(void)
+static void _test_osal_log_init_success(void)
 {
 	int32_t ret;
 
@@ -32,7 +32,7 @@ static void test_osal_log_init_success(void)
 }
 
 /* 测试用例: 日志初始化 - 空路径（仅终端输出） */
-static void test_osal_log_init_null_path(void)
+static void _test_osal_log_init_null_path(void)
 {
 	int32_t ret;
 
@@ -45,7 +45,7 @@ static void test_osal_log_init_null_path(void)
 }
 
 /* 测试用例: 日志初始化 - 不同级别 */
-static void test_osal_log_init_different_levels(void)
+static void _test_osal_log_init_different_levels(void)
 {
 	int32_t ret;
 
@@ -72,7 +72,7 @@ static void test_osal_log_init_different_levels(void)
  *===========================================================================*/
 
 /* 测试用例: 日志写入 - 基本功能 */
-static void test_osal_log_write_basic(void)
+static void _test_osal_log_write_basic(void)
 {
 	int32_t ret;
 
@@ -93,7 +93,7 @@ static void test_osal_log_write_basic(void)
 }
 
 /* 测试用例: 日志写入 - 格式化 */
-static void test_osal_log_write_formatted(void)
+static void _test_osal_log_write_formatted(void)
 {
 	int32_t ret;
 
@@ -111,7 +111,7 @@ static void test_osal_log_write_formatted(void)
 }
 
 /* 测试用例: 日志写入 - 长消息 */
-static void test_osal_log_write_long_message(void)
+static void _test_osal_log_write_long_message(void)
 {
 	int32_t ret;
 	char long_msg[512];
@@ -137,7 +137,7 @@ static void test_osal_log_write_long_message(void)
  *===========================================================================*/
 
 /* 测试用例: 设置日志级别 */
-static void test_osal_log_set_level(void)
+static void _test_osal_log_set_level(void)
 {
 	int32_t ret;
 
@@ -173,7 +173,7 @@ static void test_osal_log_set_level(void)
  *===========================================================================*/
 
 /* 测试用例: 日志轮转 - 基本功能 */
-static void test_osal_log_rotation_basic(void)
+static void _test_osal_log_rotation_basic(void)
 {
 	int32_t ret;
 
@@ -206,7 +206,7 @@ static void test_osal_log_rotation_basic(void)
  *===========================================================================*/
 
 /* 测试用例: Printf - 简单打印 */
-static void test_osal_printf(void)
+static void _test_osal_printf(void)
 {
 	int32_t ret;
 
@@ -230,7 +230,7 @@ static void test_osal_printf(void)
 /* 测试任务函数 */
 static volatile bool g_log_test_running = true;
 
-static void *log_test_task(void *arg)
+static void *_log_test_task(void *arg)
 {
 	int32_t task_id = *(int32_t *)arg;
 
@@ -244,7 +244,7 @@ static void *log_test_task(void *arg)
 }
 
 /* 测试用例: 多线程日志写入 */
-static void test_osal_log_multithread(void)
+static void _test_osal_log_multithread(void)
 {
 	int32_t ret;
 	osal_thread_t task_ids[3];
@@ -260,7 +260,7 @@ static void test_osal_log_multithread(void)
 	int32_t i;
 
 	for (i = 0; i < 3; i++) {
-		ret = osal_pthread_create(&task_ids[i], NULL, log_test_task,
+		ret = osal_pthread_create(&task_ids[i], NULL, _log_test_task,
 								  &task_args[i]);
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	}
@@ -284,7 +284,7 @@ static void test_osal_log_multithread(void)
  *===========================================================================*/
 
 /* 测试用例: 未初始化时写入日志 */
-static void test_osal_log_write_without_init(void)
+static void _test_osal_log_write_without_init(void)
 {
 	/* 跳过此测试：当前OSAL日志实现在未初始化时调用LOG_INFO会导致段错误
      * 原因：log_internal_ex函数使用pthread_mutex_lock但没有检查初始化状态
@@ -295,7 +295,7 @@ static void test_osal_log_write_without_init(void)
 }
 
 /* 测试用例: 重复初始化 */
-static void test_osal_log_init_twice(void)
+static void _test_osal_log_init_twice(void)
 {
 	/* 跳过此测试：重复调用OSAL_LogInit会导致文件描述符泄漏和状态损坏
      * 原因：OSAL_LogInit不检查是否已初始化，直接打开新文件而不关闭旧文件
@@ -305,7 +305,7 @@ static void test_osal_log_init_twice(void)
 }
 
 /* 测试用例: 重复清理 */
-static void test_osal_log_shutdown_twice(void)
+static void _test_osal_log_shutdown_twice(void)
 {
 	/* 跳过此测试：重复调用OSAL_LogShutdown后，后续测试可能因状态不一致导致段错误
      * 原因：OSAL_LogShutdown只关闭文件但不清理全局状态，可能影响后续测试
@@ -320,7 +320,7 @@ static void test_osal_log_shutdown_twice(void)
  *===========================================================================*/
 
 /* 测试用例: 日志写入性能 */
-static void test_osal_log_performance(void)
+static void _test_osal_log_performance(void)
 {
 	int32_t ret;
 	uint64_t start_time, end_time;
@@ -367,59 +367,59 @@ static void test_osal_log_performance(void)
 /* 测试用例数组 - 使用函数指针数组 */
 static const test_case_t test_cases[] = {
 	{ .name = "test_osal_log_init_success",
-	  .func = test_osal_log_init_success,
+	  .func = _test_osal_log_init_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_log_init_null_path",
-	  .func = test_osal_log_init_null_path,
+	  .func = _test_osal_log_init_null_path,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_log_init_different_levels",
-	  .func = test_osal_log_init_different_levels,
+	  .func = _test_osal_log_init_different_levels,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_log_write_basic",
-	  .func = test_osal_log_write_basic,
+	  .func = _test_osal_log_write_basic,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_log_write_formatted",
-	  .func = test_osal_log_write_formatted,
+	  .func = _test_osal_log_write_formatted,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_log_write_long_message",
-	  .func = test_osal_log_write_long_message,
+	  .func = _test_osal_log_write_long_message,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_log_set_level",
-	  .func = test_osal_log_set_level,
+	  .func = _test_osal_log_set_level,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_log_rotation_basic",
-	  .func = test_osal_log_rotation_basic,
+	  .func = _test_osal_log_rotation_basic,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_printf",
-	  .func = test_osal_printf,
+	  .func = _test_osal_printf,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_log_multithread",
-	  .func = test_osal_log_multithread,
+	  .func = _test_osal_log_multithread,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_log_write_without_init",
-	  .func = test_osal_log_write_without_init,
+	  .func = _test_osal_log_write_without_init,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_log_init_twice",
-	  .func = test_osal_log_init_twice,
+	  .func = _test_osal_log_init_twice,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_log_shutdown_twice",
-	  .func = test_osal_log_shutdown_twice,
+	  .func = _test_osal_log_shutdown_twice,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_log_performance",
-	  .func = test_osal_log_performance,
+	  .func = _test_osal_log_performance,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

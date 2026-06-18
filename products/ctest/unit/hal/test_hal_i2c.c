@@ -12,7 +12,7 @@
  *===========================================================================*/
 
 /* 测试用例: I2C打开 - 成功 */
-static void test_hal_i2c_open_success(void)
+static void _test_hal_i2c_open_success(void)
 {
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 1000 };
@@ -30,7 +30,7 @@ static void test_hal_i2c_open_success(void)
 }
 
 /* 测试用例: I2C打开 - 空配置 */
-static void test_hal_i2c_open_null_config(void)
+static void _test_hal_i2c_open_null_config(void)
 {
 	hal_i2c_handle_t handle = NULL;
 
@@ -39,7 +39,7 @@ static void test_hal_i2c_open_null_config(void)
 }
 
 /* 测试用例: I2C打开 - 空句柄 */
-static void test_hal_i2c_open_null_handle(void)
+static void _test_hal_i2c_open_null_handle(void)
 {
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 1000 };
 
@@ -48,7 +48,7 @@ static void test_hal_i2c_open_null_handle(void)
 }
 
 /* 测试用例: I2C打开 - 无效设备 */
-static void test_hal_i2c_open_invalid_device(void)
+static void _test_hal_i2c_open_invalid_device(void)
 {
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-999", .timeout = 1000 };
@@ -58,7 +58,7 @@ static void test_hal_i2c_open_invalid_device(void)
 }
 
 /* 测试用例: I2C关闭 */
-static void test_hal_i2c_close(void)
+static void _test_hal_i2c_close(void)
 {
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 1000 };
@@ -73,7 +73,7 @@ static void test_hal_i2c_close(void)
 }
 
 /* 测试用例: I2C关闭 - 空句柄 */
-static void test_hal_i2c_close_null_handle(void)
+static void _test_hal_i2c_close_null_handle(void)
 {
 	int32_t ret = hal_i2c_close(NULL);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
@@ -84,7 +84,7 @@ static void test_hal_i2c_close_null_handle(void)
  *===========================================================================*/
 
 /* 测试用例: I2C写入 - 空句柄 */
-static void test_hal_i2c_write_null_handle(void)
+static void _test_hal_i2c_write_null_handle(void)
 {
 	uint8_t buffer[4] = { 0x01, 0x02, 0x03, 0x04 };
 
@@ -93,7 +93,7 @@ static void test_hal_i2c_write_null_handle(void)
 }
 
 /* 测试用例: I2C写入 - 空缓冲区 */
-static void test_hal_i2c_write_null_buffer(void)
+static void _test_hal_i2c_write_null_buffer(void)
 {
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 1000 };
@@ -110,7 +110,7 @@ static void test_hal_i2c_write_null_buffer(void)
 }
 
 /* 测试用例: I2C读取 - 空句柄 */
-static void test_hal_i2c_read_null_handle(void)
+static void _test_hal_i2c_read_null_handle(void)
 {
 	uint8_t buffer[4];
 
@@ -119,7 +119,7 @@ static void test_hal_i2c_read_null_handle(void)
 }
 
 /* 测试用例: I2C读取 - 空缓冲区 */
-static void test_hal_i2c_read_null_buffer(void)
+static void _test_hal_i2c_read_null_buffer(void)
 {
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 1000 };
@@ -140,7 +140,7 @@ static void test_hal_i2c_read_null_buffer(void)
  *===========================================================================*/
 
 /* 测试用例: I2C写寄存器 - 空句柄 */
-static void test_hal_i2c_write_reg_null_handle(void)
+static void _test_hal_i2c_write_reg_null_handle(void)
 {
 	uint8_t buffer[4] = { 0x01, 0x02, 0x03, 0x04 };
 
@@ -150,7 +150,7 @@ static void test_hal_i2c_write_reg_null_handle(void)
 }
 
 /* 测试用例: I2C写寄存器 - 空缓冲区 */
-static void test_hal_i2c_write_reg_null_buffer(void)
+static void _test_hal_i2c_write_reg_null_buffer(void)
 {
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 1000 };
@@ -167,7 +167,7 @@ static void test_hal_i2c_write_reg_null_buffer(void)
 }
 
 /* 测试用例: I2C读寄存器 - 空句柄 */
-static void test_hal_i2c_read_reg_null_handle(void)
+static void _test_hal_i2c_read_reg_null_handle(void)
 {
 	uint8_t buffer[4];
 
@@ -177,7 +177,7 @@ static void test_hal_i2c_read_reg_null_handle(void)
 }
 
 /* 测试用例: I2C读寄存器 - 空缓冲区 */
-static void test_hal_i2c_read_reg_null_buffer(void)
+static void _test_hal_i2c_read_reg_null_buffer(void)
 {
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 1000 };
@@ -198,7 +198,7 @@ static void test_hal_i2c_read_reg_null_buffer(void)
  *===========================================================================*/
 
 /* 测试用例: I2C传输 - 空句柄 */
-static void test_hal_i2c_transfer_null_handle(void)
+static void _test_hal_i2c_transfer_null_handle(void)
 {
 	uint8_t buffer[4] = { 0x01, 0x02, 0x03, 0x04 };
 	hal_i2c_msg_t msg = {
@@ -210,7 +210,7 @@ static void test_hal_i2c_transfer_null_handle(void)
 }
 
 /* 测试用例: I2C传输 - 空消息 */
-static void test_hal_i2c_transfer_null_msgs(void)
+static void _test_hal_i2c_transfer_null_msgs(void)
 {
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 1000 };
@@ -231,7 +231,7 @@ static void test_hal_i2c_transfer_null_msgs(void)
  *===========================================================================*/
 
 /* 测试用例: I2C最小从机地址 */
-static void test_hal_i2c_min_slave_address(void)
+static void _test_hal_i2c_min_slave_address(void)
 {
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 1000 };
@@ -250,7 +250,7 @@ static void test_hal_i2c_min_slave_address(void)
 }
 
 /* 测试用例: I2C最大从机地址 */
-static void test_hal_i2c_max_slave_address(void)
+static void _test_hal_i2c_max_slave_address(void)
 {
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 1000 };
@@ -269,7 +269,7 @@ static void test_hal_i2c_max_slave_address(void)
 }
 
 /* 测试用例: I2C大数据写入 */
-static void test_hal_i2c_large_write(void)
+static void _test_hal_i2c_large_write(void)
 {
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 5000 };
@@ -292,7 +292,7 @@ static void test_hal_i2c_large_write(void)
 }
 
 /* 测试用例: I2C大数据读取 */
-static void test_hal_i2c_large_read(void)
+static void _test_hal_i2c_large_read(void)
 {
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 5000 };
@@ -311,7 +311,7 @@ static void test_hal_i2c_large_read(void)
 }
 
 /* 测试用例: I2C零长度传输 */
-static void test_hal_i2c_zero_length_transfer(void)
+static void _test_hal_i2c_zero_length_transfer(void)
 {
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 1000 };
@@ -335,7 +335,7 @@ static void test_hal_i2c_zero_length_transfer(void)
 }
 
 /* 测试用例: I2C寄存器连续写入 */
-static void test_hal_i2c_register_burst_write(void)
+static void _test_hal_i2c_register_burst_write(void)
 {
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 1000 };
@@ -356,7 +356,7 @@ static void test_hal_i2c_register_burst_write(void)
 }
 
 /* 测试用例: I2C寄存器连续读取 */
-static void test_hal_i2c_register_burst_read(void)
+static void _test_hal_i2c_register_burst_read(void)
 {
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 1000 };
@@ -377,7 +377,7 @@ static void test_hal_i2c_register_burst_read(void)
 }
 
 /* 测试用例: I2C多消息传输 */
-static void test_hal_i2c_multi_message_transfer(void)
+static void _test_hal_i2c_multi_message_transfer(void)
 {
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 1000 };
@@ -407,7 +407,7 @@ static void test_hal_i2c_multi_message_transfer(void)
 }
 
 /* 测试用例: I2C不同超时值 */
-static void test_hal_i2c_different_timeouts(void)
+static void _test_hal_i2c_different_timeouts(void)
 {
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = {
@@ -446,103 +446,103 @@ static void test_hal_i2c_different_timeouts(void)
 /* 测试用例数组 - 使用函数指针数组 */
 static const test_case_t test_cases[] = {
 	{ .name = "test_hal_i2c_open_success",
-	  .func = test_hal_i2c_open_success,
+	  .func = _test_hal_i2c_open_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_i2c_open_null_config",
-	  .func = test_hal_i2c_open_null_config,
+	  .func = _test_hal_i2c_open_null_config,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_i2c_open_null_handle",
-	  .func = test_hal_i2c_open_null_handle,
+	  .func = _test_hal_i2c_open_null_handle,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_i2c_open_invalid_device",
-	  .func = test_hal_i2c_open_invalid_device,
+	  .func = _test_hal_i2c_open_invalid_device,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_i2c_close",
-	  .func = test_hal_i2c_close,
+	  .func = _test_hal_i2c_close,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_i2c_close_null_handle",
-	  .func = test_hal_i2c_close_null_handle,
+	  .func = _test_hal_i2c_close_null_handle,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_i2c_write_null_handle",
-	  .func = test_hal_i2c_write_null_handle,
+	  .func = _test_hal_i2c_write_null_handle,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_i2c_write_null_buffer",
-	  .func = test_hal_i2c_write_null_buffer,
+	  .func = _test_hal_i2c_write_null_buffer,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_i2c_read_null_handle",
-	  .func = test_hal_i2c_read_null_handle,
+	  .func = _test_hal_i2c_read_null_handle,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_i2c_read_null_buffer",
-	  .func = test_hal_i2c_read_null_buffer,
+	  .func = _test_hal_i2c_read_null_buffer,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_i2c_write_reg_null_handle",
-	  .func = test_hal_i2c_write_reg_null_handle,
+	  .func = _test_hal_i2c_write_reg_null_handle,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_i2c_write_reg_null_buffer",
-	  .func = test_hal_i2c_write_reg_null_buffer,
+	  .func = _test_hal_i2c_write_reg_null_buffer,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_i2c_read_reg_null_handle",
-	  .func = test_hal_i2c_read_reg_null_handle,
+	  .func = _test_hal_i2c_read_reg_null_handle,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_i2c_read_reg_null_buffer",
-	  .func = test_hal_i2c_read_reg_null_buffer,
+	  .func = _test_hal_i2c_read_reg_null_buffer,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_i2c_transfer_null_handle",
-	  .func = test_hal_i2c_transfer_null_handle,
+	  .func = _test_hal_i2c_transfer_null_handle,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_i2c_transfer_null_msgs",
-	  .func = test_hal_i2c_transfer_null_msgs,
+	  .func = _test_hal_i2c_transfer_null_msgs,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_i2c_min_slave_address",
-	  .func = test_hal_i2c_min_slave_address,
+	  .func = _test_hal_i2c_min_slave_address,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_i2c_max_slave_address",
-	  .func = test_hal_i2c_max_slave_address,
+	  .func = _test_hal_i2c_max_slave_address,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_i2c_large_write",
-	  .func = test_hal_i2c_large_write,
+	  .func = _test_hal_i2c_large_write,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_i2c_large_read",
-	  .func = test_hal_i2c_large_read,
+	  .func = _test_hal_i2c_large_read,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_i2c_zero_length_transfer",
-	  .func = test_hal_i2c_zero_length_transfer,
+	  .func = _test_hal_i2c_zero_length_transfer,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_i2c_register_burst_write",
-	  .func = test_hal_i2c_register_burst_write,
+	  .func = _test_hal_i2c_register_burst_write,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_i2c_register_burst_read",
-	  .func = test_hal_i2c_register_burst_read,
+	  .func = _test_hal_i2c_register_burst_read,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_i2c_multi_message_transfer",
-	  .func = test_hal_i2c_multi_message_transfer,
+	  .func = _test_hal_i2c_multi_message_transfer,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_i2c_different_timeouts",
-	  .func = test_hal_i2c_different_timeouts,
+	  .func = _test_hal_i2c_different_timeouts,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

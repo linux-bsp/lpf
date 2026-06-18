@@ -11,7 +11,7 @@
 /**
  * 测试CAN发送性能
  */
-static void test_perf_can_send(void)
+static void _test_perf_can_send(void)
 {
 	// TODO: 实现CAN发送性能测试
 	osal_printf("[ INFO ] CAN send performance test - not implemented yet\n");
@@ -20,7 +20,7 @@ static void test_perf_can_send(void)
 /**
  * 测试UART发送性能
  */
-static void test_perf_uart_send(void)
+static void _test_perf_uart_send(void)
 {
 	// TODO: 实现UART发送性能测试
 	osal_printf("[ INFO ] UART send performance test - not implemented yet\n");
@@ -29,7 +29,7 @@ static void test_perf_uart_send(void)
 /**
  * 测试GPIO读写性能
  */
-static void test_perf_gpio_read_write(void)
+static void _test_perf_gpio_read_write(void)
 {
 	// TODO: 实现GPIO读写性能测试
 	osal_printf(
@@ -39,7 +39,7 @@ static void test_perf_gpio_read_write(void)
 /**
  * 测试I2C传输性能
  */
-static void test_perf_i2c_transfer(void)
+static void _test_perf_i2c_transfer(void)
 {
 	// TODO: 实现I2C传输性能测试
 	osal_printf(
@@ -49,7 +49,7 @@ static void test_perf_i2c_transfer(void)
 /**
  * 测试SPI传输性能
  */
-static void test_perf_spi_transfer(void)
+static void _test_perf_spi_transfer(void)
 {
 	// TODO: 实现SPI传输性能测试
 	osal_printf(
@@ -61,23 +61,23 @@ static void test_perf_spi_transfer(void)
 /* 测试用例数组 - 使用函数指针数组 */
 static const test_case_t test_cases[] = {
 	{ .name = "test_perf_can_send",
-	  .func = test_perf_can_send,
+	  .func = _test_perf_can_send,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_perf_uart_send",
-	  .func = test_perf_uart_send,
+	  .func = _test_perf_uart_send,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_perf_gpio_read_write",
-	  .func = test_perf_gpio_read_write,
+	  .func = _test_perf_gpio_read_write,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_perf_i2c_transfer",
-	  .func = test_perf_i2c_transfer,
+	  .func = _test_perf_i2c_transfer,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_perf_spi_transfer",
-	  .func = test_perf_spi_transfer,
+	  .func = _test_perf_spi_transfer,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

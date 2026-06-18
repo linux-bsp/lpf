@@ -31,7 +31,8 @@ typedef struct {
 /**
  * Worker for rapid I2C transactions
  */
-static int32_t i2c_rapid_transaction_worker(void *user_data, uint32_t iteration)
+static int32_t _i2c_rapid_transaction_worker(void *user_data,
+											 uint32_t iteration)
 {
 	i2c_worker_ctx_t *ctx = (i2c_worker_ctx_t *)user_data;
 	uint8_t write_data[16];
@@ -73,7 +74,7 @@ static int32_t i2c_rapid_transaction_worker(void *user_data, uint32_t iteration)
  * Test: Rapid I2C transactions
  * Verifies: transaction stability, error handling
  */
-static void test_stress_i2c_rapid_transactions(void)
+static void _test_stress_i2c_rapid_transactions(void)
 {
 	hal_i2c_handle_t handle = NULL;
 	osal_atomic_uint32_t transaction_counter;
@@ -110,7 +111,7 @@ static void test_stress_i2c_rapid_transactions(void)
 	TEST_ASSERT_NOT_NULL(stress_ctx);
 
 	/* Run stress test */
-	ret = stress_run(stress_ctx, i2c_rapid_transaction_worker, &worker_ctx);
+	ret = stress_run(stress_ctx, _i2c_rapid_transaction_worker, &worker_ctx);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* Wait for completion */
@@ -138,7 +139,7 @@ static void test_stress_i2c_rapid_transactions(void)
 /**
  * Worker for concurrent I2C access
  */
-static int32_t i2c_concurrent_worker(void *user_data, uint32_t iteration)
+static int32_t _i2c_concurrent_worker(void *user_data, uint32_t iteration)
 {
 	i2c_worker_ctx_t *ctx = (i2c_worker_ctx_t *)user_data;
 	uint8_t reg_addr = (uint8_t)(iteration % 256);
@@ -172,7 +173,7 @@ static int32_t i2c_concurrent_worker(void *user_data, uint32_t iteration)
  * Test: Concurrent I2C access from multiple threads
  * Verifies: bus arbitration, thread safety
  */
-static void test_stress_i2c_concurrent_access(void)
+static void _test_stress_i2c_concurrent_access(void)
 {
 	hal_i2c_handle_t handles[I2C_STRESS_THREAD_COUNT];
 	osal_atomic_uint32_t transaction_counter;
@@ -215,7 +216,7 @@ static void test_stress_i2c_concurrent_access(void)
 
 	/* Run stress test */
 	for (uint32_t i = 0; i < I2C_STRESS_THREAD_COUNT; i++) {
-		ret = stress_run(stress_ctx, i2c_concurrent_worker, &worker_ctx[i]);
+		ret = stress_run(stress_ctx, _i2c_concurrent_worker, &worker_ctx[i]);
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	}
 
@@ -247,7 +248,7 @@ static void test_stress_i2c_concurrent_access(void)
  * Test: I2C resource exhaustion (max handles)
  * Verifies: graceful failure, proper cleanup
  */
-static void test_stress_i2c_resource_exhaustion(void)
+static void _test_stress_i2c_resource_exhaustion(void)
 {
 	hal_i2c_handle_t handles[I2C_STRESS_MAX_HANDLES];
 	uint32_t opened_count = 0;
@@ -306,7 +307,7 @@ static void test_stress_i2c_resource_exhaustion(void)
  * Test: NAK/timeout handling under high transaction rate
  * Verifies: error recovery, no system hang
  */
-static void test_stress_i2c_nak_handling(void)
+static void _test_stress_i2c_nak_handling(void)
 {
 	hal_i2c_handle_t handle = NULL;
 	uint8_t data[8];
@@ -371,19 +372,19 @@ static void test_stress_i2c_nak_handling(void)
 
 static const test_case_t test_cases[] = {
 	{ .name = "test_stress_i2c_rapid_transactions",
-	  .func = test_stress_i2c_rapid_transactions,
+	  .func = _test_stress_i2c_rapid_transactions,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_i2c_concurrent_access",
-	  .func = test_stress_i2c_concurrent_access,
+	  .func = _test_stress_i2c_concurrent_access,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_i2c_resource_exhaustion",
-	  .func = test_stress_i2c_resource_exhaustion,
+	  .func = _test_stress_i2c_resource_exhaustion,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_i2c_nak_handling",
-	  .func = test_stress_i2c_nak_handling,
+	  .func = _test_stress_i2c_nak_handling,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

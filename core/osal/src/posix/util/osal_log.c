@@ -378,7 +378,7 @@ void osal_log_set_max_files(uint32_t max_files)
 /**
  * @brief 获取当前时间字符串
  */
-static void get_timestamp(char *buffer, osal_size_t size)
+static void _get_timestamp(char *buffer, osal_size_t size)
 {
 	struct timeval tv;
 	struct tm tm_info;
@@ -397,7 +397,7 @@ static void get_timestamp(char *buffer, osal_size_t size)
  *
  * 注意：调用此函数前必须持有 g_log_mutex
  */
-static void rotate_log_file(void)
+static void _rotate_log_file(void)
 {
 	char old_file[OSAL_LOG_FILENAME_SIZE];
 	char from[OSAL_LOG_FILENAME_SIZE], to[OSAL_LOG_FILENAME_SIZE];
@@ -464,7 +464,7 @@ static void rotate_log_file(void)
  *
  * 注意：调用此函数前必须持有 g_log_mutex
  */
-static void check_and_rotate_log(void)
+static void _check_and_rotate_log(void)
 {
 	int64_t file_size;
 	uint32_t max_size;
@@ -484,7 +484,7 @@ static void check_and_rotate_log(void)
 	pthread_mutex_lock(&g_log_mutex);
 
 	if (file_size > (int64_t)max_size) {
-		rotate_log_file();
+		_rotate_log_file();
 	}
 }
 
@@ -493,7 +493,7 @@ static void check_and_rotate_log(void)
  *
  * 注意：使用原子操作更新计数器，使用 config_mutex 保护配置读取
  */
-static bool should_log_message(const char *message)
+static bool _should_log_message(const char *message)
 {
 	uint64_t counter;
 	uint32_t sampling_rate;
@@ -534,7 +534,7 @@ static bool should_log_message(const char *message)
  *
  * 注意：使用 config_mutex 保护远程日志配置的读取
  */
-static void send_remote_log(const char *log_message)
+static void _send_remote_log(const char *log_message)
 {
 	int sock;
 	struct sockaddr_in addr;
@@ -563,7 +563,7 @@ static void send_remote_log(const char *log_message)
 /**
  * @brief 提取文件名（去掉路径）
  */
-static const char *extract_filename(const char *path)
+static const char *_extract_filename(const char *path)
 {
 	const char *filename = strrchr(path, '/');
 	return filename ? filename + 1 : path;
@@ -579,14 +579,14 @@ static const char *extract_filename(const char *path)
  *
  * 参考 spdlog 的两级过滤设计
  */
-static void log_internal_ex(log_level_t level, const char *module,
-							const char *file, const char *func, int32_t line,
-							const char *format, va_list args)
+static void _log_internal_ex(log_level_t level, const char *module,
+							 const char *file, const char *func, int32_t line,
+							 const char *format, va_list args)
 {
 	char timestamp[OSAL_LOG_TIMESTAMP_SIZE];
 	char message[OSAL_LOG_MESSAGE_SIZE];
 	char full_log[OSAL_LOG_MESSAGE_SIZE + 256];
-	const char *filename = extract_filename(file);
+	const char *filename = _extract_filename(file);
 	log_level_t current_level;
 
 	/* 快速路径：无锁读取日志级别（使用原子操作） */
@@ -597,20 +597,20 @@ static void log_internal_ex(log_level_t level, const char *module,
 		return;
 
 	/* 获取时间戳 */
-	get_timestamp(timestamp, OSAL_sizeof(timestamp));
+	_get_timestamp(timestamp, OSAL_sizeof(timestamp));
 
 	/* 延迟格式化：只有通过级别检查才进行格式化 */
 	vsnprintf(message, OSAL_sizeof(message), format, args);
 
 	/* 采样和过滤检查 */
-	if (!should_log_message(message))
+	if (!_should_log_message(message))
 		return;
 
 	/* 加锁（临界区：文件操作和控制台输出） */
 	pthread_mutex_lock(&g_log_mutex);
 
 	/* 检查并轮转日志文件 */
-	check_and_rotate_log();
+	_check_and_rotate_log();
 
 	/* 构造完整日志 */
 	snprintf(full_log, OSAL_sizeof(full_log), "[%s] [%s] [%s] [%s:%s:%d] %s",
@@ -644,7 +644,7 @@ static void log_internal_ex(log_level_t level, const char *module,
 	pthread_mutex_unlock(&g_log_mutex);
 
 	/* 发送到远程服务器（不持有锁，避免网络延迟阻塞日志系统） */
-	send_remote_log(full_log);
+	_send_remote_log(full_log);
 }
 
 /**
@@ -652,8 +652,8 @@ static void log_internal_ex(log_level_t level, const char *module,
  *
  * 性能优化：使用原子操作进行快速路径级别检查
  */
-static void log_internal(log_level_t level, const char *module,
-						 const char *format, va_list args)
+static void _log_internal(log_level_t level, const char *module,
+						  const char *format, va_list args)
 {
 	char timestamp[OSAL_LOG_TIMESTAMP_SIZE];
 	char message[OSAL_LOG_MESSAGE_SIZE];
@@ -667,7 +667,7 @@ static void log_internal(log_level_t level, const char *module,
 		return;
 
 	/* 获取时间戳 */
-	get_timestamp(timestamp, OSAL_sizeof(timestamp));
+	_get_timestamp(timestamp, OSAL_sizeof(timestamp));
 
 	/* 格式化消息 */
 	vsnprintf(message, OSAL_sizeof(message), format, args);
@@ -676,7 +676,7 @@ static void log_internal(log_level_t level, const char *module,
 	pthread_mutex_lock(&g_log_mutex);
 
 	/* 检查并轮转日志文件 */
-	check_and_rotate_log();
+	_check_and_rotate_log();
 
 	/* 输出到终端（带颜色） - 使用 write 系统调用 */
 	if (NULL != module) {
@@ -735,7 +735,7 @@ void osal_log(int32_t level, const char *module, const char *format, ...)
 		return;
 
 	va_start(args, format);
-	log_internal(level, module, format, args);
+	_log_internal(level, module, format, args);
 	va_end(args);
 }
 
@@ -768,7 +768,7 @@ void osal_log_emit(int32_t level, const char *module, const char *file,
 		return;
 
 	va_start(args, format);
-	log_internal_ex(level, module, file, func, line, format, args);
+	_log_internal_ex(level, module, file, func, line, format, args);
 	va_end(args);
 }
 
@@ -855,17 +855,17 @@ void osal_log_structured(int32_t level, log_module_t module,
 			 kv_buffer);
 
 	/* 采样和过滤检查 */
-	if (!should_log_message(full_message))
+	if (!_should_log_message(full_message))
 		return;
 
 	/* 获取时间戳 */
-	get_timestamp(timestamp, OSAL_sizeof(timestamp));
+	_get_timestamp(timestamp, OSAL_sizeof(timestamp));
 
 	/* 加锁 */
 	pthread_mutex_lock(&g_log_mutex);
 
 	/* 检查并轮转日志文件 */
-	check_and_rotate_log();
+	_check_and_rotate_log();
 
 	/* 输出到终端（带颜色） - 使用 write 系统调用 */
 	{
@@ -901,5 +901,5 @@ void osal_log_structured(int32_t level, log_module_t module,
 			 timestamp, log_level_names[level],
 			 module < LOG_MODULE_MAX ? log_module_names[module] : "UNKNOWN",
 			 full_message);
-	send_remote_log(remote_log);
+	_send_remote_log(remote_log);
 }

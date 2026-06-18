@@ -9,7 +9,7 @@
 #include "hal_serial_internal.h"
 #include <termios.h> /* 系统波特率常量 B9600 等 */
 
-static uint32_t hal_serial_get_baudrate(uint32_t baudrate)
+static uint32_t _hal_serial_get_baudrate(uint32_t baudrate)
 {
 	switch (baudrate) {
 	case 9600:
@@ -103,7 +103,7 @@ int32_t hal_serial_open(const char *device, const hal_serial_config_t *config,
 	}
 
 	/* 配置波特率 */
-	speed = hal_serial_get_baudrate(config->baud_rate);
+	speed = _hal_serial_get_baudrate(config->baud_rate);
 	osal_cfsetispeed(&tty, speed);
 	osal_cfsetospeed(&tty, speed);
 
@@ -501,7 +501,7 @@ int32_t hal_serial_set_config(hal_serial_handle_t handle,
 	}
 
 	/* 配置波特率 */
-	speed = hal_serial_get_baudrate(config->baud_rate);
+	speed = _hal_serial_get_baudrate(config->baud_rate);
 	osal_cfsetispeed(&tty, speed);
 	osal_cfsetospeed(&tty, speed);
 

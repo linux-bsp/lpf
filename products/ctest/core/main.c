@@ -12,7 +12,7 @@
 /**
  * Extract program name from argv[0] (handles both full path and basename)
  */
-static const char *get_program_name(const char *argv0)
+static const char *_get_program_name(const char *argv0)
 {
 	const char *name = argv0;
 	const char *p = argv0;
@@ -32,7 +32,7 @@ static const char *get_program_name(const char *argv0)
  * Busybox-style dispatch: check if invoked via symlink
  * Returns layer filter string or NULL for full test suite
  */
-static const char *detect_layer_filter(const char *program_name)
+static const char *_detect_layer_filter(const char *program_name)
 {
 	if (0 == osal_strcmp(program_name, "osal-test")) {
 		return "OSAL";
@@ -49,7 +49,7 @@ static const char *detect_layer_filter(const char *program_name)
 /**
  * Print usage information
  */
-static void print_usage(const char *program_name)
+static void _print_usage(const char *program_name)
 {
 	osal_printf("\nES-Middleware Test Runner\n");
 	osal_printf("==========================\n\n");
@@ -156,7 +156,7 @@ static void print_usage(const char *program_name)
 		osal_printf("For more information, see: docs/TEST_FRAMEWORK.md\n\n");
 	} else {
 		/* Invoked via symlink */
-		const char *layer = detect_layer_filter(program_name);
+		const char *layer = _detect_layer_filter(program_name);
 		osal_printf("USAGE:\n");
 		osal_printf("    %s [OPTIONS]\n\n", program_name);
 		osal_printf("This symlink filters tests for the %s layer.\n\n", layer);
@@ -190,7 +190,7 @@ static void print_usage(const char *program_name)
 /**
  * Parse category string to enum
  */
-static test_category_t parse_category(const char *str)
+static test_category_t _parse_category(const char *str)
 {
 	if (0 == osal_strcmp(str, "unit")) {
 		return TEST_CATEGORY_UNIT;
@@ -208,7 +208,7 @@ static test_category_t parse_category(const char *str)
 /**
  * Parse tags string (comma-separated) to bitmask
  */
-static uint32_t parse_tags(const char *str)
+static uint32_t _parse_tags(const char *str)
 {
 	uint32_t tags = 0;
 	char buffer[256];
@@ -275,7 +275,7 @@ static uint32_t parse_tags(const char *str)
 /**
  * Export test results after running tests
  */
-static void export_test_results(const char *format, const char *output_file)
+static void _export_test_results(const char *format, const char *output_file)
 {
 	if (!format || !output_file)
 		return;
@@ -292,8 +292,8 @@ static void export_test_results(const char *format, const char *output_file)
 
 int main(int argc, char *argv[])
 {
-	const char *program_name = get_program_name(argv[0]);
-	const char *layer_filter = detect_layer_filter(program_name);
+	const char *program_name = _get_program_name(argv[0]);
+	const char *layer_filter = _detect_layer_filter(program_name);
 
 	/* Initialize filter */
 	test_filter_t filter = { .category_mask = 0,
@@ -322,7 +322,7 @@ int main(int argc, char *argv[])
 			filter.exclude_tags |= TEST_TAG_NETWORK;
 			filter.enabled = true;
 		} else if (0 == osal_strcmp(argv[i], "--category") && i + 1 < argc) {
-			test_category_t cat = parse_category(argv[i + 1]);
+			test_category_t cat = _parse_category(argv[i + 1]);
 			if (cat != TEST_CATEGORY_MAX) {
 				filter.category_mask = TEST_CATEGORY_MASK(cat);
 				filter.enabled = true;
@@ -332,7 +332,7 @@ int main(int argc, char *argv[])
 			}
 			i++; /* Skip category value */
 		} else if (0 == osal_strcmp(argv[i], "--tags") && i + 1 < argc) {
-			filter.include_tags |= parse_tags(argv[i + 1]);
+			filter.include_tags |= _parse_tags(argv[i + 1]);
 			filter.enabled = true;
 			i++; /* Skip tags value */
 		} else if (0 == osal_strcmp(argv[i], "--format") && i + 1 < argc) {
@@ -359,7 +359,7 @@ int main(int argc, char *argv[])
 			}
 
 			/* Export results if requested */
-			export_test_results(output_format, output_file);
+			_export_test_results(output_format, output_file);
 
 			return result;
 		} else {
@@ -402,7 +402,7 @@ int main(int argc, char *argv[])
 		}
 
 		/* Export results if requested */
-		export_test_results(output_format, output_file);
+		_export_test_results(output_format, output_file);
 
 		return result;
 	}
@@ -435,7 +435,7 @@ int main(int argc, char *argv[])
 		}
 
 		/* Export results if requested */
-		export_test_results(output_format, output_file);
+		_export_test_results(output_format, output_file);
 
 		return result;
 	}
@@ -457,7 +457,7 @@ int main(int argc, char *argv[])
 		}
 
 		/* Export results if requested */
-		export_test_results(output_format, output_file);
+		_export_test_results(output_format, output_file);
 
 		return result;
 	}
@@ -469,7 +469,7 @@ int main(int argc, char *argv[])
 		int32_t result = libutest_run_suite(argv[2]);
 
 		/* Export results if requested */
-		export_test_results(output_format, output_file);
+		_export_test_results(output_format, output_file);
 
 		return result;
 	}
@@ -562,7 +562,7 @@ int main(int argc, char *argv[])
 	/* Help */
 	if (0 == osal_strcmp(argv[1], "-h") ||
 		0 == osal_strcmp(argv[1], "--help")) {
-		print_usage(program_name);
+		_print_usage(program_name);
 		return 0;
 	}
 

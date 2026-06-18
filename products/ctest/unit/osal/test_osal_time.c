@@ -7,7 +7,7 @@
 #include "osal.h"
 
 /* 辅助函数：获取当前时间（微秒） */
-static uint64_t get_time_in_micros(void)
+static uint64_t _get_time_in_micros(void)
 {
 	return (uint64_t)osal_get_monotonic_time();
 }
@@ -17,19 +17,19 @@ static uint64_t get_time_in_micros(void)
  *===========================================================================*/
 
 /* 测试用例: msleep - 毫秒延时 */
-static void test_osal_msleep_success(void)
+static void _test_osal_msleep_success(void)
 {
 	uint64_t start_time, end_time, elapsed_ms;
 
 	/* 获取开始时间 */
-	start_time = get_time_in_micros();
+	start_time = _get_time_in_micros();
 
 	/* 延时100毫秒 */
 	int32_t ret = osal_msleep(100);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 获取结束时间 */
-	end_time = get_time_in_micros();
+	end_time = _get_time_in_micros();
 
 	/* 计算实际延时（允许±20ms误差） */
 	elapsed_ms = (end_time - start_time) / 1000;
@@ -37,19 +37,19 @@ static void test_osal_msleep_success(void)
 }
 
 /* 测试用例: usleep - 微秒延时 */
-static void test_osal_usleep_success(void)
+static void _test_osal_usleep_success(void)
 {
 	uint64_t start_time, end_time, elapsed_us;
 
 	/* 获取开始时间 */
-	start_time = get_time_in_micros();
+	start_time = _get_time_in_micros();
 
 	/* 延时50000微秒（50毫秒） */
 	int32_t ret = osal_usleep(50000);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 获取结束时间 */
-	end_time = get_time_in_micros();
+	end_time = _get_time_in_micros();
 
 	/* 计算实际延时（允许±10ms误差） */
 	elapsed_us = end_time - start_time;
@@ -57,19 +57,19 @@ static void test_osal_usleep_success(void)
 }
 
 /* 测试用例: sleep - 秒延时 */
-static void test_osal_sleep_success(void)
+static void _test_osal_sleep_success(void)
 {
 	uint64_t start_time, end_time, elapsed_ms;
 
 	/* 获取开始时间 */
-	start_time = get_time_in_micros();
+	start_time = _get_time_in_micros();
 
 	/* 延时1秒 */
 	int32_t ret = osal_sleep(1);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 获取结束时间 */
-	end_time = get_time_in_micros();
+	end_time = _get_time_in_micros();
 
 	/* 计算实际延时（允许±50ms误差） */
 	elapsed_ms = (end_time - start_time) / 1000;
@@ -77,19 +77,19 @@ static void test_osal_sleep_success(void)
 }
 
 /* 测试用例: nanosleep - 纳秒延时 */
-static void test_osal_nanosleep_success(void)
+static void _test_osal_nanosleep_success(void)
 {
 	uint64_t start_time, end_time, elapsed_us;
 
 	/* 获取开始时间 */
-	start_time = get_time_in_micros();
+	start_time = _get_time_in_micros();
 
 	/* 延时10000000纳秒（10毫秒） */
 	int32_t ret = osal_nanosleep(10000000);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 获取结束时间 */
-	end_time = get_time_in_micros();
+	end_time = _get_time_in_micros();
 
 	/* 计算实际延时（允许±5ms误差） */
 	elapsed_us = end_time - start_time;
@@ -97,19 +97,19 @@ static void test_osal_nanosleep_success(void)
 }
 
 /* 测试用例: msleep - OSAL毫秒延时（替代TaskDelay） */
-static void test_osal_task_delay_success(void)
+static void _test_osal_task_delay_success(void)
 {
 	uint64_t start_time, end_time, elapsed_ms;
 
 	/* 获取开始时间 */
-	start_time = get_time_in_micros();
+	start_time = _get_time_in_micros();
 
 	/* 延时200毫秒 */
 	int32_t ret = osal_msleep(200);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 获取结束时间 */
-	end_time = get_time_in_micros();
+	end_time = _get_time_in_micros();
 
 	/* 计算实际延时（允许±30ms误差） */
 	elapsed_ms = (end_time - start_time) / 1000;
@@ -121,7 +121,7 @@ static void test_osal_task_delay_success(void)
  *===========================================================================*/
 
 /* 测试用例: GetLocalTime - 获取本地时间 */
-static void test_osal_get_local_time_success(void)
+static void _test_osal_get_local_time_success(void)
 {
 	OS_time_t time1, time2;
 	int32_t ret;
@@ -146,14 +146,14 @@ static void test_osal_get_local_time_success(void)
 }
 
 /* 测试用例: GetLocalTime - 空指针 */
-static void test_osal_get_local_time_null_pointer(void)
+static void _test_osal_get_local_time_null_pointer(void)
 {
 	int32_t ret = osal_get_local_time(NULL);
 	TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_POINTER, ret);
 }
 
 /* 测试用例: GetTickCount - 获取系统滴答 */
-static void test_osal_get_tick_count(void)
+static void _test_osal_get_tick_count(void)
 {
 	uint32_t tick1, tick2;
 
@@ -172,7 +172,7 @@ static void test_osal_get_tick_count(void)
 }
 
 /* 测试用例: 时间单调性 */
-static void test_osal_time_monotonic(void)
+static void _test_osal_time_monotonic(void)
 {
 	OS_time_t prev_time, curr_time;
 
@@ -201,42 +201,42 @@ static void test_osal_time_monotonic(void)
  *===========================================================================*/
 
 /* 测试用例: msleep - 零延时 */
-static void test_osal_msleep_zero(void)
+static void _test_osal_msleep_zero(void)
 {
 	int32_t ret = osal_msleep(0);
 	TEST_ASSERT_EQUAL(0, ret);
 }
 
 /* 测试用例: usleep - 零延时 */
-static void test_osal_usleep_zero(void)
+static void _test_osal_usleep_zero(void)
 {
 	int32_t ret = osal_usleep(0);
 	TEST_ASSERT_EQUAL(0, ret);
 }
 
 /* 测试用例: sleep - 零延时 */
-static void test_osal_sleep_zero(void)
+static void _test_osal_sleep_zero(void)
 {
 	int32_t ret = osal_sleep(0);
 	TEST_ASSERT_EQUAL(0, ret);
 }
 
 /* 测试用例: msleep - 零延时（替代TaskDelay） */
-static void test_osal_task_delay_zero(void)
+static void _test_osal_task_delay_zero(void)
 {
 	int32_t ret = osal_msleep(0);
 	TEST_ASSERT_EQUAL(0, ret);
 }
 
 /* 测试用例: 短延时精度 */
-static void test_osal_short_delay_precision(void)
+static void _test_osal_short_delay_precision(void)
 {
 	uint64_t start_time, end_time, elapsed_us;
 
 	/* 测试1毫秒延时 */
-	start_time = get_time_in_micros();
+	start_time = _get_time_in_micros();
 	osal_msleep(1);
-	end_time = get_time_in_micros();
+	end_time = _get_time_in_micros();
 
 	elapsed_us = end_time - start_time;
 	/* 短延时允许较大误差（0.5-5ms） */
@@ -244,14 +244,14 @@ static void test_osal_short_delay_precision(void)
 }
 
 /* 测试用例: 长延时精度 */
-static void test_osal_long_delay_precision(void)
+static void _test_osal_long_delay_precision(void)
 {
 	uint64_t start_time, end_time, elapsed_ms;
 
 	/* 测试500毫秒延时 */
-	start_time = get_time_in_micros();
+	start_time = _get_time_in_micros();
 	osal_msleep(500);
-	end_time = get_time_in_micros();
+	end_time = _get_time_in_micros();
 
 	elapsed_ms = (end_time - start_time) / 1000;
 	/* 长延时精度应该更高（±50ms） */
@@ -263,20 +263,20 @@ static void test_osal_long_delay_precision(void)
  *===========================================================================*/
 
 /* 测试用例: 时间获取性能 */
-static void test_osal_time_get_performance(void)
+static void _test_osal_time_get_performance(void)
 {
 	uint64_t start_time, end_time;
 	const int32_t iterations = 1000;
 	OS_time_t time_struct;
 
 	/* 测试GetLocalTime性能 */
-	start_time = get_time_in_micros();
+	start_time = _get_time_in_micros();
 	int32_t i;
 
 	for (i = 0; i < iterations; i++) {
 		osal_get_local_time(&time_struct);
 	}
-	end_time = get_time_in_micros();
+	end_time = _get_time_in_micros();
 
 	/* 平均每次调用应该小于10微秒 */
 	uint64_t avg_time = (end_time - start_time) / iterations;
@@ -296,67 +296,67 @@ static void test_osal_time_get_performance(void)
 /* 测试用例数组 - 使用函数指针数组 */
 static const test_case_t test_cases[] = {
 	{ .name = "test_osal_msleep_success",
-	  .func = test_osal_msleep_success,
+	  .func = _test_osal_msleep_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_usleep_success",
-	  .func = test_osal_usleep_success,
+	  .func = _test_osal_usleep_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_sleep_success",
-	  .func = test_osal_sleep_success,
+	  .func = _test_osal_sleep_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_nanosleep_success",
-	  .func = test_osal_nanosleep_success,
+	  .func = _test_osal_nanosleep_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_task_delay_success",
-	  .func = test_osal_task_delay_success,
+	  .func = _test_osal_task_delay_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_get_local_time_success",
-	  .func = test_osal_get_local_time_success,
+	  .func = _test_osal_get_local_time_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_get_local_time_null_pointer",
-	  .func = test_osal_get_local_time_null_pointer,
+	  .func = _test_osal_get_local_time_null_pointer,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_get_tick_count",
-	  .func = test_osal_get_tick_count,
+	  .func = _test_osal_get_tick_count,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_time_monotonic",
-	  .func = test_osal_time_monotonic,
+	  .func = _test_osal_time_monotonic,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_msleep_zero",
-	  .func = test_osal_msleep_zero,
+	  .func = _test_osal_msleep_zero,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_usleep_zero",
-	  .func = test_osal_usleep_zero,
+	  .func = _test_osal_usleep_zero,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_sleep_zero",
-	  .func = test_osal_sleep_zero,
+	  .func = _test_osal_sleep_zero,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_task_delay_zero",
-	  .func = test_osal_task_delay_zero,
+	  .func = _test_osal_task_delay_zero,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_short_delay_precision",
-	  .func = test_osal_short_delay_precision,
+	  .func = _test_osal_short_delay_precision,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_long_delay_precision",
-	  .func = test_osal_long_delay_precision,
+	  .func = _test_osal_long_delay_precision,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_time_get_performance",
-	  .func = test_osal_time_get_performance,
+	  .func = _test_osal_time_get_performance,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

@@ -15,7 +15,7 @@
  *===========================================================================*/
 
 /* 测试用例: MCU驱动初始化 - 有效索引 */
-static void test_pdl_mcu_init_valid_index(void)
+static void _test_pdl_mcu_init_valid_index(void)
 {
 	pdl_mcu_handle_t handle = NULL;
 
@@ -33,14 +33,14 @@ static void test_pdl_mcu_init_valid_index(void)
 }
 
 /* 测试用例: MCU驱动初始化 - 空句柄指针 */
-static void test_pdl_mcu_init_null_handle(void)
+static void _test_pdl_mcu_init_null_handle(void)
 {
 	int32_t ret = pdl_mcu_init(0, NULL);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
 /* 测试用例: MCU驱动初始化 - 无效索引 */
-static void test_pdl_mcu_init_invalid_index(void)
+static void _test_pdl_mcu_init_invalid_index(void)
 {
 	pdl_mcu_handle_t handle = NULL;
 
@@ -50,7 +50,7 @@ static void test_pdl_mcu_init_invalid_index(void)
 }
 
 /* 测试用例: MCU驱动清理 */
-static void test_pdl_mcu_deinit(void)
+static void _test_pdl_mcu_deinit(void)
 {
 	pdl_mcu_handle_t handle = NULL;
 
@@ -64,7 +64,7 @@ static void test_pdl_mcu_deinit(void)
 }
 
 /* 测试用例: 清理空句柄 */
-static void test_pdl_mcu_deinit_null_handle(void)
+static void _test_pdl_mcu_deinit_null_handle(void)
 {
 	int32_t ret = pdl_mcu_deinit(NULL);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
@@ -75,7 +75,7 @@ static void test_pdl_mcu_deinit_null_handle(void)
  *===========================================================================*/
 
 /* 测试用例: 获取版本信息 - 空句柄 */
-static void test_pdl_mcu_get_version_null_handle(void)
+static void _test_pdl_mcu_get_version_null_handle(void)
 {
 	pdl_mcu_version_t version;
 	int32_t ret = pdl_mcu_get_version(NULL, &version);
@@ -83,7 +83,7 @@ static void test_pdl_mcu_get_version_null_handle(void)
 }
 
 /* 测试用例: 获取版本信息 - 空输出指针 */
-static void test_pdl_mcu_get_version_null_output(void)
+static void _test_pdl_mcu_get_version_null_output(void)
 {
 	pdl_mcu_handle_t handle = NULL;
 
@@ -102,7 +102,7 @@ static void test_pdl_mcu_get_version_null_output(void)
  *===========================================================================*/
 
 /* 测试用例: 发送命令 - 空句柄 */
-static void test_pdl_mcu_send_command_null_handle(void)
+static void _test_pdl_mcu_send_command_null_handle(void)
 {
 	uint8_t cmd_data[] = { 0x01, 0x02, 0x03 };
 	uint8_t resp_data[32];
@@ -114,7 +114,7 @@ static void test_pdl_mcu_send_command_null_handle(void)
 }
 
 /* 测试用例: 发送命令 - 空响应缓冲区 */
-static void test_pdl_mcu_send_command_null_response(void)
+static void _test_pdl_mcu_send_command_null_response(void)
 {
 	pdl_mcu_handle_t handle = NULL;
 	uint8_t cmd_data[] = { 0x01, 0x02, 0x03 };
@@ -136,7 +136,7 @@ static void test_pdl_mcu_send_command_null_response(void)
  *===========================================================================*/
 
 /* 测试用例: 获取状态 - 空句柄 */
-static void test_pdl_mcu_get_status_null_handle(void)
+static void _test_pdl_mcu_get_status_null_handle(void)
 {
 	pdl_mcu_status_t status;
 	int32_t ret = pdl_mcu_get_status(NULL, &status);
@@ -144,7 +144,7 @@ static void test_pdl_mcu_get_status_null_handle(void)
 }
 
 /* 测试用例: 获取状态 - 空输出指针 */
-static void test_pdl_mcu_get_status_null_output(void)
+static void _test_pdl_mcu_get_status_null_output(void)
 {
 	pdl_mcu_handle_t handle = NULL;
 
@@ -164,18 +164,18 @@ static void test_pdl_mcu_get_status_null_output(void)
 
 void test_pdl_mcu(void)
 {
-	test_pdl_mcu_init_valid_index();
-	test_pdl_mcu_init_null_handle();
-	test_pdl_mcu_init_invalid_index();
-	test_pdl_mcu_deinit();
-	test_pdl_mcu_deinit_null_handle();
+	_test_pdl_mcu_init_valid_index();
+	_test_pdl_mcu_init_null_handle();
+	_test_pdl_mcu_init_invalid_index();
+	_test_pdl_mcu_deinit();
+	_test_pdl_mcu_deinit_null_handle();
 
-	test_pdl_mcu_get_version_null_handle();
-	test_pdl_mcu_get_version_null_output();
+	_test_pdl_mcu_get_version_null_handle();
+	_test_pdl_mcu_get_version_null_output();
 
-	test_pdl_mcu_send_command_null_handle();
-	test_pdl_mcu_send_command_null_response();
+	_test_pdl_mcu_send_command_null_handle();
+	_test_pdl_mcu_send_command_null_response();
 
-	test_pdl_mcu_get_status_null_handle();
-	test_pdl_mcu_get_status_null_output();
+	_test_pdl_mcu_get_status_null_handle();
+	_test_pdl_mcu_get_status_null_output();
 }

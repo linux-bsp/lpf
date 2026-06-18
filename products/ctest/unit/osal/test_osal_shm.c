@@ -20,7 +20,7 @@
  * 共享内存基础测试
  *===========================================================================*/
 
-static void test_shm_open_close_success(void)
+static void _test_shm_open_close_success(void)
 {
 	/* 先清理可能存在的共享内存 */
 	osal_shm_unlink(TEST_SHM_NAME);
@@ -42,7 +42,7 @@ static void test_shm_open_close_success(void)
 	TEST_ASSERT_EQUAL(0, ret);
 }
 
-static void test_shm_unlink_success(void)
+static void _test_shm_unlink_success(void)
 {
 	/* 创建共享内存 */
 	osal_shm_unlink(TEST_SHM_NAME);
@@ -59,7 +59,7 @@ static void test_shm_unlink_success(void)
 	TEST_ASSERT_NOT_EQUAL(0, ret);
 }
 
-static void test_shm_open_existing(void)
+static void _test_shm_open_existing(void)
 {
 	/* 创建共享内存 */
 	osal_shm_unlink(TEST_SHM_NAME);
@@ -82,7 +82,7 @@ static void test_shm_open_existing(void)
  * 共享内存映射测试
  *===========================================================================*/
 
-static void test_shm_mmap_munmap_success(void)
+static void _test_shm_mmap_munmap_success(void)
 {
 	/* 创建共享内存 */
 	osal_shm_unlink(TEST_SHM_NAME);
@@ -105,7 +105,7 @@ static void test_shm_mmap_munmap_success(void)
 	osal_shm_unlink(TEST_SHM_NAME);
 }
 
-static void test_shm_write_read_data(void)
+static void _test_shm_write_read_data(void)
 {
 	const char *test_data = "Hello, Shared Memory!";
 	char read_buffer[64];
@@ -135,7 +135,7 @@ static void test_shm_write_read_data(void)
 	osal_shm_unlink(TEST_SHM_NAME);
 }
 
-static void test_shm_multiple_mappings(void)
+static void _test_shm_multiple_mappings(void)
 {
 	const int32_t test_value = 12345;
 
@@ -173,7 +173,7 @@ static void test_shm_multiple_mappings(void)
  * 内存保护测试
  *===========================================================================*/
 
-static void test_shm_readonly_mapping(void)
+static void _test_shm_readonly_mapping(void)
 {
 	const int32_t test_value = 99;
 
@@ -209,31 +209,31 @@ static void test_shm_readonly_mapping(void)
 
 static const test_case_t test_cases[] = {
 	{ .name = "test_shm_open_close_success",
-	  .func = test_shm_open_close_success,
+	  .func = _test_shm_open_close_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_shm_unlink_success",
-	  .func = test_shm_unlink_success,
+	  .func = _test_shm_unlink_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_shm_open_existing",
-	  .func = test_shm_open_existing,
+	  .func = _test_shm_open_existing,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_shm_mmap_munmap_success",
-	  .func = test_shm_mmap_munmap_success,
+	  .func = _test_shm_mmap_munmap_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_shm_write_read_data",
-	  .func = test_shm_write_read_data,
+	  .func = _test_shm_write_read_data,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_shm_multiple_mappings",
-	  .func = test_shm_multiple_mappings,
+	  .func = _test_shm_multiple_mappings,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_shm_readonly_mapping",
-	  .func = test_shm_readonly_mapping,
+	  .func = _test_shm_readonly_mapping,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

@@ -9,7 +9,7 @@
  * Poll 测试
  *===========================================================================*/
 
-static void test_poll_immediate_return(void)
+static void _test_poll_immediate_return(void)
 {
 	osal_pollfd_t fds[1];
 	int32_t ret;
@@ -36,7 +36,7 @@ static void test_poll_immediate_return(void)
 	close(pipe_fds[1]);
 }
 
-static void test_poll_timeout(void)
+static void _test_poll_timeout(void)
 {
 	osal_pollfd_t fds[1];
 	int32_t ret;
@@ -64,7 +64,7 @@ static void test_poll_timeout(void)
 	close(pipe_fds[1]);
 }
 
-static void test_poll_multiple_fds(void)
+static void _test_poll_multiple_fds(void)
 {
 	osal_pollfd_t fds[2];
 	int pipe_fds1[2], pipe_fds2[2];
@@ -100,7 +100,7 @@ static void test_poll_multiple_fds(void)
 	close(pipe_fds2[1]);
 }
 
-static void test_poll_write_ready(void)
+static void _test_poll_write_ready(void)
 {
 	osal_pollfd_t fds[1];
 	int pipe_fds[2];
@@ -122,7 +122,7 @@ static void test_poll_write_ready(void)
 	close(pipe_fds[1]);
 }
 
-static void test_poll_invalid_fd(void)
+static void _test_poll_invalid_fd(void)
 {
 	osal_pollfd_t fds[1];
 	int32_t ret;
@@ -137,7 +137,7 @@ static void test_poll_invalid_fd(void)
 	TEST_ASSERT(fds[0].revents & OSAL_POLLNVAL);
 }
 
-static void test_poll_null_pointer(void)
+static void _test_poll_null_pointer(void)
 {
 	int32_t ret;
 
@@ -146,7 +146,7 @@ static void test_poll_null_pointer(void)
 	TEST_ASSERT_EQUAL(0, ret);
 }
 
-static void test_poll_hangup(void)
+static void _test_poll_hangup(void)
 {
 	osal_pollfd_t fds[1];
 	int pipe_fds[2];
@@ -173,7 +173,7 @@ static void test_poll_hangup(void)
  * Select 测试
  *===========================================================================*/
 
-static void test_fd_set_operations(void)
+static void _test_fd_set_operations(void)
 {
 	osal_fd_set_t set;
 	int32_t ret;
@@ -209,7 +209,7 @@ static void test_fd_set_operations(void)
 	TEST_ASSERT_NOT_EQUAL(0, ret);
 }
 
-static void test_select_immediate_return(void)
+static void _test_select_immediate_return(void)
 {
 	osal_fd_set_t readfds;
 	osal_timeval_t timeout;
@@ -238,7 +238,7 @@ static void test_select_immediate_return(void)
 	close(pipe_fds[1]);
 }
 
-static void test_select_timeout(void)
+static void _test_select_timeout(void)
 {
 	osal_fd_set_t readfds;
 	osal_timeval_t timeout;
@@ -268,7 +268,7 @@ static void test_select_timeout(void)
 	close(pipe_fds[1]);
 }
 
-static void test_select_multiple_fds(void)
+static void _test_select_multiple_fds(void)
 {
 	osal_fd_set_t readfds;
 	osal_timeval_t timeout;
@@ -305,7 +305,7 @@ static void test_select_multiple_fds(void)
 	close(pipe_fds2[1]);
 }
 
-static void test_select_write_ready(void)
+static void _test_select_write_ready(void)
 {
 	osal_fd_set_t writefds;
 	osal_timeval_t timeout;
@@ -330,7 +330,7 @@ static void test_select_write_ready(void)
 	close(pipe_fds[1]);
 }
 
-static void test_select_read_and_write(void)
+static void _test_select_read_and_write(void)
 {
 	osal_fd_set_t readfds, writefds;
 	osal_timeval_t timeout;
@@ -362,7 +362,7 @@ static void test_select_read_and_write(void)
 	close(pipe_fds[1]);
 }
 
-static void test_select_null_sets(void)
+static void _test_select_null_sets(void)
 {
 	osal_timeval_t timeout;
 	int32_t ret;
@@ -380,7 +380,7 @@ static void test_select_null_sets(void)
 	TEST_ASSERT(elapsed < 50);
 }
 
-static void test_select_null_timeout(void)
+static void _test_select_null_timeout(void)
 {
 	osal_fd_set_t readfds;
 	int pipe_fds[2];
@@ -402,7 +402,7 @@ static void test_select_null_timeout(void)
 	close(pipe_fds[1]);
 }
 
-static void test_pselect_basic(void)
+static void _test_pselect_basic(void)
 {
 	osal_fd_set_t readfds;
 	osal_timespec_t timeout;
@@ -433,7 +433,7 @@ static void test_pselect_basic(void)
  * 边界测试
  *===========================================================================*/
 
-static void test_fd_set_large_fd(void)
+static void _test_fd_set_large_fd(void)
 {
 	osal_fd_set_t set;
 	int32_t ret;
@@ -451,7 +451,7 @@ static void test_fd_set_large_fd(void)
 	TEST_ASSERT_EQUAL(0, ret);
 }
 
-static void test_fd_set_boundary(void)
+static void _test_fd_set_boundary(void)
 {
 	osal_fd_set_t set;
 	int32_t ret;
@@ -475,26 +475,26 @@ static void test_fd_set_boundary(void)
 void test_osal_poll_select(void)
 {
 	/* Poll 测试 */
-	test_poll_immediate_return();
-	test_poll_timeout();
-	test_poll_multiple_fds();
-	test_poll_write_ready();
-	test_poll_invalid_fd();
-	test_poll_null_pointer();
-	test_poll_hangup();
+	_test_poll_immediate_return();
+	_test_poll_timeout();
+	_test_poll_multiple_fds();
+	_test_poll_write_ready();
+	_test_poll_invalid_fd();
+	_test_poll_null_pointer();
+	_test_poll_hangup();
 
 	/* Select 测试 */
-	test_fd_set_operations();
-	test_select_immediate_return();
-	test_select_timeout();
-	test_select_multiple_fds();
-	test_select_write_ready();
-	test_select_read_and_write();
-	test_select_null_sets();
-	test_select_null_timeout();
-	test_pselect_basic();
+	_test_fd_set_operations();
+	_test_select_immediate_return();
+	_test_select_timeout();
+	_test_select_multiple_fds();
+	_test_select_write_ready();
+	_test_select_read_and_write();
+	_test_select_null_sets();
+	_test_select_null_timeout();
+	_test_pselect_basic();
 
 	/* 边界测试 */
-	test_fd_set_large_fd();
-	test_fd_set_boundary();
+	_test_fd_set_large_fd();
+	_test_fd_set_boundary();
 }

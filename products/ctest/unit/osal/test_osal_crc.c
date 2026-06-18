@@ -9,7 +9,7 @@
  * CRC16-CCITT 测试
  *===========================================================================*/
 
-static void test_crc16_empty_data(void)
+static void _test_crc16_empty_data(void)
 {
 	uint8_t data[1] = { 0 };
 
@@ -18,7 +18,7 @@ static void test_crc16_empty_data(void)
 	TEST_ASSERT_EQUAL(0xFFFF, crc);
 }
 
-static void test_crc16_single_byte(void)
+static void _test_crc16_single_byte(void)
 {
 	uint8_t data[] = { 0x00 };
 
@@ -27,7 +27,7 @@ static void test_crc16_single_byte(void)
 	TEST_ASSERT_NOT_EQUAL(0xFFFF, crc);
 }
 
-static void test_crc16_known_values(void)
+static void _test_crc16_known_values(void)
 {
 	/* 测试已知的CRC值 */
 	uint8_t data1[] = {
@@ -37,7 +37,7 @@ static void test_crc16_known_values(void)
 	TEST_ASSERT_EQUAL(0x29B1, crc1); /* CRC16-CCITT标准测试向量 */
 }
 
-static void test_crc16_same_data_same_result(void)
+static void _test_crc16_same_data_same_result(void)
 {
 	uint8_t data[] = { 0x01, 0x02, 0x03, 0x04, 0x05 };
 
@@ -47,7 +47,7 @@ static void test_crc16_same_data_same_result(void)
 	TEST_ASSERT_EQUAL(crc1, crc2);
 }
 
-static void test_crc16_different_data_different_result(void)
+static void _test_crc16_different_data_different_result(void)
 {
 	uint8_t data1[] = { 0x01, 0x02, 0x03, 0x04, 0x05 };
 	uint8_t data2[] = { 0x01, 0x02, 0x03, 0x04, 0x06 }; /* 最后一个字节不同 */
@@ -57,7 +57,7 @@ static void test_crc16_different_data_different_result(void)
 	TEST_ASSERT_NOT_EQUAL(crc1, crc2);
 }
 
-static void test_crc16_all_zeros(void)
+static void _test_crc16_all_zeros(void)
 {
 	uint8_t data[10] = { 0 };
 
@@ -66,7 +66,7 @@ static void test_crc16_all_zeros(void)
 	TEST_ASSERT_NOT_EQUAL(0xFFFF, crc);
 }
 
-static void test_crc16_all_ones(void)
+static void _test_crc16_all_ones(void)
 {
 	uint8_t data[10];
 	osal_memset(data, 0xFF, sizeof(data));
@@ -76,7 +76,7 @@ static void test_crc16_all_ones(void)
 	TEST_ASSERT_NOT_EQUAL(0xFFFF, crc);
 }
 
-static void test_crc16_null_pointer(void)
+static void _test_crc16_null_pointer(void)
 {
 	/* 测试NULL指针（应该返回初始值或处理错误） */
 	uint16_t crc = osal_crc16_ccitt(NULL, 10);
@@ -87,7 +87,7 @@ static void test_crc16_null_pointer(void)
  * CRC16-CCITT Update 测试
  *===========================================================================*/
 
-static void test_crc16_update_incremental(void)
+static void _test_crc16_update_incremental(void)
 {
 	uint8_t data[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06 };
 
@@ -102,7 +102,7 @@ static void test_crc16_update_incremental(void)
 	TEST_ASSERT_EQUAL(crc_full, crc_part);
 }
 
-static void test_crc16_update_single_bytes(void)
+static void _test_crc16_update_single_bytes(void)
 {
 	uint8_t data[] = { 0xAA, 0xBB, 0xCC, 0xDD };
 
@@ -118,7 +118,7 @@ static void test_crc16_update_single_bytes(void)
 	TEST_ASSERT_EQUAL(crc_full, crc_byte);
 }
 
-static void test_crc16_update_with_skip(void)
+static void _test_crc16_update_with_skip(void)
 {
 	/* 模拟跳过CRC字段本身的场景 */
 	uint8_t data[] = {
@@ -135,7 +135,7 @@ static void test_crc16_update_with_skip(void)
 	TEST_ASSERT_NOT_EQUAL(0, crc);
 }
 
-static void test_crc16_update_empty_data(void)
+static void _test_crc16_update_empty_data(void)
 {
 	uint16_t crc = 0xFFFF;
 	uint8_t data[1] = { 0 };
@@ -145,7 +145,7 @@ static void test_crc16_update_empty_data(void)
 	TEST_ASSERT_EQUAL(crc, crc_new);
 }
 
-static void test_crc16_update_null_pointer(void)
+static void _test_crc16_update_null_pointer(void)
 {
 	uint16_t crc = 0xFFFF;
 
@@ -158,7 +158,7 @@ static void test_crc16_update_null_pointer(void)
  * CRC16 数据完整性测试
  *===========================================================================*/
 
-static void test_crc16_data_corruption_detection(void)
+static void _test_crc16_data_corruption_detection(void)
 {
 	uint8_t data[] = { 0x01, 0x02, 0x03, 0x04, 0x05 };
 
@@ -173,7 +173,7 @@ static void test_crc16_data_corruption_detection(void)
 	TEST_ASSERT_NOT_EQUAL(crc_original, crc_corrupted);
 }
 
-static void test_crc16_length_sensitivity(void)
+static void _test_crc16_length_sensitivity(void)
 {
 	uint8_t data[] = { 0x01, 0x02, 0x03, 0x04, 0x05 };
 
@@ -187,7 +187,7 @@ static void test_crc16_length_sensitivity(void)
 	TEST_ASSERT_NOT_EQUAL(crc1, crc3);
 }
 
-static void test_crc16_large_data(void)
+static void _test_crc16_large_data(void)
 {
 	/* 测试较大数据块 */
 	uint8_t data[1024];
@@ -204,7 +204,7 @@ static void test_crc16_large_data(void)
  * CRC32 测试（预留功能）
  *===========================================================================*/
 
-static void test_crc32_empty_data(void)
+static void _test_crc32_empty_data(void)
 {
 	uint8_t data[1] = { 0 };
 
@@ -213,7 +213,7 @@ static void test_crc32_empty_data(void)
 	TEST_ASSERT_EQUAL(0, crc);
 }
 
-static void test_crc32_some_data(void)
+static void _test_crc32_some_data(void)
 {
 	uint8_t data[] = { 0x01, 0x02, 0x03, 0x04, 0x05 };
 
@@ -222,7 +222,7 @@ static void test_crc32_some_data(void)
 	TEST_ASSERT_EQUAL(0, crc);
 }
 
-static void test_crc32_update_returns_input(void)
+static void _test_crc32_update_returns_input(void)
 {
 	/* CRC32_Update not implemented in API */
 	TEST_SKIP("OSAL_crc32_update not implemented");
@@ -232,7 +232,7 @@ static void test_crc32_update_returns_input(void)
  * 实际应用场景测试
  *===========================================================================*/
 
-static void test_crc16_packet_validation(void)
+static void _test_crc16_packet_validation(void)
 {
 	/* 模拟数据包：header + payload + crc */
 	struct {
@@ -262,7 +262,7 @@ static void test_crc16_packet_validation(void)
 	TEST_ASSERT_EQUAL(packet.crc, crc_check);
 }
 
-static void test_crc16_incremental_stream(void)
+static void _test_crc16_incremental_stream(void)
 {
 	/* 模拟流式数据处理 */
 	uint8_t stream_data[100];
@@ -294,33 +294,33 @@ static void test_crc16_incremental_stream(void)
 void test_osal_crc(void)
 {
 	/* CRC16-CCITT 基础测试 */
-	test_crc16_empty_data();
-	test_crc16_single_byte();
-	test_crc16_known_values();
-	test_crc16_same_data_same_result();
-	test_crc16_different_data_different_result();
-	test_crc16_all_zeros();
-	test_crc16_all_ones();
-	test_crc16_null_pointer();
+	_test_crc16_empty_data();
+	_test_crc16_single_byte();
+	_test_crc16_known_values();
+	_test_crc16_same_data_same_result();
+	_test_crc16_different_data_different_result();
+	_test_crc16_all_zeros();
+	_test_crc16_all_ones();
+	_test_crc16_null_pointer();
 
 	/* CRC16-CCITT Update 测试 */
-	test_crc16_update_incremental();
-	test_crc16_update_single_bytes();
-	test_crc16_update_with_skip();
-	test_crc16_update_empty_data();
-	test_crc16_update_null_pointer();
+	_test_crc16_update_incremental();
+	_test_crc16_update_single_bytes();
+	_test_crc16_update_with_skip();
+	_test_crc16_update_empty_data();
+	_test_crc16_update_null_pointer();
 
 	/* CRC16 数据完整性测试 */
-	test_crc16_data_corruption_detection();
-	test_crc16_length_sensitivity();
-	test_crc16_large_data();
+	_test_crc16_data_corruption_detection();
+	_test_crc16_length_sensitivity();
+	_test_crc16_large_data();
 
 	/* CRC32 测试（预留） */
-	test_crc32_empty_data();
-	test_crc32_some_data();
-	test_crc32_update_returns_input();
+	_test_crc32_empty_data();
+	_test_crc32_some_data();
+	_test_crc32_update_returns_input();
 
 	/* 实际应用场景测试 */
-	test_crc16_packet_validation();
-	test_crc16_incremental_stream();
+	_test_crc16_packet_validation();
+	_test_crc16_incremental_stream();
 }

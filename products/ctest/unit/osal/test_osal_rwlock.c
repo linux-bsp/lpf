@@ -9,7 +9,7 @@
  * 基础功能测试
  *===========================================================================*/
 
-static void test_rwlock_init_destroy(void)
+static void _test_rwlock_init_destroy(void)
 {
 	osal_rwlock_t rwlock;
 
@@ -22,7 +22,7 @@ static void test_rwlock_init_destroy(void)
 	TEST_ASSERT_EQUAL(0, ret);
 }
 
-static void test_rwlock_init_destroy_null_pointer(void)
+static void _test_rwlock_init_destroy_null_pointer(void)
 {
 	/* 测试NULL指针 */
 	int32_t ret = osal_pthread_rwlock_init(NULL, NULL);
@@ -32,7 +32,7 @@ static void test_rwlock_init_destroy_null_pointer(void)
 	TEST_ASSERT_EQUAL(-1, ret);
 }
 
-static void test_rwlock_rdlock_unlock(void)
+static void _test_rwlock_rdlock_unlock(void)
 {
 	osal_rwlock_t rwlock;
 	int32_t ret;
@@ -51,7 +51,7 @@ static void test_rwlock_rdlock_unlock(void)
 	osal_pthread_rwlock_destroy(&rwlock);
 }
 
-static void test_rwlock_wrlock_unlock(void)
+static void _test_rwlock_wrlock_unlock(void)
 {
 	osal_rwlock_t rwlock;
 	int32_t ret;
@@ -70,7 +70,7 @@ static void test_rwlock_wrlock_unlock(void)
 	osal_pthread_rwlock_destroy(&rwlock);
 }
 
-static void test_rwlock_tryrdlock(void)
+static void _test_rwlock_tryrdlock(void)
 {
 	osal_rwlock_t rwlock;
 	int32_t ret;
@@ -91,7 +91,7 @@ static void test_rwlock_tryrdlock(void)
 	osal_pthread_rwlock_destroy(&rwlock);
 }
 
-static void test_rwlock_trywrlock(void)
+static void _test_rwlock_trywrlock(void)
 {
 	osal_rwlock_t rwlock;
 	int32_t ret;
@@ -107,7 +107,7 @@ static void test_rwlock_trywrlock(void)
 	osal_pthread_rwlock_destroy(&rwlock);
 }
 
-static void test_rwlock_tryrdlock_when_write_locked(void)
+static void _test_rwlock_tryrdlock_when_write_locked(void)
 {
 	osal_rwlock_t rwlock;
 	int32_t ret;
@@ -127,7 +127,7 @@ static void test_rwlock_tryrdlock_when_write_locked(void)
 	osal_pthread_rwlock_destroy(&rwlock);
 }
 
-static void test_rwlock_trywrlock_when_read_locked(void)
+static void _test_rwlock_trywrlock_when_read_locked(void)
 {
 	osal_rwlock_t rwlock;
 	int32_t ret;
@@ -147,7 +147,7 @@ static void test_rwlock_trywrlock_when_read_locked(void)
 	osal_pthread_rwlock_destroy(&rwlock);
 }
 
-static void test_rwlock_trywrlock_when_write_locked(void)
+static void _test_rwlock_trywrlock_when_write_locked(void)
 {
 	osal_rwlock_t rwlock;
 	int32_t ret;
@@ -167,7 +167,7 @@ static void test_rwlock_trywrlock_when_write_locked(void)
 	osal_pthread_rwlock_destroy(&rwlock);
 }
 
-static void test_rwlock_null_pointer_operations(void)
+static void _test_rwlock_null_pointer_operations(void)
 {
 	/* 测试NULL指针操作 */
 	int32_t ret;
@@ -198,7 +198,7 @@ typedef struct {
 	uint32_t read_count;
 } rwlock_test_ctx_t;
 
-static void *reader_thread(void *arg)
+static void *_reader_thread(void *arg)
 {
 	rwlock_test_ctx_t *ctx = (rwlock_test_ctx_t *)arg;
 	uint32_t local_data;
@@ -216,7 +216,7 @@ static void *reader_thread(void *arg)
 	return NULL;
 }
 
-static void *writer_thread(void *arg)
+static void *_writer_thread(void *arg)
 {
 	rwlock_test_ctx_t *ctx = (rwlock_test_ctx_t *)arg;
 
@@ -230,7 +230,7 @@ static void *writer_thread(void *arg)
 	return NULL;
 }
 
-static void test_rwlock_multiple_readers(void)
+static void _test_rwlock_multiple_readers(void)
 {
 	osal_rwlock_t rwlock;
 	uint32_t shared_data = 0;
@@ -244,7 +244,7 @@ static void test_rwlock_multiple_readers(void)
 		ctx[i].rwlock = &rwlock;
 		ctx[i].shared_data = &shared_data;
 		ctx[i].read_count = 0;
-		osal_pthread_create(&threads[i], NULL, reader_thread, &ctx[i]);
+		osal_pthread_create(&threads[i], NULL, _reader_thread, &ctx[i]);
 	}
 
 	/* 等待所有线程完成 */
@@ -262,7 +262,7 @@ static void test_rwlock_multiple_readers(void)
 	osal_pthread_rwlock_destroy(&rwlock);
 }
 
-static void test_rwlock_readers_and_writers(void)
+static void _test_rwlock_readers_and_writers(void)
 {
 	osal_rwlock_t rwlock;
 	uint32_t shared_data = 0;
@@ -278,13 +278,13 @@ static void test_rwlock_readers_and_writers(void)
 		reader_ctx[i].rwlock = &rwlock;
 		reader_ctx[i].shared_data = &shared_data;
 		reader_ctx[i].read_count = 0;
-		osal_pthread_create(&reader_threads[i], NULL, reader_thread,
+		osal_pthread_create(&reader_threads[i], NULL, _reader_thread,
 							&reader_ctx[i]);
 
 		writer_ctx[i].rwlock = &rwlock;
 		writer_ctx[i].shared_data = &shared_data;
 		writer_ctx[i].read_count = 0;
-		osal_pthread_create(&writer_threads[i], NULL, writer_thread,
+		osal_pthread_create(&writer_threads[i], NULL, _writer_thread,
 							&writer_ctx[i]);
 	}
 
@@ -307,18 +307,18 @@ static void test_rwlock_readers_and_writers(void)
 void test_osal_rwlock(void)
 {
 	/* 基础功能测试 */
-	test_rwlock_init_destroy();
-	test_rwlock_init_destroy_null_pointer();
-	test_rwlock_rdlock_unlock();
-	test_rwlock_wrlock_unlock();
-	test_rwlock_tryrdlock();
-	test_rwlock_trywrlock();
-	test_rwlock_tryrdlock_when_write_locked();
-	test_rwlock_trywrlock_when_read_locked();
-	test_rwlock_trywrlock_when_write_locked();
-	test_rwlock_null_pointer_operations();
+	_test_rwlock_init_destroy();
+	_test_rwlock_init_destroy_null_pointer();
+	_test_rwlock_rdlock_unlock();
+	_test_rwlock_wrlock_unlock();
+	_test_rwlock_tryrdlock();
+	_test_rwlock_trywrlock();
+	_test_rwlock_tryrdlock_when_write_locked();
+	_test_rwlock_trywrlock_when_read_locked();
+	_test_rwlock_trywrlock_when_write_locked();
+	_test_rwlock_null_pointer_operations();
 
 	/* 多线程测试 */
-	test_rwlock_multiple_readers();
-	test_rwlock_readers_and_writers();
+	_test_rwlock_multiple_readers();
+	_test_rwlock_readers_and_writers();
 }

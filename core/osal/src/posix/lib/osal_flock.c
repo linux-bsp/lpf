@@ -32,7 +32,7 @@ struct osal_flock_s {
 /**
  * @brief 执行 fcntl 加锁操作
  */
-static int32_t flock_do_lock(int fd, osal_flock_type_t type, int cmd)
+static int32_t _flock_do_lock(int fd, osal_flock_type_t type, int cmd)
 {
 	struct flock lock;
 
@@ -55,7 +55,7 @@ static int32_t flock_do_lock(int fd, osal_flock_type_t type, int cmd)
 /**
  * @brief 执行 fcntl 解锁操作
  */
-static int32_t flock_do_unlock(int fd)
+static int32_t _flock_do_unlock(int fd)
 {
 	struct flock lock;
 
@@ -144,7 +144,7 @@ int32_t osal_flock_lock(osal_flock_t *flock, osal_flock_type_t type)
 	}
 
 	/* 使用 F_SETLKW（阻塞等待） */
-	int32_t ret = flock_do_lock(flock->fd, type, F_SETLKW);
+	int32_t ret = _flock_do_lock(flock->fd, type, F_SETLKW);
 	if (ret == OSAL_SUCCESS) {
 		flock->is_locked = true;
 		flock->current_type = type;
@@ -163,7 +163,7 @@ int32_t osal_flock_try_lock(osal_flock_t *flock, osal_flock_type_t type)
 	}
 
 	/* 使用 F_SETLK（非阻塞） */
-	int32_t ret = flock_do_lock(flock->fd, type, F_SETLK);
+	int32_t ret = _flock_do_lock(flock->fd, type, F_SETLK);
 	if (ret == OSAL_SUCCESS) {
 		flock->is_locked = true;
 		flock->current_type = type;
@@ -233,7 +233,7 @@ int32_t osal_flock_unlock(osal_flock_t *flock)
 		return OSAL_SUCCESS; /* 已经解锁 */
 	}
 
-	int32_t ret = flock_do_unlock(flock->fd);
+	int32_t ret = _flock_do_unlock(flock->fd);
 	if (ret == OSAL_SUCCESS) {
 		flock->is_locked = false;
 	}

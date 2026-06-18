@@ -39,7 +39,7 @@ typedef struct {
 /**
  * Worker function for concurrent send test
  */
-static int32_t can_concurrent_send_worker(void *user_data, uint32_t iteration)
+static int32_t _can_concurrent_send_worker(void *user_data, uint32_t iteration)
 {
 	can_send_worker_ctx_t *ctx = (can_send_worker_ctx_t *)user_data;
 	hal_can_frame_t frame;
@@ -70,7 +70,7 @@ static int32_t can_concurrent_send_worker(void *user_data, uint32_t iteration)
  * Test: CAN concurrent send from multiple threads
  * Verifies: thread-safe transmission, no message loss, buffer management
  */
-static void test_stress_can_concurrent_send(void)
+static void _test_stress_can_concurrent_send(void)
 {
 	hal_can_handle_t handle = NULL;
 	hal_can_config_t config = { .interface = CAN_STRESS_INTERFACE,
@@ -116,7 +116,7 @@ static void test_stress_can_concurrent_send(void)
 
 	/* Run stress test with all workers */
 	for (uint32_t i = 0; i < CAN_STRESS_THREAD_COUNT; i++) {
-		ret = stress_run(stress_ctx, can_concurrent_send_worker,
+		ret = stress_run(stress_ctx, _can_concurrent_send_worker,
 						 &worker_contexts[i]);
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	}
@@ -150,7 +150,7 @@ static void test_stress_can_concurrent_send(void)
 /**
  * TX worker: flood CAN bus with frames
  */
-static int32_t can_flood_tx_worker(void *user_data, uint32_t iteration)
+static int32_t _can_flood_tx_worker(void *user_data, uint32_t iteration)
 {
 	can_flood_worker_ctx_t *ctx = (can_flood_worker_ctx_t *)user_data;
 	hal_can_frame_t frame;
@@ -181,7 +181,7 @@ static int32_t can_flood_tx_worker(void *user_data, uint32_t iteration)
 /**
  * RX worker: receive frames as fast as possible
  */
-static int32_t can_flood_rx_worker(void *user_data, uint32_t iteration)
+static int32_t _can_flood_rx_worker(void *user_data, uint32_t iteration)
 {
 	can_flood_worker_ctx_t *ctx = (can_flood_worker_ctx_t *)user_data;
 	hal_can_frame_t frame;
@@ -203,7 +203,7 @@ static int32_t can_flood_rx_worker(void *user_data, uint32_t iteration)
  * Test: CAN receive buffer flooding
  * Verifies: buffer overflow protection, no data loss, receive performance
  */
-static void test_stress_can_rx_flooding(void)
+static void _test_stress_can_rx_flooding(void)
 {
 	hal_can_handle_t tx_handle = NULL;
 	hal_can_handle_t rx_handle = NULL;
@@ -251,11 +251,11 @@ static void test_stress_can_rx_flooding(void)
 	TEST_ASSERT_NOT_NULL(rx_stress_ctx);
 
 	/* Start TX flood */
-	ret = stress_run(tx_stress_ctx, can_flood_tx_worker, &worker_ctx);
+	ret = stress_run(tx_stress_ctx, _can_flood_tx_worker, &worker_ctx);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* Start RX workers */
-	ret = stress_run(rx_stress_ctx, can_flood_rx_worker, &worker_ctx);
+	ret = stress_run(rx_stress_ctx, _can_flood_rx_worker, &worker_ctx);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* Wait for completion */
@@ -289,7 +289,7 @@ static void test_stress_can_rx_flooding(void)
  * Test: CAN resource exhaustion (max handles)
  * Verifies: graceful failure when resources exhausted, proper cleanup
  */
-static void test_stress_can_resource_exhaustion(void)
+static void _test_stress_can_resource_exhaustion(void)
 {
 	hal_can_handle_t handles[CAN_STRESS_MAX_HANDLES];
 	hal_can_config_t config = { .interface = CAN_STRESS_INTERFACE,
@@ -350,7 +350,7 @@ static void test_stress_can_resource_exhaustion(void)
  * Test: Rapid filter reconfiguration under load
  * Verifies: filter setup stability, no race conditions
  */
-static void test_stress_can_filter_reconfiguration(void)
+static void _test_stress_can_filter_reconfiguration(void)
 {
 	hal_can_handle_t handle = NULL;
 	hal_can_config_t config = { .interface = CAN_STRESS_INTERFACE,
@@ -406,19 +406,19 @@ static void test_stress_can_filter_reconfiguration(void)
 
 static const test_case_t test_cases[] = {
 	{ .name = "test_stress_can_concurrent_send",
-	  .func = test_stress_can_concurrent_send,
+	  .func = _test_stress_can_concurrent_send,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_can_rx_flooding",
-	  .func = test_stress_can_rx_flooding,
+	  .func = _test_stress_can_rx_flooding,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_can_resource_exhaustion",
-	  .func = test_stress_can_resource_exhaustion,
+	  .func = _test_stress_can_resource_exhaustion,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_can_filter_reconfiguration",
-	  .func = test_stress_can_filter_reconfiguration,
+	  .func = _test_stress_can_filter_reconfiguration,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

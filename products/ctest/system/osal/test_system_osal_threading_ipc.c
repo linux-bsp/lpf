@@ -21,7 +21,7 @@ typedef struct {
 	int done;
 } producer_consumer_t;
 
-static void *producer_func(void *arg)
+static void *_producer_func(void *arg)
 {
 	producer_consumer_t *pc = (producer_consumer_t *)arg;
 	int i;
@@ -53,7 +53,7 @@ static void *producer_func(void *arg)
 	return NULL;
 }
 
-static void *consumer_func(void *arg)
+static void *_consumer_func(void *arg)
 {
 	producer_consumer_t *pc = (producer_consumer_t *)arg;
 	int consumed = 0;
@@ -85,7 +85,7 @@ static void *consumer_func(void *arg)
 /**
  * Test producer-consumer pattern
  */
-static void test_producer_consumer_pattern(void)
+static void _test_producer_consumer_pattern(void)
 {
 	osal_printf("[ TEST     ] Producer-consumer pattern\n");
 
@@ -105,13 +105,13 @@ static void test_producer_consumer_pattern(void)
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* Create threads */
-	ret = osal_pthread_create(&producer, NULL, producer_func, &pc);
+	ret = osal_pthread_create(&producer, NULL, _producer_func, &pc);
 	TEST_ASSERT_EQUAL(0, ret);
 
-	ret = osal_pthread_create(&consumer1, NULL, consumer_func, &pc);
+	ret = osal_pthread_create(&consumer1, NULL, _consumer_func, &pc);
 	TEST_ASSERT_EQUAL(0, ret);
 
-	ret = osal_pthread_create(&consumer2, NULL, consumer_func, &pc);
+	ret = osal_pthread_create(&consumer2, NULL, _consumer_func, &pc);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* Wait for completion */
@@ -135,7 +135,7 @@ typedef struct {
 	int shutdown;
 } thread_pool_t;
 
-static void *worker_func(void *arg)
+static void *_worker_func(void *arg)
 {
 	thread_pool_t *pool = (thread_pool_t *)arg;
 
@@ -159,7 +159,7 @@ static void *worker_func(void *arg)
 /**
  * Test thread pool with semaphore coordination
  */
-static void test_thread_pool_semaphore(void)
+static void _test_thread_pool_semaphore(void)
 {
 	osal_printf("[ TEST     ] Thread pool with semaphore coordination\n");
 
@@ -181,7 +181,7 @@ static void test_thread_pool_semaphore(void)
 
 	/* Create worker threads */
 	for (i = 0; i < 4; i++) {
-		ret = osal_pthread_create(&workers[i], NULL, worker_func, &pool);
+		ret = osal_pthread_create(&workers[i], NULL, _worker_func, &pool);
 		TEST_ASSERT_EQUAL(0, ret);
 	}
 
@@ -224,7 +224,7 @@ typedef struct {
 	osal_atomic_uint32_t *shm_counter;
 } shm_ctx_t;
 
-static void *shm_writer_func(void *arg)
+static void *_shm_writer_func(void *arg)
 {
 	shm_ctx_t *ctx = (shm_ctx_t *)arg;
 	uint32_t i;
@@ -245,7 +245,7 @@ static void *shm_writer_func(void *arg)
 /**
  * Test shared memory access from multiple threads
  */
-static void test_shared_memory_multithread(void)
+static void _test_shared_memory_multithread(void)
 {
 	osal_printf("[ TEST     ] Shared memory multi-thread access\n");
 
@@ -283,7 +283,7 @@ static void test_shared_memory_multithread(void)
 
 	/* Create writer threads */
 	for (i = 0; i < 3; i++) {
-		ret = osal_pthread_create(&threads[i], NULL, shm_writer_func, &ctx);
+		ret = osal_pthread_create(&threads[i], NULL, _shm_writer_func, &ctx);
 		TEST_ASSERT_EQUAL(0, ret);
 	}
 
@@ -307,7 +307,7 @@ static void test_shared_memory_multithread(void)
 /**
  * Test condition variable wakeup patterns
  */
-static void test_condition_wakeup_patterns(void)
+static void _test_condition_wakeup_patterns(void)
 {
 	osal_printf("[ TEST     ] Condition variable wakeup patterns\n");
 
@@ -378,19 +378,19 @@ static void test_condition_wakeup_patterns(void)
 /* Test cases array */
 static const test_case_t test_cases[] = {
 	{ .name = "test_producer_consumer_pattern",
-	  .func = test_producer_consumer_pattern,
+	  .func = _test_producer_consumer_pattern,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_thread_pool_semaphore",
-	  .func = test_thread_pool_semaphore,
+	  .func = _test_thread_pool_semaphore,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_shared_memory_multithread",
-	  .func = test_shared_memory_multithread,
+	  .func = _test_shared_memory_multithread,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_condition_wakeup_patterns",
-	  .func = test_condition_wakeup_patterns,
+	  .func = _test_condition_wakeup_patterns,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

@@ -12,7 +12,7 @@
  *===========================================================================*/
 
 /* 创建伪终端对用于测试 */
-static int32_t create_pty(int32_t *master_fd, int32_t *slave_fd)
+static int32_t _create_pty(int32_t *master_fd, int32_t *slave_fd)
 {
 	char name[256];
 
@@ -26,14 +26,14 @@ static int32_t create_pty(int32_t *master_fd, int32_t *slave_fd)
  * 基础功能测试
  *===========================================================================*/
 
-static void test_tcgetattr_tcsetattr(void)
+static void _test_tcgetattr_tcsetattr(void)
 {
 	int32_t master_fd, slave_fd;
 	osal_termios_t term;
 	int32_t ret;
 
 	/* 创建伪终端 */
-	ret = create_pty(&master_fd, &slave_fd);
+	ret = _create_pty(&master_fd, &slave_fd);
 	if (ret < 0) {
 		TEST_SKIP("Cannot create pty");
 		return;
@@ -62,7 +62,7 @@ static void test_tcgetattr_tcsetattr(void)
 	close(slave_fd);
 }
 
-static void test_tcgetattr_invalid_fd(void)
+static void _test_tcgetattr_invalid_fd(void)
 {
 	osal_termios_t term;
 	int32_t ret;
@@ -75,12 +75,12 @@ static void test_tcgetattr_invalid_fd(void)
 	TEST_ASSERT_EQUAL(-1, ret);
 }
 
-static void test_tcgetattr_null_pointer(void)
+static void _test_tcgetattr_null_pointer(void)
 {
 	int32_t master_fd, slave_fd;
 	int32_t ret;
 
-	ret = create_pty(&master_fd, &slave_fd);
+	ret = _create_pty(&master_fd, &slave_fd);
 	if (ret < 0) {
 		TEST_SKIP("Cannot create pty");
 		return;
@@ -94,12 +94,12 @@ static void test_tcgetattr_null_pointer(void)
 	close(slave_fd);
 }
 
-static void test_tcsetattr_null_pointer(void)
+static void _test_tcsetattr_null_pointer(void)
 {
 	int32_t master_fd, slave_fd;
 	int32_t ret;
 
-	ret = create_pty(&master_fd, &slave_fd);
+	ret = _create_pty(&master_fd, &slave_fd);
 	if (ret < 0) {
 		TEST_SKIP("Cannot create pty");
 		return;
@@ -117,7 +117,7 @@ static void test_tcsetattr_null_pointer(void)
  * 波特率测试
  *===========================================================================*/
 
-static void test_cfsetispeed_cfgetispeed(void)
+static void _test_cfsetispeed_cfgetispeed(void)
 {
 	osal_termios_t term;
 	int32_t ret;
@@ -141,7 +141,7 @@ static void test_cfsetispeed_cfgetispeed(void)
 	TEST_ASSERT_EQUAL(OSAL_B115200, speed);
 }
 
-static void test_cfsetospeed_cfgetospeed(void)
+static void _test_cfsetospeed_cfgetospeed(void)
 {
 	osal_termios_t term;
 	int32_t ret;
@@ -165,7 +165,7 @@ static void test_cfsetospeed_cfgetospeed(void)
 	TEST_ASSERT_EQUAL(OSAL_B115200, speed);
 }
 
-static void test_baudrate_common_values(void)
+static void _test_baudrate_common_values(void)
 {
 	osal_termios_t term;
 	int32_t ret;
@@ -191,7 +191,7 @@ static void test_baudrate_common_values(void)
 	}
 }
 
-static void test_cfsetispeed_null_pointer(void)
+static void _test_cfsetispeed_null_pointer(void)
 {
 	int32_t ret;
 
@@ -200,7 +200,7 @@ static void test_cfsetispeed_null_pointer(void)
 	TEST_ASSERT_EQUAL(-1, ret);
 }
 
-static void test_cfsetospeed_null_pointer(void)
+static void _test_cfsetospeed_null_pointer(void)
 {
 	int32_t ret;
 
@@ -213,13 +213,13 @@ static void test_cfsetospeed_null_pointer(void)
  * 控制模式测试
  *===========================================================================*/
 
-static void test_set_raw_mode(void)
+static void _test_set_raw_mode(void)
 {
 	int32_t master_fd, slave_fd;
 	osal_termios_t term;
 	int32_t ret;
 
-	ret = create_pty(&master_fd, &slave_fd);
+	ret = _create_pty(&master_fd, &slave_fd);
 	if (ret < 0) {
 		TEST_SKIP("Cannot create pty");
 		return;
@@ -252,13 +252,13 @@ static void test_set_raw_mode(void)
 	close(slave_fd);
 }
 
-static void test_set_8n1_mode(void)
+static void _test_set_8n1_mode(void)
 {
 	int32_t master_fd, slave_fd;
 	osal_termios_t term;
 	int32_t ret;
 
-	ret = create_pty(&master_fd, &slave_fd);
+	ret = _create_pty(&master_fd, &slave_fd);
 	if (ret < 0) {
 		TEST_SKIP("Cannot create pty");
 		return;
@@ -292,12 +292,12 @@ static void test_set_8n1_mode(void)
  * 队列控制测试
  *===========================================================================*/
 
-static void test_tcflush(void)
+static void _test_tcflush(void)
 {
 	int32_t master_fd, slave_fd;
 	int32_t ret;
 
-	ret = create_pty(&master_fd, &slave_fd);
+	ret = _create_pty(&master_fd, &slave_fd);
 	if (ret < 0) {
 		TEST_SKIP("Cannot create pty");
 		return;
@@ -323,7 +323,7 @@ static void test_tcflush(void)
 	close(slave_fd);
 }
 
-static void test_tcflush_invalid_fd(void)
+static void _test_tcflush_invalid_fd(void)
 {
 	int32_t ret;
 
@@ -332,12 +332,12 @@ static void test_tcflush_invalid_fd(void)
 	TEST_ASSERT_EQUAL(-1, ret);
 }
 
-static void test_tcdrain(void)
+static void _test_tcdrain(void)
 {
 	int32_t master_fd, slave_fd;
 	int32_t ret;
 
-	ret = create_pty(&master_fd, &slave_fd);
+	ret = _create_pty(&master_fd, &slave_fd);
 	if (ret < 0) {
 		TEST_SKIP("Cannot create pty");
 		return;
@@ -355,12 +355,12 @@ static void test_tcdrain(void)
 	close(slave_fd);
 }
 
-static void test_tcsendbreak(void)
+static void _test_tcsendbreak(void)
 {
 	int32_t master_fd, slave_fd;
 	int32_t ret;
 
-	ret = create_pty(&master_fd, &slave_fd);
+	ret = _create_pty(&master_fd, &slave_fd);
 	if (ret < 0) {
 		TEST_SKIP("Cannot create pty");
 		return;
@@ -374,12 +374,12 @@ static void test_tcsendbreak(void)
 	close(slave_fd);
 }
 
-static void test_tcflow(void)
+static void _test_tcflow(void)
 {
 	int32_t master_fd, slave_fd;
 	int32_t ret;
 
-	ret = create_pty(&master_fd, &slave_fd);
+	ret = _create_pty(&master_fd, &slave_fd);
 	if (ret < 0) {
 		TEST_SKIP("Cannot create pty");
 		return;
@@ -409,13 +409,13 @@ static void test_tcflow(void)
  * 串口配置场景测试
  *===========================================================================*/
 
-static void test_configure_serial_115200_8n1(void)
+static void _test_configure_serial_115200_8n1(void)
 {
 	int32_t master_fd, slave_fd;
 	osal_termios_t term;
 	int32_t ret;
 
-	ret = create_pty(&master_fd, &slave_fd);
+	ret = _create_pty(&master_fd, &slave_fd);
 	if (ret < 0) {
 		TEST_SKIP("Cannot create pty");
 		return;
@@ -453,13 +453,13 @@ static void test_configure_serial_115200_8n1(void)
 	close(slave_fd);
 }
 
-static void test_configure_serial_9600_7e1(void)
+static void _test_configure_serial_9600_7e1(void)
 {
 	int32_t master_fd, slave_fd;
 	osal_termios_t term;
 	int32_t ret;
 
-	ret = create_pty(&master_fd, &slave_fd);
+	ret = _create_pty(&master_fd, &slave_fd);
 	if (ret < 0) {
 		TEST_SKIP("Cannot create pty");
 		return;
@@ -501,30 +501,30 @@ static void test_configure_serial_9600_7e1(void)
 void test_osal_termios(void)
 {
 	/* 基础功能测试 */
-	test_tcgetattr_tcsetattr();
-	test_tcgetattr_invalid_fd();
-	test_tcgetattr_null_pointer();
-	test_tcsetattr_null_pointer();
+	_test_tcgetattr_tcsetattr();
+	_test_tcgetattr_invalid_fd();
+	_test_tcgetattr_null_pointer();
+	_test_tcsetattr_null_pointer();
 
 	/* 波特率测试 */
-	test_cfsetispeed_cfgetispeed();
-	test_cfsetospeed_cfgetospeed();
-	test_baudrate_common_values();
-	test_cfsetispeed_null_pointer();
-	test_cfsetospeed_null_pointer();
+	_test_cfsetispeed_cfgetispeed();
+	_test_cfsetospeed_cfgetospeed();
+	_test_baudrate_common_values();
+	_test_cfsetispeed_null_pointer();
+	_test_cfsetospeed_null_pointer();
 
 	/* 控制模式测试 */
-	test_set_raw_mode();
-	test_set_8n1_mode();
+	_test_set_raw_mode();
+	_test_set_8n1_mode();
 
 	/* 队列控制测试 */
-	test_tcflush();
-	test_tcflush_invalid_fd();
-	test_tcdrain();
-	test_tcsendbreak();
-	test_tcflow();
+	_test_tcflush();
+	_test_tcflush_invalid_fd();
+	_test_tcdrain();
+	_test_tcsendbreak();
+	_test_tcflow();
 
 	/* 串口配置场景测试 */
-	test_configure_serial_115200_8n1();
-	test_configure_serial_9600_7e1();
+	_test_configure_serial_115200_8n1();
+	_test_configure_serial_9600_7e1();
 }

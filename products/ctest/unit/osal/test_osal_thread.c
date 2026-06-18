@@ -11,14 +11,14 @@
  * 测试辅助函数
  *===========================================================================*/
 
-static void *simple_thread_func(void *arg)
+static void *_simple_thread_func(void *arg)
 {
 	int32_t *result = (int32_t *)arg;
 	*result = 42;
 	return arg;
 }
 
-static void *sleep_thread_func(void *arg)
+static void *_sleep_thread_func(void *arg)
 {
 	osal_msleep(100);
 	return arg;
@@ -28,7 +28,7 @@ static void *sleep_thread_func(void *arg)
  * 线程创建和销毁测试
  *===========================================================================*/
 
-static void test_thread_create_join_success(void)
+static void _test_thread_create_join_success(void)
 {
 	osal_thread_t thread;
 	int32_t result = 0;
@@ -36,7 +36,7 @@ static void test_thread_create_join_success(void)
 
 	/* 创建线程 */
 	int32_t ret =
-		osal_pthread_create(&thread, NULL, simple_thread_func, &result);
+		osal_pthread_create(&thread, NULL, _simple_thread_func, &result);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 等待线程结束 */
@@ -46,20 +46,21 @@ static void test_thread_create_join_success(void)
 	TEST_ASSERT_EQUAL(&result, retval);
 }
 
-static void test_thread_create_null_pointer(void)
+static void _test_thread_create_null_pointer(void)
 {
 	/* 线程指针为NULL应该失败 */
-	int32_t ret = osal_pthread_create(NULL, NULL, simple_thread_func, NULL);
+	int32_t ret = osal_pthread_create(NULL, NULL, _simple_thread_func, NULL);
 	TEST_ASSERT_NOT_EQUAL(0, ret);
 }
 
-static void test_thread_detach_success(void)
+static void _test_thread_detach_success(void)
 {
 	osal_thread_t thread;
 	int32_t dummy = 0;
 
 	/* 创建线程 */
-	int32_t ret = osal_pthread_create(&thread, NULL, sleep_thread_func, &dummy);
+	int32_t ret =
+		osal_pthread_create(&thread, NULL, _sleep_thread_func, &dummy);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 分离线程 */
@@ -70,7 +71,7 @@ static void test_thread_detach_success(void)
 	osal_msleep(200);
 }
 
-static void test_thread_self(void)
+static void _test_thread_self(void)
 {
 	/* 获取当前线程ID */
 	osal_thread_t self = osal_pthread_self();
@@ -80,14 +81,15 @@ static void test_thread_self(void)
 	TEST_ASSERT_TRUE(pthread_equal(self, self2));
 }
 
-static void test_thread_equal(void)
+static void _test_thread_equal(void)
 {
 	osal_thread_t self = osal_pthread_self();
 	osal_thread_t thread;
 	int32_t dummy = 0;
 
 	/* 创建另一个线程 */
-	int32_t ret = osal_pthread_create(&thread, NULL, sleep_thread_func, &dummy);
+	int32_t ret =
+		osal_pthread_create(&thread, NULL, _sleep_thread_func, &dummy);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 两个线程ID应该不同 */
@@ -105,7 +107,7 @@ static void test_thread_equal(void)
  * 线程属性测试
  *===========================================================================*/
 
-static void test_thread_attr_init_destroy(void)
+static void _test_thread_attr_init_destroy(void)
 {
 	osal_threadattr_t attr;
 
@@ -118,7 +120,7 @@ static void test_thread_attr_init_destroy(void)
 	TEST_ASSERT_EQUAL(0, ret);
 }
 
-static void test_thread_attr_detachstate(void)
+static void _test_thread_attr_detachstate(void)
 {
 	osal_threadattr_t attr;
 	int32_t state;
@@ -144,7 +146,7 @@ static void test_thread_attr_detachstate(void)
 
 static int32_t shared_counter = 0;
 
-static void *increment_thread_func(void *arg)
+static void *_increment_thread_func(void *arg)
 {
 	int32_t count = *(int32_t *)arg;
 	for (int32_t i = 0; i < count; i++) {
@@ -153,7 +155,7 @@ static void *increment_thread_func(void *arg)
 	return NULL;
 }
 
-static void test_thread_multithread_execution(void)
+static void _test_thread_multithread_execution(void)
 {
 	const int32_t NUM_THREADS = 4;
 	const int32_t INCREMENTS_PER_THREAD = 1000;
@@ -165,7 +167,7 @@ static void test_thread_multithread_execution(void)
 	/* 创建多个线程 */
 	for (int32_t i = 0; i < NUM_THREADS; i++) {
 		int32_t ret = osal_pthread_create(&threads[i], NULL,
-										  increment_thread_func, &count);
+										  _increment_thread_func, &count);
 		TEST_ASSERT_EQUAL(0, ret);
 	}
 
@@ -184,35 +186,35 @@ static void test_thread_multithread_execution(void)
 
 static const test_case_t test_cases[] = {
 	{ .name = "test_thread_create_join_success",
-	  .func = test_thread_create_join_success,
+	  .func = _test_thread_create_join_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_thread_create_null_pointer",
-	  .func = test_thread_create_null_pointer,
+	  .func = _test_thread_create_null_pointer,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_thread_detach_success",
-	  .func = test_thread_detach_success,
+	  .func = _test_thread_detach_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_thread_self",
-	  .func = test_thread_self,
+	  .func = _test_thread_self,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_thread_equal",
-	  .func = test_thread_equal,
+	  .func = _test_thread_equal,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_thread_attr_init_destroy",
-	  .func = test_thread_attr_init_destroy,
+	  .func = _test_thread_attr_init_destroy,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_thread_attr_detachstate",
-	  .func = test_thread_attr_detachstate,
+	  .func = _test_thread_attr_detachstate,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_thread_multithread_execution",
-	  .func = test_thread_multithread_execution,
+	  .func = _test_thread_multithread_execution,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

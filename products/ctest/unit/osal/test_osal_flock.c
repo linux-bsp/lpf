@@ -15,7 +15,7 @@
  * 基础功能测试
  *===========================================================================*/
 
-static void test_flock_create_destroy(void)
+static void _test_flock_create_destroy(void)
 {
 	osal_flock_t *flock = NULL;
 	int32_t ret;
@@ -30,7 +30,7 @@ static void test_flock_create_destroy(void)
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 }
 
-static void test_flock_create_null_path(void)
+static void _test_flock_create_null_path(void)
 {
 	osal_flock_t *flock = NULL;
 	int32_t ret;
@@ -40,7 +40,7 @@ static void test_flock_create_null_path(void)
 	TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_POINTER, ret);
 }
 
-static void test_flock_create_null_output(void)
+static void _test_flock_create_null_output(void)
 {
 	int32_t ret;
 
@@ -49,7 +49,7 @@ static void test_flock_create_null_output(void)
 	TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_POINTER, ret);
 }
 
-static void test_flock_destroy_null_pointer(void)
+static void _test_flock_destroy_null_pointer(void)
 {
 	int32_t ret;
 
@@ -62,7 +62,7 @@ static void test_flock_destroy_null_pointer(void)
  * 独占锁测试
  *===========================================================================*/
 
-static void test_flock_exclusive_lock_unlock(void)
+static void _test_flock_exclusive_lock_unlock(void)
 {
 	osal_flock_t *flock = NULL;
 	int32_t ret;
@@ -81,7 +81,7 @@ static void test_flock_exclusive_lock_unlock(void)
 	osal_flock_destroy(flock);
 }
 
-static void test_flock_try_lock_exclusive(void)
+static void _test_flock_try_lock_exclusive(void)
 {
 	osal_flock_t *flock = NULL;
 	int32_t ret;
@@ -100,7 +100,7 @@ static void test_flock_try_lock_exclusive(void)
 	osal_flock_destroy(flock);
 }
 
-static void test_flock_exclusive_blocks_exclusive(void)
+static void _test_flock_exclusive_blocks_exclusive(void)
 {
 	osal_flock_t *flock1 = NULL;
 	osal_flock_t *flock2 = NULL;
@@ -139,7 +139,7 @@ static void test_flock_exclusive_blocks_exclusive(void)
  * 共享锁测试
  *===========================================================================*/
 
-static void test_flock_shared_lock_unlock(void)
+static void _test_flock_shared_lock_unlock(void)
 {
 	osal_flock_t *flock = NULL;
 	int32_t ret;
@@ -158,7 +158,7 @@ static void test_flock_shared_lock_unlock(void)
 	osal_flock_destroy(flock);
 }
 
-static void test_flock_multiple_shared_locks(void)
+static void _test_flock_multiple_shared_locks(void)
 {
 	osal_flock_t *flock1 = NULL;
 	osal_flock_t *flock2 = NULL;
@@ -194,7 +194,7 @@ static void test_flock_multiple_shared_locks(void)
 	osal_flock_destroy(flock3);
 }
 
-static void test_flock_shared_blocks_exclusive(void)
+static void _test_flock_shared_blocks_exclusive(void)
 {
 	osal_flock_t *flock1 = NULL;
 	osal_flock_t *flock2 = NULL;
@@ -229,7 +229,7 @@ static void test_flock_shared_blocks_exclusive(void)
 	osal_flock_destroy(flock2);
 }
 
-static void test_flock_exclusive_blocks_shared(void)
+static void _test_flock_exclusive_blocks_shared(void)
 {
 	osal_flock_t *flock1 = NULL;
 	osal_flock_t *flock2 = NULL;
@@ -268,7 +268,7 @@ static void test_flock_exclusive_blocks_shared(void)
  * 超时锁测试
  *===========================================================================*/
 
-static void test_flock_timed_lock_success(void)
+static void _test_flock_timed_lock_success(void)
 {
 	osal_flock_t *flock = NULL;
 	int32_t ret;
@@ -286,7 +286,7 @@ static void test_flock_timed_lock_success(void)
 	osal_flock_destroy(flock);
 }
 
-static void test_flock_timed_lock_timeout(void)
+static void _test_flock_timed_lock_timeout(void)
 {
 	osal_flock_t *flock1 = NULL;
 	osal_flock_t *flock2 = NULL;
@@ -322,7 +322,7 @@ static void test_flock_timed_lock_timeout(void)
  * 错误处理测试
  *===========================================================================*/
 
-static void test_flock_lock_null_pointer(void)
+static void _test_flock_lock_null_pointer(void)
 {
 	int32_t ret;
 
@@ -331,7 +331,7 @@ static void test_flock_lock_null_pointer(void)
 	TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_POINTER, ret);
 }
 
-static void test_flock_unlock_null_pointer(void)
+static void _test_flock_unlock_null_pointer(void)
 {
 	int32_t ret;
 
@@ -340,7 +340,7 @@ static void test_flock_unlock_null_pointer(void)
 	TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_POINTER, ret);
 }
 
-static void test_flock_try_lock_null_pointer(void)
+static void _test_flock_try_lock_null_pointer(void)
 {
 	int32_t ret;
 
@@ -349,7 +349,7 @@ static void test_flock_try_lock_null_pointer(void)
 	TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_POINTER, ret);
 }
 
-static void test_flock_timed_lock_null_pointer(void)
+static void _test_flock_timed_lock_null_pointer(void)
 {
 	int32_t ret;
 
@@ -368,7 +368,7 @@ typedef struct {
 	int32_t iterations;
 } flock_thread_ctx_t;
 
-static void *flock_exclusive_thread(void *arg)
+static void *_flock_exclusive_thread(void *arg)
 {
 	flock_thread_ctx_t *ctx = (flock_thread_ctx_t *)arg;
 
@@ -381,7 +381,7 @@ static void *flock_exclusive_thread(void *arg)
 	return NULL;
 }
 
-static void test_flock_multiple_threads_exclusive(void)
+static void _test_flock_multiple_threads_exclusive(void)
 {
 	osal_flock_t *flock = NULL;
 	int32_t shared_counter = 0;
@@ -397,7 +397,8 @@ static void test_flock_multiple_threads_exclusive(void)
 		ctx[i].flock = flock;
 		ctx[i].shared_counter = &shared_counter;
 		ctx[i].iterations = 100;
-		osal_pthread_create(&threads[i], NULL, flock_exclusive_thread, &ctx[i]);
+		osal_pthread_create(&threads[i], NULL, _flock_exclusive_thread,
+							&ctx[i]);
 	}
 
 	/* 等待所有线程完成 */
@@ -415,7 +416,7 @@ static void test_flock_multiple_threads_exclusive(void)
  * 实际场景测试
  *===========================================================================*/
 
-static void test_flock_upgrade_lock(void)
+static void _test_flock_upgrade_lock(void)
 {
 	osal_flock_t *flock = NULL;
 	int32_t ret;
@@ -442,7 +443,7 @@ static void test_flock_upgrade_lock(void)
 	osal_flock_destroy(flock);
 }
 
-static void test_flock_different_files(void)
+static void _test_flock_different_files(void)
 {
 	osal_flock_t *flock1 = NULL;
 	osal_flock_t *flock2 = NULL;
@@ -480,36 +481,36 @@ static void test_flock_different_files(void)
 void test_osal_flock(void)
 {
 	/* 基础功能测试 */
-	test_flock_create_destroy();
-	test_flock_create_null_path();
-	test_flock_create_null_output();
-	test_flock_destroy_null_pointer();
+	_test_flock_create_destroy();
+	_test_flock_create_null_path();
+	_test_flock_create_null_output();
+	_test_flock_destroy_null_pointer();
 
 	/* 独占锁测试 */
-	test_flock_exclusive_lock_unlock();
-	test_flock_try_lock_exclusive();
-	test_flock_exclusive_blocks_exclusive();
+	_test_flock_exclusive_lock_unlock();
+	_test_flock_try_lock_exclusive();
+	_test_flock_exclusive_blocks_exclusive();
 
 	/* 共享锁测试 */
-	test_flock_shared_lock_unlock();
-	test_flock_multiple_shared_locks();
-	test_flock_shared_blocks_exclusive();
-	test_flock_exclusive_blocks_shared();
+	_test_flock_shared_lock_unlock();
+	_test_flock_multiple_shared_locks();
+	_test_flock_shared_blocks_exclusive();
+	_test_flock_exclusive_blocks_shared();
 
 	/* 超时锁测试 */
-	test_flock_timed_lock_success();
-	test_flock_timed_lock_timeout();
+	_test_flock_timed_lock_success();
+	_test_flock_timed_lock_timeout();
 
 	/* 错误处理测试 */
-	test_flock_lock_null_pointer();
-	test_flock_unlock_null_pointer();
-	test_flock_try_lock_null_pointer();
-	test_flock_timed_lock_null_pointer();
+	_test_flock_lock_null_pointer();
+	_test_flock_unlock_null_pointer();
+	_test_flock_try_lock_null_pointer();
+	_test_flock_timed_lock_null_pointer();
 
 	/* 多线程测试 */
-	test_flock_multiple_threads_exclusive();
+	_test_flock_multiple_threads_exclusive();
 
 	/* 实际场景测试 */
-	test_flock_upgrade_lock();
-	test_flock_different_files();
+	_test_flock_upgrade_lock();
+	_test_flock_different_files();
 }

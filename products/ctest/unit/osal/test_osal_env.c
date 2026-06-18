@@ -10,7 +10,7 @@
  * 测试用例
  *===========================================================================*/
 
-static void test_osal_getenv_existing(void)
+static void _test_osal_getenv_existing(void)
 {
 	/* Get an existing environment variable */
 	char *value = osal_getenv("PATH");
@@ -18,14 +18,14 @@ static void test_osal_getenv_existing(void)
 	TEST_ASSERT_TRUE(osal_strlen(value) > 0);
 }
 
-static void test_osal_getenv_nonexistent(void)
+static void _test_osal_getenv_nonexistent(void)
 {
 	/* Get a non-existent environment variable */
 	char *value = osal_getenv("OSAL_NONEXISTENT_VAR_12345");
 	TEST_ASSERT_NULL(value);
 }
 
-static void test_osal_setenv_new_variable(void)
+static void _test_osal_setenv_new_variable(void)
 {
 	/* Set a new environment variable */
 	int32_t ret = osal_setenv("OSAL_TEST_VAR", "test_value", 1);
@@ -40,7 +40,7 @@ static void test_osal_setenv_new_variable(void)
 	osal_unsetenv("OSAL_TEST_VAR");
 }
 
-static void test_osal_setenv_overwrite(void)
+static void _test_osal_setenv_overwrite(void)
 {
 	/* Set initial value */
 	osal_setenv("OSAL_TEST_VAR2", "initial", 1);
@@ -58,7 +58,7 @@ static void test_osal_setenv_overwrite(void)
 	osal_unsetenv("OSAL_TEST_VAR2");
 }
 
-static void test_osal_setenv_no_overwrite(void)
+static void _test_osal_setenv_no_overwrite(void)
 {
 	/* Set initial value */
 	osal_setenv("OSAL_TEST_VAR3", "initial", 1);
@@ -76,7 +76,7 @@ static void test_osal_setenv_no_overwrite(void)
 	osal_unsetenv("OSAL_TEST_VAR3");
 }
 
-static void test_osal_unsetenv_existing(void)
+static void _test_osal_unsetenv_existing(void)
 {
 	/* Set a variable */
 	osal_setenv("OSAL_TEST_VAR4", "temp_value", 1);
@@ -90,14 +90,14 @@ static void test_osal_unsetenv_existing(void)
 	TEST_ASSERT_NULL(value);
 }
 
-static void test_osal_unsetenv_nonexistent(void)
+static void _test_osal_unsetenv_nonexistent(void)
 {
 	/* Unset a non-existent variable (should succeed) */
 	int32_t ret = osal_unsetenv("OSAL_NONEXISTENT_VAR_67890");
 	TEST_ASSERT_EQUAL(0, ret);
 }
 
-static void test_osal_env_empty_value(void)
+static void _test_osal_env_empty_value(void)
 {
 	/* Set variable with empty value */
 	int32_t ret = osal_setenv("OSAL_TEST_VAR5", "", 1);
@@ -119,35 +119,35 @@ static void test_osal_env_empty_value(void)
 /* 测试用例数组 - 使用函数指针数组 */
 static const test_case_t test_cases[] = {
 	{ .name = "test_osal_getenv_existing",
-	  .func = test_osal_getenv_existing,
+	  .func = _test_osal_getenv_existing,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_getenv_nonexistent",
-	  .func = test_osal_getenv_nonexistent,
+	  .func = _test_osal_getenv_nonexistent,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_setenv_new_variable",
-	  .func = test_osal_setenv_new_variable,
+	  .func = _test_osal_setenv_new_variable,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_setenv_overwrite",
-	  .func = test_osal_setenv_overwrite,
+	  .func = _test_osal_setenv_overwrite,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_setenv_no_overwrite",
-	  .func = test_osal_setenv_no_overwrite,
+	  .func = _test_osal_setenv_no_overwrite,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_unsetenv_existing",
-	  .func = test_osal_unsetenv_existing,
+	  .func = _test_osal_unsetenv_existing,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_unsetenv_nonexistent",
-	  .func = test_osal_unsetenv_nonexistent,
+	  .func = _test_osal_unsetenv_nonexistent,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_env_empty_value",
-	  .func = test_osal_env_empty_value,
+	  .func = _test_osal_env_empty_value,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

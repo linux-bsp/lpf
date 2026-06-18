@@ -37,7 +37,7 @@ typedef struct {
 /**
  * CAN worker thread
  */
-static void *can_worker_thread(void *arg)
+static void *_can_worker_thread(void *arg)
 {
 	concurrent_test_ctx_t *ctx = (concurrent_test_ctx_t *)arg;
 	hal_can_frame_t frame;
@@ -69,7 +69,7 @@ static void *can_worker_thread(void *arg)
 /**
  * Serial worker thread
  */
-static void *serial_worker_thread(void *arg)
+static void *_serial_worker_thread(void *arg)
 {
 	concurrent_test_ctx_t *ctx = (concurrent_test_ctx_t *)arg;
 	uint8_t buffer[64];
@@ -99,7 +99,7 @@ static void *serial_worker_thread(void *arg)
 /**
  * SPI worker thread
  */
-static void *spi_worker_thread(void *arg)
+static void *_spi_worker_thread(void *arg)
 {
 	concurrent_test_ctx_t *ctx = (concurrent_test_ctx_t *)arg;
 	uint8_t tx_buffer[32];
@@ -131,7 +131,7 @@ static void *spi_worker_thread(void *arg)
 /**
  * I2C worker thread
  */
-static void *i2c_worker_thread(void *arg)
+static void *_i2c_worker_thread(void *arg)
 {
 	concurrent_test_ctx_t *ctx = (concurrent_test_ctx_t *)arg;
 	uint8_t data[8];
@@ -161,7 +161,7 @@ static void *i2c_worker_thread(void *arg)
 /**
  * GPIO worker thread
  */
-static void *gpio_worker_thread(void *arg)
+static void *_gpio_worker_thread(void *arg)
 {
 	concurrent_test_ctx_t *ctx = (concurrent_test_ctx_t *)arg;
 	int32_t ret;
@@ -194,7 +194,7 @@ static void *gpio_worker_thread(void *arg)
  * Test: All HAL drivers operating simultaneously
  * Verifies: driver independence, no side effects, system stability
  */
-static void test_stress_hal_all_drivers_concurrent(void)
+static void _test_stress_hal_all_drivers_concurrent(void)
 {
 	concurrent_test_ctx_t ctx;
 	osal_thread_t threads[5];
@@ -276,23 +276,23 @@ static void test_stress_hal_all_drivers_concurrent(void)
 	uint32_t thread_idx = 0;
 
 	if (ctx.can_handle) {
-		osal_pthread_create(&threads[thread_idx++], NULL, can_worker_thread,
+		osal_pthread_create(&threads[thread_idx++], NULL, _can_worker_thread,
 							&ctx);
 	}
 	if (ctx.serial_handle) {
-		osal_pthread_create(&threads[thread_idx++], NULL, serial_worker_thread,
+		osal_pthread_create(&threads[thread_idx++], NULL, _serial_worker_thread,
 							&ctx);
 	}
 	if (ctx.spi_handle) {
-		osal_pthread_create(&threads[thread_idx++], NULL, spi_worker_thread,
+		osal_pthread_create(&threads[thread_idx++], NULL, _spi_worker_thread,
 							&ctx);
 	}
 	if (ctx.i2c_handle) {
-		osal_pthread_create(&threads[thread_idx++], NULL, i2c_worker_thread,
+		osal_pthread_create(&threads[thread_idx++], NULL, _i2c_worker_thread,
 							&ctx);
 	}
 	if (ctx.gpio_pin) {
-		osal_pthread_create(&threads[thread_idx++], NULL, gpio_worker_thread,
+		osal_pthread_create(&threads[thread_idx++], NULL, _gpio_worker_thread,
 							&ctx);
 	}
 
@@ -381,7 +381,7 @@ cleanup:
 
 static const test_case_t test_cases[] = {
 	{ .name = "test_stress_hal_all_drivers_concurrent",
-	  .func = test_stress_hal_all_drivers_concurrent,
+	  .func = _test_stress_hal_all_drivers_concurrent,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

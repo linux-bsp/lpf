@@ -9,7 +9,7 @@
 #include "osal.h"
 #include "aconfig.h"
 
-static void test_aconfig_get_table(void)
+static void _test_aconfig_get_table(void)
 {
 	const aconfig_config_table_t *table = aconfig_get_table();
 
@@ -21,7 +21,7 @@ static void test_aconfig_get_table(void)
 
 static const test_case_t test_cases[] = {
 	{ .name = "test_aconfig_get_table",
-	  .func = test_aconfig_get_table,
+	  .func = _test_aconfig_get_table,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

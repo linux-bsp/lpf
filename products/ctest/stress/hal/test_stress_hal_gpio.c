@@ -39,7 +39,7 @@ typedef struct {
 /**
  * Worker function for high-frequency toggling
  */
-static int32_t gpio_toggle_worker(void *user_data, uint32_t iteration)
+static int32_t _gpio_toggle_worker(void *user_data, uint32_t iteration)
 {
 	gpio_worker_ctx_t *ctx = (gpio_worker_ctx_t *)user_data;
 	int32_t ret;
@@ -60,7 +60,7 @@ static int32_t gpio_toggle_worker(void *user_data, uint32_t iteration)
  * Test: High-frequency GPIO pin toggling
  * Verifies: maximum toggle rate, no state corruption
  */
-static void test_stress_gpio_high_frequency_toggle(void)
+static void _test_stress_gpio_high_frequency_toggle(void)
 {
 	hal_gpio_handle_t handles[GPIO_STRESS_THREAD_COUNT];
 	hal_gpio_config_t config;
@@ -115,7 +115,7 @@ static void test_stress_gpio_high_frequency_toggle(void)
 	start_time = 0;
 
 	for (uint32_t i = 0; i < GPIO_STRESS_THREAD_COUNT; i++) {
-		ret = stress_run(stress_ctx, gpio_toggle_worker, &worker_ctx[i]);
+		ret = stress_run(stress_ctx, _gpio_toggle_worker, &worker_ctx[i]);
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	}
 
@@ -160,8 +160,8 @@ static void test_stress_gpio_high_frequency_toggle(void)
 /**
  * Worker for concurrent read/write
  */
-static int32_t gpio_concurrent_access_worker(void *user_data,
-											 uint32_t iteration)
+static int32_t _gpio_concurrent_access_worker(void *user_data,
+											  uint32_t iteration)
 {
 	gpio_worker_ctx_t *ctx = (gpio_worker_ctx_t *)user_data;
 	int32_t ret;
@@ -194,7 +194,7 @@ static int32_t gpio_concurrent_access_worker(void *user_data,
  * Test: Concurrent access to multiple GPIO pins
  * Verifies: thread safety, state consistency
  */
-static void test_stress_gpio_concurrent_access(void)
+static void _test_stress_gpio_concurrent_access(void)
 {
 	hal_gpio_handle_t handles[GPIO_STRESS_PIN_COUNT];
 	hal_gpio_config_t config;
@@ -246,7 +246,7 @@ static void test_stress_gpio_concurrent_access(void)
 
 	/* Run stress test */
 	for (uint32_t i = 0; i < GPIO_STRESS_PIN_COUNT; i++) {
-		ret = stress_run(stress_ctx, gpio_concurrent_access_worker,
+		ret = stress_run(stress_ctx, _gpio_concurrent_access_worker,
 						 &worker_ctx[i]);
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	}
@@ -282,8 +282,8 @@ static void test_stress_gpio_concurrent_access(void)
 /**
  * Interrupt callback for storm test
  */
-static void gpio_interrupt_storm_callback(uint32_t pin, hal_gpio_level_t level,
-										  void *user_data)
+static void _gpio_interrupt_storm_callback(uint32_t pin, hal_gpio_level_t level,
+										   void *user_data)
 {
 	gpio_interrupt_ctx_t *ctx = (gpio_interrupt_ctx_t *)user_data;
 
@@ -300,7 +300,7 @@ static void gpio_interrupt_storm_callback(uint32_t pin, hal_gpio_level_t level,
  * Test: Interrupt storm handling (many interrupts per second)
  * Verifies: interrupt handler stability, no missed interrupts
  */
-static void test_stress_gpio_interrupt_storm(void)
+static void _test_stress_gpio_interrupt_storm(void)
 {
 	gpio_interrupt_ctx_t ctx;
 	hal_gpio_config_t config;
@@ -324,7 +324,7 @@ static void test_stress_gpio_interrupt_storm(void)
 		config.direction = HAL_GPIO_DIRECTION_OUTPUT;
 		config.level = HAL_GPIO_LEVEL_LOW;
 		config.interrupt_mode = HAL_GPIO_INTERRUPT_BOTH_EDGES;
-		config.callback = gpio_interrupt_storm_callback;
+		config.callback = _gpio_interrupt_storm_callback;
 		config.user_data = &ctx;
 
 		ret = hal_gpio_init(&config, &ctx.handles[i]);
@@ -402,7 +402,7 @@ static void test_stress_gpio_interrupt_storm(void)
  * Test: Rapid direction and configuration changes
  * Verifies: configuration stability, no race conditions
  */
-static void test_stress_gpio_rapid_config_changes(void)
+static void _test_stress_gpio_rapid_config_changes(void)
 {
 	hal_gpio_handle_t handle = NULL;
 	hal_gpio_config_t config = { .pin = GPIO_STRESS_PIN_BASE,
@@ -465,19 +465,19 @@ static void test_stress_gpio_rapid_config_changes(void)
 
 static const test_case_t test_cases[] = {
 	{ .name = "test_stress_gpio_high_frequency_toggle",
-	  .func = test_stress_gpio_high_frequency_toggle,
+	  .func = _test_stress_gpio_high_frequency_toggle,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_gpio_concurrent_access",
-	  .func = test_stress_gpio_concurrent_access,
+	  .func = _test_stress_gpio_concurrent_access,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_gpio_interrupt_storm",
-	  .func = test_stress_gpio_interrupt_storm,
+	  .func = _test_stress_gpio_interrupt_storm,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_gpio_rapid_config_changes",
-	  .func = test_stress_gpio_rapid_config_changes,
+	  .func = _test_stress_gpio_rapid_config_changes,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

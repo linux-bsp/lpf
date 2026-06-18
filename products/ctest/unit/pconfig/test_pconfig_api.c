@@ -7,7 +7,7 @@
 #include "osal.h"
 #include "pconfig/pconfig.h"
 
-static void test_pconfig_get_board(void)
+static void _test_pconfig_get_board(void)
 {
 	const pconfig_platform_config_t *cfg = pconfig_get_board();
 	TEST_ASSERT_NOT_NULL(cfg);
@@ -15,7 +15,7 @@ static void test_pconfig_get_board(void)
 	TEST_ASSERT_EQUAL(0, osal_strcmp(cfg->product_name, "middleware"));
 }
 
-static void test_pconfig_find_by_name(void)
+static void _test_pconfig_find_by_name(void)
 {
 	const pconfig_platform_config_t *cfg =
 		pconfig_find("ti", "framework", NULL);
@@ -23,7 +23,7 @@ static void test_pconfig_find_by_name(void)
 	TEST_ASSERT_EQUAL(0, osal_strcmp(cfg->chip_name, "am625"));
 }
 
-static void test_pconfig_find_alt_config(void)
+static void _test_pconfig_find_alt_config(void)
 {
 	const pconfig_platform_config_t *cfg =
 		pconfig_find("ti", "framework_alt", NULL);
@@ -31,14 +31,14 @@ static void test_pconfig_find_alt_config(void)
 	TEST_ASSERT_EQUAL(0, osal_strcmp(cfg->product_name, "framework_alt"));
 }
 
-static void test_pconfig_find_missing_config(void)
+static void _test_pconfig_find_missing_config(void)
 {
 	const pconfig_platform_config_t *cfg =
 		pconfig_find("missing", "framework", NULL);
 	TEST_ASSERT_NULL(cfg);
 }
 
-static void test_pconfig_hw_get_mcu_by_id(void)
+static void _test_pconfig_hw_get_mcu_by_id(void)
 {
 	const pconfig_platform_config_t *platform =
 		pconfig_find("ti", "framework", NULL);
@@ -47,7 +47,7 @@ static void test_pconfig_hw_get_mcu_by_id(void)
 	TEST_ASSERT_EQUAL(0, osal_strcmp(mcu->config.name, "mcu0"));
 }
 
-static void test_pconfig_hw_get_mcu_second_entry(void)
+static void _test_pconfig_hw_get_mcu_second_entry(void)
 {
 	const pconfig_platform_config_t *platform =
 		pconfig_find("ti", "framework", NULL);
@@ -56,12 +56,12 @@ static void test_pconfig_hw_get_mcu_second_entry(void)
 	TEST_ASSERT_EQUAL(0, osal_strcmp(mcu->config.name, "mcu1"));
 }
 
-static void test_pconfig_validate_success(void)
+static void _test_pconfig_validate_success(void)
 {
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, pconfig_validate(pconfig_get_board()));
 }
 
-static void test_pconfig_list(void)
+static void _test_pconfig_list(void)
 {
 	const pconfig_platform_config_t *configs[10];
 	uint32_t count = 10;
@@ -75,35 +75,35 @@ static void test_pconfig_list(void)
 
 static const test_case_t test_cases[] = {
 	{ .name = "test_pconfig_get_board",
-	  .func = test_pconfig_get_board,
+	  .func = _test_pconfig_get_board,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_pconfig_find_by_name",
-	  .func = test_pconfig_find_by_name,
+	  .func = _test_pconfig_find_by_name,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_pconfig_find_alt_config",
-	  .func = test_pconfig_find_alt_config,
+	  .func = _test_pconfig_find_alt_config,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_pconfig_find_missing_config",
-	  .func = test_pconfig_find_missing_config,
+	  .func = _test_pconfig_find_missing_config,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_pconfig_hw_get_mcu_by_id",
-	  .func = test_pconfig_hw_get_mcu_by_id,
+	  .func = _test_pconfig_hw_get_mcu_by_id,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_pconfig_hw_get_mcu_second_entry",
-	  .func = test_pconfig_hw_get_mcu_second_entry,
+	  .func = _test_pconfig_hw_get_mcu_second_entry,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_pconfig_validate_success",
-	  .func = test_pconfig_validate_success,
+	  .func = _test_pconfig_validate_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_pconfig_list",
-	  .func = test_pconfig_list,
+	  .func = _test_pconfig_list,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

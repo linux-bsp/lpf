@@ -9,7 +9,7 @@
  * 基础功能测试
  *===========================================================================*/
 
-static void test_socket_create_close(void)
+static void _test_socket_create_close(void)
 {
 	/* 测试创建TCP socket */
 	int32_t sockfd =
@@ -21,7 +21,7 @@ static void test_socket_create_close(void)
 	TEST_ASSERT_EQUAL(0, ret);
 }
 
-static void test_socket_create_udp(void)
+static void _test_socket_create_udp(void)
 {
 	/* 测试创建UDP socket */
 	int32_t sockfd =
@@ -31,14 +31,14 @@ static void test_socket_create_udp(void)
 	osal_close(sockfd);
 }
 
-static void test_socket_create_invalid_domain(void)
+static void _test_socket_create_invalid_domain(void)
 {
 	/* 测试无效的协议族 */
 	int32_t sockfd = osal_socket(999, OSAL_SOCK_STREAM, OSAL_IPPROTO_TCP);
 	TEST_ASSERT_EQUAL(-1, sockfd);
 }
 
-static void test_socket_bind(void)
+static void _test_socket_bind(void)
 {
 	int32_t sockfd;
 	osal_sockaddr_in_t addr;
@@ -60,7 +60,7 @@ static void test_socket_bind(void)
 	osal_close(sockfd);
 }
 
-static void test_socket_bind_null_addr(void)
+static void _test_socket_bind_null_addr(void)
 {
 	int32_t sockfd;
 	int32_t ret;
@@ -75,7 +75,7 @@ static void test_socket_bind_null_addr(void)
 	osal_close(sockfd);
 }
 
-static void test_socket_listen(void)
+static void _test_socket_listen(void)
 {
 	int32_t sockfd;
 	osal_sockaddr_in_t addr;
@@ -99,7 +99,7 @@ static void test_socket_listen(void)
 	osal_close(sockfd);
 }
 
-static void test_socket_setsockopt_reuseaddr(void)
+static void _test_socket_setsockopt_reuseaddr(void)
 {
 	int32_t sockfd;
 	int32_t optval = 1;
@@ -116,7 +116,7 @@ static void test_socket_setsockopt_reuseaddr(void)
 	osal_close(sockfd);
 }
 
-static void test_socket_getsockopt(void)
+static void _test_socket_getsockopt(void)
 {
 	int32_t sockfd;
 	int32_t optval = 0;
@@ -135,7 +135,7 @@ static void test_socket_getsockopt(void)
 	osal_close(sockfd);
 }
 
-static void test_socket_shutdown(void)
+static void _test_socket_shutdown(void)
 {
 	int32_t sockfd;
 	int32_t ret;
@@ -154,7 +154,7 @@ static void test_socket_shutdown(void)
  * 字节序转换测试
  *===========================================================================*/
 
-static void test_htons(void)
+static void _test_htons(void)
 {
 	uint16_t host_val = 0x1234;
 	uint16_t net_val = osal_htons(host_val);
@@ -166,7 +166,7 @@ static void test_htons(void)
 #endif
 }
 
-static void test_htonl(void)
+static void _test_htonl(void)
 {
 	uint32_t host_val = 0x12345678;
 	uint32_t net_val = osal_htonl(host_val);
@@ -178,7 +178,7 @@ static void test_htonl(void)
 #endif
 }
 
-static void test_ntohs(void)
+static void _test_ntohs(void)
 {
 	uint16_t net_val = 0x1234;
 	uint16_t host_val = osal_ntohs(net_val);
@@ -190,7 +190,7 @@ static void test_ntohs(void)
 #endif
 }
 
-static void test_ntohl(void)
+static void _test_ntohl(void)
 {
 	uint32_t net_val = 0x12345678;
 	uint32_t host_val = osal_ntohl(net_val);
@@ -202,7 +202,7 @@ static void test_ntohl(void)
 #endif
 }
 
-static void test_byteorder_round_trip(void)
+static void _test_byteorder_round_trip(void)
 {
 	uint16_t val16 = 0xABCD;
 	uint32_t val32 = 0xDEADBEEF;
@@ -216,7 +216,7 @@ static void test_byteorder_round_trip(void)
  * IP地址转换测试
  *===========================================================================*/
 
-static void test_inet_pton_ipv4(void)
+static void _test_inet_pton_ipv4(void)
 {
 	uint32_t addr;
 	int32_t ret;
@@ -237,7 +237,7 @@ static void test_inet_pton_ipv4(void)
 	TEST_ASSERT_EQUAL(0, addr);
 }
 
-static void test_inet_pton_ipv4_invalid(void)
+static void _test_inet_pton_ipv4_invalid(void)
 {
 	uint32_t addr;
 	int32_t ret;
@@ -253,7 +253,7 @@ static void test_inet_pton_ipv4_invalid(void)
 	TEST_ASSERT_EQUAL(0, ret);
 }
 
-static void test_inet_ntop_ipv4(void)
+static void _test_inet_ntop_ipv4(void)
 {
 	uint32_t addr;
 	char str[32];
@@ -272,7 +272,7 @@ static void test_inet_ntop_ipv4(void)
 	TEST_ASSERT_EQUAL_STRING("127.0.0.1", str);
 }
 
-static void test_inet_round_trip(void)
+static void _test_inet_round_trip(void)
 {
 	uint32_t addr1, addr2;
 	char str[32];
@@ -298,7 +298,7 @@ typedef struct {
 	int32_t server_fd;
 } tcp_server_ctx_t;
 
-static void *tcp_server_thread(void *arg)
+static void *_tcp_server_thread(void *arg)
 {
 	tcp_server_ctx_t *ctx = (tcp_server_ctx_t *)arg;
 	osal_sockaddr_in_t addr;
@@ -355,7 +355,7 @@ static void *tcp_server_thread(void *arg)
 	return NULL;
 }
 
-static void test_socket_tcp_client_server(void)
+static void _test_socket_tcp_client_server(void)
 {
 	tcp_server_ctx_t ctx;
 	osal_thread_t server_thread;
@@ -369,7 +369,7 @@ static void test_socket_tcp_client_server(void)
 	ctx.port = 19999;
 
 	/* 启动服务器线程 */
-	ret = osal_pthread_create(&server_thread, NULL, tcp_server_thread, &ctx);
+	ret = osal_pthread_create(&server_thread, NULL, _tcp_server_thread, &ctx);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 等待服务器启动 */
@@ -405,7 +405,7 @@ static void test_socket_tcp_client_server(void)
  * UDP测试
  *===========================================================================*/
 
-static void test_socket_udp_sendto_recvfrom(void)
+static void _test_socket_udp_sendto_recvfrom(void)
 {
 	int32_t sockfd;
 	osal_sockaddr_in_t addr;
@@ -446,7 +446,7 @@ static void test_socket_udp_sendto_recvfrom(void)
  * 网络接口测试
  *===========================================================================*/
 
-static void test_if_nametoindex(void)
+static void _test_if_nametoindex(void)
 {
 	/* 测试loopback接口 */
 	uint32_t index = osal_if_nametoindex("lo");
@@ -457,7 +457,7 @@ static void test_if_nametoindex(void)
 	TEST_ASSERT_EQUAL(0, index);
 }
 
-static void test_if_indextoname(void)
+static void _test_if_indextoname(void)
 {
 	char ifname[16];
 	char *ret;
@@ -480,36 +480,36 @@ static void test_if_indextoname(void)
 void test_osal_socket(void)
 {
 	/* 基础功能测试 */
-	test_socket_create_close();
-	test_socket_create_udp();
-	test_socket_create_invalid_domain();
-	test_socket_bind();
-	test_socket_bind_null_addr();
-	test_socket_listen();
-	test_socket_setsockopt_reuseaddr();
-	test_socket_getsockopt();
-	test_socket_shutdown();
+	_test_socket_create_close();
+	_test_socket_create_udp();
+	_test_socket_create_invalid_domain();
+	_test_socket_bind();
+	_test_socket_bind_null_addr();
+	_test_socket_listen();
+	_test_socket_setsockopt_reuseaddr();
+	_test_socket_getsockopt();
+	_test_socket_shutdown();
 
 	/* 字节序转换测试 */
-	test_htons();
-	test_htonl();
-	test_ntohs();
-	test_ntohl();
-	test_byteorder_round_trip();
+	_test_htons();
+	_test_htonl();
+	_test_ntohs();
+	_test_ntohl();
+	_test_byteorder_round_trip();
 
 	/* IP地址转换测试 */
-	test_inet_pton_ipv4();
-	test_inet_pton_ipv4_invalid();
-	test_inet_ntop_ipv4();
-	test_inet_round_trip();
+	_test_inet_pton_ipv4();
+	_test_inet_pton_ipv4_invalid();
+	_test_inet_ntop_ipv4();
+	_test_inet_round_trip();
 
 	/* TCP测试 */
-	test_socket_tcp_client_server();
+	_test_socket_tcp_client_server();
 
 	/* UDP测试 */
-	test_socket_udp_sendto_recvfrom();
+	_test_socket_udp_sendto_recvfrom();
 
 	/* 网络接口测试 */
-	test_if_nametoindex();
-	test_if_indextoname();
+	_test_if_nametoindex();
+	_test_if_indextoname();
 }

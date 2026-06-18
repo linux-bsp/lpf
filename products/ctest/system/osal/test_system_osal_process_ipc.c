@@ -10,7 +10,7 @@
 /**
  * Test parent-child communication via pipes
  */
-static void test_parent_child_pipe_communication(void)
+static void _test_parent_child_pipe_communication(void)
 {
 	osal_printf("[ TEST     ] Parent-child pipe communication\n");
 
@@ -67,7 +67,7 @@ static void test_parent_child_pipe_communication(void)
 /**
  * Test shared memory between processes
  */
-static void test_shared_memory_between_processes(void)
+static void _test_shared_memory_between_processes(void)
 {
 	osal_printf("[ TEST     ] Shared memory between processes\n");
 
@@ -143,7 +143,7 @@ static void test_shared_memory_between_processes(void)
 /**
  * Test semaphore-based process synchronization
  */
-static void test_semaphore_process_sync(void)
+static void _test_semaphore_process_sync(void)
 {
 	osal_printf("[ TEST     ] Semaphore process synchronization\n");
 
@@ -240,7 +240,7 @@ static void test_semaphore_process_sync(void)
 /* Signal handler flag */
 static volatile int g_signal_received = 0;
 
-static void signal_handler(int signum)
+static void _signal_handler(int signum)
 {
 	g_signal_received = signum;
 }
@@ -248,14 +248,14 @@ static void signal_handler(int signum)
 /**
  * Test signal-based process coordination
  */
-static void test_signal_process_coordination(void)
+static void _test_signal_process_coordination(void)
 {
 	osal_printf("[ TEST     ] Signal-based process coordination\n");
 
 	pid_t pid;
 
 	/* Set up signal handler */
-	osal_signal(SIGUSR1, signal_handler);
+	osal_signal(SIGUSR1, _signal_handler);
 
 	/* Fork child process */
 	pid = osal_fork();
@@ -298,7 +298,7 @@ static void test_signal_process_coordination(void)
 /**
  * Test process group operations
  */
-static void test_process_group_operations(void)
+static void _test_process_group_operations(void)
 {
 	osal_printf("[ TEST     ] Process group operations\n");
 
@@ -356,23 +356,23 @@ static void test_process_group_operations(void)
 /* Test cases array */
 static const test_case_t test_cases[] = {
 	{ .name = "test_parent_child_pipe_communication",
-	  .func = test_parent_child_pipe_communication,
+	  .func = _test_parent_child_pipe_communication,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_shared_memory_between_processes",
-	  .func = test_shared_memory_between_processes,
+	  .func = _test_shared_memory_between_processes,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_semaphore_process_sync",
-	  .func = test_semaphore_process_sync,
+	  .func = _test_semaphore_process_sync,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_signal_process_coordination",
-	  .func = test_signal_process_coordination,
+	  .func = _test_signal_process_coordination,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_process_group_operations",
-	  .func = test_process_group_operations,
+	  .func = _test_process_group_operations,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

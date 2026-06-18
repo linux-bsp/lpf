@@ -24,7 +24,7 @@ static shm_context_t shm_table[MAX_SHM_HANDLES];
 static int shm_table_initialized = 0;
 
 /* 初始化句柄表 */
-static void init_shm_table(void)
+static void _init_shm_table(void)
 {
 	if (!shm_table_initialized) {
 		memset(shm_table, 0, sizeof(shm_table));
@@ -36,9 +36,9 @@ static void init_shm_table(void)
 }
 
 /* 分配句柄 */
-static int32_t alloc_shm_handle(int32_t fd, osal_size_t size)
+static int32_t _alloc_shm_handle(int32_t fd, osal_size_t size)
 {
-	init_shm_table();
+	_init_shm_table();
 
 	for (int32_t i = 0; i < MAX_SHM_HANDLES; i++) {
 		if (shm_table[i].fd == -1) {
@@ -51,7 +51,7 @@ static int32_t alloc_shm_handle(int32_t fd, osal_size_t size)
 }
 
 /* 释放句柄 */
-static void free_shm_handle(int32_t handle)
+static void _free_shm_handle(int32_t handle)
 {
 	if (handle >= 0 && handle < MAX_SHM_HANDLES) {
 		shm_table[handle].fd = -1;
@@ -60,7 +60,7 @@ static void free_shm_handle(int32_t handle)
 }
 
 /* 获取句柄信息 */
-static shm_context_t *get_shm_context(int32_t handle)
+static shm_context_t *_get_shm_context(int32_t handle)
 {
 	if (handle >= 0 && handle < MAX_SHM_HANDLES && shm_table[handle].fd != -1) {
 		return &shm_table[handle];
@@ -110,7 +110,7 @@ int32_t osal_shm_create(const char *name, osal_size_t size, int32_t flags,
 	}
 
 	/* 分配句柄 */
-	int32_t handle = alloc_shm_handle(fd, size);
+	int32_t handle = _alloc_shm_handle(fd, size);
 	if (handle < 0) {
 		close(fd);
 		return OSAL_ERR_NO_MEMORY;
@@ -134,7 +134,7 @@ int32_t osal_shm_map(osal_shm_t shm, osal_off_t offset, osal_size_t length,
 		return OSAL_ERR_INVALID_PARAM;
 	}
 
-	ctx = get_shm_context(shm);
+	ctx = _get_shm_context(shm);
 	if (!ctx) {
 		return OSAL_ERR_INVALID_PARAM;
 	}
@@ -186,13 +186,13 @@ int32_t osal_shm_close(osal_shm_t shm)
 {
 	shm_context_t *ctx;
 
-	ctx = get_shm_context(shm);
+	ctx = _get_shm_context(shm);
 	if (!ctx) {
 		return OSAL_ERR_INVALID_PARAM;
 	}
 
 	close(ctx->fd);
-	free_shm_handle(shm);
+	_free_shm_handle(shm);
 
 	return OSAL_SUCCESS;
 }

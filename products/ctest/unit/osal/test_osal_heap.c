@@ -11,7 +11,7 @@
  *===========================================================================*/
 
 /* 测试用例: Malloc - 成功 */
-static void test_osal_malloc_success(void)
+static void _test_osal_malloc_success(void)
 {
 	void *ptr;
 
@@ -32,7 +32,7 @@ static void test_osal_malloc_success(void)
 }
 
 /* 测试用例: Malloc - 零大小 */
-static void test_osal_malloc_zero_size(void)
+static void _test_osal_malloc_zero_size(void)
 {
 	void *ptr;
 
@@ -45,7 +45,7 @@ static void test_osal_malloc_zero_size(void)
 }
 
 /* 测试用例: Free - 成功 */
-static void test_osal_free_success(void)
+static void _test_osal_free_success(void)
 {
 	void *ptr;
 
@@ -57,7 +57,7 @@ static void test_osal_free_success(void)
 }
 
 /* 测试用例: Free - NULL指针 */
-static void test_osal_free_null_pointer(void)
+static void _test_osal_free_null_pointer(void)
 {
 	/* Free(NULL) 应该安全（不崩溃） */
 	osal_free(NULL);
@@ -68,7 +68,7 @@ static void test_osal_free_null_pointer(void)
  *===========================================================================*/
 
 /* 测试用例: HeapGetInfo - 成功 */
-static void test_osal_heap_get_info_success(void)
+static void _test_osal_heap_get_info_success(void)
 {
 	uint32_t free_bytes, total_bytes;
 	int32_t ret;
@@ -80,7 +80,7 @@ static void test_osal_heap_get_info_success(void)
 }
 
 /* 测试用例: HeapGetInfo - 空指针 */
-static void test_osal_heap_get_info_null_pointer(void)
+static void _test_osal_heap_get_info_null_pointer(void)
 {
 	uint32_t free_bytes, total_bytes;
 	int32_t ret;
@@ -99,7 +99,7 @@ static void test_osal_heap_get_info_null_pointer(void)
 }
 
 /* 测试用例: HeapGetStats - 成功 */
-static void test_osal_heap_get_stats_success(void)
+static void _test_osal_heap_get_stats_success(void)
 {
 	uint32_t current, peak;
 	int32_t ret;
@@ -110,7 +110,7 @@ static void test_osal_heap_get_stats_success(void)
 }
 
 /* 测试用例: HeapGetStats - 空指针 */
-static void test_osal_heap_get_stats_null_pointer(void)
+static void _test_osal_heap_get_stats_null_pointer(void)
 {
 	uint32_t current, peak;
 	int32_t ret;
@@ -125,7 +125,7 @@ static void test_osal_heap_get_stats_null_pointer(void)
 }
 
 /* 测试用例: HeapSetThreshold - 成功 */
-static void test_osal_heap_set_threshold_success(void)
+static void _test_osal_heap_set_threshold_success(void)
 {
 	int32_t ret;
 
@@ -147,7 +147,7 @@ static void test_osal_heap_set_threshold_success(void)
 }
 
 /* 测试用例: HeapSetThreshold - 无效参数 */
-static void test_osal_heap_set_threshold_invalid(void)
+static void _test_osal_heap_set_threshold_invalid(void)
 {
 	int32_t ret;
 
@@ -161,7 +161,7 @@ static void test_osal_heap_set_threshold_invalid(void)
 }
 
 /* 测试用例: HeapCheckThreshold - 成功 */
-static void test_osal_heap_check_threshold_success(void)
+static void _test_osal_heap_check_threshold_success(void)
 {
 	bool exceeded;
 	int32_t ret;
@@ -175,7 +175,7 @@ static void test_osal_heap_check_threshold_success(void)
 }
 
 /* 测试用例: HeapCheckThreshold - 空指针 */
-static void test_osal_heap_check_threshold_null_pointer(void)
+static void _test_osal_heap_check_threshold_null_pointer(void)
 {
 	int32_t ret;
 
@@ -188,7 +188,7 @@ static void test_osal_heap_check_threshold_null_pointer(void)
  *===========================================================================*/
 
 /* 测试用例: 内存对齐 */
-static void test_osal_malloc_alignment(void)
+static void _test_osal_malloc_alignment(void)
 {
 	void *ptr;
 
@@ -208,7 +208,7 @@ static void test_osal_malloc_alignment(void)
  *===========================================================================*/
 
 /* 测试用例: 多次分配释放 */
-static void test_osal_malloc_free_multiple(void)
+static void _test_osal_malloc_free_multiple(void)
 {
 	const int32_t iterations = 100;
 	void *ptrs[100];
@@ -229,7 +229,7 @@ static void test_osal_malloc_free_multiple(void)
 }
 
 /* 测试用例: 交替分配释放 */
-static void test_osal_malloc_free_interleaved(void)
+static void _test_osal_malloc_free_interleaved(void)
 {
 	void *ptr1, *ptr2, *ptr3;
 
@@ -253,7 +253,7 @@ static void test_osal_malloc_free_interleaved(void)
  *===========================================================================*/
 
 /* 测试用例: 大内存分配 */
-static void test_osal_malloc_large(void)
+static void _test_osal_malloc_large(void)
 {
 	void *ptr;
 	osal_size_t large_size = 10 * 1024 * 1024; /* 10MB */
@@ -274,7 +274,7 @@ static void test_osal_malloc_large(void)
 }
 
 /* 测试用例: 内存写入验证 */
-static void test_osal_malloc_write_verify(void)
+static void _test_osal_malloc_write_verify(void)
 {
 	uint8_t *ptr;
 	osal_size_t size = 256;
@@ -299,7 +299,7 @@ static void test_osal_malloc_write_verify(void)
 }
 
 /* 测试用例: 内存统计验证 */
-static void test_osal_heap_stats_verify(void)
+static void _test_osal_heap_stats_verify(void)
 {
 	uint32_t current1, peak1, current2, peak2;
 	void *ptr;
@@ -327,7 +327,7 @@ static void test_osal_heap_stats_verify(void)
  *===========================================================================*/
 
 /* 测试用例: 分配性能 */
-static void test_osal_malloc_performance(void)
+static void _test_osal_malloc_performance(void)
 {
 	const int32_t iterations = 1000;
 	void *ptrs[1000];
@@ -374,79 +374,79 @@ static void test_osal_malloc_performance(void)
 /* 测试用例数组 - 使用函数指针数组 */
 static const test_case_t test_cases[] = {
 	{ .name = "test_osal_malloc_success",
-	  .func = test_osal_malloc_success,
+	  .func = _test_osal_malloc_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_malloc_zero_size",
-	  .func = test_osal_malloc_zero_size,
+	  .func = _test_osal_malloc_zero_size,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_free_success",
-	  .func = test_osal_free_success,
+	  .func = _test_osal_free_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_free_null_pointer",
-	  .func = test_osal_free_null_pointer,
+	  .func = _test_osal_free_null_pointer,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_heap_get_info_success",
-	  .func = test_osal_heap_get_info_success,
+	  .func = _test_osal_heap_get_info_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_heap_get_info_null_pointer",
-	  .func = test_osal_heap_get_info_null_pointer,
+	  .func = _test_osal_heap_get_info_null_pointer,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_heap_get_stats_success",
-	  .func = test_osal_heap_get_stats_success,
+	  .func = _test_osal_heap_get_stats_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_heap_get_stats_null_pointer",
-	  .func = test_osal_heap_get_stats_null_pointer,
+	  .func = _test_osal_heap_get_stats_null_pointer,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_heap_set_threshold_success",
-	  .func = test_osal_heap_set_threshold_success,
+	  .func = _test_osal_heap_set_threshold_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_heap_set_threshold_invalid",
-	  .func = test_osal_heap_set_threshold_invalid,
+	  .func = _test_osal_heap_set_threshold_invalid,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_heap_check_threshold_success",
-	  .func = test_osal_heap_check_threshold_success,
+	  .func = _test_osal_heap_check_threshold_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_heap_check_threshold_null_pointer",
-	  .func = test_osal_heap_check_threshold_null_pointer,
+	  .func = _test_osal_heap_check_threshold_null_pointer,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_malloc_alignment",
-	  .func = test_osal_malloc_alignment,
+	  .func = _test_osal_malloc_alignment,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_malloc_free_multiple",
-	  .func = test_osal_malloc_free_multiple,
+	  .func = _test_osal_malloc_free_multiple,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_malloc_free_interleaved",
-	  .func = test_osal_malloc_free_interleaved,
+	  .func = _test_osal_malloc_free_interleaved,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_malloc_large",
-	  .func = test_osal_malloc_large,
+	  .func = _test_osal_malloc_large,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_malloc_write_verify",
-	  .func = test_osal_malloc_write_verify,
+	  .func = _test_osal_malloc_write_verify,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_heap_stats_verify",
-	  .func = test_osal_heap_stats_verify,
+	  .func = _test_osal_heap_stats_verify,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_malloc_performance",
-	  .func = test_osal_malloc_performance,
+	  .func = _test_osal_malloc_performance,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

@@ -12,7 +12,7 @@
  *===========================================================================*/
 
 /* 测试用例: SPI打开 - 成功 */
-static void test_hal_spi_open_success(void)
+static void _test_hal_spi_open_success(void)
 {
 	hal_spi_handle_t handle = NULL;
 	hal_spi_config_t config = { .device = "/dev/spidev0.0",
@@ -34,7 +34,7 @@ static void test_hal_spi_open_success(void)
 }
 
 /* 测试用例: SPI打开 - 空配置 */
-static void test_hal_spi_open_null_config(void)
+static void _test_hal_spi_open_null_config(void)
 {
 	hal_spi_handle_t handle = NULL;
 
@@ -43,7 +43,7 @@ static void test_hal_spi_open_null_config(void)
 }
 
 /* 测试用例: SPI打开 - 空句柄 */
-static void test_hal_spi_open_null_handle(void)
+static void _test_hal_spi_open_null_handle(void)
 {
 	hal_spi_config_t config = { .device = "/dev/spidev0.0",
 								.mode = SPI_MODE_0,
@@ -56,7 +56,7 @@ static void test_hal_spi_open_null_handle(void)
 }
 
 /* 测试用例: SPI打开 - 无效设备 */
-static void test_hal_spi_open_invalid_device(void)
+static void _test_hal_spi_open_invalid_device(void)
 {
 	hal_spi_handle_t handle = NULL;
 	hal_spi_config_t config = { .device = "/dev/spidev99.99",
@@ -70,7 +70,7 @@ static void test_hal_spi_open_invalid_device(void)
 }
 
 /* 测试用例: SPI关闭 */
-static void test_hal_spi_close(void)
+static void _test_hal_spi_close(void)
 {
 	hal_spi_handle_t handle = NULL;
 	hal_spi_config_t config = { .device = "/dev/spidev0.0",
@@ -89,7 +89,7 @@ static void test_hal_spi_close(void)
 }
 
 /* 测试用例: SPI关闭 - 空句柄 */
-static void test_hal_spi_close_null_handle(void)
+static void _test_hal_spi_close_null_handle(void)
 {
 	int32_t ret = hal_spi_close(NULL);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
@@ -100,7 +100,7 @@ static void test_hal_spi_close_null_handle(void)
  *===========================================================================*/
 
 /* 测试用例: SPI写入 - 空句柄 */
-static void test_hal_spi_write_null_handle(void)
+static void _test_hal_spi_write_null_handle(void)
 {
 	uint8_t buffer[4] = { 0x01, 0x02, 0x03, 0x04 };
 
@@ -109,7 +109,7 @@ static void test_hal_spi_write_null_handle(void)
 }
 
 /* 测试用例: SPI写入 - 空缓冲区 */
-static void test_hal_spi_write_null_buffer(void)
+static void _test_hal_spi_write_null_buffer(void)
 {
 	hal_spi_handle_t handle = NULL;
 	hal_spi_config_t config = { .device = "/dev/spidev0.0",
@@ -130,7 +130,7 @@ static void test_hal_spi_write_null_buffer(void)
 }
 
 /* 测试用例: SPI读取 - 空句柄 */
-static void test_hal_spi_read_null_handle(void)
+static void _test_hal_spi_read_null_handle(void)
 {
 	uint8_t buffer[4];
 
@@ -139,7 +139,7 @@ static void test_hal_spi_read_null_handle(void)
 }
 
 /* 测试用例: SPI读取 - 空缓冲区 */
-static void test_hal_spi_read_null_buffer(void)
+static void _test_hal_spi_read_null_buffer(void)
 {
 	hal_spi_handle_t handle = NULL;
 	hal_spi_config_t config = { .device = "/dev/spidev0.0",
@@ -164,7 +164,7 @@ static void test_hal_spi_read_null_buffer(void)
  *===========================================================================*/
 
 /* 测试用例: SPI全双工传输 - 空句柄 */
-static void test_hal_spi_transfer_null_handle(void)
+static void _test_hal_spi_transfer_null_handle(void)
 {
 	uint8_t tx_buffer[4] = { 0x01, 0x02, 0x03, 0x04 };
 	uint8_t rx_buffer[4];
@@ -175,7 +175,7 @@ static void test_hal_spi_transfer_null_handle(void)
 }
 
 /* 测试用例: SPI全双工传输 - 回环测试 */
-static void test_hal_spi_transfer_loopback(void)
+static void _test_hal_spi_transfer_loopback(void)
 {
 	hal_spi_handle_t handle = NULL;
 	hal_spi_config_t config = { .device = "/dev/spidev0.0",
@@ -204,7 +204,7 @@ static void test_hal_spi_transfer_loopback(void)
 }
 
 /* 测试用例: SPI批量传输 - 空句柄 */
-static void test_hal_spi_transfer_multi_null_handle(void)
+static void _test_hal_spi_transfer_multi_null_handle(void)
 {
 	uint8_t tx_buffer[4] = { 0x01, 0x02, 0x03, 0x04 };
 	uint8_t rx_buffer[4];
@@ -221,7 +221,7 @@ static void test_hal_spi_transfer_multi_null_handle(void)
 }
 
 /* 测试用例: SPI批量传输 - 空传输数组 */
-static void test_hal_spi_transfer_multi_null_transfers(void)
+static void _test_hal_spi_transfer_multi_null_transfers(void)
 {
 	hal_spi_handle_t handle = NULL;
 	hal_spi_config_t config = { .device = "/dev/spidev0.0",
@@ -246,7 +246,7 @@ static void test_hal_spi_transfer_multi_null_transfers(void)
  *===========================================================================*/
 
 /* 测试用例: SPI设置配置 - 空句柄 */
-static void test_hal_spi_set_config_null_handle(void)
+static void _test_hal_spi_set_config_null_handle(void)
 {
 	hal_spi_config_t config = { .device = "/dev/spidev0.0",
 								.mode = SPI_MODE_1,
@@ -259,7 +259,7 @@ static void test_hal_spi_set_config_null_handle(void)
 }
 
 /* 测试用例: SPI设置配置 - 空配置 */
-static void test_hal_spi_set_config_null_config(void)
+static void _test_hal_spi_set_config_null_config(void)
 {
 	hal_spi_handle_t handle = NULL;
 	hal_spi_config_t config = { .device = "/dev/spidev0.0",
@@ -280,7 +280,7 @@ static void test_hal_spi_set_config_null_config(void)
 }
 
 /* 测试用例: SPI设置配置 - 更改模式 */
-static void test_hal_spi_set_config_change_mode(void)
+static void _test_hal_spi_set_config_change_mode(void)
 {
 	hal_spi_handle_t handle = NULL;
 	hal_spi_config_t config = { .device = "/dev/spidev0.0",
@@ -307,7 +307,7 @@ static void test_hal_spi_set_config_change_mode(void)
  *===========================================================================*/
 
 /* 测试用例: SPI独立读取 - 功能测试 */
-static void test_hal_spi_read_standalone(void)
+static void _test_hal_spi_read_standalone(void)
 {
 	hal_spi_handle_t handle = NULL;
 	hal_spi_config_t config = { .device = "/dev/spidev0.0",
@@ -330,7 +330,7 @@ static void test_hal_spi_read_standalone(void)
 }
 
 /* 测试用例: SPI独立写入 - 功能测试 */
-static void test_hal_spi_write_standalone(void)
+static void _test_hal_spi_write_standalone(void)
 {
 	hal_spi_handle_t handle = NULL;
 	hal_spi_config_t config = { .device = "/dev/spidev0.0",
@@ -358,7 +358,7 @@ static void test_hal_spi_write_standalone(void)
  *===========================================================================*/
 
 /* 测试用例: SPI最大速度 */
-static void test_hal_spi_max_speed(void)
+static void _test_hal_spi_max_speed(void)
 {
 	hal_spi_handle_t handle = NULL;
 	hal_spi_config_t config = { .device = "/dev/spidev0.0",
@@ -378,7 +378,7 @@ static void test_hal_spi_max_speed(void)
 }
 
 /* 测试用例: SPI最小速度 */
-static void test_hal_spi_min_speed(void)
+static void _test_hal_spi_min_speed(void)
 {
 	hal_spi_handle_t handle = NULL;
 	hal_spi_config_t config = { .device = "/dev/spidev0.0",
@@ -398,7 +398,7 @@ static void test_hal_spi_min_speed(void)
 }
 
 /* 测试用例: SPI不同位宽 */
-static void test_hal_spi_different_bits_per_word(void)
+static void _test_hal_spi_different_bits_per_word(void)
 {
 	hal_spi_handle_t handle = NULL;
 	hal_spi_config_t config = { .device = "/dev/spidev0.0",
@@ -416,7 +416,7 @@ static void test_hal_spi_different_bits_per_word(void)
 }
 
 /* 测试用例: SPI所有模式 */
-static void test_hal_spi_all_modes(void)
+static void _test_hal_spi_all_modes(void)
 {
 	hal_spi_handle_t handle = NULL;
 	hal_spi_config_t config = { .device = "/dev/spidev0.0",
@@ -455,7 +455,7 @@ static void test_hal_spi_all_modes(void)
 }
 
 /* 测试用例: SPI大数据传输 */
-static void test_hal_spi_large_transfer(void)
+static void _test_hal_spi_large_transfer(void)
 {
 	hal_spi_handle_t handle = NULL;
 	hal_spi_config_t config = { .device = "/dev/spidev0.0",
@@ -484,7 +484,7 @@ static void test_hal_spi_large_transfer(void)
 }
 
 /* 测试用例: SPI零长度传输 */
-static void test_hal_spi_zero_length_transfer(void)
+static void _test_hal_spi_zero_length_transfer(void)
 {
 	hal_spi_handle_t handle = NULL;
 	hal_spi_config_t config = { .device = "/dev/spidev0.0",
@@ -518,103 +518,103 @@ static void test_hal_spi_zero_length_transfer(void)
 /* 测试用例数组 - 使用函数指针数组 */
 static const test_case_t test_cases[] = {
 	{ .name = "test_hal_spi_open_success",
-	  .func = test_hal_spi_open_success,
+	  .func = _test_hal_spi_open_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_spi_open_null_config",
-	  .func = test_hal_spi_open_null_config,
+	  .func = _test_hal_spi_open_null_config,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_spi_open_null_handle",
-	  .func = test_hal_spi_open_null_handle,
+	  .func = _test_hal_spi_open_null_handle,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_spi_open_invalid_device",
-	  .func = test_hal_spi_open_invalid_device,
+	  .func = _test_hal_spi_open_invalid_device,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_spi_close",
-	  .func = test_hal_spi_close,
+	  .func = _test_hal_spi_close,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_spi_close_null_handle",
-	  .func = test_hal_spi_close_null_handle,
+	  .func = _test_hal_spi_close_null_handle,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_spi_write_null_handle",
-	  .func = test_hal_spi_write_null_handle,
+	  .func = _test_hal_spi_write_null_handle,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_spi_write_null_buffer",
-	  .func = test_hal_spi_write_null_buffer,
+	  .func = _test_hal_spi_write_null_buffer,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_spi_read_null_handle",
-	  .func = test_hal_spi_read_null_handle,
+	  .func = _test_hal_spi_read_null_handle,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_spi_read_null_buffer",
-	  .func = test_hal_spi_read_null_buffer,
+	  .func = _test_hal_spi_read_null_buffer,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_spi_transfer_null_handle",
-	  .func = test_hal_spi_transfer_null_handle,
+	  .func = _test_hal_spi_transfer_null_handle,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_spi_transfer_loopback",
-	  .func = test_hal_spi_transfer_loopback,
+	  .func = _test_hal_spi_transfer_loopback,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_spi_transfer_multi_null_handle",
-	  .func = test_hal_spi_transfer_multi_null_handle,
+	  .func = _test_hal_spi_transfer_multi_null_handle,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_spi_transfer_multi_null_transfers",
-	  .func = test_hal_spi_transfer_multi_null_transfers,
+	  .func = _test_hal_spi_transfer_multi_null_transfers,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_spi_set_config_null_handle",
-	  .func = test_hal_spi_set_config_null_handle,
+	  .func = _test_hal_spi_set_config_null_handle,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_spi_set_config_null_config",
-	  .func = test_hal_spi_set_config_null_config,
+	  .func = _test_hal_spi_set_config_null_config,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_spi_set_config_change_mode",
-	  .func = test_hal_spi_set_config_change_mode,
+	  .func = _test_hal_spi_set_config_change_mode,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_spi_read_standalone",
-	  .func = test_hal_spi_read_standalone,
+	  .func = _test_hal_spi_read_standalone,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_spi_write_standalone",
-	  .func = test_hal_spi_write_standalone,
+	  .func = _test_hal_spi_write_standalone,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_spi_max_speed",
-	  .func = test_hal_spi_max_speed,
+	  .func = _test_hal_spi_max_speed,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_spi_min_speed",
-	  .func = test_hal_spi_min_speed,
+	  .func = _test_hal_spi_min_speed,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_spi_different_bits_per_word",
-	  .func = test_hal_spi_different_bits_per_word,
+	  .func = _test_hal_spi_different_bits_per_word,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_spi_all_modes",
-	  .func = test_hal_spi_all_modes,
+	  .func = _test_hal_spi_all_modes,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_spi_large_transfer",
-	  .func = test_hal_spi_large_transfer,
+	  .func = _test_hal_spi_large_transfer,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_hal_spi_zero_length_transfer",
-	  .func = test_hal_spi_zero_length_transfer,
+	  .func = _test_hal_spi_zero_length_transfer,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

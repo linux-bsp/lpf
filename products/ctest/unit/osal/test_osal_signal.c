@@ -18,7 +18,7 @@ static volatile int32_t signal_number = 0;
  * 信号处理函数
  *===========================================================================*/
 
-static void test_signal_handler(int sig)
+static void _test_signal_handler(int sig)
 {
 	signal_received = 1;
 	signal_number = sig;
@@ -28,13 +28,13 @@ static void test_signal_handler(int sig)
  * 信号基础测试
  *===========================================================================*/
 
-static void test_signal_raise_and_handle(void)
+static void _test_signal_raise_and_handle(void)
 {
 	signal_received = 0;
 	signal_number = 0;
 
 	/* 注册信号处理函数 */
-	int32_t ret = osal_signal(SIGUSR1, test_signal_handler);
+	int32_t ret = osal_signal(SIGUSR1, _test_signal_handler);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 发送信号给自己 */
@@ -52,13 +52,13 @@ static void test_signal_raise_and_handle(void)
 	osal_signal(SIGUSR1, SIG_DFL);
 }
 
-static void test_signal_kill_self(void)
+static void _test_signal_kill_self(void)
 {
 	signal_received = 0;
 	signal_number = 0;
 
 	/* 注册信号处理函数 */
-	osal_signal(SIGUSR2, test_signal_handler);
+	osal_signal(SIGUSR2, _test_signal_handler);
 
 	/* 使用kill发送信号给自己 */
 	osal_pid_t pid = osal_getpid();
@@ -76,7 +76,7 @@ static void test_signal_kill_self(void)
 	osal_signal(SIGUSR2, SIG_DFL);
 }
 
-static void test_signal_ignore(void)
+static void _test_signal_ignore(void)
 {
 	signal_received = 0;
 
@@ -102,7 +102,7 @@ static void test_signal_ignore(void)
  * 信号集操作测试
  *===========================================================================*/
 
-static void test_sigset_empty_and_add(void)
+static void _test_sigset_empty_and_add(void)
 {
 	sigset_t set;
 
@@ -123,7 +123,7 @@ static void test_sigset_empty_and_add(void)
 	TEST_ASSERT_EQUAL(1, ret);
 }
 
-static void test_sigset_fill_and_delete(void)
+static void _test_sigset_fill_and_delete(void)
 {
 	sigset_t set;
 
@@ -144,7 +144,7 @@ static void test_sigset_fill_and_delete(void)
 	TEST_ASSERT_EQUAL(0, ret);
 }
 
-static void test_sigprocmask_block_unblock(void)
+static void _test_sigprocmask_block_unblock(void)
 {
 	sigset_t set, oldset;
 
@@ -165,7 +165,7 @@ static void test_sigprocmask_block_unblock(void)
  * sigaction测试
  *===========================================================================*/
 
-static void test_sigaction_basic(void)
+static void _test_sigaction_basic(void)
 {
 	struct sigaction act, oldact;
 
@@ -174,7 +174,7 @@ static void test_sigaction_basic(void)
 
 	/* 设置信号动作 */
 	osal_memset(&act, 0, sizeof(act));
-	act.sa_handler = test_signal_handler;
+	act.sa_handler = _test_signal_handler;
 	osal_sigemptyset(&act.sa_mask);
 	act.sa_flags = 0;
 
@@ -199,31 +199,31 @@ static void test_sigaction_basic(void)
 
 static const test_case_t test_cases[] = {
 	{ .name = "test_signal_raise_and_handle",
-	  .func = test_signal_raise_and_handle,
+	  .func = _test_signal_raise_and_handle,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_signal_kill_self",
-	  .func = test_signal_kill_self,
+	  .func = _test_signal_kill_self,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_signal_ignore",
-	  .func = test_signal_ignore,
+	  .func = _test_signal_ignore,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_sigset_empty_and_add",
-	  .func = test_sigset_empty_and_add,
+	  .func = _test_sigset_empty_and_add,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_sigset_fill_and_delete",
-	  .func = test_sigset_fill_and_delete,
+	  .func = _test_sigset_fill_and_delete,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_sigprocmask_block_unblock",
-	  .func = test_sigprocmask_block_unblock,
+	  .func = _test_sigprocmask_block_unblock,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_sigaction_basic",
-	  .func = test_sigaction_basic,
+	  .func = _test_sigaction_basic,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

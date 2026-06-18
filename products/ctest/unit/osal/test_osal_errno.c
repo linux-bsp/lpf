@@ -10,7 +10,7 @@
  * 测试用例
  *===========================================================================*/
 
-static void test_osal_get_errno(void)
+static void _test_osal_get_errno(void)
 {
 	/* Set errno to a known value */
 	osal_set_errno(OSAL_EINVAL);
@@ -20,7 +20,7 @@ static void test_osal_get_errno(void)
 	TEST_ASSERT_EQUAL(OSAL_EINVAL, err);
 }
 
-static void test_osal_set_errno(void)
+static void _test_osal_set_errno(void)
 {
 	/* Set errno to different values */
 	osal_set_errno(OSAL_ENOENT);
@@ -33,7 +33,7 @@ static void test_osal_set_errno(void)
 	TEST_ASSERT_EQUAL(0, osal_get_errno());
 }
 
-static void test_osal_strerror(void)
+static void _test_osal_strerror(void)
 {
 	/* Test common error codes */
 	const char *msg;
@@ -51,7 +51,7 @@ static void test_osal_strerror(void)
 	TEST_ASSERT_TRUE(osal_strlen(msg) > 0);
 }
 
-static void test_osal_get_status_name(void)
+static void _test_osal_get_status_name(void)
 {
 	/* Test OSAL status code names */
 	const char *name;
@@ -76,19 +76,19 @@ static void test_osal_get_status_name(void)
 /* 测试用例数组 - 使用函数指针数组 */
 static const test_case_t test_cases[] = {
 	{ .name = "test_osal_get_errno",
-	  .func = test_osal_get_errno,
+	  .func = _test_osal_get_errno,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_set_errno",
-	  .func = test_osal_set_errno,
+	  .func = _test_osal_set_errno,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_strerror",
-	  .func = test_osal_strerror,
+	  .func = _test_osal_strerror,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_get_status_name",
-	  .func = test_osal_get_status_name,
+	  .func = _test_osal_get_status_name,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

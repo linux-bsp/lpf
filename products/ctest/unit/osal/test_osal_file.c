@@ -15,7 +15,7 @@
  *===========================================================================*/
 
 /* 测试用例: open/close - 成功 */
-static void test_osal_file_open_close_success(void)
+static void _test_osal_file_open_close_success(void)
 {
 	int32_t fd;
 
@@ -33,7 +33,7 @@ static void test_osal_file_open_close_success(void)
 }
 
 /* 测试用例: open - 只读模式 */
-static void test_osal_file_open_readonly(void)
+static void _test_osal_file_open_readonly(void)
 {
 	int32_t fd;
 
@@ -52,7 +52,7 @@ static void test_osal_file_open_readonly(void)
 }
 
 /* 测试用例: open - 文件不存在 */
-static void test_osal_file_open_not_exist(void)
+static void _test_osal_file_open_not_exist(void)
 {
 	int32_t fd;
 
@@ -65,7 +65,7 @@ static void test_osal_file_open_not_exist(void)
 }
 
 /* 测试用例: open - O_EXCL标志 */
-static void test_osal_file_open_excl(void)
+static void _test_osal_file_open_excl(void)
 {
 	int32_t fd1, fd2;
 
@@ -91,7 +91,7 @@ static void test_osal_file_open_excl(void)
  *===========================================================================*/
 
 /* 测试用例: write/read - 成功 */
-static void test_osal_file_write_read_success(void)
+static void _test_osal_file_write_read_success(void)
 {
 	int32_t fd;
 	osal_ssize_t ret;
@@ -122,7 +122,7 @@ static void test_osal_file_write_read_success(void)
 }
 
 /* 测试用例: write - 追加模式 */
-static void test_osal_file_write_append(void)
+static void _test_osal_file_write_append(void)
 {
 	int32_t fd;
 	osal_ssize_t ret;
@@ -158,7 +158,7 @@ static void test_osal_file_write_append(void)
 }
 
 /* 测试用例: read - EOF */
-static void test_osal_file_read_eof(void)
+static void _test_osal_file_read_eof(void)
 {
 	int32_t fd;
 	osal_ssize_t ret;
@@ -189,7 +189,7 @@ static void test_osal_file_read_eof(void)
  *===========================================================================*/
 
 /* 测试用例: lseek - SEEK_SET */
-static void test_osal_file_lseek_set(void)
+static void _test_osal_file_lseek_set(void)
 {
 	int32_t fd;
 	osal_ssize_t pos;
@@ -216,7 +216,7 @@ static void test_osal_file_lseek_set(void)
 }
 
 /* 测试用例: lseek - SEEK_CUR */
-static void test_osal_file_lseek_cur(void)
+static void _test_osal_file_lseek_cur(void)
 {
 	int32_t fd;
 	osal_ssize_t pos;
@@ -251,7 +251,7 @@ static void test_osal_file_lseek_cur(void)
 }
 
 /* 测试用例: lseek - SEEK_END */
-static void test_osal_file_lseek_end(void)
+static void _test_osal_file_lseek_end(void)
 {
 	int32_t fd;
 	osal_ssize_t pos;
@@ -280,7 +280,7 @@ static void test_osal_file_lseek_end(void)
  *===========================================================================*/
 
 /* 测试用例: fcntl - 获取/设置标志 */
-static void test_osal_file_fcntl_flags(void)
+static void _test_osal_file_fcntl_flags(void)
 {
 	int32_t fd;
 	int32_t flags;
@@ -311,7 +311,7 @@ static void test_osal_file_fcntl_flags(void)
  *===========================================================================*/
 
 /* 测试用例: write - 空数据 */
-static void test_osal_file_write_empty(void)
+static void _test_osal_file_write_empty(void)
 {
 	int32_t fd;
 	osal_ssize_t ret;
@@ -329,7 +329,7 @@ static void test_osal_file_write_empty(void)
 }
 
 /* 测试用例: read - 空缓冲区 */
-static void test_osal_file_read_empty(void)
+static void _test_osal_file_read_empty(void)
 {
 	int32_t fd;
 	osal_ssize_t ret;
@@ -350,7 +350,7 @@ static void test_osal_file_read_empty(void)
 }
 
 /* 测试用例: close - 无效文件描述符 */
-static void test_osal_file_close_invalid_fd(void)
+static void _test_osal_file_close_invalid_fd(void)
 {
 	int32_t ret;
 
@@ -376,59 +376,59 @@ static void test_osal_file_close_invalid_fd(void)
 /* 测试用例数组 - 使用函数指针数组 */
 static const test_case_t test_cases[] = {
 	{ .name = "test_osal_file_open_close_success",
-	  .func = test_osal_file_open_close_success,
+	  .func = _test_osal_file_open_close_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_file_open_readonly",
-	  .func = test_osal_file_open_readonly,
+	  .func = _test_osal_file_open_readonly,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_file_open_not_exist",
-	  .func = test_osal_file_open_not_exist,
+	  .func = _test_osal_file_open_not_exist,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_file_open_excl",
-	  .func = test_osal_file_open_excl,
+	  .func = _test_osal_file_open_excl,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_file_write_read_success",
-	  .func = test_osal_file_write_read_success,
+	  .func = _test_osal_file_write_read_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_file_write_append",
-	  .func = test_osal_file_write_append,
+	  .func = _test_osal_file_write_append,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_file_read_eof",
-	  .func = test_osal_file_read_eof,
+	  .func = _test_osal_file_read_eof,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_file_lseek_set",
-	  .func = test_osal_file_lseek_set,
+	  .func = _test_osal_file_lseek_set,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_file_lseek_cur",
-	  .func = test_osal_file_lseek_cur,
+	  .func = _test_osal_file_lseek_cur,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_file_lseek_end",
-	  .func = test_osal_file_lseek_end,
+	  .func = _test_osal_file_lseek_end,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_file_fcntl_flags",
-	  .func = test_osal_file_fcntl_flags,
+	  .func = _test_osal_file_fcntl_flags,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_file_write_empty",
-	  .func = test_osal_file_write_empty,
+	  .func = _test_osal_file_write_empty,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_file_read_empty",
-	  .func = test_osal_file_read_empty,
+	  .func = _test_osal_file_read_empty,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_file_close_invalid_fd",
-	  .func = test_osal_file_close_invalid_fd,
+	  .func = _test_osal_file_close_invalid_fd,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

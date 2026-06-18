@@ -22,8 +22,8 @@ extern const test_stats_t *libutest_get_stats(void);
  * Escape special XML characters: & < > " '
  * Returns number of bytes written (excluding null terminator)
  */
-static uint32_t xml_escape(const char *input, char *output,
-						   uint32_t output_size)
+static uint32_t _xml_escape(const char *input, char *output,
+							uint32_t output_size)
 {
 	uint32_t out_pos = 0;
 	const char *p = input;
@@ -118,8 +118,8 @@ int32_t libutest_export_junit_xml(const char *output_path)
 #define WRITE_TESTSUITE_HEADER()                                           \
 	do {                                                                   \
 		if (current_suite) {                                               \
-			xml_escape(current_suite, escaped_name,                        \
-					   OSAL_sizeof(escaped_name));                         \
+			_xml_escape(current_suite, escaped_name,                       \
+						OSAL_sizeof(escaped_name));                        \
 			len = osal_snprintf(buf, OSAL_sizeof(buf),                     \
 								"  <testsuite name=\"%s\" tests=\"%u\" "   \
 								"failures=\"%u\" time=\"%.3f\">\n",        \
@@ -151,7 +151,7 @@ int32_t libutest_export_junit_xml(const char *output_path)
 		}
 
 		/* Write test case */
-		xml_escape(node->test_name, escaped_name, OSAL_sizeof(escaped_name));
+		_xml_escape(node->test_name, escaped_name, OSAL_sizeof(escaped_name));
 		len = osal_snprintf(buf, OSAL_sizeof(buf),
 							"    <testcase name=\"%s\" time=\"%.3f\"/>\n",
 							escaped_name, node->elapsed_ms / 1000.0);
@@ -175,7 +175,7 @@ int32_t libutest_export_junit_xml(const char *output_path)
 		}
 
 		/* Write test case with failure */
-		xml_escape(node->test_name, escaped_name, OSAL_sizeof(escaped_name));
+		_xml_escape(node->test_name, escaped_name, OSAL_sizeof(escaped_name));
 		len = osal_snprintf(buf, OSAL_sizeof(buf),
 							"    <testcase name=\"%s\" time=\"%.3f\">\n",
 							escaped_name, node->elapsed_ms / 1000.0);
@@ -317,7 +317,7 @@ int32_t libutest_export_json(const char *output_path)
 /**
  * Compare function for sorting test results by elapsed time (descending)
  */
-static int compare_elapsed_desc(const void *a, const void *b)
+static int _compare_elapsed_desc(const void *a, const void *b)
 {
 	const test_result_node_t *node_a = *(const test_result_node_t **)a;
 	const test_result_node_t *node_b = *(const test_result_node_t **)b;
@@ -332,7 +332,7 @@ static int compare_elapsed_desc(const void *a, const void *b)
 /**
  * Simple insertion sort for test results (replaces qsort)
  */
-static void sort_tests_by_time(test_result_node_t **all_tests, uint32_t count)
+static void _sort_tests_by_time(test_result_node_t **all_tests, uint32_t count)
 {
 	uint32_t i, j;
 	test_result_node_t *key;
@@ -342,7 +342,7 @@ static void sort_tests_by_time(test_result_node_t **all_tests, uint32_t count)
 		j = i;
 
 		/* Move elements that are slower than key to one position ahead */
-		while (j > 0 && compare_elapsed_desc(&all_tests[j - 1], &key) > 0) {
+		while (j > 0 && _compare_elapsed_desc(&all_tests[j - 1], &key) > 0) {
 			all_tests[j] = all_tests[j - 1];
 			j--;
 		}
@@ -382,7 +382,7 @@ void libutest_print_slowest_tests(uint32_t top_n)
 	}
 
 	/* Sort by elapsed time (descending) */
-	sort_tests_by_time(all_tests, count);
+	_sort_tests_by_time(all_tests, count);
 
 	/* Print top N */
 	if (top_n > count)

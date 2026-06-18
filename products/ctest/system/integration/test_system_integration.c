@@ -40,7 +40,7 @@ static osal_cond_t g_responder_cond;
 
 static const uint8_t g_test_payload[] = { 0x10, 0x20, 0x30, 0x40 };
 
-static void set_raw_mode(int32_t fd)
+static void _set_raw_mode(int32_t fd)
 {
 	osal_termios_t term;
 
@@ -58,7 +58,7 @@ static void set_raw_mode(int32_t fd)
 	(void)osal_tcsetattr(fd, OSAL_TCSANOW, &term);
 }
 
-static int32_t create_pty_pair(void)
+static int32_t _create_pty_pair(void)
 {
 	int32_t ret;
 
@@ -68,12 +68,12 @@ static int32_t create_pty_pair(void)
 		return ret;
 	}
 
-	set_raw_mode(g_pty_master_fd);
-	set_raw_mode(g_pty_slave_fd);
+	_set_raw_mode(g_pty_master_fd);
+	_set_raw_mode(g_pty_slave_fd);
 	return OSAL_SUCCESS;
 }
 
-static void destroy_pty_pair(void)
+static void _destroy_pty_pair(void)
 {
 	if (g_pty_master_fd >= 0) {
 		osal_close(g_pty_master_fd);
@@ -85,7 +85,7 @@ static void destroy_pty_pair(void)
 	}
 }
 
-static int32_t bind_test_serial_device(void)
+static int32_t _bind_test_serial_device(void)
 {
 	(void)osal_unlink(TEST_PCONFIG_SERIAL_LINK);
 
@@ -96,7 +96,7 @@ static int32_t bind_test_serial_device(void)
 	return OSAL_SUCCESS;
 }
 
-static void *pty_responder_thread(void *arg)
+static void *_pty_responder_thread(void *arg)
 {
 	uint8_t rx_buffer[512];
 	uint8_t tx_buffer[512];
@@ -204,7 +204,7 @@ static void *pty_responder_thread(void *arg)
 	return NULL;
 }
 
-static void setup_full_stack(void)
+static void _setup_full_stack(void)
 {
 	int32_t ret;
 
@@ -221,16 +221,16 @@ static void setup_full_stack(void)
 		return;
 	}
 
-	ret = create_pty_pair();
+	ret = _create_pty_pair();
 	if (ret != OSAL_SUCCESS) {
 		osal_pthread_cond_destroy(&g_responder_cond);
 		osal_pthread_mutex_destroy(&g_responder_mutex);
 		return;
 	}
 
-	ret = bind_test_serial_device();
+	ret = _bind_test_serial_device();
 	if (ret != OSAL_SUCCESS) {
-		destroy_pty_pair();
+		_destroy_pty_pair();
 		osal_pthread_cond_destroy(&g_responder_cond);
 		osal_pthread_mutex_destroy(&g_responder_mutex);
 		return;
@@ -239,20 +239,20 @@ static void setup_full_stack(void)
 	ret = prl_init();
 	if (ret != OSAL_SUCCESS) {
 		osal_unlink(TEST_PCONFIG_SERIAL_LINK);
-		destroy_pty_pair();
+		_destroy_pty_pair();
 		osal_pthread_cond_destroy(&g_responder_cond);
 		osal_pthread_mutex_destroy(&g_responder_mutex);
 		return;
 	}
 
 	g_responder_running = true;
-	ret = osal_pthread_create(&g_responder_thread, NULL, pty_responder_thread,
+	ret = osal_pthread_create(&g_responder_thread, NULL, _pty_responder_thread,
 							  NULL);
 	if (ret != OSAL_SUCCESS) {
 		g_responder_running = false;
 		prl_deinit();
 		osal_unlink(TEST_PCONFIG_SERIAL_LINK);
-		destroy_pty_pair();
+		_destroy_pty_pair();
 		osal_pthread_cond_destroy(&g_responder_cond);
 		osal_pthread_mutex_destroy(&g_responder_mutex);
 		return;
@@ -265,7 +265,7 @@ static void setup_full_stack(void)
 	osal_pthread_mutex_unlock(&g_responder_mutex);
 }
 
-static void teardown_full_stack(void)
+static void _teardown_full_stack(void)
 {
 	g_responder_running = false;
 	if (g_pty_master_fd >= 0) {
@@ -275,12 +275,12 @@ static void teardown_full_stack(void)
 
 	prl_deinit();
 	osal_unlink(TEST_PCONFIG_SERIAL_LINK);
-	destroy_pty_pair();
+	_destroy_pty_pair();
 	osal_pthread_cond_destroy(&g_responder_cond);
 	osal_pthread_mutex_destroy(&g_responder_mutex);
 }
 
-static void test_full_stack_configuration_path(void)
+static void _test_full_stack_configuration_path(void)
 {
 	const pconfig_platform_config_t *board = pconfig_get_board();
 	const aconfig_config_table_t *table = aconfig_get_table();
@@ -325,7 +325,7 @@ static void test_full_stack_configuration_path(void)
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 }
 
-static void test_full_stack_repeated_roundtrip(void)
+static void _test_full_stack_repeated_roundtrip(void)
 {
 	pdl_mcu_handle_t handle = NULL;
 	uint8_t response[32];
@@ -354,13 +354,13 @@ static void test_full_stack_repeated_roundtrip(void)
 
 static const test_case_t test_cases[] = {
 	{ .name = "test_full_stack_configuration_path",
-	  .func = test_full_stack_configuration_path,
-	  .setup = setup_full_stack,
-	  .teardown = teardown_full_stack },
+	  .func = _test_full_stack_configuration_path,
+	  .setup = _setup_full_stack,
+	  .teardown = _teardown_full_stack },
 	{ .name = "test_full_stack_repeated_roundtrip",
-	  .func = test_full_stack_repeated_roundtrip,
-	  .setup = setup_full_stack,
-	  .teardown = teardown_full_stack },
+	  .func = _test_full_stack_repeated_roundtrip,
+	  .setup = _setup_full_stack,
+	  .teardown = _teardown_full_stack },
 };
 
 static const test_suite_t test_suite = {

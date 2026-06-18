@@ -20,7 +20,7 @@
 /**
  * @brief 转换 PDL 校验位类型到 HAL 校验位类型
  */
-static uint8_t pdl_to_hal_parity(pconfig_mcu_parity_t pdl_parity)
+static uint8_t _pdl_to_hal_parity(pconfig_mcu_parity_t pdl_parity)
 {
 	switch (pdl_parity) {
 	case PCONFIG_MCU_PARITY_NONE:
@@ -37,7 +37,7 @@ static uint8_t pdl_to_hal_parity(pconfig_mcu_parity_t pdl_parity)
 /**
  * @brief 转换 PDL 流控类型到 HAL 流控类型
  */
-static uint8_t pdl_to_hal_flow_control(pconfig_mcu_flow_control_t pdl_flow)
+static uint8_t _pdl_to_hal_flow_control(pconfig_mcu_flow_control_t pdl_flow)
 {
 	switch (pdl_flow) {
 	case PCONFIG_MCU_FLOW_NONE:
@@ -88,9 +88,9 @@ int32_t mcu_serial_init(const void *config, void **handle)
 	serial_config.baud_rate = mcu_cfg->hw.serial.baudrate;
 	serial_config.data_bits = mcu_cfg->hw.serial.data_bits;
 	serial_config.stop_bits = mcu_cfg->hw.serial.stop_bits;
-	serial_config.parity = pdl_to_hal_parity(mcu_cfg->hw.serial.parity);
+	serial_config.parity = _pdl_to_hal_parity(mcu_cfg->hw.serial.parity);
 	serial_config.flow_control =
-		pdl_to_hal_flow_control(mcu_cfg->hw.serial.flow_control);
+		_pdl_to_hal_flow_control(mcu_cfg->hw.serial.flow_control);
 
 	if (OSAL_SUCCESS != hal_serial_open(mcu_cfg->hw.serial.device,
 										&serial_config, &ctx->serial_handle)) {

@@ -36,10 +36,10 @@ static bool g_registry_initialized = false;
 /**
  * @brief 发送 PRL 报文
  */
-static int32_t mcu_send_packet(pdl_mcu_context_t *ctx, uint8_t msg_type,
-							   const void *payload, uint16_t payload_len,
-							   uint8_t *response, uint32_t resp_size,
-							   uint32_t *actual_size)
+static int32_t _mcu_send_packet(pdl_mcu_context_t *ctx, uint8_t msg_type,
+								const void *payload, uint16_t payload_len,
+								uint8_t *response, uint32_t resp_size,
+								uint32_t *actual_size)
 {
 	uint8_t tx_buffer[PRL_MAX_PACKET_SIZE];
 	uint8_t rx_buffer[PRL_MAX_PACKET_SIZE];
@@ -98,8 +98,8 @@ int32_t pdl_mcu_send_cmd(pdl_mcu_handle_t handle, pdl_mcu_cmd_t *cmd)
 
 	osal_pthread_mutex_lock(&ctx->mutex);
 
-	ret = mcu_send_packet(ctx, cmd->cmd, NULL, 0, cmd->response,
-						  cmd->response_max, &cmd->response_len);
+	ret = _mcu_send_packet(ctx, cmd->cmd, NULL, 0, cmd->response,
+						   cmd->response_max, &cmd->response_len);
 
 	osal_pthread_mutex_unlock(&ctx->mutex);
 
@@ -120,9 +120,9 @@ int32_t pdl_mcu_send_data(pdl_mcu_handle_t handle, pdl_mcu_data_t *data)
 
 	osal_pthread_mutex_lock(&ctx->mutex);
 
-	ret = mcu_send_packet(ctx, data->cmd, data->data, data->data_len,
-						  data->response, data->response_max,
-						  &data->response_len);
+	ret = _mcu_send_packet(ctx, data->cmd, data->data, data->data_len,
+						   data->response, data->response_max,
+						   &data->response_len);
 
 	osal_pthread_mutex_unlock(&ctx->mutex);
 

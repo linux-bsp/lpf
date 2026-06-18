@@ -21,7 +21,7 @@ struct perf_context {
 /**
  * 简单的平方根实现（牛顿迭代法）
  */
-static double simple_sqrt(double x)
+static double _simple_sqrt(double x)
 {
 	if (x < 0)
 		return 0;
@@ -47,7 +47,7 @@ static double simple_sqrt(double x)
 /**
  * 简单的冒泡排序（用于百分位数计算）
  */
-static void simple_sort(double *arr, uint32_t count)
+static void _simple_sort(double *arr, uint32_t count)
 {
 	uint32_t i;
 
@@ -67,8 +67,8 @@ static void simple_sort(double *arr, uint32_t count)
 /**
  * 计算百分位数
  */
-static double calculate_percentile(double *sorted_samples, uint32_t count,
-								   double percentile)
+static double _calculate_percentile(double *sorted_samples, uint32_t count,
+									double percentile)
 {
 	if (count == 0)
 		return 0.0;
@@ -192,7 +192,7 @@ int32_t perf_calculate_stats(perf_context_t *ctx, perf_stats_t *stats)
 		variance_sum += diff * diff;
 	}
 	stats->variance = variance_sum / stats->count;
-	stats->stddev = simple_sqrt(stats->variance);
+	stats->stddev = _simple_sqrt(stats->variance);
 
 	/* 计算百分位数（需要排序） */
 	double *sorted =
@@ -200,12 +200,12 @@ int32_t perf_calculate_stats(perf_context_t *ctx, perf_stats_t *stats)
 	if (sorted) {
 		osal_memcpy(sorted, ctx->samples,
 					OSAL_sizeof(double) * ctx->sample_count);
-		simple_sort(sorted, ctx->sample_count);
+		_simple_sort(sorted, ctx->sample_count);
 
-		stats->p50 = calculate_percentile(sorted, ctx->sample_count, 50.0);
-		stats->p95 = calculate_percentile(sorted, ctx->sample_count, 95.0);
-		stats->p99 = calculate_percentile(sorted, ctx->sample_count, 99.0);
-		stats->p999 = calculate_percentile(sorted, ctx->sample_count, 99.9);
+		stats->p50 = _calculate_percentile(sorted, ctx->sample_count, 50.0);
+		stats->p95 = _calculate_percentile(sorted, ctx->sample_count, 95.0);
+		stats->p99 = _calculate_percentile(sorted, ctx->sample_count, 99.0);
+		stats->p999 = _calculate_percentile(sorted, ctx->sample_count, 99.9);
 
 		osal_free(sorted);
 	}

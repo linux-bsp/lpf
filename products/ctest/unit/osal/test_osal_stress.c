@@ -14,7 +14,7 @@
 static osal_mutex_t stress_mutex;
 static int32_t stress_counter = 0;
 
-static void *mutex_stress_thread(void *arg)
+static void *_mutex_stress_thread(void *arg)
 {
 	int32_t iterations = *(int32_t *)arg;
 
@@ -27,7 +27,7 @@ static void *mutex_stress_thread(void *arg)
 	return NULL;
 }
 
-static void test_stress_mutex_high_contention(void)
+static void _test_stress_mutex_high_contention(void)
 {
 	const int32_t NUM_THREADS = 10;
 	const int32_t ITERATIONS = 1000;
@@ -42,7 +42,7 @@ static void test_stress_mutex_high_contention(void)
 
 	/* 创建多个线程 */
 	for (int32_t i = 0; i < NUM_THREADS; i++) {
-		ret = osal_pthread_create(&threads[i], NULL, mutex_stress_thread,
+		ret = osal_pthread_create(&threads[i], NULL, _mutex_stress_thread,
 								  &iterations);
 		TEST_ASSERT_EQUAL(0, ret);
 	}
@@ -63,7 +63,7 @@ static void test_stress_mutex_high_contention(void)
  * 内存分配压力测试
  *===========================================================================*/
 
-static void test_stress_memory_allocation(void)
+static void _test_stress_memory_allocation(void)
 {
 	const int32_t NUM_ALLOCS = 1000;
 	const int32_t ALLOC_SIZE = 1024;
@@ -92,7 +92,7 @@ static void test_stress_memory_allocation(void)
 	}
 }
 
-static void *memory_stress_thread(void *arg)
+static void *_memory_stress_thread(void *arg)
 {
 	const int32_t NUM_ALLOCS = 100;
 	const int32_t ALLOC_SIZE = 512;
@@ -108,7 +108,7 @@ static void *memory_stress_thread(void *arg)
 	return NULL;
 }
 
-static void test_stress_memory_multithread(void)
+static void _test_stress_memory_multithread(void)
 {
 	const int32_t NUM_THREADS = 8;
 	osal_thread_t threads[NUM_THREADS];
@@ -116,7 +116,7 @@ static void test_stress_memory_multithread(void)
 	/* 创建多个线程 */
 	for (int32_t i = 0; i < NUM_THREADS; i++) {
 		int32_t ret =
-			osal_pthread_create(&threads[i], NULL, memory_stress_thread, NULL);
+			osal_pthread_create(&threads[i], NULL, _memory_stress_thread, NULL);
 		TEST_ASSERT_EQUAL(0, ret);
 	}
 
@@ -133,7 +133,7 @@ static void test_stress_memory_multithread(void)
 static osal_sem_t stress_sem;
 static int32_t sem_counter = 0;
 
-static void *semaphore_stress_thread(void *arg)
+static void *_semaphore_stress_thread(void *arg)
 {
 	int32_t iterations = *(int32_t *)arg;
 
@@ -146,7 +146,7 @@ static void *semaphore_stress_thread(void *arg)
 	return NULL;
 }
 
-static void test_stress_semaphore_contention(void)
+static void _test_stress_semaphore_contention(void)
 {
 	const int32_t NUM_THREADS = 8;
 	const int32_t ITERATIONS = 500;
@@ -161,7 +161,7 @@ static void test_stress_semaphore_contention(void)
 
 	/* 创建多个线程 */
 	for (int32_t i = 0; i < NUM_THREADS; i++) {
-		ret = osal_pthread_create(&threads[i], NULL, semaphore_stress_thread,
+		ret = osal_pthread_create(&threads[i], NULL, _semaphore_stress_thread,
 								  &iterations);
 		TEST_ASSERT_EQUAL(0, ret);
 	}
@@ -182,13 +182,13 @@ static void test_stress_semaphore_contention(void)
  * 线程创建压力测试
  *===========================================================================*/
 
-static void *dummy_thread_func(void *arg)
+static void *_dummy_thread_func(void *arg)
 {
 	osal_usleep(1000);
 	return NULL;
 }
 
-static void test_stress_thread_creation(void)
+static void _test_stress_thread_creation(void)
 {
 	const int32_t NUM_ITERATIONS = 100;
 
@@ -197,7 +197,7 @@ static void test_stress_thread_creation(void)
 
 		/* 创建线程 */
 		int32_t ret =
-			osal_pthread_create(&thread, NULL, dummy_thread_func, NULL);
+			osal_pthread_create(&thread, NULL, _dummy_thread_func, NULL);
 		TEST_ASSERT_EQUAL(0, ret);
 
 		/* 等待线程结束 */
@@ -212,7 +212,7 @@ static void test_stress_thread_creation(void)
 
 static osal_atomic_uint32_t stress_atomic;
 
-static void *atomic_stress_thread(void *arg)
+static void *_atomic_stress_thread(void *arg)
 {
 	int32_t iterations = *(int32_t *)arg;
 
@@ -223,7 +223,7 @@ static void *atomic_stress_thread(void *arg)
 	return NULL;
 }
 
-static void test_stress_atomic_operations(void)
+static void _test_stress_atomic_operations(void)
 {
 	const int32_t NUM_THREADS = 10;
 	const int32_t ITERATIONS = 10000;
@@ -235,7 +235,7 @@ static void test_stress_atomic_operations(void)
 	/* 创建多个线程 */
 	for (int32_t i = 0; i < NUM_THREADS; i++) {
 		int32_t ret = osal_pthread_create(&threads[i], NULL,
-										  atomic_stress_thread, &iterations);
+										  _atomic_stress_thread, &iterations);
 		TEST_ASSERT_EQUAL(0, ret);
 	}
 
@@ -255,27 +255,27 @@ static void test_stress_atomic_operations(void)
 
 static const test_case_t test_cases[] = {
 	{ .name = "test_stress_mutex_high_contention",
-	  .func = test_stress_mutex_high_contention,
+	  .func = _test_stress_mutex_high_contention,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_memory_allocation",
-	  .func = test_stress_memory_allocation,
+	  .func = _test_stress_memory_allocation,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_memory_multithread",
-	  .func = test_stress_memory_multithread,
+	  .func = _test_stress_memory_multithread,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_semaphore_contention",
-	  .func = test_stress_semaphore_contention,
+	  .func = _test_stress_semaphore_contention,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_thread_creation",
-	  .func = test_stress_thread_creation,
+	  .func = _test_stress_thread_creation,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_atomic_operations",
-	  .func = test_stress_atomic_operations,
+	  .func = _test_stress_atomic_operations,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

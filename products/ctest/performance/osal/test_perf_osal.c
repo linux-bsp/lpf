@@ -18,7 +18,7 @@ static const perf_baseline_t mutex_lock_baseline = {
 /**
  * 测试互斥锁性能
  */
-static void test_perf_mutex_lock_unlock(void)
+static void _test_perf_mutex_lock_unlock(void)
 {
 	const uint32_t iterations = 10000;
 	osal_mutex_t mutex;
@@ -58,7 +58,7 @@ static void test_perf_mutex_lock_unlock(void)
 /**
  * 测试原子操作性能
  */
-static void test_perf_atomic_operations(void)
+static void _test_perf_atomic_operations(void)
 {
 	const uint32_t iterations = 100000;
 	osal_atomic_uint32_t counter;
@@ -92,7 +92,7 @@ static void test_perf_atomic_operations(void)
 /**
  * 测试时间获取性能
  */
-static void test_perf_time_get(void)
+static void _test_perf_time_get(void)
 {
 	const uint32_t iterations = 10000;
 
@@ -122,15 +122,15 @@ static void test_perf_time_get(void)
 /* 测试用例数组 - 使用函数指针数组 */
 static const test_case_t test_cases[] = {
 	{ .name = "test_perf_mutex_lock_unlock",
-	  .func = test_perf_mutex_lock_unlock,
+	  .func = _test_perf_mutex_lock_unlock,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_perf_atomic_operations",
-	  .func = test_perf_atomic_operations,
+	  .func = _test_perf_atomic_operations,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_perf_time_get",
-	  .func = test_perf_time_get,
+	  .func = _test_perf_time_get,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

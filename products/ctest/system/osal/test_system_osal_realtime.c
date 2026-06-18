@@ -10,7 +10,7 @@
 /**
  * Test RT thread priority enforcement
  */
-static void test_rt_thread_priority_enforcement(void)
+static void _test_rt_thread_priority_enforcement(void)
 {
 	osal_printf("[ TEST     ] RT thread priority enforcement\n");
 
@@ -111,7 +111,7 @@ static void test_rt_thread_priority_enforcement(void)
 /**
  * Test priority inheritance with mutexes
  */
-static void test_priority_inheritance_mutex(void)
+static void _test_priority_inheritance_mutex(void)
 {
 	osal_printf("[ TEST     ] Priority inheritance mutex\n");
 
@@ -150,7 +150,7 @@ static void test_priority_inheritance_mutex(void)
 /**
  * Test CPU affinity with RT threads
  */
-static void test_cpu_affinity_rt_threads(void)
+static void _test_cpu_affinity_rt_threads(void)
 {
 	osal_printf("[ TEST     ] CPU affinity with RT threads\n");
 
@@ -204,7 +204,7 @@ static void test_cpu_affinity_rt_threads(void)
 /**
  * Test RT thread + Timer interaction
  */
-static void test_rt_thread_timer_interaction(void)
+static void _test_rt_thread_timer_interaction(void)
 {
 	osal_printf("[ TEST     ] RT thread + Timer interaction\n");
 
@@ -267,7 +267,7 @@ static void test_rt_thread_timer_interaction(void)
 /**
  * Test scheduler policy interactions
  */
-static void test_scheduler_policy_interactions(void)
+static void _test_scheduler_policy_interactions(void)
 {
 	osal_printf("[ TEST     ] Scheduler policy interactions\n");
 
@@ -334,23 +334,23 @@ static void test_scheduler_policy_interactions(void)
 /* Test cases array */
 static const test_case_t test_cases[] = {
 	{ .name = "test_rt_thread_priority_enforcement",
-	  .func = test_rt_thread_priority_enforcement,
+	  .func = _test_rt_thread_priority_enforcement,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_priority_inheritance_mutex",
-	  .func = test_priority_inheritance_mutex,
+	  .func = _test_priority_inheritance_mutex,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_cpu_affinity_rt_threads",
-	  .func = test_cpu_affinity_rt_threads,
+	  .func = _test_cpu_affinity_rt_threads,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_rt_thread_timer_interaction",
-	  .func = test_rt_thread_timer_interaction,
+	  .func = _test_rt_thread_timer_interaction,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_scheduler_policy_interactions",
-	  .func = test_scheduler_policy_interactions,
+	  .func = _test_scheduler_policy_interactions,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

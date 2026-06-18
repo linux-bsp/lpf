@@ -11,7 +11,7 @@
 /**
  * 测试命令配置查询性能
  */
-static void test_perf_tc_config_query(void)
+static void _test_perf_tc_config_query(void)
 {
 	// TODO: 实现命令配置查询性能测试
 	osal_printf(
@@ -21,7 +21,7 @@ static void test_perf_tc_config_query(void)
 /**
  * 测试状态数据配置查询性能
  */
-static void test_perf_tm_config_query(void)
+static void _test_perf_tm_config_query(void)
 {
 	// TODO: 实现状态数据配置查询性能测试
 	osal_printf(
@@ -31,7 +31,7 @@ static void test_perf_tm_config_query(void)
 /**
  * 测试配置验证性能
  */
-static void test_perf_config_validation(void)
+static void _test_perf_config_validation(void)
 {
 	// TODO: 实现配置验证性能测试
 	osal_printf(
@@ -43,15 +43,15 @@ static void test_perf_config_validation(void)
 /* 测试用例数组 - 使用函数指针数组 */
 static const test_case_t test_cases[] = {
 	{ .name = "test_perf_tc_config_query",
-	  .func = test_perf_tc_config_query,
+	  .func = _test_perf_tc_config_query,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_perf_tm_config_query",
-	  .func = test_perf_tm_config_query,
+	  .func = _test_perf_tm_config_query,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_perf_config_validation",
-	  .func = test_perf_config_validation,
+	  .func = _test_perf_config_validation,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

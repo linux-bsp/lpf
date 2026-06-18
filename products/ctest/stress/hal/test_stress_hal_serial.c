@@ -42,7 +42,7 @@ typedef struct {
 /**
  * Worker function for continuous transmission
  */
-static int32_t serial_continuous_tx_worker(void *user_data, uint32_t iteration)
+static int32_t _serial_continuous_tx_worker(void *user_data, uint32_t iteration)
 {
 	serial_worker_ctx_t *ctx = (serial_worker_ctx_t *)user_data;
 	uint8_t buffer[SERIAL_STRESS_BUFFER_SIZE];
@@ -68,7 +68,7 @@ static int32_t serial_continuous_tx_worker(void *user_data, uint32_t iteration)
  * Test: Continuous full-speed serial transmission
  * Verifies: buffer management, no data loss, sustained throughput
  */
-static void test_stress_serial_continuous_transmission(void)
+static void _test_stress_serial_continuous_transmission(void)
 {
 	hal_serial_handle_t handle = NULL;
 	hal_serial_config_t config = { .baud_rate = SERIAL_STRESS_BAUDRATE,
@@ -109,7 +109,7 @@ static void test_stress_serial_continuous_transmission(void)
 
 	/* Start test */
 	start_time = 0;
-	ret = stress_run(stress_ctx, serial_continuous_tx_worker, &worker_ctx);
+	ret = stress_run(stress_ctx, _serial_continuous_tx_worker, &worker_ctx);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* Wait for completion */
@@ -154,8 +154,8 @@ static void test_stress_serial_continuous_transmission(void)
 /**
  * Worker function for concurrent write
  */
-static int32_t serial_concurrent_write_worker(void *user_data,
-											  uint32_t iteration)
+static int32_t _serial_concurrent_write_worker(void *user_data,
+											   uint32_t iteration)
 {
 	serial_worker_ctx_t *ctx = (serial_worker_ctx_t *)user_data;
 	uint8_t buffer[SERIAL_STRESS_PATTERN_SIZE];
@@ -180,8 +180,8 @@ static int32_t serial_concurrent_write_worker(void *user_data,
 /**
  * Worker function for concurrent read
  */
-static int32_t serial_concurrent_read_worker(void *user_data,
-											 uint32_t iteration)
+static int32_t _serial_concurrent_read_worker(void *user_data,
+											  uint32_t iteration)
 {
 	serial_worker_ctx_t *ctx = (serial_worker_ctx_t *)user_data;
 	uint8_t buffer[SERIAL_STRESS_PATTERN_SIZE];
@@ -205,7 +205,7 @@ static int32_t serial_concurrent_read_worker(void *user_data,
  * Test: Concurrent read and write operations
  * Verifies: thread-safety, buffer integrity, no deadlocks
  */
-static void test_stress_serial_concurrent_operations(void)
+static void _test_stress_serial_concurrent_operations(void)
 {
 	hal_serial_handle_t handle = NULL;
 	hal_serial_config_t config = { .baud_rate = SERIAL_STRESS_BAUDRATE,
@@ -257,14 +257,14 @@ static void test_stress_serial_concurrent_operations(void)
 
 	/* Start write workers */
 	for (uint32_t i = 0; i < SERIAL_STRESS_THREAD_COUNT; i++) {
-		ret = stress_run(write_stress, serial_concurrent_write_worker,
+		ret = stress_run(write_stress, _serial_concurrent_write_worker,
 						 &write_ctx[i]);
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	}
 
 	/* Start read workers */
 	for (uint32_t i = 0; i < SERIAL_STRESS_THREAD_COUNT; i++) {
-		ret = stress_run(read_stress, serial_concurrent_read_worker,
+		ret = stress_run(read_stress, _serial_concurrent_read_worker,
 						 &read_ctx[i]);
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	}
@@ -301,7 +301,7 @@ static void test_stress_serial_concurrent_operations(void)
  * Test: Receive buffer overflow handling
  * Verifies: no data corruption, graceful overflow handling
  */
-static void test_stress_serial_buffer_overflow(void)
+static void _test_stress_serial_buffer_overflow(void)
 {
 	hal_serial_handle_t handle = NULL;
 	hal_serial_config_t config = { .baud_rate = SERIAL_STRESS_BAUDRATE,
@@ -383,7 +383,7 @@ static void test_stress_serial_buffer_overflow(void)
 /**
  * Long-running worker thread
  */
-static void *serial_longrun_worker(void *arg)
+static void *_serial_longrun_worker(void *arg)
 {
 	serial_longrun_ctx_t *ctx = (serial_longrun_ctx_t *)arg;
 	uint8_t tx_buffer[1024];
@@ -441,7 +441,7 @@ static void *serial_longrun_worker(void *arg)
  * Test: Long-running stability test (memory leak detection)
  * Verifies: no memory leaks, stable operation over time
  */
-static void test_stress_serial_long_running(void)
+static void _test_stress_serial_long_running(void)
 {
 	hal_serial_handle_t handle = NULL;
 	hal_serial_config_t config = { .baud_rate = SERIAL_STRESS_BAUDRATE,
@@ -450,7 +450,7 @@ static void test_stress_serial_long_running(void)
 								   .parity = HAL_SERIAL_PARITY_NONE,
 								   .flow_control = HAL_SERIAL_FLOW_NONE };
 	serial_longrun_ctx_t ctx;
-	osal_thread_t worker_thread;
+	osal_thread_t _worker_thread;
 	int32_t ret;
 	const uint32_t test_duration_sec = 30;
 
@@ -471,8 +471,8 @@ static void test_stress_serial_long_running(void)
 	ctx.stop_flag = false;
 
 	/* Create worker thread */
-	ret =
-		osal_pthread_create(&worker_thread, NULL, serial_longrun_worker, &ctx);
+	ret = osal_pthread_create(&_worker_thread, NULL, _serial_longrun_worker,
+							  &ctx);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* Let it run */
@@ -480,7 +480,7 @@ static void test_stress_serial_long_running(void)
 
 	/* Stop worker */
 	ctx.stop_flag = true;
-	osal_pthread_join(worker_thread, NULL);
+	osal_pthread_join(_worker_thread, NULL);
 
 	/* Print final statistics */
 	osal_printf("\n[ INFO ] Final Statistics:\n");
@@ -506,19 +506,19 @@ static void test_stress_serial_long_running(void)
 
 static const test_case_t test_cases[] = {
 	{ .name = "test_stress_serial_continuous_transmission",
-	  .func = test_stress_serial_continuous_transmission,
+	  .func = _test_stress_serial_continuous_transmission,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_serial_concurrent_operations",
-	  .func = test_stress_serial_concurrent_operations,
+	  .func = _test_stress_serial_concurrent_operations,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_serial_buffer_overflow",
-	  .func = test_stress_serial_buffer_overflow,
+	  .func = _test_stress_serial_buffer_overflow,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_serial_long_running",
-	  .func = test_stress_serial_long_running,
+	  .func = _test_stress_serial_long_running,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

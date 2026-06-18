@@ -11,7 +11,7 @@
 /**
  * 测试平台配置查询性能
  */
-static void test_perf_platform_config_query(void)
+static void _test_perf_platform_config_query(void)
 {
 	// TODO: 实现平台配置查询性能测试
 	osal_printf("[ INFO ] Platform config query performance test - not "
@@ -21,7 +21,7 @@ static void test_perf_platform_config_query(void)
 /**
  * 测试外设配置查询性能
  */
-static void test_perf_peripheral_config_query(void)
+static void _test_perf_peripheral_config_query(void)
 {
 	// TODO: 实现外设配置查询性能测试
 	osal_printf("[ INFO ] Peripheral config query performance test - not "
@@ -31,7 +31,7 @@ static void test_perf_peripheral_config_query(void)
 /**
  * 测试CAN配置查询性能
  */
-static void test_perf_can_config_query(void)
+static void _test_perf_can_config_query(void)
 {
 	// TODO: 实现CAN配置查询性能测试
 	osal_printf(
@@ -43,15 +43,15 @@ static void test_perf_can_config_query(void)
 /* 测试用例数组 - 使用函数指针数组 */
 static const test_case_t test_cases[] = {
 	{ .name = "test_perf_platform_config_query",
-	  .func = test_perf_platform_config_query,
+	  .func = _test_perf_platform_config_query,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_perf_peripheral_config_query",
-	  .func = test_perf_peripheral_config_query,
+	  .func = _test_perf_peripheral_config_query,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_perf_can_config_query",
-	  .func = test_perf_can_config_query,
+	  .func = _test_perf_can_config_query,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

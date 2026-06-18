@@ -21,7 +21,7 @@ static uint32_t g_suite_capacity = 0;
 /**
  * Initialize registry with initial capacity
  */
-static void init_registry(void)
+static void _init_registry(void)
 {
 	if (g_registered_suites == NULL) {
 		g_suite_capacity = INITIAL_CAPACITY;
@@ -37,7 +37,7 @@ static void init_registry(void)
 /**
  * Expand registry capacity
  */
-static bool expand_registry(void)
+static bool _expand_registry(void)
 {
 	uint32_t new_capacity = g_suite_capacity * GROWTH_FACTOR;
 	const test_suite_t **new_suites = (const test_suite_t **)osal_malloc(
@@ -69,10 +69,10 @@ void libutest_register_suite(const test_suite_t *suite)
 		return;
 	}
 
-	init_registry();
+	_init_registry();
 
 	if (g_suite_count >= g_suite_capacity) {
-		if (!expand_registry()) {
+		if (!_expand_registry()) {
 			osal_printf(
 				"ERROR: Cannot register test suite '%s' - registry full\n",
 				suite->suite_name);

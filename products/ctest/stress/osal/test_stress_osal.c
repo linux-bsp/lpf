@@ -20,7 +20,7 @@ typedef struct {
 	osal_atomic_uint32_t errors;
 } atomic_stress_data_t;
 
-static int32_t atomic_stress_worker(void *user_data, uint32_t iteration)
+static int32_t _atomic_stress_worker(void *user_data, uint32_t iteration)
 {
 	atomic_stress_data_t *data = (atomic_stress_data_t *)user_data;
 	(void)iteration;
@@ -42,7 +42,7 @@ static int32_t atomic_stress_worker(void *user_data, uint32_t iteration)
 	return 0;
 }
 
-static void test_stress_atomic_operations(void)
+static void _test_stress_atomic_operations(void)
 {
 	atomic_stress_data_t data;
 	const uint32_t thread_count = 20;
@@ -58,7 +58,7 @@ static void test_stress_atomic_operations(void)
 
 	osal_printf("[ INFO     ] Running atomic stress: %u threads, %u seconds\n",
 				thread_count, duration_sec);
-	TEST_ASSERT_EQUAL(stress_run(ctx, atomic_stress_worker, &data), 0);
+	TEST_ASSERT_EQUAL(stress_run(ctx, _atomic_stress_worker, &data), 0);
 
 	stress_print_report(ctx);
 	STRESS_ASSERT_NO_ERRORS(ctx);
@@ -75,7 +75,7 @@ typedef struct {
 	osal_atomic_uint32_t lock_failures;
 } mutex_stress_data_t;
 
-static int32_t mutex_contention_worker(void *user_data, uint32_t iteration)
+static int32_t _mutex_contention_worker(void *user_data, uint32_t iteration)
 {
 	mutex_stress_data_t *data = (mutex_stress_data_t *)user_data;
 	(void)iteration;
@@ -97,7 +97,7 @@ static int32_t mutex_contention_worker(void *user_data, uint32_t iteration)
 	return 0;
 }
 
-static void test_stress_mutex_contention(void)
+static void _test_stress_mutex_contention(void)
 {
 	mutex_stress_data_t data;
 	const uint32_t thread_count = 50;
@@ -115,7 +115,7 @@ static void test_stress_mutex_contention(void)
 	osal_printf(
 		"[ INFO     ] Running mutex contention: %u threads, %u seconds\n",
 		thread_count, duration_sec);
-	TEST_ASSERT_EQUAL(stress_run(ctx, mutex_contention_worker, &data), 0);
+	TEST_ASSERT_EQUAL(stress_run(ctx, _mutex_contention_worker, &data), 0);
 
 	stress_print_report(ctx);
 	STRESS_ASSERT_NO_ERRORS(ctx);
@@ -135,7 +135,7 @@ typedef struct {
 	osal_atomic_uint32_t wait_count;
 } semaphore_stress_data_t;
 
-static int32_t semaphore_post_worker(void *user_data, uint32_t iteration)
+static int32_t _semaphore_post_worker(void *user_data, uint32_t iteration)
 {
 	semaphore_stress_data_t *data = (semaphore_stress_data_t *)user_data;
 	(void)iteration;
@@ -146,7 +146,7 @@ static int32_t semaphore_post_worker(void *user_data, uint32_t iteration)
 	return 0;
 }
 
-static int32_t semaphore_wait_worker(void *user_data, uint32_t iteration)
+static int32_t _semaphore_wait_worker(void *user_data, uint32_t iteration)
 {
 	semaphore_stress_data_t *data = (semaphore_stress_data_t *)user_data;
 	(void)iteration;
@@ -159,7 +159,7 @@ static int32_t semaphore_wait_worker(void *user_data, uint32_t iteration)
 	return ret;
 }
 
-static void test_stress_semaphore_signaling(void)
+static void _test_stress_semaphore_signaling(void)
 {
 	semaphore_stress_data_t data;
 	const uint32_t thread_count = 10;
@@ -182,7 +182,7 @@ static void test_stress_semaphore_signaling(void)
 	TEST_ASSERT_NOT_NULL(post_ctx);
 
 	osal_printf("[ INFO     ] Running semaphore signaling stress test\n");
-	TEST_ASSERT_EQUAL(stress_run(post_ctx, semaphore_post_worker, &data), 0);
+	TEST_ASSERT_EQUAL(stress_run(post_ctx, _semaphore_post_worker, &data), 0);
 
 	/* 再启动wait线程 */
 	stress_config_t wait_config = post_config;
@@ -190,7 +190,7 @@ static void test_stress_semaphore_signaling(void)
 		stress_context_create("Semaphore Wait", &wait_config);
 	TEST_ASSERT_NOT_NULL(wait_ctx);
 
-	TEST_ASSERT_EQUAL(stress_run(wait_ctx, semaphore_wait_worker, &data), 0);
+	TEST_ASSERT_EQUAL(stress_run(wait_ctx, _semaphore_wait_worker, &data), 0);
 
 	osal_printf("[ INFO     ] Post count: %u, Wait count: %u\n",
 				osal_atomic_load(&data.post_count),
@@ -211,7 +211,7 @@ typedef struct {
 	osal_atomic_uint32_t wait_count;
 } cond_stress_data_t;
 
-static int32_t cond_signal_worker(void *user_data, uint32_t iteration)
+static int32_t _cond_signal_worker(void *user_data, uint32_t iteration)
 {
 	cond_stress_data_t *data = (cond_stress_data_t *)user_data;
 	(void)iteration;
@@ -225,7 +225,7 @@ static int32_t cond_signal_worker(void *user_data, uint32_t iteration)
 	return 0;
 }
 
-static int32_t cond_wait_worker(void *user_data, uint32_t iteration)
+static int32_t _cond_wait_worker(void *user_data, uint32_t iteration)
 {
 	cond_stress_data_t *data = (cond_stress_data_t *)user_data;
 	(void)iteration;
@@ -241,7 +241,7 @@ static int32_t cond_wait_worker(void *user_data, uint32_t iteration)
 	return 0;
 }
 
-static void test_stress_condition_variable(void)
+static void _test_stress_condition_variable(void)
 {
 	cond_stress_data_t data;
 	const uint32_t thread_count = 10;
@@ -264,8 +264,8 @@ static void test_stress_condition_variable(void)
 	osal_printf("[ INFO     ] Running condition variable stress test\n");
 
 	/* 交替运行signal和wait */
-	TEST_ASSERT_EQUAL(stress_run(signal_ctx, cond_signal_worker, &data), 0);
-	TEST_ASSERT_EQUAL(stress_run(wait_ctx, cond_wait_worker, &data), 0);
+	TEST_ASSERT_EQUAL(stress_run(signal_ctx, _cond_signal_worker, &data), 0);
+	TEST_ASSERT_EQUAL(stress_run(wait_ctx, _cond_wait_worker, &data), 0);
 
 	stress_context_destroy(signal_ctx);
 	stress_context_destroy(wait_ctx);
@@ -275,14 +275,14 @@ static void test_stress_condition_variable(void)
 
 /* ==================== 线程创建压力测试 ==================== */
 
-static void *thread_stress_func(void *arg)
+static void *_thread_stress_func(void *arg)
 {
 	osal_atomic_uint32_t *counter = (osal_atomic_uint32_t *)arg;
 	osal_atomic_inc(counter);
 	return NULL;
 }
 
-static void test_stress_thread_creation(void)
+static void _test_stress_thread_creation(void)
 {
 	const uint32_t thread_count = 100;
 	osal_thread_t threads[thread_count];
@@ -296,8 +296,8 @@ static void test_stress_thread_creation(void)
 
 	/* 快速创建大量线程 */
 	for (uint32_t i = 0; i < thread_count; i++) {
-		int32_t ret = osal_pthread_create(&threads[i], NULL, thread_stress_func,
-										  &counter);
+		int32_t ret = osal_pthread_create(&threads[i], NULL,
+										  _thread_stress_func, &counter);
 		TEST_ASSERT_EQUAL(ret, 0);
 	}
 
@@ -321,7 +321,7 @@ typedef struct {
 	osal_atomic_uint32_t alloc_failures;
 } memory_stress_data_t;
 
-static int32_t memory_alloc_worker(void *user_data, uint32_t iteration)
+static int32_t _memory_alloc_worker(void *user_data, uint32_t iteration)
 {
 	memory_stress_data_t *data = (memory_stress_data_t *)user_data;
 	(void)iteration;
@@ -348,7 +348,7 @@ static int32_t memory_alloc_worker(void *user_data, uint32_t iteration)
 	return 0;
 }
 
-static void test_stress_memory_allocation(void)
+static void _test_stress_memory_allocation(void)
 {
 	memory_stress_data_t data;
 	const uint32_t thread_count = 20;
@@ -366,7 +366,7 @@ static void test_stress_memory_allocation(void)
 	osal_printf("[ INFO     ] Running memory allocation stress: %u threads, %u "
 				"seconds\n",
 				thread_count, duration_sec);
-	TEST_ASSERT_EQUAL(stress_run(ctx, memory_alloc_worker, &data), 0);
+	TEST_ASSERT_EQUAL(stress_run(ctx, _memory_alloc_worker, &data), 0);
 
 	stress_print_report(ctx);
 
@@ -383,7 +383,7 @@ static void test_stress_memory_allocation(void)
 
 /* ==================== 时间操作压力测试 ==================== */
 
-static int32_t time_ops_worker(void *user_data, uint32_t iteration)
+static int32_t _time_ops_worker(void *user_data, uint32_t iteration)
 {
 	(void)user_data;
 	(void)iteration;
@@ -408,7 +408,7 @@ static int32_t time_ops_worker(void *user_data, uint32_t iteration)
 	return 0;
 }
 
-static void test_stress_time_operations(void)
+static void _test_stress_time_operations(void)
 {
 	const uint32_t thread_count = 10;
 	const uint32_t duration_sec = 5;
@@ -419,7 +419,7 @@ static void test_stress_time_operations(void)
 	TEST_ASSERT_NOT_NULL(ctx);
 
 	osal_printf("[ INFO     ] Running time operations stress test\n");
-	TEST_ASSERT_EQUAL(stress_run(ctx, time_ops_worker, NULL), 0);
+	TEST_ASSERT_EQUAL(stress_run(ctx, _time_ops_worker, NULL), 0);
 
 	stress_print_report(ctx);
 	STRESS_ASSERT_NO_ERRORS(ctx);
@@ -430,7 +430,7 @@ static void test_stress_time_operations(void)
 
 /* ==================== 字符串操作压力测试 ==================== */
 
-static int32_t string_ops_worker(void *user_data, uint32_t iteration)
+static int32_t _string_ops_worker(void *user_data, uint32_t iteration)
 {
 	(void)user_data;
 
@@ -455,7 +455,7 @@ static int32_t string_ops_worker(void *user_data, uint32_t iteration)
 	return 0;
 }
 
-static void test_stress_string_operations(void)
+static void _test_stress_string_operations(void)
 {
 	const uint32_t thread_count = 20;
 	const uint32_t duration_sec = 5;
@@ -466,7 +466,7 @@ static void test_stress_string_operations(void)
 	TEST_ASSERT_NOT_NULL(ctx);
 
 	osal_printf("[ INFO     ] Running string operations stress test\n");
-	TEST_ASSERT_EQUAL(stress_run(ctx, string_ops_worker, NULL), 0);
+	TEST_ASSERT_EQUAL(stress_run(ctx, _string_ops_worker, NULL), 0);
 
 	stress_print_report(ctx);
 	STRESS_ASSERT_NO_ERRORS(ctx);
@@ -482,7 +482,7 @@ typedef struct {
 	char prefix[64];
 } file_stress_data_t;
 
-static int32_t file_ops_worker(void *user_data, uint32_t iteration)
+static int32_t _file_ops_worker(void *user_data, uint32_t iteration)
 {
 	file_stress_data_t *data = (file_stress_data_t *)user_data;
 	char filename[128];
@@ -525,7 +525,7 @@ static int32_t file_ops_worker(void *user_data, uint32_t iteration)
 	return 0;
 }
 
-static void test_stress_file_operations(void)
+static void _test_stress_file_operations(void)
 {
 	file_stress_data_t data;
 	const uint32_t thread_count = 10;
@@ -541,7 +541,7 @@ static void test_stress_file_operations(void)
 	TEST_ASSERT_NOT_NULL(ctx);
 
 	osal_printf("[ INFO     ] Running file operations stress test\n");
-	TEST_ASSERT_EQUAL(stress_run(ctx, file_ops_worker, &data), 0);
+	TEST_ASSERT_EQUAL(stress_run(ctx, _file_ops_worker, &data), 0);
 
 	stress_print_report(ctx);
 	STRESS_ASSERT_SUCCESS_RATE_GT(ctx, 99.0);
@@ -554,7 +554,7 @@ static void test_stress_file_operations(void)
 
 /* ==================== CRC计算压力测试 ==================== */
 
-static int32_t crc_ops_worker(void *user_data, uint32_t iteration)
+static int32_t _crc_ops_worker(void *user_data, uint32_t iteration)
 {
 	(void)user_data;
 
@@ -577,7 +577,7 @@ static int32_t crc_ops_worker(void *user_data, uint32_t iteration)
 	return 0;
 }
 
-static void test_stress_crc_operations(void)
+static void _test_stress_crc_operations(void)
 {
 	const uint32_t thread_count = 20;
 	const uint32_t duration_sec = 5;
@@ -588,7 +588,7 @@ static void test_stress_crc_operations(void)
 	TEST_ASSERT_NOT_NULL(ctx);
 
 	osal_printf("[ INFO     ] Running CRC operations stress test\n");
-	TEST_ASSERT_EQUAL(stress_run(ctx, crc_ops_worker, NULL), 0);
+	TEST_ASSERT_EQUAL(stress_run(ctx, _crc_ops_worker, NULL), 0);
 
 	stress_print_report(ctx);
 	STRESS_ASSERT_NO_ERRORS(ctx);
@@ -605,7 +605,7 @@ typedef struct {
 	osal_atomic_uint32_t operations;
 } mixed_stress_data_t;
 
-static int32_t mixed_ops_worker(void *user_data, uint32_t iteration)
+static int32_t _mixed_ops_worker(void *user_data, uint32_t iteration)
 {
 	mixed_stress_data_t *data = (mixed_stress_data_t *)user_data;
 
@@ -654,7 +654,7 @@ static int32_t mixed_ops_worker(void *user_data, uint32_t iteration)
 	return 0;
 }
 
-static void test_stress_mixed_operations(void)
+static void _test_stress_mixed_operations(void)
 {
 	mixed_stress_data_t data;
 	const uint32_t thread_count = 30;
@@ -672,7 +672,7 @@ static void test_stress_mixed_operations(void)
 	osal_printf("[ INFO     ] Running mixed operations stress: %u threads, %u "
 				"seconds\n",
 				thread_count, duration_sec);
-	TEST_ASSERT_EQUAL(stress_run(ctx, mixed_ops_worker, &data), 0);
+	TEST_ASSERT_EQUAL(stress_run(ctx, _mixed_ops_worker, &data), 0);
 
 	stress_print_report(ctx);
 	STRESS_ASSERT_SUCCESS_RATE_GT(ctx, 99.0);
@@ -686,47 +686,47 @@ static void test_stress_mixed_operations(void)
 
 static const test_case_t test_cases[] = {
 	{ .name = "test_stress_atomic_operations",
-	  .func = test_stress_atomic_operations,
+	  .func = _test_stress_atomic_operations,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_mutex_contention",
-	  .func = test_stress_mutex_contention,
+	  .func = _test_stress_mutex_contention,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_semaphore_signaling",
-	  .func = test_stress_semaphore_signaling,
+	  .func = _test_stress_semaphore_signaling,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_condition_variable",
-	  .func = test_stress_condition_variable,
+	  .func = _test_stress_condition_variable,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_thread_creation",
-	  .func = test_stress_thread_creation,
+	  .func = _test_stress_thread_creation,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_memory_allocation",
-	  .func = test_stress_memory_allocation,
+	  .func = _test_stress_memory_allocation,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_time_operations",
-	  .func = test_stress_time_operations,
+	  .func = _test_stress_time_operations,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_string_operations",
-	  .func = test_stress_string_operations,
+	  .func = _test_stress_string_operations,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_file_operations",
-	  .func = test_stress_file_operations,
+	  .func = _test_stress_file_operations,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_crc_operations",
-	  .func = test_stress_crc_operations,
+	  .func = _test_stress_crc_operations,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_mixed_operations",
-	  .func = test_stress_mixed_operations,
+	  .func = _test_stress_mixed_operations,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

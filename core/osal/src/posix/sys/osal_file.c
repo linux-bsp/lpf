@@ -14,7 +14,7 @@
  * 标志位映射（OSAL -> POSIX）
  *===========================================================================*/
 
-static int32_t osal_flags_to_posix(int32_t osal_flags)
+static int32_t _osal_flags_to_posix(int32_t osal_flags)
 {
 	int32_t posix_flags = 0;
 
@@ -46,7 +46,7 @@ static int32_t osal_flags_to_posix(int32_t osal_flags)
 	return posix_flags;
 }
 
-static int32_t posix_flags_to_osal(int32_t posix_flags)
+static int32_t _posix_flags_to_osal(int32_t posix_flags)
 {
 	int32_t osal_flags = 0;
 
@@ -79,7 +79,7 @@ static int32_t posix_flags_to_osal(int32_t posix_flags)
 	return osal_flags;
 }
 
-static uint32_t osal_mode_to_posix(uint32_t osal_mode)
+static uint32_t _osal_mode_to_posix(uint32_t osal_mode)
 {
 	uint32_t posix_mode = 0;
 
@@ -111,8 +111,8 @@ static uint32_t osal_mode_to_posix(uint32_t osal_mode)
 
 int32_t osal_open(const char *pathname, int32_t flags, uint32_t mode)
 {
-	int32_t posix_flags = osal_flags_to_posix(flags);
-	uint32_t posix_mode = osal_mode_to_posix(mode);
+	int32_t posix_flags = _osal_flags_to_posix(flags);
+	uint32_t posix_mode = _osal_mode_to_posix(mode);
 	int32_t result = open(pathname, posix_flags, posix_mode);
 	return result;
 }
@@ -163,11 +163,11 @@ int32_t osal_fcntl(int32_t fd, int32_t cmd, int32_t arg)
 		/* 获取标志：需要转换POSIX -> OSAL */
 		result = fcntl(fd, F_GETFL, 0);
 		if (result >= 0) {
-			result = posix_flags_to_osal(result);
+			result = _posix_flags_to_osal(result);
 		}
 	} else if (cmd == OSAL_F_SETFL) {
 		/* 设置标志：需要转换OSAL -> POSIX */
-		int32_t posix_flags = osal_flags_to_posix(arg);
+		int32_t posix_flags = _osal_flags_to_posix(arg);
 		result = fcntl(fd, F_SETFL, posix_flags);
 	} else if (cmd == OSAL_F_GETFD) {
 		result = fcntl(fd, F_GETFD, 0);

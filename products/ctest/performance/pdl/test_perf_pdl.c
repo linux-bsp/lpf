@@ -10,7 +10,7 @@
 /**
  * 测试MCU状态查询性能
  */
-static void test_perf_mcu_status_query(void)
+static void _test_perf_mcu_status_query(void)
 {
 	// TODO: 实现MCU状态查询性能测试
 	osal_printf(
@@ -22,7 +22,7 @@ static void test_perf_mcu_status_query(void)
 /* 测试用例数组 - 使用函数指针数组 */
 static const test_case_t test_cases[] = {
 	{ .name = "test_perf_mcu_status_query",
-	  .func = test_perf_mcu_status_query,
+	  .func = _test_perf_mcu_status_query,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

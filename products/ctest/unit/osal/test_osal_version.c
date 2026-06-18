@@ -10,7 +10,7 @@
  * 测试用例
  *===========================================================================*/
 
-static void test_osal_get_version_string(void)
+static void _test_osal_get_version_string(void)
 {
 	const char *version = osal_get_version_string();
 
@@ -21,7 +21,7 @@ static void test_osal_get_version_string(void)
 	TEST_ASSERT_TRUE(osal_strstr(version, "OSAL") != NULL);
 }
 
-static void test_osal_version_format(void)
+static void _test_osal_version_format(void)
 {
 	const char *version = osal_get_version_string();
 
@@ -41,7 +41,7 @@ static void test_osal_version_format(void)
 	TEST_ASSERT_TRUE(has_v || has_dot);
 }
 
-static void test_osal_version_consistency(void)
+static void _test_osal_version_consistency(void)
 {
 	/* Multiple calls should return the same string */
 	const char *v1 = osal_get_version_string();
@@ -57,15 +57,15 @@ static void test_osal_version_consistency(void)
 /* 测试用例数组 - 使用函数指针数组 */
 static const test_case_t test_cases[] = {
 	{ .name = "test_osal_get_version_string",
-	  .func = test_osal_get_version_string,
+	  .func = _test_osal_get_version_string,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_version_format",
-	  .func = test_osal_version_format,
+	  .func = _test_osal_version_format,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_version_consistency",
-	  .func = test_osal_version_consistency,
+	  .func = _test_osal_version_consistency,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

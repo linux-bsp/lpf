@@ -36,7 +36,7 @@ void OS_HeapInit(void)
 	pthread_mutex_init(&g_heap_monitor.lock, NULL);
 }
 
-static uint32_t read_memory_from_proc(const char *field)
+static uint32_t _read_memory_from_proc(const char *field)
 {
 	FILE *fp;
 	char line[OSAL_HEAP_LINE_BUFFER_SIZE];
@@ -65,8 +65,8 @@ int32_t osal_heap_get_info(uint32_t *free_bytes, uint32_t *total_bytes)
 	if (NULL == free_bytes || NULL == total_bytes)
 		return OSAL_ERR_INVALID_POINTER;
 
-	vm_rss = read_memory_from_proc("VmRSS:");
-	vm_peak = read_memory_from_proc("VmPeak:");
+	vm_rss = _read_memory_from_proc("VmRSS:");
+	vm_peak = _read_memory_from_proc("VmPeak:");
 
 	pthread_mutex_lock(&g_heap_monitor.lock);
 

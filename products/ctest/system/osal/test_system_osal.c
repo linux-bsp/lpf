@@ -19,7 +19,7 @@ typedef struct {
 } thread_coord_ctx_t;
 
 /* 生产者线程 */
-static void *producer_thread(void *arg)
+static void *_producer_thread(void *arg)
 {
 	thread_coord_ctx_t *ctx = (thread_coord_ctx_t *)arg;
 	uint32_t i;
@@ -36,7 +36,7 @@ static void *producer_thread(void *arg)
 }
 
 /* 消费者线程 */
-static void *consumer_thread(void *arg)
+static void *_consumer_thread(void *arg)
 {
 	thread_coord_ctx_t *ctx = (thread_coord_ctx_t *)arg;
 	uint32_t consumed = 0;
@@ -59,7 +59,7 @@ static void *consumer_thread(void *arg)
 /**
  * 测试多线程协同工作
  */
-static void test_system_multi_thread_coordination(void)
+static void _test_system_multi_thread_coordination(void)
 {
 	osal_printf("[ TEST     ] Multi-thread coordination system test\n");
 
@@ -79,13 +79,13 @@ static void test_system_multi_thread_coordination(void)
 	ctx.shutdown = 0;
 
 	/* 创建生产者和消费者线程 */
-	ret = osal_pthread_create(&producer, NULL, producer_thread, &ctx);
+	ret = osal_pthread_create(&producer, NULL, _producer_thread, &ctx);
 	TEST_ASSERT_EQUAL(0, ret);
 
-	ret = osal_pthread_create(&consumer1, NULL, consumer_thread, &ctx);
+	ret = osal_pthread_create(&consumer1, NULL, _consumer_thread, &ctx);
 	TEST_ASSERT_EQUAL(0, ret);
 
-	ret = osal_pthread_create(&consumer2, NULL, consumer_thread, &ctx);
+	ret = osal_pthread_create(&consumer2, NULL, _consumer_thread, &ctx);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 等待完成 */
@@ -114,7 +114,7 @@ typedef struct {
 } ipc_e2e_ctx_t;
 
 /* 写入线程 */
-static void *writer_thread(void *arg)
+static void *_writer_thread(void *arg)
 {
 	ipc_e2e_ctx_t *ctx = (ipc_e2e_ctx_t *)arg;
 	uint32_t i;
@@ -136,7 +136,7 @@ static void *writer_thread(void *arg)
 }
 
 /* 读取线程 */
-static void *reader_thread(void *arg)
+static void *_reader_thread(void *arg)
 {
 	ipc_e2e_ctx_t *ctx = (ipc_e2e_ctx_t *)arg;
 	uint32_t i;
@@ -162,7 +162,7 @@ static void *reader_thread(void *arg)
 /**
  * 测试进程间通信端到端
  */
-static void test_system_ipc_end_to_end(void)
+static void _test_system_ipc_end_to_end(void)
 {
 	osal_printf("[ TEST     ] IPC end-to-end system test\n");
 
@@ -195,10 +195,10 @@ static void test_system_ipc_end_to_end(void)
 	}
 
 	/* 创建读写线程 */
-	ret = osal_pthread_create(&writer, NULL, writer_thread, &ctx);
+	ret = osal_pthread_create(&writer, NULL, _writer_thread, &ctx);
 	TEST_ASSERT_EQUAL(0, ret);
 
-	ret = osal_pthread_create(&reader, NULL, reader_thread, &ctx);
+	ret = osal_pthread_create(&reader, NULL, _reader_thread, &ctx);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 等待完成 */
@@ -233,7 +233,7 @@ typedef struct {
 /**
  * 测试资源管理完整流程
  */
-static void test_system_resource_management_full_flow(void)
+static void _test_system_resource_management_full_flow(void)
 {
 	osal_printf("[ TEST     ] Resource management full flow system test\n");
 
@@ -324,7 +324,7 @@ typedef struct {
 static lifecycle_ctx_t g_lifecycle_ctx;
 
 /* 工作线程 */
-static void *lifecycle_worker_thread(void *arg)
+static void *_lifecycle_worker_thread(void *arg)
 {
 	uint32_t thread_id = (uint32_t)(uintptr_t)arg;
 	uint32_t flag = (1U << thread_id);
@@ -357,7 +357,7 @@ static void *lifecycle_worker_thread(void *arg)
 /**
  * 测试系统启动关闭流程
  */
-static void test_system_startup_shutdown_flow(void)
+static void _test_system_startup_shutdown_flow(void)
 {
 	osal_printf("[ TEST     ] Startup/shutdown flow system test\n");
 
@@ -381,7 +381,7 @@ static void test_system_startup_shutdown_flow(void)
 	/* 阶段2: 启动工作线程 */
 	for (i = 0; i < 5; i++) {
 		ret = osal_pthread_create(&g_lifecycle_ctx.worker_threads[i], NULL,
-								  lifecycle_worker_thread,
+								  _lifecycle_worker_thread,
 								  (void *)(uintptr_t)i);
 		TEST_ASSERT_EQUAL(0, ret);
 	}
@@ -422,19 +422,19 @@ static void test_system_startup_shutdown_flow(void)
 /* 测试用例数组 - 使用函数指针数组 */
 static const test_case_t test_cases[] = {
 	{ .name = "test_system_multi_thread_coordination",
-	  .func = test_system_multi_thread_coordination,
+	  .func = _test_system_multi_thread_coordination,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_system_ipc_end_to_end",
-	  .func = test_system_ipc_end_to_end,
+	  .func = _test_system_ipc_end_to_end,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_system_resource_management_full_flow",
-	  .func = test_system_resource_management_full_flow,
+	  .func = _test_system_resource_management_full_flow,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_system_startup_shutdown_flow",
-	  .func = test_system_startup_shutdown_flow,
+	  .func = _test_system_startup_shutdown_flow,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

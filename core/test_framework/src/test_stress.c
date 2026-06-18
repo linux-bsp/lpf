@@ -23,7 +23,7 @@ struct stress_context {
 /**
  * 获取当前时间（微秒）
  */
-static uint64_t get_time_us(void)
+static uint64_t _get_time_us(void)
 {
 	struct timespec ts;
 	clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -82,7 +82,7 @@ typedef struct {
 /**
  * 工作线程函数
  */
-static void *worker_thread(void *arg)
+static void *_worker_thread(void *arg)
 {
 	worker_thread_data_t *data = (worker_thread_data_t *)arg;
 	stress_context_t *ctx = data->ctx;
@@ -96,16 +96,16 @@ static void *worker_thread(void *arg)
 
 		/* 检查时长限制 */
 		if (ctx->config.duration_sec > 0) {
-			uint64_t elapsed_ms = (get_time_us() - ctx->start_time_us) / 1000;
+			uint64_t elapsed_ms = (_get_time_us() - ctx->start_time_us) / 1000;
 			if (elapsed_ms >= (uint64_t)ctx->config.duration_sec * 1000) {
 				break;
 			}
 		}
 
 		/* 执行工作函数 */
-		uint64_t start = get_time_us();
+		uint64_t start = _get_time_us();
 		int32_t result = data->worker(data->user_data, iteration);
-		uint64_t end = get_time_us();
+		uint64_t end = _get_time_us();
 		uint64_t latency = end - start;
 
 		/* 更新统计 */
@@ -155,7 +155,7 @@ int32_t stress_run(stress_context_t *ctx, stress_worker_func_t worker,
 	/* 重置统计和状态 */
 	memset(&ctx->stats, 0, sizeof(ctx->stats));
 	ctx->should_stop = false;
-	ctx->start_time_us = get_time_us();
+	ctx->start_time_us = _get_time_us();
 
 	/* 创建工作线程 */
 	uint32_t thread_count = ctx->config.thread_count;
@@ -181,7 +181,7 @@ int32_t stress_run(stress_context_t *ctx, stress_worker_func_t worker,
 		thread_data[i].user_data = user_data;
 		thread_data[i].thread_id = i;
 
-		if (osal_pthread_create(&threads[i], NULL, worker_thread,
+		if (osal_pthread_create(&threads[i], NULL, _worker_thread,
 								&thread_data[i]) != 0) {
 			/* 启动失败，停止已启动的线程 */
 			ctx->should_stop = true;
@@ -208,7 +208,7 @@ int32_t stress_run(stress_context_t *ctx, stress_worker_func_t worker,
 	}
 
 	/* 计算最终统计 */
-	uint64_t elapsed_us = get_time_us() - ctx->start_time_us;
+	uint64_t elapsed_us = _get_time_us() - ctx->start_time_us;
 	ctx->stats.elapsed_time_ms = elapsed_us / 1000;
 
 	if (elapsed_us > 0) {

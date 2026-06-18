@@ -49,7 +49,7 @@ static osal_mutex_t g_cache_table_mutex = PTHREAD_MUTEX_INITIALIZER;
 /**
  * @brief 计算CRC32校验和
  */
-static uint32_t calculate_crc32(const uint8_t *data, uint32_t len)
+static uint32_t _calculate_crc32(const uint8_t *data, uint32_t len)
 {
 	uint32_t crc = 0xFFFFFFFF;
 	uint32_t i;
@@ -67,7 +67,7 @@ static uint32_t calculate_crc32(const uint8_t *data, uint32_t len)
 /**
  * @brief 获取单调时间戳（微秒）
  */
-static uint64_t get_monotonic_us(void)
+static uint64_t _get_monotonic_us(void)
 {
 	struct timespec ts;
 	clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -77,7 +77,7 @@ static uint64_t get_monotonic_us(void)
 /**
  * @brief 查找空闲的缓存槽位
  */
-static int32_t find_free_cache_slot(void)
+static int32_t _find_free_cache_slot(void)
 {
 	uint32_t i;
 	for (i = 0; i < MAX_CACHES; i++) {
@@ -110,7 +110,7 @@ int32_t osal_cache_create(const char *name, uint32_t max_entries,
 	pthread_mutex_lock(&g_cache_table_mutex);
 
 	/* 查找空闲槽位 */
-	slot = find_free_cache_slot();
+	slot = _find_free_cache_slot();
 	if (slot < 0) {
 		pthread_mutex_unlock(&g_cache_table_mutex);
 		return OSAL_ERR_NO_FREE_IDS;
@@ -202,7 +202,7 @@ int32_t osal_cache_open(const char *name, osal_id_t *cache_id)
 	pthread_mutex_lock(&g_cache_table_mutex);
 
 	/* 查找空闲槽位 */
-	slot = find_free_cache_slot();
+	slot = _find_free_cache_slot();
 	if (slot < 0) {
 		pthread_mutex_unlock(&g_cache_table_mutex);
 		return OSAL_ERR_NO_FREE_IDS;
@@ -330,14 +330,14 @@ int32_t osal_cache_write(osal_id_t cache_id, uint32_t entry_id,
 	entry->data_len = data_len;
 
 	/* 更新元数据 */
-	entry->timestamp_us = get_monotonic_us();
+	entry->timestamp_us = _get_monotonic_us();
 	entry->data_validity_ms = data_validity_ms;
 	entry->status = OSAL_CACHE_STATUS_FRESH;
 	entry->valid = true;
 	entry->update_count++;
 
 	/* 计算校验和 */
-	entry->checksum = calculate_crc32(data, data_len);
+	entry->checksum = _calculate_crc32(data, data_len);
 
 	/* 解锁 */
 	pthread_mutex_unlock(&cache->header->mutex);
@@ -382,7 +382,7 @@ int32_t osal_cache_read(osal_id_t cache_id, uint32_t entry_id,
 	}
 
 	/* 计算数据年龄 */
-	now = get_monotonic_us();
+	now = _get_monotonic_us();
 	age_ms = (uint32_t)((now - entry->timestamp_us) / 1000);
 
 	/* 判断新鲜度 */
@@ -495,7 +495,7 @@ int32_t osal_cache_get_stats(osal_id_t cache_id, uint32_t *total_count,
 	*fresh_count = 0;
 	*stale_count = 0;
 
-	now = get_monotonic_us();
+	now = _get_monotonic_us();
 
 	for (i = 0; i < cache->header->max_entries; i++) {
 		osal_cache_entry_t *entry = &cache->header->entries[i];

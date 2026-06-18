@@ -11,7 +11,7 @@
  *===========================================================================*/
 
 /* 测试用例: GetLocalTime - 成功获取本地时间 */
-static void test_osal_get_local_time_success(void)
+static void _test_osal_get_local_time_success(void)
 {
 	OS_time_t time1, time2;
 	int32_t ret;
@@ -34,7 +34,7 @@ static void test_osal_get_local_time_success(void)
 }
 
 /* 测试用例: GetLocalTime - 空指针 */
-static void test_osal_get_local_time_null_pointer(void)
+static void _test_osal_get_local_time_null_pointer(void)
 {
 	int32_t ret = osal_get_local_time(NULL);
 	TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_POINTER, ret);
@@ -45,7 +45,7 @@ static void test_osal_get_local_time_null_pointer(void)
  *===========================================================================*/
 
 /* 测试用例: SetLocalTime - 未实现 */
-static void test_osal_set_local_time_not_implemented(void)
+static void _test_osal_set_local_time_not_implemented(void)
 {
 	OS_time_t time = { 1234567890, 0 };
 	/* Function has been removed from API */
@@ -58,7 +58,7 @@ static void test_osal_set_local_time_not_implemented(void)
  *===========================================================================*/
 
 /* 测试用例: GetTickCount - 单调递增 */
-static void test_osal_get_tick_count_monotonic(void)
+static void _test_osal_get_tick_count_monotonic(void)
 {
 	uint32_t tick1, tick2;
 
@@ -77,7 +77,7 @@ static void test_osal_get_tick_count_monotonic(void)
 }
 
 /* 测试用例: GetTickCount - 多次调用 */
-static void test_osal_get_tick_count_multiple_calls(void)
+static void _test_osal_get_tick_count_multiple_calls(void)
 {
 	uint32_t tick1, tick2, tick3;
 
@@ -97,7 +97,7 @@ static void test_osal_get_tick_count_multiple_calls(void)
  *===========================================================================*/
 
 /* 测试用例: 时间精度测试 */
-static void test_osal_time_precision(void)
+static void _test_osal_time_precision(void)
 {
 	OS_time_t time1, time2;
 	uint32_t tick1, tick2;
@@ -133,27 +133,27 @@ static void test_osal_time_precision(void)
 /* 测试用例数组 - 使用函数指针数组 */
 static const test_case_t test_cases[] = {
 	{ .name = "test_osal_get_local_time_success",
-	  .func = test_osal_get_local_time_success,
+	  .func = _test_osal_get_local_time_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_get_local_time_null_pointer",
-	  .func = test_osal_get_local_time_null_pointer,
+	  .func = _test_osal_get_local_time_null_pointer,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_set_local_time_not_implemented",
-	  .func = test_osal_set_local_time_not_implemented,
+	  .func = _test_osal_set_local_time_not_implemented,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_get_tick_count_monotonic",
-	  .func = test_osal_get_tick_count_monotonic,
+	  .func = _test_osal_get_tick_count_monotonic,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_get_tick_count_multiple_calls",
-	  .func = test_osal_get_tick_count_multiple_calls,
+	  .func = _test_osal_get_tick_count_multiple_calls,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_osal_time_precision",
-	  .func = test_osal_time_precision,
+	  .func = _test_osal_time_precision,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

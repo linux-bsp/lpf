@@ -34,8 +34,8 @@ typedef struct {
 /**
  * Worker for continuous SPI transfer
  */
-static int32_t spi_continuous_transfer_worker(void *user_data,
-											  uint32_t iteration)
+static int32_t _spi_continuous_transfer_worker(void *user_data,
+											   uint32_t iteration)
 {
 	spi_worker_ctx_t *ctx = (spi_worker_ctx_t *)user_data;
 	uint8_t tx_buffer[SPI_STRESS_SMALL_BUF];
@@ -62,7 +62,7 @@ static int32_t spi_continuous_transfer_worker(void *user_data,
  * Test: Continuous high-speed SPI transfers
  * Verifies: sustained throughput, data integrity
  */
-static void test_stress_spi_continuous_transfer(void)
+static void _test_stress_spi_continuous_transfer(void)
 {
 	hal_spi_handle_t handle = NULL;
 	hal_spi_config_t config = { .device = SPI_STRESS_DEVICE,
@@ -107,7 +107,7 @@ static void test_stress_spi_continuous_transfer(void)
 
 	/* Run stress test */
 	start_time = 0;
-	ret = stress_run(stress_ctx, spi_continuous_transfer_worker, &worker_ctx);
+	ret = stress_run(stress_ctx, _spi_continuous_transfer_worker, &worker_ctx);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* Wait for completion */
@@ -154,7 +154,7 @@ static void test_stress_spi_continuous_transfer(void)
  * Test: Large buffer SPI transfers (MB range)
  * Verifies: DMA handling, memory management
  */
-static void test_stress_spi_large_buffers(void)
+static void _test_stress_spi_large_buffers(void)
 {
 	hal_spi_handle_t handle = NULL;
 	hal_spi_config_t config = { .device = SPI_STRESS_DEVICE,
@@ -230,7 +230,7 @@ static void test_stress_spi_large_buffers(void)
 /**
  * Worker for concurrent SPI access
  */
-static int32_t spi_concurrent_worker(void *user_data, uint32_t iteration)
+static int32_t _spi_concurrent_worker(void *user_data, uint32_t iteration)
 {
 	spi_worker_ctx_t *ctx = (spi_worker_ctx_t *)user_data;
 	uint8_t tx_buffer[SPI_STRESS_SMALL_BUF];
@@ -256,7 +256,7 @@ static int32_t spi_concurrent_worker(void *user_data, uint32_t iteration)
  * Test: Concurrent SPI access (simulates multiple device contention)
  * Verifies: exclusive bus access, no data corruption
  */
-static void test_stress_spi_concurrent_access(void)
+static void _test_stress_spi_concurrent_access(void)
 {
 	hal_spi_handle_t handles[SPI_STRESS_THREAD_COUNT];
 	hal_spi_config_t config = { .device = SPI_STRESS_DEVICE,
@@ -305,7 +305,7 @@ static void test_stress_spi_concurrent_access(void)
 
 	/* Run stress test */
 	for (uint32_t i = 0; i < SPI_STRESS_THREAD_COUNT; i++) {
-		ret = stress_run(stress_ctx, spi_concurrent_worker, &worker_ctx[i]);
+		ret = stress_run(stress_ctx, _spi_concurrent_worker, &worker_ctx[i]);
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	}
 
@@ -341,7 +341,7 @@ static void test_stress_spi_concurrent_access(void)
  * Test: Rapid SPI configuration changes under load
  * Verifies: configuration stability, no corruption
  */
-static void test_stress_spi_rapid_config_changes(void)
+static void _test_stress_spi_rapid_config_changes(void)
 {
 	hal_spi_handle_t handle = NULL;
 	hal_spi_config_t config = { .device = SPI_STRESS_DEVICE,
@@ -402,19 +402,19 @@ static void test_stress_spi_rapid_config_changes(void)
 
 static const test_case_t test_cases[] = {
 	{ .name = "test_stress_spi_continuous_transfer",
-	  .func = test_stress_spi_continuous_transfer,
+	  .func = _test_stress_spi_continuous_transfer,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_spi_large_buffers",
-	  .func = test_stress_spi_large_buffers,
+	  .func = _test_stress_spi_large_buffers,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_spi_concurrent_access",
-	  .func = test_stress_spi_concurrent_access,
+	  .func = _test_stress_spi_concurrent_access,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_stress_spi_rapid_config_changes",
-	  .func = test_stress_spi_rapid_config_changes,
+	  .func = _test_stress_spi_rapid_config_changes,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

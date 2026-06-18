@@ -25,12 +25,12 @@ static uint8_t test_buffer[1024];
  * Setup/Teardown
  *===========================================================================*/
 
-static void system_hal_setup(void)
+static void _system_hal_setup(void)
 {
 	osal_memset(test_buffer, 0, sizeof(test_buffer));
 }
 
-static void system_hal_teardown(void)
+static void _system_hal_teardown(void)
 {
 	/* 清理任何残留资源 */
 	osal_msleep(100); /* 100ms */
@@ -44,7 +44,7 @@ static void system_hal_teardown(void)
  * @brief 测试CAN完整生命周期管理
  * @details 验证CAN从初始化到配置、通信、清理的完整流程
  */
-static void test_system_can_lifecycle(void)
+static void _test_system_can_lifecycle(void)
 {
 	hal_can_handle_t handle = NULL;
 	hal_can_config_t config = { .interface = TEST_CAN_INTERFACE,
@@ -94,7 +94,7 @@ static void test_system_can_lifecycle(void)
  * @brief 测试CAN环回通信
  * @details 使用CAN loopback模式验证端到端通信
  */
-static void test_system_can_loopback(void)
+static void _test_system_can_loopback(void)
 {
 	hal_can_handle_t handle = NULL;
 	hal_can_config_t config = { .interface = TEST_CAN_INTERFACE,
@@ -136,7 +136,7 @@ static void test_system_can_loopback(void)
  * @brief 测试UART完整生命周期管理
  * @details 验证UART从初始化到配置、通信、清理的完整流程
  */
-static void test_system_uart_lifecycle(void)
+static void _test_system_uart_lifecycle(void)
 {
 	hal_serial_handle_t handle = NULL;
 	hal_serial_config_t config = { .baud_rate = TEST_UART_BAUDRATE,
@@ -195,7 +195,7 @@ static void test_system_uart_lifecycle(void)
  * @brief 测试UART回显通信
  * @details 发送数据并尝试读回（需要硬件loopback或外部设备）
  */
-static void test_system_uart_echo(void)
+static void _test_system_uart_echo(void)
 {
 	hal_serial_handle_t handle = NULL;
 	hal_serial_config_t config = { .baud_rate = TEST_UART_BAUDRATE,
@@ -240,7 +240,7 @@ static void test_system_uart_echo(void)
  * @brief 测试GPIO完整生命周期
  * @details 验证GPIO初始化、配置、读写、中断的完整流程
  */
-static void test_system_gpio_lifecycle(void)
+static void _test_system_gpio_lifecycle(void)
 {
 	hal_gpio_config_t config = { .direction = HAL_GPIO_DIR_OUTPUT,
 								 .initial_level = HAL_GPIO_LEVEL_LOW,
@@ -289,7 +289,7 @@ static void test_system_gpio_lifecycle(void)
  * @brief 测试GPIO快速翻转
  * @details 验证GPIO在高频率操作下的稳定性
  */
-static void test_system_gpio_toggle(void)
+static void _test_system_gpio_toggle(void)
 {
 	hal_gpio_config_t config = { .direction = HAL_GPIO_DIR_OUTPUT,
 								 .initial_level = HAL_GPIO_LEVEL_LOW,
@@ -327,7 +327,7 @@ static void test_system_gpio_toggle(void)
  * @brief 测试多个外设同时工作
  * @details 验证CAN + GPIO同时运行时的稳定性
  */
-static void test_system_multi_peripheral_coordination(void)
+static void _test_system_multi_peripheral_coordination(void)
 {
 	hal_can_handle_t can_handle = NULL;
 	int32_t ret;
@@ -400,7 +400,7 @@ static void test_system_multi_peripheral_coordination(void)
  * @brief 测试硬件故障场景下的恢复能力
  * @details 模拟各种错误情况并验证系统能否正确恢复
  */
-static void test_system_hardware_fault_recovery(void)
+static void _test_system_hardware_fault_recovery(void)
 {
 	int32_t ret;
 	int recovery_count = 0;
@@ -498,7 +498,7 @@ static void test_system_hardware_fault_recovery(void)
  * @brief 测试资源耗尽恢复
  * @details 打开多个外设直到资源耗尽，然后验证释放后能否恢复
  */
-static void test_system_resource_exhaustion_recovery(void)
+static void _test_system_resource_exhaustion_recovery(void)
 {
 #define MAX_HANDLES 10
 	int opened_count = 0;
@@ -555,45 +555,45 @@ static void test_system_resource_exhaustion_recovery(void)
 static const test_case_t test_cases[] = {
 	/* CAN系统测试 */
 	{ .name = "test_system_can_lifecycle",
-	  .func = test_system_can_lifecycle,
-	  .setup = system_hal_setup,
-	  .teardown = system_hal_teardown },
+	  .func = _test_system_can_lifecycle,
+	  .setup = _system_hal_setup,
+	  .teardown = _system_hal_teardown },
 	{ .name = "test_system_can_loopback",
-	  .func = test_system_can_loopback,
-	  .setup = system_hal_setup,
-	  .teardown = system_hal_teardown },
+	  .func = _test_system_can_loopback,
+	  .setup = _system_hal_setup,
+	  .teardown = _system_hal_teardown },
 	/* UART系统测试 */
 	{ .name = "test_system_uart_lifecycle",
-	  .func = test_system_uart_lifecycle,
-	  .setup = system_hal_setup,
-	  .teardown = system_hal_teardown },
+	  .func = _test_system_uart_lifecycle,
+	  .setup = _system_hal_setup,
+	  .teardown = _system_hal_teardown },
 	{ .name = "test_system_uart_echo",
-	  .func = test_system_uart_echo,
-	  .setup = system_hal_setup,
-	  .teardown = system_hal_teardown },
+	  .func = _test_system_uart_echo,
+	  .setup = _system_hal_setup,
+	  .teardown = _system_hal_teardown },
 	/* GPIO系统测试 */
 	{ .name = "test_system_gpio_lifecycle",
-	  .func = test_system_gpio_lifecycle,
-	  .setup = system_hal_setup,
-	  .teardown = system_hal_teardown },
+	  .func = _test_system_gpio_lifecycle,
+	  .setup = _system_hal_setup,
+	  .teardown = _system_hal_teardown },
 	{ .name = "test_system_gpio_toggle",
-	  .func = test_system_gpio_toggle,
-	  .setup = system_hal_setup,
-	  .teardown = system_hal_teardown },
+	  .func = _test_system_gpio_toggle,
+	  .setup = _system_hal_setup,
+	  .teardown = _system_hal_teardown },
 	/* 多外设协同测试 */
 	{ .name = "test_system_multi_peripheral_coordination",
-	  .func = test_system_multi_peripheral_coordination,
-	  .setup = system_hal_setup,
-	  .teardown = system_hal_teardown },
+	  .func = _test_system_multi_peripheral_coordination,
+	  .setup = _system_hal_setup,
+	  .teardown = _system_hal_teardown },
 	/* 错误恢复测试 */
 	{ .name = "test_system_hardware_fault_recovery",
-	  .func = test_system_hardware_fault_recovery,
-	  .setup = system_hal_setup,
-	  .teardown = system_hal_teardown },
+	  .func = _test_system_hardware_fault_recovery,
+	  .setup = _system_hal_setup,
+	  .teardown = _system_hal_teardown },
 	{ .name = "test_system_resource_exhaustion_recovery",
-	  .func = test_system_resource_exhaustion_recovery,
-	  .setup = system_hal_setup,
-	  .teardown = system_hal_teardown },
+	  .func = _test_system_resource_exhaustion_recovery,
+	  .setup = _system_hal_setup,
+	  .teardown = _system_hal_teardown },
 };
 
 /* 测试套件定义 */

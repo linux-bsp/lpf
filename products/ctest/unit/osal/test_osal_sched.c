@@ -12,7 +12,7 @@
  * 调度策略测试
  *===========================================================================*/
 
-static void test_sched_set_get_policy(void)
+static void _test_sched_set_get_policy(void)
 {
 	osal_thread_t thread = osal_pthread_self();
 	int32_t policy;
@@ -27,7 +27,7 @@ static void test_sched_set_get_policy(void)
 					 policy == SCHED_RR);
 }
 
-static void test_sched_priority_range(void)
+static void _test_sched_priority_range(void)
 {
 	/* 获取SCHED_OTHER的优先级范围 */
 	int32_t min = sched_get_priority_min(SCHED_OTHER);
@@ -55,7 +55,7 @@ static void test_sched_priority_range(void)
  * 线程优先级测试
  *===========================================================================*/
 
-static void test_sched_set_priority_other(void)
+static void _test_sched_set_priority_other(void)
 {
 	osal_thread_t thread = osal_pthread_self();
 	int32_t policy;
@@ -79,7 +79,7 @@ static void test_sched_set_priority_other(void)
  * CPU亲和性测试
  *===========================================================================*/
 
-static void test_sched_cpu_affinity(void)
+static void _test_sched_cpu_affinity(void)
 {
 	int32_t cpu_id = 0;
 
@@ -100,7 +100,7 @@ static void test_sched_cpu_affinity(void)
 	}
 }
 
-static void test_sched_process_cpu_affinity(void)
+static void _test_sched_process_cpu_affinity(void)
 {
 	int32_t cpu_id = 0;
 
@@ -120,7 +120,7 @@ static void test_sched_process_cpu_affinity(void)
 	}
 }
 
-static void test_sched_process_affinity_with_pid(void)
+static void _test_sched_process_affinity_with_pid(void)
 {
 	int32_t cpu_id = 0;
 	osal_pid_t pid = osal_getpid();
@@ -145,7 +145,7 @@ static void test_sched_process_affinity_with_pid(void)
  * 线程属性调度测试
  *===========================================================================*/
 
-static void test_sched_attr_set_policy(void)
+static void _test_sched_attr_set_policy(void)
 {
 	osal_threadattr_t attr;
 
@@ -161,7 +161,7 @@ static void test_sched_attr_set_policy(void)
 	osal_pthread_attr_destroy(&attr);
 }
 
-static void test_sched_attr_set_param(void)
+static void _test_sched_attr_set_param(void)
 {
 	osal_threadattr_t attr;
 	osal_sched_param_t param;
@@ -183,7 +183,7 @@ static void test_sched_attr_set_param(void)
  * yield测试
  *===========================================================================*/
 
-static void test_sched_yield(void)
+static void _test_sched_yield(void)
 {
 	/* 主动让出CPU */
 	int32_t ret = osal_sched_yield();
@@ -202,39 +202,39 @@ static void test_sched_yield(void)
 
 static const test_case_t test_cases[] = {
 	{ .name = "test_sched_set_get_policy",
-	  .func = test_sched_set_get_policy,
+	  .func = _test_sched_set_get_policy,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_sched_priority_range",
-	  .func = test_sched_priority_range,
+	  .func = _test_sched_priority_range,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_sched_set_priority_other",
-	  .func = test_sched_set_priority_other,
+	  .func = _test_sched_set_priority_other,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_sched_cpu_affinity",
-	  .func = test_sched_cpu_affinity,
+	  .func = _test_sched_cpu_affinity,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_sched_process_cpu_affinity",
-	  .func = test_sched_process_cpu_affinity,
+	  .func = _test_sched_process_cpu_affinity,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_sched_process_affinity_with_pid",
-	  .func = test_sched_process_affinity_with_pid,
+	  .func = _test_sched_process_affinity_with_pid,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_sched_attr_set_policy",
-	  .func = test_sched_attr_set_policy,
+	  .func = _test_sched_attr_set_policy,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_sched_attr_set_param",
-	  .func = test_sched_attr_set_param,
+	  .func = _test_sched_attr_set_param,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_sched_yield",
-	  .func = test_sched_yield,
+	  .func = _test_sched_yield,
 	  .setup = NULL,
 	  .teardown = NULL },
 };

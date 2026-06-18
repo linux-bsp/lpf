@@ -18,7 +18,7 @@
 static int32_t shared_counter = 0;
 
 /* 测试用例1: 互斥锁初始化成功 */
-static void test_mutex_init_success(void)
+static void _test_mutex_init_success(void)
 {
 	osal_mutex_t mutex;
 
@@ -30,7 +30,7 @@ static void test_mutex_init_success(void)
 }
 
 /* 测试用例2: 互斥锁初始化失败 - 空指针 */
-static void test_mutex_init_nullpointer(void)
+static void _test_mutex_init_nullpointer(void)
 {
 	int32_t ret = osal_pthread_mutex_init(NULL, NULL);
 	TEST_ASSERT_EQUAL(-1, ret);
@@ -38,7 +38,7 @@ static void test_mutex_init_nullpointer(void)
 }
 
 /* 测试用例3: 互斥锁加锁解锁 */
-static void test_mutex_lockunlock_success(void)
+static void _test_mutex_lockunlock_success(void)
 {
 	osal_mutex_t mutex;
 	osal_pthread_mutex_init(&mutex, NULL);
@@ -53,7 +53,7 @@ static void test_mutex_lockunlock_success(void)
 }
 
 /* 测试用例4: 互斥锁加锁失败 - 空指针 */
-static void test_mutex_lock_nullpointer(void)
+static void _test_mutex_lock_nullpointer(void)
 {
 	int32_t ret = osal_pthread_mutex_lock(NULL);
 	TEST_ASSERT_EQUAL(-1, ret);
@@ -61,7 +61,7 @@ static void test_mutex_lock_nullpointer(void)
 }
 
 /* 测试用例5: 互斥锁解锁失败 - 空指针 */
-static void test_mutex_unlock_nullpointer(void)
+static void _test_mutex_unlock_nullpointer(void)
 {
 	int32_t ret = osal_pthread_mutex_unlock(NULL);
 	TEST_ASSERT_EQUAL(-1, ret);
@@ -69,7 +69,7 @@ static void test_mutex_unlock_nullpointer(void)
 }
 
 /* 测试用例6: 互斥锁销毁成功 */
-static void test_mutex_destroy_success(void)
+static void _test_mutex_destroy_success(void)
 {
 	osal_mutex_t mutex;
 	osal_pthread_mutex_init(&mutex, NULL);
@@ -79,7 +79,7 @@ static void test_mutex_destroy_success(void)
 }
 
 /* 测试用例7: 互斥锁销毁失败 - 空指针 */
-static void test_mutex_destroy_nullpointer(void)
+static void _test_mutex_destroy_nullpointer(void)
 {
 	int32_t ret = osal_pthread_mutex_destroy(NULL);
 	TEST_ASSERT_EQUAL(-1, ret);
@@ -87,7 +87,7 @@ static void test_mutex_destroy_nullpointer(void)
 }
 
 /* 生产者线程 */
-static void *producer_thread(void *arg)
+static void *_producer_thread(void *arg)
 {
 	osal_mutex_t *mutex = (osal_mutex_t *)arg;
 	int32_t i;
@@ -102,7 +102,7 @@ static void *producer_thread(void *arg)
 }
 
 /* 消费者线程 */
-static void *consumer_thread(void *arg)
+static void *_consumer_thread(void *arg)
 {
 	osal_mutex_t *mutex = (osal_mutex_t *)arg;
 	int32_t i;
@@ -117,7 +117,7 @@ static void *consumer_thread(void *arg)
 }
 
 /* 测试用例8: 多线程互斥 */
-static void test_mutex_multithread(void)
+static void _test_mutex_multithread(void)
 {
 	shared_counter = 0;
 	osal_mutex_t mutex;
@@ -126,8 +126,8 @@ static void test_mutex_multithread(void)
 	osal_thread_t producer, consumer;
 
 	/* 创建生产者和消费者线程 */
-	osal_pthread_create(&producer, NULL, producer_thread, &mutex);
-	osal_pthread_create(&consumer, NULL, consumer_thread, &mutex);
+	osal_pthread_create(&producer, NULL, _producer_thread, &mutex);
+	osal_pthread_create(&consumer, NULL, _consumer_thread, &mutex);
 
 	/* 等待线程完成 */
 	osal_pthread_join(producer, NULL);
@@ -140,7 +140,7 @@ static void test_mutex_multithread(void)
 }
 
 /* 测试用例9: 递归锁 */
-static void test_mutex_recursive(void)
+static void _test_mutex_recursive(void)
 {
 	osal_mutex_t mutex;
 	osal_mutexattr_t attr;
@@ -169,7 +169,7 @@ static void test_mutex_recursive(void)
 }
 
 /* 测试用例10: trylock 非阻塞 */
-static void test_mutex_trylock(void)
+static void _test_mutex_trylock(void)
 {
 	osal_mutex_t mutex;
 	osal_pthread_mutex_init(&mutex, NULL);
@@ -194,43 +194,43 @@ static void test_mutex_trylock(void)
 /* 测试用例数组 */
 static const test_case_t test_cases[] = {
 	{ .name = "test_mutex_init_success",
-	  .func = test_mutex_init_success,
+	  .func = _test_mutex_init_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_mutex_init_nullpointer",
-	  .func = test_mutex_init_nullpointer,
+	  .func = _test_mutex_init_nullpointer,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_mutex_lockunlock_success",
-	  .func = test_mutex_lockunlock_success,
+	  .func = _test_mutex_lockunlock_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_mutex_lock_nullpointer",
-	  .func = test_mutex_lock_nullpointer,
+	  .func = _test_mutex_lock_nullpointer,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_mutex_unlock_nullpointer",
-	  .func = test_mutex_unlock_nullpointer,
+	  .func = _test_mutex_unlock_nullpointer,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_mutex_destroy_success",
-	  .func = test_mutex_destroy_success,
+	  .func = _test_mutex_destroy_success,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_mutex_destroy_nullpointer",
-	  .func = test_mutex_destroy_nullpointer,
+	  .func = _test_mutex_destroy_nullpointer,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_mutex_multithread",
-	  .func = test_mutex_multithread,
+	  .func = _test_mutex_multithread,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_mutex_recursive",
-	  .func = test_mutex_recursive,
+	  .func = _test_mutex_recursive,
 	  .setup = NULL,
 	  .teardown = NULL },
 	{ .name = "test_mutex_trylock",
-	  .func = test_mutex_trylock,
+	  .func = _test_mutex_trylock,
 	  .setup = NULL,
 	  .teardown = NULL },
 };
