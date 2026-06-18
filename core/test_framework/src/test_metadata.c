@@ -13,7 +13,7 @@
  * @param buf_size Buffer size
  * @return Pointer to formatted string
  */
-const char* test_tags_to_string(uint32_t tags, char *buf, uint32_t buf_size)
+const char *test_tags_to_string(uint32_t tags, char *buf, uint32_t buf_size)
 {
     static char static_buf[256];
     char *output = buf ? buf : static_buf;
@@ -33,18 +33,18 @@ const char* test_tags_to_string(uint32_t tags, char *buf, uint32_t buf_size)
 
     output[0] = '\0';
 
-#define APPEND_TAG(flag, name) \
-    if ((tags & (flag)) && pos < size - 1) { \
-        if (!first && pos < size - 2) { \
-            output[pos++] = ','; \
-            output[pos++] = ' '; \
-        } \
-        uint32_t len = OSAL_strlen(name); \
-        if (pos + len < size - 1) { \
+#define APPEND_TAG(flag, name)                            \
+    if ((tags & (flag)) && pos < size - 1) {              \
+        if (!first && pos < size - 2) {                   \
+            output[pos++] = ',';                          \
+            output[pos++] = ' ';                          \
+        }                                                 \
+        uint32_t len = OSAL_strlen(name);                 \
+        if (pos + len < size - 1) {                       \
             OSAL_strncpy(output + pos, name, size - pos); \
-            pos += len; \
-            first = false; \
-        } \
+            pos += len;                                   \
+            first = false;                                \
+        }                                                 \
     }
 
     APPEND_TAG(TEST_TAG_FAST, "fast");

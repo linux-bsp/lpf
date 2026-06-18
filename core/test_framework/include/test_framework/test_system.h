@@ -19,10 +19,10 @@
 
 /* 系统测试类型 */
 typedef enum {
-    SYSTEM_TEST_INTEGRATION,    /* 集成测试 */
-    SYSTEM_TEST_E2E,            /* 端到端测试 */
-    SYSTEM_TEST_SCENARIO,       /* 场景测试 */
-    SYSTEM_TEST_REGRESSION      /* 回归测试 */
+    SYSTEM_TEST_INTEGRATION, /* 集成测试 */
+    SYSTEM_TEST_E2E,         /* 端到端测试 */
+    SYSTEM_TEST_SCENARIO,    /* 场景测试 */
+    SYSTEM_TEST_REGRESSION   /* 回归测试 */
 } system_test_type_t;
 
 /* 系统测试环境 */
@@ -53,8 +53,8 @@ typedef int32_t (*system_test_func_t)(system_test_env_t *env);
  * @param type 测试类型
  * @return 系统测试上下文，失败返回NULL
  */
-system_test_context_t* system_test_create(const char *name,
-                                           system_test_type_t type);
+system_test_context_t *system_test_create(const char *name,
+                                          system_test_type_t type);
 
 /**
  * 销毁系统测试上下文
@@ -69,8 +69,8 @@ void system_test_destroy(system_test_context_t *ctx);
  * @param teardown 清理函数
  */
 void system_test_set_env_funcs(system_test_context_t *ctx,
-                                system_env_setup_func_t setup,
-                                system_env_teardown_func_t teardown);
+                               system_env_setup_func_t setup,
+                               system_env_teardown_func_t teardown);
 
 /**
  * 运行系统测试
@@ -86,7 +86,7 @@ int32_t system_test_run(system_test_context_t *ctx,
  * @param ctx 系统测试上下文
  * @return 测试环境指针
  */
-system_test_env_t* system_test_get_env(system_test_context_t *ctx);
+system_test_env_t *system_test_get_env(system_test_context_t *ctx);
 
 /**
  * 记录系统测试检查点
@@ -133,13 +133,13 @@ void system_test_print_report(system_test_context_t *ctx);
  * @param name 检查点名称
  * @param condition 条件表达式
  */
-#define SYSTEM_CHECKPOINT(ctx, name, condition) \
-    do { \
-        bool _passed = (condition); \
-        system_test_checkpoint(ctx, name, _passed); \
-        if (!_passed) { \
+#define SYSTEM_CHECKPOINT(ctx, name, condition)                            \
+    do {                                                                   \
+        bool _passed = (condition);                                        \
+        system_test_checkpoint(ctx, name, _passed);                        \
+        if (!_passed) {                                                    \
             OSAL_printf("[ CHECKPOINT FAIL ] %s: %s\n", name, #condition); \
-        } \
+        }                                                                  \
     } while (0)
 
 /**
@@ -147,8 +147,8 @@ void system_test_print_report(system_test_context_t *ctx);
  * @param ctx 系统测试上下文
  */
 #define SYSTEM_ASSERT_ALL_CHECKPOINTS_PASSED(ctx) \
-    do { \
-        /* 实现由框架提供 */ \
+    do {                                          \
+        /* 实现由框架提供 */               \
     } while (0)
 
 #endif /* TEST_SYSTEM_H */

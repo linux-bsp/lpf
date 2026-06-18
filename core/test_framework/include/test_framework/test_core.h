@@ -35,11 +35,13 @@ typedef struct {
 
 /**
  * Auto-collected test case structure (for linker section-based collection)
- * This allows TEST_CASE() to automatically register without explicit TEST_CASE_REF()
+ * This allows TEST_CASE() to automatically register without explicit
+ * TEST_CASE_REF()
  */
 typedef struct {
-    const char *section_name;  /**< Section name to identify which suite this belongs to */
-    test_case_t case_info;     /**< Test case information */
+    const char *section_name; /**< Section name to identify which suite this
+                                 belongs to */
+    test_case_t case_info;    /**< Test case information */
 } auto_test_case_t;
 
 /* Test suite structure with metadata support */
@@ -51,14 +53,12 @@ typedef struct {
     uint32_t case_count;
     fixture_func_t suite_setup;
     fixture_func_t suite_teardown;
-    test_metadata_t metadata;  /**< Test suite metadata (category, tags, timeout, description) */
+    test_metadata_t metadata; /**< Test suite metadata (category, tags, timeout,
+                                 description) */
 } test_suite_t;
 
 /* Test result codes */
-typedef enum {
-    TEST_RESULT_PASS = 0,
-    TEST_RESULT_FAIL = 1
-} test_result_t;
+typedef enum { TEST_RESULT_PASS = 0, TEST_RESULT_FAIL = 1 } test_result_t;
 
 /* Test result record (for detailed summary) */
 typedef struct test_result_node {
@@ -73,10 +73,11 @@ typedef struct {
     uint32_t total;
     uint32_t passed;
     uint32_t failed;
-    uint64_t total_time_ms;      /* Total execution time in milliseconds */
-    uint64_t avg_time_ms;        /* Average execution time per test */
+    uint64_t total_time_ms;       /* Total execution time in milliseconds */
+    uint64_t avg_time_ms;         /* Average execution time per test */
     const char *failed_tests[64]; /* List of failed test names (legacy) */
-    uint32_t failed_test_count;  /* Number of failed tests in the list (legacy) */
+    uint32_t
+        failed_test_count; /* Number of failed tests in the list (legacy) */
 
     /* Separate linked lists for each result type */
     test_result_node_t *passed_list_head;
@@ -92,9 +93,11 @@ void libutest_register_suite(const test_suite_t *suite);
 int32_t libutest_run_all(void);
 int32_t libutest_run_all_filtered(const test_filter_t *filter);
 int32_t libutest_run_layer(const char *layer_name);
-int32_t libutest_run_layer_filtered(const char *layer_name, const test_filter_t *filter);
+int32_t libutest_run_layer_filtered(const char *layer_name,
+                                    const test_filter_t *filter);
 int32_t libutest_run_module(const char *module_name);
-int32_t libutest_run_module_filtered(const char *module_name, const test_filter_t *filter);
+int32_t libutest_run_module_filtered(const char *module_name,
+                                     const test_filter_t *filter);
 int32_t libutest_run_suite(const char *suite_name);
 int32_t libutest_run_test(const char *suite_name, const char *test_name);
 
@@ -116,7 +119,7 @@ int32_t libutest_interactive_menu(void);
 int32_t libutest_interactive_menu_filtered(const test_filter_t *filter);
 
 /* Core API - Statistics */
-const test_stats_t* libutest_get_stats(void);
+const test_stats_t *libutest_get_stats(void);
 void libutest_reset_stats(void);
 
 /* Core API - Reporting and Export */

@@ -3,8 +3,8 @@
  * @brief Test suite registry implementation
  *
  * Maintains a global registry of all test suites registered via
- * constructor attributes. Provides lookup, enumeration, and filtering functions.
- * Supports dynamic allocation to avoid hardcoded limits.
+ * constructor attributes. Provides lookup, enumeration, and filtering
+ * functions. Supports dynamic allocation to avoid hardcoded limits.
  */
 
 #include "test_core.h"
@@ -49,7 +49,8 @@ static bool expand_registry(void)
     }
 
     /* Copy old data to new buffer */
-    OSAL_memcpy(new_suites, g_registered_suites,
+    OSAL_memcpy(new_suites,
+                g_registered_suites,
                 g_suite_count * OSAL_sizeof(test_suite_t *));
 
     /* Free old buffer and update registry */
@@ -73,8 +74,9 @@ void libutest_register_suite(const test_suite_t *suite)
 
     if (g_suite_count >= g_suite_capacity) {
         if (!expand_registry()) {
-            OSAL_printf("ERROR: Cannot register test suite '%s' - registry full\n",
-                        suite->suite_name);
+            OSAL_printf(
+                "ERROR: Cannot register test suite '%s' - registry full\n",
+                suite->suite_name);
             return;
         }
     }
@@ -85,7 +87,7 @@ void libutest_register_suite(const test_suite_t *suite)
 /**
  * Get all registered suites
  */
-const test_suite_t** test_get_all_suites(uint32_t *count)
+const test_suite_t **test_get_all_suites(uint32_t *count)
 {
     if (NULL != count) {
         *count = g_suite_count;
@@ -97,8 +99,8 @@ const test_suite_t** test_get_all_suites(uint32_t *count)
  * Get all suites matching filter
  */
 uint32_t test_get_filtered_suites(const test_filter_t *filter,
-                                   const test_suite_t **suites,
-                                   uint32_t max_suites)
+                                  const test_suite_t **suites,
+                                  uint32_t max_suites)
 {
     if (NULL == suites) {
         return 0;
@@ -108,7 +110,8 @@ uint32_t test_get_filtered_suites(const test_filter_t *filter,
     uint32_t i;
 
     for (i = 0; i < g_suite_count && count < max_suites; i++) {
-        if (test_metadata_matches_filter(&g_registered_suites[i]->metadata, filter)) {
+        if (test_metadata_matches_filter(&g_registered_suites[i]->metadata,
+                                         filter)) {
             suites[count++] = g_registered_suites[i];
         }
     }
@@ -119,14 +122,13 @@ uint32_t test_get_filtered_suites(const test_filter_t *filter,
 /**
  * Find suite by name
  */
-const test_suite_t* test_find_suite(const char *name)
+const test_suite_t *test_find_suite(const char *name)
 {
     if (NULL == name) {
         return NULL;
     }
 
     uint32_t i;
-
 
     for (i = 0; i < g_suite_count; i++) {
         if (0 == OSAL_strcmp(g_registered_suites[i]->suite_name, name)) {
@@ -139,7 +141,9 @@ const test_suite_t* test_find_suite(const char *name)
 /**
  * Get suites by layer
  */
-uint32_t test_get_suites_by_layer(const char *layer_name, const test_suite_t **suites, uint32_t max_suites)
+uint32_t test_get_suites_by_layer(const char *layer_name,
+                                  const test_suite_t **suites,
+                                  uint32_t max_suites)
 {
     if (NULL == layer_name || NULL == suites) {
         return 0;
@@ -160,9 +164,9 @@ uint32_t test_get_suites_by_layer(const char *layer_name, const test_suite_t **s
  * Get suites by layer with filter
  */
 uint32_t test_get_suites_by_layer_filtered(const char *layer_name,
-                                            const test_filter_t *filter,
-                                            const test_suite_t **suites,
-                                            uint32_t max_suites)
+                                           const test_filter_t *filter,
+                                           const test_suite_t **suites,
+                                           uint32_t max_suites)
 {
     if (NULL == layer_name || NULL == suites) {
         return 0;
@@ -173,7 +177,8 @@ uint32_t test_get_suites_by_layer_filtered(const char *layer_name,
 
     for (i = 0; i < g_suite_count && count < max_suites; i++) {
         if (0 == OSAL_strcmp(g_registered_suites[i]->layer_name, layer_name)) {
-            if (test_metadata_matches_filter(&g_registered_suites[i]->metadata, filter)) {
+            if (test_metadata_matches_filter(&g_registered_suites[i]->metadata,
+                                             filter)) {
                 suites[count++] = g_registered_suites[i];
             }
         }
@@ -184,7 +189,9 @@ uint32_t test_get_suites_by_layer_filtered(const char *layer_name,
 /**
  * Get suites by module
  */
-uint32_t test_get_suites_by_module(const char *module_name, const test_suite_t **suites, uint32_t max_suites)
+uint32_t test_get_suites_by_module(const char *module_name,
+                                   const test_suite_t **suites,
+                                   uint32_t max_suites)
 {
     if (NULL == module_name || NULL == suites) {
         return 0;
@@ -194,7 +201,8 @@ uint32_t test_get_suites_by_module(const char *module_name, const test_suite_t *
     uint32_t i;
 
     for (i = 0; i < g_suite_count && count < max_suites; i++) {
-        if (0 == OSAL_strcmp(g_registered_suites[i]->module_name, module_name)) {
+        if (0 ==
+            OSAL_strcmp(g_registered_suites[i]->module_name, module_name)) {
             suites[count++] = g_registered_suites[i];
         }
     }
@@ -205,9 +213,9 @@ uint32_t test_get_suites_by_module(const char *module_name, const test_suite_t *
  * Get suites by module with filter
  */
 uint32_t test_get_suites_by_module_filtered(const char *module_name,
-                                             const test_filter_t *filter,
-                                             const test_suite_t **suites,
-                                             uint32_t max_suites)
+                                            const test_filter_t *filter,
+                                            const test_suite_t **suites,
+                                            uint32_t max_suites)
 {
     if (NULL == module_name || NULL == suites) {
         return 0;
@@ -217,8 +225,10 @@ uint32_t test_get_suites_by_module_filtered(const char *module_name,
     uint32_t i;
 
     for (i = 0; i < g_suite_count && count < max_suites; i++) {
-        if (0 == OSAL_strcmp(g_registered_suites[i]->module_name, module_name)) {
-            if (test_metadata_matches_filter(&g_registered_suites[i]->metadata, filter)) {
+        if (0 ==
+            OSAL_strcmp(g_registered_suites[i]->module_name, module_name)) {
+            if (test_metadata_matches_filter(&g_registered_suites[i]->metadata,
+                                             filter)) {
                 suites[count++] = g_registered_suites[i];
             }
         }
@@ -230,8 +240,8 @@ uint32_t test_get_suites_by_module_filtered(const char *module_name,
  * Get suites by category
  */
 uint32_t test_get_suites_by_category(test_category_t category,
-                                      const test_suite_t **suites,
-                                      uint32_t max_suites)
+                                     const test_suite_t **suites,
+                                     uint32_t max_suites)
 {
     if (NULL == suites) {
         return 0;
@@ -252,8 +262,8 @@ uint32_t test_get_suites_by_category(test_category_t category,
  * Get suites by tag (any of the specified tags must match)
  */
 uint32_t test_get_suites_by_tags(uint32_t tags,
-                                  const test_suite_t **suites,
-                                  uint32_t max_suites)
+                                 const test_suite_t **suites,
+                                 uint32_t max_suites)
 {
     if (NULL == suites || tags == 0) {
         return 0;

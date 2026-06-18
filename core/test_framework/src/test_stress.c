@@ -23,7 +23,8 @@ struct stress_context {
 /**
  * 获取当前时间（微秒）
  */
-static uint64_t get_time_us(void) {
+static uint64_t get_time_us(void)
+{
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return (uint64_t)ts.tv_sec * 1000000ULL + (uint64_t)ts.tv_nsec / 1000ULL;
@@ -32,13 +33,15 @@ static uint64_t get_time_us(void) {
 /**
  * 创建压力测试上下文
  */
-stress_context_t* stress_context_create(const char *name,
-                                         const stress_config_t *config) {
+stress_context_t *stress_context_create(const char *name,
+                                        const stress_config_t *config)
+{
     if (!name || !config) {
         return NULL;
     }
 
-    stress_context_t *ctx = (stress_context_t*)calloc(1, sizeof(stress_context_t));
+    stress_context_t *ctx =
+        (stress_context_t *)calloc(1, sizeof(stress_context_t));
     if (!ctx) {
         return NULL;
     }
@@ -58,7 +61,8 @@ stress_context_t* stress_context_create(const char *name,
 /**
  * 销毁压力测试上下文
  */
-void stress_context_destroy(stress_context_t *ctx) {
+void stress_context_destroy(stress_context_t *ctx)
+{
     if (!ctx) {
         return;
     }
@@ -78,8 +82,9 @@ typedef struct {
 /**
  * 工作线程函数
  */
-static void* worker_thread(void *arg) {
-    worker_thread_data_t *data = (worker_thread_data_t*)arg;
+static void *worker_thread(void *arg)
+{
+    worker_thread_data_t *data = (worker_thread_data_t *)arg;
     stress_context_t *ctx = data->ctx;
     uint32_t iteration = 0;
 
@@ -140,9 +145,9 @@ static void* worker_thread(void *arg) {
 /**
  * 运行压力测试
  */
-int32_t stress_run(stress_context_t *ctx,
-                   stress_worker_func_t worker,
-                   void *user_data) {
+int32_t
+stress_run(stress_context_t *ctx, stress_worker_func_t worker, void *user_data)
+{
     if (!ctx || !worker) {
         return -1;
     }
@@ -158,9 +163,11 @@ int32_t stress_run(stress_context_t *ctx,
         thread_count = 1;
     }
 
-    osal_thread_t *threads = (osal_thread_t*)calloc(thread_count, sizeof(osal_thread_t));
+    osal_thread_t *threads =
+        (osal_thread_t *)calloc(thread_count, sizeof(osal_thread_t));
     worker_thread_data_t *thread_data =
-        (worker_thread_data_t*)calloc(thread_count, sizeof(worker_thread_data_t));
+        (worker_thread_data_t *)calloc(thread_count,
+                                       sizeof(worker_thread_data_t));
 
     if (!threads || !thread_data) {
         free(threads);
@@ -175,7 +182,10 @@ int32_t stress_run(stress_context_t *ctx,
         thread_data[i].user_data = user_data;
         thread_data[i].thread_id = i;
 
-        if (OSAL_pthread_create(&threads[i], NULL, worker_thread, &thread_data[i]) != 0) {
+        if (OSAL_pthread_create(&threads[i],
+                                NULL,
+                                worker_thread,
+                                &thread_data[i]) != 0) {
             /* 启动失败，停止已启动的线程 */
             ctx->should_stop = true;
             for (uint32_t j = 0; j < i; j++) {
@@ -189,10 +199,8 @@ int32_t stress_run(stress_context_t *ctx,
         /* Ramp-up延迟 */
         if (ctx->config.ramp_up_sec > 0 && i < thread_count - 1) {
             uint32_t delay_ms = (ctx->config.ramp_up_sec * 1000) / thread_count;
-            struct timespec ts = {
-                .tv_sec = delay_ms / 1000,
-                .tv_nsec = (delay_ms % 1000) * 1000000
-            };
+            struct timespec ts = { .tv_sec = delay_ms / 1000,
+                                   .tv_nsec = (delay_ms % 1000) * 1000000 };
             nanosleep(&ts, NULL);
         }
     }
@@ -220,7 +228,8 @@ int32_t stress_run(stress_context_t *ctx,
 /**
  * 停止压力测试
  */
-void stress_stop(stress_context_t *ctx) {
+void stress_stop(stress_context_t *ctx)
+{
     if (ctx) {
         ctx->should_stop = true;
     }
@@ -229,7 +238,8 @@ void stress_stop(stress_context_t *ctx) {
 /**
  * 获取压力测试统计
  */
-int32_t stress_get_stats(stress_context_t *ctx, stress_stats_t *stats) {
+int32_t stress_get_stats(stress_context_t *ctx, stress_stats_t *stats)
+{
     if (!ctx || !stats) {
         return -1;
     }
@@ -244,7 +254,8 @@ int32_t stress_get_stats(stress_context_t *ctx, stress_stats_t *stats) {
 /**
  * 打印压力测试报告
  */
-void stress_print_report(stress_context_t *ctx) {
+void stress_print_report(stress_context_t *ctx)
+{
     if (!ctx) {
         return;
     }
@@ -252,8 +263,10 @@ void stress_print_report(stress_context_t *ctx) {
     stress_stats_t stats;
     stress_get_stats(ctx, &stats);
 
-    double success_rate = (stats.total_operations > 0) ?
-        (100.0 * stats.successful_ops / stats.total_operations) : 0.0;
+    double success_rate =
+        (stats.total_operations > 0)
+            ? (100.0 * stats.successful_ops / stats.total_operations)
+            : 0.0;
 
     OSAL_printf("\n");
     OSAL_printf("=== Stress Test Report: %s ===\n", ctx->name);
@@ -264,12 +277,15 @@ void stress_print_report(stress_context_t *ctx) {
     OSAL_printf("  Iterations: %u\n", ctx->config.iterations);
     OSAL_printf("\n");
     OSAL_printf("Results:\n");
-    OSAL_printf("  Total operations: %llu\n", (unsigned long long)stats.total_operations);
+    OSAL_printf("  Total operations: %llu\n",
+                (unsigned long long)stats.total_operations);
     OSAL_printf("  Successful: %llu (%.2f%%)\n",
-               (unsigned long long)stats.successful_ops, success_rate);
+                (unsigned long long)stats.successful_ops,
+                success_rate);
     OSAL_printf("  Failed: %llu\n", (unsigned long long)stats.failed_ops);
     OSAL_printf("  Errors: %u\n", stats.error_count);
-    OSAL_printf("  Elapsed time: %llu ms\n", (unsigned long long)stats.elapsed_time_ms);
+    OSAL_printf("  Elapsed time: %llu ms\n",
+                (unsigned long long)stats.elapsed_time_ms);
     OSAL_printf("  Operations/sec: %.2f\n", stats.ops_per_sec);
     OSAL_printf("  Avg latency: %.2f us\n", stats.avg_latency_us);
     OSAL_printf("  Max latency: %.2f us\n", stats.max_latency_us);
@@ -280,7 +296,8 @@ void stress_print_report(stress_context_t *ctx) {
 /**
  * 记录压力测试错误
  */
-void stress_record_error(stress_context_t *ctx, const char *error_msg) {
+void stress_record_error(stress_context_t *ctx, const char *error_msg)
+{
     if (!ctx) {
         return;
     }
@@ -297,6 +314,7 @@ void stress_record_error(stress_context_t *ctx, const char *error_msg) {
 /**
  * 检查是否应该停止
  */
-bool stress_should_stop(stress_context_t *ctx) {
+bool stress_should_stop(stress_context_t *ctx)
+{
     return ctx ? ctx->should_stop : true;
 }
