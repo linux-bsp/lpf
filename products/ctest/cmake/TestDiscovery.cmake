@@ -254,7 +254,7 @@ endfunction()
 #   test_discover_category(
 #       TARGET es-middleware-test
 #       CATEGORY "unit"
-#       MODULES osal hal pdl prl pconfig aconfig
+#       MODULES osal hal pdi prl pconfig aconfig
 #   )
 # ----------------------------------------------------------------------------
 function(test_discover_category)
@@ -471,7 +471,7 @@ endfunction()
 #        test_discover_category(
 #            TARGET es-middleware-test
 #            CATEGORY "unit"
-#            MODULES osal hal pdl prl pconfig aconfig
+#            MODULES osal hal pdi prl pconfig aconfig
 #        )
 #    endif()
 #

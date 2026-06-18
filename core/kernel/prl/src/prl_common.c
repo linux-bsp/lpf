@@ -79,6 +79,11 @@ int prl_validate_header(const prl_header_t *hdr, uint8_t expected_type)
  * CRC 校验（使用 OSAL CRC 函数）
  *===========================================================================*/
 
+uint16_t prl_crc16(const uint8_t *data, uint16_t len)
+{
+	return osal_crc16_ccitt(data, len);
+}
+
 void prl_set_packet_crc(uint8_t *packet, size_t total_len)
 {
 	prl_header_t *hdr = (prl_header_t *)packet;

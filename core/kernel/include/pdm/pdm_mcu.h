@@ -15,8 +15,7 @@
 #ifndef PDM_MCU_H
 #define PDM_MCU_H
 
-#include <stdint.h>
-#include <stdbool.h>
+#include "osal.h"
 
 /*===========================================================================
  * MCU 句柄和状态类型
@@ -159,6 +158,32 @@ int32_t pdm_mcu_send_cmd(pdm_mcu_handle_t handle, pdm_mcu_cmd_t *cmd);
  * @note 适用于 READ_DATA, WRITE_DATA, EXECUTE_CMD 等带数据命令
  */
 int32_t pdm_mcu_send_data(pdm_mcu_handle_t handle, pdm_mcu_data_t *data);
+
+/**
+ * @brief 读取 MCU 数据
+ *
+ * @param[in] handle MCU句柄
+ * @param[in] addr 读取地址
+ * @param[out] data 输出缓冲区
+ * @param[in] size 读取长度
+ *
+ * @return OSAL_SUCCESS 成功
+ */
+int32_t pdm_mcu_read_data(pdm_mcu_handle_t handle, uint32_t addr, uint8_t *data,
+						  uint32_t size);
+
+/**
+ * @brief 写入 MCU 数据
+ *
+ * @param[in] handle MCU句柄
+ * @param[in] addr 写入地址
+ * @param[in] data 输入数据
+ * @param[in] size 写入长度
+ *
+ * @return OSAL_SUCCESS 成功
+ */
+int32_t pdm_mcu_write_data(pdm_mcu_handle_t handle, uint32_t addr,
+						   const uint8_t *data, uint32_t size);
 
 /**
  * @brief 发送命令到MCU（兼容旧接口，建议使用 send_cmd/send_data）

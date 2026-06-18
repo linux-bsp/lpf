@@ -81,7 +81,7 @@ endfunction()
 
 # Register an application component with standard dependencies
 # Usage: register_app_component(dep1 dep2 ...)
-# Example: register_app_component(osal hal pconfig pdl aconfig libpmc)
+# Example: register_app_component(osal pdi aconfig libpmc)
 function(register_app_component)
     # Collect all source files
     if(NOT ADD_SRCS)

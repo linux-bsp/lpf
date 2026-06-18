@@ -18,7 +18,7 @@ Follow the existing C style in the tree: 4-space indentation in newer code, tabs
 Tests are C sources registered through `core/user/test_framework/` and grouped by scope under `products/ctest/` (`unit`, `system`, `stress`, `performance`). Name test files `test_*.c` and keep module-specific configs alongside them in `Config.in`. Prefer running the smallest defconfig that exercises your change, then verify with `./_build/bin/es-middleware-test --all`.
 
 ## Commit & Pull Request Guidelines
-Recent history uses concise prefixes such as `refactor:` and `fix:`, often with a module scope like `refactor(pdl): ...`. Follow that pattern: short, imperative, and specific. Pull requests should explain the functional change, list the defconfig or test binary used for verification, and mention any configuration impact or skipped coverage.
+Recent history uses concise prefixes such as `refactor:` and `fix:`, often with a module scope like `refactor(pdi): ...` or `refactor(pdm): ...`. Follow that pattern: short, imperative, and specific. Pull requests should explain the functional change, list the defconfig or test binary used for verification, and mention any configuration impact or skipped coverage.
 
 ## Configuration Notes
 Do not edit generated files under `_build/`. When adding a module or test, update the relevant `Config.in` and CMake files together so Kconfig and CMake stay aligned.

@@ -11,8 +11,7 @@
 #ifndef PRL_COMMON_H
 #define PRL_COMMON_H
 
-#include <stdint.h>
-#include <stdbool.h>
+#include "osal.h"
 
 /* ========== Protocol Constants ========== */
 
@@ -61,6 +60,9 @@ typedef struct {
 uint16_t prl_crc16(const uint8_t *data, uint16_t len);
 uint32_t prl_get_next_seq(void);
 uint32_t prl_get_timestamp(void);
+void prl_init_header(prl_header_t *hdr, uint8_t dev_type, uint8_t msg_type,
+		     uint16_t payload_len, uint8_t flags);
+int prl_validate_header(const prl_header_t *hdr, uint8_t expected_type);
 void prl_set_packet_crc(uint8_t *packet, size_t total_len);
 bool prl_verify_packet_crc(const uint8_t *packet, size_t total_len);
 
@@ -87,5 +89,8 @@ const char *prl_get_device_type_name(uint8_t dev_type);
  * @return 错误码描述字符串
  */
 const char *prl_get_error_string(int32_t error_code);
+void prl_get_version(uint8_t *major, uint8_t *minor);
+void prl_reset_sequence(uint32_t seq);
+uint32_t prl_get_current_sequence(void);
 
 #endif /* PRL_COMMON_H */

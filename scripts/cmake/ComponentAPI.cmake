@@ -33,7 +33,7 @@ include_guard(GLOBAL)
 #   # Standard PMC app
 #   register_app_component(
 #       PRODUCT pmc
-#       REQUIREMENTS osal hal pconfig pdl aconfig libpmc
+#       REQUIREMENTS osal pdi aconfig libpmc
 #   )
 #
 #   # App with explicit sources

@@ -69,8 +69,8 @@ MODULES_BUILD_DIR ?= _build/modules
 override MODULES_BUILD_DIR := $(patsubst %/,%,$(MODULES_BUILD_DIR))
 MODULES_SRC_DIR ?= $(srctree)/core/kernel
 MODULES_OUTPUT_DIR ?= $(MODULES_BUILD_DIR)
-MODULES_LIST ?= osal pdm
-MODULES_ARTIFACTS := $(addprefix $(MODULES_OUTPUT_DIR)/,$(addsuffix .ko,$(MODULES_LIST)))
+MODULES_LIST ?= $(strip $(if $(CONFIG_OSAL),osal) $(if $(CONFIG_PDM),pdm))
+MODULES_ARTIFACTS = $(addprefix $(MODULES_OUTPUT_DIR)/,$(addsuffix .ko,$(MODULES_LIST)))
 
 # Parallel build auto-detection
 ifeq ($(filter -j%,$(MAKEFLAGS)),)
@@ -406,7 +406,7 @@ all: _check_config _validate_config include/generated/gen_autoconf.h include/gen
 	@echo ""
 
 PHONY += modules
-modules: _modules_check_environment _modules_prepare
+modules: _check_config include/generated/gen_autoconf.h include/generated/gen_version.h _modules_check_environment _modules_prepare
 	@echo ""
 	@echo "==================================================================="
 	@echo "ES-Middleware Kernel Module Build"
@@ -432,6 +432,19 @@ modules: _modules_check_environment _modules_prepare
 
 PHONY += _modules_check_environment
 _modules_check_environment:
+	@if [ -z "$(strip $(MODULES_LIST))" ]; then \
+		echo ""; \
+		echo "==================================================================="; \
+		echo "ERROR: No kernel modules are enabled in the current configuration."; \
+		echo "==================================================================="; \
+		echo ""; \
+		echo "Enable CONFIG_OSAL and/or CONFIG_PDM before invoking make modules."; \
+		echo "For example, run make menuconfig or load a defconfig that enables"; \
+		echo "the kernel modules you want to build."; \
+		echo "==================================================================="; \
+		echo ""; \
+		exit 1; \
+	fi
 	@if [ ! -f "$(KERNEL_SRC)/Makefile" ]; then \
 		echo ""; \
 		echo "==================================================================="; \

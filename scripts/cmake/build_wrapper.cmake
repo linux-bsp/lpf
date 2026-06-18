@@ -2,7 +2,7 @@
 # Build System Wrapper for ES-Middleware
 # ==============================================================================
 # This module provides a clean interface layer between Makefile and CMake,
-# inspired by ESP-IDF and Zephyr RTOS architecture.
+# inspired by Kconfig-driven build systems.
 #
 # Design principles:
 #   - Clear separation of concerns

@@ -44,28 +44,21 @@ config PCONFIG_BUILD_STATIC
 	bool "Build static library (.a)"
 	default n
 	help
-	  Build PCONFIG as a static library (libpconfig.a).
+	  Build PCONFIG as a static library (libpconfig.a) for CMake-based
+	  transitional validation.
 
-	  Static linking advantages:
-	  - No runtime dependencies
-	  - Configuration data embedded in executable
-	  - Slightly faster (no dynamic linking)
-
-	  Recommended: Enable for embedded systems with fixed hardware
+	  Kernel module builds do not use this option; PCONFIG is intended
+	  to be linked into kernel-side modules that need it.
 
 config PCONFIG_BUILD_SHARED
 	bool "Build shared library (.so)"
 	default n
 	help
-	  Build PCONFIG as a shared library (libpconfig.so).
+	  Build PCONFIG as a shared library (libpconfig.so) for CMake-based
+	  transitional validation.
 
-	  Shared library advantages:
-	  - Smaller executable size
-	  - Code sharing between processes
-
-	  Note: configuration data is still read-only from PCONFIG's public API.
-
-	  Recommended: Enable for multi-application systems
+	  Kernel module builds do not use this option; PCONFIG is intended
+	  to be linked into kernel-side modules that need it.
 
 endmenu
 

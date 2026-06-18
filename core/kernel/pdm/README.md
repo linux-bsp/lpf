@@ -4,19 +4,24 @@ PDM is the Peripheral Driver Module. It contains high-level peripheral drivers b
 
 ## Current Scope
 
-The framework currently keeps one concrete peripheral type:
+The kernel module currently provides:
 
-- `pdm_mcu`: MCU peripheral driver with CAN and serial transports.
+- ioctl device-node dispatch in `pdm/src/pdm_main.c`
+- PCONFIG query logic linked into `pdm.ko`
+- PRL protocol encode/decode logic linked into `pdm.ko`
+- PDM MCU core and CAN/Serial transport glue linked into `pdm.ko`
 
-The layer is intentionally still organized by peripheral type so future peripherals can be added under `core/kernel/pdm/src/<peripheral>/` with matching public headers and Kconfig entries.
+The kernel HAL CAN/Serial implementations are currently stubs that return
+`OSAL_ERR_NOT_SUPPORTED`. They provide a kernel-safe link boundary for PDM MCU
+while the real in-kernel transport implementations are developed.
 
 ## Configuration
 
 ```text
 CONFIG_PDM=y
+CONFIG_PCONFIG=y
+CONFIG_PRL=y
 CONFIG_PDM_MCU_SUPPORT=y
-CONFIG_PDM_MCU_CAN_SUPPORT=y
-CONFIG_PDM_MCU_UART_SUPPORT=y
 ```
 
 ## Layout
@@ -25,12 +30,14 @@ CONFIG_PDM_MCU_UART_SUPPORT=y
 core/kernel/pdm/
 ├── Config.in
 ├── CMakeLists.txt
-└── src/pdm_mcu/
-    ├── Config.in
-    ├── pdm_mcu.c
-    ├── pdm_mcu_can.c
-    ├── pdm_mcu_serial.c
-    └── pdm_mcu_internal.h
+└── src/
+    ├── pdm_main.c
+    └── pdm_mcu/
+        ├── Config.in
+        ├── pdm_mcu.c
+        ├── pdm_mcu_can.c
+        ├── pdm_mcu_serial.c
+        └── pdm_mcu_internal.h
 
 core/kernel/include/pdm/
 ├── pdm.h
@@ -39,4 +46,9 @@ core/kernel/include/pdm/
 
 ## Layering
 
-`PDM_MCU_init()` resolves MCU indexes through `PCONFIG_GetBoard()` and `PCONFIG_HW_GetMCU()`. PDM consumes typed platform configuration and should not know concrete product table symbols.
+`pdm.ko` owns the userspace boundary. PDM may consume PCONFIG and PRL internally,
+but userspace must call through PDI/ioctl rather than including kernel headers.
+
+MCU transport APIs are linked into `pdm.ko`, but hardware access remains behind
+HAL. Until the kernel HAL CAN/Serial backends are implemented, MCU init fails
+with `OSAL_ERR_NOT_SUPPORTED` from the HAL transport stub.

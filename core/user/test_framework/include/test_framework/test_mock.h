@@ -24,7 +24,7 @@
  * }
  *
  * // 2. 在测试中使用
- * TEST_CASE(test_pdl_without_hardware) {
+ * TEST_CASE(test_pdi_without_device) {
  *     // 替换真实函数为 mock
  *     TEST_MOCK_REPLACE(HAL_CAN_Init, mock_HAL_CAN_Init);
  *

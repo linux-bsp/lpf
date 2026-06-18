@@ -7,6 +7,8 @@
 #ifndef HAL_SERIAL_H
 #define HAL_SERIAL_H
 
+#include "osal.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

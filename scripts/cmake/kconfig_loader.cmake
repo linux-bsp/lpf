@@ -2,7 +2,7 @@
 # Kconfig Configuration Loader for ES-Middleware
 # ==============================================================================
 # This module provides clean separation between configuration management and
-# build logic, inspired by ESP-IDF and Zephyr RTOS architecture.
+# build logic, inspired by Kconfig-driven build systems.
 #
 # Design principles:
 #   - Configuration management is isolated from build logic

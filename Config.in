@@ -4,7 +4,7 @@
 # This is the root Config.in file for the entire ES-Middleware SDK.
 # It provides a unified configuration interface for:
 #   - Product selection (which products to build)
-#   - Core components configuration (OSAL, HAL, PCONFIG, PDL, ACONFIG)
+#   - Core components configuration (OSAL, HAL, PCONFIG, PDM, PDI, ACONFIG)
 #   - Product-specific configurations
 # ============================================================================
 
@@ -74,8 +74,7 @@ choice
 	help
 	  Select the target operating system type.
 
-	  This determines which OS abstraction layer implementation to use.
-	  The choice affects available features and memory footprint.
+	  ES-Middleware currently supports Linux only.
 
 config OS_LINUX
 	bool "Linux"
@@ -91,63 +90,11 @@ config OS_LINUX
 	  Suitable for: Embedded Linux (AM625, i.MX6/8, Zynq), Desktop Linux
 	  Memory: Requires MMU, typically 32MB+ RAM
 
-if !LINUX_ONLY
-config OS_WINDOWS
-	bool "Windows"
-	help
-	  Target Windows operating system (Win32 API).
-
-	  Provides:
-	  - Win32 threading and synchronization
-	  - Windows file I/O
-	  - Winsock networking
-	  - Limited POSIX compatibility
-
-	  Suitable for: Windows desktop, Windows IoT
-	  Memory: Requires 64MB+ RAM
-
-config OS_RTOS
-	bool "RTOS (Real-Time OS)"
-	help
-	  Target real-time operating system (FreeRTOS, Zephyr, etc).
-
-	  Provides:
-	  - Deterministic scheduling
-	  - Low memory footprint
-	  - Fast interrupt response
-	  - Limited POSIX subset
-
-	  Suitable for: Cortex-M MCUs, resource-constrained systems
-	  Memory: Can run in 30KB+ RAM
-
-	  Note: Feature availability depends on RTOS capabilities.
-	  Some OSAL features may be unavailable or limited.
-
-config OS_BARE
-	bool "Bare Metal"
-	help
-	  No operating system (bare metal execution).
-
-	  Provides:
-	  - Direct hardware access
-	  - Minimal runtime overhead
-	  - Custom scheduling (if any)
-
-	  Suitable for: Simple MCU applications, bootloaders
-	  Memory: Can run in <10KB RAM
-
-	  Note: Most OSAL features unavailable. Only basic library
-	  functions (heap, string) are provided.
-endif
-
 endchoice
 
 config OS
 	string
 	default "linux" if OS_LINUX
-	default "windows" if OS_WINDOWS && !LINUX_ONLY
-	default "rtos" if OS_RTOS && !LINUX_ONLY
-	default "bare" if OS_BARE && !LINUX_ONLY
 
 choice
 	prompt "Target architecture"
@@ -1133,13 +1080,13 @@ config SANITY_ERROR_HAL_NO_OSAL
 
 config SANITY_ERROR_PCONFIG_NO_DEPS
 	def_bool y
-	depends on PCONFIG && (!OSAL || !HAL || !TYPES)
-	prompt "ERROR: PCONFIG requires OSAL, HAL, and TYPES to be enabled"
+	depends on PCONFIG && !OSAL
+	prompt "ERROR: PCONFIG requires OSAL to be enabled"
 
-config SANITY_ERROR_PDL_NO_DEPS
+config SANITY_ERROR_PDM_NO_DEPS
 	def_bool y
-	depends on PDL && (!OSAL || !HAL || !PCONFIG || !TYPES)
-	prompt "ERROR: PDL requires OSAL, HAL, PCONFIG, and TYPES to be enabled"
+	depends on PDM && (!OSAL || !HAL || !PCONFIG)
+	prompt "ERROR: PDM requires OSAL, HAL, and PCONFIG to be enabled"
 
 config SANITY_ERROR_ACONFIG_NO_OSAL
 	def_bool y
@@ -1170,10 +1117,10 @@ config SANITY_ERROR_TEST_PCONFIG_NO_MODULE
 	depends on TEST_PCONFIG && !PCONFIG
 	prompt "ERROR: PCONFIG tests require PCONFIG module to be enabled"
 
-config SANITY_ERROR_TEST_PDL_NO_MODULE
+config SANITY_ERROR_TEST_PDI_NO_MODULE
 	def_bool y
-	depends on TEST_PDL && !PDL
-	prompt "ERROR: PDL tests require PDL module to be enabled"
+	depends on TEST_PDI && !PDI
+	prompt "ERROR: PDI tests require PDI module to be enabled"
 
 config SANITY_ERROR_TEST_PRL_NO_MODULE
 	def_bool y
@@ -1203,20 +1150,6 @@ config SANITY_ERROR_HAL_GPIO_NO_PLATFORM
 	def_bool y
 	depends on HAL_GPIO && !PLATFORM_LINUX
 	prompt "ERROR: HAL_GPIO requires Linux platform support (PLATFORM_LINUX)"
-
-# ============================================================================
-# PDL Subsystem Dependency Checks
-# ============================================================================
-
-config SANITY_ERROR_PDL_MCU_CAN_NO_HAL_CAN
-	def_bool y
-	depends on PDL_MCU_CAN_SUPPORT && !HAL_CAN
-	prompt "ERROR: PDL_MCU_CAN_SUPPORT requires HAL_CAN to be enabled"
-
-config SANITY_ERROR_PDL_MCU_UART_NO_HAL_UART
-	def_bool y
-	depends on PDL_MCU_UART_SUPPORT && !HAL_UART
-	prompt "ERROR: PDL_MCU_UART_SUPPORT requires HAL_UART to be enabled"
 
 # ============================================================================
 # PRL Protocol Dependency Checks
@@ -1342,20 +1275,6 @@ config SANITY_ERROR_SANITIZER_CONFLICT
 	depends on COMPILER_SANITIZER_ADDRESS && COMPILER_SANITIZER_THREAD
 	prompt "ERROR: AddressSanitizer and ThreadSanitizer cannot be used together"
 
-if !LINUX_ONLY
-
-config SANITY_ERROR_BARE_METAL_WITH_OS_FEATURES
-	def_bool y
-	depends on OS_BARE && (OSAL_THREAD || OSAL_IPC || OSAL_NETWORK)
-	prompt "ERROR: Bare metal does not support threads, IPC, or networking"
-
-config SANITY_ERROR_RTOS_WITH_UNSUPPORTED_FEATURES
-	def_bool y
-	depends on OS_RTOS && (LOG_OUTPUT_SYSLOG || DEBUG_DUMP_STACK_ON_ERROR)
-	prompt "ERROR: Selected features not available on RTOS"
-
-endif
-
 # ============================================================================
 # Product Configuration Checks
 # ============================================================================
@@ -1368,12 +1287,11 @@ config SANITY_CHECK_PASSED
 	def_bool y
 	depends on !SANITY_ERROR_HAL_NO_OSAL && \
 	           !SANITY_ERROR_PCONFIG_NO_DEPS && \
-	           !SANITY_ERROR_PDL_NO_DEPS && \
+	           !SANITY_ERROR_PDM_NO_DEPS && \
 	           !SANITY_ERROR_ACONFIG_NO_OSAL && \
 	           !SANITY_ERROR_FORTIFY_WITH_O0 && \
 	           !SANITY_ERROR_PIE_NO_PIC && \
-	           !SANITY_ERROR_SANITIZER_CONFLICT && \
-	           !SANITY_ERROR_BARE_METAL_WITH_OS_FEATURES
+	           !SANITY_ERROR_SANITIZER_CONFLICT
 	help
 	  This symbol is set when all sanity checks pass.
 	  If this is not set, review error messages above.

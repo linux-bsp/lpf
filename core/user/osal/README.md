@@ -2,11 +2,11 @@
 
 ## 概述
 
-OSAL (Operating System Abstraction Layer) 提供跨平台的操作系统抽象接口，封装任务管理、进程间通信、网络、文件操作等系统调用。
+OSAL (Operating System Abstraction Layer) 提供 Linux 用户态系统接口封装，覆盖任务管理、进程间通信、网络、文件操作等系统调用。
 
 **设计理念**：
 - 用户态库设计，无需显式初始化
-- 跨平台支持（Linux/RTOS）
+- Linux-only 用户态实现
 - 线程安全，优雅退出
 - 引用计数，死锁检测
 
@@ -52,7 +52,7 @@ int main(void)
 ## 主要特性
 
 - **零初始化**：静态初始化，无需显式 Init/Teardown
-- **跨平台**：POSIX 实现，易于移植到 RTOS
+- **Linux-only**：基于 POSIX/Linux libc API 的用户态实现
 - **线程安全**：所有接口均为线程安全
 - **优雅退出**：避免 pthread_cancel，支持任务优雅关闭
 - **引用计数**：消息队列使用引用计数，防止 use-after-free

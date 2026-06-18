@@ -41,11 +41,18 @@ static int32_t _mcu_send_packet(pdm_mcu_context_t *ctx, uint8_t msg_type,
 								uint8_t *response, uint32_t resp_size,
 								uint32_t *actual_size)
 {
-	uint8_t tx_buffer[PRL_MAX_PACKET_SIZE];
-	uint8_t rx_buffer[PRL_MAX_PACKET_SIZE];
+	uint8_t *tx_buffer;
+	uint8_t *rx_buffer;
 	int32_t tx_len;
 	int32_t ret;
 	uint32_t rx_len;
+
+	tx_buffer = osal_malloc(PRL_MAX_PACKET_SIZE);
+	rx_buffer = osal_malloc(PRL_MAX_PACKET_SIZE);
+	if (!tx_buffer || !rx_buffer) {
+		ret = OSAL_ERR_NO_MEMORY;
+		goto out_free;
+	}
 
 	/* 编码 PRL 报文 */
 	prl_encode_ctx_t encode_ctx = { .dev_type = PRL_DEV_TYPE_MCU,
@@ -54,18 +61,19 @@ static int32_t _mcu_send_packet(pdm_mcu_context_t *ctx, uint8_t msg_type,
 									.payload = payload,
 									.payload_len = payload_len,
 									.buffer = tx_buffer,
-									.buffer_size = sizeof(tx_buffer) };
+									.buffer_size = PRL_MAX_PACKET_SIZE };
 	tx_len = prl_device_encode(&encode_ctx);
 	if (tx_len < 0) {
-		return tx_len;
+		ret = tx_len;
+		goto out_free;
 	}
 
 	/* 发送并接收响应 */
 	ret = ctx->ops->send_packet(ctx->transport_handle, tx_buffer, tx_len,
-								rx_buffer, sizeof(rx_buffer), &rx_len,
+								rx_buffer, PRL_MAX_PACKET_SIZE, &rx_len,
 								ctx->config->cmd_timeout_ms);
 	if (ret != OSAL_SUCCESS) {
-		return ret;
+		goto out_free;
 	}
 
 	/* 解码响应报文 */
@@ -77,6 +85,10 @@ static int32_t _mcu_send_packet(pdm_mcu_context_t *ctx, uint8_t msg_type,
 	if (ret == OSAL_SUCCESS && actual_size) {
 		*actual_size = decode_ctx.payload_len;
 	}
+
+out_free:
+	osal_free(rx_buffer);
+	osal_free(tx_buffer);
 	return ret;
 }
 

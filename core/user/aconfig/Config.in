@@ -83,7 +83,7 @@ config ACONFIG_MAX_DEVICES
 	  generated mapping tables.
 
 	  Recommended values:
-	  - RTOS Minimal: 8-16 devices
+	  - Minimal Linux product: 8-16 devices
 	  - Linux Minimal: 32 devices
 	  - Linux Standard: 64 devices
 	  - Linux Full: 128-256 devices

@@ -151,7 +151,7 @@ static void _print_usage(const char *program_name)
 					"test_mutex_init_success\n\n");
 
 		osal_printf("SYMLINKS:\n");
-		osal_printf("    osal-test, hal-test, pdl-test\n");
+		osal_printf("    osal-test, hal-test, pdi-test\n");
 		osal_printf(
 			"    These symlinks automatically filter tests by layer.\n\n");
 

@@ -40,33 +40,31 @@ config PDM_BUILD_STATIC
 	bool "Build static library (.a)"
 	default y
 	help
-	  Build PDM as a static library (libpdm.a).
+	  Build PDM as a static library (libpdm.a) for CMake-based
+	  transitional validation.
 
-	  Static linking advantages:
-	  - No runtime dependencies
-	  - Peripheral drivers embedded in executable
-	  - Slightly faster
-
-	  Recommended: Enable for embedded systems
+	  Kernel module builds do not use this option; use make modules to
+	  generate pdm.ko when CONFIG_PDM is enabled.
 
 config PDM_BUILD_SHARED
 	bool "Build shared library (.so)"
 	default n
 	help
-	  Build PDM as a shared library (libpdm.so).
+	  Build PDM as a shared library (libpdm.so) for CMake-based
+	  transitional validation.
 
-	  Shared library advantages:
-	  - Can update peripheral drivers without recompiling apps
-	  - Smaller executable size
-	  - Code sharing between processes
-
-	  Recommended: Enable for multi-application systems
+	  Kernel module builds do not use this option; use make modules to
+	  generate pdm.ko when CONFIG_PDM is enabled.
 
 endmenu
 
 menuconfig PDM_MCU_SUPPORT
 	bool "MCU peripheral support"
 	default n
+	depends on PRL
+	select PRL_MCU
+	select HAL_CAN
+	select HAL_UART
 	help
 	  Enable MCU (Microcontroller) peripheral support.
 
@@ -87,6 +85,10 @@ menuconfig PDM_MCU_SUPPORT
 	  Memory footprint: ~8KB base + protocol overhead
 
 	  You can enable CAN-based or UART-based MCU support in the submenu.
+
+	  Kernel module builds currently link the MCU core and kernel-safe
+	  HAL transport stubs. The real in-kernel CAN/UART transport
+	  implementations are still pending.
 
 	  If unsure, say Y.
 

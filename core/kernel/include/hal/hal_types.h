@@ -7,6 +7,8 @@
 #ifndef HAL_TYPES_H
 #define HAL_TYPES_H
 
+#include "osal.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

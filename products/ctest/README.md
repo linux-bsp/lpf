@@ -426,8 +426,8 @@ tests/
 │   │   └── ...
 │   ├── pconfig/                    # PConfig层单元测试
 │   │   └── test_pconfig_api.c
-│   └── pdl/                    # PDL层单元测试
-│       ├── test_pdl_mcu.c
+│   └── pdi/                    # PDI层单元测试
+│       ├── test_pdi_api.c
 │       └── ...
 ├── system/                     # 系统测试（待添加）
 │   └── (跨层级集成测试)
@@ -478,11 +478,11 @@ tests/
 |------|-----------|---------|
 | test_pconfig_api | 3 | 配置查询、外设枚举 |
 
-### PDL层测试
+### PDI层测试
 
 | 模块 | 测试用例数 | 覆盖功能 |
 |------|-----------|---------|
-| test_pdl_mcu | 3 | MCU通信 |
+| test_pdi_api | 5 | 用户态 API 参数校验和设备不可用路径 |
 
 ## 开发指南
 
@@ -852,4 +852,5 @@ TEST_CASE(test_with_timeout)
 - [OSAL层文档](../osal/README.md)
 - [HAL层文档](../hal/README.md)
 - [PCONFIG文档](../pconfig/README.md)
-- [PDL文档](../pdl/README.md)
+- [PDI文档](../../core/user/pdi/README.md)
+- [PDM文档](../../core/kernel/pdm/README.md)
