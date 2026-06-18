@@ -15,13 +15,11 @@
 static void test_hal_serial_open_success(void)
 {
     hal_serial_handle_t handle = NULL;
-    hal_serial_config_t config = {
-        .baud_rate = 115200,
-        .data_bits = 8,
-        .stop_bits = 1,
-        .parity = HAL_SERIAL_PARITY_NONE,
-        .flow_control = HAL_SERIAL_FLOW_NONE
-    };
+    hal_serial_config_t config = { .baud_rate = 115200,
+                                   .data_bits = 8,
+                                   .stop_bits = 1,
+                                   .parity = HAL_SERIAL_PARITY_NONE,
+                                   .flow_control = HAL_SERIAL_FLOW_NONE };
 
     int32_t ret = HAL_SERIAL_open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
@@ -38,13 +36,11 @@ static void test_hal_serial_open_success(void)
 static void test_hal_serial_open_null_device(void)
 {
     hal_serial_handle_t handle = NULL;
-    hal_serial_config_t config = {
-        .baud_rate = 115200,
-        .data_bits = 8,
-        .stop_bits = 1,
-        .parity = HAL_SERIAL_PARITY_NONE,
-        .flow_control = HAL_SERIAL_FLOW_NONE
-    };
+    hal_serial_config_t config = { .baud_rate = 115200,
+                                   .data_bits = 8,
+                                   .stop_bits = 1,
+                                   .parity = HAL_SERIAL_PARITY_NONE,
+                                   .flow_control = HAL_SERIAL_FLOW_NONE };
 
     int32_t ret = HAL_SERIAL_open(NULL, &config, &handle);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
@@ -62,13 +58,11 @@ static void test_hal_serial_open_null_config(void)
 /* 测试用例: 串口打开 - 空句柄 */
 static void test_hal_serial_open_null_handle(void)
 {
-    hal_serial_config_t config = {
-        .baud_rate = 115200,
-        .data_bits = 8,
-        .stop_bits = 1,
-        .parity = HAL_SERIAL_PARITY_NONE,
-        .flow_control = HAL_SERIAL_FLOW_NONE
-    };
+    hal_serial_config_t config = { .baud_rate = 115200,
+                                   .data_bits = 8,
+                                   .stop_bits = 1,
+                                   .parity = HAL_SERIAL_PARITY_NONE,
+                                   .flow_control = HAL_SERIAL_FLOW_NONE };
 
     int32_t ret = HAL_SERIAL_open("/dev/ttyS0", &config, NULL);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
@@ -78,13 +72,11 @@ static void test_hal_serial_open_null_handle(void)
 static void test_hal_serial_open_invalid_device(void)
 {
     hal_serial_handle_t handle = NULL;
-    hal_serial_config_t config = {
-        .baud_rate = 115200,
-        .data_bits = 8,
-        .stop_bits = 1,
-        .parity = HAL_SERIAL_PARITY_NONE,
-        .flow_control = HAL_SERIAL_FLOW_NONE
-    };
+    hal_serial_config_t config = { .baud_rate = 115200,
+                                   .data_bits = 8,
+                                   .stop_bits = 1,
+                                   .parity = HAL_SERIAL_PARITY_NONE,
+                                   .flow_control = HAL_SERIAL_FLOW_NONE };
 
     int32_t ret = HAL_SERIAL_open("/dev/invalid_tty999", &config, &handle);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
@@ -94,13 +86,11 @@ static void test_hal_serial_open_invalid_device(void)
 static void test_hal_serial_close(void)
 {
     hal_serial_handle_t handle = NULL;
-    hal_serial_config_t config = {
-        .baud_rate = 115200,
-        .data_bits = 8,
-        .stop_bits = 1,
-        .parity = HAL_SERIAL_PARITY_NONE,
-        .flow_control = HAL_SERIAL_FLOW_NONE
-    };
+    hal_serial_config_t config = { .baud_rate = 115200,
+                                   .data_bits = 8,
+                                   .stop_bits = 1,
+                                   .parity = HAL_SERIAL_PARITY_NONE,
+                                   .flow_control = HAL_SERIAL_FLOW_NONE };
 
     int32_t ret = HAL_SERIAL_open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
@@ -126,13 +116,11 @@ static void test_hal_serial_close_null_handle(void)
 static void test_hal_serial_write_success(void)
 {
     hal_serial_handle_t handle = NULL;
-    hal_serial_config_t config = {
-        .baud_rate = 115200,
-        .data_bits = 8,
-        .stop_bits = 1,
-        .parity = HAL_SERIAL_PARITY_NONE,
-        .flow_control = HAL_SERIAL_FLOW_NONE
-    };
+    hal_serial_config_t config = { .baud_rate = 115200,
+                                   .data_bits = 8,
+                                   .stop_bits = 1,
+                                   .parity = HAL_SERIAL_PARITY_NONE,
+                                   .flow_control = HAL_SERIAL_FLOW_NONE };
     uint8_t data[] = "Hello Serial";
 
     int32_t ret = HAL_SERIAL_open("/dev/ttyS0", &config, &handle);
@@ -159,13 +147,11 @@ static void test_hal_serial_write_null_handle(void)
 static void test_hal_serial_write_null_buffer(void)
 {
     hal_serial_handle_t handle = NULL;
-    hal_serial_config_t config = {
-        .baud_rate = 115200,
-        .data_bits = 8,
-        .stop_bits = 1,
-        .parity = HAL_SERIAL_PARITY_NONE,
-        .flow_control = HAL_SERIAL_FLOW_NONE
-    };
+    hal_serial_config_t config = { .baud_rate = 115200,
+                                   .data_bits = 8,
+                                   .stop_bits = 1,
+                                   .parity = HAL_SERIAL_PARITY_NONE,
+                                   .flow_control = HAL_SERIAL_FLOW_NONE };
 
     int32_t ret = HAL_SERIAL_open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
@@ -182,13 +168,11 @@ static void test_hal_serial_write_null_buffer(void)
 static void test_hal_serial_write_zero_length(void)
 {
     hal_serial_handle_t handle = NULL;
-    hal_serial_config_t config = {
-        .baud_rate = 115200,
-        .data_bits = 8,
-        .stop_bits = 1,
-        .parity = HAL_SERIAL_PARITY_NONE,
-        .flow_control = HAL_SERIAL_FLOW_NONE
-    };
+    hal_serial_config_t config = { .baud_rate = 115200,
+                                   .data_bits = 8,
+                                   .stop_bits = 1,
+                                   .parity = HAL_SERIAL_PARITY_NONE,
+                                   .flow_control = HAL_SERIAL_FLOW_NONE };
     uint8_t data[] = "test";
 
     int32_t ret = HAL_SERIAL_open("/dev/ttyS0", &config, &handle);
@@ -206,13 +190,11 @@ static void test_hal_serial_write_zero_length(void)
 static void test_hal_serial_read_timeout(void)
 {
     hal_serial_handle_t handle = NULL;
-    hal_serial_config_t config = {
-        .baud_rate = 115200,
-        .data_bits = 8,
-        .stop_bits = 1,
-        .parity = HAL_SERIAL_PARITY_NONE,
-        .flow_control = HAL_SERIAL_FLOW_NONE
-    };
+    hal_serial_config_t config = { .baud_rate = 115200,
+                                   .data_bits = 8,
+                                   .stop_bits = 1,
+                                   .parity = HAL_SERIAL_PARITY_NONE,
+                                   .flow_control = HAL_SERIAL_FLOW_NONE };
     uint8_t buffer[64];
 
     int32_t ret = HAL_SERIAL_open("/dev/ttyS0", &config, &handle);
@@ -239,13 +221,11 @@ static void test_hal_serial_read_null_handle(void)
 static void test_hal_serial_read_null_buffer(void)
 {
     hal_serial_handle_t handle = NULL;
-    hal_serial_config_t config = {
-        .baud_rate = 115200,
-        .data_bits = 8,
-        .stop_bits = 1,
-        .parity = HAL_SERIAL_PARITY_NONE,
-        .flow_control = HAL_SERIAL_FLOW_NONE
-    };
+    hal_serial_config_t config = { .baud_rate = 115200,
+                                   .data_bits = 8,
+                                   .stop_bits = 1,
+                                   .parity = HAL_SERIAL_PARITY_NONE,
+                                   .flow_control = HAL_SERIAL_FLOW_NONE };
 
     int32_t ret = HAL_SERIAL_open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
@@ -266,13 +246,11 @@ static void test_hal_serial_read_null_buffer(void)
 static void test_hal_serial_flush_success(void)
 {
     hal_serial_handle_t handle = NULL;
-    hal_serial_config_t config = {
-        .baud_rate = 115200,
-        .data_bits = 8,
-        .stop_bits = 1,
-        .parity = HAL_SERIAL_PARITY_NONE,
-        .flow_control = HAL_SERIAL_FLOW_NONE
-    };
+    hal_serial_config_t config = { .baud_rate = 115200,
+                                   .data_bits = 8,
+                                   .stop_bits = 1,
+                                   .parity = HAL_SERIAL_PARITY_NONE,
+                                   .flow_control = HAL_SERIAL_FLOW_NONE };
 
     int32_t ret = HAL_SERIAL_open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
@@ -300,20 +278,16 @@ static void test_hal_serial_flush_null_handle(void)
 static void test_hal_serial_set_config_success(void)
 {
     hal_serial_handle_t handle = NULL;
-    hal_serial_config_t config = {
-        .baud_rate = 115200,
-        .data_bits = 8,
-        .stop_bits = 1,
-        .parity = HAL_SERIAL_PARITY_NONE,
-        .flow_control = HAL_SERIAL_FLOW_NONE
-    };
-    hal_serial_config_t new_config = {
-        .baud_rate = 9600,
-        .data_bits = 8,
-        .stop_bits = 1,
-        .parity = HAL_SERIAL_PARITY_EVEN,
-        .flow_control = HAL_SERIAL_FLOW_NONE
-    };
+    hal_serial_config_t config = { .baud_rate = 115200,
+                                   .data_bits = 8,
+                                   .stop_bits = 1,
+                                   .parity = HAL_SERIAL_PARITY_NONE,
+                                   .flow_control = HAL_SERIAL_FLOW_NONE };
+    hal_serial_config_t new_config = { .baud_rate = 9600,
+                                       .data_bits = 8,
+                                       .stop_bits = 1,
+                                       .parity = HAL_SERIAL_PARITY_EVEN,
+                                       .flow_control = HAL_SERIAL_FLOW_NONE };
 
     int32_t ret = HAL_SERIAL_open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
@@ -329,13 +303,11 @@ static void test_hal_serial_set_config_success(void)
 /* 测试用例: 设置配置 - 空句柄 */
 static void test_hal_serial_set_config_null_handle(void)
 {
-    hal_serial_config_t config = {
-        .baud_rate = 9600,
-        .data_bits = 8,
-        .stop_bits = 1,
-        .parity = HAL_SERIAL_PARITY_NONE,
-        .flow_control = HAL_SERIAL_FLOW_NONE
-    };
+    hal_serial_config_t config = { .baud_rate = 9600,
+                                   .data_bits = 8,
+                                   .stop_bits = 1,
+                                   .parity = HAL_SERIAL_PARITY_NONE,
+                                   .flow_control = HAL_SERIAL_FLOW_NONE };
 
     int32_t ret = HAL_SERIAL_set_config(NULL, &config);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
@@ -345,13 +317,11 @@ static void test_hal_serial_set_config_null_handle(void)
 static void test_hal_serial_set_config_null_config(void)
 {
     hal_serial_handle_t handle = NULL;
-    hal_serial_config_t config = {
-        .baud_rate = 115200,
-        .data_bits = 8,
-        .stop_bits = 1,
-        .parity = HAL_SERIAL_PARITY_NONE,
-        .flow_control = HAL_SERIAL_FLOW_NONE
-    };
+    hal_serial_config_t config = { .baud_rate = 115200,
+                                   .data_bits = 8,
+                                   .stop_bits = 1,
+                                   .parity = HAL_SERIAL_PARITY_NONE,
+                                   .flow_control = HAL_SERIAL_FLOW_NONE };
 
     int32_t ret = HAL_SERIAL_open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
@@ -372,13 +342,11 @@ static void test_hal_serial_set_config_null_config(void)
 static void test_hal_serial_different_baudrate(void)
 {
     hal_serial_handle_t handle = NULL;
-    hal_serial_config_t config = {
-        .baud_rate = 9600,
-        .data_bits = 8,
-        .stop_bits = 1,
-        .parity = HAL_SERIAL_PARITY_NONE,
-        .flow_control = HAL_SERIAL_FLOW_NONE
-    };
+    hal_serial_config_t config = { .baud_rate = 9600,
+                                   .data_bits = 8,
+                                   .stop_bits = 1,
+                                   .parity = HAL_SERIAL_PARITY_NONE,
+                                   .flow_control = HAL_SERIAL_FLOW_NONE };
 
     int32_t ret = HAL_SERIAL_open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
@@ -393,13 +361,11 @@ static void test_hal_serial_different_baudrate(void)
 static void test_hal_serial_different_parity(void)
 {
     hal_serial_handle_t handle = NULL;
-    hal_serial_config_t config = {
-        .baud_rate = 115200,
-        .data_bits = 8,
-        .stop_bits = 1,
-        .parity = HAL_SERIAL_PARITY_ODD,
-        .flow_control = HAL_SERIAL_FLOW_NONE
-    };
+    hal_serial_config_t config = { .baud_rate = 115200,
+                                   .data_bits = 8,
+                                   .stop_bits = 1,
+                                   .parity = HAL_SERIAL_PARITY_ODD,
+                                   .flow_control = HAL_SERIAL_FLOW_NONE };
 
     int32_t ret = HAL_SERIAL_open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
@@ -414,13 +380,11 @@ static void test_hal_serial_different_parity(void)
 static void test_hal_serial_different_databits(void)
 {
     hal_serial_handle_t handle = NULL;
-    hal_serial_config_t config = {
-        .baud_rate = 115200,
-        .data_bits = 7,
-        .stop_bits = 1,
-        .parity = HAL_SERIAL_PARITY_NONE,
-        .flow_control = HAL_SERIAL_FLOW_NONE
-    };
+    hal_serial_config_t config = { .baud_rate = 115200,
+                                   .data_bits = 7,
+                                   .stop_bits = 1,
+                                   .parity = HAL_SERIAL_PARITY_NONE,
+                                   .flow_control = HAL_SERIAL_FLOW_NONE };
 
     int32_t ret = HAL_SERIAL_open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
@@ -435,13 +399,11 @@ static void test_hal_serial_different_databits(void)
 static void test_hal_serial_different_stopbits(void)
 {
     hal_serial_handle_t handle = NULL;
-    hal_serial_config_t config = {
-        .baud_rate = 115200,
-        .data_bits = 8,
-        .stop_bits = 2,
-        .parity = HAL_SERIAL_PARITY_NONE,
-        .flow_control = HAL_SERIAL_FLOW_NONE
-    };
+    hal_serial_config_t config = { .baud_rate = 115200,
+                                   .data_bits = 8,
+                                   .stop_bits = 2,
+                                   .parity = HAL_SERIAL_PARITY_NONE,
+                                   .flow_control = HAL_SERIAL_FLOW_NONE };
 
     int32_t ret = HAL_SERIAL_open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
@@ -466,13 +428,11 @@ static void test_hal_serial_different_stopbits(void)
 static void test_hal_serial_hardware_flow_control(void)
 {
     hal_serial_handle_t handle = NULL;
-    hal_serial_config_t config = {
-        .baud_rate = 115200,
-        .data_bits = 8,
-        .stop_bits = 1,
-        .parity = HAL_SERIAL_PARITY_NONE,
-        .flow_control = HAL_SERIAL_FLOW_HW
-    };
+    hal_serial_config_t config = { .baud_rate = 115200,
+                                   .data_bits = 8,
+                                   .stop_bits = 1,
+                                   .parity = HAL_SERIAL_PARITY_NONE,
+                                   .flow_control = HAL_SERIAL_FLOW_HW };
 
     int32_t ret = HAL_SERIAL_open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
@@ -494,13 +454,11 @@ static void test_hal_serial_hardware_flow_control(void)
 static void test_hal_serial_software_flow_control(void)
 {
     hal_serial_handle_t handle = NULL;
-    hal_serial_config_t config = {
-        .baud_rate = 115200,
-        .data_bits = 8,
-        .stop_bits = 1,
-        .parity = HAL_SERIAL_PARITY_NONE,
-        .flow_control = HAL_SERIAL_FLOW_SW
-    };
+    hal_serial_config_t config = { .baud_rate = 115200,
+                                   .data_bits = 8,
+                                   .stop_bits = 1,
+                                   .parity = HAL_SERIAL_PARITY_NONE,
+                                   .flow_control = HAL_SERIAL_FLOW_SW };
 
     int32_t ret = HAL_SERIAL_open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
@@ -522,13 +480,11 @@ static void test_hal_serial_software_flow_control(void)
 static void test_hal_serial_max_baudrate(void)
 {
     hal_serial_handle_t handle = NULL;
-    hal_serial_config_t config = {
-        .baud_rate = 921600,
-        .data_bits = 8,
-        .stop_bits = 1,
-        .parity = HAL_SERIAL_PARITY_NONE,
-        .flow_control = HAL_SERIAL_FLOW_NONE
-    };
+    hal_serial_config_t config = { .baud_rate = 921600,
+                                   .data_bits = 8,
+                                   .stop_bits = 1,
+                                   .parity = HAL_SERIAL_PARITY_NONE,
+                                   .flow_control = HAL_SERIAL_FLOW_NONE };
 
     int32_t ret = HAL_SERIAL_open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
@@ -544,13 +500,11 @@ static void test_hal_serial_max_baudrate(void)
 static void test_hal_serial_min_baudrate(void)
 {
     hal_serial_handle_t handle = NULL;
-    hal_serial_config_t config = {
-        .baud_rate = 300,
-        .data_bits = 8,
-        .stop_bits = 1,
-        .parity = HAL_SERIAL_PARITY_NONE,
-        .flow_control = HAL_SERIAL_FLOW_NONE
-    };
+    hal_serial_config_t config = { .baud_rate = 300,
+                                   .data_bits = 8,
+                                   .stop_bits = 1,
+                                   .parity = HAL_SERIAL_PARITY_NONE,
+                                   .flow_control = HAL_SERIAL_FLOW_NONE };
 
     int32_t ret = HAL_SERIAL_open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
@@ -566,13 +520,11 @@ static void test_hal_serial_min_baudrate(void)
 static void test_hal_serial_large_write(void)
 {
     hal_serial_handle_t handle = NULL;
-    hal_serial_config_t config = {
-        .baud_rate = 115200,
-        .data_bits = 8,
-        .stop_bits = 1,
-        .parity = HAL_SERIAL_PARITY_NONE,
-        .flow_control = HAL_SERIAL_FLOW_NONE
-    };
+    hal_serial_config_t config = { .baud_rate = 115200,
+                                   .data_bits = 8,
+                                   .stop_bits = 1,
+                                   .parity = HAL_SERIAL_PARITY_NONE,
+                                   .flow_control = HAL_SERIAL_FLOW_NONE };
 
     int32_t ret = HAL_SERIAL_open("/dev/ttyS0", &config, &handle);
     if (OSAL_SUCCESS != ret) {
@@ -595,13 +547,11 @@ static void test_hal_serial_large_write(void)
 static void test_hal_serial_nonblocking_read(void)
 {
     hal_serial_handle_t handle = NULL;
-    hal_serial_config_t config = {
-        .baud_rate = 115200,
-        .data_bits = 8,
-        .stop_bits = 1,
-        .parity = HAL_SERIAL_PARITY_NONE,
-        .flow_control = HAL_SERIAL_FLOW_NONE
-    };
+    hal_serial_config_t config = { .baud_rate = 115200,
+                                   .data_bits = 8,
+                                   .stop_bits = 1,
+                                   .parity = HAL_SERIAL_PARITY_NONE,
+                                   .flow_control = HAL_SERIAL_FLOW_NONE };
     uint8_t buffer[64];
 
     int32_t ret = HAL_SERIAL_open("/dev/ttyS0", &config, &handle);
@@ -623,202 +573,141 @@ static void test_hal_serial_nonblocking_read(void)
 
 /* 测试用例数组 - 使用函数指针数组 */
 static const test_case_t test_cases[] = {
-	{
-		.name = "test_hal_serial_open_success",
-		.func = test_hal_serial_open_success,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_hal_serial_open_null_device",
-		.func = test_hal_serial_open_null_device,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_hal_serial_open_null_config",
-		.func = test_hal_serial_open_null_config,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_hal_serial_open_null_handle",
-		.func = test_hal_serial_open_null_handle,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_hal_serial_open_invalid_device",
-		.func = test_hal_serial_open_invalid_device,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_hal_serial_close",
-		.func = test_hal_serial_close,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_hal_serial_close_null_handle",
-		.func = test_hal_serial_close_null_handle,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_hal_serial_write_success",
-		.func = test_hal_serial_write_success,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_hal_serial_write_null_handle",
-		.func = test_hal_serial_write_null_handle,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_hal_serial_write_null_buffer",
-		.func = test_hal_serial_write_null_buffer,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_hal_serial_write_zero_length",
-		.func = test_hal_serial_write_zero_length,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_hal_serial_read_timeout",
-		.func = test_hal_serial_read_timeout,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_hal_serial_read_null_handle",
-		.func = test_hal_serial_read_null_handle,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_hal_serial_read_null_buffer",
-		.func = test_hal_serial_read_null_buffer,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_hal_serial_flush_success",
-		.func = test_hal_serial_flush_success,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_hal_serial_flush_null_handle",
-		.func = test_hal_serial_flush_null_handle,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_hal_serial_set_config_success",
-		.func = test_hal_serial_set_config_success,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_hal_serial_set_config_null_handle",
-		.func = test_hal_serial_set_config_null_handle,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_hal_serial_set_config_null_config",
-		.func = test_hal_serial_set_config_null_config,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_hal_serial_different_baudrate",
-		.func = test_hal_serial_different_baudrate,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_hal_serial_different_parity",
-		.func = test_hal_serial_different_parity,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_hal_serial_different_databits",
-		.func = test_hal_serial_different_databits,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_hal_serial_different_stopbits",
-		.func = test_hal_serial_different_stopbits,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_hal_serial_hardware_flow_control",
-		.func = test_hal_serial_hardware_flow_control,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_hal_serial_software_flow_control",
-		.func = test_hal_serial_software_flow_control,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_hal_serial_max_baudrate",
-		.func = test_hal_serial_max_baudrate,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_hal_serial_min_baudrate",
-		.func = test_hal_serial_min_baudrate,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_hal_serial_large_write",
-		.func = test_hal_serial_large_write,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_hal_serial_nonblocking_read",
-		.func = test_hal_serial_nonblocking_read,
-		.setup = NULL,
-		.teardown = NULL
-	},
+    { .name = "test_hal_serial_open_success",
+      .func = test_hal_serial_open_success,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_hal_serial_open_null_device",
+      .func = test_hal_serial_open_null_device,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_hal_serial_open_null_config",
+      .func = test_hal_serial_open_null_config,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_hal_serial_open_null_handle",
+      .func = test_hal_serial_open_null_handle,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_hal_serial_open_invalid_device",
+      .func = test_hal_serial_open_invalid_device,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_hal_serial_close",
+      .func = test_hal_serial_close,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_hal_serial_close_null_handle",
+      .func = test_hal_serial_close_null_handle,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_hal_serial_write_success",
+      .func = test_hal_serial_write_success,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_hal_serial_write_null_handle",
+      .func = test_hal_serial_write_null_handle,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_hal_serial_write_null_buffer",
+      .func = test_hal_serial_write_null_buffer,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_hal_serial_write_zero_length",
+      .func = test_hal_serial_write_zero_length,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_hal_serial_read_timeout",
+      .func = test_hal_serial_read_timeout,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_hal_serial_read_null_handle",
+      .func = test_hal_serial_read_null_handle,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_hal_serial_read_null_buffer",
+      .func = test_hal_serial_read_null_buffer,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_hal_serial_flush_success",
+      .func = test_hal_serial_flush_success,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_hal_serial_flush_null_handle",
+      .func = test_hal_serial_flush_null_handle,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_hal_serial_set_config_success",
+      .func = test_hal_serial_set_config_success,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_hal_serial_set_config_null_handle",
+      .func = test_hal_serial_set_config_null_handle,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_hal_serial_set_config_null_config",
+      .func = test_hal_serial_set_config_null_config,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_hal_serial_different_baudrate",
+      .func = test_hal_serial_different_baudrate,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_hal_serial_different_parity",
+      .func = test_hal_serial_different_parity,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_hal_serial_different_databits",
+      .func = test_hal_serial_different_databits,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_hal_serial_different_stopbits",
+      .func = test_hal_serial_different_stopbits,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_hal_serial_hardware_flow_control",
+      .func = test_hal_serial_hardware_flow_control,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_hal_serial_software_flow_control",
+      .func = test_hal_serial_software_flow_control,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_hal_serial_max_baudrate",
+      .func = test_hal_serial_max_baudrate,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_hal_serial_min_baudrate",
+      .func = test_hal_serial_min_baudrate,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_hal_serial_large_write",
+      .func = test_hal_serial_large_write,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_hal_serial_nonblocking_read",
+      .func = test_hal_serial_nonblocking_read,
+      .setup = NULL,
+      .teardown = NULL },
 };
 
 /* 测试套件定义 */
 static const test_suite_t test_suite = {
-	.suite_name = "hal_serial",
-	.module_name = "hal_serial",
-	.layer_name = "HAL",
-	.cases = test_cases,
-	.case_count = OSAL_sizeof(test_cases) / OSAL_sizeof(test_case_t),
-	.suite_setup = NULL,
-	.suite_teardown = NULL,
-	.metadata = {
-		.category = TEST_CATEGORY_UNIT,
-		.tags = TEST_TAG_FAST,
-		.timeout_ms = 100,
-		.description = "HAL hal_serial tests"
-	}
+    .suite_name = "hal_serial",
+    .module_name = "hal_serial",
+    .layer_name = "HAL",
+    .cases = test_cases,
+    .case_count = OSAL_sizeof(test_cases) / OSAL_sizeof(test_case_t),
+    .suite_setup = NULL,
+    .suite_teardown = NULL,
+    .metadata = { .category = TEST_CATEGORY_UNIT,
+                  .tags = TEST_TAG_FAST,
+                  .timeout_ms = 100,
+                  .description = "HAL hal_serial tests" }
 };
 
 /* 测试套件注册函数 */
-__attribute__((constructor))
-static void register_hal_serial_tests(void)
+__attribute__((constructor)) static void register_hal_serial_tests(void)
 {
-	libutest_register_suite(&test_suite);
+    libutest_register_suite(&test_suite);
 }

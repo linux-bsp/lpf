@@ -104,12 +104,17 @@ static void test_pdl_mcu_get_version_null_output(void)
 /* 测试用例: 发送命令 - 空句柄 */
 static void test_pdl_mcu_send_command_null_handle(void)
 {
-    uint8_t cmd_data[] = {0x01, 0x02, 0x03};
+    uint8_t cmd_data[] = { 0x01, 0x02, 0x03 };
     uint8_t resp_data[32];
     uint32_t resp_len;
 
-    int32_t ret = PDL_MCU_send_command(NULL, 0x01, cmd_data, sizeof(cmd_data),
-                                       resp_data, sizeof(resp_data), &resp_len);
+    int32_t ret = PDL_MCU_send_command(NULL,
+                                       0x01,
+                                       cmd_data,
+                                       sizeof(cmd_data),
+                                       resp_data,
+                                       sizeof(resp_data),
+                                       &resp_len);
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -117,13 +122,18 @@ static void test_pdl_mcu_send_command_null_handle(void)
 static void test_pdl_mcu_send_command_null_response(void)
 {
     pdl_mcu_handle_t handle = NULL;
-    uint8_t cmd_data[] = {0x01, 0x02, 0x03};
+    uint8_t cmd_data[] = { 0x01, 0x02, 0x03 };
     uint32_t resp_len;
 
     int32_t ret = PDL_MCU_init(0, &handle);
     if (ret == OSAL_SUCCESS) {
-        ret = PDL_MCU_send_command(handle, 0x01, cmd_data, sizeof(cmd_data),
-                                   NULL, 32, &resp_len);
+        ret = PDL_MCU_send_command(handle,
+                                   0x01,
+                                   cmd_data,
+                                   sizeof(cmd_data),
+                                   NULL,
+                                   32,
+                                   &resp_len);
         TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
         PDL_MCU_deinit(handle);
     } else {

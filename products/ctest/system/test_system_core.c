@@ -38,13 +38,14 @@ struct system_test_context {
     bool test_passed;
 };
 
-system_test_context_t* system_test_create(const char *name,
-                                           system_test_type_t type) {
+system_test_context_t *system_test_create(const char *name,
+                                          system_test_type_t type)
+{
     if (!name) {
         return NULL;
     }
 
-    system_test_context_t *ctx = (system_test_context_t*)OSAL_malloc(
+    system_test_context_t *ctx = (system_test_context_t *)OSAL_malloc(
         OSAL_sizeof(system_test_context_t));
     if (!ctx) {
         return NULL;
@@ -58,15 +59,17 @@ system_test_context_t* system_test_create(const char *name,
     return ctx;
 }
 
-void system_test_destroy(system_test_context_t *ctx) {
+void system_test_destroy(system_test_context_t *ctx)
+{
     if (ctx) {
         OSAL_free(ctx);
     }
 }
 
 void system_test_set_env_funcs(system_test_context_t *ctx,
-                                system_env_setup_func_t setup,
-                                system_env_teardown_func_t teardown) {
+                               system_env_setup_func_t setup,
+                               system_env_teardown_func_t teardown)
+{
     if (ctx) {
         ctx->setup_func = setup;
         ctx->teardown_func = teardown;
@@ -74,7 +77,8 @@ void system_test_set_env_funcs(system_test_context_t *ctx,
 }
 
 int32_t system_test_run(system_test_context_t *ctx,
-                        system_test_func_t test_func) {
+                        system_test_func_t test_func)
+{
     if (!ctx || !test_func) {
         return -1;
     }
@@ -86,7 +90,8 @@ int32_t system_test_run(system_test_context_t *ctx,
         OSAL_printf("[ SETUP    ] Initializing test environment...\n");
         int32_t result = ctx->setup_func(&ctx->env);
         if (result != 0) {
-            OSAL_printf("[ SETUP FAIL ] Environment setup failed: %d\n", result);
+            OSAL_printf("[ SETUP FAIL ] Environment setup failed: %d\n",
+                        result);
             return result;
         }
         OSAL_printf("[ SETUP OK ] Environment initialized\n");
@@ -109,24 +114,26 @@ int32_t system_test_run(system_test_context_t *ctx,
     /* 打印结果 */
     if (ctx->test_passed) {
         OSAL_printf("[ PASS     ] %s (%lu ms)\n",
-                   ctx->name,
-                   (unsigned long)(ctx->end_time_ms - ctx->start_time_ms));
+                    ctx->name,
+                    (unsigned long)(ctx->end_time_ms - ctx->start_time_ms));
     } else {
         OSAL_printf("[ FAIL     ] %s (%lu ms)\n",
-                   ctx->name,
-                   (unsigned long)(ctx->end_time_ms - ctx->start_time_ms));
+                    ctx->name,
+                    (unsigned long)(ctx->end_time_ms - ctx->start_time_ms));
     }
 
     return test_result;
 }
 
-system_test_env_t* system_test_get_env(system_test_context_t *ctx) {
+system_test_env_t *system_test_get_env(system_test_context_t *ctx)
+{
     return ctx ? &ctx->env : NULL;
 }
 
 void system_test_checkpoint(system_test_context_t *ctx,
                             const char *checkpoint_name,
-                            bool passed) {
+                            bool passed)
+{
     if (!ctx || !checkpoint_name || ctx->checkpoint_count >= MAX_CHECKPOINTS) {
         return;
     }
@@ -146,26 +153,28 @@ void system_test_checkpoint(system_test_context_t *ctx,
     }
 }
 
-void system_test_print_report(system_test_context_t *ctx) {
-    if (!ctx) return;
+void system_test_print_report(system_test_context_t *ctx)
+{
+    if (!ctx)
+        return;
 
     const char *type_str = "";
     switch (ctx->type) {
-        case SYSTEM_TEST_INTEGRATION:
-            type_str = "Integration";
-            break;
-        case SYSTEM_TEST_E2E:
-            type_str = "End-to-End";
-            break;
-        case SYSTEM_TEST_SCENARIO:
-            type_str = "Scenario";
-            break;
-        case SYSTEM_TEST_REGRESSION:
-            type_str = "Regression";
-            break;
-        default:
-            type_str = "Unknown";
-            break;
+    case SYSTEM_TEST_INTEGRATION:
+        type_str = "Integration";
+        break;
+    case SYSTEM_TEST_E2E:
+        type_str = "End-to-End";
+        break;
+    case SYSTEM_TEST_SCENARIO:
+        type_str = "Scenario";
+        break;
+    case SYSTEM_TEST_REGRESSION:
+        type_str = "Regression";
+        break;
+    default:
+        type_str = "Unknown";
+        break;
     }
 
     OSAL_printf("\n");
@@ -173,7 +182,7 @@ void system_test_print_report(system_test_context_t *ctx) {
     OSAL_printf("Type:        %s\n", type_str);
     OSAL_printf("Status:      %s\n", ctx->test_passed ? "PASSED" : "FAILED");
     OSAL_printf("Duration:    %lu ms\n",
-               (unsigned long)(ctx->end_time_ms - ctx->start_time_ms));
+                (unsigned long)(ctx->end_time_ms - ctx->start_time_ms));
     OSAL_printf("\n");
     OSAL_printf("Checkpoints:\n");
     OSAL_printf("  Total:     %u\n", ctx->checkpoint_count);

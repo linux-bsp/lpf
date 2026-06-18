@@ -6,8 +6,6 @@
 #include "osal.h"
 #include "aconfig.h"
 
-const aconfig_config_table_t g_aconfig_table = {
-    .name = "ctest_aconfig",
-    .function_map = NULL,
-    .user_data = NULL
-};
+const aconfig_config_table_t g_aconfig_table = { .name = "ctest_aconfig",
+                                                 .function_map = NULL,
+                                                 .user_data = NULL };

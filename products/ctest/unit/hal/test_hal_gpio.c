@@ -13,7 +13,9 @@
 static volatile int32_t interrupt_count = 0;
 static volatile hal_gpio_level_t last_level = HAL_GPIO_LEVEL_LOW;
 
-static void test_gpio_isr_callback(uint32_t gpio_num, hal_gpio_level_t level, void *user_data)
+static void test_gpio_isr_callback(uint32_t gpio_num,
+                                   hal_gpio_level_t level,
+                                   void *user_data)
 {
     (void)gpio_num;
     interrupt_count++;
@@ -25,13 +27,11 @@ static void test_gpio_isr_callback(uint32_t gpio_num, hal_gpio_level_t level, vo
 
 static void test_gpio_init_deinit(void)
 {
-    hal_gpio_config_t config = {
-        .direction = HAL_GPIO_DIR_OUTPUT,
-        .initial_level = HAL_GPIO_LEVEL_LOW,
-        .edge = HAL_GPIO_EDGE_NONE,
-        .callback = NULL,
-        .user_data = NULL
-    };
+    hal_gpio_config_t config = { .direction = HAL_GPIO_DIR_OUTPUT,
+                                 .initial_level = HAL_GPIO_LEVEL_LOW,
+                                 .edge = HAL_GPIO_EDGE_NONE,
+                                 .callback = NULL,
+                                 .user_data = NULL };
 
     /* 使用较大的GPIO号避免与系统GPIO冲突 */
     uint32_t test_gpio = 200;
@@ -54,13 +54,11 @@ static void test_gpio_init_deinit(void)
 
 static void test_gpio_set_get_direction(void)
 {
-    hal_gpio_config_t config = {
-        .direction = HAL_GPIO_DIR_OUTPUT,
-        .initial_level = HAL_GPIO_LEVEL_LOW,
-        .edge = HAL_GPIO_EDGE_NONE,
-        .callback = NULL,
-        .user_data = NULL
-    };
+    hal_gpio_config_t config = { .direction = HAL_GPIO_DIR_OUTPUT,
+                                 .initial_level = HAL_GPIO_LEVEL_LOW,
+                                 .edge = HAL_GPIO_EDGE_NONE,
+                                 .callback = NULL,
+                                 .user_data = NULL };
 
     uint32_t test_gpio = 201;
     int32_t ret = HAL_GPIO_init(test_gpio, &config);
@@ -91,13 +89,11 @@ static void test_gpio_set_get_direction(void)
 
 static void test_gpio_set_get_level(void)
 {
-    hal_gpio_config_t config = {
-        .direction = HAL_GPIO_DIR_OUTPUT,
-        .initial_level = HAL_GPIO_LEVEL_LOW,
-        .edge = HAL_GPIO_EDGE_NONE,
-        .callback = NULL,
-        .user_data = NULL
-    };
+    hal_gpio_config_t config = { .direction = HAL_GPIO_DIR_OUTPUT,
+                                 .initial_level = HAL_GPIO_LEVEL_LOW,
+                                 .edge = HAL_GPIO_EDGE_NONE,
+                                 .callback = NULL,
+                                 .user_data = NULL };
 
     uint32_t test_gpio = 202;
     int32_t ret = HAL_GPIO_init(test_gpio, &config);
@@ -133,13 +129,11 @@ static void test_gpio_set_get_level(void)
 
 static void test_gpio_interrupt_setup(void)
 {
-    hal_gpio_config_t config = {
-        .direction = HAL_GPIO_DIR_INPUT,
-        .initial_level = HAL_GPIO_LEVEL_LOW,
-        .edge = HAL_GPIO_EDGE_BOTH,
-        .callback = test_gpio_isr_callback,
-        .user_data = NULL
-    };
+    hal_gpio_config_t config = { .direction = HAL_GPIO_DIR_INPUT,
+                                 .initial_level = HAL_GPIO_LEVEL_LOW,
+                                 .edge = HAL_GPIO_EDGE_BOTH,
+                                 .callback = test_gpio_isr_callback,
+                                 .user_data = NULL };
 
     uint32_t test_gpio = 203;
     int32_t ret = HAL_GPIO_init(test_gpio, &config);
@@ -166,13 +160,11 @@ static void test_gpio_interrupt_setup(void)
 
 static void test_gpio_invalid_params(void)
 {
-    hal_gpio_config_t config = {
-        .direction = HAL_GPIO_DIR_OUTPUT,
-        .initial_level = HAL_GPIO_LEVEL_LOW,
-        .edge = HAL_GPIO_EDGE_NONE,
-        .callback = NULL,
-        .user_data = NULL
-    };
+    hal_gpio_config_t config = { .direction = HAL_GPIO_DIR_OUTPUT,
+                                 .initial_level = HAL_GPIO_LEVEL_LOW,
+                                 .edge = HAL_GPIO_EDGE_NONE,
+                                 .callback = NULL,
+                                 .user_data = NULL };
 
     /* 无效的GPIO号 */
     int32_t ret = HAL_GPIO_init(999, &config);
@@ -193,13 +185,11 @@ static void test_gpio_invalid_params(void)
 
 static void test_gpio_output_mode(void)
 {
-    hal_gpio_config_t config = {
-        .direction = HAL_GPIO_DIR_OUTPUT,
-        .initial_level = HAL_GPIO_LEVEL_HIGH,
-        .edge = HAL_GPIO_EDGE_NONE,
-        .callback = NULL,
-        .user_data = NULL
-    };
+    hal_gpio_config_t config = { .direction = HAL_GPIO_DIR_OUTPUT,
+                                 .initial_level = HAL_GPIO_LEVEL_HIGH,
+                                 .edge = HAL_GPIO_EDGE_NONE,
+                                 .callback = NULL,
+                                 .user_data = NULL };
 
     uint32_t test_gpio = 204;
     int32_t ret = HAL_GPIO_init(test_gpio, &config);
@@ -232,13 +222,11 @@ static void test_gpio_output_mode(void)
 
 static void test_gpio_input_mode(void)
 {
-    hal_gpio_config_t config = {
-        .direction = HAL_GPIO_DIR_INPUT,
-        .initial_level = HAL_GPIO_LEVEL_LOW,
-        .edge = HAL_GPIO_EDGE_NONE,
-        .callback = NULL,
-        .user_data = NULL
-    };
+    hal_gpio_config_t config = { .direction = HAL_GPIO_DIR_INPUT,
+                                 .initial_level = HAL_GPIO_LEVEL_LOW,
+                                 .edge = HAL_GPIO_EDGE_NONE,
+                                 .callback = NULL,
+                                 .user_data = NULL };
 
     uint32_t test_gpio = 205;
     int32_t ret = HAL_GPIO_init(test_gpio, &config);
@@ -272,13 +260,11 @@ static void test_gpio_interrupt_enable_disable_edge_cases(void)
     TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 初始化GPIO但不设置中断 */
-    hal_gpio_config_t config = {
-        .direction = HAL_GPIO_DIR_INPUT,
-        .initial_level = HAL_GPIO_LEVEL_LOW,
-        .edge = HAL_GPIO_EDGE_NONE,
-        .callback = NULL,
-        .user_data = NULL
-    };
+    hal_gpio_config_t config = { .direction = HAL_GPIO_DIR_INPUT,
+                                 .initial_level = HAL_GPIO_LEVEL_LOW,
+                                 .edge = HAL_GPIO_EDGE_NONE,
+                                 .callback = NULL,
+                                 .user_data = NULL };
 
     ret = HAL_GPIO_init(test_gpio, &config);
 #ifdef __linux__
@@ -302,13 +288,11 @@ static void test_gpio_interrupt_callback_verification(void)
     last_level = HAL_GPIO_LEVEL_LOW;
     int32_t user_counter = 0;
 
-    hal_gpio_config_t config = {
-        .direction = HAL_GPIO_DIR_INPUT,
-        .initial_level = HAL_GPIO_LEVEL_LOW,
-        .edge = HAL_GPIO_EDGE_BOTH,
-        .callback = test_gpio_isr_callback,
-        .user_data = &user_counter
-    };
+    hal_gpio_config_t config = { .direction = HAL_GPIO_DIR_INPUT,
+                                 .initial_level = HAL_GPIO_LEVEL_LOW,
+                                 .edge = HAL_GPIO_EDGE_BOTH,
+                                 .callback = test_gpio_isr_callback,
+                                 .user_data = &user_counter };
 
     uint32_t test_gpio = 207;
     int32_t ret = HAL_GPIO_init(test_gpio, &config);
@@ -345,13 +329,11 @@ static void test_gpio_set_interrupt_different_edges(void)
 {
     uint32_t test_gpio = 208;
 
-    hal_gpio_config_t config = {
-        .direction = HAL_GPIO_DIR_INPUT,
-        .initial_level = HAL_GPIO_LEVEL_LOW,
-        .edge = HAL_GPIO_EDGE_NONE,
-        .callback = NULL,
-        .user_data = NULL
-    };
+    hal_gpio_config_t config = { .direction = HAL_GPIO_DIR_INPUT,
+                                 .initial_level = HAL_GPIO_LEVEL_LOW,
+                                 .edge = HAL_GPIO_EDGE_NONE,
+                                 .callback = NULL,
+                                 .user_data = NULL };
 
     int32_t ret = HAL_GPIO_init(test_gpio, &config);
 
@@ -365,15 +347,24 @@ static void test_gpio_set_interrupt_different_edges(void)
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 测试上升沿 */
-    ret = HAL_GPIO_set_interrupt(test_gpio, HAL_GPIO_EDGE_RISING, test_gpio_isr_callback, NULL);
+    ret = HAL_GPIO_set_interrupt(test_gpio,
+                                 HAL_GPIO_EDGE_RISING,
+                                 test_gpio_isr_callback,
+                                 NULL);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 测试下降沿 */
-    ret = HAL_GPIO_set_interrupt(test_gpio, HAL_GPIO_EDGE_FALLING, test_gpio_isr_callback, NULL);
+    ret = HAL_GPIO_set_interrupt(test_gpio,
+                                 HAL_GPIO_EDGE_FALLING,
+                                 test_gpio_isr_callback,
+                                 NULL);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 测试双边沿 */
-    ret = HAL_GPIO_set_interrupt(test_gpio, HAL_GPIO_EDGE_BOTH, test_gpio_isr_callback, NULL);
+    ret = HAL_GPIO_set_interrupt(test_gpio,
+                                 HAL_GPIO_EDGE_BOTH,
+                                 test_gpio_isr_callback,
+                                 NULL);
     TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
     /* 测试禁用中断（callback为NULL） */
@@ -385,13 +376,11 @@ static void test_gpio_set_interrupt_different_edges(void)
 
 static void test_gpio_boundary_values(void)
 {
-    hal_gpio_config_t config = {
-        .direction = HAL_GPIO_DIR_OUTPUT,
-        .initial_level = HAL_GPIO_LEVEL_LOW,
-        .edge = HAL_GPIO_EDGE_NONE,
-        .callback = NULL,
-        .user_data = NULL
-    };
+    hal_gpio_config_t config = { .direction = HAL_GPIO_DIR_OUTPUT,
+                                 .initial_level = HAL_GPIO_LEVEL_LOW,
+                                 .edge = HAL_GPIO_EDGE_NONE,
+                                 .callback = NULL,
+                                 .user_data = NULL };
 
     /* 测试GPIO号边界值 */
     int32_t ret = HAL_GPIO_init(0, &config);
@@ -418,94 +407,69 @@ static void test_gpio_boundary_values(void)
 
 /* 测试用例数组 - 使用函数指针数组 */
 static const test_case_t test_cases[] = {
-	{
-		.name = "test_gpio_init_deinit",
-		.func = test_gpio_init_deinit,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_gpio_set_get_direction",
-		.func = test_gpio_set_get_direction,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_gpio_set_get_level",
-		.func = test_gpio_set_get_level,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_gpio_interrupt_setup",
-		.func = test_gpio_interrupt_setup,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_gpio_invalid_params",
-		.func = test_gpio_invalid_params,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_gpio_output_mode",
-		.func = test_gpio_output_mode,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_gpio_input_mode",
-		.func = test_gpio_input_mode,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_gpio_interrupt_enable_disable_edge_cases",
-		.func = test_gpio_interrupt_enable_disable_edge_cases,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_gpio_interrupt_callback_verification",
-		.func = test_gpio_interrupt_callback_verification,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_gpio_set_interrupt_different_edges",
-		.func = test_gpio_set_interrupt_different_edges,
-		.setup = NULL,
-		.teardown = NULL
-	},
-	{
-		.name = "test_gpio_boundary_values",
-		.func = test_gpio_boundary_values,
-		.setup = NULL,
-		.teardown = NULL
-	},
+    { .name = "test_gpio_init_deinit",
+      .func = test_gpio_init_deinit,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_gpio_set_get_direction",
+      .func = test_gpio_set_get_direction,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_gpio_set_get_level",
+      .func = test_gpio_set_get_level,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_gpio_interrupt_setup",
+      .func = test_gpio_interrupt_setup,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_gpio_invalid_params",
+      .func = test_gpio_invalid_params,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_gpio_output_mode",
+      .func = test_gpio_output_mode,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_gpio_input_mode",
+      .func = test_gpio_input_mode,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_gpio_interrupt_enable_disable_edge_cases",
+      .func = test_gpio_interrupt_enable_disable_edge_cases,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_gpio_interrupt_callback_verification",
+      .func = test_gpio_interrupt_callback_verification,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_gpio_set_interrupt_different_edges",
+      .func = test_gpio_set_interrupt_different_edges,
+      .setup = NULL,
+      .teardown = NULL },
+    { .name = "test_gpio_boundary_values",
+      .func = test_gpio_boundary_values,
+      .setup = NULL,
+      .teardown = NULL },
 };
 
 /* 测试套件定义 */
 static const test_suite_t test_suite = {
-	.suite_name = "hal_gpio",
-	.module_name = "hal_gpio",
-	.layer_name = "HAL",
-	.cases = test_cases,
-	.case_count = OSAL_sizeof(test_cases) / OSAL_sizeof(test_case_t),
-	.suite_setup = NULL,
-	.suite_teardown = NULL,
-	.metadata = {
-		.category = TEST_CATEGORY_UNIT,
-		.tags = TEST_TAG_FAST,
-		.timeout_ms = 100,
-		.description = "HAL hal_gpio tests"
-	}
+    .suite_name = "hal_gpio",
+    .module_name = "hal_gpio",
+    .layer_name = "HAL",
+    .cases = test_cases,
+    .case_count = OSAL_sizeof(test_cases) / OSAL_sizeof(test_case_t),
+    .suite_setup = NULL,
+    .suite_teardown = NULL,
+    .metadata = { .category = TEST_CATEGORY_UNIT,
+                  .tags = TEST_TAG_FAST,
+                  .timeout_ms = 100,
+                  .description = "HAL hal_gpio tests" }
 };
 
 /* 测试套件注册函数 */
-__attribute__((constructor))
-static void register_hal_gpio_tests(void)
+__attribute__((constructor)) static void register_hal_gpio_tests(void)
 {
-	libutest_register_suite(&test_suite);
+    libutest_register_suite(&test_suite);
 }

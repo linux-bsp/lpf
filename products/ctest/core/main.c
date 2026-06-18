@@ -43,7 +43,7 @@ static const char *detect_layer_filter(const char *program_name)
     } else if (0 == OSAL_strcmp(program_name, "pdl-test")) {
         return "PDL";
     }
-    return NULL;  /* es-middleware-test: no filter */
+    return NULL; /* es-middleware-test: no filter */
 }
 
 /**
@@ -60,39 +60,59 @@ static void print_usage(const char *program_name)
 
         OSAL_printf("RUN OPTIONS:\n");
         OSAL_printf("    -a, --all                  Run all tests\n");
-        OSAL_printf("    -L, --layer <name>         Run tests from specific layer\n");
-        OSAL_printf("    -m, --module <name>        Run tests from specific module\n");
+        OSAL_printf(
+            "    -L, --layer <name>         Run tests from specific layer\n");
+        OSAL_printf(
+            "    -m, --module <name>        Run tests from specific module\n");
         OSAL_printf("    -s, --suite <name>         Run specific test suite\n");
-        OSAL_printf("    -i, --interactive          Interactive menu mode (default)\n\n");
+        OSAL_printf("    -i, --interactive          Interactive menu mode "
+                    "(default)\n\n");
 
         OSAL_printf("LIST OPTIONS:\n");
-        OSAL_printf("    -l, --list                 List all tests with details\n");
-        OSAL_printf("        --list-layers          List all available layers\n");
-        OSAL_printf("        --list-modules         List all available modules\n");
-        OSAL_printf("        --list-suites          List all available test suites\n\n");
+        OSAL_printf(
+            "    -l, --list                 List all tests with details\n");
+        OSAL_printf(
+            "        --list-layers          List all available layers\n");
+        OSAL_printf(
+            "        --list-modules         List all available modules\n");
+        OSAL_printf("        --list-suites          List all available test "
+                    "suites\n\n");
 
         OSAL_printf("FILTER OPTIONS:\n");
-        OSAL_printf("    -L, --layer <name>         Filter by layer (OSAL, HAL, PDL, PRL, etc.)\n");
+        OSAL_printf("    -L, --layer <name>         Filter by layer (OSAL, "
+                    "HAL, PDL, PRL, etc.)\n");
         OSAL_printf("    -M, --module <name>        Filter by module name\n");
         OSAL_printf("        --category <cat>       Filter by category:\n");
-        OSAL_printf("                               unit, performance, stress, system\n");
-        OSAL_printf("        --fast                 Run only fast tests (<100ms)\n");
-        OSAL_printf("        --slow                 Run only slow tests (>1s)\n");
-        OSAL_printf("        --tags <tags>          Filter by tags (comma-separated)\n");
-        OSAL_printf("        --exclude-hardware     Exclude tests requiring hardware\n");
-        OSAL_printf("        --exclude-network      Exclude tests requiring network\n\n");
+        OSAL_printf("                               unit, performance, stress, "
+                    "system\n");
+        OSAL_printf(
+            "        --fast                 Run only fast tests (<100ms)\n");
+        OSAL_printf(
+            "        --slow                 Run only slow tests (>1s)\n");
+        OSAL_printf("        --tags <tags>          Filter by tags "
+                    "(comma-separated)\n");
+        OSAL_printf("        --exclude-hardware     Exclude tests requiring "
+                    "hardware\n");
+        OSAL_printf("        --exclude-network      Exclude tests requiring "
+                    "network\n\n");
 
         OSAL_printf("OUTPUT OPTIONS:\n");
-        OSAL_printf("    -v, --verbose              Verbose output (show all assertions)\n");
-        OSAL_printf("    -q, --quiet                Quiet mode (errors only)\n");
-        OSAL_printf("        --format <fmt>         Output format: text, junit, json\n");
+        OSAL_printf("    -v, --verbose              Verbose output (show all "
+                    "assertions)\n");
+        OSAL_printf(
+            "    -q, --quiet                Quiet mode (errors only)\n");
+        OSAL_printf("        --format <fmt>         Output format: text, "
+                    "junit, json\n");
         OSAL_printf("        --output <file>        Write output to file\n");
-        OSAL_printf("        --no-stats             Disable statistics summary\n");
-        OSAL_printf("        --color <when>         Colorize output: auto, always, never\n\n");
+        OSAL_printf(
+            "        --no-stats             Disable statistics summary\n");
+        OSAL_printf("        --color <when>         Colorize output: auto, "
+                    "always, never\n\n");
 
         OSAL_printf("OTHER OPTIONS:\n");
         OSAL_printf("    -h, --help                 Show this help message\n");
-        OSAL_printf("        --version              Show version information\n\n");
+        OSAL_printf(
+            "        --version              Show version information\n\n");
 
         OSAL_printf("EXAMPLES:\n");
         OSAL_printf("    # Run all tests\n");
@@ -118,16 +138,20 @@ static void print_usage(const char *program_name)
         OSAL_printf("    %s --all --tags fast,memory\n\n", program_name);
 
         OSAL_printf("    # CI/CD integration\n");
-        OSAL_printf("    %s --all --format junit --output report.xml\n", program_name);
-        OSAL_printf("    %s --all --format json --output results.json\n\n", program_name);
+        OSAL_printf("    %s --all --format junit --output report.xml\n",
+                    program_name);
+        OSAL_printf("    %s --all --format json --output results.json\n\n",
+                    program_name);
 
         OSAL_printf("TEST STRUCTURE:\n");
         OSAL_printf("    Layer → Module → Suite → Test Case\n");
-        OSAL_printf("    Example: OSAL → osal_mutex → osal_mutex → test_mutex_init_success\n\n");
+        OSAL_printf("    Example: OSAL → osal_mutex → osal_mutex → "
+                    "test_mutex_init_success\n\n");
 
         OSAL_printf("SYMLINKS:\n");
         OSAL_printf("    osal-test, hal-test, pdl-test\n");
-        OSAL_printf("    These symlinks automatically filter tests by layer.\n\n");
+        OSAL_printf(
+            "    These symlinks automatically filter tests by layer.\n\n");
 
         OSAL_printf("For more information, see: docs/TEST_FRAMEWORK.md\n\n");
     } else {
@@ -151,7 +175,8 @@ static void print_usage(const char *program_name)
         OSAL_printf("        --exclude-hardware Exclude hardware tests\n\n");
 
         OSAL_printf("OUTPUT OPTIONS:\n");
-        OSAL_printf("        --format <fmt>     Output format: text, junit, json\n");
+        OSAL_printf(
+            "        --format <fmt>     Output format: text, junit, json\n");
         OSAL_printf("        --output <file>    Write output to file\n\n");
 
         OSAL_printf("EXAMPLES:\n");
@@ -169,14 +194,15 @@ static test_category_t parse_category(const char *str)
 {
     if (0 == OSAL_strcmp(str, "unit")) {
         return TEST_CATEGORY_UNIT;
-    } else if (0 == OSAL_strcmp(str, "performance") || 0 == OSAL_strcmp(str, "perf")) {
+    } else if (0 == OSAL_strcmp(str, "performance") ||
+               0 == OSAL_strcmp(str, "perf")) {
         return TEST_CATEGORY_PERFORMANCE;
     } else if (0 == OSAL_strcmp(str, "stress")) {
         return TEST_CATEGORY_STRESS;
     } else if (0 == OSAL_strcmp(str, "system")) {
         return TEST_CATEGORY_SYSTEM;
     }
-    return TEST_CATEGORY_MAX;  /* Invalid */
+    return TEST_CATEGORY_MAX; /* Invalid */
 }
 
 /**
@@ -238,7 +264,8 @@ static uint32_t parse_tags(const char *str)
             tags |= TEST_TAG_PRIVILEGED;
         }
 
-        if (!has_more) break;
+        if (!has_more)
+            break;
         token = next;
     }
 
@@ -250,14 +277,16 @@ static uint32_t parse_tags(const char *str)
  */
 static void export_test_results(const char *format, const char *output_file)
 {
-    if (!format || !output_file) return;
+    if (!format || !output_file)
+        return;
 
     if (0 == OSAL_strcmp(format, "junit")) {
         libutest_export_junit_xml(output_file);
     } else if (0 == OSAL_strcmp(format, "json")) {
         libutest_export_json(output_file);
     } else if (0 != OSAL_strcmp(format, "text")) {
-        OSAL_printf("Warning: Unknown output format '%s', using text\n", format);
+        OSAL_printf("Warning: Unknown output format '%s', using text\n",
+                    format);
     }
 }
 
@@ -267,16 +296,14 @@ int main(int argc, char *argv[])
     const char *layer_filter = detect_layer_filter(program_name);
 
     /* Initialize filter */
-    test_filter_t filter = {
-        .category_mask = 0,
-        .include_tags = 0,
-        .exclude_tags = 0,
-        .max_timeout_ms = 0,
-        .enabled = false
-    };
+    test_filter_t filter = { .category_mask = 0,
+                             .include_tags = 0,
+                             .exclude_tags = 0,
+                             .max_timeout_ms = 0,
+                             .enabled = false };
 
     /* Output format configuration */
-    const char *output_format = "text";  /* Default: text */
+    const char *output_format = "text"; /* Default: text */
     const char *output_file = NULL;
 
     /* Parse filtering options first */
@@ -303,17 +330,17 @@ int main(int argc, char *argv[])
                 OSAL_printf("Error: Invalid category '%s'\n", argv[i + 1]);
                 return 1;
             }
-            i++;  /* Skip category value */
+            i++; /* Skip category value */
         } else if (0 == OSAL_strcmp(argv[i], "--tags") && i + 1 < argc) {
             filter.include_tags |= parse_tags(argv[i + 1]);
             filter.enabled = true;
-            i++;  /* Skip tags value */
+            i++; /* Skip tags value */
         } else if (0 == OSAL_strcmp(argv[i], "--format") && i + 1 < argc) {
             output_format = argv[i + 1];
-            i++;  /* Skip format value */
+            i++; /* Skip format value */
         } else if (0 == OSAL_strcmp(argv[i], "--output") && i + 1 < argc) {
             output_file = argv[i + 1];
-            i++;  /* Skip output file value */
+            i++; /* Skip output file value */
         }
     }
 
@@ -345,7 +372,7 @@ int main(int argc, char *argv[])
     bool print_mode = false;
     if (argc >= 2 && 0 == OSAL_strcmp(argv[argc - 1], "-p")) {
         print_mode = true;
-        argc--;  /* Remove -p from argument count */
+        argc--; /* Remove -p from argument count */
     }
 
     /* Run all tests */
@@ -381,11 +408,14 @@ int main(int argc, char *argv[])
     }
 
     /* Run tests by layer (only for es-middleware-test) */
-    if ((0 == OSAL_strcmp(argv[1], "-L") || 0 == OSAL_strcmp(argv[1], "--layer")) && argc >= 3) {
+    if ((0 == OSAL_strcmp(argv[1], "-L") ||
+         0 == OSAL_strcmp(argv[1], "--layer")) &&
+        argc >= 3) {
         int32_t result;
 
         if (layer_filter) {
-            OSAL_printf("Warning: --layer option ignored when invoked via %s\n", program_name);
+            OSAL_printf("Warning: --layer option ignored when invoked via %s\n",
+                        program_name);
             OSAL_printf("Running %s tests instead.\n\n", layer_filter);
             if (filter.enabled) {
                 result = libutest_run_layer_filtered(layer_filter, &filter);
@@ -411,7 +441,9 @@ int main(int argc, char *argv[])
     }
 
     /* Run tests by module */
-    if ((0 == OSAL_strcmp(argv[1], "-m") || 0 == OSAL_strcmp(argv[1], "--module")) && argc >= 3) {
+    if ((0 == OSAL_strcmp(argv[1], "-m") ||
+         0 == OSAL_strcmp(argv[1], "--module")) &&
+        argc >= 3) {
         int32_t result;
 
         if (print_mode) {
@@ -431,7 +463,9 @@ int main(int argc, char *argv[])
     }
 
     /* Run specific test suite */
-    if ((0 == OSAL_strcmp(argv[1], "-s") || 0 == OSAL_strcmp(argv[1], "--suite")) && argc >= 3) {
+    if ((0 == OSAL_strcmp(argv[1], "-s") ||
+         0 == OSAL_strcmp(argv[1], "--suite")) &&
+        argc >= 3) {
         int32_t result = libutest_run_suite(argv[2]);
 
         /* Export results if requested */
@@ -441,7 +475,8 @@ int main(int argc, char *argv[])
     }
 
     /* List all tests */
-    if (0 == OSAL_strcmp(argv[1], "-l") || 0 == OSAL_strcmp(argv[1], "--list")) {
+    if (0 == OSAL_strcmp(argv[1], "-l") ||
+        0 == OSAL_strcmp(argv[1], "--list")) {
         /* Check for --layers option */
         if (argc >= 3 && 0 == OSAL_strcmp(argv[2], "--layers")) {
             libutest_list_layers();
@@ -492,7 +527,8 @@ int main(int argc, char *argv[])
     if (0 == OSAL_strcmp(argv[1], "--list-modules")) {
         const char *layer = NULL;
         /* Check for --layer filter */
-        if (argc >= 4 && (0 == OSAL_strcmp(argv[2], "-L") || 0 == OSAL_strcmp(argv[2], "--layer"))) {
+        if (argc >= 4 && (0 == OSAL_strcmp(argv[2], "-L") ||
+                          0 == OSAL_strcmp(argv[2], "--layer"))) {
             layer = argv[3];
         }
         libutest_list_modules(layer);
@@ -505,9 +541,11 @@ int main(int argc, char *argv[])
         const char *module = NULL;
         /* Check for --layer or --module filter */
         if (argc >= 4) {
-            if (0 == OSAL_strcmp(argv[2], "-L") || 0 == OSAL_strcmp(argv[2], "--layer")) {
+            if (0 == OSAL_strcmp(argv[2], "-L") ||
+                0 == OSAL_strcmp(argv[2], "--layer")) {
                 layer = argv[3];
-            } else if (0 == OSAL_strcmp(argv[2], "-M") || 0 == OSAL_strcmp(argv[2], "--module")) {
+            } else if (0 == OSAL_strcmp(argv[2], "-M") ||
+                       0 == OSAL_strcmp(argv[2], "--module")) {
                 module = argv[3];
             }
         }
@@ -516,12 +554,14 @@ int main(int argc, char *argv[])
     }
 
     /* Interactive menu */
-    if (0 == OSAL_strcmp(argv[1], "-i") || 0 == OSAL_strcmp(argv[1], "--interactive")) {
+    if (0 == OSAL_strcmp(argv[1], "-i") ||
+        0 == OSAL_strcmp(argv[1], "--interactive")) {
         return libutest_interactive_menu_filtered(&filter);
     }
 
     /* Help */
-    if (0 == OSAL_strcmp(argv[1], "-h") || 0 == OSAL_strcmp(argv[1], "--help")) {
+    if (0 == OSAL_strcmp(argv[1], "-h") ||
+        0 == OSAL_strcmp(argv[1], "--help")) {
         print_usage(program_name);
         return 0;
     }

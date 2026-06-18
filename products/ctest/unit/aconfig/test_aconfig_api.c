@@ -20,7 +20,10 @@ static void test_aconfig_get_table(void)
 }
 
 static const test_case_t test_cases[] = {
-    { .name = "test_aconfig_get_table", .func = test_aconfig_get_table, .setup = NULL, .teardown = NULL },
+    { .name = "test_aconfig_get_table",
+      .func = test_aconfig_get_table,
+      .setup = NULL,
+      .teardown = NULL },
 };
 
 static const test_suite_t test_suite = {
@@ -31,16 +34,13 @@ static const test_suite_t test_suite = {
     .case_count = OSAL_sizeof(test_cases) / OSAL_sizeof(test_case_t),
     .suite_setup = NULL,
     .suite_teardown = NULL,
-    .metadata = {
-        .category = TEST_CATEGORY_UNIT,
-        .tags = TEST_TAG_FAST,
-        .timeout_ms = 100,
-        .description = "ACONFIG API unit tests"
-    }
+    .metadata = { .category = TEST_CATEGORY_UNIT,
+                  .tags = TEST_TAG_FAST,
+                  .timeout_ms = 100,
+                  .description = "ACONFIG API unit tests" }
 };
 
-__attribute__((constructor))
-static void register_aconfig_api_tests(void)
+__attribute__((constructor)) static void register_aconfig_api_tests(void)
 {
     libutest_register_suite(&test_suite);
 }
