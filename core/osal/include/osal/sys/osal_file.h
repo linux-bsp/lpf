@@ -153,6 +153,14 @@ int32_t OSAL_ioctl(int32_t fd, uint32_t request, void *argp);
 int32_t OSAL_unlink(const char *pathname);
 
 /**
+ * @brief 创建符号链接
+ * @param target 目标路径
+ * @param linkpath 符号链接路径
+ * @return 0成功，-1失败
+ */
+int32_t OSAL_symlink(const char *target, const char *linkpath);
+
+/**
  * @brief 检查文件访问权限
  * @param pathname 文件路径
  * @param mode 检查模式（OSAL_F_OK/R_OK/W_OK/X_OK）

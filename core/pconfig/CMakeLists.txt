@@ -16,7 +16,6 @@ endif()
 # PCONFIG 核心源文件
 list(APPEND ADD_SRCS
     "src/pconfig_api.c"
-    "src/pconfig_register.c"
 )
 
 # 添加平台配置源文件（如果有）

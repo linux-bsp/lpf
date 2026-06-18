@@ -162,13 +162,26 @@ int32_t HAL_SERIAL_open(const char *device, const hal_serial_config_t *config, h
 
     /* 创建文件锁（进程间保护） */
     char lock_file[OSAL_LOCK_PATH_MAX_LEN];
-    /* 将设备路径转换为锁文件名（跳过 /dev/ 前缀） */
+    char lock_name[OSAL_LOCK_PATH_MAX_LEN];
     const char *dev_name = device;
+    uint32_t i;
+
     if (OSAL_strncmp(device, "/dev/", 5) == 0)
     {
         dev_name = device + 5;  /* 跳过 /dev/ */
     }
-    OSAL_snprintf(lock_file, OSAL_sizeof(lock_file), HAL_SERIAL_LOCK_PATH_FMT, dev_name);
+
+    OSAL_strncpy(lock_name, dev_name, OSAL_sizeof(lock_name) - 1);
+    lock_name[OSAL_sizeof(lock_name) - 1] = '\0';
+    for (i = 0; lock_name[i] != '\0'; i++)
+    {
+        if (lock_name[i] == '/')
+        {
+            lock_name[i] = '_';
+        }
+    }
+
+    OSAL_snprintf(lock_file, OSAL_sizeof(lock_file), HAL_SERIAL_LOCK_PATH_FMT, lock_name);
     ret = OSAL_flock_create(lock_file, &ctx->flock);
     if (ret != OSAL_SUCCESS)
     {

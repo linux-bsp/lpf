@@ -9,164 +9,25 @@
 #include "osal.h"
 #include "pconfig/pconfig.h"
 
-/*===========================================================================
- * 内部数据结构
- *===========================================================================*/
-
-#define MAX_PLATFORM_CONFIGS 32
-
-typedef struct {
-    const pconfig_platform_config_t *configs[MAX_PLATFORM_CONFIGS];
-    uint32_t count;
-    const pconfig_platform_config_t *current;
-} pconfig_registry_t;
-
-static pconfig_registry_t g_registry = {0};
-static bool g_initialized = false;
-static pthread_mutex_t g_registry_mutex = PTHREAD_MUTEX_INITIALIZER;
+__attribute__((weak)) const pconfig_platform_table_t g_pconfig_platform_table = {
+    .configs = NULL,
+    .count = 0,
+    .current_index = 0
+};
 
 /*===========================================================================
- * 配置库初始化
+ * 平台配置查询
  *===========================================================================*/
-
-int32_t PCONFIG_init(void)
-{
-    if (g_initialized) {
-        return OSAL_SUCCESS;
-    }
-
-    OSAL_memset(&g_registry, 0, OSAL_sizeof(g_registry));
-    g_initialized = true;
-
-    LOG_INFO("PCONFIG", "Platform configuration library initialized");
-    return OSAL_SUCCESS;
-}
-
-void PCONFIG_cleanup(void)
-{
-    if (!g_initialized) {
-        return;
-    }
-
-    OSAL_memset(&g_registry, 0, OSAL_sizeof(g_registry));
-    g_initialized = false;
-
-    LOG_INFO("PCONFIG", "Platform configuration library cleaned up");
-}
-
-/*===========================================================================
- * 平台配置注册和查询
- *===========================================================================*/
-
-int32_t PCONFIG_register(const pconfig_platform_config_t *config)
-{
-    uint32_t i;
-    const pconfig_platform_config_t *existing;
-    int32_t ret;
-
-    if (!g_initialized) {
-        LOG_ERROR("PCONFIG", "Library not initialized");
-        return OSAL_ERR_GENERIC;
-    }
-
-    if (NULL == config) {
-        LOG_ERROR("PCONFIG", "Invalid config pointer");
-        return OSAL_ERR_GENERIC;
-    }
-
-    /* 验证配置（在加锁前进行，减少临界区时间） */
-    if (OSAL_SUCCESS != PCONFIG_validate(config)) {
-        LOG_ERROR("PCONFIG", "Config validation failed: %s/%s",
-                  config->platform_name, config->product_name);
-        return OSAL_ERR_GENERIC;
-    }
-
-    /* 加锁保护全局注册表 */
-    ret = OSAL_pthread_mutex_lock(&g_registry_mutex);
-    if (OSAL_SUCCESS != ret) {
-        LOG_ERROR("PCONFIG", "Failed to lock registry mutex");
-        return ret;
-    }
-
-    /* 检查注册表是否已满 */
-    if (g_registry.count >= MAX_PLATFORM_CONFIGS) {
-        OSAL_pthread_mutex_unlock(&g_registry_mutex);
-        LOG_ERROR("PCONFIG", "Registry full");
-        return OSAL_ERR_GENERIC;
-    }
-
-    /* 检查重复 */
-    for (i = 0; i < g_registry.count; i++) {
-        existing = g_registry.configs[i];
-        if (0 == OSAL_strcmp(existing->platform_name, config->platform_name) &&
-            0 == OSAL_strcmp(existing->product_name, config->product_name)) {
-            OSAL_pthread_mutex_unlock(&g_registry_mutex);
-            LOG_WARN("PCONFIG", "Config already registered: %s/%s",
-                     config->platform_name, config->product_name);
-            return OSAL_ERR_GENERIC;
-        }
-    }
-
-    /* 注册配置 */
-    g_registry.configs[g_registry.count++] = config;
-    if (NULL == g_registry.current) {
-        g_registry.current = config;
-    }
-
-    /* 解锁 */
-    OSAL_pthread_mutex_unlock(&g_registry_mutex);
-
-    LOG_INFO("PCONFIG", "Registered config: %s/%s",
-             config->platform_name, config->product_name);
-
-    return OSAL_SUCCESS;
-}
 
 const pconfig_platform_config_t* PCONFIG_GetBoard(void)
 {
-    const pconfig_platform_config_t *config;
-
-    if (!g_initialized) {
+    if (NULL == g_pconfig_platform_table.configs ||
+        0u == g_pconfig_platform_table.count ||
+        g_pconfig_platform_table.current_index >= g_pconfig_platform_table.count) {
         return NULL;
     }
 
-    /* 加锁保护全局注册表 */
-    if (OSAL_SUCCESS != OSAL_pthread_mutex_lock(&g_registry_mutex)) {
-        return NULL;
-    }
-
-    config = g_registry.current;
-
-    /* 解锁 */
-    OSAL_pthread_mutex_unlock(&g_registry_mutex);
-
-    return config;
-}
-
-int32_t PCONFIG_SetBoard(const pconfig_platform_config_t *config)
-{
-    uint32_t i;
-    int32_t ret;
-
-    if (!g_initialized || NULL == config) {
-        return OSAL_ERR_GENERIC;
-    }
-
-    ret = OSAL_pthread_mutex_lock(&g_registry_mutex);
-    if (OSAL_SUCCESS != ret) {
-        return ret;
-    }
-
-    for (i = 0; i < g_registry.count; i++) {
-        if (g_registry.configs[i] == config) {
-            g_registry.current = config;
-            OSAL_pthread_mutex_unlock(&g_registry_mutex);
-            return OSAL_SUCCESS;
-        }
-    }
-
-    OSAL_pthread_mutex_unlock(&g_registry_mutex);
-    return OSAL_ERR_GENERIC;
+    return g_pconfig_platform_table.configs[g_pconfig_platform_table.current_index];
 }
 
 const pconfig_platform_config_t* PCONFIG_Find(const char *platform,
@@ -175,19 +36,20 @@ const pconfig_platform_config_t* PCONFIG_Find(const char *platform,
 {
     uint32_t i;
     const pconfig_platform_config_t *config;
-    const pconfig_platform_config_t *found = NULL;
 
-    if (!g_initialized || NULL == platform || NULL == product) {
+    if (NULL == platform || NULL == product || NULL == g_pconfig_platform_table.configs) {
         return NULL;
     }
 
-    /* 加锁保护全局注册表 */
-    if (OSAL_SUCCESS != OSAL_pthread_mutex_lock(&g_registry_mutex)) {
-        return NULL;
-    }
+    for (i = 0; i < g_pconfig_platform_table.count; i++) {
+        config = g_pconfig_platform_table.configs[i];
+        if (NULL == config) {
+            continue;
+        }
 
-    for (i = 0; i < g_registry.count; i++) {
-        config = g_registry.configs[i];
+        if (NULL == config->platform_name || NULL == config->product_name) {
+            continue;
+        }
 
         if (0 != OSAL_strcmp(config->platform_name, platform)) {
             continue;
@@ -197,14 +59,10 @@ const pconfig_platform_config_t* PCONFIG_Find(const char *platform,
             continue;
         }
 
-        found = config;
-        break;
+        return config;
     }
 
-    /* 解锁 */
-    OSAL_pthread_mutex_unlock(&g_registry_mutex);
-
-    return found;
+    return NULL;
 }
 
 int32_t PCONFIG_list(const pconfig_platform_config_t **configs, uint32_t *count)
@@ -212,29 +70,25 @@ int32_t PCONFIG_list(const pconfig_platform_config_t **configs, uint32_t *count)
     uint32_t max_count;
     uint32_t actual_count;
     uint32_t i;
-    int32_t ret;
 
-    if (!g_initialized || NULL == configs || NULL == count) {
+    if (NULL == configs || NULL == count) {
         return OSAL_ERR_GENERIC;
     }
 
-    /* 加锁保护全局注册表 */
-    ret = OSAL_pthread_mutex_lock(&g_registry_mutex);
-    if (OSAL_SUCCESS != ret) {
-        return ret;
+    if (NULL == g_pconfig_platform_table.configs) {
+        *count = 0;
+        return OSAL_SUCCESS;
     }
 
     max_count = *count;
-    actual_count = (g_registry.count < max_count) ? g_registry.count : max_count;
+    actual_count = (g_pconfig_platform_table.count < max_count) ?
+                   g_pconfig_platform_table.count : max_count;
 
     for (i = 0; i < actual_count; i++) {
-        configs[i] = g_registry.configs[i];
+        configs[i] = g_pconfig_platform_table.configs[i];
     }
 
     *count = actual_count;
-
-    /* 解锁 */
-    OSAL_pthread_mutex_unlock(&g_registry_mutex);
 
     return OSAL_SUCCESS;
 }

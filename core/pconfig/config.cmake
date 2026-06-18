@@ -16,7 +16,6 @@ set(PCONFIG_SRCS "")
 # =============================================================================
 list(APPEND PCONFIG_SRCS
     "src/pconfig_api.c"
-    "src/pconfig_register.c"
 )
 
 message(STATUS "  [PCONFIG] Core API enabled")

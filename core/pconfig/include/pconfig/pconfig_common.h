@@ -12,8 +12,7 @@
 #ifndef PCONFIG_COMMON_H
 #define PCONFIG_COMMON_H
 
-#include <stdint.h>
-#include <stdbool.h>
+#include "osal.h"
 
 /*===========================================================================
  * GPIO配置（PCONFIG 层扩展）

@@ -181,6 +181,12 @@ int32_t OSAL_unlink(const char *pathname)
     return result;
 }
 
+int32_t OSAL_symlink(const char *target, const char *linkpath)
+{
+    int32_t result = symlink(target, linkpath);
+    return result;
+}
+
 /*===========================================================================
  * 文件访问权限检查
  *===========================================================================*/

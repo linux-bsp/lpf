@@ -2,7 +2,7 @@
 # ACONFIG Test Configuration
 # ============================================================================
 # ACONFIG (Application Configuration Layer) 测试配置
-# 用于测试应用配置层功能
+# 用于测试应用配置层只读查询功能
 # ============================================================================
 
 # Architecture and OS
@@ -13,19 +13,13 @@ CONFIG_ARCH_X86_64=y
 CONFIG_PLATFORM_LINUX=y
 CONFIG_PROJECT_H200_AM625=y
 
-# Core Components - OSAL + PDL + PCONFIG + ACONFIG
+# Core Components - OSAL + ACONFIG
 CONFIG_OSAL=y
 CONFIG_TEST_FRAMEWORK=y
-CONFIG_HAL=y
-CONFIG_PDL=y
-CONFIG_PCONFIG=y
 CONFIG_ACONFIG=y
 
 # Build Configuration
 CONFIG_OSAL_BUILD_SHARED=y
-CONFIG_HAL_BUILD_SHARED=y
-CONFIG_PDL_BUILD_STATIC=y
-CONFIG_PCONFIG_BUILD_SHARED=y
 CONFIG_ACONFIG_BUILD_SHARED=y
 
 # OSAL Features - Required
@@ -78,12 +72,3 @@ CONFIG_TEST_ACONFIG_API=y
 # CONFIG_TEST_SYSTEM is not set
 
 # Products - All Disabled
-
-# HAL - Minimal (required by PDL)
-CONFIG_HAL_CAN=y
-CONFIG_HAL_UART=y
-
-# PDL - Minimal (required by ACONFIG for hwid types)
-
-# PRL - Disabled
-# CONFIG_PRL is not set

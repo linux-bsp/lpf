@@ -22,6 +22,23 @@
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/TestDiscovery.cmake)
 
 # ============================================================================
+# Product Static Configuration
+# ============================================================================
+# PCONFIG/ACONFIG are read-only query libraries. The ctest product provides
+# concrete configuration tables at build time through the core modules' extra
+# source hooks.
+
+set(CTEST_CONFIG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/config)
+
+if(CONFIG_PCONFIG)
+    set(PCONFIG_EXTRA_SRCS ${CTEST_CONFIG_DIR}/ctest_pconfig.c)
+endif()
+
+if(CONFIG_ACONFIG)
+    set(ACONFIG_EXTRA_SRCS ${CTEST_CONFIG_DIR}/ctest_aconfig.c)
+endif()
+
+# ============================================================================
 # Register SDK Core Components (like other products do)
 # ============================================================================
 # Build core modules required by tests

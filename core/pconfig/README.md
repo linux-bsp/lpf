@@ -1,28 +1,30 @@
 # PCONFIG
 
-PCONFIG is the platform hardware-configuration registry. It stores platform-level hardware tables and exposes typed index-based accessors for enabled core device families.
+PCONFIG is the platform hardware-configuration query layer. It reads platform-level hardware tables that are compiled in by the product and exposes typed index-based accessors for enabled core device families.
 
 ## Current Responsibility
 
-- Register platform configurations (`pconfig_platform_config_t`).
-- Track the current board configuration.
+- Read product-provided platform configurations (`pconfig_platform_config_t`).
+- Track the current board through a compile-time `current_index` in `g_pconfig_platform_table`.
 - Provide typed accessors for MCU entries.
 - Keep hardware configuration data separate from PDL and application logic.
 
 ## Public API
 
 ```c
-int32_t PCONFIG_init(void);
-void PCONFIG_cleanup(void);
-int32_t PCONFIG_register(const pconfig_platform_config_t *config);
 const pconfig_platform_config_t *PCONFIG_GetBoard(void);
-int32_t PCONFIG_SetBoard(const pconfig_platform_config_t *config);
 const pconfig_platform_config_t *PCONFIG_Find(const char *platform,
                                              const char *product,
                                              const char *version);
 int32_t PCONFIG_list(const pconfig_platform_config_t **configs, uint32_t *count);
 int32_t PCONFIG_validate(const pconfig_platform_config_t *config);
 void PCONFIG_print(const pconfig_platform_config_t *config);
+```
+
+Products provide the table symbol:
+
+```c
+extern const pconfig_platform_table_t g_pconfig_platform_table;
 ```
 
 ## Typed Accessors
@@ -35,7 +37,7 @@ PCONFIG_HW_GetMCU(platform, index);
 
 ## Layering Rules
 
-- `core/pconfig` defines data structures and registry behavior only.
+- `core/pconfig` defines data structures and read-only query behavior only.
 - Product or board integration code owns concrete platform tables.
 - PDL consumes `PCONFIG_GetBoard()` and typed accessors; it should not know concrete product table symbols.
-- Applications should initialize PCONFIG through their platform runtime/bootstrap code.
+- Runtime code must not register, switch, reload, or mutate PCONFIG tables through core APIs.

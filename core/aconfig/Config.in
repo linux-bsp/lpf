@@ -5,38 +5,33 @@ menuconfig ACONFIG
 	default n
 	depends on OSAL
 	help
-	  Application Configuration Layer provides business logic to hardware
-	  device mapping and high-level application APIs.
+	  Application Configuration Layer provides read-only access to
+	  product-defined application configuration tables.
 
 	  ACONFIG is the top layer of the ES-Middleware SDK stack, providing:
-	  - Business function abstraction (telemetry, commands, data storage)
-	  - Device-to-function mapping (which sensor provides which telemetry)
-	  - Application-level APIs (hide hardware complexity)
-	  - Configuration management (device tables, parameter sets)
+	  - Business function metadata containers
+	  - Application-level mapping table access
+	  - Separation between product configuration and core middleware logic
+	  - Query-only configuration management
 
 	  Architecture:
-	  Applications use ACONFIG APIs to access business functions without
-	  knowing the underlying hardware details. ACONFIG translates business
-	  requests into PDL peripheral operations.
+	  Products compile a concrete g_aconfig_table into the ACONFIG component
+	  through ACONFIG_EXTRA_SRCS. Runtime code queries that table through
+	  ACONFIG_GetTable(); it does not register, unregister, reload, or mutate
+	  ACONFIG data through core APIs.
 
-	  Example:
-	  - Application: "Reset controller #1"
-	  - ACONFIG: Maps the command to MCU index 0, command 0x01
-	  - PDL: Sends the controller command through the MCU driver
-	  - HAL: Performs low-level CAN communication
-
-	  Memory footprint: ~20KB code + configuration tables
+	  Memory footprint: small code footprint + product configuration tables
 
 	  Use cases:
-	  - Complex systems with many devices
-	  - Applications that need hardware abstraction
-	  - Systems with configurable device mappings
+	  - Fixed application-level mapping tables
+	  - Products that need a core-owned query API over product metadata
+	  - Systems where configuration is generated or compiled at build time
 
 	  Dependencies: OSAL
 
 	  Note: Enable OSAL first in "Core Modules" menu.
-	  ACONFIG provides configuration management only. Runtime data
-	  caching (telemetry cache) is provided by the separate TM_CACHE module.
+	  ACONFIG provides configuration query only. Runtime data caching
+	  (telemetry cache) belongs in a separate module.
 
 	  Recommended: Enable for application-level development
 
@@ -66,13 +61,10 @@ config ACONFIG_BUILD_SHARED
 	  Build ACONFIG as a shared library (libaconfig.so).
 
 	  Shared library advantages:
-	  - Can update device mappings without recompiling apps
 	  - Smaller executable size
 	  - Code sharing between processes
 
-	  Use cases:
-	  - Systems with multiple applications using ACONFIG
-	  - Field-updatable device configurations
+	  Note: configuration data is still read-only from ACONFIG's public API.
 
 	  Recommended: Enable for multi-application systems
 
@@ -85,28 +77,16 @@ config ACONFIG_MAX_DEVICES
 	default 64
 	range 1 256
 	help
-	  Maximum number of devices that can be configured in ACONFIG.
+	  Maximum number of devices described by the product ACONFIG table.
 
-	  This limits the size of the device configuration table.
-	  Each device entry contains mapping information (device ID,
-	  peripheral type, channel, parameters, etc.).
-
-	  Memory impact: ~64 bytes per device slot
-	  Total memory: ACONFIG_MAX_DEVICES × 64 bytes
+	  This value is available to product configuration sources that size
+	  generated mapping tables.
 
 	  Recommended values:
-	  - RTOS Minimal: 8-16 devices (~1KB)
-	  - Linux Minimal: 32 devices (~2KB)
-	  - Linux Standard: 64 devices (~4KB)
-	  - Linux Full: 128-256 devices (~8-16KB)
-
-	  Examples:
-	  - Simple sensor node: 8-16 devices
-	  - Standard payload: 32-64 devices
-	  - Complex industrial system: 128-256 devices
-
-	  Note: Set this to the maximum number of physical devices
-	  (controllers, switches, endpoints, etc.) your system will manage.
+	  - RTOS Minimal: 8-16 devices
+	  - Linux Minimal: 32 devices
+	  - Linux Standard: 64 devices
+	  - Linux Full: 128-256 devices
 
 endmenu
 

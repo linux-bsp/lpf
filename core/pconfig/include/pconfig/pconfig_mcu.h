@@ -12,8 +12,6 @@
 #ifndef PCONFIG_MCU_H
 #define PCONFIG_MCU_H
 
-#include <stdint.h>
-#include <stdbool.h>
 #include "pconfig_common.h"
 
 /*===========================================================================
@@ -96,8 +94,8 @@ typedef struct {
 	pconfig_mcu_config_t config;        /* MCU配置 */
 
 	/* GPIO控制（可选） */
-	pconfig_gpio_config_t *reset_gpio;  /* 复位GPIO */
-	pconfig_gpio_config_t *irq_gpio;    /* 中断GPIO */
+	const pconfig_gpio_config_t *reset_gpio;  /* 复位GPIO */
+	const pconfig_gpio_config_t *irq_gpio;    /* 中断GPIO */
 } pconfig_mcu_entry_t;
 
 #endif /* PCONFIG_MCU_H */

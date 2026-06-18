@@ -1,120 +1,26 @@
 /**
  * @file aconfig_api.c
  * @brief ACONFIG 层 API 实现 - 通用配置管理框架
- * @note 提供通用的配置注册和查询功能，不包含业务特定逻辑
+ * @note 提供通用的配置查询功能，不包含业务特定逻辑
  */
 
 #include "osal.h"
 #include "aconfig.h"
 
-/* 全局配置表 */
-static const aconfig_config_table_t *g_aconfig_table = NULL;
-
-/* 读写锁保护全局配置表（读多写少场景） */
-static osal_rwlock_t g_aconfig_rwlock = PTHREAD_RWLOCK_INITIALIZER;
-
-/**
- * @brief 初始化 ACONFIG 层
- */
-int32_t ACONFIG_init(void)
-{
-	g_aconfig_table = NULL;
-	LOG_INFO("ACONFIG", "Initialized (generic version)");
-	return OSAL_SUCCESS;
-}
-
-/**
- * @brief 清理 ACONFIG 层
- */
-void ACONFIG_cleanup(void)
-{
-	int32_t ret;
-
-	ret = OSAL_pthread_rwlock_wrlock(&g_aconfig_rwlock);
-	if (OSAL_SUCCESS == ret) {
-		g_aconfig_table = NULL;
-		OSAL_pthread_rwlock_unlock(&g_aconfig_rwlock);
-	}
-
-	LOG_INFO("ACONFIG", "Cleaned up");
-}
-
-/**
- * @brief 注册配置表
- */
-int32_t ACONFIG_register_table(const aconfig_config_table_t *table)
-{
-	int32_t ret;
-
-	if (NULL == table) {
-		LOG_ERROR("ACONFIG", "Invalid table pointer");
-		return OSAL_ERR_INVALID_POINTER;
-	}
-
-	if (NULL == table->name) {
-		LOG_ERROR("ACONFIG", "Table name is NULL");
-		return OSAL_ERR_INVALID_POINTER;
-	}
-
-	/* 获取写锁（独占访问） */
-	ret = OSAL_pthread_rwlock_wrlock(&g_aconfig_rwlock);
-	if (OSAL_SUCCESS != ret) {
-		LOG_ERROR("ACONFIG", "Failed to acquire write lock: %d", ret);
-		return ret;
-	}
-
-	if (NULL != g_aconfig_table) {
-		LOG_WARN("ACONFIG", "Table already registered, overwriting");
-	}
-
-	g_aconfig_table = table;
-
-	LOG_INFO("ACONFIG", "Registered table '%s'", table->name);
-
-	/* 释放写锁 */
-	OSAL_pthread_rwlock_unlock(&g_aconfig_rwlock);
-
-	return OSAL_SUCCESS;
-}
-
-/**
- * @brief 注销配置表
- */
-int32_t ACONFIG_unregister_table(void)
-{
-	int32_t ret;
-
-	ret = OSAL_pthread_rwlock_wrlock(&g_aconfig_rwlock);
-	if (OSAL_SUCCESS != ret) {
-		LOG_ERROR("ACONFIG", "Failed to acquire write lock: %d", ret);
-		return ret;
-	}
-
-	if (NULL == g_aconfig_table) {
-		LOG_WARN("ACONFIG", "No table registered");
-		OSAL_pthread_rwlock_unlock(&g_aconfig_rwlock);
-		return OSAL_ERR_NAME_NOT_FOUND;
-	}
-
-	LOG_INFO("ACONFIG", "Unregistered table '%s'", g_aconfig_table->name);
-	g_aconfig_table = NULL;
-
-	OSAL_pthread_rwlock_unlock(&g_aconfig_rwlock);
-
-	return OSAL_SUCCESS;
-}
+__attribute__((weak)) const aconfig_config_table_t g_aconfig_table = {
+	.name = NULL,
+	.function_map = NULL,
+	.user_data = NULL
+};
 
 /**
  * @brief 获取当前配置表
  */
 const aconfig_config_table_t* ACONFIG_GetTable(void)
 {
-	const aconfig_config_table_t *table = NULL;
-
-	if (OSAL_SUCCESS == OSAL_pthread_rwlock_rdlock(&g_aconfig_rwlock)) {
-		table = g_aconfig_table;
-		OSAL_pthread_rwlock_unlock(&g_aconfig_rwlock);
+	if (NULL == g_aconfig_table.name) {
+		return NULL;
 	}
 
-	return table;
+	return &g_aconfig_table;
 }

@@ -5,32 +5,34 @@ menuconfig PCONFIG
 	default n
 	depends on OSAL && HAL
 	help
-	  Peripheral Configuration Library provides device-tree-like hardware
-	  configuration management.
+	  Peripheral Configuration Library provides read-only access to
+	  product-defined hardware configuration tables.
 
-	  PCONFIG acts as a hardware abstraction layer that describes the physical
-	  hardware configuration of a platform (board variant, peripheral
-	  connections, pin mappings, etc.) in a structured, data-driven way.
+	  PCONFIG describes the physical hardware configuration of a platform
+	  (board variant, peripheral connections, pin mappings, etc.) in a
+	  structured, data-driven way.
 
 	  Key features:
 	  - Platform-specific hardware descriptions
-	  - Board variant management (e.g., H200_100P_V1, H200_100P_V2)
+	  - Board variant tables compiled in by the product
 	  - Peripheral configuration tables
-	  - Runtime hardware detection and configuration
+	  - Query-only platform configuration API
 
-	  Memory footprint: ~10KB code + configuration data (varies by platform)
+	  Memory footprint: small code footprint + product configuration data
 
 	  Use cases:
-	  - Multi-board product variants
-	  - Hardware abstraction for applications
-	  - Runtime board identification
-	  - Peripheral auto-configuration
+	  - Fixed product hardware descriptions
+	  - Multi-board product variants selected at build time
+	  - Hardware abstraction for applications and PDL
+	  - Peripheral lookup by index or platform/product name
 
-	  Dependencies: OSAL (for basic services), HAL (for hardware access)
+	  Dependencies: OSAL (for basic services), HAL (for hardware types/users)
 
-	  Note: Enable OSAL, HAL, and TYPES first in "Core Modules" menu.
+	  Note: Enable OSAL and HAL first in "Core Modules" menu.
+	  Runtime code must not register, reload, switch, or mutate PCONFIG data
+	  through core APIs.
 
-	  Recommended: Enable for products with multiple hardware variants
+	  Recommended: Enable for products with hardware configuration tables
 
 	  If unsure, say Y.
 
@@ -58,13 +60,10 @@ config PCONFIG_BUILD_SHARED
 	  Build PCONFIG as a shared library (libpconfig.so).
 
 	  Shared library advantages:
-	  - Can update hardware configurations without recompiling apps
 	  - Smaller executable size
 	  - Code sharing between processes
 
-	  Use cases:
-	  - Systems with multiple applications using PCONFIG
-	  - Field-updatable hardware configurations
+	  Note: configuration data is still read-only from PCONFIG's public API.
 
 	  Recommended: Enable for multi-application systems
 

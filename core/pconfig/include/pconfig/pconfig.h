@@ -2,9 +2,8 @@
  * PCONFIG 对外 API
  *
  * 功能：
- * - 硬件配置注册和查询（以外设为单位）
- * - 配置验证和加载
- * - 运行时配置切换
+ * - 硬件配置只读查询（以外设为单位）
+ * - 配置验证和调试打印
  *
  * 命名规范：
  * - PCONFIG_*      - 通用接口
@@ -24,34 +23,20 @@
 #include "pconfig_platform.h"  /* 板级配置类型 */
 
 /*===========================================================================
- * 配置库初始化
+ * 产品配置入口
  *===========================================================================*/
 
 /**
- * @brief 初始化硬件配置库
+ * @brief 产品层提供的只读平台配置表
  *
- * @return OSAL_SUCCESS 成功
+ * 产品或测试目标通过 PCONFIG_EXTRA_SRCS 编译进该符号。PCONFIG 只读取该表，
+ * 不在运行期注册、切换或释放配置。
  */
-int32_t PCONFIG_init(void);
-
-/**
- * @brief 清理硬件配置库
- */
-void PCONFIG_cleanup(void);
+extern const pconfig_platform_table_t g_pconfig_platform_table;
 
 /*===========================================================================
- * 板级配置注册和查询
+ * 板级配置查询
  *===========================================================================*/
-
-/**
- * @brief 注册平台配置
- *
- * @param[in] config 平台配置指针
- *
- * @return OSAL_SUCCESS 成功
- * @return OSAL_ERR_GENERIC 失败
- */
-int32_t PCONFIG_register(const pconfig_platform_config_t *config);
 
 /**
  * @brief 获取当前平台配置
@@ -61,21 +46,11 @@ int32_t PCONFIG_register(const pconfig_platform_config_t *config);
 const pconfig_platform_config_t* PCONFIG_GetBoard(void);
 
 /**
- * @brief 设置当前平台配置
- *
- * @param[in] config 已注册的平台配置指针
- *
- * @return OSAL_SUCCESS 成功
- * @return OSAL_ERR_GENERIC 失败
- */
-int32_t PCONFIG_SetBoard(const pconfig_platform_config_t *config);
-
-/**
  * @brief 根据平台和产品名称查找配置
  *
  * @param[in] platform 平台名称（如"ti/am625"）
  * @param[in] product 产品名称（如"framework"）
- * @param[in] version 版本号（如"v1.0"，可选）
+ * @param[in] version 版本号（如"v1.0"，当前未使用）
  *
  * @return 平台配置指针，失败返回NULL
  */
@@ -84,7 +59,7 @@ const pconfig_platform_config_t* PCONFIG_Find(const char *platform,
 					    const char *version);
 
 /**
- * @brief 列出所有已注册的配置
+ * @brief 列出所有配置
  *
  * @param[out] configs 配置列表
  * @param[in,out] count 输入：缓冲区大小，输出：实际数量

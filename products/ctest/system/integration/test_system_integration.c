@@ -24,6 +24,7 @@
 #define TEST_PCONFIG_PROJECT      "ctest"
 #define TEST_PCONFIG_PRODUCT      "middleware"
 #define TEST_PCONFIG_MCU_NAME     "mcu0"
+#define TEST_PCONFIG_SERIAL_LINK   "/tmp/es_middleware_ctest_mcu0"
 
 #define TEST_RESPONSE_TAG         0x55
 #define TEST_RESPONSE_PREFIX      0xAA
@@ -36,10 +37,6 @@ static bool g_responder_running = false;
 static bool g_responder_ready = false;
 static osal_mutex_t g_responder_mutex;
 static osal_cond_t g_responder_cond;
-
-static pconfig_mcu_entry_t g_mcu_entries[1];
-static pconfig_platform_config_t g_platform_config;
-static aconfig_config_table_t g_aconfig_table;
 
 static const uint8_t g_test_payload[] = {0x10, 0x20, 0x30, 0x40};
 
@@ -87,31 +84,15 @@ static void destroy_pty_pair(void)
 	}
 }
 
-static void build_platform_config(void)
+static int32_t bind_test_serial_device(void)
 {
-	OSAL_memset(&g_mcu_entries, 0, sizeof(g_mcu_entries));
-	OSAL_memset(&g_platform_config, 0, sizeof(g_platform_config));
+	(void)OSAL_unlink(TEST_PCONFIG_SERIAL_LINK);
 
-	g_mcu_entries[0].description = "PTY-backed MCU";
-	g_mcu_entries[0].enabled = true;
-	OSAL_strncpy(g_mcu_entries[0].config.name, TEST_PCONFIG_MCU_NAME,
-			     OSAL_sizeof(g_mcu_entries[0].config.name) - 1);
-	g_mcu_entries[0].config.interface = PCONFIG_MCU_INTERFACE_SERIAL;
-	g_mcu_entries[0].config.hw.serial.device = g_pty_slave_name;
-	g_mcu_entries[0].config.hw.serial.baudrate = TEST_UART_BAUDRATE;
-	g_mcu_entries[0].config.hw.serial.data_bits = TEST_UART_DATA_BITS;
-	g_mcu_entries[0].config.hw.serial.stop_bits = TEST_UART_STOP_BITS;
-	g_mcu_entries[0].config.hw.serial.parity = PCONFIG_MCU_PARITY_NONE;
-	g_mcu_entries[0].config.hw.serial.flow_control = PCONFIG_MCU_FLOW_NONE;
-	g_mcu_entries[0].config.cmd_timeout_ms = TEST_RESPONSE_TIMEOUT_MS;
-	g_mcu_entries[0].config.retry_count = 0;
+	if (0 != OSAL_symlink(g_pty_slave_name, TEST_PCONFIG_SERIAL_LINK)) {
+		return OSAL_ERR_GENERIC;
+	}
 
-	g_platform_config.platform_name = TEST_PCONFIG_PLATFORM;
-	g_platform_config.chip_name = TEST_PCONFIG_CHIP;
-	g_platform_config.project_name = TEST_PCONFIG_PROJECT;
-	g_platform_config.product_name = TEST_PCONFIG_PRODUCT;
-	g_platform_config.mcu_count = 1;
-	g_platform_config.mcu_array = g_mcu_entries;
+	return OSAL_SUCCESS;
 }
 
 static void* pty_responder_thread(void *arg)
@@ -139,7 +120,7 @@ static void* pty_responder_thread(void *arg)
 			continue;
 		}
 
-		osal_ssize_t rx_len = OSAL_read(g_pty_master_fd, rx_buffer, sizeof(rx_buffer));
+		osal_ssize_t rx_len = OSAL_read(g_pty_master_fd, rx_buffer, OSAL_sizeof(rx_buffer));
 		if (rx_len <= 0) {
 			continue;
 		}
@@ -149,14 +130,14 @@ static void* pty_responder_thread(void *arg)
 		decode_ctx.buffer = rx_buffer;
 		decode_ctx.buffer_len = (size_t)rx_len;
 		decode_ctx.payload = tx_buffer;
-		decode_ctx.payload_size = sizeof(tx_buffer);
+		decode_ctx.payload_size = OSAL_sizeof(tx_buffer);
 		if (prl_device_decode(&decode_ctx) != OSAL_SUCCESS) {
 			continue;
 		}
 
 		uint8_t payload[16];
 		uint32_t payload_len = 0;
-		OSAL_memset(payload, 0, sizeof(payload));
+		OSAL_memset(payload, 0, OSAL_sizeof(payload));
 
 		switch (decode_ctx.msg_type) {
 		case PRL_MCU_MSG_GET_VERSION:
@@ -207,7 +188,7 @@ static void* pty_responder_thread(void *arg)
 		encode_ctx.payload = payload;
 		encode_ctx.payload_len = (uint16_t)payload_len;
 		encode_ctx.buffer = tx_buffer;
-		encode_ctx.buffer_size = sizeof(tx_buffer);
+		encode_ctx.buffer_size = OSAL_sizeof(tx_buffer);
 
 		int encoded_len = prl_device_encode(&encode_ctx);
 		if (encoded_len > 0) {
@@ -242,50 +223,8 @@ static void setup_full_stack(void)
 		return;
 	}
 
-	build_platform_config();
-
-	ret = PCONFIG_init();
+	ret = bind_test_serial_device();
 	if (ret != OSAL_SUCCESS) {
-		destroy_pty_pair();
-		OSAL_pthread_cond_destroy(&g_responder_cond);
-		OSAL_pthread_mutex_destroy(&g_responder_mutex);
-		return;
-	}
-
-	ret = PCONFIG_register(&g_platform_config);
-	if (ret != OSAL_SUCCESS) {
-		PCONFIG_cleanup();
-		destroy_pty_pair();
-		OSAL_pthread_cond_destroy(&g_responder_cond);
-		OSAL_pthread_mutex_destroy(&g_responder_mutex);
-		return;
-	}
-
-	ret = PCONFIG_SetBoard(&g_platform_config);
-	if (ret != OSAL_SUCCESS) {
-		PCONFIG_cleanup();
-		destroy_pty_pair();
-		OSAL_pthread_cond_destroy(&g_responder_cond);
-		OSAL_pthread_mutex_destroy(&g_responder_mutex);
-		return;
-	}
-
-	ret = ACONFIG_init();
-	if (ret != OSAL_SUCCESS) {
-		PCONFIG_cleanup();
-		destroy_pty_pair();
-		OSAL_pthread_cond_destroy(&g_responder_cond);
-		OSAL_pthread_mutex_destroy(&g_responder_mutex);
-		return;
-	}
-
-	g_aconfig_table.name = "system_integration";
-	g_aconfig_table.function_map = NULL;
-	g_aconfig_table.user_data = &g_platform_config;
-	ret = ACONFIG_register_table(&g_aconfig_table);
-	if (ret != OSAL_SUCCESS) {
-		ACONFIG_cleanup();
-		PCONFIG_cleanup();
 		destroy_pty_pair();
 		OSAL_pthread_cond_destroy(&g_responder_cond);
 		OSAL_pthread_mutex_destroy(&g_responder_mutex);
@@ -294,8 +233,7 @@ static void setup_full_stack(void)
 
 	ret = PRL_init();
 	if (ret != OSAL_SUCCESS) {
-		ACONFIG_cleanup();
-		PCONFIG_cleanup();
+		OSAL_unlink(TEST_PCONFIG_SERIAL_LINK);
 		destroy_pty_pair();
 		OSAL_pthread_cond_destroy(&g_responder_cond);
 		OSAL_pthread_mutex_destroy(&g_responder_mutex);
@@ -307,8 +245,7 @@ static void setup_full_stack(void)
 	if (ret != OSAL_SUCCESS) {
 		g_responder_running = false;
 		PRL_deinit();
-		ACONFIG_cleanup();
-		PCONFIG_cleanup();
+		OSAL_unlink(TEST_PCONFIG_SERIAL_LINK);
 		destroy_pty_pair();
 		OSAL_pthread_cond_destroy(&g_responder_cond);
 		OSAL_pthread_mutex_destroy(&g_responder_mutex);
@@ -331,9 +268,7 @@ static void teardown_full_stack(void)
 	(void)OSAL_pthread_join(g_responder_thread, NULL);
 
 	PRL_deinit();
-	ACONFIG_unregister_table();
-	ACONFIG_cleanup();
-	PCONFIG_cleanup();
+	OSAL_unlink(TEST_PCONFIG_SERIAL_LINK);
 	destroy_pty_pair();
 	OSAL_pthread_cond_destroy(&g_responder_cond);
 	OSAL_pthread_mutex_destroy(&g_responder_mutex);
@@ -355,7 +290,7 @@ static void test_full_stack_configuration_path(void)
 	TEST_ASSERT_EQUAL_STRING(TEST_PCONFIG_PLATFORM, board->platform_name);
 	TEST_ASSERT_EQUAL_STRING(TEST_PCONFIG_PRODUCT, board->product_name);
 	TEST_ASSERT_EQUAL(1u, board->mcu_count);
-	TEST_ASSERT_TRUE(table->user_data == &g_platform_config);
+	TEST_ASSERT_EQUAL_STRING("ctest_aconfig", table->name);
 
 	ret = PDL_MCU_init(0, &handle);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
@@ -372,7 +307,7 @@ static void test_full_stack_configuration_path(void)
 	TEST_ASSERT_TRUE(status.state == PDL_MCU_STATE_READY);
 	TEST_ASSERT_TRUE(status.error_code == 0);
 
-	ret = PDL_MCU_send_command(handle, 0x42, g_test_payload, sizeof(g_test_payload), response, sizeof(response), &response_len);
+	ret = PDL_MCU_send_command(handle, 0x42, g_test_payload, OSAL_sizeof(g_test_payload), response, OSAL_sizeof(response), &response_len);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	TEST_ASSERT_TRUE(response_len >= 2);
 	TEST_ASSERT_EQUAL(TEST_RESPONSE_PREFIX, response[0]);
@@ -398,7 +333,7 @@ static void test_full_stack_repeated_roundtrip(void)
 		ret = PDL_MCU_reset(handle);
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-		ret = PDL_MCU_send_command(handle, (uint8_t)(0x21 + i), NULL, 0, response, sizeof(response), &response_len);
+		ret = PDL_MCU_send_command(handle, (uint8_t)(0x21 + i), NULL, 0, response, OSAL_sizeof(response), &response_len);
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 		TEST_ASSERT_TRUE(response_len >= 2);
 	}
