@@ -84,6 +84,5 @@ install_module_headers(OSAL "core/user/osal")
 install_module_headers(ACONFIG "core/user/aconfig")
 install_module_headers(PDI "core/user/pdi")
 install_header_tree(PDI "core/uapi")
-install_module_headers(PRL "core/prl")
 
 message(STATUS "Headers installation complete")

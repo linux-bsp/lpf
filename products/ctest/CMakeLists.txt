@@ -29,6 +29,12 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/TestDiscovery.cmake)
 # source hooks.
 
 set(CTEST_CONFIG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/config)
+set(CTEST_ENABLE_LEGACY_PDL_TESTS OFF)
+
+if(CONFIG_TEST_PDL OR CONFIG_TEST_PERFORMANCE_PDL OR CONFIG_TEST_STRESS_PDL OR
+   CONFIG_TEST_SYSTEM_PDL OR CONFIG_TEST_INTEGRATION)
+    message(STATUS "Skipping legacy PDL ctest sources; PDL is now kernel PDM and needs PDI/ioctl tests")
+endif()
 
 if(CONFIG_PCONFIG)
     set(PCONFIG_EXTRA_SRCS ${CTEST_CONFIG_DIR}/ctest_pconfig.c)
@@ -62,7 +68,7 @@ if(CONFIG_PDI AND NOT TARGET pdi)
 endif()
 
 if(CONFIG_PRL AND NOT TARGET prl)
-    add_subdirectory(${SDK_PATH}/core/prl ${CMAKE_CURRENT_BINARY_DIR}/prl)
+    add_subdirectory(${SDK_PATH}/core/kernel/prl ${CMAKE_CURRENT_BINARY_DIR}/prl)
 endif()
 
 if(CONFIG_ACONFIG AND NOT TARGET aconfig)
@@ -76,7 +82,7 @@ endif()
 # Register UTEST module from core (same pattern as other core modules)
 
 if(CONFIG_TEST_FRAMEWORK AND NOT TARGET test_framework)
-    add_subdirectory(${SDK_PATH}/core/test_framework ${CMAKE_CURRENT_BINARY_DIR}/test_framework)
+    add_subdirectory(${SDK_PATH}/core/user/test_framework ${CMAKE_CURRENT_BINARY_DIR}/test_framework)
 endif()
 
 # ============================================================================
@@ -101,18 +107,19 @@ endif()
 # Add include directories for test cases
 target_include_directories(es-middleware-test PRIVATE
     ${SDK_PATH}/core/user/osal/include/osal
+    ${SDK_PATH}/core/kernel/include
     ${SDK_PATH}/core/kernel/include/hal
     ${SDK_PATH}/core/kernel/include/pconfig
     ${SDK_PATH}/core/user/pdi/include/pdi
     ${SDK_PATH}/core/uapi
-    ${SDK_PATH}/core/prl/include/prl
+    ${SDK_PATH}/core/kernel/include/prl
     ${SDK_PATH}/core/user/aconfig/include/aconfig
 )
 
 # Add test framework headers if enabled
 if(CONFIG_TEST_FRAMEWORK)
     target_include_directories(es-middleware-test PRIVATE
-        ${SDK_PATH}/core/test_framework/include/test_framework
+        ${SDK_PATH}/core/user/test_framework/include/test_framework
     )
 endif()
 
@@ -154,7 +161,7 @@ if(CONFIG_TEST_UNIT)
     endif()
 
     # PDL Unit Tests - Auto-discover all test_pdl_*.c files
-    if(CONFIG_TEST_PDL)
+    if(CONFIG_TEST_PDL AND CTEST_ENABLE_LEGACY_PDL_TESTS)
         test_discover_and_add(
             TARGET es-middleware-test
             DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/unit/pdl
@@ -222,7 +229,7 @@ if(CONFIG_TEST_PERFORMANCE)
     endif()
 
     # PDL Performance Tests - Auto-discover all test_perf_pdl_*.c files
-    if(CONFIG_TEST_PERFORMANCE_PDL)
+    if(CONFIG_TEST_PERFORMANCE_PDL AND CTEST_ENABLE_LEGACY_PDL_TESTS)
         test_discover_and_add(
             TARGET es-middleware-test
             DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/performance/pdl
@@ -281,7 +288,7 @@ if(CONFIG_TEST_STRESS)
     endif()
 
     # PDL Stress Tests - Auto-discover all test_stress_pdl_*.c files
-    if(CONFIG_TEST_STRESS_PDL)
+    if(CONFIG_TEST_STRESS_PDL AND CTEST_ENABLE_LEGACY_PDL_TESTS)
         test_discover_and_add(
             TARGET es-middleware-test
             DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/stress/pdl
@@ -378,7 +385,7 @@ if(CONFIG_TEST_SYSTEM)
     endif()
 
     # PDL System Tests - Auto-discover all test_system_pdl_*.c files
-    if(CONFIG_TEST_SYSTEM_PDL)
+    if(CONFIG_TEST_SYSTEM_PDL AND CTEST_ENABLE_LEGACY_PDL_TESTS)
         test_discover_and_add(
             TARGET es-middleware-test
             DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/system/pdl
@@ -418,7 +425,7 @@ if(CONFIG_TEST_SYSTEM)
     endif()
 
     # Integration Tests - Auto-discover all test_system_integration_*.c files
-    if(CONFIG_TEST_INTEGRATION)
+    if(CONFIG_TEST_INTEGRATION AND CTEST_ENABLE_LEGACY_PDL_TESTS)
         test_discover_and_add(
             TARGET es-middleware-test
             DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/system/integration

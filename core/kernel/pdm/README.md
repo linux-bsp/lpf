@@ -25,15 +25,16 @@ CONFIG_PDM_MCU_UART_SUPPORT=y
 core/kernel/pdm/
 ├── Config.in
 ├── CMakeLists.txt
-├── include/pdm/
-│   ├── pdm.h
-│   └── pdm_mcu.h
 └── src/pdm_mcu/
     ├── Config.in
     ├── pdm_mcu.c
     ├── pdm_mcu_can.c
     ├── pdm_mcu_serial.c
     └── pdm_mcu_internal.h
+
+core/kernel/include/pdm/
+├── pdm.h
+└── pdm_mcu.h
 ```
 
 ## Layering

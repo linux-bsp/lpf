@@ -115,10 +115,10 @@ if(CONFIG_LINUX_ONLY)
     message(STATUS "Building Linux-only core modules")
 
     _es_middleware_add_core_component(CONFIG_OSAL osal user/osal)
-    _es_middleware_add_core_component(CONFIG_PRL prl prl)
+    _es_middleware_add_core_component(CONFIG_PRL prl kernel/prl)
     _es_middleware_add_core_component(CONFIG_PDI pdi user/pdi)
     _es_middleware_add_core_component(CONFIG_ACONFIG aconfig user/aconfig)
-    _es_middleware_add_core_component(CONFIG_TEST_FRAMEWORK test_framework test_framework)
+    _es_middleware_add_core_component(CONFIG_TEST_FRAMEWORK test_framework user/test_framework)
 endif()
 
 # ==============================================================================

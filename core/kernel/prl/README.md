@@ -24,16 +24,17 @@ CONFIG_PRL_SEQUENCE_CHECK=y
 ## Layout
 
 ```text
-core/prl/
+core/kernel/prl/
 ├── Config.in
 ├── CMakeLists.txt
-├── include/prl/
-│   ├── prl.h
-│   ├── prl_common.h
-│   ├── prl_device.h
-│   └── prl_mcu.h
 └── src/
     ├── prl_api.c
     ├── prl_common.c
     └── prl_device.c
+
+core/kernel/include/prl/
+├── prl.h
+├── prl_common.h
+├── prl_device.h
+└── prl_mcu.h
 ```

@@ -13,12 +13,15 @@ core/
       hal/           # kernel-side cross-module HAL headers
       pconfig/       # kernel-side cross-module PConfig headers
       pdm/           # kernel-side cross-module PDM headers
+      prl/           # kernel-side cross-module protocol headers
     osal/
       src/           # builds osal.ko
     hal/
       src/           # kernel-only hardware access implementation
     pconfig/
       src/           # kernel-side configuration implementation
+    prl/
+      src/           # kernel-side protocol layer implementation
     pdm/
       src/           # builds pdm.ko, owns ioctl dispatch
 
@@ -26,6 +29,7 @@ core/
     osal/            # userspace OSAL library
     aconfig/         # userspace application configuration
     pdi/             # userspace API library for PDM
+    test_framework/  # userspace-only test support library
 
   uapi/
     pdi/             # ioctl ABI shared by PDM and PDI
@@ -39,7 +43,9 @@ core/
 - `core/kernel/hal` provides kernel-only hardware access used by PDM.
 - `core/kernel/pconfig` provides kernel-side platform/product configuration used
   by PDM and HAL.
+- `core/kernel/prl` provides kernel-side protocol processing used by PDM.
 - `core/user/pdi` provides the application-facing C API and wraps open/ioctl.
+- `core/user/test_framework` provides userspace-only test infrastructure.
 - `core/uapi/pdi` is the stable ABI shared by `core/kernel/pdm` and
   `core/user/pdi`.
 
