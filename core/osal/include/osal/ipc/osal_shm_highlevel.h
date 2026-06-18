@@ -44,8 +44,8 @@ typedef int32_t osal_shm_t;
  * @return OSAL_SUCCESS 成功
  * @return 其他值 失败
  */
-int32_t OSAL_ShmCreate(const char *name, osal_size_t size, int32_t flags,
-					   osal_shm_t *shm);
+int32_t osal_shm_create(const char *name, osal_size_t size, int32_t flags,
+						osal_shm_t *shm);
 
 /**
  * @brief 映射共享内存到进程地址空间
@@ -58,8 +58,8 @@ int32_t OSAL_ShmCreate(const char *name, osal_size_t size, int32_t flags,
  * @return OSAL_SUCCESS 成功
  * @return 其他值 失败
  */
-int32_t OSAL_ShmMap(osal_shm_t shm, osal_off_t offset, osal_size_t length,
-					int32_t flags, void **addr);
+int32_t osal_shm_map(osal_shm_t shm, osal_off_t offset, osal_size_t length,
+					 int32_t flags, void **addr);
 
 /**
  * @brief 解除共享内存映射
@@ -69,7 +69,7 @@ int32_t OSAL_ShmMap(osal_shm_t shm, osal_off_t offset, osal_size_t length,
  * @return OSAL_SUCCESS 成功
  * @return 其他值 失败
  */
-int32_t OSAL_ShmUnmap(void *addr, osal_size_t length);
+int32_t osal_shm_unmap(void *addr, osal_size_t length);
 
 /**
  * @brief 关闭共享内存句柄
@@ -78,7 +78,7 @@ int32_t OSAL_ShmUnmap(void *addr, osal_size_t length);
  * @return OSAL_SUCCESS 成功
  * @return 其他值 失败
  */
-int32_t OSAL_ShmClose(osal_shm_t shm);
+int32_t osal_shm_close(osal_shm_t shm);
 
 /**
  * @brief 删除共享内存对象
@@ -87,7 +87,7 @@ int32_t OSAL_ShmClose(osal_shm_t shm);
  * @return OSAL_SUCCESS 成功
  * @return 其他值 失败
  */
-int32_t OSAL_ShmUnlink(const char *name);
+int32_t osal_shm_remove(const char *name);
 
 #ifdef __cplusplus
 }

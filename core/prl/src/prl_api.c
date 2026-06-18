@@ -13,23 +13,23 @@ static bool g_prl_initialized = false;
 
 /* Secondary API functions */
 
-bool PRL_IsDeviceTypeValid(uint8_t dev_type)
+bool prl_is_device_type_valid(uint8_t dev_type)
 {
 	return prl_device_type_valid(dev_type);
 }
 
-const char *PRL_GetDeviceTypeName(uint8_t dev_type)
+const char *prl_get_device_type_name(uint8_t dev_type)
 {
 	return prl_device_type_name(dev_type);
 }
 
-const char *PRL_GetErrorString(int error_code)
+const char *prl_get_error_string(int error_code)
 {
 	/* 现在使用 OSAL 错误码，直接返回 OSAL 错误描述 */
-	return OSAL_get_status_name(error_code);
+	return osal_get_status_name(error_code);
 }
 
-void PRL_get_version(uint8_t *major, uint8_t *minor)
+void prl_get_version(uint8_t *major, uint8_t *minor)
 {
 	if (major) {
 		*major = PRL_VERSION_MAJOR;
@@ -39,21 +39,21 @@ void PRL_get_version(uint8_t *major, uint8_t *minor)
 	}
 }
 
-void PRL_reset_sequence(uint32_t seq)
+void prl_reset_sequence(uint32_t seq)
 {
 	extern osal_atomic_uint32_t g_seq_number; /* 定义在 prl_common.c */
-	OSAL_atomic_store(&g_seq_number, seq);
+	osal_atomic_store(&g_seq_number, seq);
 }
 
-uint32_t PRL_GetCurrentSequence(void)
+uint32_t prl_get_current_sequence(void)
 {
 	extern osal_atomic_uint32_t g_seq_number;
-	return OSAL_atomic_load(&g_seq_number);
+	return osal_atomic_load(&g_seq_number);
 }
 
 /* Initialization and cleanup functions */
 
-int PRL_init(void)
+int prl_init(void)
 {
 	if (g_prl_initialized) {
 		return OSAL_SUCCESS;
@@ -66,7 +66,7 @@ int PRL_init(void)
 	return OSAL_SUCCESS;
 }
 
-int PRL_deinit(void)
+int prl_deinit(void)
 {
 	if (!g_prl_initialized) {
 		return OSAL_SUCCESS;

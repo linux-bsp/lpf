@@ -10,12 +10,12 @@
  * fd_set操作实现
  *===========================================================================*/
 
-void OSAL_FD_ZERO(osal_fd_set_t *set)
+void osal_fd_zero(osal_fd_set_t *set)
 {
 	memset(set, 0, OSAL_sizeof(osal_fd_set_t));
 }
 
-void OSAL_FD_SET(int32_t fd, osal_fd_set_t *set)
+void osal_fd_set(int32_t fd, osal_fd_set_t *set)
 {
 	if (fd >= 0 && fd < OSAL_FD_SETSIZE) {
 		set->fds_bits[fd / OSAL_FD_BITS_PER_WORD] |=
@@ -23,7 +23,7 @@ void OSAL_FD_SET(int32_t fd, osal_fd_set_t *set)
 	}
 }
 
-void OSAL_FD_CLR(int32_t fd, osal_fd_set_t *set)
+void osal_fd_clr(int32_t fd, osal_fd_set_t *set)
 {
 	if (fd >= 0 && fd < OSAL_FD_SETSIZE) {
 		set->fds_bits[fd / OSAL_FD_BITS_PER_WORD] &=
@@ -31,7 +31,7 @@ void OSAL_FD_CLR(int32_t fd, osal_fd_set_t *set)
 	}
 }
 
-int32_t OSAL_FD_ISSET(int32_t fd, const osal_fd_set_t *set)
+int32_t osal_fd_isset(int32_t fd, const osal_fd_set_t *set)
 {
 	if (fd >= 0 && fd < OSAL_FD_SETSIZE) {
 		return (set->fds_bits[fd / OSAL_FD_BITS_PER_WORD] &
@@ -46,7 +46,7 @@ int32_t OSAL_FD_ISSET(int32_t fd, const osal_fd_set_t *set)
  * select系统调用实现
  *===========================================================================*/
 
-int32_t OSAL_select(int32_t nfds, osal_fd_set_t *readfds,
+int32_t osal_select(int32_t nfds, osal_fd_set_t *readfds,
 					osal_fd_set_t *writefds, osal_fd_set_t *exceptfds,
 					osal_timeval_t *timeout)
 {
@@ -79,7 +79,7 @@ int32_t OSAL_select(int32_t nfds, osal_fd_set_t *readfds,
 	return result;
 }
 
-int32_t OSAL_pselect(int32_t nfds, osal_fd_set_t *readfds,
+int32_t osal_pselect(int32_t nfds, osal_fd_set_t *readfds,
 					 osal_fd_set_t *writefds, osal_fd_set_t *exceptfds,
 					 const osal_timespec_t *timeout, const void *sigmask)
 {

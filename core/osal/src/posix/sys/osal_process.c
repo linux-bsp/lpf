@@ -14,37 +14,42 @@
  * 基础进程控制函数（保持兼容）
  */
 
-void OSAL_exit(int32_t status)
+void osal_exit(int32_t status)
 {
 	exit(status);
 }
 
-osal_pid_t OSAL_getpid(void)
+osal_pid_t osal_getpid(void)
 {
 	return getpid();
 }
 
-osal_pid_t OSAL_getppid(void)
+osal_pid_t osal_getppid(void)
 {
 	return getppid();
 }
 
-void OSAL_abort(void)
+void osal_abort(void)
 {
 	abort();
 }
 
-osal_pid_t OSAL_fork(void)
+osal_pid_t osal_fork(void)
 {
 	return fork();
 }
 
-int32_t OSAL_execvp(const char *file, char *const argv[])
+int32_t osal_pipe(int32_t pipefd[2])
+{
+	return pipe(pipefd);
+}
+
+int32_t osal_execvp(const char *file, char *const argv[])
 {
 	return execvp(file, argv);
 }
 
-int32_t OSAL_waitpid(osal_pid_t pid, int32_t *status, int32_t options)
+int32_t osal_waitpid(osal_pid_t pid, int32_t *status, int32_t options)
 {
 	int wait_status;
 	int posix_options = 0;
@@ -72,6 +77,16 @@ int32_t OSAL_waitpid(osal_pid_t pid, int32_t *status, int32_t options)
 
 	/* result < 0: 错误 */
 	return -1;
+}
+
+int32_t osal_setpgid(osal_pid_t pid, osal_pid_t pgid)
+{
+	return setpgid(pid, pgid);
+}
+
+osal_pid_t osal_getpgid(osal_pid_t pid)
+{
+	return getpgid(pid);
 }
 
 /*

@@ -48,11 +48,11 @@ static int32_t spi_continuous_transfer_worker(void *user_data,
 	}
 
 	/* Perform transfer */
-	ret = HAL_SPI_transfer(ctx->handle, tx_buffer, rx_buffer,
+	ret = hal_spi_transfer(ctx->handle, tx_buffer, rx_buffer,
 						   SPI_STRESS_SMALL_BUF);
 	if (ret == OSAL_SUCCESS) {
-		OSAL_atomic_inc(ctx->transfer_counter);
-		OSAL_atomic_add(ctx->byte_counter, SPI_STRESS_SMALL_BUF);
+		osal_atomic_inc(ctx->transfer_counter);
+		osal_atomic_fetch_add(ctx->byte_counter, SPI_STRESS_SMALL_BUF);
 	}
 
 	return ret;
@@ -66,9 +66,10 @@ static void test_stress_spi_continuous_transfer(void)
 {
 	hal_spi_handle_t handle = NULL;
 	hal_spi_config_t config = { .device = SPI_STRESS_DEVICE,
-								.mode = HAL_SPI_MODE_0,
+								.mode = SPI_MODE_0,
 								.bits_per_word = 8,
-								.speed_hz = SPI_STRESS_SPEED_HZ };
+								.max_speed_hz = SPI_STRESS_SPEED_HZ,
+								.timeout = 1000 };
 	osal_atomic_uint32_t transfer_counter, byte_counter;
 	spi_worker_ctx_t worker_ctx;
 	stress_context_t *stress_ctx = NULL;
@@ -77,21 +78,21 @@ static void test_stress_spi_continuous_transfer(void)
 	int32_t ret;
 	uint64_t start_time, end_time;
 
-	OSAL_printf("[ INFO ] Starting SPI continuous transfer stress test\n");
-	OSAL_printf("         Duration: %u sec, Speed: %u Hz\n",
+	osal_printf("[ INFO ] Starting SPI continuous transfer stress test\n");
+	osal_printf("         Duration: %u sec, Speed: %u Hz\n",
 				SPI_STRESS_DURATION_SEC, SPI_STRESS_SPEED_HZ);
 
 	/* Open SPI device */
-	ret = HAL_SPI_open(&config, &handle);
+	ret = hal_spi_open(&config, &handle);
 	if (ret != OSAL_SUCCESS) {
-		OSAL_printf("[ SKIP ] SPI device not available\n");
+		osal_printf("[ SKIP ] SPI device not available\n");
 		TEST_SKIP("SPI device not available");
 		return;
 	}
 
 	/* Initialize counters */
-	OSAL_atomic_store(&transfer_counter, 0);
-	OSAL_atomic_store(&byte_counter, 0);
+	osal_atomic_store(&transfer_counter, 0);
+	osal_atomic_store(&byte_counter, 0);
 
 	/* Setup worker context */
 	worker_ctx.handle = handle;
@@ -110,26 +111,26 @@ static void test_stress_spi_continuous_transfer(void)
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* Wait for completion */
-	OSAL_usleep(SPI_STRESS_DURATION_SEC * 1000 + 1000 * 1000);
+	osal_usleep(SPI_STRESS_DURATION_SEC * 1000 + 1000 * 1000);
 	end_time = 0;
 
 	/* Print report */
 	stress_print_report(stress_ctx);
 
 	/* Calculate throughput */
-	uint64_t total_bytes = OSAL_atomic_load(&byte_counter);
-	uint64_t total_transfers = OSAL_atomic_load(&transfer_counter);
+	uint64_t total_bytes = osal_atomic_load(&byte_counter);
+	uint64_t total_transfers = osal_atomic_load(&transfer_counter);
 	uint64_t elapsed_ms = end_time - start_time;
 	double throughput_kbps =
 		(total_bytes * 8.0 / 1000.0) / (elapsed_ms / 1000.0);
 	double transfers_per_sec = (total_transfers * 1000.0) / elapsed_ms;
 
-	OSAL_printf("[ INFO ] Total transfers: %llu\n",
+	osal_printf("[ INFO ] Total transfers: %llu\n",
 				(unsigned long long)total_transfers);
-	OSAL_printf("[ INFO ] Total bytes: %llu\n",
+	osal_printf("[ INFO ] Total bytes: %llu\n",
 				(unsigned long long)total_bytes);
-	OSAL_printf("[ INFO ] Throughput: %.2f kbps\n", throughput_kbps);
-	OSAL_printf("[ INFO ] Transfers/sec: %.2f\n", transfers_per_sec);
+	osal_printf("[ INFO ] Throughput: %.2f kbps\n", throughput_kbps);
+	osal_printf("[ INFO ] Transfers/sec: %.2f\n", transfers_per_sec);
 
 	/* Verify operation */
 	TEST_ASSERT_TRUE(total_transfers > 0);
@@ -140,9 +141,9 @@ static void test_stress_spi_continuous_transfer(void)
 
 	/* Cleanup */
 	stress_context_destroy(stress_ctx);
-	HAL_SPI_close(handle);
+	hal_spi_close(handle);
 
-	OSAL_printf("[ PASS ] SPI continuous transfer stress test completed\n");
+	osal_printf("[ PASS ] SPI continuous transfer stress test completed\n");
 }
 
 /*===========================================================================
@@ -157,29 +158,30 @@ static void test_stress_spi_large_buffers(void)
 {
 	hal_spi_handle_t handle = NULL;
 	hal_spi_config_t config = { .device = SPI_STRESS_DEVICE,
-								.mode = HAL_SPI_MODE_0,
+								.mode = SPI_MODE_0,
 								.bits_per_word = 8,
-								.speed_hz = SPI_STRESS_SPEED_HZ };
+								.max_speed_hz = SPI_STRESS_SPEED_HZ,
+								.timeout = 1000 };
 	uint8_t *tx_buffer = NULL;
 	uint8_t *rx_buffer = NULL;
 	int32_t ret;
 	const uint32_t iterations = 10;
 
-	OSAL_printf("[ INFO ] Starting SPI large buffer stress test\n");
-	OSAL_printf("         Buffer size: %u bytes, Iterations: %u\n",
+	osal_printf("[ INFO ] Starting SPI large buffer stress test\n");
+	osal_printf("         Buffer size: %u bytes, Iterations: %u\n",
 				SPI_STRESS_HUGE_BUF, iterations);
 
 	/* Open SPI device */
-	ret = HAL_SPI_open(&config, &handle);
+	ret = hal_spi_open(&config, &handle);
 	if (ret != OSAL_SUCCESS) {
-		OSAL_printf("[ SKIP ] SPI device not available\n");
+		osal_printf("[ SKIP ] SPI device not available\n");
 		TEST_SKIP("SPI device not available");
 		return;
 	}
 
 	/* Allocate large buffers */
-	tx_buffer = OSAL_malloc(SPI_STRESS_HUGE_BUF);
-	rx_buffer = OSAL_malloc(SPI_STRESS_HUGE_BUF);
+	tx_buffer = osal_malloc(SPI_STRESS_HUGE_BUF);
+	rx_buffer = osal_malloc(SPI_STRESS_HUGE_BUF);
 	TEST_ASSERT_NOT_NULL(tx_buffer);
 	TEST_ASSERT_NOT_NULL(rx_buffer);
 
@@ -194,12 +196,12 @@ static void test_stress_spi_large_buffers(void)
 
 	for (uint32_t i = 0; i < iterations; i++) {
 		ret =
-			HAL_SPI_transfer(handle, tx_buffer, rx_buffer, SPI_STRESS_HUGE_BUF);
+			hal_spi_transfer(handle, tx_buffer, rx_buffer, SPI_STRESS_HUGE_BUF);
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 		total_bytes += SPI_STRESS_HUGE_BUF;
 
-		OSAL_printf("[ INFO ] Completed transfer %u/%u\n", i + 1, iterations);
+		osal_printf("[ INFO ] Completed transfer %u/%u\n", i + 1, iterations);
 	}
 
 	uint64_t end_time = 0;
@@ -208,17 +210,17 @@ static void test_stress_spi_large_buffers(void)
 	/* Calculate throughput */
 	double throughput_mbps =
 		(total_bytes * 8.0 / 1000000.0) / (elapsed_ms / 1000.0);
-	OSAL_printf("[ INFO ] Total transferred: %llu bytes in %llu ms\n",
+	osal_printf("[ INFO ] Total transferred: %llu bytes in %llu ms\n",
 				(unsigned long long)total_bytes,
 				(unsigned long long)elapsed_ms);
-	OSAL_printf("[ INFO ] Throughput: %.2f Mbps\n", throughput_mbps);
+	osal_printf("[ INFO ] Throughput: %.2f Mbps\n", throughput_mbps);
 
 	/* Cleanup */
-	OSAL_free(tx_buffer);
-	OSAL_free(rx_buffer);
-	HAL_SPI_close(handle);
+	osal_free(tx_buffer);
+	osal_free(rx_buffer);
+	hal_spi_close(handle);
 
-	OSAL_printf("[ PASS ] SPI large buffer stress test completed\n");
+	osal_printf("[ PASS ] SPI large buffer stress test completed\n");
 }
 
 /*===========================================================================
@@ -241,10 +243,10 @@ static int32_t spi_concurrent_worker(void *user_data, uint32_t iteration)
 	}
 
 	/* Perform transfer */
-	ret = HAL_SPI_transfer(ctx->handle, tx_buffer, rx_buffer,
+	ret = hal_spi_transfer(ctx->handle, tx_buffer, rx_buffer,
 						   SPI_STRESS_SMALL_BUF);
 	if (ret == OSAL_SUCCESS) {
-		OSAL_atomic_inc(ctx->transfer_counter);
+		osal_atomic_inc(ctx->transfer_counter);
 	}
 
 	return ret;
@@ -258,9 +260,10 @@ static void test_stress_spi_concurrent_access(void)
 {
 	hal_spi_handle_t handles[SPI_STRESS_THREAD_COUNT];
 	hal_spi_config_t config = { .device = SPI_STRESS_DEVICE,
-								.mode = HAL_SPI_MODE_0,
+								.mode = SPI_MODE_0,
 								.bits_per_word = 8,
-								.speed_hz = SPI_STRESS_SPEED_HZ };
+								.max_speed_hz = SPI_STRESS_SPEED_HZ,
+								.timeout = 1000 };
 	osal_atomic_uint32_t transfer_counter;
 	spi_worker_ctx_t worker_ctx[SPI_STRESS_THREAD_COUNT];
 	stress_context_t *stress_ctx = NULL;
@@ -268,25 +271,25 @@ static void test_stress_spi_concurrent_access(void)
 		STRESS_CONFIG_CONCURRENCY(SPI_STRESS_THREAD_COUNT, 10);
 	int32_t ret;
 
-	OSAL_printf("[ INFO ] Starting SPI concurrent access stress test\n");
-	OSAL_printf("         Threads: %u, Duration: 10 sec\n",
+	osal_printf("[ INFO ] Starting SPI concurrent access stress test\n");
+	osal_printf("         Threads: %u, Duration: 10 sec\n",
 				SPI_STRESS_THREAD_COUNT);
 
 	/* Open multiple SPI handles */
 	for (uint32_t i = 0; i < SPI_STRESS_THREAD_COUNT; i++) {
-		ret = HAL_SPI_open(&config, &handles[i]);
+		ret = hal_spi_open(&config, &handles[i]);
 		if (ret != OSAL_SUCCESS) {
 			for (uint32_t j = 0; j < i; j++) {
-				HAL_SPI_close(handles[j]);
+				hal_spi_close(handles[j]);
 			}
-			OSAL_printf("[ SKIP ] Cannot open multiple SPI handles\n");
+			osal_printf("[ SKIP ] Cannot open multiple SPI handles\n");
 			TEST_SKIP("SPI multi-open not supported");
 			return;
 		}
 	}
 
 	/* Initialize counter */
-	OSAL_atomic_store(&transfer_counter, 0);
+	osal_atomic_store(&transfer_counter, 0);
 
 	/* Setup worker contexts */
 	for (uint32_t i = 0; i < SPI_STRESS_THREAD_COUNT; i++) {
@@ -307,14 +310,14 @@ static void test_stress_spi_concurrent_access(void)
 	}
 
 	/* Wait for completion */
-	OSAL_sleep(12000 / 1000);
+	osal_sleep(12000 / 1000);
 
 	/* Print report */
 	stress_print_report(stress_ctx);
 
 	/* Verify transfers */
-	uint64_t total_transfers = OSAL_atomic_load(&transfer_counter);
-	OSAL_printf("[ INFO ] Total concurrent transfers: %llu\n",
+	uint64_t total_transfers = osal_atomic_load(&transfer_counter);
+	osal_printf("[ INFO ] Total concurrent transfers: %llu\n",
 				(unsigned long long)total_transfers);
 	TEST_ASSERT_TRUE(total_transfers > 0);
 
@@ -324,10 +327,10 @@ static void test_stress_spi_concurrent_access(void)
 	/* Cleanup */
 	stress_context_destroy(stress_ctx);
 	for (uint32_t i = 0; i < SPI_STRESS_THREAD_COUNT; i++) {
-		HAL_SPI_close(handles[i]);
+		hal_spi_close(handles[i]);
 	}
 
-	OSAL_printf("[ PASS ] SPI concurrent access stress test completed\n");
+	osal_printf("[ PASS ] SPI concurrent access stress test completed\n");
 }
 
 /*===========================================================================
@@ -342,21 +345,22 @@ static void test_stress_spi_rapid_config_changes(void)
 {
 	hal_spi_handle_t handle = NULL;
 	hal_spi_config_t config = { .device = SPI_STRESS_DEVICE,
-								.mode = HAL_SPI_MODE_0,
+								.mode = SPI_MODE_0,
 								.bits_per_word = 8,
-								.speed_hz = SPI_STRESS_SPEED_HZ };
+								.max_speed_hz = SPI_STRESS_SPEED_HZ,
+								.timeout = 1000 };
 	uint8_t tx_buffer[64];
 	uint8_t rx_buffer[64];
 	int32_t ret;
 	const uint32_t iterations = 1000;
 
-	OSAL_printf("[ INFO ] Starting SPI rapid config changes stress test\n");
-	OSAL_printf("         Iterations: %u\n", iterations);
+	osal_printf("[ INFO ] Starting SPI rapid config changes stress test\n");
+	osal_printf("         Iterations: %u\n", iterations);
 
 	/* Open SPI device */
-	ret = HAL_SPI_open(&config, &handle);
+	ret = hal_spi_open(&config, &handle);
 	if (ret != OSAL_SUCCESS) {
-		OSAL_printf("[ SKIP ] SPI device not available\n");
+		osal_printf("[ SKIP ] SPI device not available\n");
 		TEST_SKIP("SPI device not available");
 		return;
 	}
@@ -364,11 +368,11 @@ static void test_stress_spi_rapid_config_changes(void)
 	/* Rapidly change configuration and transfer */
 	for (uint32_t i = 0; i < iterations; i++) {
 		/* Cycle through SPI modes */
-		hal_spi_mode_t mode = (hal_spi_mode_t)(i % 4);
+		uint8_t mode = (uint8_t)(i % 4);
 		config.mode = mode;
-		config.speed_hz = 500000 + ((i % 4) * 250000);
+		config.max_speed_hz = 500000 + ((i % 4) * 250000);
 
-		ret = HAL_SPI_set_config(handle, &config);
+		ret = hal_spi_set_config(handle, &config);
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 		/* Fill buffer */
@@ -377,19 +381,19 @@ static void test_stress_spi_rapid_config_changes(void)
 		}
 
 		/* Perform transfer with new config */
-		ret = HAL_SPI_transfer(handle, tx_buffer, rx_buffer, sizeof(tx_buffer));
+		ret = hal_spi_transfer(handle, tx_buffer, rx_buffer, sizeof(tx_buffer));
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 		/* Progress indicator */
 		if (i % 100 == 0) {
-			OSAL_printf("[ INFO ] Progress: %u/%u\n", i, iterations);
+			osal_printf("[ INFO ] Progress: %u/%u\n", i, iterations);
 		}
 	}
 
 	/* Cleanup */
-	HAL_SPI_close(handle);
+	hal_spi_close(handle);
 
-	OSAL_printf("[ PASS ] SPI rapid config changes stress test completed\n");
+	osal_printf("[ PASS ] SPI rapid config changes stress test completed\n");
 }
 
 /*===========================================================================

@@ -21,7 +21,7 @@ static void test_hal_spi_open_success(void)
 								.max_speed_hz = 1000000,
 								.timeout = 1000 };
 
-	int32_t ret = HAL_SPI_open(&config, &handle);
+	int32_t ret = hal_spi_open(&config, &handle);
 
 	if (OSAL_SUCCESS != ret) {
 		TEST_ASSERT_FALSE(true); // /dev/spidev0.0 not available
@@ -30,7 +30,7 @@ static void test_hal_spi_open_success(void)
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	TEST_ASSERT_NOT_NULL(handle);
 
-	HAL_SPI_close(handle);
+	hal_spi_close(handle);
 }
 
 /* 测试用例: SPI打开 - 空配置 */
@@ -38,7 +38,7 @@ static void test_hal_spi_open_null_config(void)
 {
 	hal_spi_handle_t handle = NULL;
 
-	int32_t ret = HAL_SPI_open(NULL, &handle);
+	int32_t ret = hal_spi_open(NULL, &handle);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -51,7 +51,7 @@ static void test_hal_spi_open_null_handle(void)
 								.max_speed_hz = 1000000,
 								.timeout = 1000 };
 
-	int32_t ret = HAL_SPI_open(&config, NULL);
+	int32_t ret = hal_spi_open(&config, NULL);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -65,7 +65,7 @@ static void test_hal_spi_open_invalid_device(void)
 								.max_speed_hz = 1000000,
 								.timeout = 1000 };
 
-	int32_t ret = HAL_SPI_open(&config, &handle);
+	int32_t ret = hal_spi_open(&config, &handle);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -79,19 +79,19 @@ static void test_hal_spi_close(void)
 								.max_speed_hz = 1000000,
 								.timeout = 1000 };
 
-	int32_t ret = HAL_SPI_open(&config, &handle);
+	int32_t ret = hal_spi_open(&config, &handle);
 	if (OSAL_SUCCESS != ret) {
 		TEST_ASSERT_FALSE(true); // /dev/spidev0.0 not available
 	}
 
-	ret = HAL_SPI_close(handle);
+	ret = hal_spi_close(handle);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 }
 
 /* 测试用例: SPI关闭 - 空句柄 */
 static void test_hal_spi_close_null_handle(void)
 {
-	int32_t ret = HAL_SPI_close(NULL);
+	int32_t ret = hal_spi_close(NULL);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -104,7 +104,7 @@ static void test_hal_spi_write_null_handle(void)
 {
 	uint8_t buffer[4] = { 0x01, 0x02, 0x03, 0x04 };
 
-	int32_t ret = HAL_SPI_write(NULL, buffer, OSAL_sizeof(buffer));
+	int32_t ret = hal_spi_write(NULL, buffer, OSAL_sizeof(buffer));
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -118,15 +118,15 @@ static void test_hal_spi_write_null_buffer(void)
 								.max_speed_hz = 1000000,
 								.timeout = 1000 };
 
-	int32_t ret = HAL_SPI_open(&config, &handle);
+	int32_t ret = hal_spi_open(&config, &handle);
 	if (OSAL_SUCCESS != ret) {
 		TEST_ASSERT_FALSE(true); // /dev/spidev0.0 not available
 	}
 
-	ret = HAL_SPI_write(handle, NULL, 4);
+	ret = hal_spi_write(handle, NULL, 4);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 
-	HAL_SPI_close(handle);
+	hal_spi_close(handle);
 }
 
 /* 测试用例: SPI读取 - 空句柄 */
@@ -134,7 +134,7 @@ static void test_hal_spi_read_null_handle(void)
 {
 	uint8_t buffer[4];
 
-	int32_t ret = HAL_SPI_read(NULL, buffer, OSAL_sizeof(buffer));
+	int32_t ret = hal_spi_read(NULL, buffer, OSAL_sizeof(buffer));
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -148,15 +148,15 @@ static void test_hal_spi_read_null_buffer(void)
 								.max_speed_hz = 1000000,
 								.timeout = 1000 };
 
-	int32_t ret = HAL_SPI_open(&config, &handle);
+	int32_t ret = hal_spi_open(&config, &handle);
 	if (OSAL_SUCCESS != ret) {
 		TEST_ASSERT_FALSE(true); // /dev/spidev0.0 not available
 	}
 
-	ret = HAL_SPI_read(handle, NULL, 4);
+	ret = hal_spi_read(handle, NULL, 4);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 
-	HAL_SPI_close(handle);
+	hal_spi_close(handle);
 }
 
 /*===========================================================================
@@ -170,7 +170,7 @@ static void test_hal_spi_transfer_null_handle(void)
 	uint8_t rx_buffer[4];
 
 	int32_t ret =
-		HAL_SPI_transfer(NULL, tx_buffer, rx_buffer, OSAL_sizeof(tx_buffer));
+		hal_spi_transfer(NULL, tx_buffer, rx_buffer, OSAL_sizeof(tx_buffer));
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -186,13 +186,13 @@ static void test_hal_spi_transfer_loopback(void)
 	uint8_t tx_buffer[4] = { 0xAA, 0xBB, 0xCC, 0xDD };
 	uint8_t rx_buffer[4] = { 0 };
 
-	int32_t ret = HAL_SPI_open(&config, &handle);
+	int32_t ret = hal_spi_open(&config, &handle);
 	if (OSAL_SUCCESS != ret) {
 		TEST_ASSERT_FALSE(true); // /dev/spidev0.0 not available
 	}
 
 	ret =
-		HAL_SPI_transfer(handle, tx_buffer, rx_buffer, OSAL_sizeof(tx_buffer));
+		hal_spi_transfer(handle, tx_buffer, rx_buffer, OSAL_sizeof(tx_buffer));
 
 	/* 注意: 需要硬件回环才能验证数据 */
 	if (OSAL_SUCCESS == ret) {
@@ -200,7 +200,7 @@ static void test_hal_spi_transfer_loopback(void)
 				 "SPI transfer completed (loopback test requires hardware)");
 	}
 
-	HAL_SPI_close(handle);
+	hal_spi_close(handle);
 }
 
 /* 测试用例: SPI批量传输 - 空句柄 */
@@ -216,7 +216,7 @@ static void test_hal_spi_transfer_multi_null_handle(void)
 								.bits_per_word = 0,
 								.cs_change = 0 };
 
-	int32_t ret = HAL_SPI_transfer_multi(NULL, &xfer, 1);
+	int32_t ret = hal_spi_transfer_multi(NULL, &xfer, 1);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -230,15 +230,15 @@ static void test_hal_spi_transfer_multi_null_transfers(void)
 								.max_speed_hz = 1000000,
 								.timeout = 1000 };
 
-	int32_t ret = HAL_SPI_open(&config, &handle);
+	int32_t ret = hal_spi_open(&config, &handle);
 	if (OSAL_SUCCESS != ret) {
 		TEST_ASSERT_FALSE(true); // /dev/spidev0.0 not available
 	}
 
-	ret = HAL_SPI_transfer_multi(handle, NULL, 1);
+	ret = hal_spi_transfer_multi(handle, NULL, 1);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 
-	HAL_SPI_close(handle);
+	hal_spi_close(handle);
 }
 
 /*===========================================================================
@@ -254,7 +254,7 @@ static void test_hal_spi_set_config_null_handle(void)
 								.max_speed_hz = 500000,
 								.timeout = 1000 };
 
-	int32_t ret = HAL_SPI_set_config(NULL, &config);
+	int32_t ret = hal_spi_set_config(NULL, &config);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -268,15 +268,15 @@ static void test_hal_spi_set_config_null_config(void)
 								.max_speed_hz = 1000000,
 								.timeout = 1000 };
 
-	int32_t ret = HAL_SPI_open(&config, &handle);
+	int32_t ret = hal_spi_open(&config, &handle);
 	if (OSAL_SUCCESS != ret) {
 		TEST_ASSERT_FALSE(true); // /dev/spidev0.0 not available
 	}
 
-	ret = HAL_SPI_set_config(handle, NULL);
+	ret = hal_spi_set_config(handle, NULL);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 
-	HAL_SPI_close(handle);
+	hal_spi_close(handle);
 }
 
 /* 测试用例: SPI设置配置 - 更改模式 */
@@ -289,17 +289,17 @@ static void test_hal_spi_set_config_change_mode(void)
 								.max_speed_hz = 1000000,
 								.timeout = 1000 };
 
-	int32_t ret = HAL_SPI_open(&config, &handle);
+	int32_t ret = hal_spi_open(&config, &handle);
 	if (OSAL_SUCCESS != ret) {
 		TEST_ASSERT_FALSE(true); // /dev/spidev0.0 not available
 	}
 
 	/* 更改为MODE_1 */
 	config.mode = SPI_MODE_1;
-	ret = HAL_SPI_set_config(handle, &config);
+	ret = hal_spi_set_config(handle, &config);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-	HAL_SPI_close(handle);
+	hal_spi_close(handle);
 }
 
 /*===========================================================================
@@ -317,16 +317,16 @@ static void test_hal_spi_read_standalone(void)
 								.timeout = 1000 };
 	uint8_t rx_buffer[16] = { 0 };
 
-	int32_t ret = HAL_SPI_open(&config, &handle);
+	int32_t ret = hal_spi_open(&config, &handle);
 	if (OSAL_SUCCESS != ret) {
 		TEST_ASSERT_FALSE(true); // /dev/spidev0.0 not available
 	}
 
 	/* 独立读取（发送全0或全1） */
-	ret = HAL_SPI_read(handle, rx_buffer, sizeof(rx_buffer));
+	ret = hal_spi_read(handle, rx_buffer, sizeof(rx_buffer));
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-	HAL_SPI_close(handle);
+	hal_spi_close(handle);
 }
 
 /* 测试用例: SPI独立写入 - 功能测试 */
@@ -341,16 +341,16 @@ static void test_hal_spi_write_standalone(void)
 	uint8_t tx_buffer[16] = { 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA,
 							  0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA };
 
-	int32_t ret = HAL_SPI_open(&config, &handle);
+	int32_t ret = hal_spi_open(&config, &handle);
 	if (OSAL_SUCCESS != ret) {
 		TEST_ASSERT_FALSE(true); // /dev/spidev0.0 not available
 	}
 
 	/* 独立写入（忽略接收数据） */
-	ret = HAL_SPI_write(handle, tx_buffer, sizeof(tx_buffer));
+	ret = hal_spi_write(handle, tx_buffer, sizeof(tx_buffer));
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-	HAL_SPI_close(handle);
+	hal_spi_close(handle);
 }
 
 /*===========================================================================
@@ -367,14 +367,14 @@ static void test_hal_spi_max_speed(void)
 								.max_speed_hz = 10000000, /* 10MHz */
 								.timeout = 1000 };
 
-	int32_t ret = HAL_SPI_open(&config, &handle);
+	int32_t ret = hal_spi_open(&config, &handle);
 	if (OSAL_SUCCESS != ret) {
 		TEST_MESSAGE("SKIPPED: Max speed not supported");
 		return;
 	}
 
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
-	HAL_SPI_close(handle);
+	hal_spi_close(handle);
 }
 
 /* 测试用例: SPI最小速度 */
@@ -387,14 +387,14 @@ static void test_hal_spi_min_speed(void)
 								.max_speed_hz = 10000, /* 10KHz */
 								.timeout = 1000 };
 
-	int32_t ret = HAL_SPI_open(&config, &handle);
+	int32_t ret = hal_spi_open(&config, &handle);
 	if (OSAL_SUCCESS != ret) {
 		TEST_MESSAGE("SKIPPED: Min speed not supported");
 		return;
 	}
 
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
-	HAL_SPI_close(handle);
+	hal_spi_close(handle);
 }
 
 /* 测试用例: SPI不同位宽 */
@@ -407,9 +407,9 @@ static void test_hal_spi_different_bits_per_word(void)
 								.max_speed_hz = 1000000,
 								.timeout = 1000 };
 
-	int32_t ret = HAL_SPI_open(&config, &handle);
+	int32_t ret = hal_spi_open(&config, &handle);
 	if (ret == OSAL_SUCCESS) {
-		HAL_SPI_close(handle);
+		hal_spi_close(handle);
 	} else {
 		TEST_MESSAGE("SKIPPED: 16-bit word size not supported");
 	}
@@ -427,30 +427,30 @@ static void test_hal_spi_all_modes(void)
 
 	/* 测试MODE_0 */
 	config.mode = SPI_MODE_0;
-	int32_t ret = HAL_SPI_open(&config, &handle);
+	int32_t ret = hal_spi_open(&config, &handle);
 	if (ret == OSAL_SUCCESS) {
-		HAL_SPI_close(handle);
+		hal_spi_close(handle);
 	}
 
 	/* 测试MODE_1 */
 	config.mode = SPI_MODE_1;
-	ret = HAL_SPI_open(&config, &handle);
+	ret = hal_spi_open(&config, &handle);
 	if (ret == OSAL_SUCCESS) {
-		HAL_SPI_close(handle);
+		hal_spi_close(handle);
 	}
 
 	/* 测试MODE_2 */
 	config.mode = SPI_MODE_2;
-	ret = HAL_SPI_open(&config, &handle);
+	ret = hal_spi_open(&config, &handle);
 	if (ret == OSAL_SUCCESS) {
-		HAL_SPI_close(handle);
+		hal_spi_close(handle);
 	}
 
 	/* 测试MODE_3 */
 	config.mode = SPI_MODE_3;
-	ret = HAL_SPI_open(&config, &handle);
+	ret = hal_spi_open(&config, &handle);
 	if (ret == OSAL_SUCCESS) {
-		HAL_SPI_close(handle);
+		hal_spi_close(handle);
 	}
 }
 
@@ -466,7 +466,7 @@ static void test_hal_spi_large_transfer(void)
 	uint8_t tx_buffer[4096];
 	uint8_t rx_buffer[4096];
 
-	int32_t ret = HAL_SPI_open(&config, &handle);
+	int32_t ret = hal_spi_open(&config, &handle);
 	if (OSAL_SUCCESS != ret) {
 		TEST_ASSERT_FALSE(true); // /dev/spidev0.0 not available
 	}
@@ -477,10 +477,10 @@ static void test_hal_spi_large_transfer(void)
 	}
 
 	/* 大数据传输 */
-	ret = HAL_SPI_transfer(handle, tx_buffer, rx_buffer, sizeof(tx_buffer));
+	ret = hal_spi_transfer(handle, tx_buffer, rx_buffer, sizeof(tx_buffer));
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-	HAL_SPI_close(handle);
+	hal_spi_close(handle);
 }
 
 /* 测试用例: SPI零长度传输 */
@@ -494,16 +494,16 @@ static void test_hal_spi_zero_length_transfer(void)
 								.timeout = 1000 };
 	uint8_t buffer[4];
 
-	int32_t ret = HAL_SPI_open(&config, &handle);
+	int32_t ret = hal_spi_open(&config, &handle);
 	if (OSAL_SUCCESS != ret) {
 		TEST_ASSERT_FALSE(true); // /dev/spidev0.0 not available
 	}
 
 	/* 零长度传输应该失败或返回0 */
-	ret = HAL_SPI_transfer(handle, buffer, buffer, 0);
+	ret = hal_spi_transfer(handle, buffer, buffer, 0);
 	TEST_ASSERT_TRUE(ret == OSAL_SUCCESS || ret < 0);
 
-	HAL_SPI_close(handle);
+	hal_spi_close(handle);
 }
 
 /*===========================================================================

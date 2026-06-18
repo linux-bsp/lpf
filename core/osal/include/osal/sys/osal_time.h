@@ -43,7 +43,7 @@ extern "C" {
  * @return 0成功，-1失败
  * @note 这是最常用的延迟接口，精度为毫秒
  */
-int32_t OSAL_msleep(uint32_t msec);
+int32_t osal_msleep(uint32_t msec);
 
 /**
  * @brief 微秒级延迟
@@ -51,7 +51,7 @@ int32_t OSAL_msleep(uint32_t msec);
  * @return 0成功，-1失败
  * @note 精度为微秒，适用于需要高精度延迟的场景
  */
-int32_t OSAL_usleep(uint32_t usec);
+int32_t osal_usleep(uint32_t usec);
 
 /**
  * @brief 秒级延迟
@@ -59,7 +59,7 @@ int32_t OSAL_usleep(uint32_t usec);
  * @return 0成功，-1失败
  * @note 精度为秒，适用于长时间延迟
  */
-int32_t OSAL_sleep(uint32_t sec);
+int32_t osal_sleep(uint32_t sec);
 
 /**
  * @brief 纳秒级延迟
@@ -67,7 +67,7 @@ int32_t OSAL_sleep(uint32_t sec);
  * @return 0成功，-1失败
  * @note 精度为纳秒，适用于极高精度延迟场景
  */
-int32_t OSAL_nanosleep(uint64_t nsec);
+int32_t osal_nanosleep(uint64_t nsec);
 
 /*===========================================================================
  * 时间获取 API
@@ -79,7 +79,7 @@ int32_t OSAL_nanosleep(uint64_t nsec);
  * @note 用于超时计算、性能测量等场景，不受NTP同步影响
  *       封装clock_gettime(CLOCK_MONOTONIC)
  */
-int64_t OSAL_get_monotonic_time(void);
+int64_t osal_get_monotonic_time(void);
 
 /**
  * @brief 获取启动时钟时间（包含休眠时间）
@@ -87,14 +87,14 @@ int64_t OSAL_get_monotonic_time(void);
  * @note 与CLOCK_MONOTONIC类似，但包含系统休眠时间
  *       封装clock_gettime(CLOCK_BOOTTIME)
  */
-int64_t OSAL_get_boot_time(void);
+int64_t osal_get_boot_time(void);
 
 /**
  * @brief 获取高精度时间戳（纳秒）
  * @return 时间戳（纳秒），用于性能测量
  * @note 用于微秒级性能测量，封装clock_gettime(CLOCK_MONOTONIC)
  */
-int64_t OSAL_get_highres_time(void);
+int64_t osal_get_highres_time(void);
 
 #ifdef __cplusplus
 }

@@ -17,7 +17,7 @@ static void test_hal_i2c_open_success(void)
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 1000 };
 
-	int32_t ret = HAL_I2C_open(&config, &handle);
+	int32_t ret = hal_i2c_open(&config, &handle);
 
 	if (OSAL_SUCCESS != ret) {
 		TEST_ASSERT_FALSE(true); // /dev/i2c-0 not available
@@ -26,7 +26,7 @@ static void test_hal_i2c_open_success(void)
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	TEST_ASSERT_NOT_NULL(handle);
 
-	HAL_I2C_close(handle);
+	hal_i2c_close(handle);
 }
 
 /* 测试用例: I2C打开 - 空配置 */
@@ -34,7 +34,7 @@ static void test_hal_i2c_open_null_config(void)
 {
 	hal_i2c_handle_t handle = NULL;
 
-	int32_t ret = HAL_I2C_open(NULL, &handle);
+	int32_t ret = hal_i2c_open(NULL, &handle);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -43,7 +43,7 @@ static void test_hal_i2c_open_null_handle(void)
 {
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 1000 };
 
-	int32_t ret = HAL_I2C_open(&config, NULL);
+	int32_t ret = hal_i2c_open(&config, NULL);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -53,7 +53,7 @@ static void test_hal_i2c_open_invalid_device(void)
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-999", .timeout = 1000 };
 
-	int32_t ret = HAL_I2C_open(&config, &handle);
+	int32_t ret = hal_i2c_open(&config, &handle);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -63,19 +63,19 @@ static void test_hal_i2c_close(void)
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 1000 };
 
-	int32_t ret = HAL_I2C_open(&config, &handle);
+	int32_t ret = hal_i2c_open(&config, &handle);
 	if (OSAL_SUCCESS != ret) {
 		TEST_ASSERT_FALSE(true); // /dev/i2c-0 not available
 	}
 
-	ret = HAL_I2C_close(handle);
+	ret = hal_i2c_close(handle);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 }
 
 /* 测试用例: I2C关闭 - 空句柄 */
 static void test_hal_i2c_close_null_handle(void)
 {
-	int32_t ret = HAL_I2C_close(NULL);
+	int32_t ret = hal_i2c_close(NULL);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -88,7 +88,7 @@ static void test_hal_i2c_write_null_handle(void)
 {
 	uint8_t buffer[4] = { 0x01, 0x02, 0x03, 0x04 };
 
-	int32_t ret = HAL_I2C_write(NULL, 0x50, buffer, OSAL_sizeof(buffer));
+	int32_t ret = hal_i2c_write(NULL, 0x50, buffer, OSAL_sizeof(buffer));
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -98,15 +98,15 @@ static void test_hal_i2c_write_null_buffer(void)
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 1000 };
 
-	int32_t ret = HAL_I2C_open(&config, &handle);
+	int32_t ret = hal_i2c_open(&config, &handle);
 	if (OSAL_SUCCESS != ret) {
 		TEST_ASSERT_FALSE(true); // /dev/i2c-0 not available
 	}
 
-	ret = HAL_I2C_write(handle, 0x50, NULL, 4);
+	ret = hal_i2c_write(handle, 0x50, NULL, 4);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 
-	HAL_I2C_close(handle);
+	hal_i2c_close(handle);
 }
 
 /* 测试用例: I2C读取 - 空句柄 */
@@ -114,7 +114,7 @@ static void test_hal_i2c_read_null_handle(void)
 {
 	uint8_t buffer[4];
 
-	int32_t ret = HAL_I2C_read(NULL, 0x50, buffer, OSAL_sizeof(buffer));
+	int32_t ret = hal_i2c_read(NULL, 0x50, buffer, OSAL_sizeof(buffer));
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -124,15 +124,15 @@ static void test_hal_i2c_read_null_buffer(void)
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 1000 };
 
-	int32_t ret = HAL_I2C_open(&config, &handle);
+	int32_t ret = hal_i2c_open(&config, &handle);
 	if (OSAL_SUCCESS != ret) {
 		TEST_ASSERT_FALSE(true); // /dev/i2c-0 not available
 	}
 
-	ret = HAL_I2C_read(handle, 0x50, NULL, 4);
+	ret = hal_i2c_read(handle, 0x50, NULL, 4);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 
-	HAL_I2C_close(handle);
+	hal_i2c_close(handle);
 }
 
 /*===========================================================================
@@ -145,7 +145,7 @@ static void test_hal_i2c_write_reg_null_handle(void)
 	uint8_t buffer[4] = { 0x01, 0x02, 0x03, 0x04 };
 
 	int32_t ret =
-		HAL_I2C_write_reg(NULL, 0x50, 0x00, buffer, OSAL_sizeof(buffer));
+		hal_i2c_write_reg(NULL, 0x50, 0x00, buffer, OSAL_sizeof(buffer));
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -155,15 +155,15 @@ static void test_hal_i2c_write_reg_null_buffer(void)
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 1000 };
 
-	int32_t ret = HAL_I2C_open(&config, &handle);
+	int32_t ret = hal_i2c_open(&config, &handle);
 	if (OSAL_SUCCESS != ret) {
 		TEST_ASSERT_FALSE(true); // /dev/i2c-0 not available
 	}
 
-	ret = HAL_I2C_write_reg(handle, 0x50, 0x00, NULL, 4);
+	ret = hal_i2c_write_reg(handle, 0x50, 0x00, NULL, 4);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 
-	HAL_I2C_close(handle);
+	hal_i2c_close(handle);
 }
 
 /* 测试用例: I2C读寄存器 - 空句柄 */
@@ -172,7 +172,7 @@ static void test_hal_i2c_read_reg_null_handle(void)
 	uint8_t buffer[4];
 
 	int32_t ret =
-		HAL_I2C_read_reg(NULL, 0x50, 0x00, buffer, OSAL_sizeof(buffer));
+		hal_i2c_read_reg(NULL, 0x50, 0x00, buffer, OSAL_sizeof(buffer));
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -182,15 +182,15 @@ static void test_hal_i2c_read_reg_null_buffer(void)
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 1000 };
 
-	int32_t ret = HAL_I2C_open(&config, &handle);
+	int32_t ret = hal_i2c_open(&config, &handle);
 	if (OSAL_SUCCESS != ret) {
 		TEST_ASSERT_FALSE(true); // /dev/i2c-0 not available
 	}
 
-	ret = HAL_I2C_read_reg(handle, 0x50, 0x00, NULL, 4);
+	ret = hal_i2c_read_reg(handle, 0x50, 0x00, NULL, 4);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 
-	HAL_I2C_close(handle);
+	hal_i2c_close(handle);
 }
 
 /*===========================================================================
@@ -205,7 +205,7 @@ static void test_hal_i2c_transfer_null_handle(void)
 		.addr = 0x50, .flags = 0, .len = OSAL_sizeof(buffer), .buf = buffer
 	};
 
-	int32_t ret = HAL_I2C_transfer(NULL, &msg, 1);
+	int32_t ret = hal_i2c_transfer(NULL, &msg, 1);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -215,15 +215,15 @@ static void test_hal_i2c_transfer_null_msgs(void)
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 1000 };
 
-	int32_t ret = HAL_I2C_open(&config, &handle);
+	int32_t ret = hal_i2c_open(&config, &handle);
 	if (OSAL_SUCCESS != ret) {
 		TEST_ASSERT_FALSE(true); // /dev/i2c-0 not available
 	}
 
-	ret = HAL_I2C_transfer(handle, NULL, 1);
+	ret = hal_i2c_transfer(handle, NULL, 1);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 
-	HAL_I2C_close(handle);
+	hal_i2c_close(handle);
 }
 
 /*===========================================================================
@@ -236,17 +236,17 @@ static void test_hal_i2c_min_slave_address(void)
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 1000 };
 
-	int32_t ret = HAL_I2C_open(&config, &handle);
+	int32_t ret = hal_i2c_open(&config, &handle);
 	if (OSAL_SUCCESS != ret) {
 		TEST_ASSERT_FALSE(true);
 	}
 
 	/* 地址0x08是最小有效从机地址 */
 	uint8_t data = 0xAA;
-	ret = HAL_I2C_write(handle, 0x08, &data, 1);
+	ret = hal_i2c_write(handle, 0x08, &data, 1);
 	/* 可能失败（设备不存在），但不应该崩溃 */
 
-	HAL_I2C_close(handle);
+	hal_i2c_close(handle);
 }
 
 /* 测试用例: I2C最大从机地址 */
@@ -255,17 +255,17 @@ static void test_hal_i2c_max_slave_address(void)
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 1000 };
 
-	int32_t ret = HAL_I2C_open(&config, &handle);
+	int32_t ret = hal_i2c_open(&config, &handle);
 	if (OSAL_SUCCESS != ret) {
 		TEST_ASSERT_FALSE(true);
 	}
 
 	/* 地址0x77是最大7位从机地址 */
 	uint8_t data = 0x55;
-	ret = HAL_I2C_write(handle, 0x77, &data, 1);
+	ret = hal_i2c_write(handle, 0x77, &data, 1);
 	/* 可能失败（设备不存在），但不应该崩溃 */
 
-	HAL_I2C_close(handle);
+	hal_i2c_close(handle);
 }
 
 /* 测试用例: I2C大数据写入 */
@@ -274,7 +274,7 @@ static void test_hal_i2c_large_write(void)
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 5000 };
 
-	int32_t ret = HAL_I2C_open(&config, &handle);
+	int32_t ret = hal_i2c_open(&config, &handle);
 	if (OSAL_SUCCESS != ret) {
 		TEST_ASSERT_FALSE(true);
 	}
@@ -285,10 +285,10 @@ static void test_hal_i2c_large_write(void)
 		large_data[i] = (uint8_t)(i & 0xFF);
 	}
 
-	ret = HAL_I2C_write(handle, 0x50, large_data, sizeof(large_data));
+	ret = hal_i2c_write(handle, 0x50, large_data, sizeof(large_data));
 	/* 可能失败（设备不存在或不支持），但不应该崩溃 */
 
-	HAL_I2C_close(handle);
+	hal_i2c_close(handle);
 }
 
 /* 测试用例: I2C大数据读取 */
@@ -297,17 +297,17 @@ static void test_hal_i2c_large_read(void)
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 5000 };
 
-	int32_t ret = HAL_I2C_open(&config, &handle);
+	int32_t ret = hal_i2c_open(&config, &handle);
 	if (OSAL_SUCCESS != ret) {
 		TEST_ASSERT_FALSE(true);
 	}
 
 	/* 读取256字节数据 */
 	uint8_t rx_buffer[256];
-	ret = HAL_I2C_read(handle, 0x50, rx_buffer, sizeof(rx_buffer));
+	ret = hal_i2c_read(handle, 0x50, rx_buffer, sizeof(rx_buffer));
 	/* 可能失败（设备不存在），但不应该崩溃 */
 
-	HAL_I2C_close(handle);
+	hal_i2c_close(handle);
 }
 
 /* 测试用例: I2C零长度传输 */
@@ -316,7 +316,7 @@ static void test_hal_i2c_zero_length_transfer(void)
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 1000 };
 
-	int32_t ret = HAL_I2C_open(&config, &handle);
+	int32_t ret = hal_i2c_open(&config, &handle);
 	if (OSAL_SUCCESS != ret) {
 		TEST_ASSERT_FALSE(true);
 	}
@@ -324,14 +324,14 @@ static void test_hal_i2c_zero_length_transfer(void)
 	uint8_t buffer[4];
 
 	/* 零长度写入 */
-	ret = HAL_I2C_write(handle, 0x50, buffer, 0);
+	ret = hal_i2c_write(handle, 0x50, buffer, 0);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* 零长度读取 */
-	ret = HAL_I2C_read(handle, 0x50, buffer, 0);
+	ret = hal_i2c_read(handle, 0x50, buffer, 0);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 
-	HAL_I2C_close(handle);
+	hal_i2c_close(handle);
 }
 
 /* 测试用例: I2C寄存器连续写入 */
@@ -340,7 +340,7 @@ static void test_hal_i2c_register_burst_write(void)
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 1000 };
 
-	int32_t ret = HAL_I2C_open(&config, &handle);
+	int32_t ret = hal_i2c_open(&config, &handle);
 	if (OSAL_SUCCESS != ret) {
 		TEST_ASSERT_FALSE(true);
 	}
@@ -348,11 +348,11 @@ static void test_hal_i2c_register_burst_write(void)
 	/* 连续写入多个寄存器 */
 	for (uint8_t reg = 0x00; reg < 0x10; reg++) {
 		uint8_t data = reg * 2;
-		ret = HAL_I2C_write_reg(handle, 0x50, reg, &data, 1);
+		ret = hal_i2c_write_reg(handle, 0x50, reg, &data, 1);
 		/* 可能失败，但不应该崩溃 */
 	}
 
-	HAL_I2C_close(handle);
+	hal_i2c_close(handle);
 }
 
 /* 测试用例: I2C寄存器连续读取 */
@@ -361,7 +361,7 @@ static void test_hal_i2c_register_burst_read(void)
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 1000 };
 
-	int32_t ret = HAL_I2C_open(&config, &handle);
+	int32_t ret = hal_i2c_open(&config, &handle);
 	if (OSAL_SUCCESS != ret) {
 		TEST_ASSERT_FALSE(true);
 	}
@@ -369,11 +369,11 @@ static void test_hal_i2c_register_burst_read(void)
 	/* 连续读取多个寄存器 */
 	for (uint8_t reg = 0x00; reg < 0x10; reg++) {
 		uint8_t data;
-		ret = HAL_I2C_read_reg(handle, 0x50, reg, &data, 1);
+		ret = hal_i2c_read_reg(handle, 0x50, reg, &data, 1);
 		/* 可能失败，但不应该崩溃 */
 	}
 
-	HAL_I2C_close(handle);
+	hal_i2c_close(handle);
 }
 
 /* 测试用例: I2C多消息传输 */
@@ -382,7 +382,7 @@ static void test_hal_i2c_multi_message_transfer(void)
 	hal_i2c_handle_t handle = NULL;
 	hal_i2c_config_t config = { .device = "/dev/i2c-0", .timeout = 1000 };
 
-	int32_t ret = HAL_I2C_open(&config, &handle);
+	int32_t ret = hal_i2c_open(&config, &handle);
 	if (OSAL_SUCCESS != ret) {
 		TEST_ASSERT_FALSE(true);
 	}
@@ -400,10 +400,10 @@ static void test_hal_i2c_multi_message_transfer(void)
 								.len = sizeof(rx_buf),
 								.buf = rx_buf } };
 
-	ret = HAL_I2C_transfer(handle, msgs, 2);
+	ret = hal_i2c_transfer(handle, msgs, 2);
 	/* 可能失败（设备不存在），但不应该崩溃 */
 
-	HAL_I2C_close(handle);
+	hal_i2c_close(handle);
 }
 
 /* 测试用例: I2C不同超时值 */
@@ -414,23 +414,23 @@ static void test_hal_i2c_different_timeouts(void)
 		.device = "/dev/i2c-0", .timeout = 100 /* 短超时 */
 	};
 
-	int32_t ret = HAL_I2C_open(&config, &handle);
+	int32_t ret = hal_i2c_open(&config, &handle);
 	if (ret == OSAL_SUCCESS) {
-		HAL_I2C_close(handle);
+		hal_i2c_close(handle);
 	}
 
 	/* 长超时 */
 	config.timeout = 10000;
-	ret = HAL_I2C_open(&config, &handle);
+	ret = hal_i2c_open(&config, &handle);
 	if (ret == OSAL_SUCCESS) {
-		HAL_I2C_close(handle);
+		hal_i2c_close(handle);
 	}
 
 	/* 零超时 */
 	config.timeout = 0;
-	ret = HAL_I2C_open(&config, &handle);
+	ret = hal_i2c_open(&config, &handle);
 	if (ret == OSAL_SUCCESS) {
-		HAL_I2C_close(handle);
+		hal_i2c_close(handle);
 	}
 }
 

@@ -8,7 +8,7 @@
 #include <time.h>
 
 /* 时间API */
-int32_t OSAL_get_local_time(OS_time_t *time_struct)
+int32_t osal_get_local_time(OS_time_t *time_struct)
 {
 	struct timeval tv;
 
@@ -22,7 +22,7 @@ int32_t OSAL_get_local_time(OS_time_t *time_struct)
 	return OSAL_SUCCESS;
 }
 
-uint32_t OSAL_get_tick_count(void)
+uint32_t osal_get_tick_count(void)
 {
 	struct timespec ts;
 	uint64_t sec_ms;

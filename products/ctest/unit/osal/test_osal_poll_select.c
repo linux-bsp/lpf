@@ -28,7 +28,7 @@ static void test_poll_immediate_return(void)
 	fds[0].revents = 0;
 
 	/* 立即返回（有数据可读） */
-	ret = OSAL_poll(fds, 1, 0);
+	ret = osal_poll(fds, 1, 0);
 	TEST_ASSERT_EQUAL(1, ret);
 	TEST_ASSERT(fds[0].revents & OSAL_POLLIN);
 
@@ -52,9 +52,9 @@ static void test_poll_timeout(void)
 	fds[0].revents = 0;
 
 	/* 测试超时 */
-	uint64_t start_time = OSAL_get_tick_count();
-	ret = OSAL_poll(fds, 1, 100);
-	uint64_t elapsed = OSAL_get_tick_count() - start_time;
+	uint64_t start_time = osal_get_tick_count();
+	ret = osal_poll(fds, 1, 100);
+	uint64_t elapsed = osal_get_tick_count() - start_time;
 
 	TEST_ASSERT_EQUAL(0, ret); /* 超时返回0 */
 	TEST_ASSERT(elapsed >= 90); /* 至少接近100ms */
@@ -89,7 +89,7 @@ static void test_poll_multiple_fds(void)
 	fds[1].revents = 0;
 
 	/* poll应该返回1（只有一个fd就绪） */
-	ret = OSAL_poll(fds, 2, 0);
+	ret = osal_poll(fds, 2, 0);
 	TEST_ASSERT_EQUAL(1, ret);
 	TEST_ASSERT(fds[0].revents & OSAL_POLLIN);
 	TEST_ASSERT_EQUAL(0, fds[1].revents);
@@ -114,7 +114,7 @@ static void test_poll_write_ready(void)
 	fds[0].events = OSAL_POLLOUT;
 	fds[0].revents = 0;
 
-	ret = OSAL_poll(fds, 1, 0);
+	ret = osal_poll(fds, 1, 0);
 	TEST_ASSERT_EQUAL(1, ret);
 	TEST_ASSERT(fds[0].revents & OSAL_POLLOUT);
 
@@ -132,7 +132,7 @@ static void test_poll_invalid_fd(void)
 	fds[0].events = OSAL_POLLIN;
 	fds[0].revents = 0;
 
-	ret = OSAL_poll(fds, 1, 0);
+	ret = osal_poll(fds, 1, 0);
 	TEST_ASSERT_EQUAL(1, ret);
 	TEST_ASSERT(fds[0].revents & OSAL_POLLNVAL);
 }
@@ -142,7 +142,7 @@ static void test_poll_null_pointer(void)
 	int32_t ret;
 
 	/* 测试NULL指针 */
-	ret = OSAL_poll(NULL, 0, 0);
+	ret = osal_poll(NULL, 0, 0);
 	TEST_ASSERT_EQUAL(0, ret);
 }
 
@@ -162,7 +162,7 @@ static void test_poll_hangup(void)
 	fds[0].events = OSAL_POLLIN;
 	fds[0].revents = 0;
 
-	ret = OSAL_poll(fds, 1, 0);
+	ret = osal_poll(fds, 1, 0);
 	TEST_ASSERT(ret >= 0);
 	TEST_ASSERT(fds[0].revents & (OSAL_POLLHUP | OSAL_POLLIN));
 
@@ -179,33 +179,33 @@ static void test_fd_set_operations(void)
 	int32_t ret;
 
 	/* 清空集合 */
-	OSAL_FD_ZERO(&set);
+	osal_fd_zero(&set);
 
 	/* 测试文件描述符3不在集合中 */
-	ret = OSAL_FD_ISSET(3, &set);
+	ret = osal_fd_isset(3, &set);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 添加文件描述符3 */
-	OSAL_FD_SET(3, &set);
-	ret = OSAL_FD_ISSET(3, &set);
+	osal_fd_set(3, &set);
+	ret = osal_fd_isset(3, &set);
 	TEST_ASSERT_NOT_EQUAL(0, ret);
 
 	/* 添加文件描述符5 */
-	OSAL_FD_SET(5, &set);
-	ret = OSAL_FD_ISSET(5, &set);
+	osal_fd_set(5, &set);
+	ret = osal_fd_isset(5, &set);
 	TEST_ASSERT_NOT_EQUAL(0, ret);
 
 	/* 3应该仍然在集合中 */
-	ret = OSAL_FD_ISSET(3, &set);
+	ret = osal_fd_isset(3, &set);
 	TEST_ASSERT_NOT_EQUAL(0, ret);
 
 	/* 移除文件描述符3 */
-	OSAL_FD_CLR(3, &set);
-	ret = OSAL_FD_ISSET(3, &set);
+	osal_fd_clr(3, &set);
+	ret = osal_fd_isset(3, &set);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 5应该仍然在集合中 */
-	ret = OSAL_FD_ISSET(5, &set);
+	ret = osal_fd_isset(5, &set);
 	TEST_ASSERT_NOT_EQUAL(0, ret);
 }
 
@@ -223,16 +223,16 @@ static void test_select_immediate_return(void)
 	write(pipe_fds[1], "test", 4);
 
 	/* 设置文件描述符集合 */
-	OSAL_FD_ZERO(&readfds);
-	OSAL_FD_SET(pipe_fds[0], &readfds);
+	osal_fd_zero(&readfds);
+	osal_fd_set(pipe_fds[0], &readfds);
 
 	/* 立即返回 */
 	timeout.tv_sec = 0;
 	timeout.tv_usec = 0;
 
-	ret = OSAL_select(pipe_fds[0] + 1, &readfds, NULL, NULL, &timeout);
+	ret = osal_select(pipe_fds[0] + 1, &readfds, NULL, NULL, &timeout);
 	TEST_ASSERT_EQUAL(1, ret);
-	TEST_ASSERT_NOT_EQUAL(0, OSAL_FD_ISSET(pipe_fds[0], &readfds));
+	TEST_ASSERT_NOT_EQUAL(0, osal_fd_isset(pipe_fds[0], &readfds));
 
 	close(pipe_fds[0]);
 	close(pipe_fds[1]);
@@ -249,16 +249,16 @@ static void test_select_timeout(void)
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 不写入数据 */
-	OSAL_FD_ZERO(&readfds);
-	OSAL_FD_SET(pipe_fds[0], &readfds);
+	osal_fd_zero(&readfds);
+	osal_fd_set(pipe_fds[0], &readfds);
 
 	/* 设置100ms超时 */
 	timeout.tv_sec = 0;
 	timeout.tv_usec = 100000;
 
-	uint64_t start_time = OSAL_get_tick_count();
-	ret = OSAL_select(pipe_fds[0] + 1, &readfds, NULL, NULL, &timeout);
-	uint64_t elapsed = OSAL_get_tick_count() - start_time;
+	uint64_t start_time = osal_get_tick_count();
+	ret = osal_select(pipe_fds[0] + 1, &readfds, NULL, NULL, &timeout);
+	uint64_t elapsed = osal_get_tick_count() - start_time;
 
 	TEST_ASSERT_EQUAL(0, ret); /* 超时返回0 */
 	TEST_ASSERT(elapsed >= 90);
@@ -285,19 +285,19 @@ static void test_select_multiple_fds(void)
 	write(pipe_fds2[1], "data2", 5);
 
 	/* 设置文件描述符集合 */
-	OSAL_FD_ZERO(&readfds);
-	OSAL_FD_SET(pipe_fds1[0], &readfds);
-	OSAL_FD_SET(pipe_fds2[0], &readfds);
+	osal_fd_zero(&readfds);
+	osal_fd_set(pipe_fds1[0], &readfds);
+	osal_fd_set(pipe_fds2[0], &readfds);
 
 	timeout.tv_sec = 0;
 	timeout.tv_usec = 0;
 
 	int max_fd = (pipe_fds1[0] > pipe_fds2[0]) ? pipe_fds1[0] : pipe_fds2[0];
-	ret = OSAL_select(max_fd + 1, &readfds, NULL, NULL, &timeout);
+	ret = osal_select(max_fd + 1, &readfds, NULL, NULL, &timeout);
 
 	TEST_ASSERT_EQUAL(2, ret);
-	TEST_ASSERT_NOT_EQUAL(0, OSAL_FD_ISSET(pipe_fds1[0], &readfds));
-	TEST_ASSERT_NOT_EQUAL(0, OSAL_FD_ISSET(pipe_fds2[0], &readfds));
+	TEST_ASSERT_NOT_EQUAL(0, osal_fd_isset(pipe_fds1[0], &readfds));
+	TEST_ASSERT_NOT_EQUAL(0, osal_fd_isset(pipe_fds2[0], &readfds));
 
 	close(pipe_fds1[0]);
 	close(pipe_fds1[1]);
@@ -316,15 +316,15 @@ static void test_select_write_ready(void)
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 监听写事件 */
-	OSAL_FD_ZERO(&writefds);
-	OSAL_FD_SET(pipe_fds[1], &writefds);
+	osal_fd_zero(&writefds);
+	osal_fd_set(pipe_fds[1], &writefds);
 
 	timeout.tv_sec = 0;
 	timeout.tv_usec = 0;
 
-	ret = OSAL_select(pipe_fds[1] + 1, NULL, &writefds, NULL, &timeout);
+	ret = osal_select(pipe_fds[1] + 1, NULL, &writefds, NULL, &timeout);
 	TEST_ASSERT_EQUAL(1, ret);
-	TEST_ASSERT_NOT_EQUAL(0, OSAL_FD_ISSET(pipe_fds[1], &writefds));
+	TEST_ASSERT_NOT_EQUAL(0, osal_fd_isset(pipe_fds[1], &writefds));
 
 	close(pipe_fds[0]);
 	close(pipe_fds[1]);
@@ -343,20 +343,20 @@ static void test_select_read_and_write(void)
 	write(pipe_fds[1], "test", 4);
 
 	/* 同时监听读和写 */
-	OSAL_FD_ZERO(&readfds);
-	OSAL_FD_ZERO(&writefds);
-	OSAL_FD_SET(pipe_fds[0], &readfds);
-	OSAL_FD_SET(pipe_fds[1], &writefds);
+	osal_fd_zero(&readfds);
+	osal_fd_zero(&writefds);
+	osal_fd_set(pipe_fds[0], &readfds);
+	osal_fd_set(pipe_fds[1], &writefds);
 
 	timeout.tv_sec = 0;
 	timeout.tv_usec = 0;
 
 	int max_fd = (pipe_fds[0] > pipe_fds[1]) ? pipe_fds[0] : pipe_fds[1];
-	ret = OSAL_select(max_fd + 1, &readfds, &writefds, NULL, &timeout);
+	ret = osal_select(max_fd + 1, &readfds, &writefds, NULL, &timeout);
 
 	TEST_ASSERT_EQUAL(2, ret);
-	TEST_ASSERT_NOT_EQUAL(0, OSAL_FD_ISSET(pipe_fds[0], &readfds));
-	TEST_ASSERT_NOT_EQUAL(0, OSAL_FD_ISSET(pipe_fds[1], &writefds));
+	TEST_ASSERT_NOT_EQUAL(0, osal_fd_isset(pipe_fds[0], &readfds));
+	TEST_ASSERT_NOT_EQUAL(0, osal_fd_isset(pipe_fds[1], &writefds));
 
 	close(pipe_fds[0]);
 	close(pipe_fds[1]);
@@ -371,9 +371,9 @@ static void test_select_null_sets(void)
 	timeout.tv_sec = 0;
 	timeout.tv_usec = 10000; /* 10ms */
 
-	uint64_t start_time = OSAL_get_tick_count();
-	ret = OSAL_select(0, NULL, NULL, NULL, &timeout);
-	uint64_t elapsed = OSAL_get_tick_count() - start_time;
+	uint64_t start_time = osal_get_tick_count();
+	ret = osal_select(0, NULL, NULL, NULL, &timeout);
+	uint64_t elapsed = osal_get_tick_count() - start_time;
 
 	TEST_ASSERT_EQUAL(0, ret);
 	TEST_ASSERT(elapsed >= 5);
@@ -391,11 +391,11 @@ static void test_select_null_timeout(void)
 
 	write(pipe_fds[1], "test", 4);
 
-	OSAL_FD_ZERO(&readfds);
-	OSAL_FD_SET(pipe_fds[0], &readfds);
+	osal_fd_zero(&readfds);
+	osal_fd_set(pipe_fds[0], &readfds);
 
 	/* NULL timeout表示无限等待，但因为有数据所以会立即返回 */
-	ret = OSAL_select(pipe_fds[0] + 1, &readfds, NULL, NULL, NULL);
+	ret = osal_select(pipe_fds[0] + 1, &readfds, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL(1, ret);
 
 	close(pipe_fds[0]);
@@ -414,16 +414,16 @@ static void test_pselect_basic(void)
 
 	write(pipe_fds[1], "test", 4);
 
-	OSAL_FD_ZERO(&readfds);
-	OSAL_FD_SET(pipe_fds[0], &readfds);
+	osal_fd_zero(&readfds);
+	osal_fd_set(pipe_fds[0], &readfds);
 
 	/* pselect使用纳秒精度 */
 	timeout.tv_sec = 0;
 	timeout.tv_nsec = 100000000; /* 100ms */
 
-	ret = OSAL_pselect(pipe_fds[0] + 1, &readfds, NULL, NULL, &timeout, NULL);
+	ret = osal_pselect(pipe_fds[0] + 1, &readfds, NULL, NULL, &timeout, NULL);
 	TEST_ASSERT_EQUAL(1, ret);
-	TEST_ASSERT_NOT_EQUAL(0, OSAL_FD_ISSET(pipe_fds[0], &readfds));
+	TEST_ASSERT_NOT_EQUAL(0, osal_fd_isset(pipe_fds[0], &readfds));
 
 	close(pipe_fds[0]);
 	close(pipe_fds[1]);
@@ -438,16 +438,16 @@ static void test_fd_set_large_fd(void)
 	osal_fd_set_t set;
 	int32_t ret;
 
-	OSAL_FD_ZERO(&set);
+	osal_fd_zero(&set);
 
 	/* 测试较大的文件描述符 */
 	int fd = 100;
-	OSAL_FD_SET(fd, &set);
-	ret = OSAL_FD_ISSET(fd, &set);
+	osal_fd_set(fd, &set);
+	ret = osal_fd_isset(fd, &set);
 	TEST_ASSERT_NOT_EQUAL(0, ret);
 
-	OSAL_FD_CLR(fd, &set);
-	ret = OSAL_FD_ISSET(fd, &set);
+	osal_fd_clr(fd, &set);
+	ret = osal_fd_isset(fd, &set);
 	TEST_ASSERT_EQUAL(0, ret);
 }
 
@@ -456,15 +456,15 @@ static void test_fd_set_boundary(void)
 	osal_fd_set_t set;
 	int32_t ret;
 
-	OSAL_FD_ZERO(&set);
+	osal_fd_zero(&set);
 
 	/* 测试边界值 */
-	OSAL_FD_SET(0, &set);
-	ret = OSAL_FD_ISSET(0, &set);
+	osal_fd_set(0, &set);
+	ret = osal_fd_isset(0, &set);
 	TEST_ASSERT_NOT_EQUAL(0, ret);
 
-	OSAL_FD_SET(OSAL_FD_SETSIZE - 1, &set);
-	ret = OSAL_FD_ISSET(OSAL_FD_SETSIZE - 1, &set);
+	osal_fd_set(OSAL_FD_SETSIZE - 1, &set);
+	ret = osal_fd_isset(OSAL_FD_SETSIZE - 1, &set);
 	TEST_ASSERT_NOT_EQUAL(0, ret);
 }
 

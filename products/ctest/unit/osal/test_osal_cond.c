@@ -14,17 +14,17 @@ static bool data_ready = false;
 static void test_cond_init_success(void)
 {
 	osal_cond_t cond;
-	int32_t ret = OSAL_pthread_cond_init(&cond, NULL);
+	int32_t ret = osal_pthread_cond_init(&cond, NULL);
 
 	TEST_ASSERT_EQUAL(0, ret);
 
-	OSAL_pthread_cond_destroy(&cond);
+	osal_pthread_cond_destroy(&cond);
 }
 
 /* 测试用例2: 条件变量初始化失败 - 空指针 */
 static void test_cond_init_nullpointer(void)
 {
-	int32_t ret = OSAL_pthread_cond_init(NULL, NULL);
+	int32_t ret = osal_pthread_cond_init(NULL, NULL);
 	TEST_ASSERT_EQUAL(-1, ret);
 	TEST_ASSERT_EQUAL(EINVAL, errno);
 }
@@ -33,16 +33,16 @@ static void test_cond_init_nullpointer(void)
 static void test_cond_destroy_success(void)
 {
 	osal_cond_t cond;
-	OSAL_pthread_cond_init(&cond, NULL);
+	osal_pthread_cond_init(&cond, NULL);
 
-	int32_t ret = OSAL_pthread_cond_destroy(&cond);
+	int32_t ret = osal_pthread_cond_destroy(&cond);
 	TEST_ASSERT_EQUAL(0, ret);
 }
 
 /* 测试用例4: 条件变量销毁失败 - 空指针 */
 static void test_cond_destroy_nullpointer(void)
 {
-	int32_t ret = OSAL_pthread_cond_destroy(NULL);
+	int32_t ret = osal_pthread_cond_destroy(NULL);
 	TEST_ASSERT_EQUAL(-1, ret);
 	TEST_ASSERT_EQUAL(EINVAL, errno);
 }
@@ -50,7 +50,7 @@ static void test_cond_destroy_nullpointer(void)
 /* 测试用例5: 条件变量Signal失败 - 空指针 */
 static void test_cond_signal_nullpointer(void)
 {
-	int32_t ret = OSAL_pthread_cond_signal(NULL);
+	int32_t ret = osal_pthread_cond_signal(NULL);
 	TEST_ASSERT_EQUAL(-1, ret);
 	TEST_ASSERT_EQUAL(EINVAL, errno);
 }
@@ -58,7 +58,7 @@ static void test_cond_signal_nullpointer(void)
 /* 测试用例6: 条件变量Broadcast失败 - 空指针 */
 static void test_cond_broadcast_nullpointer(void)
 {
-	int32_t ret = OSAL_pthread_cond_broadcast(NULL);
+	int32_t ret = osal_pthread_cond_broadcast(NULL);
 	TEST_ASSERT_EQUAL(-1, ret);
 	TEST_ASSERT_EQUAL(EINVAL, errno);
 }
@@ -69,21 +69,21 @@ static void test_cond_wait_nullpointer(void)
 	osal_cond_t cond;
 	osal_mutex_t mutex;
 
-	OSAL_pthread_cond_init(&cond, NULL);
-	OSAL_pthread_mutex_init(&mutex, NULL);
+	osal_pthread_cond_init(&cond, NULL);
+	osal_pthread_mutex_init(&mutex, NULL);
 
 	/* cond 为 NULL */
-	int32_t ret = OSAL_pthread_cond_wait(NULL, &mutex);
+	int32_t ret = osal_pthread_cond_wait(NULL, &mutex);
 	TEST_ASSERT_EQUAL(-1, ret);
 	TEST_ASSERT_EQUAL(EINVAL, errno);
 
 	/* mutex 为 NULL */
-	ret = OSAL_pthread_cond_wait(&cond, NULL);
+	ret = osal_pthread_cond_wait(&cond, NULL);
 	TEST_ASSERT_EQUAL(-1, ret);
 	TEST_ASSERT_EQUAL(EINVAL, errno);
 
-	OSAL_pthread_cond_destroy(&cond);
-	OSAL_pthread_mutex_destroy(&mutex);
+	osal_pthread_cond_destroy(&cond);
+	osal_pthread_mutex_destroy(&mutex);
 }
 
 /* 测试用例8: 条件变量超时等待 - 超时 */
@@ -92,18 +92,18 @@ static void test_cond_timedwait_timeout(void)
 	osal_cond_t cond;
 	osal_mutex_t mutex;
 
-	OSAL_pthread_cond_init(&cond, NULL);
-	OSAL_pthread_mutex_init(&mutex, NULL);
+	osal_pthread_cond_init(&cond, NULL);
+	osal_pthread_mutex_init(&mutex, NULL);
 
-	OSAL_pthread_mutex_lock(&mutex);
-	int32_t ret = OSAL_pthread_cond_timedwait(&cond, &mutex, 100);
-	OSAL_pthread_mutex_unlock(&mutex);
+	osal_pthread_mutex_lock(&mutex);
+	int32_t ret = osal_pthread_cond_timedwait(&cond, &mutex, 100);
+	osal_pthread_mutex_unlock(&mutex);
 
 	TEST_ASSERT_EQUAL(-1, ret);
 	TEST_ASSERT_EQUAL(ETIMEDOUT, errno);
 
-	OSAL_pthread_cond_destroy(&cond);
-	OSAL_pthread_mutex_destroy(&mutex);
+	osal_pthread_cond_destroy(&cond);
+	osal_pthread_mutex_destroy(&mutex);
 }
 
 /* 生产者线程 */
@@ -112,13 +112,13 @@ static void *producer_thread(void *arg)
 	osal_cond_t *cond = ((osal_cond_t **)arg)[0];
 	osal_mutex_t *mutex = ((osal_mutex_t **)arg)[1];
 
-	OSAL_msleep(50); /* 等待消费者先运行 */
+	osal_msleep(50); /* 等待消费者先运行 */
 
-	OSAL_pthread_mutex_lock(mutex);
+	osal_pthread_mutex_lock(mutex);
 	shared_data = 42;
 	data_ready = true;
-	OSAL_pthread_cond_signal(cond);
-	OSAL_pthread_mutex_unlock(mutex);
+	osal_pthread_cond_signal(cond);
+	osal_pthread_mutex_unlock(mutex);
 
 	return NULL;
 }
@@ -129,11 +129,11 @@ static void *consumer_thread(void *arg)
 	osal_cond_t *cond = ((osal_cond_t **)arg)[0];
 	osal_mutex_t *mutex = ((osal_mutex_t **)arg)[1];
 
-	OSAL_pthread_mutex_lock(mutex);
+	osal_pthread_mutex_lock(mutex);
 	while (!data_ready) {
-		OSAL_pthread_cond_wait(cond, mutex);
+		osal_pthread_cond_wait(cond, mutex);
 	}
-	OSAL_pthread_mutex_unlock(mutex);
+	osal_pthread_mutex_unlock(mutex);
 
 	return NULL;
 }
@@ -146,26 +146,26 @@ static void test_cond_signal_wakeup(void)
 
 	osal_cond_t cond;
 	osal_mutex_t mutex;
-	OSAL_pthread_cond_init(&cond, NULL);
-	OSAL_pthread_mutex_init(&mutex, NULL);
+	osal_pthread_cond_init(&cond, NULL);
+	osal_pthread_mutex_init(&mutex, NULL);
 
 	osal_thread_t producer, consumer;
 	void *args[] = { &cond, &mutex };
 
 	/* 创建生产者和消费者线程 */
-	OSAL_pthread_create(&consumer, NULL, consumer_thread, args);
-	OSAL_pthread_create(&producer, NULL, producer_thread, args);
+	osal_pthread_create(&consumer, NULL, consumer_thread, args);
+	osal_pthread_create(&producer, NULL, producer_thread, args);
 
 	/* 等待线程完成 */
-	OSAL_pthread_join(producer, NULL);
-	OSAL_pthread_join(consumer, NULL);
+	osal_pthread_join(producer, NULL);
+	osal_pthread_join(consumer, NULL);
 
 	/* 验证数据已传递 */
 	TEST_ASSERT_EQUAL(42, shared_data);
 	TEST_ASSERT_TRUE(data_ready);
 
-	OSAL_pthread_cond_destroy(&cond);
-	OSAL_pthread_mutex_destroy(&mutex);
+	osal_pthread_cond_destroy(&cond);
+	osal_pthread_mutex_destroy(&mutex);
 }
 
 /* 多个等待线程 */
@@ -174,12 +174,12 @@ static void *wait_thread(void *arg)
 	osal_cond_t *cond = ((osal_cond_t **)arg)[0];
 	osal_mutex_t *mutex = ((osal_mutex_t **)arg)[1];
 
-	OSAL_pthread_mutex_lock(mutex);
+	osal_pthread_mutex_lock(mutex);
 	while (!data_ready) {
-		OSAL_pthread_cond_wait(cond, mutex);
+		osal_pthread_cond_wait(cond, mutex);
 	}
 	shared_data++; /* 每个线程增加计数 */
-	OSAL_pthread_mutex_unlock(mutex);
+	osal_pthread_mutex_unlock(mutex);
 
 	return NULL;
 }
@@ -190,12 +190,12 @@ static void *broadcast_thread(void *arg)
 	osal_cond_t *cond = ((osal_cond_t **)arg)[0];
 	osal_mutex_t *mutex = ((osal_mutex_t **)arg)[1];
 
-	OSAL_msleep(100); /* 等待所有等待线程就绪 */
+	osal_msleep(100); /* 等待所有等待线程就绪 */
 
-	OSAL_pthread_mutex_lock(mutex);
+	osal_pthread_mutex_lock(mutex);
 	data_ready = true;
-	OSAL_pthread_cond_broadcast(cond); /* 唤醒所有等待线程 */
-	OSAL_pthread_mutex_unlock(mutex);
+	osal_pthread_cond_broadcast(cond); /* 唤醒所有等待线程 */
+	osal_pthread_mutex_unlock(mutex);
 
 	return NULL;
 }
@@ -208,8 +208,8 @@ static void test_cond_broadcast_wakeup(void)
 
 	osal_cond_t cond;
 	osal_mutex_t mutex;
-	OSAL_pthread_cond_init(&cond, NULL);
-	OSAL_pthread_mutex_init(&mutex, NULL);
+	osal_pthread_cond_init(&cond, NULL);
+	osal_pthread_mutex_init(&mutex, NULL);
 
 	osal_thread_t threads[5];
 	void *args[] = { &cond, &mutex };
@@ -217,22 +217,22 @@ static void test_cond_broadcast_wakeup(void)
 
 	/* 创建多个等待线程 */
 	for (i = 0; i < 4; i++) {
-		OSAL_pthread_create(&threads[i], NULL, wait_thread, args);
+		osal_pthread_create(&threads[i], NULL, wait_thread, args);
 	}
 
 	/* 创建广播线程 */
-	OSAL_pthread_create(&threads[4], NULL, broadcast_thread, args);
+	osal_pthread_create(&threads[4], NULL, broadcast_thread, args);
 
 	/* 等待所有线程完成 */
 	for (i = 0; i < 5; i++) {
-		OSAL_pthread_join(threads[i], NULL);
+		osal_pthread_join(threads[i], NULL);
 	}
 
 	/* 验证所有等待线程都被唤醒 */
 	TEST_ASSERT_EQUAL(4, shared_data);
 
-	OSAL_pthread_cond_destroy(&cond);
-	OSAL_pthread_mutex_destroy(&mutex);
+	osal_pthread_cond_destroy(&cond);
+	osal_pthread_mutex_destroy(&mutex);
 }
 
 /* 注册测试套件 */

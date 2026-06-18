@@ -200,14 +200,14 @@ typedef int64_t osal_nsec_t;
  * - osal_atomic_uint32_t: 原子无符号32位整数
  *
  * 主要接口：
- * - OSAL_atomic_init()          初始化
- * - OSAL_atomic_load()          原子读取
- * - OSAL_atomic_store()         原子写入
- * - OSAL_atomic_fetch_add()      原子加法
- * - OSAL_atomic_fetch_sub()      原子减法
- * - OSAL_atomic_inc()     原子自增
- * - OSAL_atomic_dec()     原子自减
- * - OSAL_atomic_compare_exchange_strong() 原子CAS
+ * - osal_atomic_init()          初始化
+ * - osal_atomic_load()          原子读取
+ * - osal_atomic_store()         原子写入
+ * - osal_atomic_fetch_add()      原子加法
+ * - osal_atomic_fetch_sub()      原子减法
+ * - osal_atomic_inc()     原子自增
+ * - osal_atomic_dec()     原子自减
+ * - osal_atomic_compare_exchange_strong() 原子CAS
  *
  * 详见：osal/include/ipc/osal_atomic.h
  */

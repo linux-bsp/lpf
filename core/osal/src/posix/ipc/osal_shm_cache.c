@@ -91,8 +91,8 @@ static int32_t find_free_cache_slot(void)
 /**
  * @brief 创建共享内存缓存
  */
-int32_t OSAL_CacheCreate(const char *name, uint32_t max_entries,
-						 osal_id_t *cache_id)
+int32_t osal_cache_create(const char *name, uint32_t max_entries,
+						  osal_id_t *cache_id)
 {
 	int32_t slot;
 	cache_descriptor_t *cache;
@@ -186,7 +186,7 @@ int32_t OSAL_CacheCreate(const char *name, uint32_t max_entries,
 /**
  * @brief 打开已存在的共享内存缓存
  */
-int32_t OSAL_CacheOpen(const char *name, osal_id_t *cache_id)
+int32_t osal_cache_open(const char *name, osal_id_t *cache_id)
 {
 	int32_t slot;
 	cache_descriptor_t *cache;
@@ -260,7 +260,7 @@ int32_t OSAL_CacheOpen(const char *name, osal_id_t *cache_id)
 /**
  * @brief 删除共享内存缓存
  */
-int32_t OSAL_CacheDelete(osal_id_t cache_id)
+int32_t osal_cache_delete(osal_id_t cache_id)
 {
 	cache_descriptor_t *cache;
 
@@ -299,9 +299,9 @@ int32_t OSAL_CacheDelete(osal_id_t cache_id)
 /**
  * @brief 写入缓存条目
  */
-int32_t OSAL_CacheWrite(osal_id_t cache_id, uint32_t entry_id,
-						const uint8_t *data, uint32_t data_len,
-						uint32_t data_validity_ms)
+int32_t osal_cache_write(osal_id_t cache_id, uint32_t entry_id,
+						 const uint8_t *data, uint32_t data_len,
+						 uint32_t data_validity_ms)
 {
 	cache_descriptor_t *cache;
 	osal_cache_entry_t *entry;
@@ -326,7 +326,7 @@ int32_t OSAL_CacheWrite(osal_id_t cache_id, uint32_t entry_id,
 	pthread_mutex_lock(&cache->header->mutex);
 
 	/* 复制数据 */
-	OSAL_memcpy(entry->data, data, data_len);
+	osal_memcpy(entry->data, data, data_len);
 	entry->data_len = data_len;
 
 	/* 更新元数据 */
@@ -348,8 +348,8 @@ int32_t OSAL_CacheWrite(osal_id_t cache_id, uint32_t entry_id,
 /**
  * @brief 读取缓存条目
  */
-int32_t OSAL_CacheRead(osal_id_t cache_id, uint32_t entry_id,
-					   osal_cache_result_t *result)
+int32_t osal_cache_read(osal_id_t cache_id, uint32_t entry_id,
+						osal_cache_result_t *result)
 {
 	cache_descriptor_t *cache;
 	osal_cache_entry_t *entry;
@@ -396,7 +396,7 @@ int32_t OSAL_CacheRead(osal_id_t cache_id, uint32_t entry_id,
 
 	/* 封装结果 */
 	result->entry_id = entry_id;
-	OSAL_memcpy(result->data, entry->data, entry->data_len);
+	osal_memcpy(result->data, entry->data, entry->data_len);
 	result->data_len = entry->data_len;
 	result->timestamp_us = entry->timestamp_us;
 	result->age_ms = age_ms;
@@ -415,7 +415,7 @@ int32_t OSAL_CacheRead(osal_id_t cache_id, uint32_t entry_id,
 /**
  * @brief 标记缓存条目为STALE
  */
-int32_t OSAL_CacheInvalidate(osal_id_t cache_id, uint32_t entry_id)
+int32_t osal_cache_invalidate(osal_id_t cache_id, uint32_t entry_id)
 {
 	cache_descriptor_t *cache;
 	osal_cache_entry_t *entry;
@@ -451,8 +451,8 @@ int32_t OSAL_CacheInvalidate(osal_id_t cache_id, uint32_t entry_id)
 /**
  * @brief 批量标记缓存条目为STALE
  */
-int32_t OSAL_CacheInvalidateBatch(osal_id_t cache_id, const uint32_t *entry_ids,
-								  uint32_t count)
+int32_t osal_cache_invalidate_batch(osal_id_t cache_id,
+									const uint32_t *entry_ids, uint32_t count)
 {
 	uint32_t i;
 
@@ -461,7 +461,7 @@ int32_t OSAL_CacheInvalidateBatch(osal_id_t cache_id, const uint32_t *entry_ids,
 	}
 
 	for (i = 0; i < count; i++) {
-		OSAL_CacheInvalidate(cache_id, entry_ids[i]);
+		osal_cache_invalidate(cache_id, entry_ids[i]);
 	}
 
 	return OSAL_SUCCESS;
@@ -470,9 +470,9 @@ int32_t OSAL_CacheInvalidateBatch(osal_id_t cache_id, const uint32_t *entry_ids,
 /**
  * @brief 获取缓存统计信息
  */
-int32_t OSAL_CacheGetStats(osal_id_t cache_id, uint32_t *total_count,
-						   uint32_t *valid_count, uint32_t *fresh_count,
-						   uint32_t *stale_count)
+int32_t osal_cache_get_stats(osal_id_t cache_id, uint32_t *total_count,
+							 uint32_t *valid_count, uint32_t *fresh_count,
+							 uint32_t *stale_count)
 {
 	cache_descriptor_t *cache;
 	uint64_t now;

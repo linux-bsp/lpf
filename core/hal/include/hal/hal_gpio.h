@@ -87,7 +87,7 @@ typedef struct {
  * @note 如果GPIO已被导出，会先释放再重新初始化
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_GPIO_init(uint32_t gpio_num, const hal_gpio_config_t *config);
+int32_t hal_gpio_init(uint32_t gpio_num, const hal_gpio_config_t *config);
 
 /**
  * @brief 释放GPIO引脚
@@ -103,7 +103,7 @@ int32_t HAL_GPIO_init(uint32_t gpio_num, const hal_gpio_config_t *config);
  * @note 如果配置了中断，会自动停止中断监听线程
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_GPIO_deinit(uint32_t gpio_num);
+int32_t hal_gpio_deinit(uint32_t gpio_num);
 
 /**
  * @brief 设置GPIO方向
@@ -119,7 +119,7 @@ int32_t HAL_GPIO_deinit(uint32_t gpio_num);
  *
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_GPIO_set_direction(uint32_t gpio_num,
+int32_t hal_gpio_set_direction(uint32_t gpio_num,
 							   hal_gpio_direction_t direction);
 
 /**
@@ -136,7 +136,7 @@ int32_t HAL_GPIO_set_direction(uint32_t gpio_num,
  *
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_GPIO_get_direction(uint32_t gpio_num,
+int32_t hal_gpio_get_direction(uint32_t gpio_num,
 							   hal_gpio_direction_t *direction);
 
 /**
@@ -153,7 +153,7 @@ int32_t HAL_GPIO_get_direction(uint32_t gpio_num,
  *
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_GPIO_set_level(uint32_t gpio_num, hal_gpio_level_t level);
+int32_t hal_gpio_set_level(uint32_t gpio_num, hal_gpio_level_t level);
 
 /**
  * @brief 读取GPIO输入电平
@@ -170,7 +170,7 @@ int32_t HAL_GPIO_set_level(uint32_t gpio_num, hal_gpio_level_t level);
  * @note 输入和输出模式都可以读取电平
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_GPIO_get_level(uint32_t gpio_num, hal_gpio_level_t *level);
+int32_t hal_gpio_get_level(uint32_t gpio_num, hal_gpio_level_t *level);
 
 /**
  * @brief 配置GPIO中断
@@ -190,7 +190,7 @@ int32_t HAL_GPIO_get_level(uint32_t gpio_num, hal_gpio_level_t *level);
  * @note 回调函数在独立的中断监听线程中执行，注意线程安全
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_GPIO_set_interrupt(uint32_t gpio_num, hal_gpio_edge_t edge,
+int32_t hal_gpio_set_interrupt(uint32_t gpio_num, hal_gpio_edge_t edge,
 							   hal_gpio_isr_callback_t callback,
 							   void *user_data);
 
@@ -208,7 +208,7 @@ int32_t HAL_GPIO_set_interrupt(uint32_t gpio_num, hal_gpio_edge_t edge,
  * @note 必须先调用HAL_GPIO_SetInterrupt配置中断
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_GPIO_enable_interrupt(uint32_t gpio_num);
+int32_t hal_gpio_enable_interrupt(uint32_t gpio_num);
 
 /**
  * @brief 禁用GPIO中断
@@ -224,7 +224,7 @@ int32_t HAL_GPIO_enable_interrupt(uint32_t gpio_num);
  * @note 中断配置仍然保留，可以重新使能
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_GPIO_disable_interrupt(uint32_t gpio_num);
+int32_t hal_gpio_disable_interrupt(uint32_t gpio_num);
 
 #ifdef __cplusplus
 }

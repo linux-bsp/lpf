@@ -63,8 +63,8 @@ typedef struct {
  * @param[out] cache_id 输出缓存ID
  * @return OSAL_SUCCESS 成功
  */
-int32_t OSAL_CacheCreate(const char *name, uint32_t max_entries,
-						 osal_id_t *cache_id);
+int32_t osal_cache_create(const char *name, uint32_t max_entries,
+						  osal_id_t *cache_id);
 
 /**
  * @brief 打开已存在的共享内存缓存
@@ -73,7 +73,7 @@ int32_t OSAL_CacheCreate(const char *name, uint32_t max_entries,
  * @param[out] cache_id 输出缓存ID
  * @return OSAL_SUCCESS 成功
  */
-int32_t OSAL_CacheOpen(const char *name, osal_id_t *cache_id);
+int32_t osal_cache_open(const char *name, osal_id_t *cache_id);
 
 /**
  * @brief 删除共享内存缓存
@@ -81,7 +81,7 @@ int32_t OSAL_CacheOpen(const char *name, osal_id_t *cache_id);
  * @param[in] cache_id 缓存ID
  * @return OSAL_SUCCESS 成功
  */
-int32_t OSAL_CacheDelete(osal_id_t cache_id);
+int32_t osal_cache_delete(osal_id_t cache_id);
 
 /**
  * @brief 写入缓存条目（生产者调用）
@@ -93,9 +93,9 @@ int32_t OSAL_CacheDelete(osal_id_t cache_id);
  * @param[in] data_validity_ms 数据有效期（毫秒）
  * @return OSAL_SUCCESS 成功
  */
-int32_t OSAL_CacheWrite(osal_id_t cache_id, uint32_t entry_id,
-						const uint8_t *data, uint32_t data_len,
-						uint32_t data_validity_ms);
+int32_t osal_cache_write(osal_id_t cache_id, uint32_t entry_id,
+						 const uint8_t *data, uint32_t data_len,
+						 uint32_t data_validity_ms);
 
 /**
  * @brief 读取缓存条目（消费者调用，快速读取<50μs）
@@ -105,8 +105,8 @@ int32_t OSAL_CacheWrite(osal_id_t cache_id, uint32_t entry_id,
  * @param[out] result 输出结果
  * @return OSAL_SUCCESS 成功
  */
-int32_t OSAL_CacheRead(osal_id_t cache_id, uint32_t entry_id,
-					   osal_cache_result_t *result);
+int32_t osal_cache_read(osal_id_t cache_id, uint32_t entry_id,
+						osal_cache_result_t *result);
 
 /**
  * @brief 标记缓存条目为STALE（失效但可用）
@@ -115,7 +115,7 @@ int32_t OSAL_CacheRead(osal_id_t cache_id, uint32_t entry_id,
  * @param[in] entry_id 条目ID
  * @return OSAL_SUCCESS 成功
  */
-int32_t OSAL_CacheInvalidate(osal_id_t cache_id, uint32_t entry_id);
+int32_t osal_cache_invalidate(osal_id_t cache_id, uint32_t entry_id);
 
 /**
  * @brief 批量标记缓存条目为STALE
@@ -125,8 +125,8 @@ int32_t OSAL_CacheInvalidate(osal_id_t cache_id, uint32_t entry_id);
  * @param[in] count 数组长度
  * @return OSAL_SUCCESS 成功
  */
-int32_t OSAL_CacheInvalidateBatch(osal_id_t cache_id, const uint32_t *entry_ids,
-								  uint32_t count);
+int32_t osal_cache_invalidate_batch(osal_id_t cache_id,
+									const uint32_t *entry_ids, uint32_t count);
 
 /**
  * @brief 获取缓存统计信息
@@ -138,8 +138,8 @@ int32_t OSAL_CacheInvalidateBatch(osal_id_t cache_id, const uint32_t *entry_ids,
  * @param[out] stale_count 过期条目数
  * @return OSAL_SUCCESS 成功
  */
-int32_t OSAL_CacheGetStats(osal_id_t cache_id, uint32_t *total_count,
-						   uint32_t *valid_count, uint32_t *fresh_count,
-						   uint32_t *stale_count);
+int32_t osal_cache_get_stats(osal_id_t cache_id, uint32_t *total_count,
+							 uint32_t *valid_count, uint32_t *fresh_count,
+							 uint32_t *stale_count);
 
 #endif /* OSAL_SHM_CACHE_INTERNAL_H */

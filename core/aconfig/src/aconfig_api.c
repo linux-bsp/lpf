@@ -15,7 +15,7 @@ const aconfig_config_table_t g_aconfig_table = { .name = NULL,
 /**
  * @brief 获取当前配置表
  */
-const aconfig_config_table_t *ACONFIG_GetTable(void)
+const aconfig_config_table_t *aconfig_get_table(void)
 {
 	if (NULL == g_aconfig_table.name) {
 		return NULL;

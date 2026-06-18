@@ -22,7 +22,7 @@ extern "C" {
  * @param n 字节数
  * @return 目标内存地址
  */
-void *OSAL_memset(void *s, int32_t c, osal_size_t n);
+void *osal_memset(void *s, int32_t c, osal_size_t n);
 
 /**
  * @brief 内存复制
@@ -31,7 +31,7 @@ void *OSAL_memset(void *s, int32_t c, osal_size_t n);
  * @param n 字节数
  * @return 目标内存地址
  */
-void *OSAL_memcpy(void *dest, const void *src, osal_size_t n);
+void *osal_memcpy(void *dest, const void *src, osal_size_t n);
 
 /**
  * @brief 内存移动（支持重叠）
@@ -40,7 +40,7 @@ void *OSAL_memcpy(void *dest, const void *src, osal_size_t n);
  * @param n 字节数
  * @return 目标内存地址
  */
-void *OSAL_memmove(void *dest, const void *src, osal_size_t n);
+void *osal_memmove(void *dest, const void *src, osal_size_t n);
 
 /**
  * @brief 内存比较
@@ -49,7 +49,7 @@ void *OSAL_memmove(void *dest, const void *src, osal_size_t n);
  * @param n 字节数
  * @return 0表示相等，<0表示s1<s2，>0表示s1>s2
  */
-int32_t OSAL_memcmp(const void *s1, const void *s2, osal_size_t n);
+int32_t osal_memcmp(const void *s1, const void *s2, osal_size_t n);
 
 /*===========================================================================
  * 字符串操作 API
@@ -60,7 +60,7 @@ int32_t OSAL_memcmp(const void *s1, const void *s2, osal_size_t n);
  * @param s 字符串
  * @return 字符串长度（不包括'\0'）
  */
-osal_size_t OSAL_strlen(const char *s);
+osal_size_t osal_strlen(const char *s);
 
 /**
  * @brief 字符串比较
@@ -68,7 +68,7 @@ osal_size_t OSAL_strlen(const char *s);
  * @param s2 第二个字符串
  * @return 0表示相等，<0表示s1<s2，>0表示s1>s2
  */
-int32_t OSAL_strcmp(const char *s1, const char *s2);
+int32_t osal_strcmp(const char *s1, const char *s2);
 
 /**
  * @brief 字符串比较（限定长度）
@@ -77,7 +77,7 @@ int32_t OSAL_strcmp(const char *s1, const char *s2);
  * @param n 最大比较长度
  * @return 0表示相等，<0表示s1<s2，>0表示s1>s2
  */
-int32_t OSAL_strncmp(const char *s1, const char *s2, osal_size_t n);
+int32_t osal_strncmp(const char *s1, const char *s2, osal_size_t n);
 
 /**
  * @brief 字符串比较（忽略大小写）
@@ -85,7 +85,7 @@ int32_t OSAL_strncmp(const char *s1, const char *s2, osal_size_t n);
  * @param s2 第二个字符串
  * @return 0表示相等，<0表示s1<s2，>0表示s1>s2
  */
-int32_t OSAL_strcasecmp(const char *s1, const char *s2);
+int32_t osal_strcasecmp(const char *s1, const char *s2);
 
 /**
  * @brief 字符串复制
@@ -93,7 +93,7 @@ int32_t OSAL_strcasecmp(const char *s1, const char *s2);
  * @param src 源字符串
  * @return 目标缓冲区
  */
-char *OSAL_strcpy(char *dest, const char *src);
+char *osal_strcpy(char *dest, const char *src);
 
 /**
  * @brief 字符串复制（限定长度）
@@ -102,7 +102,7 @@ char *OSAL_strcpy(char *dest, const char *src);
  * @param n 最大复制长度
  * @return 目标缓冲区
  */
-char *OSAL_strncpy(char *dest, const char *src, osal_size_t n);
+char *osal_strncpy(char *dest, const char *src, osal_size_t n);
 
 /**
  * @brief 字符串连接
@@ -110,7 +110,7 @@ char *OSAL_strncpy(char *dest, const char *src, osal_size_t n);
  * @param src 源字符串
  * @return 目标缓冲区
  */
-char *OSAL_strcat(char *dest, const char *src);
+char *osal_strcat(char *dest, const char *src);
 
 /**
  * @brief 字符串连接（限定长度）
@@ -119,7 +119,7 @@ char *OSAL_strcat(char *dest, const char *src);
  * @param n 最大连接长度
  * @return 目标缓冲区
  */
-char *OSAL_strncat(char *dest, const char *src, osal_size_t n);
+char *osal_strncat(char *dest, const char *src, osal_size_t n);
 
 /**
  * @brief 查找子字符串
@@ -127,7 +127,7 @@ char *OSAL_strncat(char *dest, const char *src, osal_size_t n);
  * @param needle 要查找的子字符串
  * @return 子字符串位置，未找到返回NULL
  */
-char *OSAL_strstr(const char *haystack, const char *needle);
+char *osal_strstr(const char *haystack, const char *needle);
 
 /**
  * @brief 计算字符串前缀长度（不包含指定字符集）
@@ -135,7 +135,7 @@ char *OSAL_strstr(const char *haystack, const char *needle);
  * @param reject 拒绝字符集
  * @return 前缀长度
  */
-osal_size_t OSAL_strcspn(const char *s, const char *reject);
+osal_size_t osal_strcspn(const char *s, const char *reject);
 
 /*===========================================================================
  * 格式化字符串 API
@@ -148,7 +148,7 @@ osal_size_t OSAL_strcspn(const char *s, const char *reject);
  * @param ... 可变参数
  * @return 写入的字符数（不包括'\0'）
  */
-int32_t OSAL_sprintf(char *str, const char *format, ...);
+int32_t osal_sprintf(char *str, const char *format, ...);
 
 /**
  * @brief 格式化输出到字符串（限定长度）
@@ -158,7 +158,7 @@ int32_t OSAL_sprintf(char *str, const char *format, ...);
  * @param ... 可变参数
  * @return 写入的字符数（不包括'\0'）
  */
-int32_t OSAL_snprintf(char *str, osal_size_t size, const char *format, ...);
+int32_t osal_snprintf(char *str, osal_size_t size, const char *format, ...);
 
 /**
  * @brief 格式化输出到字符串（使用va_list）
@@ -168,7 +168,7 @@ int32_t OSAL_snprintf(char *str, osal_size_t size, const char *format, ...);
  * @param ap 参数列表
  * @return 写入的字符数（不包括'\0'）
  */
-int32_t OSAL_vsnprintf(char *str, osal_size_t size, const char *format,
+int32_t osal_vsnprintf(char *str, osal_size_t size, const char *format,
 					   va_list ap);
 
 /**
@@ -178,7 +178,7 @@ int32_t OSAL_vsnprintf(char *str, osal_size_t size, const char *format,
  * @param ... 可变参数
  * @return 成功读取的项数
  */
-int32_t OSAL_sscanf(const char *str, const char *format, ...);
+int32_t osal_sscanf(const char *str, const char *format, ...);
 
 /*===========================================================================
  * 字符串转换 API
@@ -189,14 +189,14 @@ int32_t OSAL_sscanf(const char *str, const char *format, ...);
  * @param nptr 字符串
  * @return 整数值
  */
-int32_t OSAL_atoi(const char *nptr);
+int32_t osal_atoi(const char *nptr);
 
 /**
  * @brief 字符串转长整数
  * @param nptr 字符串
  * @return 长整数值
  */
-long OSAL_atol(const char *nptr);
+long osal_atol(const char *nptr);
 
 /**
  * @brief 字符串转长整数（指定进制）
@@ -205,7 +205,7 @@ long OSAL_atol(const char *nptr);
  * @param base 进制（2-36，0表示自动检测）
  * @return 长整数值
  */
-long OSAL_strtol(const char *nptr, char **endptr, int32_t base);
+long osal_strtol(const char *nptr, char **endptr, int32_t base);
 
 #ifdef __cplusplus
 }

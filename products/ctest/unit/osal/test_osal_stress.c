@@ -19,9 +19,9 @@ static void *mutex_stress_thread(void *arg)
 	int32_t iterations = *(int32_t *)arg;
 
 	for (int32_t i = 0; i < iterations; i++) {
-		OSAL_pthread_mutex_lock(&stress_mutex);
+		osal_pthread_mutex_lock(&stress_mutex);
 		stress_counter++;
-		OSAL_pthread_mutex_unlock(&stress_mutex);
+		osal_pthread_mutex_unlock(&stress_mutex);
 	}
 
 	return NULL;
@@ -37,26 +37,26 @@ static void test_stress_mutex_high_contention(void)
 	stress_counter = 0;
 
 	/* 初始化互斥锁 */
-	int32_t ret = OSAL_pthread_mutex_init(&stress_mutex, NULL);
+	int32_t ret = osal_pthread_mutex_init(&stress_mutex, NULL);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 创建多个线程 */
 	for (int32_t i = 0; i < NUM_THREADS; i++) {
-		ret = OSAL_pthread_create(&threads[i], NULL, mutex_stress_thread,
+		ret = osal_pthread_create(&threads[i], NULL, mutex_stress_thread,
 								  &iterations);
 		TEST_ASSERT_EQUAL(0, ret);
 	}
 
 	/* 等待所有线程完成 */
 	for (int32_t i = 0; i < NUM_THREADS; i++) {
-		OSAL_pthread_join(threads[i], NULL);
+		osal_pthread_join(threads[i], NULL);
 	}
 
 	/* 验证计数器值 */
 	TEST_ASSERT_EQUAL(NUM_THREADS * ITERATIONS, stress_counter);
 
 	/* 清理 */
-	OSAL_pthread_mutex_destroy(&stress_mutex);
+	osal_pthread_mutex_destroy(&stress_mutex);
 }
 
 /*===========================================================================
@@ -71,11 +71,11 @@ static void test_stress_memory_allocation(void)
 
 	/* 大量分配 */
 	for (int32_t i = 0; i < NUM_ALLOCS; i++) {
-		ptrs[i] = OSAL_malloc(ALLOC_SIZE);
+		ptrs[i] = osal_malloc(ALLOC_SIZE);
 		TEST_ASSERT_NOT_NULL(ptrs[i]);
 
 		/* 写入数据 */
-		OSAL_memset(ptrs[i], i % 256, ALLOC_SIZE);
+		osal_memset(ptrs[i], i % 256, ALLOC_SIZE);
 	}
 
 	/* 验证数据 */
@@ -88,7 +88,7 @@ static void test_stress_memory_allocation(void)
 
 	/* 释放 */
 	for (int32_t i = 0; i < NUM_ALLOCS; i++) {
-		OSAL_free(ptrs[i]);
+		osal_free(ptrs[i]);
 	}
 }
 
@@ -98,10 +98,10 @@ static void *memory_stress_thread(void *arg)
 	const int32_t ALLOC_SIZE = 512;
 
 	for (int32_t i = 0; i < NUM_ALLOCS; i++) {
-		void *ptr = OSAL_malloc(ALLOC_SIZE);
+		void *ptr = osal_malloc(ALLOC_SIZE);
 		if (ptr) {
-			OSAL_memset(ptr, 0xAA, ALLOC_SIZE);
-			OSAL_free(ptr);
+			osal_memset(ptr, 0xAA, ALLOC_SIZE);
+			osal_free(ptr);
 		}
 	}
 
@@ -116,13 +116,13 @@ static void test_stress_memory_multithread(void)
 	/* 创建多个线程 */
 	for (int32_t i = 0; i < NUM_THREADS; i++) {
 		int32_t ret =
-			OSAL_pthread_create(&threads[i], NULL, memory_stress_thread, NULL);
+			osal_pthread_create(&threads[i], NULL, memory_stress_thread, NULL);
 		TEST_ASSERT_EQUAL(0, ret);
 	}
 
 	/* 等待所有线程完成 */
 	for (int32_t i = 0; i < NUM_THREADS; i++) {
-		OSAL_pthread_join(threads[i], NULL);
+		osal_pthread_join(threads[i], NULL);
 	}
 }
 
@@ -138,9 +138,9 @@ static void *semaphore_stress_thread(void *arg)
 	int32_t iterations = *(int32_t *)arg;
 
 	for (int32_t i = 0; i < iterations; i++) {
-		OSAL_sem_wait(&stress_sem);
+		osal_sem_wait(&stress_sem);
 		__sync_fetch_and_add(&sem_counter, 1);
-		OSAL_sem_post(&stress_sem);
+		osal_sem_post(&stress_sem);
 	}
 
 	return NULL;
@@ -156,26 +156,26 @@ static void test_stress_semaphore_contention(void)
 	sem_counter = 0;
 
 	/* 初始化信号量 */
-	int32_t ret = OSAL_sem_init(&stress_sem, 0, 1);
+	int32_t ret = osal_sem_init(&stress_sem, 0, 1);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 创建多个线程 */
 	for (int32_t i = 0; i < NUM_THREADS; i++) {
-		ret = OSAL_pthread_create(&threads[i], NULL, semaphore_stress_thread,
+		ret = osal_pthread_create(&threads[i], NULL, semaphore_stress_thread,
 								  &iterations);
 		TEST_ASSERT_EQUAL(0, ret);
 	}
 
 	/* 等待所有线程完成 */
 	for (int32_t i = 0; i < NUM_THREADS; i++) {
-		OSAL_pthread_join(threads[i], NULL);
+		osal_pthread_join(threads[i], NULL);
 	}
 
 	/* 验证计数器 */
 	TEST_ASSERT_EQUAL(NUM_THREADS * ITERATIONS, sem_counter);
 
 	/* 清理 */
-	OSAL_sem_destroy(&stress_sem);
+	osal_sem_destroy(&stress_sem);
 }
 
 /*===========================================================================
@@ -184,7 +184,7 @@ static void test_stress_semaphore_contention(void)
 
 static void *dummy_thread_func(void *arg)
 {
-	OSAL_usleep(1000);
+	osal_usleep(1000);
 	return NULL;
 }
 
@@ -197,11 +197,11 @@ static void test_stress_thread_creation(void)
 
 		/* 创建线程 */
 		int32_t ret =
-			OSAL_pthread_create(&thread, NULL, dummy_thread_func, NULL);
+			osal_pthread_create(&thread, NULL, dummy_thread_func, NULL);
 		TEST_ASSERT_EQUAL(0, ret);
 
 		/* 等待线程结束 */
-		ret = OSAL_pthread_join(thread, NULL);
+		ret = osal_pthread_join(thread, NULL);
 		TEST_ASSERT_EQUAL(0, ret);
 	}
 }
@@ -217,7 +217,7 @@ static void *atomic_stress_thread(void *arg)
 	int32_t iterations = *(int32_t *)arg;
 
 	for (int32_t i = 0; i < iterations; i++) {
-		OSAL_atomic_inc(&stress_atomic);
+		osal_atomic_inc(&stress_atomic);
 	}
 
 	return NULL;
@@ -230,22 +230,22 @@ static void test_stress_atomic_operations(void)
 	osal_thread_t threads[NUM_THREADS];
 	int32_t iterations = ITERATIONS;
 
-	OSAL_atomic_init(&stress_atomic, 0);
+	osal_atomic_init(&stress_atomic, 0);
 
 	/* 创建多个线程 */
 	for (int32_t i = 0; i < NUM_THREADS; i++) {
-		int32_t ret = OSAL_pthread_create(&threads[i], NULL,
+		int32_t ret = osal_pthread_create(&threads[i], NULL,
 										  atomic_stress_thread, &iterations);
 		TEST_ASSERT_EQUAL(0, ret);
 	}
 
 	/* 等待所有线程完成 */
 	for (int32_t i = 0; i < NUM_THREADS; i++) {
-		OSAL_pthread_join(threads[i], NULL);
+		osal_pthread_join(threads[i], NULL);
 	}
 
 	/* 验证结果 */
-	uint32_t final_value = OSAL_atomic_load(&stress_atomic);
+	uint32_t final_value = osal_atomic_load(&stress_atomic);
 	TEST_ASSERT_EQUAL(NUM_THREADS * ITERATIONS, final_value);
 }
 

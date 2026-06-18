@@ -109,7 +109,7 @@ static uint32_t osal_mode_to_posix(uint32_t osal_mode)
  * 文件I/O操作
  *===========================================================================*/
 
-int32_t OSAL_open(const char *pathname, int32_t flags, uint32_t mode)
+int32_t osal_open(const char *pathname, int32_t flags, uint32_t mode)
 {
 	int32_t posix_flags = osal_flags_to_posix(flags);
 	uint32_t posix_mode = osal_mode_to_posix(mode);
@@ -117,13 +117,13 @@ int32_t OSAL_open(const char *pathname, int32_t flags, uint32_t mode)
 	return result;
 }
 
-int32_t OSAL_close(int32_t fd)
+int32_t osal_close(int32_t fd)
 {
 	int32_t result = close(fd);
 	return result;
 }
 
-osal_ssize_t OSAL_read(int32_t fd, void *buf, osal_size_t count)
+osal_ssize_t osal_read(int32_t fd, void *buf, osal_size_t count)
 {
 	osal_ssize_t result;
 
@@ -133,7 +133,7 @@ osal_ssize_t OSAL_read(int32_t fd, void *buf, osal_size_t count)
 	return result;
 }
 
-osal_ssize_t OSAL_write(int32_t fd, const void *buf, osal_size_t count)
+osal_ssize_t osal_write(int32_t fd, const void *buf, osal_size_t count)
 {
 	osal_ssize_t result;
 
@@ -143,7 +143,7 @@ osal_ssize_t OSAL_write(int32_t fd, const void *buf, osal_size_t count)
 	return result;
 }
 
-osal_off_t OSAL_lseek(int32_t fd, osal_off_t offset, int32_t whence)
+osal_off_t osal_lseek(int32_t fd, osal_off_t offset, int32_t whence)
 {
 	osal_off_t result = lseek(fd, offset, whence);
 
@@ -155,7 +155,7 @@ osal_off_t OSAL_lseek(int32_t fd, osal_off_t offset, int32_t whence)
  * 文件控制操作
  *===========================================================================*/
 
-int32_t OSAL_fcntl(int32_t fd, int32_t cmd, int32_t arg)
+int32_t osal_fcntl(int32_t fd, int32_t cmd, int32_t arg)
 {
 	int32_t result;
 
@@ -185,7 +185,7 @@ int32_t OSAL_fcntl(int32_t fd, int32_t cmd, int32_t arg)
  * 设备控制操作
  *===========================================================================*/
 
-int32_t OSAL_ioctl(int32_t fd, uint32_t request, void *argp)
+int32_t osal_ioctl(int32_t fd, uint32_t request, void *argp)
 {
 	/* uint32_t 转换为 unsigned long（ioctl 的标准参数类型） */
 	int32_t result = ioctl(fd, (unsigned long)request, argp);
@@ -196,13 +196,13 @@ int32_t OSAL_ioctl(int32_t fd, uint32_t request, void *argp)
  * 文件系统操作
  *===========================================================================*/
 
-int32_t OSAL_unlink(const char *pathname)
+int32_t osal_unlink(const char *pathname)
 {
 	int32_t result = unlink(pathname);
 	return result;
 }
 
-int32_t OSAL_symlink(const char *target, const char *linkpath)
+int32_t osal_symlink(const char *target, const char *linkpath)
 {
 	int32_t result = symlink(target, linkpath);
 	return result;
@@ -212,7 +212,7 @@ int32_t OSAL_symlink(const char *target, const char *linkpath)
  * 文件访问权限检查
  *===========================================================================*/
 
-int32_t OSAL_access(const char *pathname, int32_t mode)
+int32_t osal_access(const char *pathname, int32_t mode)
 {
 	int32_t result = access(pathname, mode);
 	return result;

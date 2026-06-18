@@ -12,22 +12,22 @@
 
 static void test_osal_get_version_string(void)
 {
-	const char *version = OSAL_get_version_string();
+	const char *version = osal_get_version_string();
 
 	TEST_ASSERT_NOT_NULL(version);
-	TEST_ASSERT_TRUE(OSAL_strlen(version) > 0);
+	TEST_ASSERT_TRUE(osal_strlen(version) > 0);
 
 	/* Version string should contain "OSAL" */
-	TEST_ASSERT_TRUE(OSAL_strstr(version, "OSAL") != NULL);
+	TEST_ASSERT_TRUE(osal_strstr(version, "OSAL") != NULL);
 }
 
 static void test_osal_version_format(void)
 {
-	const char *version = OSAL_get_version_string();
+	const char *version = osal_get_version_string();
 
 	/* Version should contain version number pattern */
-	bool has_v = (OSAL_strstr(version, "v") != NULL ||
-				  OSAL_strstr(version, "V") != NULL);
+	bool has_v = (osal_strstr(version, "v") != NULL ||
+				  osal_strstr(version, "V") != NULL);
 	bool has_dot = false;
 
 	/* Check for dot manually */
@@ -44,8 +44,8 @@ static void test_osal_version_format(void)
 static void test_osal_version_consistency(void)
 {
 	/* Multiple calls should return the same string */
-	const char *v1 = OSAL_get_version_string();
-	const char *v2 = OSAL_get_version_string();
+	const char *v1 = osal_get_version_string();
+	const char *v2 = osal_get_version_string();
 
 	TEST_ASSERT_STRING_EQUAL(v1, v2);
 }

@@ -8,7 +8,7 @@
 #include <time.h>
 #include <sys/time.h>
 
-int32_t OSAL_sem_init(osal_sem_t *sem, int32_t pshared, uint32_t value)
+int32_t osal_sem_init(osal_sem_t *sem, int32_t pshared, uint32_t value)
 {
 	if (sem == NULL) {
 		errno = EINVAL;
@@ -18,7 +18,7 @@ int32_t OSAL_sem_init(osal_sem_t *sem, int32_t pshared, uint32_t value)
 	return sem_init(sem, pshared, value);
 }
 
-int32_t OSAL_sem_destroy(osal_sem_t *sem)
+int32_t osal_sem_destroy(osal_sem_t *sem)
 {
 	if (sem == NULL) {
 		errno = EINVAL;
@@ -28,7 +28,7 @@ int32_t OSAL_sem_destroy(osal_sem_t *sem)
 	return sem_destroy(sem);
 }
 
-int32_t OSAL_sem_wait(osal_sem_t *sem)
+int32_t osal_sem_wait(osal_sem_t *sem)
 {
 	if (sem == NULL) {
 		errno = EINVAL;
@@ -38,7 +38,7 @@ int32_t OSAL_sem_wait(osal_sem_t *sem)
 	return sem_wait(sem);
 }
 
-int32_t OSAL_sem_trywait(osal_sem_t *sem)
+int32_t osal_sem_trywait(osal_sem_t *sem)
 {
 	if (sem == NULL) {
 		errno = EINVAL;
@@ -48,7 +48,7 @@ int32_t OSAL_sem_trywait(osal_sem_t *sem)
 	return sem_trywait(sem);
 }
 
-int32_t OSAL_sem_timedwait(osal_sem_t *sem, uint32_t timeout_ms)
+int32_t osal_sem_timedwait(osal_sem_t *sem, uint32_t timeout_ms)
 {
 	struct timespec ts;
 
@@ -107,7 +107,7 @@ int32_t OSAL_sem_timedwait(osal_sem_t *sem, uint32_t timeout_ms)
 #endif
 }
 
-int32_t OSAL_sem_post(osal_sem_t *sem)
+int32_t osal_sem_post(osal_sem_t *sem)
 {
 	if (sem == NULL) {
 		errno = EINVAL;
@@ -117,7 +117,7 @@ int32_t OSAL_sem_post(osal_sem_t *sem)
 	return sem_post(sem);
 }
 
-int32_t OSAL_sem_getvalue(osal_sem_t *sem, int32_t *value)
+int32_t osal_sem_getvalue(osal_sem_t *sem, int32_t *value)
 {
 	int val;
 

@@ -40,7 +40,7 @@ static void test_tcgetattr_tcsetattr(void)
 	}
 
 	/* 获取终端属性 */
-	ret = OSAL_tcgetattr(slave_fd, &term);
+	ret = osal_tcgetattr(slave_fd, &term);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 修改属性：设置为原始模式 */
@@ -49,12 +49,12 @@ static void test_tcgetattr_tcsetattr(void)
 	term.c_oflag &= ~OSAL_OPOST;
 
 	/* 设置终端属性 */
-	ret = OSAL_tcsetattr(slave_fd, OSAL_TCSANOW, &term);
+	ret = osal_tcsetattr(slave_fd, OSAL_TCSANOW, &term);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 验证设置成功 */
 	osal_termios_t term2;
-	ret = OSAL_tcgetattr(slave_fd, &term2);
+	ret = osal_tcgetattr(slave_fd, &term2);
 	TEST_ASSERT_EQUAL(0, ret);
 	TEST_ASSERT_EQUAL(term.c_lflag, term2.c_lflag);
 
@@ -68,10 +68,10 @@ static void test_tcgetattr_invalid_fd(void)
 	int32_t ret;
 
 	/* 测试无效的文件描述符 */
-	ret = OSAL_tcgetattr(-1, &term);
+	ret = osal_tcgetattr(-1, &term);
 	TEST_ASSERT_EQUAL(-1, ret);
 
-	ret = OSAL_tcgetattr(9999, &term);
+	ret = osal_tcgetattr(9999, &term);
 	TEST_ASSERT_EQUAL(-1, ret);
 }
 
@@ -87,7 +87,7 @@ static void test_tcgetattr_null_pointer(void)
 	}
 
 	/* 测试NULL指针 */
-	ret = OSAL_tcgetattr(slave_fd, NULL);
+	ret = osal_tcgetattr(slave_fd, NULL);
 	TEST_ASSERT_EQUAL(-1, ret);
 
 	close(master_fd);
@@ -106,7 +106,7 @@ static void test_tcsetattr_null_pointer(void)
 	}
 
 	/* 测试NULL指针 */
-	ret = OSAL_tcsetattr(slave_fd, OSAL_TCSANOW, NULL);
+	ret = osal_tcsetattr(slave_fd, OSAL_TCSANOW, NULL);
 	TEST_ASSERT_EQUAL(-1, ret);
 
 	close(master_fd);
@@ -123,21 +123,21 @@ static void test_cfsetispeed_cfgetispeed(void)
 	int32_t ret;
 	uint32_t speed;
 
-	OSAL_memset(&term, 0, sizeof(term));
+	osal_memset(&term, 0, sizeof(term));
 
 	/* 设置9600波特率 */
-	ret = OSAL_cfsetispeed(&term, OSAL_B9600);
+	ret = osal_cfsetispeed(&term, OSAL_B9600);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 获取波特率 */
-	speed = OSAL_cfgetispeed(&term);
+	speed = osal_cfgetispeed(&term);
 	TEST_ASSERT_EQUAL(OSAL_B9600, speed);
 
 	/* 设置115200波特率 */
-	ret = OSAL_cfsetispeed(&term, OSAL_B115200);
+	ret = osal_cfsetispeed(&term, OSAL_B115200);
 	TEST_ASSERT_EQUAL(0, ret);
 
-	speed = OSAL_cfgetispeed(&term);
+	speed = osal_cfgetispeed(&term);
 	TEST_ASSERT_EQUAL(OSAL_B115200, speed);
 }
 
@@ -147,21 +147,21 @@ static void test_cfsetospeed_cfgetospeed(void)
 	int32_t ret;
 	uint32_t speed;
 
-	OSAL_memset(&term, 0, sizeof(term));
+	osal_memset(&term, 0, sizeof(term));
 
 	/* 设置9600波特率 */
-	ret = OSAL_cfsetospeed(&term, OSAL_B9600);
+	ret = osal_cfsetospeed(&term, OSAL_B9600);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 获取波特率 */
-	speed = OSAL_cfgetospeed(&term);
+	speed = osal_cfgetospeed(&term);
 	TEST_ASSERT_EQUAL(OSAL_B9600, speed);
 
 	/* 设置115200波特率 */
-	ret = OSAL_cfsetospeed(&term, OSAL_B115200);
+	ret = osal_cfsetospeed(&term, OSAL_B115200);
 	TEST_ASSERT_EQUAL(0, ret);
 
-	speed = OSAL_cfgetospeed(&term);
+	speed = osal_cfgetospeed(&term);
 	TEST_ASSERT_EQUAL(OSAL_B115200, speed);
 }
 
@@ -171,7 +171,7 @@ static void test_baudrate_common_values(void)
 	int32_t ret;
 	uint32_t speed;
 
-	OSAL_memset(&term, 0, sizeof(term));
+	osal_memset(&term, 0, sizeof(term));
 
 	/* 测试常用波特率 */
 	uint32_t baud_rates[] = { OSAL_B9600,	OSAL_B19200,  OSAL_B38400,
@@ -179,14 +179,14 @@ static void test_baudrate_common_values(void)
 							  OSAL_B460800, OSAL_B921600 };
 
 	for (size_t i = 0; i < sizeof(baud_rates) / sizeof(baud_rates[0]); i++) {
-		ret = OSAL_cfsetispeed(&term, baud_rates[i]);
+		ret = osal_cfsetispeed(&term, baud_rates[i]);
 		TEST_ASSERT_EQUAL(0, ret);
-		speed = OSAL_cfgetispeed(&term);
+		speed = osal_cfgetispeed(&term);
 		TEST_ASSERT_EQUAL(baud_rates[i], speed);
 
-		ret = OSAL_cfsetospeed(&term, baud_rates[i]);
+		ret = osal_cfsetospeed(&term, baud_rates[i]);
 		TEST_ASSERT_EQUAL(0, ret);
-		speed = OSAL_cfgetospeed(&term);
+		speed = osal_cfgetospeed(&term);
 		TEST_ASSERT_EQUAL(baud_rates[i], speed);
 	}
 }
@@ -196,7 +196,7 @@ static void test_cfsetispeed_null_pointer(void)
 	int32_t ret;
 
 	/* 测试NULL指针 */
-	ret = OSAL_cfsetispeed(NULL, OSAL_B9600);
+	ret = osal_cfsetispeed(NULL, OSAL_B9600);
 	TEST_ASSERT_EQUAL(-1, ret);
 }
 
@@ -205,7 +205,7 @@ static void test_cfsetospeed_null_pointer(void)
 	int32_t ret;
 
 	/* 测试NULL指针 */
-	ret = OSAL_cfsetospeed(NULL, OSAL_B9600);
+	ret = osal_cfsetospeed(NULL, OSAL_B9600);
 	TEST_ASSERT_EQUAL(-1, ret);
 }
 
@@ -226,7 +226,7 @@ static void test_set_raw_mode(void)
 	}
 
 	/* 获取当前属性 */
-	ret = OSAL_tcgetattr(slave_fd, &term);
+	ret = osal_tcgetattr(slave_fd, &term);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 设置原始模式 */
@@ -238,12 +238,12 @@ static void test_set_raw_mode(void)
 	term.c_cflag &= ~(OSAL_CSIZE | OSAL_PARENB);
 	term.c_cflag |= OSAL_CS8;
 
-	ret = OSAL_tcsetattr(slave_fd, OSAL_TCSANOW, &term);
+	ret = osal_tcsetattr(slave_fd, OSAL_TCSANOW, &term);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 验证设置 */
 	osal_termios_t term2;
-	ret = OSAL_tcgetattr(slave_fd, &term2);
+	ret = osal_tcgetattr(slave_fd, &term2);
 	TEST_ASSERT_EQUAL(0, ret);
 	TEST_ASSERT_EQUAL(0, term2.c_lflag & OSAL_ICANON);
 	TEST_ASSERT_EQUAL(0, term2.c_lflag & OSAL_ECHO);
@@ -264,7 +264,7 @@ static void test_set_8n1_mode(void)
 		return;
 	}
 
-	ret = OSAL_tcgetattr(slave_fd, &term);
+	ret = osal_tcgetattr(slave_fd, &term);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 设置8N1: 8位数据位，无奇偶校验，1个停止位 */
@@ -273,12 +273,12 @@ static void test_set_8n1_mode(void)
 	term.c_cflag &= ~OSAL_CSIZE;
 	term.c_cflag |= OSAL_CS8; /* 8位数据位 */
 
-	ret = OSAL_tcsetattr(slave_fd, OSAL_TCSANOW, &term);
+	ret = osal_tcsetattr(slave_fd, OSAL_TCSANOW, &term);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 验证设置 */
 	osal_termios_t term2;
-	ret = OSAL_tcgetattr(slave_fd, &term2);
+	ret = osal_tcgetattr(slave_fd, &term2);
 	TEST_ASSERT_EQUAL(0, ret);
 	TEST_ASSERT_EQUAL(0, term2.c_cflag & OSAL_PARENB);
 	TEST_ASSERT_EQUAL(0, term2.c_cflag & OSAL_CSTOPB);
@@ -305,18 +305,18 @@ static void test_tcflush(void)
 
 	/* 写入一些数据 */
 	const char *test_data = "test data";
-	write(master_fd, test_data, OSAL_strlen(test_data));
+	write(master_fd, test_data, osal_strlen(test_data));
 
 	/* 刷新输入队列 */
-	ret = OSAL_tcflush(slave_fd, OSAL_TCIFLUSH);
+	ret = osal_tcflush(slave_fd, OSAL_TCIFLUSH);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 刷新输出队列 */
-	ret = OSAL_tcflush(slave_fd, OSAL_TCOFLUSH);
+	ret = osal_tcflush(slave_fd, OSAL_TCOFLUSH);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 刷新输入和输出队列 */
-	ret = OSAL_tcflush(slave_fd, OSAL_TCIOFLUSH);
+	ret = osal_tcflush(slave_fd, OSAL_TCIOFLUSH);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	close(master_fd);
@@ -328,7 +328,7 @@ static void test_tcflush_invalid_fd(void)
 	int32_t ret;
 
 	/* 测试无效的文件描述符 */
-	ret = OSAL_tcflush(-1, OSAL_TCIFLUSH);
+	ret = osal_tcflush(-1, OSAL_TCIFLUSH);
 	TEST_ASSERT_EQUAL(-1, ret);
 }
 
@@ -345,10 +345,10 @@ static void test_tcdrain(void)
 
 	/* 写入数据 */
 	const char *test_data = "test data for drain";
-	write(slave_fd, test_data, OSAL_strlen(test_data));
+	write(slave_fd, test_data, osal_strlen(test_data));
 
 	/* 等待输出完成 */
-	ret = OSAL_tcdrain(slave_fd);
+	ret = osal_tcdrain(slave_fd);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	close(master_fd);
@@ -367,7 +367,7 @@ static void test_tcsendbreak(void)
 	}
 
 	/* 发送BREAK信号 */
-	ret = OSAL_tcsendbreak(slave_fd, 0);
+	ret = osal_tcsendbreak(slave_fd, 0);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	close(master_fd);
@@ -386,19 +386,19 @@ static void test_tcflow(void)
 	}
 
 	/* 挂起输出 */
-	ret = OSAL_tcflow(slave_fd, OSAL_TCOOFF);
+	ret = osal_tcflow(slave_fd, OSAL_TCOOFF);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 恢复输出 */
-	ret = OSAL_tcflow(slave_fd, OSAL_TCOON);
+	ret = osal_tcflow(slave_fd, OSAL_TCOON);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 发送STOP字符 */
-	ret = OSAL_tcflow(slave_fd, OSAL_TCIOFF);
+	ret = osal_tcflow(slave_fd, OSAL_TCIOFF);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 发送START字符 */
-	ret = OSAL_tcflow(slave_fd, OSAL_TCION);
+	ret = osal_tcflow(slave_fd, OSAL_TCION);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	close(master_fd);
@@ -422,12 +422,12 @@ static void test_configure_serial_115200_8n1(void)
 	}
 
 	/* 获取当前属性 */
-	ret = OSAL_tcgetattr(slave_fd, &term);
+	ret = osal_tcgetattr(slave_fd, &term);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 配置为115200 8N1 */
-	OSAL_cfsetispeed(&term, OSAL_B115200);
-	OSAL_cfsetospeed(&term, OSAL_B115200);
+	osal_cfsetispeed(&term, OSAL_B115200);
+	osal_cfsetospeed(&term, OSAL_B115200);
 
 	term.c_cflag &= ~OSAL_PARENB; /* 无校验 */
 	term.c_cflag &= ~OSAL_CSTOPB; /* 1个停止位 */
@@ -439,15 +439,15 @@ static void test_configure_serial_115200_8n1(void)
 	term.c_iflag &= ~(OSAL_IXON | OSAL_IXOFF | OSAL_IXANY);
 	term.c_oflag &= ~OSAL_OPOST;
 
-	ret = OSAL_tcsetattr(slave_fd, OSAL_TCSANOW, &term);
+	ret = osal_tcsetattr(slave_fd, OSAL_TCSANOW, &term);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 验证配置 */
 	osal_termios_t term2;
-	ret = OSAL_tcgetattr(slave_fd, &term2);
+	ret = osal_tcgetattr(slave_fd, &term2);
 	TEST_ASSERT_EQUAL(0, ret);
-	TEST_ASSERT_EQUAL(OSAL_B115200, OSAL_cfgetispeed(&term2));
-	TEST_ASSERT_EQUAL(OSAL_B115200, OSAL_cfgetospeed(&term2));
+	TEST_ASSERT_EQUAL(OSAL_B115200, osal_cfgetispeed(&term2));
+	TEST_ASSERT_EQUAL(OSAL_B115200, osal_cfgetospeed(&term2));
 
 	close(master_fd);
 	close(slave_fd);
@@ -465,12 +465,12 @@ static void test_configure_serial_9600_7e1(void)
 		return;
 	}
 
-	ret = OSAL_tcgetattr(slave_fd, &term);
+	ret = osal_tcgetattr(slave_fd, &term);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 配置为9600 7E1 (7位数据位，偶校验，1个停止位) */
-	OSAL_cfsetispeed(&term, OSAL_B9600);
-	OSAL_cfsetospeed(&term, OSAL_B9600);
+	osal_cfsetispeed(&term, OSAL_B9600);
+	osal_cfsetospeed(&term, OSAL_B9600);
 
 	term.c_cflag |= OSAL_PARENB; /* 启用校验 */
 	term.c_cflag &= ~OSAL_PARODD; /* 偶校验 */
@@ -478,14 +478,14 @@ static void test_configure_serial_9600_7e1(void)
 	term.c_cflag &= ~OSAL_CSIZE;
 	term.c_cflag |= OSAL_CS7; /* 7位数据位 */
 
-	ret = OSAL_tcsetattr(slave_fd, OSAL_TCSANOW, &term);
+	ret = osal_tcsetattr(slave_fd, OSAL_TCSANOW, &term);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 验证配置 */
 	osal_termios_t term2;
-	ret = OSAL_tcgetattr(slave_fd, &term2);
+	ret = osal_tcgetattr(slave_fd, &term2);
 	TEST_ASSERT_EQUAL(0, ret);
-	TEST_ASSERT_EQUAL(OSAL_B9600, OSAL_cfgetispeed(&term2));
+	TEST_ASSERT_EQUAL(OSAL_B9600, osal_cfgetispeed(&term2));
 	TEST_ASSERT(term2.c_cflag & OSAL_PARENB);
 	TEST_ASSERT_EQUAL(0, term2.c_cflag & OSAL_PARODD);
 	TEST_ASSERT_EQUAL(OSAL_CS7, term2.c_cflag & OSAL_CSIZE);

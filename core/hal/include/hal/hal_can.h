@@ -53,7 +53,7 @@ typedef struct {
  * @note 调用此函数前，确保CAN接口已配置并up（如 ip link set can0 up）
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_CAN_init(const hal_can_config_t *config, hal_can_handle_t *handle);
+int32_t hal_can_init(const hal_can_config_t *config, hal_can_handle_t *handle);
 
 /**
  * @brief 关闭CAN驱动
@@ -67,7 +67,7 @@ int32_t HAL_CAN_init(const hal_can_config_t *config, hal_can_handle_t *handle);
  *
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_CAN_deinit(hal_can_handle_t handle);
+int32_t hal_can_deinit(hal_can_handle_t handle);
 
 /**
  * @brief 发送CAN帧
@@ -85,7 +85,7 @@ int32_t HAL_CAN_deinit(hal_can_handle_t handle);
  * @note 发送操作使用配置的tx_timeout作为超时时间
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_CAN_send(hal_can_handle_t handle, const hal_can_frame_t *frame);
+int32_t hal_can_send(hal_can_handle_t handle, const hal_can_frame_t *frame);
 
 /**
  * @brief 接收CAN帧
@@ -104,7 +104,7 @@ int32_t HAL_CAN_send(hal_can_handle_t handle, const hal_can_frame_t *frame);
  * @note 如果timeout=OS_PEND，则阻塞等待直到收到帧
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_CAN_recv(hal_can_handle_t handle, hal_can_frame_t *frame,
+int32_t hal_can_recv(hal_can_handle_t handle, hal_can_frame_t *frame,
 					 int32_t timeout);
 
 /**
@@ -123,7 +123,7 @@ int32_t HAL_CAN_recv(hal_can_handle_t handle, hal_can_frame_t *frame,
  * @note 过滤规则：(received_id & filter_mask) == (filter_id & filter_mask)
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_CAN_set_filter(hal_can_handle_t handle, uint32_t filter_id,
+int32_t hal_can_set_filter(hal_can_handle_t handle, uint32_t filter_id,
 						   uint32_t filter_mask);
 
 #ifdef __cplusplus

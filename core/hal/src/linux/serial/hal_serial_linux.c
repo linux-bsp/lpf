@@ -53,7 +53,7 @@ static uint32_t hal_serial_get_baudrate(uint32_t baudrate)
 	}
 }
 
-int32_t HAL_SERIAL_open(const char *device, const hal_serial_config_t *config,
+int32_t hal_serial_open(const char *device, const hal_serial_config_t *config,
 						hal_serial_handle_t *handle)
 {
 	hal_serial_context_t *ctx;
@@ -70,42 +70,42 @@ int32_t HAL_SERIAL_open(const char *device, const hal_serial_config_t *config,
 	}
 
 	ctx =
-		(hal_serial_context_t *)OSAL_malloc(OSAL_sizeof(hal_serial_context_t));
+		(hal_serial_context_t *)osal_malloc(OSAL_sizeof(hal_serial_context_t));
 	if (NULL == ctx) {
 		LOG_ERROR("HAL_Serial", "Failed to allocate context");
 		return OSAL_ERR_NO_MEMORY;
 	}
 
-	OSAL_memset(ctx, 0, OSAL_sizeof(hal_serial_context_t));
+	osal_memset(ctx, 0, OSAL_sizeof(hal_serial_context_t));
 
 	/* 打开串口设备（O_EXCL 保证独占访问，防止多进程竞争） */
-	ctx->fd = OSAL_open(
+	ctx->fd = osal_open(
 		device, OSAL_O_RDWR | OSAL_O_NOCTTY | OSAL_O_NONBLOCK | OSAL_O_EXCL, 0);
 	if (ctx->fd < 0) {
-		int32_t err = OSAL_get_errno();
+		int32_t err = osal_get_errno();
 		LOG_ERROR("HAL_Serial", "Failed to open %s: %s (%d)", device,
-				  OSAL_strerror(err), err);
-		OSAL_free(ctx);
+				  osal_strerror(err), err);
+		osal_free(ctx);
 		return err;
 	}
 
 	/* 设置为阻塞模式 */
-	OSAL_fcntl(ctx->fd, OSAL_F_SETFL, 0);
+	osal_fcntl(ctx->fd, OSAL_F_SETFL, 0);
 
 	/* 获取当前配置 */
-	if (0 != OSAL_tcgetattr(ctx->fd, &tty)) {
-		int32_t err = OSAL_get_errno();
+	if (0 != osal_tcgetattr(ctx->fd, &tty)) {
+		int32_t err = osal_get_errno();
 		LOG_ERROR("HAL_Serial", "Failed to get attributes: %s (%d)",
-				  OSAL_strerror(err), err);
-		OSAL_close(ctx->fd);
-		OSAL_free(ctx);
+				  osal_strerror(err), err);
+		osal_close(ctx->fd);
+		osal_free(ctx);
 		return err;
 	}
 
 	/* 配置波特率 */
 	speed = hal_serial_get_baudrate(config->baud_rate);
-	OSAL_cfsetispeed(&tty, speed);
-	OSAL_cfsetospeed(&tty, speed);
+	osal_cfsetispeed(&tty, speed);
+	osal_cfsetospeed(&tty, speed);
 
 	/* 配置数据位 */
 	tty.c_cflag &= ~OSAL_CSIZE;
@@ -156,17 +156,17 @@ int32_t HAL_SERIAL_open(const char *device, const hal_serial_config_t *config,
 	tty.c_cc[OSAL_VTIME] = 0; /* 不等待 */
 
 	/* 应用配置 */
-	if (0 != OSAL_tcsetattr(ctx->fd, OSAL_TCSANOW, &tty)) {
-		int32_t err = OSAL_get_errno();
+	if (0 != osal_tcsetattr(ctx->fd, OSAL_TCSANOW, &tty)) {
+		int32_t err = osal_get_errno();
 		LOG_ERROR("HAL_Serial", "Failed to set attributes: %s (%d)",
-				  OSAL_strerror(err), err);
-		OSAL_close(ctx->fd);
-		OSAL_free(ctx);
+				  osal_strerror(err), err);
+		osal_close(ctx->fd);
+		osal_free(ctx);
 		return err;
 	}
 
 	/* 清空缓冲区 */
-	OSAL_tcflush(ctx->fd, OSAL_TCIOFLUSH);
+	osal_tcflush(ctx->fd, OSAL_TCIOFLUSH);
 
 	/* 创建文件锁（进程间保护） */
 	char lock_file[OSAL_LOCK_PATH_MAX_LEN];
@@ -174,11 +174,11 @@ int32_t HAL_SERIAL_open(const char *device, const hal_serial_config_t *config,
 	const char *dev_name = device;
 	uint32_t i;
 
-	if (OSAL_strncmp(device, "/dev/", 5) == 0) {
+	if (osal_strncmp(device, "/dev/", 5) == 0) {
 		dev_name = device + 5; /* 跳过 /dev/ */
 	}
 
-	OSAL_strncpy(lock_name, dev_name, OSAL_sizeof(lock_name) - 1);
+	osal_strncpy(lock_name, dev_name, OSAL_sizeof(lock_name) - 1);
 	lock_name[OSAL_sizeof(lock_name) - 1] = '\0';
 	for (i = 0; lock_name[i] != '\0'; i++) {
 		if (lock_name[i] == '/') {
@@ -186,29 +186,29 @@ int32_t HAL_SERIAL_open(const char *device, const hal_serial_config_t *config,
 		}
 	}
 
-	OSAL_snprintf(lock_file, OSAL_sizeof(lock_file), HAL_SERIAL_LOCK_PATH_FMT,
+	osal_snprintf(lock_file, OSAL_sizeof(lock_file), HAL_SERIAL_LOCK_PATH_FMT,
 				  lock_name);
-	ret = OSAL_flock_create(lock_file, &ctx->flock);
+	ret = osal_flock_create(lock_file, &ctx->flock);
 	if (ret != OSAL_SUCCESS) {
 		LOG_ERROR("HAL_Serial", "Failed to create file lock: %s", lock_file);
-		OSAL_close(ctx->fd);
-		OSAL_free(ctx);
+		osal_close(ctx->fd);
+		osal_free(ctx);
 		return ret;
 	}
 
 	/* 创建互斥锁（线程间保护） */
-	ret = OSAL_pthread_mutex_init(&ctx->mutex, NULL);
+	ret = osal_pthread_mutex_init(&ctx->mutex, NULL);
 	if (ret != OSAL_SUCCESS) {
 		LOG_ERROR("HAL_Serial", "Failed to create mutex");
-		OSAL_flock_destroy(ctx->flock);
-		OSAL_close(ctx->fd);
-		OSAL_free(ctx);
+		osal_flock_destroy(ctx->flock);
+		osal_close(ctx->fd);
+		osal_free(ctx);
 		return ret;
 	}
 
 	/* 保存配置 */
-	OSAL_memcpy(&ctx->config, config, OSAL_sizeof(hal_serial_config_t));
-	OSAL_strncpy(ctx->device, device, OSAL_sizeof(ctx->device) - 1);
+	osal_memcpy(&ctx->config, config, OSAL_sizeof(hal_serial_config_t));
+	osal_strncpy(ctx->device, device, OSAL_sizeof(ctx->device) - 1);
 	ctx->device[OSAL_sizeof(ctx->device) - 1] = '\0';
 
 	*handle = (hal_serial_handle_t)ctx;
@@ -223,9 +223,9 @@ int32_t HAL_SERIAL_open(const char *device, const hal_serial_config_t *config,
 }
 
 /************************************************************************
- * HAL_SERIAL_close - 关闭串口
+ * hal_serial_close - 关闭串口
  ************************************************************************/
-int32_t HAL_SERIAL_close(hal_serial_handle_t handle)
+int32_t hal_serial_close(hal_serial_handle_t handle)
 {
 	hal_serial_context_t *ctx = (hal_serial_context_t *)handle;
 
@@ -234,25 +234,25 @@ int32_t HAL_SERIAL_close(hal_serial_handle_t handle)
 	}
 
 	if (ctx->fd >= 0) {
-		OSAL_close(ctx->fd);
+		osal_close(ctx->fd);
 		LOG_INFO("HAL_Serial", "Closed %s", ctx->device);
 	}
 
 	/* 销毁锁 */
-	OSAL_pthread_mutex_destroy(&ctx->mutex);
+	osal_pthread_mutex_destroy(&ctx->mutex);
 
 	if (ctx->flock) {
-		OSAL_flock_destroy(ctx->flock);
+		osal_flock_destroy(ctx->flock);
 	}
 
-	OSAL_free(ctx);
+	osal_free(ctx);
 	return OSAL_SUCCESS;
 }
 
 /************************************************************************
- * HAL_SERIAL_write - 发送数据
+ * hal_serial_write - 发送数据
  ************************************************************************/
-int32_t HAL_SERIAL_write(hal_serial_handle_t handle, const void *buffer,
+int32_t hal_serial_write(hal_serial_handle_t handle, const void *buffer,
 						 uint32_t size, int32_t timeout)
 {
 	hal_serial_context_t *ctx = (hal_serial_context_t *)handle;
@@ -275,25 +275,25 @@ int32_t HAL_SERIAL_write(hal_serial_handle_t handle, const void *buffer,
      * 策略：先 select，可写后再加锁发送
      */
 	if (timeout > 0) {
-		OSAL_FD_ZERO(&writefds);
-		OSAL_FD_SET(ctx->fd, &writefds);
+		osal_fd_zero(&writefds);
+		osal_fd_set(ctx->fd, &writefds);
 
 		tv.tv_sec = timeout / 1000;
 		tv.tv_usec = (timeout % 1000) * 1000;
 
-		ret = OSAL_select(ctx->fd + 1, NULL, &writefds, NULL, &tv);
+		ret = osal_select(ctx->fd + 1, NULL, &writefds, NULL, &tv);
 		if (0 == ret) {
 			return OSAL_ERR_TIMEOUT;
 		} else if (ret < 0) {
-			int32_t err = OSAL_get_errno();
-			LOG_ERROR("HAL_Serial", "Select error: %s (%d)", OSAL_strerror(err),
+			int32_t err = osal_get_errno();
+			LOG_ERROR("HAL_Serial", "Select error: %s (%d)", osal_strerror(err),
 					  err);
 			return err;
 		}
 	}
 
 	/* 第一层：文件锁（进程间保护） */
-	ret = OSAL_flock_timed_lock(ctx->flock, OSAL_FLOCK_EXCLUSIVE,
+	ret = osal_flock_timed_lock(ctx->flock, OSAL_FLOCK_EXCLUSIVE,
 								HAL_SERIAL_LOCK_TIMEOUT_MS);
 	if (ret != OSAL_SUCCESS) {
 		LOG_ERROR("HAL_Serial",
@@ -302,18 +302,18 @@ int32_t HAL_SERIAL_write(hal_serial_handle_t handle, const void *buffer,
 	}
 
 	/* 第二层：互斥锁（线程间保护） */
-	ret = OSAL_pthread_mutex_lock(&ctx->mutex);
+	ret = osal_pthread_mutex_lock(&ctx->mutex);
 	if (ret != OSAL_SUCCESS) {
 		LOG_ERROR("HAL_Serial", "Failed to acquire mutex");
-		OSAL_flock_unlock(ctx->flock);
+		osal_flock_unlock(ctx->flock);
 		return ret;
 	}
 
 	/* 临界区：发送数据 */
-	written = OSAL_write(ctx->fd, buffer, size);
+	written = osal_write(ctx->fd, buffer, size);
 	if (written < 0) {
-		int32_t err = OSAL_get_errno();
-		LOG_ERROR("HAL_Serial", "Write error: %s (%d)", OSAL_strerror(err),
+		int32_t err = osal_get_errno();
+		LOG_ERROR("HAL_Serial", "Write error: %s (%d)", osal_strerror(err),
 				  err);
 		result = err;
 	} else {
@@ -321,16 +321,16 @@ int32_t HAL_SERIAL_write(hal_serial_handle_t handle, const void *buffer,
 	}
 
 	/* 释放锁（逆序） */
-	OSAL_pthread_mutex_unlock(&ctx->mutex);
-	OSAL_flock_unlock(ctx->flock);
+	osal_pthread_mutex_unlock(&ctx->mutex);
+	osal_flock_unlock(ctx->flock);
 
 	return result;
 }
 
 /************************************************************************
- * HAL_SERIAL_read - 接收数据
+ * hal_serial_read - 接收数据
  ************************************************************************/
-int32_t HAL_SERIAL_read(hal_serial_handle_t handle, void *buffer, uint32_t size,
+int32_t hal_serial_read(hal_serial_handle_t handle, void *buffer, uint32_t size,
 						int32_t timeout)
 {
 	hal_serial_context_t *ctx = (hal_serial_context_t *)handle;
@@ -353,25 +353,25 @@ int32_t HAL_SERIAL_read(hal_serial_handle_t handle, void *buffer, uint32_t size,
      * 策略：先 select，有数据后再加锁读取
      */
 	if (timeout > 0) {
-		OSAL_FD_ZERO(&readfds);
-		OSAL_FD_SET(ctx->fd, &readfds);
+		osal_fd_zero(&readfds);
+		osal_fd_set(ctx->fd, &readfds);
 
 		tv.tv_sec = timeout / 1000;
 		tv.tv_usec = (timeout % 1000) * 1000;
 
-		ret = OSAL_select(ctx->fd + 1, &readfds, NULL, NULL, &tv);
+		ret = osal_select(ctx->fd + 1, &readfds, NULL, NULL, &tv);
 		if (0 == ret) {
 			return OSAL_ERR_TIMEOUT;
 		} else if (ret < 0) {
-			int32_t err = OSAL_get_errno();
-			LOG_ERROR("HAL_Serial", "Select error: %s (%d)", OSAL_strerror(err),
+			int32_t err = osal_get_errno();
+			LOG_ERROR("HAL_Serial", "Select error: %s (%d)", osal_strerror(err),
 					  err);
 			return err;
 		}
 	}
 
 	/* 第一层：文件锁（进程间保护） */
-	ret = OSAL_flock_timed_lock(ctx->flock, OSAL_FLOCK_EXCLUSIVE,
+	ret = osal_flock_timed_lock(ctx->flock, OSAL_FLOCK_EXCLUSIVE,
 								HAL_SERIAL_LOCK_TIMEOUT_MS);
 	if (ret != OSAL_SUCCESS) {
 		LOG_ERROR("HAL_Serial",
@@ -380,34 +380,34 @@ int32_t HAL_SERIAL_read(hal_serial_handle_t handle, void *buffer, uint32_t size,
 	}
 
 	/* 第二层：互斥锁（线程间保护） */
-	ret = OSAL_pthread_mutex_lock(&ctx->mutex);
+	ret = osal_pthread_mutex_lock(&ctx->mutex);
 	if (ret != OSAL_SUCCESS) {
 		LOG_ERROR("HAL_Serial", "Failed to acquire mutex");
-		OSAL_flock_unlock(ctx->flock);
+		osal_flock_unlock(ctx->flock);
 		return ret;
 	}
 
 	/* 临界区：读取数据 */
-	nread = OSAL_read(ctx->fd, buffer, size);
+	nread = osal_read(ctx->fd, buffer, size);
 	if (nread < 0) {
-		int32_t err = OSAL_get_errno();
-		LOG_ERROR("HAL_Serial", "Read error: %s (%d)", OSAL_strerror(err), err);
+		int32_t err = osal_get_errno();
+		LOG_ERROR("HAL_Serial", "Read error: %s (%d)", osal_strerror(err), err);
 		result = err;
 	} else {
 		result = (int32_t)nread;
 	}
 
 	/* 释放锁（逆序） */
-	OSAL_pthread_mutex_unlock(&ctx->mutex);
-	OSAL_flock_unlock(ctx->flock);
+	osal_pthread_mutex_unlock(&ctx->mutex);
+	osal_flock_unlock(ctx->flock);
 
 	return result;
 }
 
 /************************************************************************
- * HAL_SERIAL_flush - 清空接收缓冲区
+ * hal_serial_flush - 清空接收缓冲区
  ************************************************************************/
-int32_t HAL_SERIAL_flush(hal_serial_handle_t handle)
+int32_t hal_serial_flush(hal_serial_handle_t handle)
 {
 	hal_serial_context_t *ctx = (hal_serial_context_t *)handle;
 	int32_t ret;
@@ -422,7 +422,7 @@ int32_t HAL_SERIAL_flush(hal_serial_handle_t handle)
 	}
 
 	/* 第一层：文件锁（进程间保护） */
-	ret = OSAL_flock_timed_lock(ctx->flock, OSAL_FLOCK_EXCLUSIVE,
+	ret = osal_flock_timed_lock(ctx->flock, OSAL_FLOCK_EXCLUSIVE,
 								HAL_SERIAL_LOCK_TIMEOUT_MS);
 	if (ret != OSAL_SUCCESS) {
 		LOG_ERROR("HAL_Serial",
@@ -431,32 +431,32 @@ int32_t HAL_SERIAL_flush(hal_serial_handle_t handle)
 	}
 
 	/* 第二层：互斥锁（线程间保护） */
-	ret = OSAL_pthread_mutex_lock(&ctx->mutex);
+	ret = osal_pthread_mutex_lock(&ctx->mutex);
 	if (ret != OSAL_SUCCESS) {
 		LOG_ERROR("HAL_Serial", "Failed to acquire mutex");
-		OSAL_flock_unlock(ctx->flock);
+		osal_flock_unlock(ctx->flock);
 		return ret;
 	}
 
 	/* 临界区：清空输入输出缓冲区 */
-	if (0 != OSAL_tcflush(ctx->fd, OSAL_TCIOFLUSH)) {
-		int32_t err = OSAL_get_errno();
-		LOG_ERROR("HAL_Serial", "Flush error: %s (%d)", OSAL_strerror(err),
+	if (0 != osal_tcflush(ctx->fd, OSAL_TCIOFLUSH)) {
+		int32_t err = osal_get_errno();
+		LOG_ERROR("HAL_Serial", "Flush error: %s (%d)", osal_strerror(err),
 				  err);
 		result = err;
 	}
 
 	/* 释放锁（逆序） */
-	OSAL_pthread_mutex_unlock(&ctx->mutex);
-	OSAL_flock_unlock(ctx->flock);
+	osal_pthread_mutex_unlock(&ctx->mutex);
+	osal_flock_unlock(ctx->flock);
 
 	return result;
 }
 
 /************************************************************************
- * HAL_SERIAL_set_config - 动态设置串口配置
+ * hal_serial_set_config - 动态设置串口配置
  ************************************************************************/
-int32_t HAL_SERIAL_set_config(hal_serial_handle_t handle,
+int32_t hal_serial_set_config(hal_serial_handle_t handle,
 							  const hal_serial_config_t *config)
 {
 	hal_serial_context_t *ctx = (hal_serial_context_t *)handle;
@@ -474,7 +474,7 @@ int32_t HAL_SERIAL_set_config(hal_serial_handle_t handle,
 	}
 
 	/* 第一层：文件锁（进程间保护） */
-	ret = OSAL_flock_timed_lock(ctx->flock, OSAL_FLOCK_EXCLUSIVE,
+	ret = osal_flock_timed_lock(ctx->flock, OSAL_FLOCK_EXCLUSIVE,
 								HAL_SERIAL_LOCK_TIMEOUT_MS);
 	if (ret != OSAL_SUCCESS) {
 		LOG_ERROR("HAL_Serial",
@@ -483,27 +483,27 @@ int32_t HAL_SERIAL_set_config(hal_serial_handle_t handle,
 	}
 
 	/* 第二层：互斥锁（线程间保护） */
-	ret = OSAL_pthread_mutex_lock(&ctx->mutex);
+	ret = osal_pthread_mutex_lock(&ctx->mutex);
 	if (ret != OSAL_SUCCESS) {
 		LOG_ERROR("HAL_Serial", "Failed to acquire mutex");
-		OSAL_flock_unlock(ctx->flock);
+		osal_flock_unlock(ctx->flock);
 		return ret;
 	}
 
 	/* 临界区：配置串口参数 */
 	/* 获取当前配置 */
-	if (0 != OSAL_tcgetattr(ctx->fd, &tty)) {
-		int32_t err = OSAL_get_errno();
+	if (0 != osal_tcgetattr(ctx->fd, &tty)) {
+		int32_t err = osal_get_errno();
 		LOG_ERROR("HAL_Serial", "Failed to get attributes: %s (%d)",
-				  OSAL_strerror(err), err);
+				  osal_strerror(err), err);
 		result = err;
 		goto unlock;
 	}
 
 	/* 配置波特率 */
 	speed = hal_serial_get_baudrate(config->baud_rate);
-	OSAL_cfsetispeed(&tty, speed);
-	OSAL_cfsetospeed(&tty, speed);
+	osal_cfsetispeed(&tty, speed);
+	osal_cfsetospeed(&tty, speed);
 
 	/* 配置数据位 */
 	tty.c_cflag &= ~OSAL_CSIZE;
@@ -535,16 +535,16 @@ int32_t HAL_SERIAL_set_config(hal_serial_handle_t handle,
 	}
 
 	/* 应用配置 */
-	if (0 != OSAL_tcsetattr(ctx->fd, OSAL_TCSANOW, &tty)) {
-		int32_t err = OSAL_get_errno();
+	if (0 != osal_tcsetattr(ctx->fd, OSAL_TCSANOW, &tty)) {
+		int32_t err = osal_get_errno();
 		LOG_ERROR("HAL_Serial", "Failed to set attributes: %s (%d)",
-				  OSAL_strerror(err), err);
+				  osal_strerror(err), err);
 		result = err;
 		goto unlock;
 	}
 
 	/* 更新内部配置 */
-	OSAL_memcpy(&ctx->config, config, OSAL_sizeof(hal_serial_config_t));
+	osal_memcpy(&ctx->config, config, OSAL_sizeof(hal_serial_config_t));
 
 	LOG_INFO("HAL_Serial",
 			 "Config updated: baudrate=%u, databits=%u, stopbits=%u, parity=%u",
@@ -553,8 +553,8 @@ int32_t HAL_SERIAL_set_config(hal_serial_handle_t handle,
 
 unlock:
 	/* 释放锁（逆序） */
-	OSAL_pthread_mutex_unlock(&ctx->mutex);
-	OSAL_flock_unlock(ctx->flock);
+	osal_pthread_mutex_unlock(&ctx->mutex);
+	osal_flock_unlock(ctx->flock);
 
 	return result;
 }

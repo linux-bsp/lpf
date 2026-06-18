@@ -20,12 +20,12 @@ static void test_hal_can_init_success(void)
 								.rx_timeout = 1000,
 								.tx_timeout = 1000 };
 
-	int32_t ret = HAL_CAN_init(&config, &handle);
+	int32_t ret = hal_can_init(&config, &handle);
 
 	/* 如果初始化失败，跳过所有CAN测试 */
 	TEST_ASSERT_FALSE(ret !=
 					  OSAL_SUCCESS); // CAN interface not available or down.
-		// Please run: ip link set can0 up
+	// Please run: ip link set can0 up
 
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	TEST_ASSERT_NOT_NULL(handle);
@@ -34,17 +34,17 @@ static void test_hal_can_init_success(void)
 	hal_can_frame_t test_frame = { .can_id = 0x001,
 								   .dlc = 1,
 								   .data = { 0x00 } };
-	ret = HAL_CAN_send(handle, &test_frame);
+	ret = hal_can_send(handle, &test_frame);
 
 	/* 如果发送失败（Network is down），跳过所有CAN测试 */
 	if (ret != OSAL_SUCCESS) {
-		HAL_CAN_deinit(handle);
+		hal_can_deinit(handle);
 		TEST_ASSERT_FALSE(
 			true); // CAN interface is down. Please run: ip link set can0 type
-			// can bitrate 500000 && ip link set can0 up
+		// can bitrate 500000 && ip link set can0 up
 	}
 
-	HAL_CAN_deinit(handle);
+	hal_can_deinit(handle);
 }
 
 /* 测试用例: CAN初始化 - 空配置 */
@@ -52,7 +52,7 @@ static void test_hal_can_init_null_config(void)
 {
 	hal_can_handle_t handle = NULL;
 
-	int32_t ret = HAL_CAN_init(NULL, &handle);
+	int32_t ret = hal_can_init(NULL, &handle);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -64,7 +64,7 @@ static void test_hal_can_init_null_handle(void)
 								.rx_timeout = 1000,
 								.tx_timeout = 1000 };
 
-	int32_t ret = HAL_CAN_init(&config, NULL);
+	int32_t ret = hal_can_init(&config, NULL);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -77,7 +77,7 @@ static void test_hal_can_init_invalid_interface(void)
 								.rx_timeout = 1000,
 								.tx_timeout = 1000 };
 
-	int32_t ret = HAL_CAN_init(&config, &handle);
+	int32_t ret = hal_can_init(&config, &handle);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -90,17 +90,17 @@ static void test_hal_can_deinit(void)
 								.rx_timeout = 1000,
 								.tx_timeout = 1000 };
 
-	int32_t ret = HAL_CAN_init(&config, &handle);
+	int32_t ret = hal_can_init(&config, &handle);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-	ret = HAL_CAN_deinit(handle);
+	ret = hal_can_deinit(handle);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 }
 
 /* 测试用例: CAN清理 - 空句柄 */
 static void test_hal_can_deinit_null_handle(void)
 {
-	int32_t ret = HAL_CAN_deinit(NULL);
+	int32_t ret = hal_can_deinit(NULL);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -121,13 +121,13 @@ static void test_hal_can_send_success(void)
 							  .data = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
 										0x07, 0x08 } };
 
-	int32_t ret = HAL_CAN_init(&config, &handle);
+	int32_t ret = hal_can_init(&config, &handle);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-	ret = HAL_CAN_send(handle, &frame);
+	ret = hal_can_send(handle, &frame);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-	HAL_CAN_deinit(handle);
+	hal_can_deinit(handle);
 }
 
 /* 测试用例: CAN发送 - 空句柄 */
@@ -138,7 +138,7 @@ static void test_hal_can_send_null_handle(void)
 							  .data = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
 										0x07, 0x08 } };
 
-	int32_t ret = HAL_CAN_send(NULL, &frame);
+	int32_t ret = hal_can_send(NULL, &frame);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -151,13 +151,13 @@ static void test_hal_can_send_null_frame(void)
 								.rx_timeout = 1000,
 								.tx_timeout = 1000 };
 
-	int32_t ret = HAL_CAN_init(&config, &handle);
+	int32_t ret = hal_can_init(&config, &handle);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-	ret = HAL_CAN_send(handle, NULL);
+	ret = hal_can_send(handle, NULL);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 
-	HAL_CAN_deinit(handle);
+	hal_can_deinit(handle);
 }
 
 /* 测试用例: CAN接收 - 超时 */
@@ -170,13 +170,13 @@ static void test_hal_can_recv_timeout(void)
 								.tx_timeout = 1000 };
 	hal_can_frame_t frame;
 
-	int32_t ret = HAL_CAN_init(&config, &handle);
+	int32_t ret = hal_can_init(&config, &handle);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-	ret = HAL_CAN_recv(handle, &frame, 100);
+	ret = hal_can_recv(handle, &frame, 100);
 	TEST_ASSERT_EQUAL(OSAL_ERR_TIMEOUT, ret);
 
-	HAL_CAN_deinit(handle);
+	hal_can_deinit(handle);
 }
 
 /* 测试用例: CAN接收 - 空句柄 */
@@ -184,7 +184,7 @@ static void test_hal_can_recv_null_handle(void)
 {
 	hal_can_frame_t frame;
 
-	int32_t ret = HAL_CAN_recv(NULL, &frame, 100);
+	int32_t ret = hal_can_recv(NULL, &frame, 100);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -197,13 +197,13 @@ static void test_hal_can_recv_null_frame(void)
 								.rx_timeout = 1000,
 								.tx_timeout = 1000 };
 
-	int32_t ret = HAL_CAN_init(&config, &handle);
+	int32_t ret = hal_can_init(&config, &handle);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-	ret = HAL_CAN_recv(handle, NULL, 100);
+	ret = hal_can_recv(handle, NULL, 100);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 
-	HAL_CAN_deinit(handle);
+	hal_can_deinit(handle);
 }
 
 /* 测试用例: CAN发送接收回环 */
@@ -219,15 +219,15 @@ static void test_hal_can_loopback(void)
 								 .data = { 0xAA, 0xBB, 0xCC, 0xDD } };
 	hal_can_frame_t rx_frame;
 
-	int32_t ret = HAL_CAN_init(&config, &handle);
+	int32_t ret = hal_can_init(&config, &handle);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* 发送帧 */
-	ret = HAL_CAN_send(handle, &tx_frame);
+	ret = hal_can_send(handle, &tx_frame);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* 接收帧（需要外部回环或另一个CAN节点） */
-	ret = HAL_CAN_recv(handle, &rx_frame, 1000);
+	ret = hal_can_recv(handle, &rx_frame, 1000);
 	if (OSAL_SUCCESS == ret) {
 		TEST_ASSERT_EQUAL(tx_frame.can_id, rx_frame.can_id);
 		TEST_ASSERT_EQUAL(tx_frame.dlc, rx_frame.dlc);
@@ -238,7 +238,7 @@ static void test_hal_can_loopback(void)
 		}
 	}
 
-	HAL_CAN_deinit(handle);
+	hal_can_deinit(handle);
 }
 
 /*===========================================================================
@@ -254,19 +254,19 @@ static void test_hal_can_set_filter_success(void)
 								.rx_timeout = 1000,
 								.tx_timeout = 1000 };
 
-	int32_t ret = HAL_CAN_init(&config, &handle);
+	int32_t ret = hal_can_init(&config, &handle);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-	ret = HAL_CAN_set_filter(handle, 0x100, 0x7FF);
+	ret = hal_can_set_filter(handle, 0x100, 0x7FF);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-	HAL_CAN_deinit(handle);
+	hal_can_deinit(handle);
 }
 
 /* 测试用例: 设置过滤器 - 空句柄 */
 static void test_hal_can_set_filter_null_handle(void)
 {
-	int32_t ret = HAL_CAN_set_filter(NULL, 0x100, 0x7FF);
+	int32_t ret = hal_can_set_filter(NULL, 0x100, 0x7FF);
 	TEST_ASSERT_NOT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -289,10 +289,10 @@ static void test_hal_can_different_baudrate(void)
 								.rx_timeout = 1000,
 								.tx_timeout = 1000 };
 
-	int32_t ret = HAL_CAN_init(&config, &handle);
+	int32_t ret = hal_can_init(&config, &handle);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-	HAL_CAN_deinit(handle);
+	hal_can_deinit(handle);
 }
 
 /*===========================================================================
@@ -309,7 +309,7 @@ static void test_can_send_only(void)
 								.tx_timeout = 1000 };
 
 	/* 初始化CAN */
-	int32_t ret = HAL_CAN_init(&config, &handle);
+	int32_t ret = hal_can_init(&config, &handle);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	TEST_ASSERT_NOT_NULL(handle);
 
@@ -318,7 +318,7 @@ static void test_can_send_only(void)
 								  .dlc = 8,
 								  .data = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66,
 											0x77, 0x88 } };
-	ret = HAL_CAN_send(handle, &std_frame);
+	ret = hal_can_send(handle, &std_frame);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* 测试扩展帧发送 (CAN_EFF_FLAG = 0x80000000) */
@@ -327,21 +327,21 @@ static void test_can_send_only(void)
 		.dlc = 6,
 		.data = { 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x00, 0x00 }
 	};
-	ret = HAL_CAN_send(handle, &ext_frame);
+	ret = hal_can_send(handle, &ext_frame);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* 测试RTR帧发送 (CAN_RTR_FLAG = 0x40000000) */
 	hal_can_frame_t rtr_frame = { .can_id = 0x40000456, /* RTR frame */
 								  .dlc = 0,
 								  .data = { 0 } };
-	ret = HAL_CAN_send(handle, &rtr_frame);
+	ret = hal_can_send(handle, &rtr_frame);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* 测试不同数据长度 */
 	hal_can_frame_t short_frame = { .can_id = 0x200,
 									.dlc = 2,
 									.data = { 0x12, 0x34 } };
-	ret = HAL_CAN_send(handle, &short_frame);
+	ret = hal_can_send(handle, &short_frame);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* 测试多帧连续发送 */
@@ -352,12 +352,12 @@ static void test_can_send_only(void)
 										.data = { (uint8_t)i, (uint8_t)(i + 1),
 												  (uint8_t)(i + 2),
 												  (uint8_t)(i + 3) } };
-		ret = HAL_CAN_send(handle, &burst_frame);
+		ret = hal_can_send(handle, &burst_frame);
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	}
 
 	/* 清理 */
-	ret = HAL_CAN_deinit(handle);
+	ret = hal_can_deinit(handle);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -375,12 +375,12 @@ static void test_can_receive_only(void)
 								.tx_timeout = 1000 };
 
 	/* 初始化CAN */
-	int32_t ret = HAL_CAN_init(&config, &handle);
+	int32_t ret = hal_can_init(&config, &handle);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	TEST_ASSERT_NOT_NULL(handle);
 
 	/* 设置过滤器 - 只接收ID 0x100-0x1FF的帧 */
-	ret = HAL_CAN_set_filter(handle, 0x100, 0x700);
+	ret = hal_can_set_filter(handle, 0x100, 0x700);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* 尝试接收多个帧（带超时） */
@@ -389,7 +389,7 @@ static void test_can_receive_only(void)
 	int32_t i;
 
 	for (i = 0; i < 5; i++) {
-		ret = HAL_CAN_recv(handle, &rx_frame, 500);
+		ret = hal_can_recv(handle, &rx_frame, 500);
 		if (ret == OSAL_SUCCESS) {
 			received_count++;
 
@@ -408,7 +408,7 @@ static void test_can_receive_only(void)
 	}
 
 	/* 测试长超时接收（可能超时） */
-	ret = HAL_CAN_recv(handle, &rx_frame, 1000);
+	ret = hal_can_recv(handle, &rx_frame, 1000);
 	if (ret == OSAL_SUCCESS) {
 		/* 如果接收到帧，验证数据 */
 		TEST_ASSERT_TRUE(rx_frame.dlc <= 8);
@@ -419,13 +419,13 @@ static void test_can_receive_only(void)
 	}
 
 	/* 测试短超时接收 */
-	ret = HAL_CAN_recv(handle, &rx_frame, 100);
+	ret = hal_can_recv(handle, &rx_frame, 100);
 	if (ret != OSAL_SUCCESS) {
 		TEST_ASSERT_EQUAL(OSAL_ERR_TIMEOUT, ret);
 	}
 
 	/* 清理 */
-	ret = HAL_CAN_deinit(handle);
+	ret = hal_can_deinit(handle);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 }
 
@@ -442,7 +442,7 @@ static void test_hal_can_max_data_length(void)
 								.rx_timeout = 1000,
 								.tx_timeout = 1000 };
 
-	int32_t ret = HAL_CAN_init(&config, &handle);
+	int32_t ret = hal_can_init(&config, &handle);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* 发送最大长度帧 (DLC=8) */
@@ -451,10 +451,10 @@ static void test_hal_can_max_data_length(void)
 							  .data = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66,
 										0x77, 0x88 } };
 
-	ret = HAL_CAN_send(handle, &frame);
+	ret = hal_can_send(handle, &frame);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-	HAL_CAN_deinit(handle);
+	hal_can_deinit(handle);
 }
 
 /* 测试用例: CAN最小数据长度 */
@@ -466,16 +466,16 @@ static void test_hal_can_min_data_length(void)
 								.rx_timeout = 1000,
 								.tx_timeout = 1000 };
 
-	int32_t ret = HAL_CAN_init(&config, &handle);
+	int32_t ret = hal_can_init(&config, &handle);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* 发送零长度帧 (DLC=0) */
 	hal_can_frame_t frame = { .can_id = 0x456, .dlc = 0, .data = { 0 } };
 
-	ret = HAL_CAN_send(handle, &frame);
+	ret = hal_can_send(handle, &frame);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-	HAL_CAN_deinit(handle);
+	hal_can_deinit(handle);
 }
 
 /* 测试用例: CAN扩展帧ID */
@@ -487,7 +487,7 @@ static void test_hal_can_extended_id(void)
 								.rx_timeout = 1000,
 								.tx_timeout = 1000 };
 
-	int32_t ret = HAL_CAN_init(&config, &handle);
+	int32_t ret = hal_can_init(&config, &handle);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* 发送扩展帧 (29位ID, 扩展帧标志 0x80000000) */
@@ -497,10 +497,10 @@ static void test_hal_can_extended_id(void)
 		.data = { 0xAA, 0xBB, 0xCC, 0xDD }
 	};
 
-	ret = HAL_CAN_send(handle, &frame);
+	ret = hal_can_send(handle, &frame);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-	HAL_CAN_deinit(handle);
+	hal_can_deinit(handle);
 }
 
 /* 测试用例: CAN标准帧ID边界 */
@@ -512,20 +512,20 @@ static void test_hal_can_standard_id_boundary(void)
 								.rx_timeout = 1000,
 								.tx_timeout = 1000 };
 
-	int32_t ret = HAL_CAN_init(&config, &handle);
+	int32_t ret = hal_can_init(&config, &handle);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* 最小标准ID (0x000) */
 	hal_can_frame_t frame1 = { .can_id = 0x000, .dlc = 1, .data = { 0x01 } };
-	ret = HAL_CAN_send(handle, &frame1);
+	ret = hal_can_send(handle, &frame1);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* 最大标准ID (0x7FF) */
 	hal_can_frame_t frame2 = { .can_id = 0x7FF, .dlc = 1, .data = { 0x02 } };
-	ret = HAL_CAN_send(handle, &frame2);
+	ret = hal_can_send(handle, &frame2);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-	HAL_CAN_deinit(handle);
+	hal_can_deinit(handle);
 }
 
 /* 测试用例: CAN不同波特率 */
@@ -538,23 +538,23 @@ static void test_hal_can_various_baudrates(void)
 								.tx_timeout = 1000 };
 
 	/* 测试250kbps */
-	int32_t ret = HAL_CAN_init(&config, &handle);
+	int32_t ret = hal_can_init(&config, &handle);
 	if (ret == OSAL_SUCCESS) {
-		HAL_CAN_deinit(handle);
+		hal_can_deinit(handle);
 	}
 
 	/* 测试1Mbps */
 	config.baudrate = 1000000;
-	ret = HAL_CAN_init(&config, &handle);
+	ret = hal_can_init(&config, &handle);
 	if (ret == OSAL_SUCCESS) {
-		HAL_CAN_deinit(handle);
+		hal_can_deinit(handle);
 	}
 
 	/* 测试125kbps */
 	config.baudrate = 125000;
-	ret = HAL_CAN_init(&config, &handle);
+	ret = hal_can_init(&config, &handle);
 	if (ret == OSAL_SUCCESS) {
-		HAL_CAN_deinit(handle);
+		hal_can_deinit(handle);
 	}
 }
 
@@ -567,7 +567,7 @@ static void test_hal_can_burst_send(void)
 								.rx_timeout = 1000,
 								.tx_timeout = 1000 };
 
-	int32_t ret = HAL_CAN_init(&config, &handle);
+	int32_t ret = hal_can_init(&config, &handle);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* 连续发送100帧 */
@@ -580,11 +580,11 @@ static void test_hal_can_burst_send(void)
 					  (uint8_t)(i + 6), (uint8_t)(i + 7) }
 		};
 
-		ret = HAL_CAN_send(handle, &frame);
+		ret = hal_can_send(handle, &frame);
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	}
 
-	HAL_CAN_deinit(handle);
+	hal_can_deinit(handle);
 }
 
 /* 测试用例: CAN过滤器边界值 */
@@ -596,18 +596,18 @@ static void test_hal_can_filter_boundary(void)
 								.rx_timeout = 1000,
 								.tx_timeout = 1000 };
 
-	int32_t ret = HAL_CAN_init(&config, &handle);
+	int32_t ret = hal_can_init(&config, &handle);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* 测试接收所有帧 (mask=0x000) */
-	ret = HAL_CAN_set_filter(handle, 0x000, 0x000);
+	ret = hal_can_set_filter(handle, 0x000, 0x000);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* 测试仅接收精确ID (mask=0x7FF) */
-	ret = HAL_CAN_set_filter(handle, 0x123, 0x7FF);
+	ret = hal_can_set_filter(handle, 0x123, 0x7FF);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
-	HAL_CAN_deinit(handle);
+	hal_can_deinit(handle);
 }
 
 /* 测试用例: CAN零超时发送 */
@@ -621,18 +621,18 @@ static void test_hal_can_zero_timeout_send(void)
 		.tx_timeout = 0 /* 零超时 */
 	};
 
-	int32_t ret = HAL_CAN_init(&config, &handle);
+	int32_t ret = hal_can_init(&config, &handle);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	hal_can_frame_t frame = { .can_id = 0x555,
 							  .dlc = 4,
 							  .data = { 0x12, 0x34, 0x56, 0x78 } };
 
-	ret = HAL_CAN_send(handle, &frame);
+	ret = hal_can_send(handle, &frame);
 	/* 零超时可能成功或超时 */
 	TEST_ASSERT_TRUE(ret == OSAL_SUCCESS || ret == OSAL_ERR_TIMEOUT);
 
-	HAL_CAN_deinit(handle);
+	hal_can_deinit(handle);
 }
 
 /*===========================================================================

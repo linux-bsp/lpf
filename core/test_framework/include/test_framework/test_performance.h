@@ -170,7 +170,7 @@ int32_t perf_export_json(perf_context_t *ctx, const char *filename);
 		perf_stats_t stats;                                                   \
 		perf_calculate_stats(ctx, &stats);                                    \
 		if (stats.mean > (threshold_us)) {                                    \
-			OSAL_printf("[ PERF FAIL ] Latency %.2f us > threshold %lu us\n", \
+			osal_printf("[ PERF FAIL ] Latency %.2f us > threshold %lu us\n", \
 						stats.mean, (unsigned long)(threshold_us));           \
 			TEST_FAIL();                                                      \
 		}                                                                     \
@@ -186,7 +186,7 @@ int32_t perf_export_json(perf_context_t *ctx, const char *filename);
 		perf_stats_t stats;                                                    \
 		perf_calculate_stats(ctx, &stats);                                     \
 		if (stats.mean < (threshold_ops)) {                                    \
-			OSAL_printf(                                                       \
+			osal_printf(                                                       \
 				"[ PERF FAIL ] Throughput %.2f ops/s < threshold %lu ops/s\n", \
 				stats.mean, (unsigned long)(threshold_ops));                   \
 			TEST_FAIL();                                                       \

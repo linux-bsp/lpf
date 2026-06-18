@@ -9,7 +9,7 @@
 
 /* 性能基准定义 */
 static const perf_baseline_t mutex_lock_baseline = {
-	.name = "OSAL_pthread_mutex_lock",
+	.name = "osal_pthread_mutex_lock",
 	.type = PERF_METRIC_LATENCY,
 	.baseline_value = 5.0, /* 基准：5微秒 */
 	.tolerance_percent = 50.0 /* 容差：50% */
@@ -24,10 +24,10 @@ static void test_perf_mutex_lock_unlock(void)
 	osal_mutex_t mutex;
 
 	/* 创建互斥锁 */
-	TEST_ASSERT_EQUAL(OSAL_pthread_mutex_init(&mutex, NULL), OSAL_SUCCESS);
+	TEST_ASSERT_EQUAL(osal_pthread_mutex_init(&mutex, NULL), OSAL_SUCCESS);
 
 	/* 创建性能测量上下文 */
-	perf_context_t *ctx = perf_context_create("OSAL_pthread_mutex_lock",
+	perf_context_t *ctx = perf_context_create("osal_pthread_mutex_lock",
 											  PERF_METRIC_LATENCY, iterations);
 	TEST_ASSERT_NOT_NULL(ctx);
 
@@ -36,8 +36,8 @@ static void test_perf_mutex_lock_unlock(void)
 
 	for (i = 0; i < iterations; i++) {
 		perf_begin(ctx);
-		OSAL_pthread_mutex_lock(&mutex);
-		OSAL_pthread_mutex_unlock(&mutex);
+		osal_pthread_mutex_lock(&mutex);
+		osal_pthread_mutex_unlock(&mutex);
 		perf_end(ctx);
 	}
 
@@ -52,7 +52,7 @@ static void test_perf_mutex_lock_unlock(void)
 
 	/* 清理 */
 	perf_context_destroy(ctx);
-	OSAL_pthread_mutex_destroy(&mutex);
+	osal_pthread_mutex_destroy(&mutex);
 }
 
 /**
@@ -63,7 +63,7 @@ static void test_perf_atomic_operations(void)
 	const uint32_t iterations = 100000;
 	osal_atomic_uint32_t counter;
 
-	OSAL_atomic_init(&counter, 0);
+	osal_atomic_init(&counter, 0);
 
 	/* 创建性能测量上下文 */
 	perf_context_t *ctx = perf_context_create("OSAL_AtomicIncrement",
@@ -75,7 +75,7 @@ static void test_perf_atomic_operations(void)
 
 	for (i = 0; i < iterations; i++) {
 		perf_begin(ctx);
-		OSAL_atomic_inc(&counter);
+		osal_atomic_inc(&counter);
 		perf_end(ctx);
 	}
 
@@ -83,7 +83,7 @@ static void test_perf_atomic_operations(void)
 	perf_print_stats(ctx);
 
 	/* 验证结果 */
-	TEST_ASSERT_EQUAL(OSAL_atomic_load(&counter), iterations);
+	TEST_ASSERT_EQUAL(osal_atomic_load(&counter), iterations);
 
 	/* 清理 */
 	perf_context_destroy(ctx);
@@ -97,7 +97,7 @@ static void test_perf_time_get(void)
 	const uint32_t iterations = 10000;
 
 	/* 创建性能测量上下文 */
-	perf_context_t *ctx = perf_context_create("OSAL_get_monotonic_time",
+	perf_context_t *ctx = perf_context_create("osal_get_monotonic_time",
 											  PERF_METRIC_LATENCY, iterations);
 	TEST_ASSERT_NOT_NULL(ctx);
 
@@ -106,7 +106,7 @@ static void test_perf_time_get(void)
 
 	for (i = 0; i < iterations; i++) {
 		perf_begin(ctx);
-		OSAL_get_monotonic_time();
+		osal_get_monotonic_time();
 		perf_end(ctx);
 	}
 

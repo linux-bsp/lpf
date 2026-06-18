@@ -18,9 +18,9 @@
 /*
  * 标准输入输出
  */
-int32_t OSAL_getchar(void);
-char *OSAL_fgets(char *str, osal_size_t size, void *stream);
-int32_t OSAL_fflush(void *stream);
+int32_t osal_getchar(void);
+char *osal_fgets(char *str, osal_size_t size, void *stream);
+int32_t osal_fflush(void *stream);
 
 /*
  * 标准流定义

@@ -13,7 +13,7 @@
 static void test_perf_mcu_status_query(void)
 {
 	// TODO: 实现MCU状态查询性能测试
-	OSAL_printf(
+	osal_printf(
 		"[ INFO ] MCU status query performance test - not implemented yet\n");
 }
 

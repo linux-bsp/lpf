@@ -57,7 +57,7 @@ static uint32_t read_memory_from_proc(const char *field)
 	return value * OSAL_BYTES_PER_KB;
 }
 
-int32_t OSAL_heap_get_info(uint32_t *free_bytes, uint32_t *total_bytes)
+int32_t osal_heap_get_info(uint32_t *free_bytes, uint32_t *total_bytes)
 {
 	uint32_t vm_rss;
 	uint32_t vm_peak;
@@ -88,7 +88,7 @@ int32_t OSAL_heap_get_info(uint32_t *free_bytes, uint32_t *total_bytes)
 	return OSAL_SUCCESS;
 }
 
-int32_t OSAL_heap_set_threshold(uint32_t percent)
+int32_t osal_heap_set_threshold(uint32_t percent)
 {
 	if (percent > OSAL_HEAP_PERCENT_MAX)
 		return OSAL_ERR_INVALID_SIZE;
@@ -100,7 +100,7 @@ int32_t OSAL_heap_set_threshold(uint32_t percent)
 	return OSAL_SUCCESS;
 }
 
-int32_t OSAL_heap_check_threshold(bool *exceeded)
+int32_t osal_heap_check_threshold(bool *exceeded)
 {
 	uint32_t free_bytes, total_bytes;
 	uint32_t usage_percent;
@@ -108,7 +108,7 @@ int32_t OSAL_heap_check_threshold(bool *exceeded)
 	if (NULL == exceeded)
 		return OSAL_ERR_INVALID_POINTER;
 
-	OSAL_heap_get_info(&free_bytes, &total_bytes);
+	osal_heap_get_info(&free_bytes, &total_bytes);
 
 	if (0 == total_bytes) {
 		*exceeded = false;
@@ -123,7 +123,7 @@ int32_t OSAL_heap_check_threshold(bool *exceeded)
 	*exceeded = (usage_percent >= g_heap_monitor.threshold_percent);
 	if (*exceeded && !g_heap_monitor.alert_triggered) {
 		g_heap_monitor.alert_triggered = true;
-		OSAL_printf(
+		osal_printf(
 			"[HEAP] Memory threshold exceeded: %u%% (threshold: %u%%)\n",
 			usage_percent, g_heap_monitor.threshold_percent);
 	} else if (!*exceeded) {
@@ -134,7 +134,7 @@ int32_t OSAL_heap_check_threshold(bool *exceeded)
 	return OSAL_SUCCESS;
 }
 
-int32_t OSAL_heap_get_stats(uint32_t *current, uint32_t *peak)
+int32_t osal_heap_get_stats(uint32_t *current, uint32_t *peak)
 {
 	if (NULL == current || NULL == peak)
 		return OSAL_ERR_INVALID_POINTER;
@@ -147,7 +147,7 @@ int32_t OSAL_heap_get_stats(uint32_t *current, uint32_t *peak)
 	return OSAL_SUCCESS;
 }
 
-void *OSAL_malloc(uint32_t size)
+void *osal_malloc(uint32_t size)
 {
 	osal_size_t total_size;
 	void *raw_ptr;
@@ -190,7 +190,7 @@ void *OSAL_malloc(uint32_t size)
 	return ptr_union.header + 1;
 }
 
-void OSAL_free(void *ptr)
+void osal_free(void *ptr)
 {
 	union {
 		void *user_ptr;
@@ -210,10 +210,10 @@ void OSAL_free(void *ptr)
 
 	/* 验证魔数，检测内存损坏 */
 	if (MEM_BLOCK_MAGIC != header->magic) {
-		OSAL_printf("[HEAP] CRITICAL: Memory corruption detected at %p "
+		osal_printf("[HEAP] CRITICAL: Memory corruption detected at %p "
 					"(invalid magic: 0x%X, expected: 0x%X)\n",
 					ptr, header->magic, MEM_BLOCK_MAGIC);
-		OSAL_printf("[HEAP] This indicates buffer overflow, use-after-free, or "
+		osal_printf("[HEAP] This indicates buffer overflow, use-after-free, or "
 					"double-free\n");
 
 		/* 航天级代码要求：检测到内存损坏必须终止程序
@@ -233,7 +233,7 @@ void OSAL_free(void *ptr)
 	pthread_mutex_lock(&g_heap_monitor.lock);
 	if (header->size > g_heap_monitor.current_usage) {
 		/* 统计下溢：记录详细错误信息 */
-		OSAL_printf("[HEAP] ERROR: Heap usage underflow - freeing %u bytes but "
+		osal_printf("[HEAP] ERROR: Heap usage underflow - freeing %u bytes but "
 					"current usage is %u\n",
 					header->size, g_heap_monitor.current_usage);
 		g_heap_monitor.current_usage = 0;
@@ -249,7 +249,7 @@ void OSAL_free(void *ptr)
 	free(header);
 }
 
-void *OSAL_realloc(void *ptr, uint32_t new_size)
+void *osal_realloc(void *ptr, uint32_t new_size)
 {
 	union {
 		void *user_ptr;
@@ -263,12 +263,12 @@ void *OSAL_realloc(void *ptr, uint32_t new_size)
 
 	/* 如果ptr为NULL，等同于OSAL_malloc() */
 	if (NULL == ptr) {
-		return OSAL_malloc(new_size);
+		return osal_malloc(new_size);
 	}
 
 	/* 如果new_size为0，等同于OSAL_free() */
 	if (0 == new_size) {
-		OSAL_free(ptr);
+		osal_free(ptr);
 		return NULL;
 	}
 
@@ -279,7 +279,7 @@ void *OSAL_realloc(void *ptr, uint32_t new_size)
 
 	/* 验证魔数，检测内存损坏 */
 	if (MEM_BLOCK_MAGIC != old_header->magic) {
-		OSAL_printf(
+		osal_printf(
 			"[HEAP] Memory corruption detected at %p (invalid magic: 0x%X)\n",
 			ptr, old_header->magic);
 		return NULL;
@@ -288,17 +288,17 @@ void *OSAL_realloc(void *ptr, uint32_t new_size)
 	old_size = old_header->size;
 
 	/* 分配新内存 */
-	new_ptr = OSAL_malloc(new_size);
+	new_ptr = osal_malloc(new_size);
 	if (NULL == new_ptr) {
 		return NULL;
 	}
 
 	/* 复制数据（取旧大小和新大小的最小值） */
 	copy_size = (old_size < new_size) ? old_size : new_size;
-	OSAL_memcpy(new_ptr, ptr, copy_size);
+	osal_memcpy(new_ptr, ptr, copy_size);
 
 	/* 释放旧内存 */
-	OSAL_free(ptr);
+	osal_free(ptr);
 
 	return new_ptr;
 }

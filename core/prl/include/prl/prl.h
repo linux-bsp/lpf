@@ -15,7 +15,7 @@
 #include "prl_mcu.h"
 #endif /* CONFIG_PRL_MCU */
 
-int PRL_init(void);
-int PRL_deinit(void);
+int prl_init(void);
+int prl_deinit(void);
 
 #endif /* PRL_H */

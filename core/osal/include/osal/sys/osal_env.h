@@ -24,7 +24,7 @@
  * @return 环境变量值（字符串指针），不存在返回NULL
  * @note 返回的指针指向静态存储区，不要修改或释放
  */
-char *OSAL_getenv(const char *name);
+char *osal_getenv(const char *name);
 
 /**
  * @brief 设置环境变量
@@ -33,13 +33,13 @@ char *OSAL_getenv(const char *name);
  * @param overwrite 是否覆盖已存在的变量（1=覆盖，0=不覆盖）
  * @return 0成功，-1失败
  */
-int32_t OSAL_setenv(const char *name, const char *value, int32_t overwrite);
+int32_t osal_setenv(const char *name, const char *value, int32_t overwrite);
 
 /**
  * @brief 删除环境变量
  * @param name 环境变量名
  * @return 0成功，-1失败
  */
-int32_t OSAL_unsetenv(const char *name);
+int32_t osal_unsetenv(const char *name);
 
 #endif /* OSAL_ENV_H */

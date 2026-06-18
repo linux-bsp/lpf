@@ -34,22 +34,22 @@ static void test_signal_raise_and_handle(void)
 	signal_number = 0;
 
 	/* 注册信号处理函数 */
-	int32_t ret = OSAL_signal(SIGUSR1, test_signal_handler);
+	int32_t ret = osal_signal(SIGUSR1, test_signal_handler);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 发送信号给自己 */
-	ret = OSAL_raise(SIGUSR1);
+	ret = osal_raise(SIGUSR1);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 等待信号处理完成 */
-	OSAL_usleep(10000);
+	osal_usleep(10000);
 
 	/* 验证信号被接收 */
 	TEST_ASSERT_EQUAL(1, signal_received);
 	TEST_ASSERT_EQUAL(SIGUSR1, signal_number);
 
 	/* 恢复默认处理 */
-	OSAL_signal(SIGUSR1, SIG_DFL);
+	osal_signal(SIGUSR1, SIG_DFL);
 }
 
 static void test_signal_kill_self(void)
@@ -58,22 +58,22 @@ static void test_signal_kill_self(void)
 	signal_number = 0;
 
 	/* 注册信号处理函数 */
-	OSAL_signal(SIGUSR2, test_signal_handler);
+	osal_signal(SIGUSR2, test_signal_handler);
 
 	/* 使用kill发送信号给自己 */
-	osal_pid_t pid = OSAL_getpid();
-	int32_t ret = OSAL_kill(pid, SIGUSR2);
+	osal_pid_t pid = osal_getpid();
+	int32_t ret = osal_kill(pid, SIGUSR2);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 等待信号处理完成 */
-	OSAL_usleep(10000);
+	osal_usleep(10000);
 
 	/* 验证信号被接收 */
 	TEST_ASSERT_EQUAL(1, signal_received);
 	TEST_ASSERT_EQUAL(SIGUSR2, signal_number);
 
 	/* 恢复默认处理 */
-	OSAL_signal(SIGUSR2, SIG_DFL);
+	osal_signal(SIGUSR2, SIG_DFL);
 }
 
 static void test_signal_ignore(void)
@@ -81,21 +81,21 @@ static void test_signal_ignore(void)
 	signal_received = 0;
 
 	/* 设置信号为忽略 */
-	int32_t ret = OSAL_signal(SIGUSR1, SIG_IGN);
+	int32_t ret = osal_signal(SIGUSR1, SIG_IGN);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 发送信号 */
-	ret = OSAL_raise(SIGUSR1);
+	ret = osal_raise(SIGUSR1);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 等待一段时间 */
-	OSAL_usleep(10000);
+	osal_usleep(10000);
 
 	/* 信号应该被忽略，处理函数不应被调用 */
 	TEST_ASSERT_EQUAL(0, signal_received);
 
 	/* 恢复默认处理 */
-	OSAL_signal(SIGUSR1, SIG_DFL);
+	osal_signal(SIGUSR1, SIG_DFL);
 }
 
 /*===========================================================================
@@ -107,19 +107,19 @@ static void test_sigset_empty_and_add(void)
 	sigset_t set;
 
 	/* 初始化为空集 */
-	int32_t ret = OSAL_sigemptyset(&set);
+	int32_t ret = osal_sigemptyset(&set);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 验证信号不在集合中 */
-	ret = OSAL_sigismember(&set, SIGUSR1);
+	ret = osal_sigismember(&set, SIGUSR1);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 添加信号到集合 */
-	ret = OSAL_sigaddset(&set, SIGUSR1);
+	ret = osal_sigaddset(&set, SIGUSR1);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 验证信号在集合中 */
-	ret = OSAL_sigismember(&set, SIGUSR1);
+	ret = osal_sigismember(&set, SIGUSR1);
 	TEST_ASSERT_EQUAL(1, ret);
 }
 
@@ -128,19 +128,19 @@ static void test_sigset_fill_and_delete(void)
 	sigset_t set;
 
 	/* 初始化为全集 */
-	int32_t ret = OSAL_sigfillset(&set);
+	int32_t ret = osal_sigfillset(&set);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 验证信号在集合中 */
-	ret = OSAL_sigismember(&set, SIGUSR1);
+	ret = osal_sigismember(&set, SIGUSR1);
 	TEST_ASSERT_EQUAL(1, ret);
 
 	/* 从集合中删除信号 */
-	ret = OSAL_sigdelset(&set, SIGUSR1);
+	ret = osal_sigdelset(&set, SIGUSR1);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 验证信号不在集合中 */
-	ret = OSAL_sigismember(&set, SIGUSR1);
+	ret = osal_sigismember(&set, SIGUSR1);
 	TEST_ASSERT_EQUAL(0, ret);
 }
 
@@ -149,15 +149,15 @@ static void test_sigprocmask_block_unblock(void)
 	sigset_t set, oldset;
 
 	/* 创建信号集 */
-	OSAL_sigemptyset(&set);
-	OSAL_sigaddset(&set, SIGUSR1);
+	osal_sigemptyset(&set);
+	osal_sigaddset(&set, SIGUSR1);
 
 	/* 阻塞信号 */
-	int32_t ret = OSAL_sigprocmask(SIG_BLOCK, &set, &oldset);
+	int32_t ret = osal_sigprocmask(SIG_BLOCK, &set, &oldset);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 解除阻塞 */
-	ret = OSAL_sigprocmask(SIG_UNBLOCK, &set, NULL);
+	ret = osal_sigprocmask(SIG_UNBLOCK, &set, NULL);
 	TEST_ASSERT_EQUAL(0, ret);
 }
 
@@ -173,24 +173,24 @@ static void test_sigaction_basic(void)
 	signal_number = 0;
 
 	/* 设置信号动作 */
-	OSAL_memset(&act, 0, sizeof(act));
+	osal_memset(&act, 0, sizeof(act));
 	act.sa_handler = test_signal_handler;
-	OSAL_sigemptyset(&act.sa_mask);
+	osal_sigemptyset(&act.sa_mask);
 	act.sa_flags = 0;
 
-	int32_t ret = OSAL_sigaction(SIGUSR1, &act, &oldact);
+	int32_t ret = osal_sigaction(SIGUSR1, &act, &oldact);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 发送信号 */
-	OSAL_raise(SIGUSR1);
-	OSAL_usleep(10000);
+	osal_raise(SIGUSR1);
+	osal_usleep(10000);
 
 	/* 验证 */
 	TEST_ASSERT_EQUAL(1, signal_received);
 	TEST_ASSERT_EQUAL(SIGUSR1, signal_number);
 
 	/* 恢复旧的动作 */
-	OSAL_sigaction(SIGUSR1, &oldact, NULL);
+	osal_sigaction(SIGUSR1, &oldact, NULL);
 }
 
 /*===========================================================================

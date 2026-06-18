@@ -53,6 +53,6 @@ typedef struct {
  * @param timeout 超时时间（毫秒），-1表示永久等待，0表示立即返回
  * @return >0表示就绪的文件描述符数量，0表示超时，-1表示失败
  */
-int32_t OSAL_poll(osal_pollfd_t *fds, uint32_t nfds, int32_t timeout);
+int32_t osal_poll(osal_pollfd_t *fds, uint32_t nfds, int32_t timeout);
 
 #endif /* OSAL_POLL_H */

@@ -88,7 +88,7 @@ static const uint32_t crc32_table[256] = {
 /**
  * @brief 计算 CRC16-CCITT 校验值
  */
-uint16_t OSAL_crc16_ccitt(const uint8_t *data, size_t len)
+uint16_t osal_crc16_ccitt(const uint8_t *data, size_t len)
 {
 	uint16_t crc = 0xFFFF;
 	size_t i;
@@ -105,7 +105,7 @@ uint16_t OSAL_crc16_ccitt(const uint8_t *data, size_t len)
 /**
  * @brief 增量计算 CRC16-CCITT 校验值
  */
-uint16_t OSAL_crc16_ccitt_update(uint16_t crc, const uint8_t *data, size_t len)
+uint16_t osal_crc16_ccitt_update(uint16_t crc, const uint8_t *data, size_t len)
 {
 	size_t i;
 
@@ -122,7 +122,7 @@ uint16_t OSAL_crc16_ccitt_update(uint16_t crc, const uint8_t *data, size_t len)
  * @brief 计算 CRC16-MODBUS 校验值
  * @note 多项式：0xA001，初始值：0xFFFF
  */
-uint16_t OSAL_crc16_modbus(const uint8_t *data, size_t len)
+uint16_t osal_crc16_modbus(const uint8_t *data, size_t len)
 {
 	uint16_t crc = 0xFFFF;
 	size_t i;
@@ -148,7 +148,7 @@ uint16_t OSAL_crc16_modbus(const uint8_t *data, size_t len)
 /**
  * @brief 计算 CRC32 校验值
  */
-uint32_t OSAL_crc32(const uint8_t *data, size_t len)
+uint32_t osal_crc32(const uint8_t *data, size_t len)
 {
 	uint32_t crc = 0xFFFFFFFF;
 	size_t i;

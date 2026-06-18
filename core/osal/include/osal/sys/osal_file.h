@@ -91,14 +91,14 @@ typedef mode_t osal_mode_t;
  * @param mode 文件权限（OSAL_S_*），仅在创建文件时使用
  * @return 文件描述符(>=0)，失败返回-1
  */
-int32_t OSAL_open(const char *pathname, int32_t flags, uint32_t mode);
+int32_t osal_open(const char *pathname, int32_t flags, uint32_t mode);
 
 /**
  * @brief 关闭文件描述符
  * @param fd 文件描述符
  * @return 0成功，-1失败
  */
-int32_t OSAL_close(int32_t fd);
+int32_t osal_close(int32_t fd);
 
 /**
  * @brief 读取数据
@@ -107,7 +107,7 @@ int32_t OSAL_close(int32_t fd);
  * @param count 字节数
  * @return 实际读取字节数(>=0)，0表示EOF，-1失败
  */
-osal_ssize_t OSAL_read(int32_t fd, void *buf, osal_size_t count);
+osal_ssize_t osal_read(int32_t fd, void *buf, osal_size_t count);
 
 /**
  * @brief 写入数据
@@ -116,7 +116,7 @@ osal_ssize_t OSAL_read(int32_t fd, void *buf, osal_size_t count);
  * @param count 字节数
  * @return 实际写入字节数(>=0)，-1失败
  */
-osal_ssize_t OSAL_write(int32_t fd, const void *buf, osal_size_t count);
+osal_ssize_t osal_write(int32_t fd, const void *buf, osal_size_t count);
 
 /**
  * @brief 移动文件读写位置
@@ -125,7 +125,7 @@ osal_ssize_t OSAL_write(int32_t fd, const void *buf, osal_size_t count);
  * @param whence 起始位置（OSAL_SEEK_SET/CUR/END）
  * @return 新的文件位置(>=0)，-1失败
  */
-osal_off_t OSAL_lseek(int32_t fd, osal_off_t offset, int32_t whence);
+osal_off_t osal_lseek(int32_t fd, osal_off_t offset, int32_t whence);
 
 /**
  * @brief 文件控制操作
@@ -134,7 +134,7 @@ osal_off_t OSAL_lseek(int32_t fd, osal_off_t offset, int32_t whence);
  * @param arg 参数（依赖于cmd）
  * @return 依赖于cmd，失败返回-1
  */
-int32_t OSAL_fcntl(int32_t fd, int32_t cmd, int32_t arg);
+int32_t osal_fcntl(int32_t fd, int32_t cmd, int32_t arg);
 
 /**
  * @brief 设备I/O控制
@@ -143,14 +143,14 @@ int32_t OSAL_fcntl(int32_t fd, int32_t cmd, int32_t arg);
  * @param argp 参数指针
  * @return 0成功，-1失败
  */
-int32_t OSAL_ioctl(int32_t fd, uint32_t request, void *argp);
+int32_t osal_ioctl(int32_t fd, uint32_t request, void *argp);
 
 /**
  * @brief 删除文件
  * @param pathname 文件路径
  * @return 0成功，-1失败
  */
-int32_t OSAL_unlink(const char *pathname);
+int32_t osal_unlink(const char *pathname);
 
 /**
  * @brief 创建符号链接
@@ -158,7 +158,7 @@ int32_t OSAL_unlink(const char *pathname);
  * @param linkpath 符号链接路径
  * @return 0成功，-1失败
  */
-int32_t OSAL_symlink(const char *target, const char *linkpath);
+int32_t osal_symlink(const char *target, const char *linkpath);
 
 /**
  * @brief 检查文件访问权限
@@ -166,7 +166,7 @@ int32_t OSAL_symlink(const char *target, const char *linkpath);
  * @param mode 检查模式（OSAL_F_OK/R_OK/W_OK/X_OK）
  * @return 0成功（有权限），-1失败（无权限或文件不存在）
  */
-int32_t OSAL_access(const char *pathname, int32_t mode);
+int32_t osal_access(const char *pathname, int32_t mode);
 
 #ifdef __cplusplus
 }

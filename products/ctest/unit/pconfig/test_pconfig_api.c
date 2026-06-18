@@ -9,56 +9,56 @@
 
 static void test_pconfig_get_board(void)
 {
-	const pconfig_platform_config_t *cfg = PCONFIG_GetBoard();
+	const pconfig_platform_config_t *cfg = pconfig_get_board();
 	TEST_ASSERT_NOT_NULL(cfg);
-	TEST_ASSERT_EQUAL(0, OSAL_strcmp(cfg->platform_name, "generic"));
-	TEST_ASSERT_EQUAL(0, OSAL_strcmp(cfg->product_name, "middleware"));
+	TEST_ASSERT_EQUAL(0, osal_strcmp(cfg->platform_name, "generic"));
+	TEST_ASSERT_EQUAL(0, osal_strcmp(cfg->product_name, "middleware"));
 }
 
 static void test_pconfig_find_by_name(void)
 {
 	const pconfig_platform_config_t *cfg =
-		PCONFIG_Find("ti", "framework", NULL);
+		pconfig_find("ti", "framework", NULL);
 	TEST_ASSERT_NOT_NULL(cfg);
-	TEST_ASSERT_EQUAL(0, OSAL_strcmp(cfg->chip_name, "am625"));
+	TEST_ASSERT_EQUAL(0, osal_strcmp(cfg->chip_name, "am625"));
 }
 
 static void test_pconfig_find_alt_config(void)
 {
 	const pconfig_platform_config_t *cfg =
-		PCONFIG_Find("ti", "framework_alt", NULL);
+		pconfig_find("ti", "framework_alt", NULL);
 	TEST_ASSERT_NOT_NULL(cfg);
-	TEST_ASSERT_EQUAL(0, OSAL_strcmp(cfg->product_name, "framework_alt"));
+	TEST_ASSERT_EQUAL(0, osal_strcmp(cfg->product_name, "framework_alt"));
 }
 
 static void test_pconfig_find_missing_config(void)
 {
 	const pconfig_platform_config_t *cfg =
-		PCONFIG_Find("missing", "framework", NULL);
+		pconfig_find("missing", "framework", NULL);
 	TEST_ASSERT_NULL(cfg);
 }
 
 static void test_pconfig_hw_get_mcu_by_id(void)
 {
 	const pconfig_platform_config_t *platform =
-		PCONFIG_Find("ti", "framework", NULL);
-	const pconfig_mcu_entry_t *mcu = PCONFIG_HW_GetMCU(platform, 0);
+		pconfig_find("ti", "framework", NULL);
+	const pconfig_mcu_entry_t *mcu = pconfig_hw_get_mcu(platform, 0);
 	TEST_ASSERT_NOT_NULL(mcu);
-	TEST_ASSERT_EQUAL(0, OSAL_strcmp(mcu->config.name, "mcu0"));
+	TEST_ASSERT_EQUAL(0, osal_strcmp(mcu->config.name, "mcu0"));
 }
 
 static void test_pconfig_hw_get_mcu_second_entry(void)
 {
 	const pconfig_platform_config_t *platform =
-		PCONFIG_Find("ti", "framework", NULL);
-	const pconfig_mcu_entry_t *mcu = PCONFIG_HW_GetMCU(platform, 1);
+		pconfig_find("ti", "framework", NULL);
+	const pconfig_mcu_entry_t *mcu = pconfig_hw_get_mcu(platform, 1);
 	TEST_ASSERT_NOT_NULL(mcu);
-	TEST_ASSERT_EQUAL(0, OSAL_strcmp(mcu->config.name, "mcu1"));
+	TEST_ASSERT_EQUAL(0, osal_strcmp(mcu->config.name, "mcu1"));
 }
 
 static void test_pconfig_validate_success(void)
 {
-	TEST_ASSERT_EQUAL(OSAL_SUCCESS, PCONFIG_validate(PCONFIG_GetBoard()));
+	TEST_ASSERT_EQUAL(OSAL_SUCCESS, pconfig_validate(pconfig_get_board()));
 }
 
 static void test_pconfig_list(void)
@@ -66,7 +66,7 @@ static void test_pconfig_list(void)
 	const pconfig_platform_config_t *configs[10];
 	uint32_t count = 10;
 
-	TEST_ASSERT_EQUAL(OSAL_SUCCESS, PCONFIG_list(configs, &count));
+	TEST_ASSERT_EQUAL(OSAL_SUCCESS, pconfig_list(configs, &count));
 	TEST_ASSERT_EQUAL(3u, count);
 	TEST_ASSERT_NOT_NULL(configs[0]);
 	TEST_ASSERT_NOT_NULL(configs[1]);

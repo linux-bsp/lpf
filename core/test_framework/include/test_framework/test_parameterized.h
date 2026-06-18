@@ -55,12 +55,12 @@
 		size_t _test_i;                                                        \
 		for (_test_i = 0; _test_i < _test_count; _test_i++) {                  \
 			if (g_test_failed) {                                               \
-				OSAL_printf("[   INFO   ] Skipping remaining %zu "             \
+				osal_printf("[   INFO   ] Skipping remaining %zu "             \
 							"parameter(s) due to previous failure\n",          \
 							_test_count - _test_i);                            \
 				return;                                                        \
 			}                                                                  \
-			OSAL_printf("[   RUN    ] Parameter set %zu/%zu\n", _test_i + 1,   \
+			osal_printf("[   RUN    ] Parameter set %zu/%zu\n", _test_i + 1,   \
 						_test_count);                                          \
 			test_name##_impl(&data_array[_test_i]);                            \
 		}                                                                      \
@@ -87,7 +87,7 @@
 		for (_test_i = 0; _test_i < _test_count; _test_i++) {                  \
 			bool _test_was_failed = g_test_failed;                             \
 			g_test_failed = false;                                             \
-			OSAL_printf("[   RUN    ] Parameter set %zu/%zu\n", _test_i + 1,   \
+			osal_printf("[   RUN    ] Parameter set %zu/%zu\n", _test_i + 1,   \
 						_test_count);                                          \
 			test_name##_impl(&data_array[_test_i]);                            \
 			if (g_test_failed) {                                               \
@@ -96,7 +96,7 @@
 			g_test_failed = _test_was_failed || g_test_failed;                 \
 		}                                                                      \
 		if (_test_failed_count > 0) {                                          \
-			OSAL_printf("[   INFO   ] %zu/%zu parameter set(s) failed\n",      \
+			osal_printf("[   INFO   ] %zu/%zu parameter set(s) failed\n",      \
 						_test_failed_count, _test_count);                      \
 		}                                                                      \
 	}                                                                          \
@@ -118,7 +118,7 @@
  */
 #define TEST_SKIP(reason)                         \
 	do {                                          \
-		OSAL_printf("[  SKIPPED ] %s\n", reason); \
+		osal_printf("[  SKIPPED ] %s\n", reason); \
 		return;                                   \
 	} while (0)
 
@@ -129,6 +129,6 @@
  * @param ... 参数
  */
 #define TEST_PARAM_INFO(format, ...) \
-	OSAL_printf("[  PARAM   ] " format "\n", ##__VA_ARGS__)
+	osal_printf("[  PARAM   ] " format "\n", ##__VA_ARGS__)
 
 #endif /* TEST_PARAMETERIZED_H */

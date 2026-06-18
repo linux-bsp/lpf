@@ -13,7 +13,7 @@ osal_atomic_uint32_t g_seq_number;
 /* 初始化序列号（需要在模块加载时调用） */
 __attribute__((constructor)) static void prl_init_seq(void)
 {
-	OSAL_atomic_init(&g_seq_number, 0);
+	osal_atomic_init(&g_seq_number, 0);
 }
 
 /*===========================================================================
@@ -22,13 +22,13 @@ __attribute__((constructor)) static void prl_init_seq(void)
 
 uint32_t prl_get_next_seq(void)
 {
-	return OSAL_atomic_fetch_add(&g_seq_number, 1);
+	return osal_atomic_fetch_add(&g_seq_number, 1);
 }
 
 uint32_t prl_get_timestamp(void)
 {
 	OS_time_t time_struct;
-	OSAL_get_local_time(&time_struct);
+	osal_get_local_time(&time_struct);
 	return time_struct.seconds;
 }
 
@@ -39,17 +39,17 @@ uint32_t prl_get_timestamp(void)
 void prl_init_header(prl_header_t *hdr, uint8_t dev_type, uint8_t msg_type,
 					 uint16_t payload_len, uint8_t flags)
 {
-	OSAL_memset(hdr, 0, OSAL_sizeof(prl_header_t));
+	osal_memset(hdr, 0, OSAL_sizeof(prl_header_t));
 
 	/* 多字节字段使用网络字节序（大端），确保跨平台兼容性 */
-	hdr->magic = OSAL_htons(PRL_MAGIC);
+	hdr->magic = osal_htons(PRL_MAGIC);
 	hdr->version = PRL_VERSION;
 	hdr->dev_type = dev_type;
 	hdr->msg_type = msg_type;
 	hdr->flags = flags;
-	hdr->length = OSAL_htons(payload_len);
-	hdr->seq = OSAL_htonl(prl_get_next_seq());
-	hdr->timestamp = OSAL_htonl(prl_get_timestamp());
+	hdr->length = osal_htons(payload_len);
+	hdr->seq = osal_htonl(prl_get_next_seq());
+	hdr->timestamp = osal_htonl(prl_get_timestamp());
 	/* crc16 将在 prl_set_packet_crc() 中转换 */
 }
 
@@ -59,8 +59,8 @@ int prl_validate_header(const prl_header_t *hdr, uint8_t expected_type)
 	uint16_t length;
 
 	/* 将网络字节序转换为主机字节序后再验证 */
-	magic = OSAL_ntohs(hdr->magic);
-	length = OSAL_ntohs(hdr->length);
+	magic = osal_ntohs(hdr->magic);
+	length = osal_ntohs(hdr->length);
 
 	if (magic != PRL_MAGIC) {
 		return OSAL_EPROTO; /* 协议错误：魔数不匹配 */
@@ -93,16 +93,16 @@ void prl_set_packet_crc(uint8_t *packet, size_t total_len)
 	hdr->crc16 = 0;
 
 	/* 计算整个报文的 CRC（使用 OSAL CRC16-CCITT） */
-	uint16_t crc = OSAL_crc16_ccitt(packet, total_len);
+	uint16_t crc = osal_crc16_ccitt(packet, total_len);
 
 	/* 设置 CRC（转换为网络字节序） */
-	hdr->crc16 = OSAL_htons(crc);
+	hdr->crc16 = osal_htons(crc);
 }
 
 bool prl_verify_packet_crc(const uint8_t *packet, size_t total_len)
 {
 	const prl_header_t *hdr = (const prl_header_t *)packet;
-	uint16_t received_crc = OSAL_ntohs(hdr->crc16); /* 转换为主机字节序 */
+	uint16_t received_crc = osal_ntohs(hdr->crc16); /* 转换为主机字节序 */
 
 	/* 分段计算 CRC，避免动态内存分配
      * CRC 字段位于协议头的偏移 16-17 字节处
@@ -118,14 +118,14 @@ bool prl_verify_packet_crc(const uint8_t *packet, size_t total_len)
 
 	/* 使用 OSAL 的增量 CRC 函数 */
 	/* 第一段：从报文开始到 CRC 字段之前 */
-	crc = OSAL_crc16_ccitt_update(crc, packet, crc_offset);
+	crc = osal_crc16_ccitt_update(crc, packet, crc_offset);
 
 	/* 第二段：CRC 字段作为 0x0000 处理 */
 	uint8_t zeros[2] = { 0x00, 0x00 };
-	crc = OSAL_crc16_ccitt_update(crc, zeros, OSAL_sizeof(zeros));
+	crc = osal_crc16_ccitt_update(crc, zeros, OSAL_sizeof(zeros));
 
 	/* 第三段：从 CRC 字段之后到报文结束 */
-	crc = OSAL_crc16_ccitt_update(crc, packet + crc_offset + 2,
+	crc = osal_crc16_ccitt_update(crc, packet + crc_offset + 2,
 								  total_len - crc_offset - 2);
 
 	return (crc == received_crc);

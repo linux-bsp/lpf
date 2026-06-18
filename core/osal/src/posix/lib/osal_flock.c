@@ -36,7 +36,7 @@ static int32_t flock_do_lock(int fd, osal_flock_type_t type, int cmd)
 {
 	struct flock lock;
 
-	OSAL_memset(&lock, 0, OSAL_sizeof(lock));
+	osal_memset(&lock, 0, OSAL_sizeof(lock));
 	lock.l_type = (type == OSAL_FLOCK_SHARED) ? F_RDLCK : F_WRLCK;
 	lock.l_whence = SEEK_SET;
 	lock.l_start = 0;
@@ -59,7 +59,7 @@ static int32_t flock_do_unlock(int fd)
 {
 	struct flock lock;
 
-	OSAL_memset(&lock, 0, OSAL_sizeof(lock));
+	osal_memset(&lock, 0, OSAL_sizeof(lock));
 	lock.l_type = F_UNLCK;
 	lock.l_whence = SEEK_SET;
 	lock.l_start = 0;
@@ -79,27 +79,27 @@ static int32_t flock_do_unlock(int fd)
 /**
  * @brief 创建文件锁
  */
-int32_t OSAL_flock_create(const char *lock_file, osal_flock_t **flock)
+int32_t osal_flock_create(const char *lock_file, osal_flock_t **flock)
 {
 	if (!lock_file || !flock) {
 		return OSAL_ERR_INVALID_POINTER;
 	}
 
 	/* 分配内存 */
-	osal_flock_t *fl = (osal_flock_t *)OSAL_malloc(OSAL_sizeof(osal_flock_t));
+	osal_flock_t *fl = (osal_flock_t *)osal_malloc(OSAL_sizeof(osal_flock_t));
 	if (!fl) {
 		return OSAL_ERR_NO_MEMORY;
 	}
 
-	OSAL_memset(fl, 0, OSAL_sizeof(osal_flock_t));
+	osal_memset(fl, 0, OSAL_sizeof(osal_flock_t));
 
 	/* 保存锁文件路径 */
-	OSAL_strncpy(fl->lock_file, lock_file, OSAL_sizeof(fl->lock_file) - 1);
+	osal_strncpy(fl->lock_file, lock_file, OSAL_sizeof(fl->lock_file) - 1);
 
 	/* 打开或创建锁文件 */
 	fl->fd = open(lock_file, O_RDWR | O_CREAT, 0666);
 	if (fl->fd < 0) {
-		OSAL_free(fl);
+		osal_free(fl);
 		return OSAL_ERR_GENERIC;
 	}
 
@@ -112,7 +112,7 @@ int32_t OSAL_flock_create(const char *lock_file, osal_flock_t **flock)
 /**
  * @brief 销毁文件锁
  */
-int32_t OSAL_flock_destroy(osal_flock_t *flock)
+int32_t osal_flock_destroy(osal_flock_t *flock)
 {
 	if (!flock) {
 		return OSAL_ERR_INVALID_POINTER;
@@ -120,7 +120,7 @@ int32_t OSAL_flock_destroy(osal_flock_t *flock)
 
 	/* 如果还持有锁，先释放 */
 	if (flock->is_locked) {
-		OSAL_flock_unlock(flock);
+		osal_flock_unlock(flock);
 	}
 
 	/* 关闭文件描述符 */
@@ -129,7 +129,7 @@ int32_t OSAL_flock_destroy(osal_flock_t *flock)
 	}
 
 	/* 释放内存 */
-	OSAL_free(flock);
+	osal_free(flock);
 
 	return OSAL_SUCCESS;
 }
@@ -137,7 +137,7 @@ int32_t OSAL_flock_destroy(osal_flock_t *flock)
 /**
  * @brief 加锁（阻塞模式）
  */
-int32_t OSAL_flock_lock(osal_flock_t *flock, osal_flock_type_t type)
+int32_t osal_flock_lock(osal_flock_t *flock, osal_flock_type_t type)
 {
 	if (!flock) {
 		return OSAL_ERR_INVALID_POINTER;
@@ -156,7 +156,7 @@ int32_t OSAL_flock_lock(osal_flock_t *flock, osal_flock_type_t type)
 /**
  * @brief 尝试加锁（非阻塞模式）
  */
-int32_t OSAL_flock_try_lock(osal_flock_t *flock, osal_flock_type_t type)
+int32_t osal_flock_try_lock(osal_flock_t *flock, osal_flock_type_t type)
 {
 	if (!flock) {
 		return OSAL_ERR_INVALID_POINTER;
@@ -175,7 +175,7 @@ int32_t OSAL_flock_try_lock(osal_flock_t *flock, osal_flock_type_t type)
 /**
  * @brief 带超时的加锁
  */
-int32_t OSAL_flock_timed_lock(osal_flock_t *flock, osal_flock_type_t type,
+int32_t osal_flock_timed_lock(osal_flock_t *flock, osal_flock_type_t type,
 							  uint32_t timeout_ms)
 {
 	if (!flock) {
@@ -184,7 +184,7 @@ int32_t OSAL_flock_timed_lock(osal_flock_t *flock, osal_flock_type_t type,
 
 	/* 如果超时为 0，使用非阻塞模式 */
 	if (timeout_ms == 0) {
-		return OSAL_flock_try_lock(flock, type);
+		return osal_flock_try_lock(flock, type);
 	}
 
 	/* 记录开始时间 */
@@ -193,7 +193,7 @@ int32_t OSAL_flock_timed_lock(osal_flock_t *flock, osal_flock_type_t type,
 
 	/* 轮询尝试加锁 */
 	while (1) {
-		int32_t ret = OSAL_flock_try_lock(flock, type);
+		int32_t ret = osal_flock_try_lock(flock, type);
 
 		if (ret == OSAL_SUCCESS) {
 			return OSAL_SUCCESS;
@@ -223,7 +223,7 @@ int32_t OSAL_flock_timed_lock(osal_flock_t *flock, osal_flock_type_t type,
 /**
  * @brief 解锁
  */
-int32_t OSAL_flock_unlock(osal_flock_t *flock)
+int32_t osal_flock_unlock(osal_flock_t *flock)
 {
 	if (!flock) {
 		return OSAL_ERR_INVALID_POINTER;

@@ -14,12 +14,12 @@
 
 static void test_sched_set_get_policy(void)
 {
-	osal_thread_t thread = OSAL_pthread_self();
+	osal_thread_t thread = osal_pthread_self();
 	int32_t policy;
 	int32_t priority;
 
 	/* 获取当前调度策略 */
-	int32_t ret = OSAL_pthread_getschedparam(thread, &policy, &priority);
+	int32_t ret = osal_pthread_getschedparam(thread, &policy, &priority);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 策略应该是有效值 */
@@ -57,20 +57,20 @@ static void test_sched_priority_range(void)
 
 static void test_sched_set_priority_other(void)
 {
-	osal_thread_t thread = OSAL_pthread_self();
+	osal_thread_t thread = osal_pthread_self();
 	int32_t policy;
 	int32_t priority;
 
 	/* 获取当前参数 */
-	int32_t ret = OSAL_pthread_getschedparam(thread, &policy, &priority);
+	int32_t ret = osal_pthread_getschedparam(thread, &policy, &priority);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 设置新的优先级（SCHED_OTHER通常只支持0） */
-	ret = OSAL_pthread_setschedparam(thread, SCHED_OTHER, 0);
+	ret = osal_pthread_setschedparam(thread, SCHED_OTHER, 0);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 验证设置成功 */
-	ret = OSAL_pthread_getschedparam(thread, &policy, &priority);
+	ret = osal_pthread_getschedparam(thread, &policy, &priority);
 	TEST_ASSERT_EQUAL(0, ret);
 	TEST_ASSERT_EQUAL(SCHED_OTHER, policy);
 }
@@ -84,7 +84,7 @@ static void test_sched_cpu_affinity(void)
 	int32_t cpu_id = 0;
 
 	/* 设置当前线程的CPU亲和性到CPU 0 */
-	int32_t ret = OSAL_pthread_setaffinity_np(OSAL_pthread_self(), cpu_id);
+	int32_t ret = osal_pthread_setaffinity_np(osal_pthread_self(), cpu_id);
 
 	/* 如果系统支持亲和性设置，应该成功 */
 	/* 如果不支持（如单核系统），可能返回错误，但这不是测试失败 */
@@ -92,7 +92,7 @@ static void test_sched_cpu_affinity(void)
 		int32_t get_cpu_id;
 
 		/* 获取CPU亲和性 */
-		ret = OSAL_pthread_getaffinity_np(OSAL_pthread_self(), &get_cpu_id);
+		ret = osal_pthread_getaffinity_np(osal_pthread_self(), &get_cpu_id);
 		TEST_ASSERT_EQUAL(0, ret);
 
 		/* 验证CPU 0被设置 */
@@ -105,14 +105,14 @@ static void test_sched_process_cpu_affinity(void)
 	int32_t cpu_id = 0;
 
 	/* 设置当前进程的CPU亲和性到CPU 0 */
-	int32_t ret = OSAL_sched_setaffinity(0, cpu_id);
+	int32_t ret = osal_sched_setaffinity(0, cpu_id);
 
 	/* 如果系统支持亲和性设置，应该成功 */
 	if (ret == 0) {
 		int32_t get_cpu_id;
 
 		/* 获取CPU亲和性 */
-		ret = OSAL_sched_getaffinity(0, &get_cpu_id);
+		ret = osal_sched_getaffinity(0, &get_cpu_id);
 		TEST_ASSERT_EQUAL(0, ret);
 
 		/* 验证CPU 0被设置 */
@@ -123,17 +123,17 @@ static void test_sched_process_cpu_affinity(void)
 static void test_sched_process_affinity_with_pid(void)
 {
 	int32_t cpu_id = 0;
-	osal_pid_t pid = OSAL_getpid();
+	osal_pid_t pid = osal_getpid();
 
 	/* 使用显式PID设置进程的CPU亲和性 */
-	int32_t ret = OSAL_sched_setaffinity(pid, cpu_id);
+	int32_t ret = osal_sched_setaffinity(pid, cpu_id);
 
 	/* 如果系统支持亲和性设置，应该成功 */
 	if (ret == 0) {
 		int32_t get_cpu_id;
 
 		/* 获取CPU亲和性 */
-		ret = OSAL_sched_getaffinity(pid, &get_cpu_id);
+		ret = osal_sched_getaffinity(pid, &get_cpu_id);
 		TEST_ASSERT_EQUAL(0, ret);
 
 		/* 验证CPU 0被设置 */
@@ -150,15 +150,15 @@ static void test_sched_attr_set_policy(void)
 	osal_threadattr_t attr;
 
 	/* 初始化属性 */
-	int32_t ret = OSAL_pthread_attr_init(&attr);
+	int32_t ret = osal_pthread_attr_init(&attr);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 设置调度策略 */
-	ret = OSAL_pthread_attr_setschedpolicy(&attr, SCHED_OTHER);
+	ret = osal_pthread_attr_setschedpolicy(&attr, SCHED_OTHER);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 清理 */
-	OSAL_pthread_attr_destroy(&attr);
+	osal_pthread_attr_destroy(&attr);
 }
 
 static void test_sched_attr_set_param(void)
@@ -167,16 +167,16 @@ static void test_sched_attr_set_param(void)
 	osal_sched_param_t param;
 
 	/* 初始化属性 */
-	int32_t ret = OSAL_pthread_attr_init(&attr);
+	int32_t ret = osal_pthread_attr_init(&attr);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 设置调度参数 */
 	param.sched_priority = 0;
-	ret = OSAL_pthread_attr_setschedparam(&attr, &param);
+	ret = osal_pthread_attr_setschedparam(&attr, &param);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 清理 */
-	OSAL_pthread_attr_destroy(&attr);
+	osal_pthread_attr_destroy(&attr);
 }
 
 /*===========================================================================
@@ -186,12 +186,12 @@ static void test_sched_attr_set_param(void)
 static void test_sched_yield(void)
 {
 	/* 主动让出CPU */
-	int32_t ret = OSAL_sched_yield();
+	int32_t ret = osal_sched_yield();
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 多次yield应该都成功 */
 	for (int32_t i = 0; i < 10; i++) {
-		ret = OSAL_sched_yield();
+		ret = osal_sched_yield();
 		TEST_ASSERT_EQUAL(0, ret);
 	}
 }

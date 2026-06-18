@@ -15,13 +15,13 @@
  * Socket基本操作
  *===========================================================================*/
 
-int32_t OSAL_socket(int32_t domain, int32_t type, int32_t protocol)
+int32_t osal_socket(int32_t domain, int32_t type, int32_t protocol)
 {
 	int32_t result = socket(domain, type, protocol);
 	return result;
 }
 
-int32_t OSAL_bind(int32_t sockfd, const osal_sockaddr_t *addr,
+int32_t osal_bind(int32_t sockfd, const osal_sockaddr_t *addr,
 				  osal_size_t addrlen)
 {
 	union {
@@ -33,12 +33,12 @@ int32_t OSAL_bind(int32_t sockfd, const osal_sockaddr_t *addr,
 	return bind(sockfd, addr_union.posix_addr, (socklen_t)addrlen);
 }
 
-int32_t OSAL_listen(int32_t sockfd, int32_t backlog)
+int32_t osal_listen(int32_t sockfd, int32_t backlog)
 {
 	return listen(sockfd, backlog);
 }
 
-int32_t OSAL_accept(int32_t sockfd, osal_sockaddr_t *addr, osal_size_t *addrlen)
+int32_t osal_accept(int32_t sockfd, osal_sockaddr_t *addr, osal_size_t *addrlen)
 {
 	union {
 		osal_sockaddr_t *osal_addr;
@@ -55,7 +55,7 @@ int32_t OSAL_accept(int32_t sockfd, osal_sockaddr_t *addr, osal_size_t *addrlen)
 	return result;
 }
 
-int32_t OSAL_connect(int32_t sockfd, const osal_sockaddr_t *addr,
+int32_t osal_connect(int32_t sockfd, const osal_sockaddr_t *addr,
 					 osal_size_t addrlen)
 {
 	union {
@@ -67,19 +67,19 @@ int32_t OSAL_connect(int32_t sockfd, const osal_sockaddr_t *addr,
 	return connect(sockfd, addr_union.posix_addr, (socklen_t)addrlen);
 }
 
-osal_ssize_t OSAL_send(int32_t sockfd, const void *buf, osal_size_t len,
+osal_ssize_t osal_send(int32_t sockfd, const void *buf, osal_size_t len,
 					   int32_t flags)
 {
 	return send(sockfd, buf, len, flags);
 }
 
-osal_ssize_t OSAL_recv(int32_t sockfd, void *buf, osal_size_t len,
+osal_ssize_t osal_recv(int32_t sockfd, void *buf, osal_size_t len,
 					   int32_t flags)
 {
 	return recv(sockfd, buf, len, flags);
 }
 
-osal_ssize_t OSAL_sendto(int32_t sockfd, const void *buf, osal_size_t len,
+osal_ssize_t osal_sendto(int32_t sockfd, const void *buf, osal_size_t len,
 						 int32_t flags, const osal_sockaddr_t *dest_addr,
 						 osal_size_t addrlen)
 {
@@ -93,7 +93,7 @@ osal_ssize_t OSAL_sendto(int32_t sockfd, const void *buf, osal_size_t len,
 				  (socklen_t)addrlen);
 }
 
-osal_ssize_t OSAL_recvfrom(int32_t sockfd, void *buf, osal_size_t len,
+osal_ssize_t osal_recvfrom(int32_t sockfd, void *buf, osal_size_t len,
 						   int32_t flags, osal_sockaddr_t *src_addr,
 						   osal_size_t *addrlen)
 {
@@ -114,7 +114,7 @@ osal_ssize_t OSAL_recvfrom(int32_t sockfd, void *buf, osal_size_t len,
 	return result;
 }
 
-int32_t OSAL_shutdown(int32_t sockfd, int32_t how)
+int32_t osal_shutdown(int32_t sockfd, int32_t how)
 {
 	int32_t result = shutdown(sockfd, how);
 	return result;
@@ -124,13 +124,13 @@ int32_t OSAL_shutdown(int32_t sockfd, int32_t how)
  * Socket选项操作
  *===========================================================================*/
 
-int32_t OSAL_setsockopt(int32_t sockfd, int32_t level, int32_t optname,
+int32_t osal_setsockopt(int32_t sockfd, int32_t level, int32_t optname,
 						const void *optval, osal_size_t optlen)
 {
 	return setsockopt(sockfd, level, optname, optval, (socklen_t)optlen);
 }
 
-int32_t OSAL_getsockopt(int32_t sockfd, int32_t level, int32_t optname,
+int32_t osal_getsockopt(int32_t sockfd, int32_t level, int32_t optname,
 						void *optval, osal_size_t *optlen)
 {
 	socklen_t len = (socklen_t)(*optlen);
@@ -143,13 +143,13 @@ int32_t OSAL_getsockopt(int32_t sockfd, int32_t level, int32_t optname,
  * 网络接口操作
  *===========================================================================*/
 
-uint32_t OSAL_if_nametoindex(const char *ifname)
+uint32_t osal_if_nametoindex(const char *ifname)
 {
 	uint32_t result = if_nametoindex(ifname);
 	return result;
 }
 
-char *OSAL_if_indextoname(uint32_t ifindex, char *ifname)
+char *osal_if_indextoname(uint32_t ifindex, char *ifname)
 {
 	uint32_t index;
 	char *result;
@@ -163,22 +163,22 @@ char *OSAL_if_indextoname(uint32_t ifindex, char *ifname)
  * 字节序转换
  *===========================================================================*/
 
-uint16_t OSAL_htons(uint16_t hostshort)
+uint16_t osal_htons(uint16_t hostshort)
 {
 	return htons(hostshort);
 }
 
-uint32_t OSAL_htonl(uint32_t hostlong)
+uint32_t osal_htonl(uint32_t hostlong)
 {
 	return htonl(hostlong);
 }
 
-uint16_t OSAL_ntohs(uint16_t netshort)
+uint16_t osal_ntohs(uint16_t netshort)
 {
 	return ntohs(netshort);
 }
 
-uint32_t OSAL_ntohl(uint32_t netlong)
+uint32_t osal_ntohl(uint32_t netlong)
 {
 	return ntohl(netlong);
 }
@@ -187,13 +187,13 @@ uint32_t OSAL_ntohl(uint32_t netlong)
  * IP地址转换
  *===========================================================================*/
 
-int32_t OSAL_inet_pton(int32_t af, const char *src, void *dst)
+int32_t osal_inet_pton(int32_t af, const char *src, void *dst)
 {
 	int32_t result = inet_pton(af, src, dst);
 	return result;
 }
 
-const char *OSAL_inet_ntop(int32_t af, const void *src, char *dst,
+const char *osal_inet_ntop(int32_t af, const void *src, char *dst,
 						   uint32_t size)
 {
 	socklen_t len;

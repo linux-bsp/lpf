@@ -67,6 +67,6 @@ extern const aconfig_config_table_t g_aconfig_table;
  * @brief 获取当前配置表
  * @return 配置表指针，NULL 表示未提供有效配置
  */
-const aconfig_config_table_t *ACONFIG_GetTable(void);
+const aconfig_config_table_t *aconfig_get_table(void);
 
 #endif /* ACONFIG_H */

@@ -25,13 +25,13 @@ typedef struct {
  * @return OSAL_SUCCESS 成功
  * @return OSAL_ERR_INVALID_POINTER time_struct为NULL
  */
-int32_t OSAL_get_local_time(OS_time_t *time_struct);
+int32_t osal_get_local_time(OS_time_t *time_struct);
 
 /**
  * @brief 获取系统滴答计数
  *
  * @return 系统滴答数(毫秒)
  */
-uint32_t OSAL_get_tick_count(void);
+uint32_t osal_get_tick_count(void);
 
 #endif /* OSAL_CLOCK_H */

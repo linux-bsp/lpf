@@ -32,7 +32,7 @@
  *     TEST_MOCK_SET_RETURN(OSAL_SUCCESS);
  *
  *     // 执行测试
- *     int32_t ret = PDL_MCU_init(&config);
+ *     int32_t ret = pdl_mcu_init(&config);
  *
  *     // 验证 mock 被调用
  *     TEST_MOCK_VERIFY_CALLED(HAL_CAN_Init);
@@ -184,10 +184,10 @@ test_mock_state_t *test_mock_get(const char *func_name);
 	do {                                                                     \
 		test_mock_state_t *_mock = test_mock_get(#func_name);                \
 		if (!_mock || _mock->call_count == 0) {                              \
-			OSAL_printf("[  FAILED  ] %s:%d\n", __FILE__, __LINE__);         \
-			OSAL_printf("            Expected function '%s' to be called\n", \
+			osal_printf("[  FAILED  ] %s:%d\n", __FILE__, __LINE__);         \
+			osal_printf("            Expected function '%s' to be called\n", \
 						#func_name);                                         \
-			OSAL_printf("            Actual call count: %u\n",               \
+			osal_printf("            Actual call count: %u\n",               \
 						_mock ? _mock->call_count : 0);                      \
 			g_test_failed = true;                                            \
 			return;                                                          \
@@ -205,11 +205,11 @@ test_mock_state_t *test_mock_get(const char *func_name);
 		test_mock_state_t *_mock = test_mock_get(#func_name);              \
 		uint32_t _actual = _mock ? _mock->call_count : 0;                  \
 		if (_actual != (expected_count)) {                                 \
-			OSAL_printf("[  FAILED  ] %s:%d\n", __FILE__, __LINE__);       \
-			OSAL_printf("            Function: %s\n", #func_name);         \
-			OSAL_printf("            Expected call count: %u\n",           \
+			osal_printf("[  FAILED  ] %s:%d\n", __FILE__, __LINE__);       \
+			osal_printf("            Function: %s\n", #func_name);         \
+			osal_printf("            Expected call count: %u\n",           \
 						(uint32_t)(expected_count));                       \
-			OSAL_printf("            Actual call count:   %u\n", _actual); \
+			osal_printf("            Actual call count:   %u\n", _actual); \
 			g_test_failed = true;                                          \
 			return;                                                        \
 		}                                                                  \
@@ -256,7 +256,7 @@ test_mock_state_t *test_mock_get(const char *func_name);
  * @code
  * // 在 HAL 实现文件中
  * TEST_MOCKABLE
- * int32_t HAL_CAN_init(const hal_can_config_t *cfg, hal_can_handle_t *hdl) {
+ * int32_t hal_can_init(const hal_can_config_t *cfg, hal_can_handle_t *hdl) {
  *     // 真实实现...
  * }
  * @endcode
@@ -276,7 +276,7 @@ test_mock_state_t *test_mock_get(const char *func_name);
 	do {                                                        \
 		test_mock_register(#mock_func);                         \
 		/* 实际的函数替换需要编译时支持 */        \
-		OSAL_printf("[   INFO   ] Mock registered: %s -> %s\n", \
+		osal_printf("[   INFO   ] Mock registered: %s -> %s\n", \
 					#original_func, #mock_func);                \
 	} while (0)
 

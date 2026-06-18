@@ -44,23 +44,23 @@ static int32_t i2c_rapid_transaction_worker(void *user_data, uint32_t iteration)
 	}
 
 	/* Perform write transaction */
-	ret = HAL_I2C_write(ctx->handle, I2C_STRESS_SLAVE_ADDR, write_data,
+	ret = hal_i2c_write(ctx->handle, I2C_STRESS_SLAVE_ADDR, write_data,
 						sizeof(write_data));
 	if (ret == OSAL_SUCCESS) {
-		OSAL_atomic_inc(ctx->transaction_counter);
+		osal_atomic_inc(ctx->transaction_counter);
 	} else if (ret == OSAL_ERR_TIMEOUT || ret == OSAL_ERR_DEVICE) {
 		/* I2C errors are acceptable in stress test */
 		return OSAL_SUCCESS;
 	}
 
 	/* Small delay between transactions */
-	OSAL_usleep(1 * 1000);
+	osal_usleep(1 * 1000);
 
 	/* Perform read transaction */
-	ret = HAL_I2C_read(ctx->handle, I2C_STRESS_SLAVE_ADDR, read_data,
+	ret = hal_i2c_read(ctx->handle, I2C_STRESS_SLAVE_ADDR, read_data,
 					   sizeof(read_data));
 	if (ret == OSAL_SUCCESS) {
-		OSAL_atomic_inc(ctx->transaction_counter);
+		osal_atomic_inc(ctx->transaction_counter);
 	} else if (ret == OSAL_ERR_TIMEOUT || ret == OSAL_ERR_DEVICE) {
 		/* I2C errors are acceptable in stress test */
 		return OSAL_SUCCESS;
@@ -83,21 +83,21 @@ static void test_stress_i2c_rapid_transactions(void)
 		STRESS_CONFIG_DURATION(I2C_STRESS_DURATION_SEC);
 	int32_t ret;
 
-	OSAL_printf("[ INFO ] Starting I2C rapid transactions stress test\n");
-	OSAL_printf("         Duration: %u sec, Device: %s, Addr: 0x%02X\n",
+	osal_printf("[ INFO ] Starting I2C rapid transactions stress test\n");
+	osal_printf("         Duration: %u sec, Device: %s, Addr: 0x%02X\n",
 				I2C_STRESS_DURATION_SEC, I2C_STRESS_DEVICE,
 				I2C_STRESS_SLAVE_ADDR);
 
 	/* Open I2C device */
-	ret = HAL_I2C_open(I2C_STRESS_DEVICE, &handle);
+	ret = hal_i2c_open(I2C_STRESS_DEVICE, &handle);
 	if (ret != OSAL_SUCCESS) {
-		OSAL_printf("[ SKIP ] I2C device not available\n");
+		osal_printf("[ SKIP ] I2C device not available\n");
 		TEST_SKIP("I2C device not available");
 		return;
 	}
 
 	/* Initialize counter */
-	OSAL_atomic_store(&transaction_counter, 0);
+	osal_atomic_store(&transaction_counter, 0);
 
 	/* Setup worker context */
 	worker_ctx.handle = handle;
@@ -114,21 +114,21 @@ static void test_stress_i2c_rapid_transactions(void)
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* Wait for completion */
-	OSAL_usleep(I2C_STRESS_DURATION_SEC * 1000 + 1000 * 1000);
+	osal_usleep(I2C_STRESS_DURATION_SEC * 1000 + 1000 * 1000);
 
 	/* Print report */
 	stress_print_report(stress_ctx);
 
 	/* Verify transactions */
-	uint64_t total_transactions = OSAL_atomic_load(&transaction_counter);
-	OSAL_printf("[ INFO ] Total successful transactions: %llu\n",
+	uint64_t total_transactions = osal_atomic_load(&transaction_counter);
+	osal_printf("[ INFO ] Total successful transactions: %llu\n",
 				(unsigned long long)total_transactions);
 
 	/* Cleanup */
 	stress_context_destroy(stress_ctx);
-	HAL_I2C_close(handle);
+	hal_i2c_close(handle);
 
-	OSAL_printf("[ PASS ] I2C rapid transactions stress test completed\n");
+	osal_printf("[ PASS ] I2C rapid transactions stress test completed\n");
 }
 
 /*===========================================================================
@@ -150,7 +150,7 @@ static int32_t i2c_concurrent_worker(void *user_data, uint32_t iteration)
 	int32_t ret;
 
 	/* Write to register */
-	ret = HAL_I2C_write_reg(ctx->handle, I2C_STRESS_SLAVE_ADDR, reg_addr,
+	ret = hal_i2c_write_reg(ctx->handle, I2C_STRESS_SLAVE_ADDR, reg_addr,
 							write_data, sizeof(write_data));
 	if (ret != OSAL_SUCCESS && ret != OSAL_ERR_TIMEOUT &&
 		ret != OSAL_ERR_DEVICE) {
@@ -158,10 +158,10 @@ static int32_t i2c_concurrent_worker(void *user_data, uint32_t iteration)
 	}
 
 	/* Read back from register */
-	ret = HAL_I2C_read_reg(ctx->handle, I2C_STRESS_SLAVE_ADDR, reg_addr,
+	ret = hal_i2c_read_reg(ctx->handle, I2C_STRESS_SLAVE_ADDR, reg_addr,
 						   read_data, sizeof(read_data));
 	if (ret == OSAL_SUCCESS) {
-		OSAL_atomic_inc(ctx->transaction_counter);
+		osal_atomic_inc(ctx->transaction_counter);
 	}
 
 	return (ret == OSAL_ERR_TIMEOUT || ret == OSAL_ERR_DEVICE) ? OSAL_SUCCESS :
@@ -182,25 +182,25 @@ static void test_stress_i2c_concurrent_access(void)
 		STRESS_CONFIG_CONCURRENCY(I2C_STRESS_THREAD_COUNT, 10);
 	int32_t ret;
 
-	OSAL_printf("[ INFO ] Starting I2C concurrent access stress test\n");
-	OSAL_printf("         Threads: %u, Duration: 10 sec\n",
+	osal_printf("[ INFO ] Starting I2C concurrent access stress test\n");
+	osal_printf("         Threads: %u, Duration: 10 sec\n",
 				I2C_STRESS_THREAD_COUNT);
 
 	/* Open I2C handles */
 	for (uint32_t i = 0; i < I2C_STRESS_THREAD_COUNT; i++) {
-		ret = HAL_I2C_open(I2C_STRESS_DEVICE, &handles[i]);
+		ret = hal_i2c_open(I2C_STRESS_DEVICE, &handles[i]);
 		if (ret != OSAL_SUCCESS) {
 			for (uint32_t j = 0; j < i; j++) {
-				HAL_I2C_close(handles[j]);
+				hal_i2c_close(handles[j]);
 			}
-			OSAL_printf("[ SKIP ] Cannot open multiple I2C handles\n");
+			osal_printf("[ SKIP ] Cannot open multiple I2C handles\n");
 			TEST_SKIP("I2C multi-open not supported");
 			return;
 		}
 	}
 
 	/* Initialize counter */
-	OSAL_atomic_store(&transaction_counter, 0);
+	osal_atomic_store(&transaction_counter, 0);
 
 	/* Setup worker contexts */
 	for (uint32_t i = 0; i < I2C_STRESS_THREAD_COUNT; i++) {
@@ -220,23 +220,23 @@ static void test_stress_i2c_concurrent_access(void)
 	}
 
 	/* Wait for completion */
-	OSAL_sleep(12000 / 1000);
+	osal_sleep(12000 / 1000);
 
 	/* Print report */
 	stress_print_report(stress_ctx);
 
 	/* Verify transactions */
-	uint64_t total_transactions = OSAL_atomic_load(&transaction_counter);
-	OSAL_printf("[ INFO ] Total concurrent transactions: %llu\n",
+	uint64_t total_transactions = osal_atomic_load(&transaction_counter);
+	osal_printf("[ INFO ] Total concurrent transactions: %llu\n",
 				(unsigned long long)total_transactions);
 
 	/* Cleanup */
 	stress_context_destroy(stress_ctx);
 	for (uint32_t i = 0; i < I2C_STRESS_THREAD_COUNT; i++) {
-		HAL_I2C_close(handles[i]);
+		hal_i2c_close(handles[i]);
 	}
 
-	OSAL_printf("[ PASS ] I2C concurrent access stress test completed\n");
+	osal_printf("[ PASS ] I2C concurrent access stress test completed\n");
 }
 
 /*===========================================================================
@@ -253,28 +253,28 @@ static void test_stress_i2c_resource_exhaustion(void)
 	uint32_t opened_count = 0;
 	int32_t ret;
 
-	OSAL_printf("[ INFO ] Starting I2C resource exhaustion test\n");
-	OSAL_printf("         Max handles to test: %u\n", I2C_STRESS_MAX_HANDLES);
+	osal_printf("[ INFO ] Starting I2C resource exhaustion test\n");
+	osal_printf("         Max handles to test: %u\n", I2C_STRESS_MAX_HANDLES);
 
 	/* Try to open maximum handles */
 	for (uint32_t i = 0; i < I2C_STRESS_MAX_HANDLES; i++) {
-		ret = HAL_I2C_open(I2C_STRESS_DEVICE, &handles[i]);
+		ret = hal_i2c_open(I2C_STRESS_DEVICE, &handles[i]);
 		if (ret == OSAL_SUCCESS) {
 			opened_count++;
 		} else {
-			OSAL_printf("[ INFO ] Failed to open handle #%u (expected)\n", i);
+			osal_printf("[ INFO ] Failed to open handle #%u (expected)\n", i);
 			break;
 		}
 	}
 
-	OSAL_printf("[ INFO ] Successfully opened %u handles\n", opened_count);
+	osal_printf("[ INFO ] Successfully opened %u handles\n", opened_count);
 	TEST_ASSERT_TRUE(opened_count > 0);
 
 	/* Verify opened handles are functional */
 	uint8_t test_data[4] = { 0x11, 0x22, 0x33, 0x44 };
 
 	for (uint32_t i = 0; i < opened_count; i++) {
-		ret = HAL_I2C_write(handles[i], I2C_STRESS_SLAVE_ADDR, test_data,
+		ret = hal_i2c_write(handles[i], I2C_STRESS_SLAVE_ADDR, test_data,
 							sizeof(test_data));
 		/* Acceptable to fail if no device present */
 		if (ret != OSAL_SUCCESS && ret != OSAL_ERR_TIMEOUT &&
@@ -285,17 +285,17 @@ static void test_stress_i2c_resource_exhaustion(void)
 
 	/* Cleanup all handles */
 	for (uint32_t i = 0; i < opened_count; i++) {
-		ret = HAL_I2C_close(handles[i]);
+		ret = hal_i2c_close(handles[i]);
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	}
 
 	/* Verify we can open again after cleanup */
 	hal_i2c_handle_t new_handle = NULL;
-	ret = HAL_I2C_open(I2C_STRESS_DEVICE, &new_handle);
+	ret = hal_i2c_open(I2C_STRESS_DEVICE, &new_handle);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
-	HAL_I2C_close(new_handle);
+	hal_i2c_close(new_handle);
 
-	OSAL_printf("[ PASS ] I2C resource exhaustion test completed\n");
+	osal_printf("[ PASS ] I2C resource exhaustion test completed\n");
 }
 
 /*===========================================================================
@@ -316,13 +316,13 @@ static void test_stress_i2c_nak_handling(void)
 	uint32_t nak_count = 0;
 	uint32_t timeout_count = 0;
 
-	OSAL_printf("[ INFO ] Starting I2C NAK handling stress test\n");
-	OSAL_printf("         Iterations: %u\n", iterations);
+	osal_printf("[ INFO ] Starting I2C NAK handling stress test\n");
+	osal_printf("         Iterations: %u\n", iterations);
 
 	/* Open I2C device */
-	ret = HAL_I2C_open(I2C_STRESS_DEVICE, &handle);
+	ret = hal_i2c_open(I2C_STRESS_DEVICE, &handle);
 	if (ret != OSAL_SUCCESS) {
-		OSAL_printf("[ SKIP ] I2C device not available\n");
+		osal_printf("[ SKIP ] I2C device not available\n");
 		TEST_SKIP("I2C device not available");
 		return;
 	}
@@ -331,7 +331,7 @@ static void test_stress_i2c_nak_handling(void)
 	for (uint32_t i = 0; i < iterations; i++) {
 		uint16_t slave_addr = 0x08 + (i % 120); /* Scan address range */
 
-		ret = HAL_I2C_read(handle, slave_addr, data, sizeof(data));
+		ret = hal_i2c_read(handle, slave_addr, data, sizeof(data));
 
 		if (ret == OSAL_SUCCESS) {
 			success_count++;
@@ -343,26 +343,26 @@ static void test_stress_i2c_nak_handling(void)
 
 		/* Progress indicator */
 		if (i % 100 == 0) {
-			OSAL_printf("[ INFO ] Progress: %u/%u (success: %u, NAK: %u, "
+			osal_printf("[ INFO ] Progress: %u/%u (success: %u, NAK: %u, "
 						"timeout: %u)\n",
 						i, iterations, success_count, nak_count, timeout_count);
 		}
 	}
 
 	/* Print final statistics */
-	OSAL_printf("\n[ INFO ] Final Statistics:\n");
-	OSAL_printf("         Success: %u\n", success_count);
-	OSAL_printf("         NAK/IO errors: %u\n", nak_count);
-	OSAL_printf("         Timeouts: %u\n", timeout_count);
+	osal_printf("\n[ INFO ] Final Statistics:\n");
+	osal_printf("         Success: %u\n", success_count);
+	osal_printf("         NAK/IO errors: %u\n", nak_count);
+	osal_printf("         Timeouts: %u\n", timeout_count);
 
 	/* Verify system is still functional */
-	ret = HAL_I2C_read(handle, I2C_STRESS_SLAVE_ADDR, data, sizeof(data));
+	ret = hal_i2c_read(handle, I2C_STRESS_SLAVE_ADDR, data, sizeof(data));
 	/* Acceptable to fail if no device present */
 
 	/* Cleanup */
-	HAL_I2C_close(handle);
+	hal_i2c_close(handle);
 
-	OSAL_printf("[ PASS ] I2C NAK handling stress test completed\n");
+	osal_printf("[ PASS ] I2C NAK handling stress test completed\n");
 }
 
 /*===========================================================================

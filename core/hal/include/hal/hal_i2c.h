@@ -49,7 +49,7 @@ typedef struct {
  *
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_I2C_open(const hal_i2c_config_t *config, hal_i2c_handle_t *handle);
+int32_t hal_i2c_open(const hal_i2c_config_t *config, hal_i2c_handle_t *handle);
 
 /**
  * @brief 关闭I2C设备
@@ -63,7 +63,7 @@ int32_t HAL_I2C_open(const hal_i2c_config_t *config, hal_i2c_handle_t *handle);
  *
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_I2C_close(hal_i2c_handle_t handle);
+int32_t hal_i2c_close(hal_i2c_handle_t handle);
 
 /**
  * @brief 写入数据到I2C从设备
@@ -83,7 +83,7 @@ int32_t HAL_I2C_close(hal_i2c_handle_t handle);
  * @note 使用配置的timeout作为超时时间
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_I2C_write(hal_i2c_handle_t handle, uint16_t slave_addr,
+int32_t hal_i2c_write(hal_i2c_handle_t handle, uint16_t slave_addr,
 					  const uint8_t *buffer, uint32_t size);
 
 /**
@@ -104,7 +104,7 @@ int32_t HAL_I2C_write(hal_i2c_handle_t handle, uint16_t slave_addr,
  * @note 使用配置的timeout作为超时时间
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_I2C_read(hal_i2c_handle_t handle, uint16_t slave_addr,
+int32_t hal_i2c_read(hal_i2c_handle_t handle, uint16_t slave_addr,
 					 uint8_t *buffer, uint32_t size);
 
 /**
@@ -125,7 +125,7 @@ int32_t HAL_I2C_read(hal_i2c_handle_t handle, uint16_t slave_addr,
  * @note 内部实现为组合传输：[START][ADDR+W][REG][DATA...][STOP]
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_I2C_write_reg(hal_i2c_handle_t handle, uint16_t slave_addr,
+int32_t hal_i2c_write_reg(hal_i2c_handle_t handle, uint16_t slave_addr,
 						  uint8_t reg_addr, const uint8_t *buffer,
 						  uint32_t size);
 
@@ -148,7 +148,7 @@ int32_t HAL_I2C_write_reg(hal_i2c_handle_t handle, uint16_t slave_addr,
  * 内部实现为组合传输：[START][ADDR+W][REG][RESTART][ADDR+R][DATA...][STOP]
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_I2C_read_reg(hal_i2c_handle_t handle, uint16_t slave_addr,
+int32_t hal_i2c_read_reg(hal_i2c_handle_t handle, uint16_t slave_addr,
 						 uint8_t reg_addr, uint8_t *buffer, uint32_t size);
 
 /**
@@ -167,7 +167,7 @@ int32_t HAL_I2C_read_reg(hal_i2c_handle_t handle, uint16_t slave_addr,
  * @note 使用Linux I2C_RDWR ioctl实现原子组合传输
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_I2C_transfer(hal_i2c_handle_t handle, hal_i2c_msg_t *msgs,
+int32_t hal_i2c_transfer(hal_i2c_handle_t handle, hal_i2c_msg_t *msgs,
 						 uint32_t num);
 
 #ifdef __cplusplus

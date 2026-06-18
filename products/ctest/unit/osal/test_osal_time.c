@@ -9,7 +9,7 @@
 /* 辅助函数：获取当前时间（微秒） */
 static uint64_t get_time_in_micros(void)
 {
-	return (uint64_t)OSAL_get_monotonic_time();
+	return (uint64_t)osal_get_monotonic_time();
 }
 
 /*===========================================================================
@@ -25,7 +25,7 @@ static void test_osal_msleep_success(void)
 	start_time = get_time_in_micros();
 
 	/* 延时100毫秒 */
-	int32_t ret = OSAL_msleep(100);
+	int32_t ret = osal_msleep(100);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 获取结束时间 */
@@ -45,7 +45,7 @@ static void test_osal_usleep_success(void)
 	start_time = get_time_in_micros();
 
 	/* 延时50000微秒（50毫秒） */
-	int32_t ret = OSAL_usleep(50000);
+	int32_t ret = osal_usleep(50000);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 获取结束时间 */
@@ -65,7 +65,7 @@ static void test_osal_sleep_success(void)
 	start_time = get_time_in_micros();
 
 	/* 延时1秒 */
-	int32_t ret = OSAL_sleep(1);
+	int32_t ret = osal_sleep(1);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 获取结束时间 */
@@ -85,7 +85,7 @@ static void test_osal_nanosleep_success(void)
 	start_time = get_time_in_micros();
 
 	/* 延时10000000纳秒（10毫秒） */
-	int32_t ret = OSAL_nanosleep(10000000);
+	int32_t ret = osal_nanosleep(10000000);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 获取结束时间 */
@@ -105,7 +105,7 @@ static void test_osal_task_delay_success(void)
 	start_time = get_time_in_micros();
 
 	/* 延时200毫秒 */
-	int32_t ret = OSAL_msleep(200);
+	int32_t ret = osal_msleep(200);
 	TEST_ASSERT_EQUAL(0, ret);
 
 	/* 获取结束时间 */
@@ -127,15 +127,15 @@ static void test_osal_get_local_time_success(void)
 	int32_t ret;
 
 	/* 获取第一次时间 */
-	ret = OSAL_get_local_time(&time1);
+	ret = osal_get_local_time(&time1);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	TEST_ASSERT_TRUE(time1.seconds > 0);
 
 	/* 短暂延时 */
-	OSAL_msleep(10);
+	osal_msleep(10);
 
 	/* 获取第二次时间 */
-	ret = OSAL_get_local_time(&time2);
+	ret = osal_get_local_time(&time2);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* 验证时间递增 */
@@ -148,7 +148,7 @@ static void test_osal_get_local_time_success(void)
 /* 测试用例: GetLocalTime - 空指针 */
 static void test_osal_get_local_time_null_pointer(void)
 {
-	int32_t ret = OSAL_get_local_time(NULL);
+	int32_t ret = osal_get_local_time(NULL);
 	TEST_ASSERT_EQUAL(OSAL_ERR_INVALID_POINTER, ret);
 }
 
@@ -158,13 +158,13 @@ static void test_osal_get_tick_count(void)
 	uint32_t tick1, tick2;
 
 	/* 获取第一次滴答 */
-	tick1 = OSAL_get_tick_count();
+	tick1 = osal_get_tick_count();
 
 	/* 短暂延时 */
-	OSAL_msleep(50);
+	osal_msleep(50);
 
 	/* 获取第二次滴答 */
-	tick2 = OSAL_get_tick_count();
+	tick2 = osal_get_tick_count();
 
 	/* 验证滴答递增（允许±20ms误差） */
 	uint32_t diff = tick2 - tick1;
@@ -176,14 +176,14 @@ static void test_osal_time_monotonic(void)
 {
 	OS_time_t prev_time, curr_time;
 
-	OSAL_get_local_time(&prev_time);
+	osal_get_local_time(&prev_time);
 
 	/* 连续获取10次时间，验证单调递增 */
 	int32_t i;
 
 	for (i = 0; i < 10; i++) {
-		OSAL_usleep(1000); /* 1毫秒 */
-		OSAL_get_local_time(&curr_time);
+		osal_usleep(1000); /* 1毫秒 */
+		osal_get_local_time(&curr_time);
 
 		/* 验证时间递增 */
 		if (curr_time.seconds == prev_time.seconds) {
@@ -203,28 +203,28 @@ static void test_osal_time_monotonic(void)
 /* 测试用例: msleep - 零延时 */
 static void test_osal_msleep_zero(void)
 {
-	int32_t ret = OSAL_msleep(0);
+	int32_t ret = osal_msleep(0);
 	TEST_ASSERT_EQUAL(0, ret);
 }
 
 /* 测试用例: usleep - 零延时 */
 static void test_osal_usleep_zero(void)
 {
-	int32_t ret = OSAL_usleep(0);
+	int32_t ret = osal_usleep(0);
 	TEST_ASSERT_EQUAL(0, ret);
 }
 
 /* 测试用例: sleep - 零延时 */
 static void test_osal_sleep_zero(void)
 {
-	int32_t ret = OSAL_sleep(0);
+	int32_t ret = osal_sleep(0);
 	TEST_ASSERT_EQUAL(0, ret);
 }
 
 /* 测试用例: msleep - 零延时（替代TaskDelay） */
 static void test_osal_task_delay_zero(void)
 {
-	int32_t ret = OSAL_msleep(0);
+	int32_t ret = osal_msleep(0);
 	TEST_ASSERT_EQUAL(0, ret);
 }
 
@@ -235,7 +235,7 @@ static void test_osal_short_delay_precision(void)
 
 	/* 测试1毫秒延时 */
 	start_time = get_time_in_micros();
-	OSAL_msleep(1);
+	osal_msleep(1);
 	end_time = get_time_in_micros();
 
 	elapsed_us = end_time - start_time;
@@ -250,7 +250,7 @@ static void test_osal_long_delay_precision(void)
 
 	/* 测试500毫秒延时 */
 	start_time = get_time_in_micros();
-	OSAL_msleep(500);
+	osal_msleep(500);
 	end_time = get_time_in_micros();
 
 	elapsed_ms = (end_time - start_time) / 1000;
@@ -274,7 +274,7 @@ static void test_osal_time_get_performance(void)
 	int32_t i;
 
 	for (i = 0; i < iterations; i++) {
-		OSAL_get_local_time(&time_struct);
+		osal_get_local_time(&time_struct);
 	}
 	end_time = get_time_in_micros();
 

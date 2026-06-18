@@ -25,15 +25,15 @@ extern "C" {
  * @param size Size in bytes to allocate
  * @return Pointer to allocated memory, or NULL on failure
  *
- * @note The caller must free the memory using OSAL_free()
+ * @note The caller must free the memory using osal_free()
  * @note Thread-safe
  */
-void *OSAL_malloc(uint32_t size);
+void *osal_malloc(uint32_t size);
 
 /**
  * @brief Free previously allocated memory
  *
- * Frees a memory block previously allocated by OSAL_malloc().
+ * Frees a memory block previously allocated by osal_malloc().
  *
  * @param ptr Pointer to memory block to free (NULL is safe)
  *
@@ -41,7 +41,7 @@ void *OSAL_malloc(uint32_t size);
  * @note Thread-safe
  * @warning Passing an invalid pointer causes undefined behavior
  */
-void OSAL_free(void *ptr);
+void osal_free(void *ptr);
 
 /**
  * @brief Reallocate memory block
@@ -54,12 +54,12 @@ void OSAL_free(void *ptr);
  * @param new_size New size in bytes
  * @return Pointer to reallocated memory, or NULL on failure
  *
- * @note If ptr is NULL, behaves like OSAL_malloc()
- * @note If new_size is 0 and ptr is not NULL, behaves like OSAL_free()
+ * @note If ptr is NULL, behaves like osal_malloc()
+ * @note If new_size is 0 and ptr is not NULL, behaves like osal_free()
  * @note The returned pointer may differ from ptr
  * @note Thread-safe
  */
-void *OSAL_realloc(void *ptr, uint32_t new_size);
+void *osal_realloc(void *ptr, uint32_t new_size);
 
 /************************************************************************
  * Heap Monitoring
@@ -77,13 +77,13 @@ void *OSAL_realloc(void *ptr, uint32_t new_size);
  *
  * @note Thread-safe
  */
-int32_t OSAL_heap_get_info(uint32_t *free_bytes, uint32_t *total_bytes);
+int32_t osal_heap_get_info(uint32_t *free_bytes, uint32_t *total_bytes);
 
 /**
  * @brief Set heap usage threshold
  *
  * Sets the memory usage threshold as a percentage. When usage exceeds
- * this threshold, OSAL_heap_check_threshold() will report it.
+ * this threshold, osal_heap_check_threshold() will report it.
  *
  * @param percent Threshold percentage (0-100)
  * @return OSAL_SUCCESS on success, OSAL_ERR_INVALID_SIZE if percent > 100
@@ -91,7 +91,7 @@ int32_t OSAL_heap_get_info(uint32_t *free_bytes, uint32_t *total_bytes);
  * @note Default threshold is OSAL_HEAP_THRESHOLD_DEFAULT
  * @note Thread-safe
  */
-int32_t OSAL_heap_set_threshold(uint32_t percent);
+int32_t osal_heap_set_threshold(uint32_t percent);
 
 /**
  * @brief Check if heap usage exceeds threshold
@@ -105,7 +105,7 @@ int32_t OSAL_heap_set_threshold(uint32_t percent);
  * @note Thread-safe
  * @note Only logs warning once until usage drops below threshold
  */
-int32_t OSAL_heap_check_threshold(bool *exceeded);
+int32_t osal_heap_check_threshold(bool *exceeded);
 
 /**
  * @brief Get heap usage statistics
@@ -118,7 +118,7 @@ int32_t OSAL_heap_check_threshold(bool *exceeded);
  *
  * @note Thread-safe
  */
-int32_t OSAL_heap_get_stats(uint32_t *current, uint32_t *peak);
+int32_t osal_heap_get_stats(uint32_t *current, uint32_t *peak);
 
 #ifdef __cplusplus
 }

@@ -14,7 +14,7 @@
 static void test_perf_tc_config_query(void)
 {
 	// TODO: 实现命令配置查询性能测试
-	OSAL_printf(
+	osal_printf(
 		"[ INFO ] TC config query performance test - not implemented yet\n");
 }
 
@@ -24,7 +24,7 @@ static void test_perf_tc_config_query(void)
 static void test_perf_tm_config_query(void)
 {
 	// TODO: 实现状态数据配置查询性能测试
-	OSAL_printf(
+	osal_printf(
 		"[ INFO ] TM config query performance test - not implemented yet\n");
 }
 
@@ -34,7 +34,7 @@ static void test_perf_tm_config_query(void)
 static void test_perf_config_validation(void)
 {
 	// TODO: 实现配置验证性能测试
-	OSAL_printf(
+	osal_printf(
 		"[ INFO ] Config validation performance test - not implemented yet\n");
 }
 

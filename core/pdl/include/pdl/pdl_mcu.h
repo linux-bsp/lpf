@@ -99,12 +99,12 @@ typedef struct {
  * @return OSAL_ERR_GENERIC 失败
  *
  * @note 函数内部会：
- *       1. 调用 PCONFIG_GetBoard() 获取平台配置
- *       2. 调用 PCONFIG_HW_GetMCU(platform, index) 获取 MCU 配置
+ *       1. 调用 pconfig_get_board() 获取平台配置
+ *       2. 调用 pconfig_hw_get_mcu(platform, index) 获取 MCU 配置
  *       3. 检查配置是否启用
  *       4. 将 PCONFIG 配置转换为 HAL 配置并初始化硬件
  */
-int32_t PDL_MCU_init(uint32_t index, pdl_mcu_handle_t *handle);
+int32_t pdl_mcu_init(uint32_t index, pdl_mcu_handle_t *handle);
 
 /**
  * @brief 反初始化MCU驱动
@@ -113,7 +113,7 @@ int32_t PDL_MCU_init(uint32_t index, pdl_mcu_handle_t *handle);
  *
  * @return OSAL_SUCCESS 成功
  */
-int32_t PDL_MCU_deinit(pdl_mcu_handle_t handle);
+int32_t pdl_mcu_deinit(pdl_mcu_handle_t handle);
 
 /**
  * @brief 获取MCU版本
@@ -123,7 +123,7 @@ int32_t PDL_MCU_deinit(pdl_mcu_handle_t handle);
  *
  * @return OSAL_SUCCESS 成功
  */
-int32_t PDL_MCU_get_version(pdl_mcu_handle_t handle,
+int32_t pdl_mcu_get_version(pdl_mcu_handle_t handle,
 							pdl_mcu_version_t *version);
 
 /**
@@ -134,7 +134,7 @@ int32_t PDL_MCU_get_version(pdl_mcu_handle_t handle,
  *
  * @return OSAL_SUCCESS 成功
  */
-int32_t PDL_MCU_get_status(pdl_mcu_handle_t handle, pdl_mcu_status_t *status);
+int32_t pdl_mcu_get_status(pdl_mcu_handle_t handle, pdl_mcu_status_t *status);
 
 /**
  * @brief 发送简单命令到MCU（无发送数据）
@@ -146,7 +146,7 @@ int32_t PDL_MCU_get_status(pdl_mcu_handle_t handle, pdl_mcu_status_t *status);
  *
  * @note 适用于 GET_VERSION, GET_STATUS, RESET 等无数据命令
  */
-int32_t PDL_MCU_send_cmd(pdl_mcu_handle_t handle, pdl_mcu_cmd_t *cmd);
+int32_t pdl_mcu_send_cmd(pdl_mcu_handle_t handle, pdl_mcu_cmd_t *cmd);
 
 /**
  * @brief 发送数据命令到MCU（带发送数据）
@@ -158,12 +158,12 @@ int32_t PDL_MCU_send_cmd(pdl_mcu_handle_t handle, pdl_mcu_cmd_t *cmd);
  *
  * @note 适用于 READ_DATA, WRITE_DATA, EXECUTE_CMD 等带数据命令
  */
-int32_t PDL_MCU_send_data(pdl_mcu_handle_t handle, pdl_mcu_data_t *data);
+int32_t pdl_mcu_send_data(pdl_mcu_handle_t handle, pdl_mcu_data_t *data);
 
 /**
  * @brief 发送命令到MCU（兼容旧接口，建议使用 send_cmd/send_data）
  *
- * @deprecated 建议使用 PDL_MCU_send_cmd() 或 PDL_MCU_send_data()
+ * @deprecated 建议使用 pdl_mcu_send_cmd() 或 pdl_mcu_send_data()
  *
  * @param[in] handle MCU句柄
  * @param[in] cmd 命令字
@@ -175,7 +175,7 @@ int32_t PDL_MCU_send_data(pdl_mcu_handle_t handle, pdl_mcu_data_t *data);
  *
  * @return OSAL_SUCCESS 成功
  */
-int32_t PDL_MCU_send_command(pdl_mcu_handle_t handle, uint8_t cmd,
+int32_t pdl_mcu_send_command(pdl_mcu_handle_t handle, uint8_t cmd,
 							 const uint8_t *data, uint32_t data_len,
 							 uint8_t *response, uint32_t response_max,
 							 uint32_t *response_len);
@@ -187,6 +187,6 @@ int32_t PDL_MCU_send_command(pdl_mcu_handle_t handle, uint8_t cmd,
  *
  * @return OSAL_SUCCESS 成功
  */
-int32_t PDL_MCU_reset(pdl_mcu_handle_t handle);
+int32_t pdl_mcu_reset(pdl_mcu_handle_t handle);
 
 #endif /* PDL_MCU_H */

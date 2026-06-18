@@ -14,7 +14,7 @@
 static void test_perf_platform_config_query(void)
 {
 	// TODO: 实现平台配置查询性能测试
-	OSAL_printf("[ INFO ] Platform config query performance test - not "
+	osal_printf("[ INFO ] Platform config query performance test - not "
 				"implemented yet\n");
 }
 
@@ -24,7 +24,7 @@ static void test_perf_platform_config_query(void)
 static void test_perf_peripheral_config_query(void)
 {
 	// TODO: 实现外设配置查询性能测试
-	OSAL_printf("[ INFO ] Peripheral config query performance test - not "
+	osal_printf("[ INFO ] Peripheral config query performance test - not "
 				"implemented yet\n");
 }
 
@@ -34,7 +34,7 @@ static void test_perf_peripheral_config_query(void)
 static void test_perf_can_config_query(void)
 {
 	// TODO: 实现CAN配置查询性能测试
-	OSAL_printf(
+	osal_printf(
 		"[ INFO ] CAN config query performance test - not implemented yet\n");
 }
 

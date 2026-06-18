@@ -43,7 +43,7 @@ extern const pconfig_platform_table_t g_pconfig_platform_table;
  *
  * @return 平台配置指针，失败返回NULL
  */
-const pconfig_platform_config_t *PCONFIG_GetBoard(void);
+const pconfig_platform_config_t *pconfig_get_board(void);
 
 /**
  * @brief 根据平台和产品名称查找配置
@@ -55,7 +55,7 @@ const pconfig_platform_config_t *PCONFIG_GetBoard(void);
  * @return 平台配置指针，失败返回NULL
  */
 const pconfig_platform_config_t *
-PCONFIG_Find(const char *platform, const char *product, const char *version);
+pconfig_find(const char *platform, const char *product, const char *version);
 
 /**
  * @brief 列出所有配置
@@ -65,7 +65,7 @@ PCONFIG_Find(const char *platform, const char *product, const char *version);
  *
  * @return OSAL_SUCCESS 成功
  */
-int32_t PCONFIG_list(const pconfig_platform_config_t **configs,
+int32_t pconfig_list(const pconfig_platform_config_t **configs,
 					 uint32_t *count);
 
 /*===========================================================================
@@ -81,7 +81,7 @@ int32_t PCONFIG_list(const pconfig_platform_config_t **configs,
  * @return MCU配置条目指针，失败返回NULL
  */
 static inline const pconfig_mcu_entry_t *
-PCONFIG_HW_GetMCU(const pconfig_platform_config_t *platform, uint32_t index)
+pconfig_hw_get_mcu(const pconfig_platform_config_t *platform, uint32_t index)
 {
 	if (!platform || !platform->mcu_array || index >= platform->mcu_count) {
 		return NULL;
@@ -101,13 +101,13 @@ PCONFIG_HW_GetMCU(const pconfig_platform_config_t *platform, uint32_t index)
  * @return OSAL_SUCCESS 验证通过
  * @return OSAL_ERR_GENERIC 验证失败
  */
-int32_t PCONFIG_validate(const pconfig_platform_config_t *config);
+int32_t pconfig_validate(const pconfig_platform_config_t *config);
 
 /**
  * @brief 打印平台配置信息（用于调试）
  *
  * @param[in] config 平台配置
  */
-void PCONFIG_print(const pconfig_platform_config_t *config);
+void pconfig_print(const pconfig_platform_config_t *config);
 
 #endif /* PCONFIG_H */

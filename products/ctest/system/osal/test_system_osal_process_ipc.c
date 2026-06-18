@@ -12,56 +12,56 @@
  */
 static void test_parent_child_pipe_communication(void)
 {
-	OSAL_printf("[ TEST     ] Parent-child pipe communication\n");
+	osal_printf("[ TEST     ] Parent-child pipe communication\n");
 
 	int pipe_fds[2];
 	int32_t ret;
 	pid_t pid;
 
 	/* Create pipe */
-	ret = OSAL_pipe(pipe_fds);
+	ret = osal_pipe(pipe_fds);
 	if (ret != 0) {
-		OSAL_printf("[ SKIP     ] Pipe not available\n");
+		osal_printf("[ SKIP     ] Pipe not available\n");
 		return;
 	}
 
 	/* Fork child process */
-	pid = OSAL_fork();
+	pid = osal_fork();
 	if (pid < 0) {
-		OSAL_printf("[ SKIP     ] Fork not available\n");
-		OSAL_close(pipe_fds[0]);
-		OSAL_close(pipe_fds[1]);
+		osal_printf("[ SKIP     ] Fork not available\n");
+		osal_close(pipe_fds[0]);
+		osal_close(pipe_fds[1]);
 		return;
 	}
 
 	if (pid == 0) {
 		/* Child process - reader */
-		OSAL_close(pipe_fds[1]); /* Close write end */
+		osal_close(pipe_fds[1]); /* Close write end */
 
 		char buffer[128];
-		ssize_t bytes_read = OSAL_read(pipe_fds[0], buffer, sizeof(buffer) - 1);
+		ssize_t bytes_read = osal_read(pipe_fds[0], buffer, sizeof(buffer) - 1);
 		if (bytes_read > 0) {
 			buffer[bytes_read] = '\0';
-			if (OSAL_strcmp(buffer, "Hello from parent") == 0) {
-				OSAL_exit(0); /* Success */
+			if (osal_strcmp(buffer, "Hello from parent") == 0) {
+				osal_exit(0); /* Success */
 			}
 		}
-		OSAL_exit(1); /* Failure */
+		osal_exit(1); /* Failure */
 	} else {
 		/* Parent process - writer */
-		OSAL_close(pipe_fds[0]); /* Close read end */
+		osal_close(pipe_fds[0]); /* Close read end */
 
 		const char *message = "Hello from parent";
-		OSAL_write(pipe_fds[1], message, OSAL_strlen(message));
-		OSAL_close(pipe_fds[1]);
+		osal_write(pipe_fds[1], message, osal_strlen(message));
+		osal_close(pipe_fds[1]);
 
 		/* Wait for child */
 		int status;
-		OSAL_waitpid(pid, &status, 0);
-		TEST_ASSERT_EQUAL(0, OSAL_WEXITSTATUS(status));
+		osal_waitpid(pid, &status, 0);
+		TEST_ASSERT_EQUAL(0, status);
 	}
 
-	OSAL_printf("[ PASS     ] Parent-child pipe communication test passed\n");
+	osal_printf("[ PASS     ] Parent-child pipe communication test passed\n");
 }
 
 /**
@@ -69,7 +69,7 @@ static void test_parent_child_pipe_communication(void)
  */
 static void test_shared_memory_between_processes(void)
 {
-	OSAL_printf("[ TEST     ] Shared memory between processes\n");
+	osal_printf("[ TEST     ] Shared memory between processes\n");
 
 	char shm_name[64];
 	int shm_fd;
@@ -78,66 +78,66 @@ static void test_shared_memory_between_processes(void)
 	pid_t pid;
 
 	/* Create shared memory */
-	OSAL_snprintf(shm_name, sizeof(shm_name), "/test_proc_shm_%d",
-				  OSAL_getpid());
-	shm_fd = OSAL_shm_open(shm_name, OSAL_O_CREAT | OSAL_O_RDWR, 0666);
+	osal_snprintf(shm_name, sizeof(shm_name), "/test_proc_shm_%d",
+				  osal_getpid());
+	shm_fd = osal_shm_open(shm_name, OSAL_O_CREAT | OSAL_O_RDWR, 0666);
 	if (shm_fd < 0) {
-		OSAL_printf("[ SKIP     ] Shared memory not available\n");
+		osal_printf("[ SKIP     ] Shared memory not available\n");
 		return;
 	}
 
-	OSAL_ftruncate(shm_fd, shm_size);
-	shm_ptr = OSAL_mmap(NULL, shm_size, OSAL_PROT_READ | OSAL_PROT_WRITE,
-						OSAL_MAP_SHARED, shm_fd, 0);
-	if (shm_ptr == OSAL_MAP_FAILED) {
-		OSAL_close(shm_fd);
-		OSAL_shm_unlink(shm_name);
-		OSAL_printf("[ SKIP     ] mmap failed\n");
+	osal_ftruncate(shm_fd, shm_size);
+	shm_ptr = osal_mmap(NULL, shm_size, PROT_READ | PROT_WRITE, MAP_SHARED,
+						shm_fd, 0);
+	if (shm_ptr == MAP_FAILED) {
+		osal_close(shm_fd);
+		osal_shm_unlink(shm_name);
+		osal_printf("[ SKIP     ] mmap failed\n");
 		return;
 	}
 
 	/* Write initial data */
-	OSAL_strcpy((char *)shm_ptr, "Parent initial data");
+	osal_strcpy((char *)shm_ptr, "Parent initial data");
 
 	/* Fork child process */
-	pid = OSAL_fork();
+	pid = osal_fork();
 	if (pid < 0) {
-		OSAL_printf("[ SKIP     ] Fork not available\n");
-		OSAL_munmap(shm_ptr, shm_size);
-		OSAL_close(shm_fd);
-		OSAL_shm_unlink(shm_name);
+		osal_printf("[ SKIP     ] Fork not available\n");
+		osal_munmap(shm_ptr, shm_size);
+		osal_close(shm_fd);
+		osal_shm_unlink(shm_name);
 		return;
 	}
 
 	if (pid == 0) {
 		/* Child process - modify shared memory */
-		OSAL_sleep(1); /* Let parent check initial data */
+		osal_sleep(1); /* Let parent check initial data */
 
 		char *data = (char *)shm_ptr;
-		OSAL_strcpy(data, "Child modified data");
+		osal_strcpy(data, "Child modified data");
 
-		OSAL_munmap(shm_ptr, shm_size);
-		OSAL_close(shm_fd);
-		OSAL_exit(0);
+		osal_munmap(shm_ptr, shm_size);
+		osal_close(shm_fd);
+		osal_exit(0);
 	} else {
 		/* Parent process - verify initial then final data */
 		TEST_ASSERT_STRING_EQUAL("Parent initial data", (char *)shm_ptr);
 
 		/* Wait for child to modify */
 		int status;
-		OSAL_waitpid(pid, &status, 0);
-		TEST_ASSERT_EQUAL(0, OSAL_WEXITSTATUS(status));
+		osal_waitpid(pid, &status, 0);
+		TEST_ASSERT_EQUAL(0, status);
 
 		/* Verify child's modification */
 		TEST_ASSERT_STRING_EQUAL("Child modified data", (char *)shm_ptr);
 
 		/* Cleanup */
-		OSAL_munmap(shm_ptr, shm_size);
-		OSAL_close(shm_fd);
-		OSAL_shm_unlink(shm_name);
+		osal_munmap(shm_ptr, shm_size);
+		osal_close(shm_fd);
+		osal_shm_unlink(shm_name);
 	}
 
-	OSAL_printf("[ PASS     ] Shared memory between processes test passed\n");
+	osal_printf("[ PASS     ] Shared memory between processes test passed\n");
 }
 
 /**
@@ -145,7 +145,7 @@ static void test_shared_memory_between_processes(void)
  */
 static void test_semaphore_process_sync(void)
 {
-	OSAL_printf("[ TEST     ] Semaphore process synchronization\n");
+	osal_printf("[ TEST     ] Semaphore process synchronization\n");
 
 	char shm_name[64];
 	int shm_fd;
@@ -157,21 +157,21 @@ static void test_semaphore_process_sync(void)
 	uint32_t i;
 
 	/* Create shared memory for semaphore and counter */
-	OSAL_snprintf(shm_name, sizeof(shm_name), "/test_sem_sync_%d",
-				  OSAL_getpid());
-	shm_fd = OSAL_shm_open(shm_name, OSAL_O_CREAT | OSAL_O_RDWR, 0666);
+	osal_snprintf(shm_name, sizeof(shm_name), "/test_sem_sync_%d",
+				  osal_getpid());
+	shm_fd = osal_shm_open(shm_name, OSAL_O_CREAT | OSAL_O_RDWR, 0666);
 	if (shm_fd < 0) {
-		OSAL_printf("[ SKIP     ] Shared memory not available\n");
+		osal_printf("[ SKIP     ] Shared memory not available\n");
 		return;
 	}
 
-	OSAL_ftruncate(shm_fd, shm_size);
-	shm_ptr = OSAL_mmap(NULL, shm_size, OSAL_PROT_READ | OSAL_PROT_WRITE,
-						OSAL_MAP_SHARED, shm_fd, 0);
-	if (shm_ptr == OSAL_MAP_FAILED) {
-		OSAL_close(shm_fd);
-		OSAL_shm_unlink(shm_name);
-		OSAL_printf("[ SKIP     ] mmap failed\n");
+	osal_ftruncate(shm_fd, shm_size);
+	shm_ptr = osal_mmap(NULL, shm_size, PROT_READ | PROT_WRITE, MAP_SHARED,
+						shm_fd, 0);
+	if (shm_ptr == MAP_FAILED) {
+		osal_close(shm_fd);
+		osal_shm_unlink(shm_name);
+		osal_printf("[ SKIP     ] mmap failed\n");
 		return;
 	}
 
@@ -179,62 +179,62 @@ static void test_semaphore_process_sync(void)
 	sem = (osal_sem_t *)shm_ptr;
 	counter = (osal_atomic_uint32_t *)((char *)shm_ptr + sizeof(osal_sem_t));
 
-	int32_t ret = OSAL_sem_init(sem, 1, 0); /* pshared=1 for process shared */
+	int32_t ret = osal_sem_init(sem, 1, 0); /* pshared=1 for process shared */
 	if (ret != 0) {
-		OSAL_munmap(shm_ptr, shm_size);
-		OSAL_close(shm_fd);
-		OSAL_shm_unlink(shm_name);
-		OSAL_printf("[ SKIP     ] Process-shared semaphore not available\n");
+		osal_munmap(shm_ptr, shm_size);
+		osal_close(shm_fd);
+		osal_shm_unlink(shm_name);
+		osal_printf("[ SKIP     ] Process-shared semaphore not available\n");
 		return;
 	}
 
-	OSAL_atomic_store(counter, 0);
+	osal_atomic_store(counter, 0);
 
 	/* Fork child processes */
 	for (i = 0; i < 3; i++) {
-		pid_t pid = OSAL_fork();
+		pid_t pid = osal_fork();
 		if (pid < 0) {
-			OSAL_printf("[ WARN     ] Fork failed for child %u\n", i);
+			osal_printf("[ WARN     ] Fork failed for child %u\n", i);
 			continue;
 		}
 
 		if (pid == 0) {
 			/* Child process - wait on semaphore and increment counter */
-			OSAL_sem_wait(sem);
-			OSAL_atomic_inc(counter);
-			OSAL_munmap(shm_ptr, shm_size);
-			OSAL_close(shm_fd);
-			OSAL_exit(0);
+			osal_sem_wait(sem);
+			osal_atomic_inc(counter);
+			osal_munmap(shm_ptr, shm_size);
+			osal_close(shm_fd);
+			osal_exit(0);
 		} else {
 			pids[i] = pid;
 		}
 	}
 
 	/* Parent: post semaphore 3 times */
-	OSAL_sleep(1);
+	osal_sleep(1);
 	for (i = 0; i < 3; i++) {
-		OSAL_sem_post(sem);
-		OSAL_msleep(100);
+		osal_sem_post(sem);
+		osal_msleep(100);
 	}
 
 	/* Wait for all children */
 	for (i = 0; i < 3; i++) {
 		if (pids[i] > 0) {
 			int status;
-			OSAL_waitpid(pids[i], &status, 0);
+			osal_waitpid(pids[i], &status, 0);
 		}
 	}
 
 	/* Verify counter */
-	TEST_ASSERT_EQUAL(3, OSAL_atomic_load(counter));
+	TEST_ASSERT_EQUAL(3, osal_atomic_load(counter));
 
 	/* Cleanup */
-	OSAL_sem_destroy(sem);
-	OSAL_munmap(shm_ptr, shm_size);
-	OSAL_close(shm_fd);
-	OSAL_shm_unlink(shm_name);
+	osal_sem_destroy(sem);
+	osal_munmap(shm_ptr, shm_size);
+	osal_close(shm_fd);
+	osal_shm_unlink(shm_name);
 
-	OSAL_printf("[ PASS     ] Semaphore process sync test passed\n");
+	osal_printf("[ PASS     ] Semaphore process sync test passed\n");
 }
 
 /* Signal handler flag */
@@ -250,25 +250,25 @@ static void signal_handler(int signum)
  */
 static void test_signal_process_coordination(void)
 {
-	OSAL_printf("[ TEST     ] Signal-based process coordination\n");
+	osal_printf("[ TEST     ] Signal-based process coordination\n");
 
 	pid_t pid;
 
 	/* Set up signal handler */
-	OSAL_signal(OSAL_SIGUSR1, signal_handler);
+	osal_signal(SIGUSR1, signal_handler);
 
 	/* Fork child process */
-	pid = OSAL_fork();
+	pid = osal_fork();
 	if (pid < 0) {
-		OSAL_printf("[ SKIP     ] Fork not available\n");
+		osal_printf("[ SKIP     ] Fork not available\n");
 		return;
 	}
 
 	if (pid == 0) {
 		/* Child process - send signal to parent */
-		OSAL_sleep(1);
-		OSAL_kill(OSAL_getppid(), OSAL_SIGUSR1);
-		OSAL_exit(0);
+		osal_sleep(1);
+		osal_kill(osal_getppid(), SIGUSR1);
+		osal_exit(0);
 	} else {
 		/* Parent process - wait for signal */
 		g_signal_received = 0;
@@ -277,22 +277,22 @@ static void test_signal_process_coordination(void)
 		uint32_t timeout_ms = 3000;
 		uint32_t elapsed_ms = 0;
 		while (g_signal_received == 0 && elapsed_ms < timeout_ms) {
-			OSAL_msleep(100);
+			osal_msleep(100);
 			elapsed_ms += 100;
 		}
 
-		TEST_ASSERT_EQUAL(OSAL_SIGUSR1, g_signal_received);
+		TEST_ASSERT_EQUAL(SIGUSR1, g_signal_received);
 
 		/* Wait for child */
 		int status;
-		OSAL_waitpid(pid, &status, 0);
-		TEST_ASSERT_EQUAL(0, OSAL_WEXITSTATUS(status));
+		osal_waitpid(pid, &status, 0);
+		TEST_ASSERT_EQUAL(0, status);
 
 		/* Reset signal handler */
-		OSAL_signal(OSAL_SIGUSR1, OSAL_SIG_DFL);
+		osal_signal(SIGUSR1, SIG_DFL);
 	}
 
-	OSAL_printf("[ PASS     ] Signal process coordination test passed\n");
+	osal_printf("[ PASS     ] Signal process coordination test passed\n");
 }
 
 /**
@@ -300,57 +300,57 @@ static void test_signal_process_coordination(void)
  */
 static void test_process_group_operations(void)
 {
-	OSAL_printf("[ TEST     ] Process group operations\n");
+	osal_printf("[ TEST     ] Process group operations\n");
 
 	pid_t pid1, pid2;
 	pid_t pgid;
 
 	/* Fork first child */
-	pid1 = OSAL_fork();
+	pid1 = osal_fork();
 	if (pid1 < 0) {
-		OSAL_printf("[ SKIP     ] Fork not available\n");
+		osal_printf("[ SKIP     ] Fork not available\n");
 		return;
 	}
 
 	if (pid1 == 0) {
 		/* First child - create new process group */
-		OSAL_setpgid(0, 0);
-		OSAL_sleep(2);
-		OSAL_exit(0);
+		osal_setpgid(0, 0);
+		osal_sleep(2);
+		osal_exit(0);
 	}
 
 	/* Fork second child */
-	pid2 = OSAL_fork();
+	pid2 = osal_fork();
 	if (pid2 < 0) {
 		int status;
-		OSAL_waitpid(pid1, &status, 0);
-		OSAL_printf("[ SKIP     ] Second fork failed\n");
+		osal_waitpid(pid1, &status, 0);
+		osal_printf("[ SKIP     ] Second fork failed\n");
 		return;
 	}
 
 	if (pid2 == 0) {
 		/* Second child - join first child's process group */
-		OSAL_sleep(1);
-		OSAL_setpgid(0, pid1);
-		OSAL_sleep(1);
-		OSAL_exit(0);
+		osal_sleep(1);
+		osal_setpgid(0, pid1);
+		osal_sleep(1);
+		osal_exit(0);
 	}
 
 	/* Parent - verify process groups */
-	OSAL_sleep(1);
+	osal_sleep(1);
 
-	pgid = OSAL_getpgid(pid1);
+	pgid = osal_getpgid(pid1);
 	TEST_ASSERT_EQUAL(pid1, pgid); /* First child is its own group leader */
 
 	/* Wait for children */
 	int status;
-	OSAL_waitpid(pid1, &status, 0);
-	TEST_ASSERT_EQUAL(0, OSAL_WEXITSTATUS(status));
+	osal_waitpid(pid1, &status, 0);
+	TEST_ASSERT_EQUAL(0, status);
 
-	OSAL_waitpid(pid2, &status, 0);
-	TEST_ASSERT_EQUAL(0, OSAL_WEXITSTATUS(status));
+	osal_waitpid(pid2, &status, 0);
+	TEST_ASSERT_EQUAL(0, status);
 
-	OSAL_printf("[ PASS     ] Process group operations test passed\n");
+	osal_printf("[ PASS     ] Process group operations test passed\n");
 }
 
 /* Test cases array */

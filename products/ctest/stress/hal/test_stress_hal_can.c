@@ -58,9 +58,9 @@ static int32_t can_concurrent_send_worker(void *user_data, uint32_t iteration)
 	frame.data[7] = 0xCC;
 
 	/* Send frame */
-	ret = HAL_CAN_send(ctx->handle, &frame);
+	ret = hal_can_send(ctx->handle, &frame);
 	if (ret == OSAL_SUCCESS) {
-		OSAL_atomic_inc(ctx->shared_counter);
+		osal_atomic_inc(ctx->shared_counter);
 	}
 
 	return ret;
@@ -84,24 +84,24 @@ static void test_stress_can_concurrent_send(void)
 		CAN_STRESS_THREAD_COUNT, CAN_STRESS_DURATION_SEC);
 	int32_t ret;
 
-	OSAL_printf("[ INFO ] Starting CAN concurrent send stress test\n");
-	OSAL_printf("         Threads: %u, Duration: %u sec\n",
+	osal_printf("[ INFO ] Starting CAN concurrent send stress test\n");
+	osal_printf("         Threads: %u, Duration: %u sec\n",
 				CAN_STRESS_THREAD_COUNT, CAN_STRESS_DURATION_SEC);
 
 	/* Initialize CAN */
-	ret = HAL_CAN_init(&config, &handle);
+	ret = hal_can_init(&config, &handle);
 	if (ret != OSAL_SUCCESS) {
-		OSAL_printf("[ SKIP ] CAN interface not available\n");
+		osal_printf("[ SKIP ] CAN interface not available\n");
 		TEST_SKIP("CAN interface not available");
 		return;
 	}
 
 	/* Initialize shared counter */
-	OSAL_atomic_store(&shared_counter, 0);
+	osal_atomic_store(&shared_counter, 0);
 
 	/* Allocate worker contexts */
 	worker_contexts =
-		OSAL_malloc(sizeof(can_send_worker_ctx_t) * CAN_STRESS_THREAD_COUNT);
+		osal_malloc(sizeof(can_send_worker_ctx_t) * CAN_STRESS_THREAD_COUNT);
 	TEST_ASSERT_NOT_NULL(worker_contexts);
 
 	for (uint32_t i = 0; i < CAN_STRESS_THREAD_COUNT; i++) {
@@ -122,7 +122,7 @@ static void test_stress_can_concurrent_send(void)
 	}
 
 	/* Wait for completion and check results */
-	OSAL_usleep(CAN_STRESS_DURATION_SEC * 1000 + 2000 * 1000);
+	osal_usleep(CAN_STRESS_DURATION_SEC * 1000 + 2000 * 1000);
 
 	/* Print report */
 	stress_print_report(stress_ctx);
@@ -131,16 +131,16 @@ static void test_stress_can_concurrent_send(void)
 	STRESS_ASSERT_SUCCESS_RATE_GT(stress_ctx, 95.0);
 
 	/* Verify sent count */
-	uint32_t sent_count = OSAL_atomic_load(&shared_counter);
-	OSAL_printf("[ INFO ] Total frames sent: %u\n", sent_count);
+	uint32_t sent_count = osal_atomic_load(&shared_counter);
+	osal_printf("[ INFO ] Total frames sent: %u\n", sent_count);
 	TEST_ASSERT_TRUE(sent_count > 0);
 
 	/* Cleanup */
 	stress_context_destroy(stress_ctx);
-	OSAL_free(worker_contexts);
-	HAL_CAN_deinit(handle);
+	osal_free(worker_contexts);
+	hal_can_deinit(handle);
 
-	OSAL_printf("[ PASS ] CAN concurrent send stress test completed\n");
+	osal_printf("[ PASS ] CAN concurrent send stress test completed\n");
 }
 
 /*===========================================================================
@@ -169,7 +169,7 @@ static int32_t can_flood_tx_worker(void *user_data, uint32_t iteration)
 		frame.data[6] = 0xEE;
 		frame.data[7] = 0xFF;
 
-		ret = HAL_CAN_send(ctx->tx_handle, &frame);
+		ret = hal_can_send(ctx->tx_handle, &frame);
 		if (ret != OSAL_SUCCESS) {
 			return ret;
 		}
@@ -188,9 +188,9 @@ static int32_t can_flood_rx_worker(void *user_data, uint32_t iteration)
 	int32_t ret;
 
 	/* Try to receive frame */
-	ret = HAL_CAN_recv(ctx->rx_handle, &frame, 100);
+	ret = hal_can_recv(ctx->rx_handle, &frame, 100);
 	if (ret == OSAL_SUCCESS) {
-		OSAL_atomic_inc(ctx->rx_count);
+		osal_atomic_inc(ctx->rx_count);
 	} else if (ret == OSAL_ERR_TIMEOUT) {
 		/* Timeout is acceptable during flood test */
 		return OSAL_SUCCESS;
@@ -220,26 +220,26 @@ static void test_stress_can_rx_flooding(void)
 	stress_config_t rx_config = STRESS_CONFIG_CONCURRENCY(4, 10);
 	int32_t ret;
 
-	OSAL_printf("[ INFO ] Starting CAN RX flooding stress test\n");
+	osal_printf("[ INFO ] Starting CAN RX flooding stress test\n");
 
 	/* Initialize CAN interfaces */
-	ret = HAL_CAN_init(&config, &tx_handle);
+	ret = hal_can_init(&config, &tx_handle);
 	if (ret != OSAL_SUCCESS) {
-		OSAL_printf("[ SKIP ] CAN TX interface not available\n");
+		osal_printf("[ SKIP ] CAN TX interface not available\n");
 		TEST_SKIP("CAN interface not available");
 		return;
 	}
 
-	ret = HAL_CAN_init(&config, &rx_handle);
+	ret = hal_can_init(&config, &rx_handle);
 	if (ret != OSAL_SUCCESS) {
-		HAL_CAN_deinit(tx_handle);
-		OSAL_printf("[ SKIP ] CAN RX interface not available\n");
+		hal_can_deinit(tx_handle);
+		osal_printf("[ SKIP ] CAN RX interface not available\n");
 		TEST_SKIP("CAN interface not available");
 		return;
 	}
 
 	/* Initialize context */
-	OSAL_atomic_store(&rx_count, 0);
+	osal_atomic_store(&rx_count, 0);
 	worker_ctx.tx_handle = tx_handle;
 	worker_ctx.rx_handle = rx_handle;
 	worker_ctx.rx_count = &rx_count;
@@ -259,26 +259,26 @@ static void test_stress_can_rx_flooding(void)
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 	/* Wait for completion */
-	OSAL_sleep(12000 / 1000);
+	osal_sleep(12000 / 1000);
 
 	/* Print reports */
-	OSAL_printf("\n--- TX Flood Report ---\n");
+	osal_printf("\n--- TX Flood Report ---\n");
 	stress_print_report(tx_stress_ctx);
-	OSAL_printf("\n--- RX Report ---\n");
+	osal_printf("\n--- RX Report ---\n");
 	stress_print_report(rx_stress_ctx);
 
 	/* Verify received frames */
-	uint32_t received = OSAL_atomic_load(&rx_count);
-	OSAL_printf("[ INFO ] Total frames received: %u\n", received);
+	uint32_t received = osal_atomic_load(&rx_count);
+	osal_printf("[ INFO ] Total frames received: %u\n", received);
 	TEST_ASSERT_TRUE(received > 0);
 
 	/* Cleanup */
 	stress_context_destroy(tx_stress_ctx);
 	stress_context_destroy(rx_stress_ctx);
-	HAL_CAN_deinit(rx_handle);
-	HAL_CAN_deinit(tx_handle);
+	hal_can_deinit(rx_handle);
+	hal_can_deinit(tx_handle);
 
-	OSAL_printf("[ PASS ] CAN RX flooding stress test completed\n");
+	osal_printf("[ PASS ] CAN RX flooding stress test completed\n");
 }
 
 /*===========================================================================
@@ -299,22 +299,22 @@ static void test_stress_can_resource_exhaustion(void)
 	uint32_t opened_count = 0;
 	int32_t ret;
 
-	OSAL_printf("[ INFO ] Starting CAN resource exhaustion test\n");
-	OSAL_printf("         Max handles to test: %u\n", CAN_STRESS_MAX_HANDLES);
+	osal_printf("[ INFO ] Starting CAN resource exhaustion test\n");
+	osal_printf("         Max handles to test: %u\n", CAN_STRESS_MAX_HANDLES);
 
 	/* Try to open maximum handles */
 	for (uint32_t i = 0; i < CAN_STRESS_MAX_HANDLES; i++) {
-		ret = HAL_CAN_init(&config, &handles[i]);
+		ret = hal_can_init(&config, &handles[i]);
 		if (ret == OSAL_SUCCESS) {
 			opened_count++;
 		} else {
 			/* Expected to fail eventually */
-			OSAL_printf("[ INFO ] Failed to open handle #%u (expected)\n", i);
+			osal_printf("[ INFO ] Failed to open handle #%u (expected)\n", i);
 			break;
 		}
 	}
 
-	OSAL_printf("[ INFO ] Successfully opened %u handles\n", opened_count);
+	osal_printf("[ INFO ] Successfully opened %u handles\n", opened_count);
 	TEST_ASSERT_TRUE(opened_count > 0);
 
 	/* Verify opened handles are functional */
@@ -323,23 +323,23 @@ static void test_stress_can_resource_exhaustion(void)
 								   .data = { 0x11, 0x22, 0x33, 0x44 } };
 
 	for (uint32_t i = 0; i < opened_count; i++) {
-		ret = HAL_CAN_send(handles[i], &test_frame);
+		ret = hal_can_send(handles[i], &test_frame);
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	}
 
 	/* Cleanup all handles */
 	for (uint32_t i = 0; i < opened_count; i++) {
-		ret = HAL_CAN_deinit(handles[i]);
+		ret = hal_can_deinit(handles[i]);
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 	}
 
 	/* Verify we can open again after cleanup */
 	hal_can_handle_t new_handle = NULL;
-	ret = HAL_CAN_init(&config, &new_handle);
+	ret = hal_can_init(&config, &new_handle);
 	TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
-	HAL_CAN_deinit(new_handle);
+	hal_can_deinit(new_handle);
 
-	OSAL_printf("[ PASS ] CAN resource exhaustion test completed\n");
+	osal_printf("[ PASS ] CAN resource exhaustion test completed\n");
 }
 
 /*===========================================================================
@@ -361,13 +361,13 @@ static void test_stress_can_filter_reconfiguration(void)
 	int32_t ret;
 	const uint32_t iterations = 1000;
 
-	OSAL_printf("[ INFO ] Starting CAN filter reconfiguration stress test\n");
-	OSAL_printf("         Iterations: %u\n", iterations);
+	osal_printf("[ INFO ] Starting CAN filter reconfiguration stress test\n");
+	osal_printf("         Iterations: %u\n", iterations);
 
 	/* Initialize CAN */
-	ret = HAL_CAN_init(&config, &handle);
+	ret = hal_can_init(&config, &handle);
 	if (ret != OSAL_SUCCESS) {
-		OSAL_printf("[ SKIP ] CAN interface not available\n");
+		osal_printf("[ SKIP ] CAN interface not available\n");
 		TEST_SKIP("CAN interface not available");
 		return;
 	}
@@ -377,7 +377,7 @@ static void test_stress_can_filter_reconfiguration(void)
 		filter_id = 0x100 + (i % 256);
 		filter_mask = 0x7FF;
 
-		ret = HAL_CAN_set_filter(handle, filter_id, filter_mask);
+		ret = hal_can_set_filter(handle, filter_id, filter_mask);
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 		/* Send test frame */
@@ -385,19 +385,19 @@ static void test_stress_can_filter_reconfiguration(void)
 								  .dlc = 2,
 								  .data = { (i >> 8) & 0xFF, i & 0xFF } };
 
-		ret = HAL_CAN_send(handle, &frame);
+		ret = hal_can_send(handle, &frame);
 		TEST_ASSERT_EQUAL(OSAL_SUCCESS, ret);
 
 		/* Brief sleep to allow filter to take effect */
 		if (i % 100 == 0) {
-			OSAL_usleep(1 * 1000);
+			osal_usleep(1 * 1000);
 		}
 	}
 
 	/* Cleanup */
-	HAL_CAN_deinit(handle);
+	hal_can_deinit(handle);
 
-	OSAL_printf("[ PASS ] CAN filter reconfiguration stress test completed\n");
+	osal_printf("[ PASS ] CAN filter reconfiguration stress test completed\n");
 }
 
 /*===========================================================================

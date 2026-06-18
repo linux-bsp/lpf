@@ -52,7 +52,7 @@ typedef struct {
  *
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_SPI_open(const hal_spi_config_t *config, hal_spi_handle_t *handle);
+int32_t hal_spi_open(const hal_spi_config_t *config, hal_spi_handle_t *handle);
 
 /**
  * @brief 关闭SPI设备
@@ -66,7 +66,7 @@ int32_t HAL_SPI_open(const hal_spi_config_t *config, hal_spi_handle_t *handle);
  *
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_SPI_close(hal_spi_handle_t handle);
+int32_t hal_spi_close(hal_spi_handle_t handle);
 
 /**
  * @brief SPI写操作
@@ -84,7 +84,7 @@ int32_t HAL_SPI_close(hal_spi_handle_t handle);
  * @note 使用配置的timeout作为超时时间
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_SPI_write(hal_spi_handle_t handle, const uint8_t *buffer,
+int32_t hal_spi_write(hal_spi_handle_t handle, const uint8_t *buffer,
 					  uint32_t size);
 
 /**
@@ -103,7 +103,7 @@ int32_t HAL_SPI_write(hal_spi_handle_t handle, const uint8_t *buffer,
  * @note 使用配置的timeout作为超时时间
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_SPI_read(hal_spi_handle_t handle, uint8_t *buffer, uint32_t size);
+int32_t hal_spi_read(hal_spi_handle_t handle, uint8_t *buffer, uint32_t size);
 
 /**
  * @brief SPI全双工传输
@@ -123,7 +123,7 @@ int32_t HAL_SPI_read(hal_spi_handle_t handle, uint8_t *buffer, uint32_t size);
  * @note 使用配置的timeout作为超时时间
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_SPI_transfer(hal_spi_handle_t handle, const uint8_t *tx_buffer,
+int32_t hal_spi_transfer(hal_spi_handle_t handle, const uint8_t *tx_buffer,
 						 uint8_t *rx_buffer, uint32_t size);
 
 /**
@@ -142,7 +142,7 @@ int32_t HAL_SPI_transfer(hal_spi_handle_t handle, const uint8_t *tx_buffer,
  * @note 使用Linux SPI_IOC_MESSAGE(n) ioctl实现批量传输
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_SPI_transfer_multi(hal_spi_handle_t handle,
+int32_t hal_spi_transfer_multi(hal_spi_handle_t handle,
 							   hal_spi_transfer_t *transfers, uint32_t num);
 
 /**
@@ -159,7 +159,7 @@ int32_t HAL_SPI_transfer_multi(hal_spi_handle_t handle,
  *
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_SPI_set_config(hal_spi_handle_t handle,
+int32_t hal_spi_set_config(hal_spi_handle_t handle,
 						   const hal_spi_config_t *config);
 
 #ifdef __cplusplus

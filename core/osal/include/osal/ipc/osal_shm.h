@@ -43,7 +43,7 @@ typedef mode_t osal_mode_t;
  * @return 文件描述符（成功）
  * @return -1（失败）
  */
-int32_t OSAL_shm_open(const char *name, int32_t oflag, osal_mode_t mode);
+int32_t osal_shm_open(const char *name, int32_t oflag, osal_mode_t mode);
 
 /**
  * @brief 删除共享内存对象
@@ -52,7 +52,7 @@ int32_t OSAL_shm_open(const char *name, int32_t oflag, osal_mode_t mode);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_shm_unlink(const char *name);
+int32_t osal_shm_unlink(const char *name);
 
 /**
  * @brief 设置共享内存大小
@@ -62,7 +62,7 @@ int32_t OSAL_shm_unlink(const char *name);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_ftruncate(int32_t fd, osal_off_t length);
+int32_t osal_ftruncate(int32_t fd, osal_off_t length);
 
 /**
  * @brief 映射共享内存到进程地址空间
@@ -76,7 +76,7 @@ int32_t OSAL_ftruncate(int32_t fd, osal_off_t length);
  * @return 映射地址（成功）
  * @return MAP_FAILED（失败）
  */
-void *OSAL_mmap(void *addr, osal_size_t length, int32_t prot, int32_t flags,
+void *osal_mmap(void *addr, osal_size_t length, int32_t prot, int32_t flags,
 				int32_t fd, osal_off_t offset);
 
 /**
@@ -87,7 +87,7 @@ void *OSAL_mmap(void *addr, osal_size_t length, int32_t prot, int32_t flags,
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_munmap(void *addr, osal_size_t length);
+int32_t osal_munmap(void *addr, osal_size_t length);
 
 /**
  * @brief 同步内存映射到磁盘
@@ -98,7 +98,7 @@ int32_t OSAL_munmap(void *addr, osal_size_t length);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_msync(void *addr, osal_size_t length, int32_t flags);
+int32_t osal_msync(void *addr, osal_size_t length, int32_t flags);
 
 /**
  * @brief 关闭文件描述符
@@ -107,7 +107,7 @@ int32_t OSAL_msync(void *addr, osal_size_t length, int32_t flags);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_close(int32_t fd);
+int32_t osal_close(int32_t fd);
 
 #ifdef __cplusplus
 }

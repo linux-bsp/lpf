@@ -19,7 +19,7 @@ const pconfig_platform_table_t g_pconfig_platform_table = { .configs = NULL,
  * 平台配置查询
  *===========================================================================*/
 
-const pconfig_platform_config_t *PCONFIG_GetBoard(void)
+const pconfig_platform_config_t *pconfig_get_board(void)
 {
 	if (NULL == g_pconfig_platform_table.configs ||
 		0u == g_pconfig_platform_table.count ||
@@ -32,7 +32,7 @@ const pconfig_platform_config_t *PCONFIG_GetBoard(void)
 		.configs[g_pconfig_platform_table.current_index];
 }
 
-const pconfig_platform_config_t *PCONFIG_Find(const char *platform,
+const pconfig_platform_config_t *pconfig_find(const char *platform,
 											  const char *product,
 											  const char *version
 											  __attribute__((unused)))
@@ -55,11 +55,11 @@ const pconfig_platform_config_t *PCONFIG_Find(const char *platform,
 			continue;
 		}
 
-		if (0 != OSAL_strcmp(config->platform_name, platform)) {
+		if (0 != osal_strcmp(config->platform_name, platform)) {
 			continue;
 		}
 
-		if (0 != OSAL_strcmp(config->product_name, product)) {
+		if (0 != osal_strcmp(config->product_name, product)) {
 			continue;
 		}
 
@@ -69,7 +69,7 @@ const pconfig_platform_config_t *PCONFIG_Find(const char *platform,
 	return NULL;
 }
 
-int32_t PCONFIG_list(const pconfig_platform_config_t **configs, uint32_t *count)
+int32_t pconfig_list(const pconfig_platform_config_t **configs, uint32_t *count)
 {
 	uint32_t max_count;
 	uint32_t actual_count;
@@ -108,7 +108,7 @@ int32_t PCONFIG_list(const pconfig_platform_config_t **configs, uint32_t *count)
  * 配置验证
  *===========================================================================*/
 
-int32_t PCONFIG_validate(const pconfig_platform_config_t *config)
+int32_t pconfig_validate(const pconfig_platform_config_t *config)
 {
 	if (NULL == config) {
 		return OSAL_ERR_GENERIC;
@@ -122,7 +122,7 @@ int32_t PCONFIG_validate(const pconfig_platform_config_t *config)
 	return OSAL_SUCCESS;
 }
 
-void PCONFIG_print(const pconfig_platform_config_t *config)
+void pconfig_print(const pconfig_platform_config_t *config)
 {
 	uint32_t i;
 

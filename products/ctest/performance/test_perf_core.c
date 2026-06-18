@@ -95,18 +95,18 @@ perf_context_t *perf_context_create(const char *name,
 	}
 
 	perf_context_t *ctx =
-		(perf_context_t *)OSAL_malloc(OSAL_sizeof(perf_context_t));
+		(perf_context_t *)osal_malloc(OSAL_sizeof(perf_context_t));
 	if (!ctx) {
 		return NULL;
 	}
 
-	ctx->samples = (double *)OSAL_malloc(OSAL_sizeof(double) * max_samples);
+	ctx->samples = (double *)osal_malloc(OSAL_sizeof(double) * max_samples);
 	if (!ctx->samples) {
-		OSAL_free(ctx);
+		osal_free(ctx);
 		return NULL;
 	}
 
-	OSAL_strncpy(ctx->name, name, OSAL_sizeof(ctx->name) - 1);
+	osal_strncpy(ctx->name, name, OSAL_sizeof(ctx->name) - 1);
 	ctx->name[OSAL_sizeof(ctx->name) - 1] = '\0';
 	ctx->metric_type = metric_type;
 	ctx->max_samples = max_samples;
@@ -121,9 +121,9 @@ void perf_context_destroy(perf_context_t *ctx)
 {
 	if (ctx) {
 		if (ctx->samples) {
-			OSAL_free(ctx->samples);
+			osal_free(ctx->samples);
 		}
-		OSAL_free(ctx);
+		osal_free(ctx);
 	}
 }
 
@@ -132,7 +132,7 @@ void perf_begin(perf_context_t *ctx)
 	if (!ctx)
 		return;
 
-	ctx->start_time_us = OSAL_get_monotonic_time();
+	ctx->start_time_us = osal_get_monotonic_time();
 	ctx->measuring = true;
 }
 
@@ -141,7 +141,7 @@ void perf_end(perf_context_t *ctx)
 	if (!ctx || !ctx->measuring)
 		return;
 
-	uint64_t end_time_us = OSAL_get_monotonic_time();
+	uint64_t end_time_us = osal_get_monotonic_time();
 	double elapsed_us = (double)(end_time_us - ctx->start_time_us);
 
 	perf_record(ctx, elapsed_us);
@@ -163,7 +163,7 @@ int32_t perf_calculate_stats(perf_context_t *ctx, perf_stats_t *stats)
 		return -1;
 	}
 
-	OSAL_memset(stats, 0, OSAL_sizeof(perf_stats_t));
+	osal_memset(stats, 0, OSAL_sizeof(perf_stats_t));
 
 	/* 计算基本统计量 */
 	stats->count = ctx->sample_count;
@@ -196,9 +196,9 @@ int32_t perf_calculate_stats(perf_context_t *ctx, perf_stats_t *stats)
 
 	/* 计算百分位数（需要排序） */
 	double *sorted =
-		(double *)OSAL_malloc(OSAL_sizeof(double) * ctx->sample_count);
+		(double *)osal_malloc(OSAL_sizeof(double) * ctx->sample_count);
 	if (sorted) {
-		OSAL_memcpy(sorted, ctx->samples,
+		osal_memcpy(sorted, ctx->samples,
 					OSAL_sizeof(double) * ctx->sample_count);
 		simple_sort(sorted, ctx->sample_count);
 
@@ -207,7 +207,7 @@ int32_t perf_calculate_stats(perf_context_t *ctx, perf_stats_t *stats)
 		stats->p99 = calculate_percentile(sorted, ctx->sample_count, 99.0);
 		stats->p999 = calculate_percentile(sorted, ctx->sample_count, 99.9);
 
-		OSAL_free(sorted);
+		osal_free(sorted);
 	}
 
 	return 0;
@@ -221,7 +221,7 @@ int32_t perf_compare_baseline(perf_context_t *ctx,
 		return -1;
 	}
 
-	OSAL_memset(result, 0, OSAL_sizeof(perf_result_t));
+	osal_memset(result, 0, OSAL_sizeof(perf_result_t));
 
 	result->test_name = ctx->name;
 	result->metric_type = ctx->metric_type;
@@ -250,7 +250,7 @@ void perf_print_stats(perf_context_t *ctx)
 
 	perf_stats_t stats;
 	if (perf_calculate_stats(ctx, &stats) != 0) {
-		OSAL_printf("[ PERF ERROR ] Failed to calculate statistics\n");
+		osal_printf("[ PERF ERROR ] Failed to calculate statistics\n");
 		return;
 	}
 
@@ -273,18 +273,18 @@ void perf_print_stats(perf_context_t *ctx)
 		break;
 	}
 
-	OSAL_printf("\n");
-	OSAL_printf("=== Performance Statistics: %s ===\n", ctx->name);
-	OSAL_printf("Samples:     %lu\n", (unsigned long)stats.count);
-	OSAL_printf("Mean:        %.2f %s\n", stats.mean, unit);
-	OSAL_printf("Std Dev:     %.2f %s\n", stats.stddev, unit);
-	OSAL_printf("Min:         %.2f %s\n", stats.min, unit);
-	OSAL_printf("Max:         %.2f %s\n", stats.max, unit);
-	OSAL_printf("Median(p50): %.2f %s\n", stats.p50, unit);
-	OSAL_printf("p95:         %.2f %s\n", stats.p95, unit);
-	OSAL_printf("p99:         %.2f %s\n", stats.p99, unit);
-	OSAL_printf("p99.9:       %.2f %s\n", stats.p999, unit);
-	OSAL_printf("=====================================\n\n");
+	osal_printf("\n");
+	osal_printf("=== Performance Statistics: %s ===\n", ctx->name);
+	osal_printf("Samples:     %lu\n", (unsigned long)stats.count);
+	osal_printf("Mean:        %.2f %s\n", stats.mean, unit);
+	osal_printf("Std Dev:     %.2f %s\n", stats.stddev, unit);
+	osal_printf("Min:         %.2f %s\n", stats.min, unit);
+	osal_printf("Max:         %.2f %s\n", stats.max, unit);
+	osal_printf("Median(p50): %.2f %s\n", stats.p50, unit);
+	osal_printf("p95:         %.2f %s\n", stats.p95, unit);
+	osal_printf("p99:         %.2f %s\n", stats.p99, unit);
+	osal_printf("p99.9:       %.2f %s\n", stats.p999, unit);
+	osal_printf("=====================================\n\n");
 }
 
 void perf_print_result(const perf_result_t *result)
@@ -295,13 +295,13 @@ void perf_print_result(const perf_result_t *result)
 	const char *status = result->baseline_passed ? "PASS" : "FAIL";
 	const char *symbol = result->baseline_passed ? "+" : "X";
 
-	OSAL_printf("\n");
-	OSAL_printf("=== Performance Test Result ===\n");
-	OSAL_printf("Test:        %s\n", result->test_name);
-	OSAL_printf("Status:      [%s] %s\n", symbol, status);
-	OSAL_printf("Mean:        %.2f\n", result->stats.mean);
-	OSAL_printf("Baseline:    %.2f%%\n", result->baseline_diff_percent);
-	OSAL_printf("===============================\n\n");
+	osal_printf("\n");
+	osal_printf("=== Performance Test Result ===\n");
+	osal_printf("Test:        %s\n", result->test_name);
+	osal_printf("Status:      [%s] %s\n", symbol, status);
+	osal_printf("Mean:        %.2f\n", result->stats.mean);
+	osal_printf("Baseline:    %.2f%%\n", result->baseline_diff_percent);
+	osal_printf("===============================\n\n");
 }
 
 int32_t perf_export_csv(perf_context_t *ctx, const char *filename)
@@ -311,7 +311,7 @@ int32_t perf_export_csv(perf_context_t *ctx, const char *filename)
 	}
 
 	/* CSV导出功能需要文件操作，暂不实现 */
-	OSAL_printf("[ INFO ] CSV export not implemented (requires file I/O)\n");
+	osal_printf("[ INFO ] CSV export not implemented (requires file I/O)\n");
 	return -1;
 }
 
@@ -322,6 +322,6 @@ int32_t perf_export_json(perf_context_t *ctx, const char *filename)
 	}
 
 	/* JSON导出功能需要文件操作，暂不实现 */
-	OSAL_printf("[ INFO ] JSON export not implemented (requires file I/O)\n");
+	osal_printf("[ INFO ] JSON export not implemented (requires file I/O)\n");
 	return -1;
 }

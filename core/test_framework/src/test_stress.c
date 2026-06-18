@@ -50,7 +50,7 @@ stress_context_t *stress_context_create(const char *name,
 	ctx->config = *config;
 	ctx->should_stop = false;
 
-	if (OSAL_pthread_mutex_init(&ctx->stats_mutex, NULL) != 0) {
+	if (osal_pthread_mutex_init(&ctx->stats_mutex, NULL) != 0) {
 		free(ctx);
 		return NULL;
 	}
@@ -67,7 +67,7 @@ void stress_context_destroy(stress_context_t *ctx)
 		return;
 	}
 
-	OSAL_pthread_mutex_destroy(&ctx->stats_mutex);
+	osal_pthread_mutex_destroy(&ctx->stats_mutex);
 	free(ctx);
 }
 
@@ -109,7 +109,7 @@ static void *worker_thread(void *arg)
 		uint64_t latency = end - start;
 
 		/* 更新统计 */
-		OSAL_pthread_mutex_lock(&ctx->stats_mutex);
+		osal_pthread_mutex_lock(&ctx->stats_mutex);
 		ctx->stats.total_operations++;
 		if (result == 0) {
 			ctx->stats.successful_ops++;
@@ -128,7 +128,7 @@ static void *worker_thread(void *arg)
 		ctx->stats.avg_latency_us =
 			(ctx->stats.avg_latency_us * (n - 1) + latency) / n;
 
-		OSAL_pthread_mutex_unlock(&ctx->stats_mutex);
+		osal_pthread_mutex_unlock(&ctx->stats_mutex);
 
 		/* 检查是否遇错停止 */
 		if (ctx->config.stop_on_error && result != 0) {
@@ -181,12 +181,12 @@ int32_t stress_run(stress_context_t *ctx, stress_worker_func_t worker,
 		thread_data[i].user_data = user_data;
 		thread_data[i].thread_id = i;
 
-		if (OSAL_pthread_create(&threads[i], NULL, worker_thread,
+		if (osal_pthread_create(&threads[i], NULL, worker_thread,
 								&thread_data[i]) != 0) {
 			/* 启动失败，停止已启动的线程 */
 			ctx->should_stop = true;
 			for (uint32_t j = 0; j < i; j++) {
-				OSAL_pthread_join(threads[j], NULL);
+				osal_pthread_join(threads[j], NULL);
 			}
 			free(threads);
 			free(thread_data);
@@ -204,7 +204,7 @@ int32_t stress_run(stress_context_t *ctx, stress_worker_func_t worker,
 
 	/* 等待所有线程完成 */
 	for (uint32_t i = 0; i < thread_count; i++) {
-		OSAL_pthread_join(threads[i], NULL);
+		osal_pthread_join(threads[i], NULL);
 	}
 
 	/* 计算最终统计 */
@@ -241,9 +241,9 @@ int32_t stress_get_stats(stress_context_t *ctx, stress_stats_t *stats)
 		return -1;
 	}
 
-	OSAL_pthread_mutex_lock(&ctx->stats_mutex);
+	osal_pthread_mutex_lock(&ctx->stats_mutex);
 	*stats = ctx->stats;
-	OSAL_pthread_mutex_unlock(&ctx->stats_mutex);
+	osal_pthread_mutex_unlock(&ctx->stats_mutex);
 
 	return 0;
 }
@@ -265,28 +265,28 @@ void stress_print_report(stress_context_t *ctx)
 			(100.0 * stats.successful_ops / stats.total_operations) :
 			0.0;
 
-	OSAL_printf("\n");
-	OSAL_printf("=== Stress Test Report: %s ===\n", ctx->name);
-	OSAL_printf("Configuration:\n");
-	OSAL_printf("  Type: %d\n", ctx->config.type);
-	OSAL_printf("  Threads: %u\n", ctx->config.thread_count);
-	OSAL_printf("  Duration: %u sec\n", ctx->config.duration_sec);
-	OSAL_printf("  Iterations: %u\n", ctx->config.iterations);
-	OSAL_printf("\n");
-	OSAL_printf("Results:\n");
-	OSAL_printf("  Total operations: %llu\n",
+	osal_printf("\n");
+	osal_printf("=== Stress Test Report: %s ===\n", ctx->name);
+	osal_printf("Configuration:\n");
+	osal_printf("  Type: %d\n", ctx->config.type);
+	osal_printf("  Threads: %u\n", ctx->config.thread_count);
+	osal_printf("  Duration: %u sec\n", ctx->config.duration_sec);
+	osal_printf("  Iterations: %u\n", ctx->config.iterations);
+	osal_printf("\n");
+	osal_printf("Results:\n");
+	osal_printf("  Total operations: %llu\n",
 				(unsigned long long)stats.total_operations);
-	OSAL_printf("  Successful: %llu (%.2f%%)\n",
+	osal_printf("  Successful: %llu (%.2f%%)\n",
 				(unsigned long long)stats.successful_ops, success_rate);
-	OSAL_printf("  Failed: %llu\n", (unsigned long long)stats.failed_ops);
-	OSAL_printf("  Errors: %u\n", stats.error_count);
-	OSAL_printf("  Elapsed time: %llu ms\n",
+	osal_printf("  Failed: %llu\n", (unsigned long long)stats.failed_ops);
+	osal_printf("  Errors: %u\n", stats.error_count);
+	osal_printf("  Elapsed time: %llu ms\n",
 				(unsigned long long)stats.elapsed_time_ms);
-	OSAL_printf("  Operations/sec: %.2f\n", stats.ops_per_sec);
-	OSAL_printf("  Avg latency: %.2f us\n", stats.avg_latency_us);
-	OSAL_printf("  Max latency: %.2f us\n", stats.max_latency_us);
-	OSAL_printf("====================================\n");
-	OSAL_printf("\n");
+	osal_printf("  Operations/sec: %.2f\n", stats.ops_per_sec);
+	osal_printf("  Avg latency: %.2f us\n", stats.avg_latency_us);
+	osal_printf("  Max latency: %.2f us\n", stats.max_latency_us);
+	osal_printf("====================================\n");
+	osal_printf("\n");
 }
 
 /**
@@ -298,12 +298,12 @@ void stress_record_error(stress_context_t *ctx, const char *error_msg)
 		return;
 	}
 
-	OSAL_pthread_mutex_lock(&ctx->stats_mutex);
+	osal_pthread_mutex_lock(&ctx->stats_mutex);
 	ctx->stats.error_count++;
-	OSAL_pthread_mutex_unlock(&ctx->stats_mutex);
+	osal_pthread_mutex_unlock(&ctx->stats_mutex);
 
 	if (error_msg) {
-		OSAL_printf("[ STRESS ERROR ] %s\n", error_msg);
+		osal_printf("[ STRESS ERROR ] %s\n", error_msg);
 	}
 }
 

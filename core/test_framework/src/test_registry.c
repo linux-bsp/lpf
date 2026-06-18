@@ -25,10 +25,10 @@ static void init_registry(void)
 {
 	if (g_registered_suites == NULL) {
 		g_suite_capacity = INITIAL_CAPACITY;
-		g_registered_suites = (const test_suite_t **)OSAL_malloc(
+		g_registered_suites = (const test_suite_t **)osal_malloc(
 			g_suite_capacity * OSAL_sizeof(test_suite_t *));
 		if (g_registered_suites == NULL) {
-			OSAL_printf("FATAL: Failed to allocate test suite registry\n");
+			osal_printf("FATAL: Failed to allocate test suite registry\n");
 			g_suite_capacity = 0;
 		}
 	}
@@ -40,20 +40,20 @@ static void init_registry(void)
 static bool expand_registry(void)
 {
 	uint32_t new_capacity = g_suite_capacity * GROWTH_FACTOR;
-	const test_suite_t **new_suites = (const test_suite_t **)OSAL_malloc(
+	const test_suite_t **new_suites = (const test_suite_t **)osal_malloc(
 		new_capacity * OSAL_sizeof(test_suite_t *));
 
 	if (new_suites == NULL) {
-		OSAL_printf("ERROR: Failed to expand test suite registry\n");
+		osal_printf("ERROR: Failed to expand test suite registry\n");
 		return false;
 	}
 
 	/* Copy old data to new buffer */
-	OSAL_memcpy(new_suites, g_registered_suites,
+	osal_memcpy(new_suites, g_registered_suites,
 				g_suite_count * OSAL_sizeof(test_suite_t *));
 
 	/* Free old buffer and update registry */
-	OSAL_free(g_registered_suites);
+	osal_free(g_registered_suites);
 	g_registered_suites = new_suites;
 	g_suite_capacity = new_capacity;
 	return true;
@@ -73,7 +73,7 @@ void libutest_register_suite(const test_suite_t *suite)
 
 	if (g_suite_count >= g_suite_capacity) {
 		if (!expand_registry()) {
-			OSAL_printf(
+			osal_printf(
 				"ERROR: Cannot register test suite '%s' - registry full\n",
 				suite->suite_name);
 			return;
@@ -130,7 +130,7 @@ const test_suite_t *test_find_suite(const char *name)
 	uint32_t i;
 
 	for (i = 0; i < g_suite_count; i++) {
-		if (0 == OSAL_strcmp(g_registered_suites[i]->suite_name, name)) {
+		if (0 == osal_strcmp(g_registered_suites[i]->suite_name, name)) {
 			return g_registered_suites[i];
 		}
 	}
@@ -152,7 +152,7 @@ uint32_t test_get_suites_by_layer(const char *layer_name,
 	uint32_t i;
 
 	for (i = 0; i < g_suite_count && count < max_suites; i++) {
-		if (0 == OSAL_strcmp(g_registered_suites[i]->layer_name, layer_name)) {
+		if (0 == osal_strcmp(g_registered_suites[i]->layer_name, layer_name)) {
 			suites[count++] = g_registered_suites[i];
 		}
 	}
@@ -175,7 +175,7 @@ uint32_t test_get_suites_by_layer_filtered(const char *layer_name,
 	uint32_t i;
 
 	for (i = 0; i < g_suite_count && count < max_suites; i++) {
-		if (0 == OSAL_strcmp(g_registered_suites[i]->layer_name, layer_name)) {
+		if (0 == osal_strcmp(g_registered_suites[i]->layer_name, layer_name)) {
 			if (test_metadata_matches_filter(&g_registered_suites[i]->metadata,
 											 filter)) {
 				suites[count++] = g_registered_suites[i];
@@ -201,7 +201,7 @@ uint32_t test_get_suites_by_module(const char *module_name,
 
 	for (i = 0; i < g_suite_count && count < max_suites; i++) {
 		if (0 ==
-			OSAL_strcmp(g_registered_suites[i]->module_name, module_name)) {
+			osal_strcmp(g_registered_suites[i]->module_name, module_name)) {
 			suites[count++] = g_registered_suites[i];
 		}
 	}
@@ -225,7 +225,7 @@ uint32_t test_get_suites_by_module_filtered(const char *module_name,
 
 	for (i = 0; i < g_suite_count && count < max_suites; i++) {
 		if (0 ==
-			OSAL_strcmp(g_registered_suites[i]->module_name, module_name)) {
+			osal_strcmp(g_registered_suites[i]->module_name, module_name)) {
 			if (test_metadata_matches_filter(&g_registered_suites[i]->metadata,
 											 filter)) {
 				suites[count++] = g_registered_suites[i];
@@ -298,7 +298,7 @@ uint32_t test_get_layers(const char **layers, uint32_t max_layers)
 		uint32_t j;
 
 		for (j = 0; j < count; j++) {
-			if (0 == OSAL_strcmp(layers[j], layer)) {
+			if (0 == osal_strcmp(layers[j], layer)) {
 				found = true;
 				break;
 			}
@@ -331,7 +331,7 @@ uint32_t test_get_modules(const char **modules, uint32_t max_modules)
 		uint32_t j;
 
 		for (j = 0; j < count; j++) {
-			if (0 == OSAL_strcmp(modules[j], module)) {
+			if (0 == osal_strcmp(modules[j], module)) {
 				found = true;
 				break;
 			}

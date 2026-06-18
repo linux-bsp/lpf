@@ -49,19 +49,19 @@ int prl_device_encode(prl_encode_ctx_t *ctx)
 
 	/* 填充协议头 */
 	hdr = (prl_header_t *)ctx->buffer;
-	hdr->magic = OSAL_htons(PRL_MAGIC);
+	hdr->magic = osal_htons(PRL_MAGIC);
 	hdr->version = PRL_VERSION;
 	hdr->dev_type = ctx->dev_type;
 	hdr->msg_type = ctx->msg_type;
 	hdr->flags = ctx->flags;
-	hdr->length = OSAL_htons(ctx->payload_len);
-	hdr->seq = OSAL_htonl(prl_get_next_seq());
-	hdr->timestamp = OSAL_htonl(prl_get_timestamp());
+	hdr->length = osal_htons(ctx->payload_len);
+	hdr->seq = osal_htonl(prl_get_next_seq());
+	hdr->timestamp = osal_htonl(prl_get_timestamp());
 	hdr->reserved = 0;
 
 	/* 复制payload */
 	if (ctx->payload && ctx->payload_len > 0) {
-		OSAL_memcpy(ctx->buffer + PRL_HEADER_SIZE, ctx->payload,
+		osal_memcpy(ctx->buffer + PRL_HEADER_SIZE, ctx->payload,
 					ctx->payload_len);
 	}
 
@@ -84,7 +84,7 @@ int prl_device_decode(prl_decode_ctx_t *ctx)
 	hdr = (const prl_header_t *)ctx->buffer;
 
 	/* 验证魔数 */
-	magic = OSAL_ntohs(hdr->magic);
+	magic = osal_ntohs(hdr->magic);
 	if (magic != PRL_MAGIC) {
 		return OSAL_ERR_GENERIC;
 	}
@@ -100,7 +100,7 @@ int prl_device_decode(prl_decode_ctx_t *ctx)
 	}
 
 	/* 获取payload长度 */
-	payload_len = OSAL_ntohs(hdr->length);
+	payload_len = osal_ntohs(hdr->length);
 	if (PRL_HEADER_SIZE + payload_len > ctx->buffer_len) {
 		return OSAL_ERR_GENERIC;
 	}
@@ -122,7 +122,7 @@ int prl_device_decode(prl_decode_ctx_t *ctx)
 		if (ctx->payload_size < payload_len) {
 			return OSAL_ERR_NO_MEMORY;
 		}
-		OSAL_memcpy(ctx->payload, ctx->buffer + PRL_HEADER_SIZE, payload_len);
+		osal_memcpy(ctx->payload, ctx->buffer + PRL_HEADER_SIZE, payload_len);
 	}
 
 	return OSAL_SUCCESS;

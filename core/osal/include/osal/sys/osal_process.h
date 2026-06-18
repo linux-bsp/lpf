@@ -35,14 +35,17 @@ typedef gid_t osal_gid_t; /* 组ID */
  * 进程管理接口
  *===========================================================================*/
 /* 基础进程控制函数（保持兼容） */
-void OSAL_exit(int32_t status);
-osal_pid_t OSAL_getpid(void);
-osal_pid_t OSAL_getppid(void);
-int32_t OSAL_kill(osal_pid_t pid, int32_t sig);
-void OSAL_abort(void);
-osal_pid_t OSAL_fork(void);
-int32_t OSAL_execvp(const char *file, char *const argv[]);
-int32_t OSAL_waitpid(osal_pid_t pid, int32_t *status, int32_t options);
+void osal_exit(int32_t status);
+osal_pid_t osal_getpid(void);
+osal_pid_t osal_getppid(void);
+int32_t osal_kill(osal_pid_t pid, int32_t sig);
+void osal_abort(void);
+osal_pid_t osal_fork(void);
+int32_t osal_pipe(int32_t pipefd[2]);
+int32_t osal_execvp(const char *file, char *const argv[]);
+int32_t osal_waitpid(osal_pid_t pid, int32_t *status, int32_t options);
+int32_t osal_setpgid(osal_pid_t pid, osal_pid_t pgid);
+osal_pid_t osal_getpgid(osal_pid_t pid);
 
 /* 等待选项 */
 #define OSAL_WNOHANG 0x01 /* 非阻塞等待 */

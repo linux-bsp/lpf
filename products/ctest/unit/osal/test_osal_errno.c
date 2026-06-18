@@ -13,24 +13,24 @@
 static void test_osal_get_errno(void)
 {
 	/* Set errno to a known value */
-	OSAL_set_errno(OSAL_EINVAL);
+	osal_set_errno(OSAL_EINVAL);
 
 	/* Get errno */
-	int32_t err = OSAL_get_errno();
+	int32_t err = osal_get_errno();
 	TEST_ASSERT_EQUAL(OSAL_EINVAL, err);
 }
 
 static void test_osal_set_errno(void)
 {
 	/* Set errno to different values */
-	OSAL_set_errno(OSAL_ENOENT);
-	TEST_ASSERT_EQUAL(OSAL_ENOENT, OSAL_get_errno());
+	osal_set_errno(OSAL_ENOENT);
+	TEST_ASSERT_EQUAL(OSAL_ENOENT, osal_get_errno());
 
-	OSAL_set_errno(OSAL_ENOMEM);
-	TEST_ASSERT_EQUAL(OSAL_ENOMEM, OSAL_get_errno());
+	osal_set_errno(OSAL_ENOMEM);
+	TEST_ASSERT_EQUAL(OSAL_ENOMEM, osal_get_errno());
 
-	OSAL_set_errno(0);
-	TEST_ASSERT_EQUAL(0, OSAL_get_errno());
+	osal_set_errno(0);
+	TEST_ASSERT_EQUAL(0, osal_get_errno());
 }
 
 static void test_osal_strerror(void)
@@ -38,17 +38,17 @@ static void test_osal_strerror(void)
 	/* Test common error codes */
 	const char *msg;
 
-	msg = OSAL_strerror(OSAL_EINVAL);
+	msg = osal_strerror(OSAL_EINVAL);
 	TEST_ASSERT_NOT_NULL(msg);
-	TEST_ASSERT_TRUE(OSAL_strlen(msg) > 0);
+	TEST_ASSERT_TRUE(osal_strlen(msg) > 0);
 
-	msg = OSAL_strerror(OSAL_ENOENT);
+	msg = osal_strerror(OSAL_ENOENT);
 	TEST_ASSERT_NOT_NULL(msg);
-	TEST_ASSERT_TRUE(OSAL_strlen(msg) > 0);
+	TEST_ASSERT_TRUE(osal_strlen(msg) > 0);
 
-	msg = OSAL_strerror(OSAL_ENOMEM);
+	msg = osal_strerror(OSAL_ENOMEM);
 	TEST_ASSERT_NOT_NULL(msg);
-	TEST_ASSERT_TRUE(OSAL_strlen(msg) > 0);
+	TEST_ASSERT_TRUE(osal_strlen(msg) > 0);
 }
 
 static void test_osal_get_status_name(void)
@@ -56,15 +56,15 @@ static void test_osal_get_status_name(void)
 	/* Test OSAL status code names */
 	const char *name;
 
-	name = OSAL_get_status_name(OSAL_SUCCESS);
+	name = osal_get_status_name(OSAL_SUCCESS);
 	TEST_ASSERT_NOT_NULL(name);
 	TEST_ASSERT_STRING_EQUAL("OSAL_SUCCESS", name);
 
-	name = OSAL_get_status_name(OSAL_ERR_INVALID_POINTER);
+	name = osal_get_status_name(OSAL_ERR_INVALID_POINTER);
 	TEST_ASSERT_NOT_NULL(name);
 	TEST_ASSERT_STRING_EQUAL("OSAL_ERR_INVALID_POINTER", name);
 
-	name = OSAL_get_status_name(OSAL_ERR_INVALID_SIZE);
+	name = osal_get_status_name(OSAL_ERR_INVALID_SIZE);
 	TEST_ASSERT_NOT_NULL(name);
 	TEST_ASSERT_STRING_EQUAL("OSAL_ERR_INVALID_SIZE", name);
 }

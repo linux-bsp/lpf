@@ -137,7 +137,7 @@ void system_test_print_report(system_test_context_t *ctx);
 		bool _passed = (condition);                                        \
 		system_test_checkpoint(ctx, name, _passed);                        \
 		if (!_passed) {                                                    \
-			OSAL_printf("[ CHECKPOINT FAIL ] %s: %s\n", name, #condition); \
+			osal_printf("[ CHECKPOINT FAIL ] %s: %s\n", name, #condition); \
 		}                                                                  \
 	} while (0)
 

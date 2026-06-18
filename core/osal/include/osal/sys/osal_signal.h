@@ -30,7 +30,7 @@ typedef void (*osal_sighandler_t)(int);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_signal(int32_t signum, osal_sighandler_t handler);
+int32_t osal_signal(int32_t signum, osal_sighandler_t handler);
 
 /**
  * @brief 发送信号到进程
@@ -40,7 +40,7 @@ int32_t OSAL_signal(int32_t signum, osal_sighandler_t handler);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_kill(osal_pid_t pid, int32_t sig);
+int32_t osal_kill(osal_pid_t pid, int32_t sig);
 
 /**
  * @brief 发送信号到当前进程
@@ -49,7 +49,7 @@ int32_t OSAL_kill(osal_pid_t pid, int32_t sig);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_raise(int32_t sig);
+int32_t osal_raise(int32_t sig);
 
 /**
  * @brief 阻塞信号集操作
@@ -60,7 +60,7 @@ int32_t OSAL_raise(int32_t sig);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_sigprocmask(int32_t how, const sigset_t *set, sigset_t *oldset);
+int32_t osal_sigprocmask(int32_t how, const sigset_t *set, sigset_t *oldset);
 
 /**
  * @brief 初始化信号集为空
@@ -69,7 +69,7 @@ int32_t OSAL_sigprocmask(int32_t how, const sigset_t *set, sigset_t *oldset);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_sigemptyset(sigset_t *set);
+int32_t osal_sigemptyset(sigset_t *set);
 
 /**
  * @brief 初始化信号集为全集
@@ -78,7 +78,7 @@ int32_t OSAL_sigemptyset(sigset_t *set);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_sigfillset(sigset_t *set);
+int32_t osal_sigfillset(sigset_t *set);
 
 /**
  * @brief 添加信号到信号集
@@ -88,7 +88,7 @@ int32_t OSAL_sigfillset(sigset_t *set);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_sigaddset(sigset_t *set, int32_t signum);
+int32_t osal_sigaddset(sigset_t *set, int32_t signum);
 
 /**
  * @brief 从信号集删除信号
@@ -98,7 +98,7 @@ int32_t OSAL_sigaddset(sigset_t *set, int32_t signum);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_sigdelset(sigset_t *set, int32_t signum);
+int32_t osal_sigdelset(sigset_t *set, int32_t signum);
 
 /**
  * @brief 测试信号是否在信号集中
@@ -109,7 +109,7 @@ int32_t OSAL_sigdelset(sigset_t *set, int32_t signum);
  * @return 0 信号不在集合中
  * @return -1 失败
  */
-int32_t OSAL_sigismember(const sigset_t *set, int32_t signum);
+int32_t osal_sigismember(const sigset_t *set, int32_t signum);
 
 /**
  * @brief 等待信号
@@ -119,7 +119,7 @@ int32_t OSAL_sigismember(const sigset_t *set, int32_t signum);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_sigwait(const sigset_t *set, int32_t *sig);
+int32_t osal_sigwait(const sigset_t *set, int32_t *sig);
 
 /**
  * @brief 高级信号处理（sigaction）
@@ -130,7 +130,7 @@ int32_t OSAL_sigwait(const sigset_t *set, int32_t *sig);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_sigaction(int32_t signum, const struct sigaction *act,
+int32_t osal_sigaction(int32_t signum, const struct sigaction *act,
 					   struct sigaction *oldact);
 
 #ifdef __cplusplus

@@ -47,7 +47,7 @@ typedef struct sched_param osal_sched_param_t;
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_create(osal_thread_t *thread,
+int32_t osal_pthread_create(osal_thread_t *thread,
 							const osal_threadattr_t *attr,
 							void *(*start_routine)(void *), void *arg);
 
@@ -59,7 +59,7 @@ int32_t OSAL_pthread_create(osal_thread_t *thread,
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_join(osal_thread_t thread, void **retval);
+int32_t osal_pthread_join(osal_thread_t thread, void **retval);
 
 /**
  * @brief 分离线程
@@ -68,21 +68,21 @@ int32_t OSAL_pthread_join(osal_thread_t thread, void **retval);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_detach(osal_thread_t thread);
+int32_t osal_pthread_detach(osal_thread_t thread);
 
 /**
  * @brief 获取当前线程 ID
  *
  * @return 当前线程 ID
  */
-osal_thread_t OSAL_pthread_self(void);
+osal_thread_t osal_pthread_self(void);
 
 /**
  * @brief 退出当前线程
  *
  * @param[in] retval 返回值
  */
-void OSAL_pthread_exit(void *retval);
+void osal_pthread_exit(void *retval);
 
 /**
  * @brief 取消线程
@@ -91,7 +91,7 @@ void OSAL_pthread_exit(void *retval);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_cancel(osal_thread_t thread);
+int32_t osal_pthread_cancel(osal_thread_t thread);
 
 /*===========================================================================
  * 线程属性管理（可选）
@@ -104,7 +104,7 @@ int32_t OSAL_pthread_cancel(osal_thread_t thread);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_attr_init(osal_threadattr_t *attr);
+int32_t osal_pthread_attr_init(osal_threadattr_t *attr);
 
 /**
  * @brief 销毁线程属性
@@ -113,7 +113,7 @@ int32_t OSAL_pthread_attr_init(osal_threadattr_t *attr);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_attr_destroy(osal_threadattr_t *attr);
+int32_t osal_pthread_attr_destroy(osal_threadattr_t *attr);
 
 /**
  * @brief 设置线程栈大小
@@ -123,7 +123,7 @@ int32_t OSAL_pthread_attr_destroy(osal_threadattr_t *attr);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_attr_setstacksize(osal_threadattr_t *attr,
+int32_t osal_pthread_attr_setstacksize(osal_threadattr_t *attr,
 									   osal_size_t stacksize);
 
 /**
@@ -134,7 +134,7 @@ int32_t OSAL_pthread_attr_setstacksize(osal_threadattr_t *attr,
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_attr_getstacksize(const osal_threadattr_t *attr,
+int32_t osal_pthread_attr_getstacksize(const osal_threadattr_t *attr,
 									   osal_size_t *stacksize);
 
 /**
@@ -146,7 +146,7 @@ int32_t OSAL_pthread_attr_getstacksize(const osal_threadattr_t *attr,
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_attr_setdetachstate(osal_threadattr_t *attr,
+int32_t osal_pthread_attr_setdetachstate(osal_threadattr_t *attr,
 										 int32_t detachstate);
 
 /**
@@ -157,7 +157,7 @@ int32_t OSAL_pthread_attr_setdetachstate(osal_threadattr_t *attr,
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_attr_getdetachstate(const osal_threadattr_t *attr,
+int32_t osal_pthread_attr_getdetachstate(const osal_threadattr_t *attr,
 										 int32_t *detachstate);
 
 /**
@@ -168,7 +168,7 @@ int32_t OSAL_pthread_attr_getdetachstate(const osal_threadattr_t *attr,
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_attr_setschedpolicy(osal_threadattr_t *attr,
+int32_t osal_pthread_attr_setschedpolicy(osal_threadattr_t *attr,
 										 int32_t policy);
 
 /**
@@ -179,7 +179,7 @@ int32_t OSAL_pthread_attr_setschedpolicy(osal_threadattr_t *attr,
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_attr_setschedparam(osal_threadattr_t *attr,
+int32_t osal_pthread_attr_setschedparam(osal_threadattr_t *attr,
 										const osal_sched_param_t *param);
 
 #ifdef __cplusplus

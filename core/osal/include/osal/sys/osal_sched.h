@@ -27,6 +27,9 @@ extern "C" {
 #define OSAL_SCHED_PARAM_T_DEFINED
 typedef struct sched_param osal_sched_param_t;
 #endif
+#define OSAL_SCHED_OTHER SCHED_OTHER
+#define OSAL_SCHED_FIFO SCHED_FIFO
+#define OSAL_SCHED_RR SCHED_RR
 #else
 /* 其他平台（RTOS 等）- 需要提供对应的类型定义 */
 #error "Unsupported platform - please define sched types for your platform"
@@ -45,7 +48,7 @@ typedef struct sched_param osal_sched_param_t;
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_setschedparam(osal_thread_t thread, int32_t policy,
+int32_t osal_pthread_setschedparam(osal_thread_t thread, int32_t policy,
 								   int32_t priority);
 
 /**
@@ -57,7 +60,7 @@ int32_t OSAL_pthread_setschedparam(osal_thread_t thread, int32_t policy,
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_getschedparam(osal_thread_t thread, int32_t *policy,
+int32_t osal_pthread_getschedparam(osal_thread_t thread, int32_t *policy,
 								   int32_t *priority);
 
 /**
@@ -68,7 +71,7 @@ int32_t OSAL_pthread_getschedparam(osal_thread_t thread, int32_t *policy,
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_setaffinity_np(osal_thread_t thread, int32_t cpu_id);
+int32_t osal_pthread_setaffinity_np(osal_thread_t thread, int32_t cpu_id);
 
 /**
  * @brief 获取线程 CPU 亲和性
@@ -78,7 +81,7 @@ int32_t OSAL_pthread_setaffinity_np(osal_thread_t thread, int32_t cpu_id);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_getaffinity_np(osal_thread_t thread, int32_t *cpu_id);
+int32_t osal_pthread_getaffinity_np(osal_thread_t thread, int32_t *cpu_id);
 
 /**
  * @brief 设置进程 CPU 亲和性
@@ -88,7 +91,7 @@ int32_t OSAL_pthread_getaffinity_np(osal_thread_t thread, int32_t *cpu_id);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_sched_setaffinity(osal_pid_t pid, int32_t cpu_id);
+int32_t osal_sched_setaffinity(osal_pid_t pid, int32_t cpu_id);
 
 /**
  * @brief 获取进程 CPU 亲和性
@@ -98,7 +101,27 @@ int32_t OSAL_sched_setaffinity(osal_pid_t pid, int32_t cpu_id);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_sched_getaffinity(osal_pid_t pid, int32_t *cpu_id);
+int32_t osal_sched_getaffinity(osal_pid_t pid, int32_t *cpu_id);
+
+/**
+ * @brief 设置进程调度策略
+ *
+ * @param[in] pid 进程 ID（0 表示当前进程）
+ * @param[in] policy 调度策略
+ * @param[in] param 调度参数
+ * @return 0 成功
+ * @return -1 失败
+ */
+int32_t osal_sched_setscheduler(osal_pid_t pid, int32_t policy,
+								const osal_sched_param_t *param);
+
+/**
+ * @brief 获取进程调度策略
+ *
+ * @param[in] pid 进程 ID（0 表示当前进程）
+ * @return 调度策略，失败返回 -1
+ */
+int32_t osal_sched_getscheduler(osal_pid_t pid);
 
 /**
  * @brief 让出 CPU 时间片
@@ -106,7 +129,7 @@ int32_t OSAL_sched_getaffinity(osal_pid_t pid, int32_t *cpu_id);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_sched_yield(void);
+int32_t osal_sched_yield(void);
 
 #ifdef __cplusplus
 }

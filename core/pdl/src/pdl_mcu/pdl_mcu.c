@@ -87,7 +87,7 @@ static int32_t mcu_send_packet(pdl_mcu_context_t *ctx, uint8_t msg_type,
 /**
  * @brief 发送简单命令到MCU（无发送数据）
  */
-int32_t PDL_MCU_send_cmd(pdl_mcu_handle_t handle, pdl_mcu_cmd_t *cmd)
+int32_t pdl_mcu_send_cmd(pdl_mcu_handle_t handle, pdl_mcu_cmd_t *cmd)
 {
 	pdl_mcu_context_t *ctx = (pdl_mcu_context_t *)handle;
 	int32_t ret;
@@ -96,12 +96,12 @@ int32_t PDL_MCU_send_cmd(pdl_mcu_handle_t handle, pdl_mcu_cmd_t *cmd)
 		return OSAL_ERR_INVALID_PARAM;
 	}
 
-	OSAL_pthread_mutex_lock(&ctx->mutex);
+	osal_pthread_mutex_lock(&ctx->mutex);
 
 	ret = mcu_send_packet(ctx, cmd->cmd, NULL, 0, cmd->response,
 						  cmd->response_max, &cmd->response_len);
 
-	OSAL_pthread_mutex_unlock(&ctx->mutex);
+	osal_pthread_mutex_unlock(&ctx->mutex);
 
 	return ret;
 }
@@ -109,7 +109,7 @@ int32_t PDL_MCU_send_cmd(pdl_mcu_handle_t handle, pdl_mcu_cmd_t *cmd)
 /**
  * @brief 发送数据命令到MCU（带发送数据）
  */
-int32_t PDL_MCU_send_data(pdl_mcu_handle_t handle, pdl_mcu_data_t *data)
+int32_t pdl_mcu_send_data(pdl_mcu_handle_t handle, pdl_mcu_data_t *data)
 {
 	pdl_mcu_context_t *ctx = (pdl_mcu_context_t *)handle;
 	int32_t ret;
@@ -118,13 +118,13 @@ int32_t PDL_MCU_send_data(pdl_mcu_handle_t handle, pdl_mcu_data_t *data)
 		return OSAL_ERR_INVALID_PARAM;
 	}
 
-	OSAL_pthread_mutex_lock(&ctx->mutex);
+	osal_pthread_mutex_lock(&ctx->mutex);
 
 	ret = mcu_send_packet(ctx, data->cmd, data->data, data->data_len,
 						  data->response, data->response_max,
 						  &data->response_len);
 
-	OSAL_pthread_mutex_unlock(&ctx->mutex);
+	osal_pthread_mutex_unlock(&ctx->mutex);
 
 	return ret;
 }
@@ -136,7 +136,7 @@ int32_t PDL_MCU_send_data(pdl_mcu_handle_t handle, pdl_mcu_data_t *data)
 /**
  * @brief 初始化 MCU 驱动
  */
-int32_t PDL_MCU_init(uint32_t mcu_index, pdl_mcu_handle_t *handle)
+int32_t pdl_mcu_init(uint32_t mcu_index, pdl_mcu_handle_t *handle)
 {
 	const pconfig_platform_config_t *platform;
 	const pconfig_mcu_entry_t *entry;
@@ -150,19 +150,19 @@ int32_t PDL_MCU_init(uint32_t mcu_index, pdl_mcu_handle_t *handle)
 
 	/* 初始化全局注册表互斥锁 */
 	if (!g_registry_initialized) {
-		if (OSAL_SUCCESS != OSAL_pthread_mutex_init(&g_registry_mutex, NULL)) {
+		if (OSAL_SUCCESS != osal_pthread_mutex_init(&g_registry_mutex, NULL)) {
 			return OSAL_ERR_GENERIC;
 		}
 		g_registry_initialized = true;
 	}
 
 	/* 获取配置 */
-	platform = PCONFIG_GetBoard();
+	platform = pconfig_get_board();
 	if (!platform) {
 		return OSAL_ERR_GENERIC;
 	}
 
-	entry = PCONFIG_HW_GetMCU(platform, mcu_index);
+	entry = pconfig_hw_get_mcu(platform, mcu_index);
 	if (!entry || !entry->enabled) {
 		return OSAL_ERR_GENERIC;
 	}
@@ -180,35 +180,35 @@ int32_t PDL_MCU_init(uint32_t mcu_index, pdl_mcu_handle_t *handle)
 	}
 
 	/* 分配上下文 */
-	ctx = (pdl_mcu_context_t *)OSAL_malloc(sizeof(pdl_mcu_context_t));
+	ctx = (pdl_mcu_context_t *)osal_malloc(sizeof(pdl_mcu_context_t));
 	if (!ctx) {
 		return OSAL_ERR_NO_MEMORY;
 	}
 
-	OSAL_memset(ctx, 0, sizeof(pdl_mcu_context_t));
+	osal_memset(ctx, 0, sizeof(pdl_mcu_context_t));
 	ctx->config = &entry->config;
 	ctx->ops = ops;
 
 	/* 初始化通信层 */
 	ret = ops->init(&entry->config, &ctx->transport_handle);
 	if (ret != OSAL_SUCCESS) {
-		OSAL_free(ctx);
+		osal_free(ctx);
 		return ret;
 	}
 
 	/* 创建互斥锁 */
-	if (OSAL_SUCCESS != OSAL_pthread_mutex_init(&ctx->mutex, NULL)) {
+	if (OSAL_SUCCESS != osal_pthread_mutex_init(&ctx->mutex, NULL)) {
 		ops->deinit(ctx->transport_handle);
-		OSAL_free(ctx);
+		osal_free(ctx);
 		return OSAL_ERR_GENERIC;
 	}
 
 	/* 注册上下文 */
-	OSAL_pthread_mutex_lock(&g_registry_mutex);
+	osal_pthread_mutex_lock(&g_registry_mutex);
 	if (mcu_index < sizeof(g_mcu_contexts) / sizeof(g_mcu_contexts[0])) {
 		g_mcu_contexts[mcu_index] = ctx;
 	}
-	OSAL_pthread_mutex_unlock(&g_registry_mutex);
+	osal_pthread_mutex_unlock(&g_registry_mutex);
 
 	*handle = ctx;
 	return OSAL_SUCCESS;
@@ -217,7 +217,7 @@ int32_t PDL_MCU_init(uint32_t mcu_index, pdl_mcu_handle_t *handle)
 /**
  * @brief 反初始化 MCU 驱动
  */
-int32_t PDL_MCU_deinit(pdl_mcu_handle_t handle)
+int32_t pdl_mcu_deinit(pdl_mcu_handle_t handle)
 {
 	pdl_mcu_context_t *ctx = (pdl_mcu_context_t *)handle;
 	uint32_t i;
@@ -227,19 +227,19 @@ int32_t PDL_MCU_deinit(pdl_mcu_handle_t handle)
 	}
 
 	/* 从注册表移除 */
-	OSAL_pthread_mutex_lock(&g_registry_mutex);
+	osal_pthread_mutex_lock(&g_registry_mutex);
 	for (i = 0; i < sizeof(g_mcu_contexts) / sizeof(g_mcu_contexts[0]); i++) {
 		if (g_mcu_contexts[i] == ctx) {
 			g_mcu_contexts[i] = NULL;
 			break;
 		}
 	}
-	OSAL_pthread_mutex_unlock(&g_registry_mutex);
+	osal_pthread_mutex_unlock(&g_registry_mutex);
 
 	/* 清理资源 */
 	ctx->ops->deinit(ctx->transport_handle);
-	OSAL_pthread_mutex_destroy(&ctx->mutex);
-	OSAL_free(ctx);
+	osal_pthread_mutex_destroy(&ctx->mutex);
+	osal_free(ctx);
 
 	return OSAL_SUCCESS;
 }
@@ -247,7 +247,7 @@ int32_t PDL_MCU_deinit(pdl_mcu_handle_t handle)
 /**
  * @brief 获取 MCU 版本信息
  */
-int32_t PDL_MCU_get_version(pdl_mcu_handle_t handle, pdl_mcu_version_t *version)
+int32_t pdl_mcu_get_version(pdl_mcu_handle_t handle, pdl_mcu_version_t *version)
 {
 	uint8_t response[64];
 	int32_t ret;
@@ -261,7 +261,7 @@ int32_t PDL_MCU_get_version(pdl_mcu_handle_t handle, pdl_mcu_version_t *version)
 						  .response = response,
 						  .response_max = sizeof(response) };
 
-	ret = PDL_MCU_send_cmd(handle, &cmd);
+	ret = pdl_mcu_send_cmd(handle, &cmd);
 	if (ret != OSAL_SUCCESS) {
 		return ret;
 	}
@@ -281,7 +281,7 @@ int32_t PDL_MCU_get_version(pdl_mcu_handle_t handle, pdl_mcu_version_t *version)
 /**
  * @brief 获取 MCU 状态
  */
-int32_t PDL_MCU_get_status(pdl_mcu_handle_t handle, pdl_mcu_status_t *status)
+int32_t pdl_mcu_get_status(pdl_mcu_handle_t handle, pdl_mcu_status_t *status)
 {
 	uint8_t response[64];
 	int32_t ret;
@@ -295,7 +295,7 @@ int32_t PDL_MCU_get_status(pdl_mcu_handle_t handle, pdl_mcu_status_t *status)
 						  .response = response,
 						  .response_max = sizeof(response) };
 
-	ret = PDL_MCU_send_cmd(handle, &cmd);
+	ret = pdl_mcu_send_cmd(handle, &cmd);
 	if (ret != OSAL_SUCCESS) {
 		return ret;
 	}
@@ -318,7 +318,7 @@ int32_t PDL_MCU_get_status(pdl_mcu_handle_t handle, pdl_mcu_status_t *status)
 /**
  * @brief MCU 复位
  */
-int32_t PDL_MCU_reset(pdl_mcu_handle_t handle)
+int32_t pdl_mcu_reset(pdl_mcu_handle_t handle)
 {
 	uint8_t response[64];
 
@@ -331,13 +331,13 @@ int32_t PDL_MCU_reset(pdl_mcu_handle_t handle)
 						  .response = response,
 						  .response_max = sizeof(response) };
 
-	return PDL_MCU_send_cmd(handle, &cmd);
+	return pdl_mcu_send_cmd(handle, &cmd);
 }
 
 /**
  * @brief 读取 MCU 数据
  */
-int32_t PDL_MCU_read_data(pdl_mcu_handle_t handle, uint32_t addr, uint8_t *data,
+int32_t pdl_mcu_read_data(pdl_mcu_handle_t handle, uint32_t addr, uint8_t *data,
 						  uint32_t size)
 {
 	uint8_t request[8];
@@ -364,7 +364,7 @@ int32_t PDL_MCU_read_data(pdl_mcu_handle_t handle, uint32_t addr, uint8_t *data,
 								 .response = data,
 								 .response_max = size };
 
-	ret = PDL_MCU_send_data(handle, &send_data);
+	ret = pdl_mcu_send_data(handle, &send_data);
 	if (ret != OSAL_SUCCESS) {
 		return ret;
 	}
@@ -375,7 +375,7 @@ int32_t PDL_MCU_read_data(pdl_mcu_handle_t handle, uint32_t addr, uint8_t *data,
 /**
  * @brief 写入 MCU 数据
  */
-int32_t PDL_MCU_write_data(pdl_mcu_handle_t handle, uint32_t addr,
+int32_t pdl_mcu_write_data(pdl_mcu_handle_t handle, uint32_t addr,
 						   const uint8_t *data, uint32_t size)
 {
 	uint8_t request[256];
@@ -394,7 +394,7 @@ int32_t PDL_MCU_write_data(pdl_mcu_handle_t handle, uint32_t addr,
 	request[5] = (size >> 16) & 0xFF;
 	request[6] = (size >> 8) & 0xFF;
 	request[7] = size & 0xFF;
-	OSAL_memcpy(&request[8], data, size);
+	osal_memcpy(&request[8], data, size);
 
 	/* 发送 WRITE_DATA 命令 */
 	pdl_mcu_data_t send_data = { .cmd = PRL_MCU_MSG_WRITE_DATA,
@@ -403,13 +403,13 @@ int32_t PDL_MCU_write_data(pdl_mcu_handle_t handle, uint32_t addr,
 								 .response = response,
 								 .response_max = sizeof(response) };
 
-	return PDL_MCU_send_data(handle, &send_data);
+	return pdl_mcu_send_data(handle, &send_data);
 }
 
 /**
  * @brief 执行 MCU 命令
  */
-int32_t PDL_MCU_send_command(pdl_mcu_handle_t handle, uint8_t cmd_id,
+int32_t pdl_mcu_send_command(pdl_mcu_handle_t handle, uint8_t cmd_id,
 							 const uint8_t *params, uint32_t param_len,
 							 uint8_t *result, uint32_t result_size,
 							 uint32_t *actual_len)
@@ -424,7 +424,7 @@ int32_t PDL_MCU_send_command(pdl_mcu_handle_t handle, uint8_t cmd_id,
 	/* 构造请求 */
 	request[0] = cmd_id;
 	if (params && param_len > 0) {
-		OSAL_memcpy(&request[1], params, param_len);
+		osal_memcpy(&request[1], params, param_len);
 	}
 
 	/* 发送 EXECUTE_CMD 命令 */
@@ -434,7 +434,7 @@ int32_t PDL_MCU_send_command(pdl_mcu_handle_t handle, uint8_t cmd_id,
 								 .response = result,
 								 .response_max = result_size };
 
-	ret = PDL_MCU_send_data(handle, &send_data);
+	ret = pdl_mcu_send_data(handle, &send_data);
 	if (ret == OSAL_SUCCESS && actual_len) {
 		*actual_len = send_data.response_len;
 	}

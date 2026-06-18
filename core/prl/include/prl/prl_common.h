@@ -64,7 +64,7 @@ bool prl_verify_packet_crc(const uint8_t *packet, size_t total_len);
  * @param[in] dev_type 设备类型
  * @return true 有效，false 无效
  */
-bool PRL_IsDeviceTypeValid(uint8_t dev_type);
+bool prl_is_device_type_valid(uint8_t dev_type);
 
 /**
  * @brief 获取设备类型名称
@@ -72,7 +72,7 @@ bool PRL_IsDeviceTypeValid(uint8_t dev_type);
  * @param[in] dev_type 设备类型
  * @return 设备类型名称字符串（静态字符串，无需释放）
  */
-const char *PRL_GetDeviceTypeName(uint8_t dev_type);
+const char *prl_get_device_type_name(uint8_t dev_type);
 
 /**
  * @brief 获取错误码描述
@@ -80,6 +80,6 @@ const char *PRL_GetDeviceTypeName(uint8_t dev_type);
  * @param[in] error_code 错误码（负数）
  * @return 错误码描述字符串
  */
-const char *PRL_GetErrorString(int32_t error_code);
+const char *prl_get_error_string(int32_t error_code);
 
 #endif /* PRL_COMMON_H */

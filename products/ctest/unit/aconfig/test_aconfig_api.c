@@ -11,7 +11,7 @@
 
 static void test_aconfig_get_table(void)
 {
-	const aconfig_config_table_t *table = ACONFIG_GetTable();
+	const aconfig_config_table_t *table = aconfig_get_table();
 
 	TEST_ASSERT_NOT_NULL(table);
 	TEST_ASSERT_EQUAL_STRING("ctest_aconfig", table->name);

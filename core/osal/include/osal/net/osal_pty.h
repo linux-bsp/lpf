@@ -23,7 +23,7 @@ extern "C" {
  * @param[in] winsize_p 窗口大小，可为NULL
  * @return 0成功，-1失败
  */
-int32_t OSAL_openpty(int32_t *master_fd, int32_t *slave_fd, char *name,
+int32_t osal_openpty(int32_t *master_fd, int32_t *slave_fd, char *name,
 					 const void *termios_p, const void *winsize_p);
 
 #ifdef __cplusplus

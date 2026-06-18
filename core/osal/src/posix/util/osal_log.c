@@ -10,7 +10,7 @@
  * - 自动日志轮转
  *
  * 重构说明（v2.0）：
- * - 统一日志函数：使用单一的 OSAL_log_emit() 替代5个独立函数
+ * - 统一日志函数：使用单一的 osal_log_emit() 替代5个独立函数
  * - 编译时优化：支持编译时日志级别过滤（零开销）
  * - 运行时快速路径：使用原子变量进行无锁级别检查
  * - 延迟格式化：只有通过级别检查的日志才进行格式化
@@ -124,7 +124,7 @@ static const char *color_reset = "\033[0m";
  *
  * @return OSAL_SUCCESS 成功
  */
-int32_t OSAL_log_init(const char *log_file_path, int32_t level)
+int32_t osal_log_init(const char *log_file_path, int32_t level)
 {
 	uint32_t i;
 
@@ -162,7 +162,7 @@ int32_t OSAL_log_init(const char *log_file_path, int32_t level)
 /**
  * @brief 关闭日志系统
  */
-void OSAL_log_shutdown(void)
+void osal_log_shutdown(void)
 {
 	pthread_mutex_lock(&g_log_mutex);
 	if (NULL != g_log_file) {
@@ -192,7 +192,7 @@ void OSAL_log_shutdown(void)
  *
  * 使用原子操作，无需加锁，支持运行时动态调整日志级别
  */
-void OSAL_log_set_level(int32_t level)
+void osal_log_set_level(int32_t level)
 {
 	if (level >= LOG_LEVEL_DEBUG && level <= LOG_LEVEL_FATAL) {
 		__atomic_store_n(&g_log_level, level, __ATOMIC_RELAXED);
@@ -202,7 +202,7 @@ void OSAL_log_set_level(int32_t level)
 /**
  * @brief 设置模块日志级别
  */
-void OSAL_log_set_module_level(log_module_t module, int32_t level)
+void osal_log_set_module_level(log_module_t module, int32_t level)
 {
 	if (module < LOG_MODULE_MAX && level >= LOG_LEVEL_DEBUG &&
 		level <= LOG_LEVEL_FATAL) {
@@ -216,7 +216,7 @@ void OSAL_log_set_module_level(log_module_t module, int32_t level)
 /**
  * @brief 获取模块日志级别
  */
-int32_t OSAL_log_get_module_level(log_module_t module)
+int32_t osal_log_get_module_level(log_module_t module)
 {
 	int32_t level;
 
@@ -234,7 +234,7 @@ int32_t OSAL_log_get_module_level(log_module_t module)
 /**
  * @brief 设置日志过滤器
  */
-int32_t OSAL_log_set_filter(const char *pattern)
+int32_t osal_log_set_filter(const char *pattern)
 {
 	int ret;
 	regex_t new_regex;
@@ -271,7 +271,7 @@ int32_t OSAL_log_set_filter(const char *pattern)
 /**
  * @brief 设置日志采样率
  */
-void OSAL_log_set_sampling(uint32_t rate)
+void osal_log_set_sampling(uint32_t rate)
 {
 	if (rate > 0) {
 		pthread_mutex_lock(&g_config_mutex);
@@ -283,7 +283,7 @@ void OSAL_log_set_sampling(uint32_t rate)
 /**
  * @brief 启用远程日志
  */
-int32_t OSAL_log_set_remote(const char *host, uint16_t port)
+int32_t osal_log_set_remote(const char *host, uint16_t port)
 {
 	int sock;
 	struct sockaddr_in addr;
@@ -327,7 +327,7 @@ int32_t OSAL_log_set_remote(const char *host, uint16_t port)
 /**
  * @brief 禁用远程日志
  */
-void OSAL_log_disable_remote(void)
+void osal_log_disable_remote(void)
 {
 	pthread_mutex_lock(&g_config_mutex);
 	if (g_remote_log_enabled && g_remote_log_socket >= 0) {
@@ -341,7 +341,7 @@ void OSAL_log_disable_remote(void)
 /**
  * @brief 获取日志统计信息
  */
-void OSAL_log_get_stats(uint64_t *total_count, uint64_t *dropped_count)
+void osal_log_get_stats(uint64_t *total_count, uint64_t *dropped_count)
 {
 	if (total_count) {
 		*total_count = __sync_fetch_and_add(&g_total_log_count, 0);
@@ -354,7 +354,7 @@ void OSAL_log_get_stats(uint64_t *total_count, uint64_t *dropped_count)
 /**
  * @brief 设置日志文件最大大小
  */
-void OSAL_log_set_max_file_size(uint32_t size_bytes)
+void osal_log_set_max_file_size(uint32_t size_bytes)
 {
 	if (size_bytes > 0) {
 		pthread_mutex_lock(&g_config_mutex);
@@ -366,7 +366,7 @@ void OSAL_log_set_max_file_size(uint32_t size_bytes)
 /**
  * @brief 设置最大日志文件数
  */
-void OSAL_log_set_max_files(uint32_t max_files)
+void osal_log_set_max_files(uint32_t max_files)
 {
 	if (max_files > 0) {
 		pthread_mutex_lock(&g_config_mutex);
@@ -727,7 +727,7 @@ static void log_internal(log_level_t level, const char *module,
 /**
  * @brief 通用日志函数（兼容旧接口）
  */
-void OSAL_log(int32_t level, const char *module, const char *format, ...)
+void osal_log(int32_t level, const char *module, const char *format, ...)
 {
 	va_list args;
 
@@ -758,7 +758,7 @@ void OSAL_log(int32_t level, const char *module, const char *format, ...)
  * @param[in] format 格式化字符串（printf 风格）
  * @param[in] ... 可变参数
  */
-void OSAL_log_emit(int32_t level, const char *module, const char *file,
+void osal_log_emit(int32_t level, const char *module, const char *file,
 				   const char *func, int32_t line, const char *format, ...)
 {
 	va_list args;
@@ -775,7 +775,7 @@ void OSAL_log_emit(int32_t level, const char *module, const char *file,
 /**
  * @brief 简单打印（不带日志级别和模块名）
  */
-void OSAL_printf(const char *format, ...)
+void osal_printf(const char *format, ...)
 {
 	char buffer[OSAL_LOG_MESSAGE_SIZE];
 	va_list args;
@@ -796,7 +796,7 @@ void OSAL_printf(const char *format, ...)
 /**
  * @brief 结构化日志函数
  */
-void OSAL_log_structured(int32_t level, log_module_t module,
+void osal_log_structured(int32_t level, log_module_t module,
 						 const char *message, const log_kv_pair_t *kv_pairs,
 						 uint32_t kv_count)
 {
