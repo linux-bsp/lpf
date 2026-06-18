@@ -21,7 +21,7 @@
  * GPIO 使用全局锁，所有 GPIO 操作共享同一个文件锁
  * 示例：/var/lock/hal_gpio.lock
  */
-#define HAL_GPIO_LOCK_PATH       OSAL_LOCK_DIR "/hal_gpio.lock"
+#define HAL_GPIO_LOCK_PATH OSAL_LOCK_DIR "/hal_gpio.lock"
 
 /**
  * @brief GPIO 驱动文件锁超时时间（毫秒）
@@ -35,15 +35,15 @@
 /**
  * @brief sysfs GPIO路径定义
  */
-#define HAL_GPIO_SYSFS_BASE      "/sys/class/gpio"
-#define HAL_GPIO_EXPORT_PATH     HAL_GPIO_SYSFS_BASE "/export"
-#define HAL_GPIO_UNEXPORT_PATH   HAL_GPIO_SYSFS_BASE "/unexport"
-#define HAL_GPIO_PATH_FMT        HAL_GPIO_SYSFS_BASE "/gpio%u"
+#define HAL_GPIO_SYSFS_BASE "/sys/class/gpio"
+#define HAL_GPIO_EXPORT_PATH HAL_GPIO_SYSFS_BASE "/export"
+#define HAL_GPIO_UNEXPORT_PATH HAL_GPIO_SYSFS_BASE "/unexport"
+#define HAL_GPIO_PATH_FMT HAL_GPIO_SYSFS_BASE "/gpio%u"
 
 /**
  * @brief GPIO sysfs文件路径最大长度
  */
-#define HAL_GPIO_PATH_MAX        0x100
+#define HAL_GPIO_PATH_MAX 0x100
 
 /*===========================================================================
  * 内部数据结构
@@ -54,15 +54,14 @@
  *
  * 用于管理GPIO中断监听线程和回调函数
  */
-typedef struct
-{
-	uint32_t gpio_num;                   /* GPIO引脚号 */
-	hal_gpio_edge_t edge;                /* 中断触发模式 */
-	hal_gpio_isr_callback_t callback;    /* 中断回调函数 */
-	void *user_data;                     /* 用户数据 */
-	osal_thread_t thread;                    /* 中断监听线程 */
-	bool running;                        /* 运行标志 */
-	int32_t value_fd;                    /* value文件描述符 */
+typedef struct {
+    uint32_t gpio_num;                /* GPIO引脚号 */
+    hal_gpio_edge_t edge;             /* 中断触发模式 */
+    hal_gpio_isr_callback_t callback; /* 中断回调函数 */
+    void *user_data;                  /* 用户数据 */
+    osal_thread_t thread;             /* 中断监听线程 */
+    bool running;                     /* 运行标志 */
+    int32_t value_fd;                 /* value文件描述符 */
 } hal_gpio_isr_context_t;
 
 /**

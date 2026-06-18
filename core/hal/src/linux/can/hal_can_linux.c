@@ -35,8 +35,7 @@ int32_t HAL_CAN_init(const hal_can_config_t *config, hal_can_handle_t *handle)
         return OSAL_ERR_NAME_TOO_LONG;
 
     impl = (hal_can_context_t *)OSAL_malloc(OSAL_sizeof(hal_can_context_t));
-    if (NULL == impl)
-    {
+    if (NULL == impl) {
         LOG_ERROR("HAL_CAN", "Failed to allocate memory");
         return OSAL_ERR_NO_MEMORY;
     }
@@ -49,10 +48,12 @@ int32_t HAL_CAN_init(const hal_can_config_t *config, hal_can_handle_t *handle)
 
     /* 创建文件锁（进程间保护） */
     char lock_file[OSAL_LOCK_PATH_MAX_LEN];
-    OSAL_snprintf(lock_file, OSAL_sizeof(lock_file), HAL_CAN_LOCK_PATH_FMT, config->interface);
+    OSAL_snprintf(lock_file,
+                  OSAL_sizeof(lock_file),
+                  HAL_CAN_LOCK_PATH_FMT,
+                  config->interface);
     ret = OSAL_flock_create(lock_file, &impl->flock);
-    if (ret != OSAL_SUCCESS)
-    {
+    if (ret != OSAL_SUCCESS) {
         LOG_ERROR("HAL_CAN", "Failed to create file lock: %s", lock_file);
         OSAL_free(impl);
         return ret;
@@ -60,8 +61,7 @@ int32_t HAL_CAN_init(const hal_can_config_t *config, hal_can_handle_t *handle)
 
     /* 创建互斥锁（线程间保护） */
     ret = OSAL_pthread_mutex_init(&impl->mutex, NULL);
-    if (ret != OSAL_SUCCESS)
-    {
+    if (ret != OSAL_SUCCESS) {
         LOG_ERROR("HAL_CAN", "Failed to create mutex");
         OSAL_flock_destroy(impl->flock);
         OSAL_free(impl);
@@ -69,11 +69,12 @@ int32_t HAL_CAN_init(const hal_can_config_t *config, hal_can_handle_t *handle)
     }
 
     impl->sockfd = OSAL_socket(OSAL_PF_CAN, OSAL_SOCK_RAW, OSAL_CAN_RAW);
-    if (impl->sockfd < 0)
-    {
+    if (impl->sockfd < 0) {
         int32_t err = OSAL_get_errno();
-        LOG_ERROR("HAL_CAN", "Failed to create socket: %s (%d)",
-                  OSAL_strerror(err), err);
+        LOG_ERROR("HAL_CAN",
+                  "Failed to create socket: %s (%d)",
+                  OSAL_strerror(err),
+                  err);
         OSAL_pthread_mutex_destroy(&impl->mutex);
         OSAL_flock_destroy(impl->flock);
         OSAL_free(impl);
@@ -83,11 +84,13 @@ int32_t HAL_CAN_init(const hal_can_config_t *config, hal_can_handle_t *handle)
     OSAL_memset(&ifr, 0, OSAL_sizeof(ifr));
     OSAL_strncpy(ifr.ifr_name, config->interface, IFNAMSIZ - 1);
     ret = OSAL_ioctl(impl->sockfd, SIOCGIFINDEX, &ifr);
-    if (ret < 0)
-    {
+    if (ret < 0) {
         int32_t err = OSAL_get_errno();
-        LOG_ERROR("HAL_CAN", "Interface %s not found: %s (%d)",
-                  config->interface, OSAL_strerror(err), err);
+        LOG_ERROR("HAL_CAN",
+                  "Interface %s not found: %s (%d)",
+                  config->interface,
+                  OSAL_strerror(err),
+                  err);
         OSAL_close(impl->sockfd);
         OSAL_pthread_mutex_destroy(&impl->mutex);
         OSAL_flock_destroy(impl->flock);
@@ -99,12 +102,15 @@ int32_t HAL_CAN_init(const hal_can_config_t *config, hal_can_handle_t *handle)
     addr.can_family = OSAL_AF_CAN;
     addr.can_ifindex = ifr.ifr_ifindex;
 
-    ret = OSAL_bind(impl->sockfd, (const osal_sockaddr_t *)&addr, OSAL_sizeof(addr));
-    if (ret < 0)
-    {
+    ret = OSAL_bind(impl->sockfd,
+                    (const osal_sockaddr_t *)&addr,
+                    OSAL_sizeof(addr));
+    if (ret < 0) {
         int32_t err = OSAL_get_errno();
-        LOG_ERROR("HAL_CAN", "Failed to bind interface: %s (%d)",
-                  OSAL_strerror(err), err);
+        LOG_ERROR("HAL_CAN",
+                  "Failed to bind interface: %s (%d)",
+                  OSAL_strerror(err),
+                  err);
         OSAL_close(impl->sockfd);
         OSAL_pthread_mutex_destroy(&impl->mutex);
         OSAL_flock_destroy(impl->flock);
@@ -112,27 +118,36 @@ int32_t HAL_CAN_init(const hal_can_config_t *config, hal_can_handle_t *handle)
         return err;
     }
 
-    if (config->rx_timeout > 0)
-    {
+    if (config->rx_timeout > 0) {
         struct timeval tv;
         tv.tv_sec = config->rx_timeout / 1000;
         tv.tv_usec = (config->rx_timeout % 1000) * 1000;
-        OSAL_setsockopt(impl->sockfd, OSAL_SOL_SOCKET, OSAL_SO_RCVTIMEO, &tv, OSAL_sizeof(tv));
+        OSAL_setsockopt(impl->sockfd,
+                        OSAL_SOL_SOCKET,
+                        OSAL_SO_RCVTIMEO,
+                        &tv,
+                        OSAL_sizeof(tv));
     }
 
-    if (config->tx_timeout > 0)
-    {
+    if (config->tx_timeout > 0) {
         struct timeval tv;
         tv.tv_sec = config->tx_timeout / 1000;
         tv.tv_usec = (config->tx_timeout % 1000) * 1000;
-        OSAL_setsockopt(impl->sockfd, OSAL_SOL_SOCKET, OSAL_SO_SNDTIMEO, &tv, OSAL_sizeof(tv));
+        OSAL_setsockopt(impl->sockfd,
+                        OSAL_SOL_SOCKET,
+                        OSAL_SO_SNDTIMEO,
+                        &tv,
+                        OSAL_sizeof(tv));
     }
 
     impl->initialized = true;
     *handle = (hal_can_handle_t)impl;
 
-    LOG_INFO("HAL_CAN", "Initialized successfully: %s @ %u bps (with dual-lock protection)",
-             config->interface, config->baudrate);
+    LOG_INFO(
+        "HAL_CAN",
+        "Initialized successfully: %s @ %u bps (with dual-lock protection)",
+        config->interface,
+        config->baudrate);
     return OSAL_SUCCESS;
 }
 
@@ -143,8 +158,7 @@ int32_t HAL_CAN_deinit(hal_can_handle_t handle)
     if (NULL == impl)
         return OSAL_ERR_INVALID_ID;
 
-    if (impl->initialized && impl->sockfd >= 0)
-    {
+    if (impl->initialized && impl->sockfd >= 0) {
         OSAL_close(impl->sockfd);
         impl->sockfd = -1;
     }
@@ -152,8 +166,7 @@ int32_t HAL_CAN_deinit(hal_can_handle_t handle)
     /* 销毁锁 */
     OSAL_pthread_mutex_destroy(&impl->mutex);
 
-    if (impl->flock)
-    {
+    if (impl->flock) {
         OSAL_flock_destroy(impl->flock);
     }
 
@@ -177,24 +190,23 @@ int32_t HAL_CAN_send(hal_can_handle_t handle, const hal_can_frame_t *frame)
     if (!impl->initialized || impl->sockfd < 0)
         return OSAL_ERR_INVALID_ID;
 
-    if (frame->dlc > 8)
-    {
+    if (frame->dlc > 8) {
         LOG_ERROR("HAL_CAN", "Invalid DLC: %u", frame->dlc);
         return OSAL_ERR_GENERIC;
     }
 
     /* 第一层：文件锁（进程间保护） */
-    ret = OSAL_flock_timed_lock(impl->flock, OSAL_FLOCK_EXCLUSIVE, HAL_CAN_LOCK_TIMEOUT_MS);
-    if (ret != OSAL_SUCCESS)
-    {
+    ret = OSAL_flock_timed_lock(impl->flock,
+                                OSAL_FLOCK_EXCLUSIVE,
+                                HAL_CAN_LOCK_TIMEOUT_MS);
+    if (ret != OSAL_SUCCESS) {
         LOG_ERROR("HAL_CAN", "Failed to acquire file lock (timeout or error)");
         return ret;
     }
 
     /* 第二层：互斥锁（线程间保护） */
     ret = OSAL_pthread_mutex_lock(&impl->mutex);
-    if (ret != OSAL_SUCCESS)
-    {
+    if (ret != OSAL_SUCCESS) {
         LOG_ERROR("HAL_CAN", "Failed to acquire mutex");
         OSAL_flock_unlock(impl->flock);
         return ret;
@@ -207,11 +219,9 @@ int32_t HAL_CAN_send(hal_can_handle_t handle, const hal_can_frame_t *frame)
     OSAL_memcpy(can_frame.data, frame->data, frame->dlc);
 
     ret = OSAL_write(impl->sockfd, &can_frame, OSAL_sizeof(struct can_frame));
-    if (ret != OSAL_sizeof(struct can_frame))
-    {
+    if (ret != OSAL_sizeof(struct can_frame)) {
         int32_t err = OSAL_get_errno();
-        LOG_ERROR("HAL_CAN", "Send failed: %s (%d)",
-                  OSAL_strerror(err), err);
+        LOG_ERROR("HAL_CAN", "Send failed: %s (%d)", OSAL_strerror(err), err);
         result = err;
     }
 
@@ -222,7 +232,8 @@ int32_t HAL_CAN_send(hal_can_handle_t handle, const hal_can_frame_t *frame)
     return result;
 }
 
-int32_t HAL_CAN_recv(hal_can_handle_t handle, hal_can_frame_t *frame, int32_t timeout)
+int32_t
+HAL_CAN_recv(hal_can_handle_t handle, hal_can_frame_t *frame, int32_t timeout)
 {
     hal_can_context_t *impl = (hal_can_context_t *)handle;
     struct can_frame can_frame;
@@ -239,8 +250,7 @@ int32_t HAL_CAN_recv(hal_can_handle_t handle, hal_can_frame_t *frame, int32_t ti
      * 注意：poll 等待期间不应持有锁，否则会阻塞其他进程/线程
      * 策略：先 poll，有数据后再加锁读取
      */
-    if (timeout >= 0)
-    {
+    if (timeout >= 0) {
         osal_pollfd_t pfd = {
             .fd = impl->sockfd,
             .events = OSAL_POLLIN,
@@ -249,27 +259,28 @@ int32_t HAL_CAN_recv(hal_can_handle_t handle, hal_can_frame_t *frame, int32_t ti
         int32_t poll_ret = OSAL_poll(&pfd, 1, timeout);
         if (poll_ret == 0)
             return OSAL_ERR_TIMEOUT;
-        else if (poll_ret < 0)
-        {
+        else if (poll_ret < 0) {
             int32_t err = OSAL_get_errno();
-            LOG_ERROR("HAL_CAN", "Poll failed: %s (%d)",
-                      OSAL_strerror(err), err);
+            LOG_ERROR("HAL_CAN",
+                      "Poll failed: %s (%d)",
+                      OSAL_strerror(err),
+                      err);
             return err;
         }
     }
 
     /* 第一层：文件锁（进程间保护） */
-    ret = OSAL_flock_timed_lock(impl->flock, OSAL_FLOCK_EXCLUSIVE, HAL_CAN_LOCK_TIMEOUT_MS);
-    if (ret != OSAL_SUCCESS)
-    {
+    ret = OSAL_flock_timed_lock(impl->flock,
+                                OSAL_FLOCK_EXCLUSIVE,
+                                HAL_CAN_LOCK_TIMEOUT_MS);
+    if (ret != OSAL_SUCCESS) {
         LOG_ERROR("HAL_CAN", "Failed to acquire file lock (timeout or error)");
         return ret;
     }
 
     /* 第二层：互斥锁（线程间保护） */
     ret = OSAL_pthread_mutex_lock(&impl->mutex);
-    if (ret != OSAL_SUCCESS)
-    {
+    if (ret != OSAL_SUCCESS) {
         LOG_ERROR("HAL_CAN", "Failed to acquire mutex");
         OSAL_flock_unlock(impl->flock);
         return ret;
@@ -277,27 +288,24 @@ int32_t HAL_CAN_recv(hal_can_handle_t handle, hal_can_frame_t *frame, int32_t ti
 
     /* 临界区：读取数据 */
     ret = OSAL_read(impl->sockfd, &can_frame, OSAL_sizeof(struct can_frame));
-    if (ret < 0)
-    {
+    if (ret < 0) {
         int32_t err = OSAL_get_errno();
-        if (err == OSAL_EAGAIN || err == OSAL_EWOULDBLOCK)
-        {
+        if (err == OSAL_EAGAIN || err == OSAL_EWOULDBLOCK) {
             result = OSAL_ERR_TIMEOUT;
-        }
-        else
-        {
-            LOG_ERROR("HAL_CAN", "Receive failed: %s (%d)",
-                      OSAL_strerror(err), err);
+        } else {
+            LOG_ERROR("HAL_CAN",
+                      "Receive failed: %s (%d)",
+                      OSAL_strerror(err),
+                      err);
             result = err;
         }
-    }
-    else if (ret != OSAL_sizeof(struct can_frame))
-    {
-        LOG_ERROR("HAL_CAN", "Incomplete receive: %d/%u bytes", (int32_t)ret, (uint32_t)OSAL_sizeof(struct can_frame));
+    } else if (ret != OSAL_sizeof(struct can_frame)) {
+        LOG_ERROR("HAL_CAN",
+                  "Incomplete receive: %d/%u bytes",
+                  (int32_t)ret,
+                  (uint32_t)OSAL_sizeof(struct can_frame));
         result = OSAL_ERR_GENERIC;
-    }
-    else
-    {
+    } else {
         OSAL_memset(frame, 0, OSAL_sizeof(hal_can_frame_t));
         frame->can_id = can_frame.can_id;
         frame->dlc = (can_frame.can_dlc > 8) ? 8 : can_frame.can_dlc;
@@ -313,7 +321,9 @@ int32_t HAL_CAN_recv(hal_can_handle_t handle, hal_can_frame_t *frame, int32_t ti
     return result;
 }
 
-int32_t HAL_CAN_set_filter(hal_can_handle_t handle, uint32_t filter_id, uint32_t filter_mask)
+int32_t HAL_CAN_set_filter(hal_can_handle_t handle,
+                           uint32_t filter_id,
+                           uint32_t filter_mask)
 {
     hal_can_context_t *impl = (hal_can_context_t *)handle;
     struct can_filter rfilter;
@@ -327,17 +337,17 @@ int32_t HAL_CAN_set_filter(hal_can_handle_t handle, uint32_t filter_id, uint32_t
         return OSAL_ERR_INVALID_ID;
 
     /* 第一层：文件锁（进程间保护） */
-    ret = OSAL_flock_timed_lock(impl->flock, OSAL_FLOCK_EXCLUSIVE, HAL_CAN_LOCK_TIMEOUT_MS);
-    if (ret != OSAL_SUCCESS)
-    {
+    ret = OSAL_flock_timed_lock(impl->flock,
+                                OSAL_FLOCK_EXCLUSIVE,
+                                HAL_CAN_LOCK_TIMEOUT_MS);
+    if (ret != OSAL_SUCCESS) {
         LOG_ERROR("HAL_CAN", "Failed to acquire file lock (timeout or error)");
         return ret;
     }
 
     /* 第二层：互斥锁（线程间保护） */
     ret = OSAL_pthread_mutex_lock(&impl->mutex);
-    if (ret != OSAL_SUCCESS)
-    {
+    if (ret != OSAL_SUCCESS) {
         LOG_ERROR("HAL_CAN", "Failed to acquire mutex");
         OSAL_flock_unlock(impl->flock);
         return ret;
@@ -347,16 +357,22 @@ int32_t HAL_CAN_set_filter(hal_can_handle_t handle, uint32_t filter_id, uint32_t
     rfilter.can_id = filter_id;
     rfilter.can_mask = filter_mask;
 
-    if (OSAL_setsockopt(impl->sockfd, OSAL_SOL_CAN_RAW, CAN_RAW_FILTER, &rfilter, OSAL_sizeof(rfilter)) < 0)
-    {
+    if (OSAL_setsockopt(impl->sockfd,
+                        OSAL_SOL_CAN_RAW,
+                        CAN_RAW_FILTER,
+                        &rfilter,
+                        OSAL_sizeof(rfilter)) < 0) {
         int32_t err = OSAL_get_errno();
-        LOG_ERROR("HAL_CAN", "Failed to set filter: %s (%d)",
-                  OSAL_strerror(err), err);
+        LOG_ERROR("HAL_CAN",
+                  "Failed to set filter: %s (%d)",
+                  OSAL_strerror(err),
+                  err);
         result = err;
-    }
-    else
-    {
-        LOG_INFO("HAL_CAN", "Filter set: ID=0x%X, Mask=0x%X", filter_id, filter_mask);
+    } else {
+        LOG_INFO("HAL_CAN",
+                 "Filter set: ID=0x%X, Mask=0x%X",
+                 filter_id,
+                 filter_mask);
     }
 
     /* 释放锁（逆序） */

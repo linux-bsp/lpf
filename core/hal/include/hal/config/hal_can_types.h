@@ -15,12 +15,11 @@
  * ============================================================================
  */
 
-typedef struct
-{
-    uint32_t     can_id;      /* CAN标识符 */
-    uint8_t      dlc;         /* 数据长度 (0-8) */
-    uint8_t      data[8];     /* 数据字节 */
-    uint32_t     timestamp;   /* 时间戳 (可选) */
+typedef struct {
+    uint32_t can_id;    /* CAN标识符 */
+    uint8_t dlc;        /* 数据长度 (0-8) */
+    uint8_t data[8];    /* 数据字节 */
+    uint32_t timestamp; /* 时间戳 (可选) */
 } hal_can_frame_t;
 
 /*
@@ -30,12 +29,12 @@ typedef struct
  */
 
 /* CAN默认接口 */
-#define HAL_CAN_DEFAULT_INTERFACE    "can0"
+#define HAL_CAN_DEFAULT_INTERFACE "can0"
 
 /* CAN默认波特率 */
-#define HAL_CAN_DEFAULT_BAUDRATE     500000  /* 500Kbps */
+#define HAL_CAN_DEFAULT_BAUDRATE 500000 /* 500Kbps */
 
 /* CAN消息最大长度 */
-#define HAL_CAN_MAX_DATA_LEN         8
+#define HAL_CAN_MAX_DATA_LEN 8
 
 #endif /* HAL_CAN_TYPES_H */

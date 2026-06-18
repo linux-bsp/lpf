@@ -20,7 +20,7 @@ extern "C" {
  *
  * 所有HAL模块的句柄类型都是void*指针，实际指向内部上下文结构
  */
-typedef void* hal_handle_t;
+typedef void *hal_handle_t;
 
 /*===========================================================================
  * 配置结构基类
@@ -32,7 +32,7 @@ typedef void* hal_handle_t;
  * 各个模块的配置结构可以继承此基类（虽然C不支持继承，但可以作为约定）
  */
 typedef struct {
-	uint32_t reserved;  /* 保留字段 */
+    uint32_t reserved; /* 保留字段 */
 } hal_config_base_t;
 
 #ifdef __cplusplus

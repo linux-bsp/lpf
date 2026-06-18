@@ -16,9 +16,9 @@
 /*
  * HAL 版本信息
  */
-#define HAL_VERSION_MAJOR  0x01
-#define HAL_VERSION_MINOR  0x00
-#define HAL_VERSION_PATCH  0x00
+#define HAL_VERSION_MAJOR 0x01
+#define HAL_VERSION_MINOR 0x00
+#define HAL_VERSION_PATCH 0x00
 
 /* 基础类型定义 - 所有 HAL 模块都需要 */
 #include "hal_types.h"

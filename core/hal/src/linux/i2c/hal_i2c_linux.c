@@ -31,8 +31,7 @@ int32_t HAL_I2C_open(const hal_i2c_config_t *config, hal_i2c_handle_t *handle)
 
     /* 分配句柄 */
     impl = (hal_i2c_context_t *)OSAL_malloc(OSAL_sizeof(hal_i2c_context_t));
-    if (NULL == impl)
-    {
+    if (NULL == impl) {
         LOG_ERROR("HAL_I2C", "Failed to allocate memory");
         return OSAL_ERR_NO_MEMORY;
     }
@@ -48,27 +47,28 @@ int32_t HAL_I2C_open(const hal_i2c_config_t *config, hal_i2c_handle_t *handle)
     /* 从设备路径提取总线号，例如 /dev/i2c-0 -> 0 */
     const char *dev_name = config->device;
     const char *slash = config->device;
-    while (*slash)
-    {
+    while (*slash) {
         if (*slash == '/')
             dev_name = slash + 1;
         slash++;
     }
     /* 提取数字部分，例如 i2c-0 -> 0 */
     int bus_num = 0;
-    if (OSAL_sscanf(dev_name, "i2c-%d", &bus_num) == 1)
-    {
-        OSAL_snprintf(lock_file, OSAL_sizeof(lock_file), HAL_I2C_LOCK_PATH_FMT, bus_num);
-    }
-    else
-    {
+    if (OSAL_sscanf(dev_name, "i2c-%d", &bus_num) == 1) {
+        OSAL_snprintf(lock_file,
+                      OSAL_sizeof(lock_file),
+                      HAL_I2C_LOCK_PATH_FMT,
+                      bus_num);
+    } else {
         /* 如果无法解析，使用设备名 */
-        OSAL_snprintf(lock_file, OSAL_sizeof(lock_file), OSAL_LOCK_DIR "/hal_i2c_%s.lock", dev_name);
+        OSAL_snprintf(lock_file,
+                      OSAL_sizeof(lock_file),
+                      OSAL_LOCK_DIR "/hal_i2c_%s.lock",
+                      dev_name);
     }
 
     ret = OSAL_flock_create(lock_file, &impl->flock);
-    if (ret != OSAL_SUCCESS)
-    {
+    if (ret != OSAL_SUCCESS) {
         LOG_ERROR("HAL_I2C", "Failed to create file lock: %s", lock_file);
         OSAL_free(impl);
         return ret;
@@ -76,8 +76,7 @@ int32_t HAL_I2C_open(const hal_i2c_config_t *config, hal_i2c_handle_t *handle)
 
     /* 创建互斥锁（线程间保护） */
     ret = OSAL_pthread_mutex_init(&impl->mutex, NULL);
-    if (ret != OSAL_SUCCESS)
-    {
+    if (ret != OSAL_SUCCESS) {
         LOG_ERROR("HAL_I2C", "Failed to create mutex");
         OSAL_flock_destroy(impl->flock);
         OSAL_free(impl);
@@ -86,11 +85,13 @@ int32_t HAL_I2C_open(const hal_i2c_config_t *config, hal_i2c_handle_t *handle)
 
     /* 打开I2C设备（不使用 O_EXCL，由文件锁保护） */
     impl->fd = OSAL_open(config->device, OSAL_O_RDWR, 0);
-    if (impl->fd < 0)
-    {
+    if (impl->fd < 0) {
         int32_t err = OSAL_get_errno();
-        LOG_ERROR("HAL_I2C", "Failed to open device %s: %s (%d)",
-                  config->device, OSAL_strerror(err), err);
+        LOG_ERROR("HAL_I2C",
+                  "Failed to open device %s: %s (%d)",
+                  config->device,
+                  OSAL_strerror(err),
+                  err);
         OSAL_pthread_mutex_destroy(&impl->mutex);
         OSAL_flock_destroy(impl->flock);
         OSAL_free(impl);
@@ -100,7 +101,10 @@ int32_t HAL_I2C_open(const hal_i2c_config_t *config, hal_i2c_handle_t *handle)
     impl->initialized = true;
     *handle = (hal_i2c_handle_t)impl;
 
-    LOG_INFO("HAL_I2C", "Opened device %s (fd=%d, with dual-lock protection)", config->device, impl->fd);
+    LOG_INFO("HAL_I2C",
+             "Opened device %s (fd=%d, with dual-lock protection)",
+             config->device,
+             impl->fd);
     return OSAL_SUCCESS;
 }
 
@@ -117,8 +121,7 @@ int32_t HAL_I2C_close(hal_i2c_handle_t handle)
     if (!impl->initialized)
         return OSAL_ERR_GENERIC;
 
-    if (impl->fd >= 0)
-    {
+    if (impl->fd >= 0) {
         OSAL_close(impl->fd);
         impl->fd = -1;
     }
@@ -128,8 +131,7 @@ int32_t HAL_I2C_close(hal_i2c_handle_t handle)
     /* 销毁锁 */
     OSAL_pthread_mutex_destroy(&impl->mutex);
 
-    if (impl->flock)
-    {
+    if (impl->flock) {
         OSAL_flock_destroy(impl->flock);
     }
 
@@ -142,8 +144,10 @@ int32_t HAL_I2C_close(hal_i2c_handle_t handle)
 /**
  * @brief 写入数据到I2C从设备
  */
-int32_t HAL_I2C_write(hal_i2c_handle_t handle, uint16_t slave_addr,
-                      const uint8_t *buffer, uint32_t size)
+int32_t HAL_I2C_write(hal_i2c_handle_t handle,
+                      uint16_t slave_addr,
+                      const uint8_t *buffer,
+                      uint32_t size)
 {
     hal_i2c_context_t *impl = (hal_i2c_context_t *)handle;
     int32_t ret;
@@ -156,17 +160,17 @@ int32_t HAL_I2C_write(hal_i2c_handle_t handle, uint16_t slave_addr,
         return OSAL_ERR_GENERIC;
 
     /* 第一层：文件锁（进程间保护） */
-    ret = OSAL_flock_timed_lock(impl->flock, OSAL_FLOCK_EXCLUSIVE, HAL_I2C_LOCK_TIMEOUT_MS);
-    if (ret != OSAL_SUCCESS)
-    {
+    ret = OSAL_flock_timed_lock(impl->flock,
+                                OSAL_FLOCK_EXCLUSIVE,
+                                HAL_I2C_LOCK_TIMEOUT_MS);
+    if (ret != OSAL_SUCCESS) {
         LOG_ERROR("HAL_I2C", "Failed to acquire file lock (timeout or error)");
         return ret;
     }
 
     /* 第二层：互斥锁（线程间保护） */
     ret = OSAL_pthread_mutex_lock(&impl->mutex);
-    if (ret != OSAL_SUCCESS)
-    {
+    if (ret != OSAL_SUCCESS) {
         LOG_ERROR("HAL_I2C", "Failed to acquire mutex");
         OSAL_flock_unlock(impl->flock);
         return ret;
@@ -175,28 +179,27 @@ int32_t HAL_I2C_write(hal_i2c_handle_t handle, uint16_t slave_addr,
     /* 临界区：硬件访问 */
     /* 设置从设备地址 (参考: Linux内核文档 i2c-dev.txt) */
     ret = OSAL_ioctl(impl->fd, I2C_SLAVE, (void *)(uintptr_t)slave_addr);
-    if (ret < 0)
-    {
+    if (ret < 0) {
         int32_t err = OSAL_get_errno();
-        LOG_ERROR("HAL_I2C", "Failed to set slave address 0x%02X: %s (%d)",
-                  slave_addr, OSAL_strerror(err), err);
+        LOG_ERROR("HAL_I2C",
+                  "Failed to set slave address 0x%02X: %s (%d)",
+                  slave_addr,
+                  OSAL_strerror(err),
+                  err);
         result = err;
         goto unlock;
     }
 
     /* 写入数据 */
     ret = OSAL_write(impl->fd, buffer, size);
-    if (ret < 0)
-    {
+    if (ret < 0) {
         int32_t err = OSAL_get_errno();
-        LOG_ERROR("HAL_I2C", "Write failed: %s (%d)",
-                  OSAL_strerror(err), err);
+        LOG_ERROR("HAL_I2C", "Write failed: %s (%d)", OSAL_strerror(err), err);
         result = err;
         goto unlock;
     }
 
-    if ((uint32_t)ret != size)
-    {
+    if ((uint32_t)ret != size) {
         LOG_ERROR("HAL_I2C", "Partial write: %d/%u bytes", ret, size);
         result = OSAL_ERR_GENERIC;
     }
@@ -212,8 +215,10 @@ unlock:
 /**
  * @brief 从I2C从设备读取数据
  */
-int32_t HAL_I2C_read(hal_i2c_handle_t handle, uint16_t slave_addr,
-                     uint8_t *buffer, uint32_t size)
+int32_t HAL_I2C_read(hal_i2c_handle_t handle,
+                     uint16_t slave_addr,
+                     uint8_t *buffer,
+                     uint32_t size)
 {
     hal_i2c_context_t *impl = (hal_i2c_context_t *)handle;
     int32_t ret;
@@ -226,17 +231,17 @@ int32_t HAL_I2C_read(hal_i2c_handle_t handle, uint16_t slave_addr,
         return OSAL_ERR_GENERIC;
 
     /* 第一层：文件锁（进程间保护） */
-    ret = OSAL_flock_timed_lock(impl->flock, OSAL_FLOCK_EXCLUSIVE, HAL_I2C_LOCK_TIMEOUT_MS);
-    if (ret != OSAL_SUCCESS)
-    {
+    ret = OSAL_flock_timed_lock(impl->flock,
+                                OSAL_FLOCK_EXCLUSIVE,
+                                HAL_I2C_LOCK_TIMEOUT_MS);
+    if (ret != OSAL_SUCCESS) {
         LOG_ERROR("HAL_I2C", "Failed to acquire file lock (timeout or error)");
         return ret;
     }
 
     /* 第二层：互斥锁（线程间保护） */
     ret = OSAL_pthread_mutex_lock(&impl->mutex);
-    if (ret != OSAL_SUCCESS)
-    {
+    if (ret != OSAL_SUCCESS) {
         LOG_ERROR("HAL_I2C", "Failed to acquire mutex");
         OSAL_flock_unlock(impl->flock);
         return ret;
@@ -245,28 +250,27 @@ int32_t HAL_I2C_read(hal_i2c_handle_t handle, uint16_t slave_addr,
     /* 临界区：硬件访问 */
     /* 设置从设备地址 */
     ret = OSAL_ioctl(impl->fd, I2C_SLAVE, (void *)(uintptr_t)slave_addr);
-    if (ret < 0)
-    {
+    if (ret < 0) {
         int32_t err = OSAL_get_errno();
-        LOG_ERROR("HAL_I2C", "Failed to set slave address 0x%02X: %s (%d)",
-                  slave_addr, OSAL_strerror(err), err);
+        LOG_ERROR("HAL_I2C",
+                  "Failed to set slave address 0x%02X: %s (%d)",
+                  slave_addr,
+                  OSAL_strerror(err),
+                  err);
         result = err;
         goto unlock;
     }
 
     /* 读取数据 */
     ret = OSAL_read(impl->fd, buffer, size);
-    if (ret < 0)
-    {
+    if (ret < 0) {
         int32_t err = OSAL_get_errno();
-        LOG_ERROR("HAL_I2C", "Read failed: %s (%d)",
-                  OSAL_strerror(err), err);
+        LOG_ERROR("HAL_I2C", "Read failed: %s (%d)", OSAL_strerror(err), err);
         result = err;
         goto unlock;
     }
 
-    if ((uint32_t)ret != size)
-    {
+    if ((uint32_t)ret != size) {
         LOG_ERROR("HAL_I2C", "Partial read: %d/%u bytes", ret, size);
         result = OSAL_ERR_GENERIC;
     }
@@ -282,8 +286,11 @@ unlock:
 /**
  * @brief 写寄存器操作
  */
-int32_t HAL_I2C_write_reg(hal_i2c_handle_t handle, uint16_t slave_addr,
-                         uint8_t reg_addr, const uint8_t *buffer, uint32_t size)
+int32_t HAL_I2C_write_reg(hal_i2c_handle_t handle,
+                          uint16_t slave_addr,
+                          uint8_t reg_addr,
+                          const uint8_t *buffer,
+                          uint32_t size)
 {
     hal_i2c_context_t *impl = (hal_i2c_context_t *)handle;
     uint8_t *write_buf;
@@ -297,8 +304,7 @@ int32_t HAL_I2C_write_reg(hal_i2c_handle_t handle, uint16_t slave_addr,
 
     /* 分配临时缓冲区: [寄存器地址][数据] */
     write_buf = (uint8_t *)OSAL_malloc(size + 1);
-    if (NULL == write_buf)
-    {
+    if (NULL == write_buf) {
         LOG_ERROR("HAL_I2C", "Failed to allocate write buffer");
         return OSAL_ERR_NO_MEMORY;
     }
@@ -316,8 +322,11 @@ int32_t HAL_I2C_write_reg(hal_i2c_handle_t handle, uint16_t slave_addr,
 /**
  * @brief 读寄存器操作
  */
-int32_t HAL_I2C_read_reg(hal_i2c_handle_t handle, uint16_t slave_addr,
-                        uint8_t reg_addr, uint8_t *buffer, uint32_t size)
+int32_t HAL_I2C_read_reg(hal_i2c_handle_t handle,
+                         uint16_t slave_addr,
+                         uint8_t reg_addr,
+                         uint8_t *buffer,
+                         uint32_t size)
 {
     hal_i2c_context_t *impl = (hal_i2c_context_t *)handle;
     struct i2c_msg msgs[2];
@@ -332,17 +341,17 @@ int32_t HAL_I2C_read_reg(hal_i2c_handle_t handle, uint16_t slave_addr,
         return OSAL_ERR_GENERIC;
 
     /* 第一层：文件锁（进程间保护） */
-    ret = OSAL_flock_timed_lock(impl->flock, OSAL_FLOCK_EXCLUSIVE, HAL_I2C_LOCK_TIMEOUT_MS);
-    if (ret != OSAL_SUCCESS)
-    {
+    ret = OSAL_flock_timed_lock(impl->flock,
+                                OSAL_FLOCK_EXCLUSIVE,
+                                HAL_I2C_LOCK_TIMEOUT_MS);
+    if (ret != OSAL_SUCCESS) {
         LOG_ERROR("HAL_I2C", "Failed to acquire file lock (timeout or error)");
         return ret;
     }
 
     /* 第二层：互斥锁（线程间保护） */
     ret = OSAL_pthread_mutex_lock(&impl->mutex);
-    if (ret != OSAL_SUCCESS)
-    {
+    if (ret != OSAL_SUCCESS) {
         LOG_ERROR("HAL_I2C", "Failed to acquire mutex");
         OSAL_flock_unlock(impl->flock);
         return ret;
@@ -351,12 +360,12 @@ int32_t HAL_I2C_read_reg(hal_i2c_handle_t handle, uint16_t slave_addr,
     /* 临界区：硬件访问 */
     /* 组合传输: 先写寄存器地址，再读数据 (参考: Linux内核 i2c.h) */
     msgs[0].addr = slave_addr;
-    msgs[0].flags = 0;              /* 写操作 */
+    msgs[0].flags = 0; /* 写操作 */
     msgs[0].len = 1;
     msgs[0].buf = &reg_addr;
 
     msgs[1].addr = slave_addr;
-    msgs[1].flags = I2C_M_RD;       /* 读操作 */
+    msgs[1].flags = I2C_M_RD; /* 读操作 */
     msgs[1].len = size;
     msgs[1].buf = buffer;
 
@@ -364,11 +373,12 @@ int32_t HAL_I2C_read_reg(hal_i2c_handle_t handle, uint16_t slave_addr,
     msgset.nmsgs = 2;
 
     ret = OSAL_ioctl(impl->fd, I2C_RDWR, &msgset);
-    if (ret < 0)
-    {
+    if (ret < 0) {
         int32_t err = OSAL_get_errno();
-        LOG_ERROR("HAL_I2C", "Read register failed: %s (%d)",
-                  OSAL_strerror(err), err);
+        LOG_ERROR("HAL_I2C",
+                  "Read register failed: %s (%d)",
+                  OSAL_strerror(err),
+                  err);
         result = err;
     }
 
@@ -382,7 +392,8 @@ int32_t HAL_I2C_read_reg(hal_i2c_handle_t handle, uint16_t slave_addr,
 /**
  * @brief 执行I2C传输
  */
-int32_t HAL_I2C_transfer(hal_i2c_handle_t handle, hal_i2c_msg_t *msgs, uint32_t num)
+int32_t
+HAL_I2C_transfer(hal_i2c_handle_t handle, hal_i2c_msg_t *msgs, uint32_t num)
 {
     hal_i2c_context_t *impl = (hal_i2c_context_t *)handle;
     struct i2c_msg *kernel_msgs;
@@ -398,16 +409,15 @@ int32_t HAL_I2C_transfer(hal_i2c_handle_t handle, hal_i2c_msg_t *msgs, uint32_t 
         return OSAL_ERR_GENERIC;
 
     /* 分配内核消息结构 */
-    kernel_msgs = (struct i2c_msg *)OSAL_malloc(OSAL_sizeof(struct i2c_msg) * num);
-    if (NULL == kernel_msgs)
-    {
+    kernel_msgs =
+        (struct i2c_msg *)OSAL_malloc(OSAL_sizeof(struct i2c_msg) * num);
+    if (NULL == kernel_msgs) {
         LOG_ERROR("HAL_I2C", "Failed to allocate message buffer");
         return OSAL_ERR_NO_MEMORY;
     }
 
     /* 转换消息格式 */
-    for (i = 0; i < num; i++)
-    {
+    for (i = 0; i < num; i++) {
         kernel_msgs[i].addr = msgs[i].addr;
         kernel_msgs[i].flags = msgs[i].flags;
         kernel_msgs[i].len = msgs[i].len;
@@ -415,9 +425,10 @@ int32_t HAL_I2C_transfer(hal_i2c_handle_t handle, hal_i2c_msg_t *msgs, uint32_t 
     }
 
     /* 第一层：文件锁（进程间保护） */
-    ret = OSAL_flock_timed_lock(impl->flock, OSAL_FLOCK_EXCLUSIVE, HAL_I2C_LOCK_TIMEOUT_MS);
-    if (ret != OSAL_SUCCESS)
-    {
+    ret = OSAL_flock_timed_lock(impl->flock,
+                                OSAL_FLOCK_EXCLUSIVE,
+                                HAL_I2C_LOCK_TIMEOUT_MS);
+    if (ret != OSAL_SUCCESS) {
         LOG_ERROR("HAL_I2C", "Failed to acquire file lock (timeout or error)");
         OSAL_free(kernel_msgs);
         return ret;
@@ -425,8 +436,7 @@ int32_t HAL_I2C_transfer(hal_i2c_handle_t handle, hal_i2c_msg_t *msgs, uint32_t 
 
     /* 第二层：互斥锁（线程间保护） */
     ret = OSAL_pthread_mutex_lock(&impl->mutex);
-    if (ret != OSAL_SUCCESS)
-    {
+    if (ret != OSAL_SUCCESS) {
         LOG_ERROR("HAL_I2C", "Failed to acquire mutex");
         OSAL_flock_unlock(impl->flock);
         OSAL_free(kernel_msgs);
@@ -439,11 +449,12 @@ int32_t HAL_I2C_transfer(hal_i2c_handle_t handle, hal_i2c_msg_t *msgs, uint32_t 
 
     /* 执行传输 */
     ret = OSAL_ioctl(impl->fd, I2C_RDWR, &msgset);
-    if (ret < 0)
-    {
+    if (ret < 0) {
         int32_t err = OSAL_get_errno();
-        LOG_ERROR("HAL_I2C", "Transfer failed: %s (%d)",
-                  OSAL_strerror(err), err);
+        LOG_ERROR("HAL_I2C",
+                  "Transfer failed: %s (%d)",
+                  OSAL_strerror(err),
+                  err);
         result = err;
     }
 

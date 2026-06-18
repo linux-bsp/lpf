@@ -20,15 +20,14 @@ extern "C" {
 /**
  * @brief I2C设备句柄（不透明指针）
  */
-typedef void* hal_i2c_handle_t;
+typedef void *hal_i2c_handle_t;
 
 /**
  * @brief I2C配置结构
  */
-typedef struct
-{
-	const char *device;  /* I2C设备路径，如 "/dev/i2c-0" */
-	uint32_t    timeout; /* 传输超时时间（ms） */
+typedef struct {
+    const char *device; /* I2C设备路径，如 "/dev/i2c-0" */
+    uint32_t timeout;   /* 传输超时时间（ms） */
 } hal_i2c_config_t;
 
 /*===========================================================================
@@ -84,8 +83,10 @@ int32_t HAL_I2C_close(hal_i2c_handle_t handle);
  * @note 使用配置的timeout作为超时时间
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_I2C_write(hal_i2c_handle_t handle, uint16_t slave_addr,
-                      const uint8_t *buffer, uint32_t size);
+int32_t HAL_I2C_write(hal_i2c_handle_t handle,
+                      uint16_t slave_addr,
+                      const uint8_t *buffer,
+                      uint32_t size);
 
 /**
  * @brief 从I2C从设备读取数据
@@ -105,8 +106,10 @@ int32_t HAL_I2C_write(hal_i2c_handle_t handle, uint16_t slave_addr,
  * @note 使用配置的timeout作为超时时间
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_I2C_read(hal_i2c_handle_t handle, uint16_t slave_addr,
-                     uint8_t *buffer, uint32_t size);
+int32_t HAL_I2C_read(hal_i2c_handle_t handle,
+                     uint16_t slave_addr,
+                     uint8_t *buffer,
+                     uint32_t size);
 
 /**
  * @brief 写寄存器操作（先写寄存器地址，再写数据）
@@ -126,8 +129,11 @@ int32_t HAL_I2C_read(hal_i2c_handle_t handle, uint16_t slave_addr,
  * @note 内部实现为组合传输：[START][ADDR+W][REG][DATA...][STOP]
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_I2C_write_reg(hal_i2c_handle_t handle, uint16_t slave_addr,
-                         uint8_t reg_addr, const uint8_t *buffer, uint32_t size);
+int32_t HAL_I2C_write_reg(hal_i2c_handle_t handle,
+                          uint16_t slave_addr,
+                          uint8_t reg_addr,
+                          const uint8_t *buffer,
+                          uint32_t size);
 
 /**
  * @brief 读寄存器操作（先写寄存器地址，再读数据）
@@ -144,11 +150,15 @@ int32_t HAL_I2C_write_reg(hal_i2c_handle_t handle, uint16_t slave_addr,
  * @return OSAL_ERR_INVALID_PARAM 参数无效
  * @return OSAL_ERR_GENERIC       读取失败
  *
- * @note 内部实现为组合传输：[START][ADDR+W][REG][RESTART][ADDR+R][DATA...][STOP]
+ * @note
+ * 内部实现为组合传输：[START][ADDR+W][REG][RESTART][ADDR+R][DATA...][STOP]
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_I2C_read_reg(hal_i2c_handle_t handle, uint16_t slave_addr,
-                        uint8_t reg_addr, uint8_t *buffer, uint32_t size);
+int32_t HAL_I2C_read_reg(hal_i2c_handle_t handle,
+                         uint16_t slave_addr,
+                         uint8_t reg_addr,
+                         uint8_t *buffer,
+                         uint32_t size);
 
 /**
  * @brief 执行I2C传输（支持组合传输）
@@ -166,7 +176,8 @@ int32_t HAL_I2C_read_reg(hal_i2c_handle_t handle, uint16_t slave_addr,
  * @note 使用Linux I2C_RDWR ioctl实现原子组合传输
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_I2C_transfer(hal_i2c_handle_t handle, hal_i2c_msg_t *msgs, uint32_t num);
+int32_t
+HAL_I2C_transfer(hal_i2c_handle_t handle, hal_i2c_msg_t *msgs, uint32_t num);
 
 #ifdef __cplusplus
 }
