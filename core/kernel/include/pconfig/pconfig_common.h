@@ -6,7 +6,7 @@
  *
  * 说明：
  * - 本文件包含 PCONFIG 层特有的扩展配置类型
- * - 硬件接口类型由 PDL 层定义（pdl_mcu_interface_t）
+ * - 硬件接口类型由 PDM 层定义（pdm_mcu_interface_t）
  ************************************************************************/
 
 #ifndef PCONFIG_COMMON_H

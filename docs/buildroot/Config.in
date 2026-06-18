@@ -5,8 +5,8 @@ config BR2_PACKAGE_ES_MIDDLEWARE
 	depends on BR2_INSTALL_LIBSTDCPP
 	help
 	  ES-Middleware is a generic embedded middleware framework
-	  with a Kconfig+CMake build system. It provides OSAL, HAL, PDL,
-	  PRL, ACONFIG, and PCONFIG layers for embedded systems.
+	  with a Kconfig+CMake build system. It provides OSAL, HAL, PDM,
+	  PDI, PRL, ACONFIG, and PCONFIG layers for Linux systems.
 
 if BR2_PACKAGE_ES_MIDDLEWARE
 

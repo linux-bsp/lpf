@@ -248,7 +248,8 @@ function(kconfig_print_summary)
         BUILD_TESTING
         OSAL
         HAL
-        PDL
+        PDM
+        PDI
         PRL
         PCONFIG
         ACONFIG

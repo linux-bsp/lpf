@@ -3,7 +3,7 @@
  * @brief 系统测试框架
  *
  * 提供系统级集成测试的基础设施：
- * - 多层集成测试（OSAL+HAL+PDL+PCONFIG+ACONFIG）
+ * - 多层集成测试（OSAL+HAL+PDI+PCONFIG+ACONFIG）
  * - 端到端测试（完整业务流程）
  * - 场景测试（真实使用场景模拟）
  * - 环境管理（测试环境搭建和清理）
@@ -29,7 +29,7 @@ typedef enum {
 typedef struct {
 	bool osal_initialized;
 	bool hal_initialized;
-	bool pdl_initialized;
+	bool pdi_initialized;
 	bool pconfig_initialized;
 	bool aconfig_initialized;
 	void *user_data;

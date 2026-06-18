@@ -69,7 +69,7 @@ config TEST_ACONFIG_HWID
 
 	  Coverage:
 	    - ACONFIG_FindTableByHWID (universal, specific, no table)
-	    - ACONFIG_LoadByHWID (with/without PDL support)
+	    - ACONFIG_LoadByHWID (with/without PDI support)
 	    - HWID structure field validation
 	    - HWID matching edge cases
 	    - Multiple HWID support lists

@@ -7,7 +7,6 @@
 #   - performance/Config.in (this file) - Entry point, sources layer configs
 #   - performance/osal/Config.in - OSAL performance tests
 #   - performance/hal/Config.in - HAL performance tests
-#   - performance/pdl/Config.in - PDL performance tests
 #   - performance/pconfig/Config.in - PCONFIG performance tests
 #   - performance/aconfig/Config.in - ACONFIG performance tests
 
@@ -20,7 +19,6 @@ config TEST_PERFORMANCE_ALL
 	default y
 	select TEST_PERFORMANCE_OSAL if TEST_OSAL
 	select TEST_PERFORMANCE_HAL if TEST_HAL
-	select TEST_PERFORMANCE_PDL if TEST_PDL
 	select TEST_PERFORMANCE_PCONFIG if TEST_PCONFIG
 	select TEST_PERFORMANCE_ACONFIG if TEST_ACONFIG
 	help
@@ -43,10 +41,6 @@ endif
 
 if TEST_HAL
 	source "products/ctest/performance/hal/Config.in"
-endif
-
-if TEST_PDL
-	source "products/ctest/performance/pdl/Config.in"
 endif
 
 if TEST_PCONFIG

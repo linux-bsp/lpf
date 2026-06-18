@@ -7,7 +7,7 @@ PCONFIG is the platform hardware-configuration query layer. It reads platform-le
 - Read product-provided platform configurations (`pconfig_platform_config_t`).
 - Track the current board through a compile-time `current_index` in `g_pconfig_platform_table`.
 - Provide typed accessors for MCU entries.
-- Keep hardware configuration data separate from PDL and application logic.
+- Keep hardware configuration data separate from PDM and application logic.
 
 ## Public API
 
@@ -37,7 +37,7 @@ PCONFIG_HW_GetMCU(platform, index);
 
 ## Layering Rules
 
-- `core/pconfig` defines data structures and read-only query behavior only.
+- `core/kernel/pconfig` defines data structures and read-only query behavior only.
 - Product or board integration code owns concrete platform tables.
-- PDL consumes `PCONFIG_GetBoard()` and typed accessors; it should not know concrete product table symbols.
+- PDM consumes `PCONFIG_GetBoard()` and typed accessors; it should not know concrete product table symbols.
 - Runtime code must not register, switch, reload, or mutate PCONFIG tables through core APIs.

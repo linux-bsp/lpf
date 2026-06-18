@@ -26,7 +26,7 @@ config TEST_PCONFIG_API
 	    - Device configuration lookup by ID
 	    - Device configuration lookup by name
 	    - HAL device configuration queries
-	    - PDL device configuration queries
+	    - PDM device configuration queries
 	    - Configuration table iteration
 	    - Configuration validation
 	    - Runtime configuration updates

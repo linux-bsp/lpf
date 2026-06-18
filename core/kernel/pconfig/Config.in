@@ -23,7 +23,7 @@ menuconfig PCONFIG
 	  Use cases:
 	  - Fixed product hardware descriptions
 	  - Multi-board product variants selected at build time
-	  - Hardware abstraction for applications and PDL
+	  - Hardware abstraction for kernel PDM
 	  - Peripheral lookup by index or platform/product name
 
 	  Dependencies: OSAL (for basic services)

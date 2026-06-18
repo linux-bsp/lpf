@@ -7,10 +7,8 @@
 #   - system/Config.in (this file) - Entry point, sources layer configs
 #   - system/osal/Config.in - OSAL system/integration tests
 #   - system/hal/Config.in - HAL system/integration tests
-#   - system/pdl/Config.in - PDL system/integration tests
 #   - system/pconfig/Config.in - PCONFIG system/integration tests
 #   - system/aconfig/Config.in - ACONFIG system/integration tests
-#   - system/integration/Config.in - Full stack integration tests
 
 if TEST_SYSTEM
 
@@ -21,7 +19,6 @@ config TEST_SYSTEM_ALL
 	default y
 	select TEST_SYSTEM_OSAL if TEST_OSAL
 	select TEST_SYSTEM_HAL if TEST_HAL
-	select TEST_SYSTEM_PDL if TEST_PDL
 	select TEST_SYSTEM_PRL if TEST_PRL
 	select TEST_SYSTEM_PCONFIG if TEST_PCONFIG
 	select TEST_SYSTEM_ACONFIG if TEST_ACONFIG
@@ -51,10 +48,6 @@ if TEST_HAL
 	source "products/ctest/system/hal/Config.in"
 endif
 
-if TEST_PDL
-	source "products/ctest/system/pdl/Config.in"
-endif
-
 if TEST_PRL
 	source "products/ctest/system/prl/Config.in"
 endif
@@ -66,9 +59,6 @@ endif
 if CONFIG_ACONFIG
 	source "products/ctest/system/aconfig/Config.in"
 endif
-
-# Integration tests (full stack)
-source "products/ctest/system/integration/Config.in"
 
 endmenu
 

@@ -4,7 +4,7 @@
 # This test product provides comprehensive testing for all core SDK modules:
 #   - OSAL (Operating System Abstraction Layer)
 #   - HAL (Hardware Abstraction Layer)
-#   - PDL (Peripheral Driver Library)
+#   - PDI (Peripheral Driver Interface)
 #   - PRL (Peripheral Resource Library)
 #   - PCONFIG (Platform Configuration)
 #   - ACONFIG (Application Configuration)
@@ -51,19 +51,21 @@ config TEST_HAL
 	  Fine-grained control over individual HAL test files is available
 	  in the HAL Unit Tests submenu.
 
-config TEST_PDL
-	bool "Build PDL unit tests"
-	depends on OSAL && HAL && PCONFIG  # PDL dependencies
-	select PDL
+config TEST_PDI
+	bool "Build PDI unit tests"
+	depends on OSAL
+	select PDI
 	default n
 	help
-	  Build PDL layer unit tests.
-	  This will automatically enable the PDL module.
+	  Build PDI userspace API unit tests.
+	  This will automatically enable the PDI module.
 
-	  Note: PDL requires OSAL, HAL, and PCONFIG.
+	  PDI wraps the ioctl ABI exposed by the kernel PDM module. These
+	  unit tests cover userspace API validation and do not require the
+	  kernel module to be loaded.
 
-	  Fine-grained control over individual PDL test files is available
-	  in the PDL Unit Tests submenu.
+	  Fine-grained control over individual PDI test files is available
+	  in the PDI Unit Tests submenu.
 
 config TEST_ACONFIG
 	bool "Build ACONFIG unit tests"
@@ -143,16 +145,6 @@ config TEST_PERFORMANCE_PCONFIG
 
 	  Note: PCONFIG requires OSAL.
 
-config TEST_PERFORMANCE_PDL
-	bool "Build PDL performance tests"
-	depends on OSAL && HAL && PCONFIG  # PDL dependencies
-	select PDL
-	default y
-	help
-	  Build PDL layer performance tests.
-
-	  Note: PDL requires OSAL, HAL, and PCONFIG.
-
 config TEST_PERFORMANCE_ACONFIG
 	bool "Build ACONFIG performance tests"
 	select ACONFIG
@@ -198,16 +190,6 @@ config TEST_STRESS_PCONFIG
 	  Build PCONFIG layer stress tests.
 
 	  Note: PCONFIG requires OSAL.
-
-config TEST_STRESS_PDL
-	bool "Build PDL stress tests"
-	depends on OSAL && HAL && PCONFIG  # PDL dependencies
-	select PDL
-	default n
-	help
-	  Build PDL layer stress tests.
-
-	  Note: PDL requires OSAL, HAL, and PCONFIG.
 
 config TEST_STRESS_PRL
 	bool "Build PRL stress tests"
@@ -261,16 +243,6 @@ config TEST_SYSTEM_PCONFIG
 	  Build PCONFIG layer system tests.
 
 	  Note: PCONFIG requires OSAL.
-
-config TEST_SYSTEM_PDL
-	bool "Build PDL system tests"
-	depends on OSAL && HAL && PCONFIG  # PDL dependencies
-	select PDL
-	default n
-	help
-	  Build PDL layer system tests.
-
-	  Note: PDL requires OSAL, HAL, and PCONFIG.
 
 config TEST_SYSTEM_ACONFIG
 	bool "Build ACONFIG system tests"

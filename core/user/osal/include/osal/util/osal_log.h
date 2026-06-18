@@ -70,7 +70,7 @@ typedef enum {
 	LOG_MODULE_OSAL = 0x0,
 	LOG_MODULE_HAL,
 	LOG_MODULE_PCONFIG,
-	LOG_MODULE_PDL,
+	LOG_MODULE_PDI,
 	LOG_MODULE_ACONFIG,
 	LOG_MODULE_APP,
 	LOG_MODULE_TEST,
@@ -168,7 +168,7 @@ typedef struct {
 /*
  * 结构化日志宏（便捷接口）
  * 使用示例：
- *   LOG_STRUCTURED(LOG_MODULE_PDL, "channel_switch",
+ *   LOG_STRUCTURED(LOG_MODULE_PDI, "channel_switch",
  *                  "from", "ethernet",
  *                  "to", "uart",
  *                  "reason", "timeout");

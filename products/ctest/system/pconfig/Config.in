@@ -1,7 +1,7 @@
 # PCONFIG System Test Configuration
 #
 # Platform configuration layer integration tests.
-# Tests PCONFIG with underlying HAL and PDL components.
+# Tests PCONFIG with underlying HAL and PDM components.
 
 if TEST_SYSTEM_PCONFIG
 
@@ -32,30 +32,30 @@ config TEST_SYSTEM_PCONFIG_HAL
 	  Tags: integration, config, hal
 	  Test file: test_system_pconfig_hal.c
 
-config TEST_SYSTEM_PCONFIG_PDL
-	bool "PCONFIG + PDL integration tests"
+config TEST_SYSTEM_PCONFIG_PDM
+	bool "PCONFIG + PDM integration tests"
 	default n
 	help
-	  Platform configuration with PDL device mapping.
+	  Platform configuration with PDM device mapping.
 
 	  Tests:
-	    - Device configuration → PDL device creation
+	    - Device configuration → PDM device creation
 	    - Device ID mapping
 	    - Protocol parameter configuration
 	    - Multi-device setup from config
 	    - Configuration update without restart
 
 	  Verifies:
-	    - PDL devices match configuration
+	    - PDM devices match configuration
 	    - Correct device ID assignment
 	    - Protocol parameters applied
 	    - Dynamic reconfiguration support
 
 	  Runtime: 3-5 seconds
 	  Hardware: Mock devices
-	  Dependencies: CONFIG_PCONFIG, CONFIG_PDL
-	  Tags: integration, config, pdl
-	  Test file: test_system_pconfig_pdl.c
+	  Dependencies: CONFIG_PCONFIG, CONFIG_PDM
+	  Tags: integration, config, pdm
+	  Test file: test_system_pconfig_pdm.c
 
 config TEST_SYSTEM_PCONFIG_RUNTIME
 	bool "Runtime configuration change tests"

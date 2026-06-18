@@ -12,7 +12,7 @@
 - `make clean` - remove build outputs.
 
 ## Coding Style & Naming Conventions
-Follow the existing C style in the tree: 4-space indentation in newer code, tabs in legacy Kconfig/C sources where already used, braces on the next line for functions, and short `static` helpers for file-local logic. Keep names uppercase for public APIs and macros (`OSAL_*`, `PDL_*`), lowercase snake_case for internal files and helpers, and match the module prefix already in use (`osal_`, `hal_`, `pdl_`).
+Follow the existing C style in the tree: 4-space indentation in newer code, tabs in legacy Kconfig/C sources where already used, braces on the next line for functions, and short `static` helpers for file-local logic. Keep names uppercase for public APIs and macros (`OSAL_*`, `PDI_*`, `PDM_*`), lowercase snake_case for internal files and helpers, and match the module prefix already in use (`osal_`, `hal_`, `pdi_`, `pdm_`).
 
 ## Testing Guidelines
 Tests are C sources registered through `core/user/test_framework/` and grouped by scope under `products/ctest/` (`unit`, `system`, `stress`, `performance`). Name test files `test_*.c` and keep module-specific configs alongside them in `Config.in`. Prefer running the smallest defconfig that exercises your change, then verify with `./_build/bin/es-middleware-test --all`.

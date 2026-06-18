@@ -4,7 +4,7 @@
 # This is a special "product" dedicated to testing ES-Middleware core modules.
 # Unlike regular products (e.g., PMC), this product's sole purpose is to
 # provide comprehensive testing coverage for:
-#   - OSAL, HAL, PDL, PRL, PCONFIG, ACONFIG
+#   - OSAL, HAL, PDI, PRL, PCONFIG, ACONFIG
 #
 # Test categories:
 #   - Unit: Component-level testing
@@ -29,12 +29,6 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/TestDiscovery.cmake)
 # source hooks.
 
 set(CTEST_CONFIG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/config)
-set(CTEST_ENABLE_LEGACY_PDL_TESTS OFF)
-
-if(CONFIG_TEST_PDL OR CONFIG_TEST_PERFORMANCE_PDL OR CONFIG_TEST_STRESS_PDL OR
-   CONFIG_TEST_SYSTEM_PDL OR CONFIG_TEST_INTEGRATION)
-    message(STATUS "Skipping legacy PDL ctest sources; PDL is now kernel PDM and needs PDI/ioctl tests")
-endif()
 
 if(CONFIG_PCONFIG)
     set(PCONFIG_EXTRA_SRCS ${CTEST_CONFIG_DIR}/ctest_pconfig.c)
@@ -110,7 +104,7 @@ target_include_directories(es-middleware-test PRIVATE
     ${SDK_PATH}/core/kernel/include
     ${SDK_PATH}/core/kernel/include/hal
     ${SDK_PATH}/core/kernel/include/pconfig
-    ${SDK_PATH}/core/user/pdi/include/pdi
+    ${SDK_PATH}/core/user/pdi/include
     ${SDK_PATH}/core/uapi
     ${SDK_PATH}/core/kernel/include/prl
     ${SDK_PATH}/core/user/aconfig/include/aconfig
@@ -160,15 +154,13 @@ if(CONFIG_TEST_UNIT)
         )
     endif()
 
-    # PDL Unit Tests - Auto-discover all test_pdl_*.c files
-    if(CONFIG_TEST_PDL AND CTEST_ENABLE_LEGACY_PDL_TESTS)
+    # PDI Unit Tests - Auto-discover all test_pdi_*.c files
+    if(CONFIG_TEST_PDI)
         test_discover_and_add(
             TARGET es-middleware-test
-            DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/unit/pdl
-            MODULE pdl
-            LIBRARY pdl
-            INCLUDE_DIRS
-                ${SDK_PATH}/core/kernel/pdm/src/pdm_mcu
+            DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/unit/pdi
+            MODULE pdi
+            LIBRARY pdi
         )
     endif()
 
@@ -228,16 +220,6 @@ if(CONFIG_TEST_PERFORMANCE)
         )
     endif()
 
-    # PDL Performance Tests - Auto-discover all test_perf_pdl_*.c files
-    if(CONFIG_TEST_PERFORMANCE_PDL AND CTEST_ENABLE_LEGACY_PDL_TESTS)
-        test_discover_and_add(
-            TARGET es-middleware-test
-            DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/performance/pdl
-            MODULE perf_pdl
-            LIBRARY pdl
-        )
-    endif()
-
     # PCONFIG Performance Tests - Auto-discover all test_perf_pconfig_*.c files
     if(CONFIG_TEST_PERFORMANCE_PCONFIG)
         test_discover_and_add(
@@ -284,16 +266,6 @@ if(CONFIG_TEST_STRESS)
             DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/stress/hal
             MODULE stress_hal
             LIBRARY hal
-        )
-    endif()
-
-    # PDL Stress Tests - Auto-discover all test_stress_pdl_*.c files
-    if(CONFIG_TEST_STRESS_PDL AND CTEST_ENABLE_LEGACY_PDL_TESTS)
-        test_discover_and_add(
-            TARGET es-middleware-test
-            DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/stress/pdl
-            MODULE stress_pdl
-            LIBRARY pdl
         )
     endif()
 
@@ -350,9 +322,6 @@ if(CONFIG_TEST_SYSTEM)
     if(TARGET hal)
         target_link_libraries(es-middleware-test PRIVATE hal)
     endif()
-    if(TARGET pdl)
-        target_link_libraries(es-middleware-test PRIVATE pdl)
-    endif()
     if(TARGET prl)
         target_link_libraries(es-middleware-test PRIVATE prl)
     endif()
@@ -384,16 +353,6 @@ if(CONFIG_TEST_SYSTEM)
         endif()
     endif()
 
-    # PDL System Tests - Auto-discover all test_system_pdl_*.c files
-    if(CONFIG_TEST_SYSTEM_PDL AND CTEST_ENABLE_LEGACY_PDL_TESTS)
-        test_discover_and_add(
-            TARGET es-middleware-test
-            DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/system/pdl
-            MODULE system_pdl
-            # Library already linked at system test level
-        )
-    endif()
-
     # PRL System Tests - Auto-discover all test_system_prl_*.c files
     if(CONFIG_TEST_SYSTEM_PRL)
         test_discover_and_add(
@@ -421,16 +380,6 @@ if(CONFIG_TEST_SYSTEM)
             DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/system/aconfig
             MODULE system_aconfig
             LIBRARY aconfig
-        )
-    endif()
-
-    # Integration Tests - Auto-discover all test_system_integration_*.c files
-    if(CONFIG_TEST_INTEGRATION AND CTEST_ENABLE_LEGACY_PDL_TESTS)
-        test_discover_and_add(
-            TARGET es-middleware-test
-            DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/system/integration
-            MODULE system_integration
-            # Libraries already linked at system test level
         )
     endif()
 

@@ -1,7 +1,7 @@
 # ACONFIG System Test Configuration
 #
 # Application configuration layer integration tests.
-# Tests ACONFIG with underlying PCONFIG, PDL, and HAL components.
+# Tests ACONFIG with underlying PCONFIG, PDI, and HAL components.
 
 if TEST_SYSTEM_ACONFIG
 
@@ -38,7 +38,7 @@ config TEST_SYSTEM_ACONFIG_TELECOMMAND
 	  Telecommand processing through full stack.
 
 	  Tests:
-	    - TC reception → ACONFIG lookup → PDL execution
+	    - TC reception → ACONFIG lookup → PDI request
 	    - Multi-step TC sequences
 	    - TC parameter validation
 	    - TC execution status tracking
@@ -52,7 +52,7 @@ config TEST_SYSTEM_ACONFIG_TELECOMMAND
 
 	  Runtime: 5-10 seconds
 	  Hardware: Mock devices
-	  Dependencies: CONFIG_ACONFIG, CONFIG_PDL
+	  Dependencies: CONFIG_ACONFIG, CONFIG_PDI
 	  Tags: integration, telecommand
 	  Test file: test_system_aconfig_telecommand.c
 
@@ -63,7 +63,7 @@ config TEST_SYSTEM_ACONFIG_TELEMETRY
 	  Telemetry collection through full stack.
 
 	  Tests:
-	    - Device data → PDL read → ACONFIG format → TM packet
+	    - Device data → PDI read → ACONFIG format → TM packet
 	    - Multi-device telemetry aggregation
 	    - Telemetry timestamp synchronization
 	    - High-frequency telemetry collection
@@ -77,7 +77,7 @@ config TEST_SYSTEM_ACONFIG_TELEMETRY
 
 	  Runtime: 5-10 seconds
 	  Hardware: Mock devices
-	  Dependencies: CONFIG_ACONFIG, CONFIG_PDL
+	  Dependencies: CONFIG_ACONFIG, CONFIG_PDI
 	  Tags: integration, telemetry
 	  Test file: test_system_aconfig_telemetry.c
 
@@ -102,7 +102,7 @@ config TEST_SYSTEM_ACONFIG_SCENARIO
 
 	  Runtime: 10-20 seconds
 	  Hardware: Mock devices
-	  Dependencies: CONFIG_ACONFIG, CONFIG_PCONFIG, CONFIG_PDL
+	  Dependencies: CONFIG_ACONFIG, CONFIG_PCONFIG, CONFIG_PDI
 	  Tags: integration, scenario, slow
 	  Test file: test_system_aconfig_scenario.c
 
