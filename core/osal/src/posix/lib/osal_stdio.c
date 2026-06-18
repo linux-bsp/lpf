@@ -15,8 +15,7 @@ void *OSAL_stderr = NULL;
 /*
  * 初始化标准流（构造函数自动调用）
  */
-__attribute__((constructor))
-static void init_stdio_streams(void)
+__attribute__((constructor)) static void init_stdio_streams(void)
 {
     OSAL_stdin = stdin;
     OSAL_stdout = stdout;
@@ -32,7 +31,7 @@ int32_t OSAL_getchar(void)
     return getchar();
 }
 
-char* OSAL_fgets(char *str, osal_size_t size, void *stream)
+char *OSAL_fgets(char *str, osal_size_t size, void *stream)
 {
     union {
         void *osal_stream;

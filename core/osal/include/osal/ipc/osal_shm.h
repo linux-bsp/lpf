@@ -21,13 +21,13 @@ extern "C" {
  *===========================================================================*/
 
 #if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
-    /* POSIX 平台 */
-    #ifndef OSAL_MODE_T_DEFINED
-        #define OSAL_MODE_T_DEFINED
-        typedef mode_t osal_mode_t;
-    #endif
+/* POSIX 平台 */
+#ifndef OSAL_MODE_T_DEFINED
+#define OSAL_MODE_T_DEFINED
+typedef mode_t osal_mode_t;
+#endif
 #else
-    #error "Unsupported platform - please define mode_t type for your platform"
+#error "Unsupported platform - please define mode_t type for your platform"
 #endif
 
 /*===========================================================================
@@ -76,7 +76,12 @@ int32_t OSAL_ftruncate(int32_t fd, osal_off_t length);
  * @return 映射地址（成功）
  * @return MAP_FAILED（失败）
  */
-void* OSAL_mmap(void *addr, osal_size_t length, int32_t prot, int32_t flags, int32_t fd, osal_off_t offset);
+void *OSAL_mmap(void *addr,
+                osal_size_t length,
+                int32_t prot,
+                int32_t flags,
+                int32_t fd,
+                osal_off_t offset);
 
 /**
  * @brief 解除内存映射

@@ -55,8 +55,8 @@ typedef struct osal_flock_s osal_flock_t;
  * @brief 锁类型
  */
 typedef enum {
-    OSAL_FLOCK_SHARED = 0,    /* 共享锁（读锁） */
-    OSAL_FLOCK_EXCLUSIVE = 1  /* 独占锁（写锁） */
+    OSAL_FLOCK_SHARED = 0,   /* 共享锁（读锁） */
+    OSAL_FLOCK_EXCLUSIVE = 1 /* 独占锁（写锁） */
 } osal_flock_type_t;
 
 /*===========================================================================
@@ -123,8 +123,9 @@ int32_t OSAL_flock_try_lock(osal_flock_t *flock, osal_flock_type_t type);
  * @return OSAL_ERR_INVALID_POINTER 参数为空
  * @return OSAL_ERR_GENERIC 加锁失败
  */
-int32_t OSAL_flock_timed_lock(osal_flock_t *flock, osal_flock_type_t type,
-                            uint32_t timeout_ms);
+int32_t OSAL_flock_timed_lock(osal_flock_t *flock,
+                              osal_flock_type_t type,
+                              uint32_t timeout_ms);
 
 /**
  * @brief 解锁

@@ -16,16 +16,16 @@
 #include <time.h>
 
 /* 缓存表最大数量 */
-#define MAX_CACHES  16
+#define MAX_CACHES 16
 
 /* 共享内存缓存头部 */
 typedef struct {
-    uint32_t magic;                 /* 魔数：0x43414348 ("CACH") */
-    uint32_t version;               /* 版本号 */
-    uint32_t max_entries;           /* 最大条目数 */
-    uint32_t entry_size;            /* 条目大小 */
-    osal_mutex_t mutex;          /* 互斥锁（进程间） */
-    osal_cache_entry_t entries[0];  /* 柔性数组：缓存条目 */
+    uint32_t magic;                /* 魔数：0x43414348 ("CACH") */
+    uint32_t version;              /* 版本号 */
+    uint32_t max_entries;          /* 最大条目数 */
+    uint32_t entry_size;           /* 条目大小 */
+    osal_mutex_t mutex;            /* 互斥锁（进程间） */
+    osal_cache_entry_t entries[0]; /* 柔性数组：缓存条目 */
 } shm_cache_header_t;
 
 /* 缓存描述符 */
@@ -43,8 +43,8 @@ static cache_descriptor_t g_cache_table[MAX_CACHES];
 static osal_mutex_t g_cache_table_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 /* 魔数和版本 */
-#define SHM_CACHE_MAGIC    0x43414348
-#define SHM_CACHE_VERSION  1
+#define SHM_CACHE_MAGIC 0x43414348
+#define SHM_CACHE_VERSION 1
 
 /**
  * @brief 计算CRC32校验和
@@ -91,7 +91,8 @@ static int32_t find_free_cache_slot(void)
 /**
  * @brief 创建共享内存缓存
  */
-int32_t OSAL_CacheCreate(const char *name, uint32_t max_entries, osal_id_t *cache_id)
+int32_t
+OSAL_CacheCreate(const char *name, uint32_t max_entries, osal_id_t *cache_id)
 {
     int32_t slot;
     cache_descriptor_t *cache;
@@ -116,7 +117,8 @@ int32_t OSAL_CacheCreate(const char *name, uint32_t max_entries, osal_id_t *cach
     }
 
     /* 计算共享内存大小 */
-    shm_size = OSAL_sizeof(shm_cache_header_t) + max_entries * OSAL_sizeof(osal_cache_entry_t);
+    shm_size = OSAL_sizeof(shm_cache_header_t) +
+               max_entries * OSAL_sizeof(osal_cache_entry_t);
 
     /* 创建共享内存 */
     shm_fd = shm_open(name, O_CREAT | O_RDWR, 0666);
@@ -134,7 +136,8 @@ int32_t OSAL_CacheCreate(const char *name, uint32_t max_entries, osal_id_t *cach
     }
 
     /* 映射共享内存 */
-    shm_ptr = mmap(NULL, shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
+    shm_ptr =
+        mmap(NULL, shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
     if (shm_ptr == MAP_FAILED) {
         close(shm_fd);
         shm_unlink(name);
@@ -220,7 +223,8 @@ int32_t OSAL_CacheOpen(const char *name, osal_id_t *cache_id)
     }
 
     /* 映射共享内存 */
-    shm_ptr = mmap(NULL, st.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
+    shm_ptr =
+        mmap(NULL, st.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
     if (shm_ptr == MAP_FAILED) {
         close(shm_fd);
         pthread_mutex_unlock(&g_cache_table_mutex);
@@ -295,15 +299,17 @@ int32_t OSAL_CacheDelete(osal_id_t cache_id)
 /**
  * @brief 写入缓存条目
  */
-int32_t OSAL_CacheWrite(osal_id_t cache_id, uint32_t entry_id,
-                        const uint8_t *data, uint32_t data_len,
+int32_t OSAL_CacheWrite(osal_id_t cache_id,
+                        uint32_t entry_id,
+                        const uint8_t *data,
+                        uint32_t data_len,
                         uint32_t data_validity_ms)
 {
     cache_descriptor_t *cache;
     osal_cache_entry_t *entry;
 
-    if (cache_id >= MAX_CACHES || data == NULL ||
-        data_len == 0 || data_len > OSAL_SHM_CACHE_MAX_DATA_SIZE) {
+    if (cache_id >= MAX_CACHES || data == NULL || data_len == 0 ||
+        data_len > OSAL_SHM_CACHE_MAX_DATA_SIZE) {
         return OSAL_ERR_INVALID_PARAM;
     }
 
@@ -344,7 +350,8 @@ int32_t OSAL_CacheWrite(osal_id_t cache_id, uint32_t entry_id,
 /**
  * @brief 读取缓存条目
  */
-int32_t OSAL_CacheRead(osal_id_t cache_id, uint32_t entry_id,
+int32_t OSAL_CacheRead(osal_id_t cache_id,
+                       uint32_t entry_id,
                        osal_cache_result_t *result)
 {
     cache_descriptor_t *cache;

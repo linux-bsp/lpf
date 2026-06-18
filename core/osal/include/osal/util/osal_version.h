@@ -91,43 +91,43 @@ void OSAL_print_version_info(void);
  * @brief 当前软件版本号
  * 可在任何模块中使用，获取ES-Middleware版本
  */
-#define OSAL_VERSION        OSAL_get_version()
+#define OSAL_VERSION OSAL_get_version()
 
 /**
  * @brief 当前软件完整版本（版本号+Git）
  */
-#define OSAL_VERSION_FULL   OSAL_get_version_full()
+#define OSAL_VERSION_FULL OSAL_get_version_full()
 
 /**
  * @brief 当前Git commit
  */
-#define OSAL_GIT_COMMIT     OSAL_get_git_commit()
+#define OSAL_GIT_COMMIT OSAL_get_git_commit()
 
 /**
  * @brief 构建时间戳
  */
-#define OSAL_BUILD_TIME     OSAL_get_build_time()
+#define OSAL_BUILD_TIME OSAL_get_build_time()
 
 /**
  * @brief 当前文件名（内核风格）
  */
-#define OSAL_FILE           __FILE__
+#define OSAL_FILE __FILE__
 
 /**
  * @brief 当前行号（内核风格）
  */
-#define OSAL_LINE           __LINE__
+#define OSAL_LINE __LINE__
 
 /**
  * @brief 当前函数名（内核风格）
  */
-#define OSAL_FUNC           __func__
+#define OSAL_FUNC __func__
 
 /**
  * @brief 格式化位置信息宏
  * 输出格式："文件名:行号:函数名"
  */
-#define OSAL_LOCATION       __FILE__ ":" OSAL_STRINGIFY(__LINE__) ":" __func__
+#define OSAL_LOCATION __FILE__ ":" OSAL_STRINGIFY(__LINE__) ":" __func__
 
 /**
  * @brief 带版本信息的位置宏
@@ -136,7 +136,7 @@ void OSAL_print_version_info(void);
 #define OSAL_VERSION_LOCATION "[" OSAL_VERSION "] " OSAL_LOCATION
 
 /* Helper macro for stringification */
-#define OSAL_STRINGIFY(x)   OSAL_STRINGIFY_HELPER(x)
+#define OSAL_STRINGIFY(x) OSAL_STRINGIFY_HELPER(x)
 #define OSAL_STRINGIFY_HELPER(x) #x
 
 #ifdef __cplusplus

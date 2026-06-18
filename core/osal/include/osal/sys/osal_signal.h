@@ -130,7 +130,9 @@ int32_t OSAL_sigwait(const sigset_t *set, int32_t *sig);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_sigaction(int32_t signum, const struct sigaction *act, struct sigaction *oldact);
+int32_t OSAL_sigaction(int32_t signum,
+                       const struct sigaction *act,
+                       struct sigaction *oldact);
 
 #ifdef __cplusplus
 }

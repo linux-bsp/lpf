@@ -6,16 +6,15 @@
 #define OSAL_CLOCK_H
 
 /* 时间转换常量 */
-#define OSAL_MS_PER_SEC         0x3E8ULL     /* 每秒毫秒数 */
-#define OSAL_NS_PER_MS          0xF4240ULL  /* 每毫秒纳秒数 */
+#define OSAL_MS_PER_SEC 0x3E8ULL  /* 每秒毫秒数 */
+#define OSAL_NS_PER_MS 0xF4240ULL /* 每毫秒纳秒数 */
 
 /*
  * 时间结构
  */
-typedef struct
-{
-    uint32_t seconds;      /* 秒 */
-    uint32_t microsecs;    /* 微秒 */
+typedef struct {
+    uint32_t seconds;   /* 秒 */
+    uint32_t microsecs; /* 微秒 */
 } OS_time_t;
 
 /**

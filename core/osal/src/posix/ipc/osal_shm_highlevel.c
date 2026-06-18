@@ -60,7 +60,7 @@ static void free_shm_handle(int32_t handle)
 }
 
 /* 获取句柄信息 */
-static shm_context_t* get_shm_context(int32_t handle)
+static shm_context_t *get_shm_context(int32_t handle)
 {
     if (handle >= 0 && handle < MAX_SHM_HANDLES && shm_table[handle].fd != -1) {
         return &shm_table[handle];
@@ -71,7 +71,10 @@ static shm_context_t* get_shm_context(int32_t handle)
 /**
  * @brief 创建或打开共享内存
  */
-int32_t OSAL_ShmCreate(const char *name, osal_size_t size, int32_t flags, osal_shm_t *shm)
+int32_t OSAL_ShmCreate(const char *name,
+                       osal_size_t size,
+                       int32_t flags,
+                       osal_shm_t *shm)
 {
     int32_t fd;
     int32_t oflag = 0;
@@ -91,7 +94,7 @@ int32_t OSAL_ShmCreate(const char *name, osal_size_t size, int32_t flags, osal_s
     } else if (flags & OSAL_SHM_RDONLY) {
         oflag |= O_RDONLY;
     } else {
-        oflag |= O_RDWR;  /* 默认读写 */
+        oflag |= O_RDWR; /* 默认读写 */
     }
 
     /* 打开或创建共享内存 */
@@ -122,8 +125,11 @@ int32_t OSAL_ShmCreate(const char *name, osal_size_t size, int32_t flags, osal_s
 /**
  * @brief 映射共享内存到进程地址空间
  */
-int32_t OSAL_ShmMap(osal_shm_t shm, osal_off_t offset, osal_size_t length,
-                    int32_t flags, void **addr)
+int32_t OSAL_ShmMap(osal_shm_t shm,
+                    osal_off_t offset,
+                    osal_size_t length,
+                    int32_t flags,
+                    void **addr)
 {
     shm_context_t *ctx;
     int32_t prot = 0;
@@ -149,7 +155,7 @@ int32_t OSAL_ShmMap(osal_shm_t shm, osal_off_t offset, osal_size_t length,
     } else if (flags & OSAL_SHM_RDONLY) {
         prot = PROT_READ;
     } else {
-        prot = PROT_READ | PROT_WRITE;  /* 默认读写 */
+        prot = PROT_READ | PROT_WRITE; /* 默认读写 */
     }
 
     /* 映射 */

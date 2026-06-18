@@ -22,7 +22,7 @@ extern "C" {
  * @brief 互斥锁属性内部结构
  */
 struct osal_mutex_attr_s {
-	osal_mutex_type_t type;  /* 互斥锁类型 */
+    osal_mutex_type_t type; /* 互斥锁类型 */
 };
 
 #ifdef __cplusplus

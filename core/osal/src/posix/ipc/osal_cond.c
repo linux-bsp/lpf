@@ -37,8 +37,9 @@ int32_t OSAL_pthread_cond_wait(osal_cond_t *cond, osal_mutex_t *mutex)
     return pthread_cond_wait(cond, mutex);
 }
 
-int32_t OSAL_pthread_cond_timedwait(osal_cond_t *cond, osal_mutex_t *mutex,
-                                     uint32_t timeout_ms)
+int32_t OSAL_pthread_cond_timedwait(osal_cond_t *cond,
+                                    osal_mutex_t *mutex,
+                                    uint32_t timeout_ms)
 {
     struct timespec ts;
 

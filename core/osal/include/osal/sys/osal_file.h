@@ -18,14 +18,14 @@ extern "C" {
  *===========================================================================*/
 
 #if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
-    /* POSIX 平台 */
-    #ifndef OSAL_MODE_T_DEFINED
-        #define OSAL_MODE_T_DEFINED
-        typedef mode_t osal_mode_t;
-    #endif
+/* POSIX 平台 */
+#ifndef OSAL_MODE_T_DEFINED
+#define OSAL_MODE_T_DEFINED
+typedef mode_t osal_mode_t;
+#endif
 #else
-    /* 其他平台（RTOS 等）- 需要提供对应的类型定义 */
-    #error "Unsupported platform - please define file types for your platform"
+/* 其他平台（RTOS 等）- 需要提供对应的类型定义 */
+#error "Unsupported platform - please define file types for your platform"
 #endif
 
 /*===========================================================================
@@ -33,52 +33,52 @@ extern "C" {
  *===========================================================================*/
 
 /* 标准文件描述符常量 */
-#define OSAL_STDIN_FILENO   0  /* 标准输入 */
-#define OSAL_STDOUT_FILENO  1  /* 标准输出 */
-#define OSAL_STDERR_FILENO  2  /* 标准错误 */
+#define OSAL_STDIN_FILENO 0  /* 标准输入 */
+#define OSAL_STDOUT_FILENO 1 /* 标准输出 */
+#define OSAL_STDERR_FILENO 2 /* 标准错误 */
 
 /* 访问模式 */
-#define OSAL_O_RDONLY    0x0000  /* 只读 */
-#define OSAL_O_WRONLY    0x0001  /* 只写 */
-#define OSAL_O_RDWR      0x0002  /* 读写 */
+#define OSAL_O_RDONLY 0x0000 /* 只读 */
+#define OSAL_O_WRONLY 0x0001 /* 只写 */
+#define OSAL_O_RDWR 0x0002   /* 读写 */
 
 /* 文件创建标志 */
-#define OSAL_O_CREAT     0x0040  /* 文件不存在则创建 */
-#define OSAL_O_EXCL      0x0080  /* 与O_CREAT一起使用，文件存在则失败 */
-#define OSAL_O_TRUNC     0x0200  /* 截断文件 */
-#define OSAL_O_APPEND    0x0400  /* 追加模式 */
+#define OSAL_O_CREAT 0x0040 /* 文件不存在则创建 */
+#define OSAL_O_EXCL 0x0080  /* 与O_CREAT一起使用，文件存在则失败 */
+#define OSAL_O_TRUNC 0x0200 /* 截断文件 */
+#define OSAL_O_APPEND 0x0400 /* 追加模式 */
 
 /* 文件状态标志 */
-#define OSAL_O_NONBLOCK  0x0800  /* 非阻塞模式 */
-#define OSAL_O_NOCTTY    0x8000  /* 不作为控制终端 */
+#define OSAL_O_NONBLOCK 0x0800 /* 非阻塞模式 */
+#define OSAL_O_NOCTTY 0x8000   /* 不作为控制终端 */
 
 /* 文件权限（对应mode_t） */
-#define OSAL_S_IRUSR     0x0100  /* 用户读权限 */
-#define OSAL_S_IWUSR     0x0080  /* 用户写权限 */
-#define OSAL_S_IXUSR     0x0040  /* 用户执行权限 */
-#define OSAL_S_IRGRP     0x0020  /* 组读权限 */
-#define OSAL_S_IWGRP     0x0010  /* 组写权限 */
-#define OSAL_S_IXGRP     0x0008  /* 组执行权限 */
-#define OSAL_S_IROTH     0x0004  /* 其他读权限 */
-#define OSAL_S_IWOTH     0x0002  /* 其他写权限 */
-#define OSAL_S_IXOTH     0x0001  /* 其他执行权限 */
+#define OSAL_S_IRUSR 0x0100 /* 用户读权限 */
+#define OSAL_S_IWUSR 0x0080 /* 用户写权限 */
+#define OSAL_S_IXUSR 0x0040 /* 用户执行权限 */
+#define OSAL_S_IRGRP 0x0020 /* 组读权限 */
+#define OSAL_S_IWGRP 0x0010 /* 组写权限 */
+#define OSAL_S_IXGRP 0x0008 /* 组执行权限 */
+#define OSAL_S_IROTH 0x0004 /* 其他读权限 */
+#define OSAL_S_IWOTH 0x0002 /* 其他写权限 */
+#define OSAL_S_IXOTH 0x0001 /* 其他执行权限 */
 
 /* lseek的whence参数 */
-#define OSAL_SEEK_SET    0x00  /* 从文件开头 */
-#define OSAL_SEEK_CUR    0x01  /* 从当前位置 */
-#define OSAL_SEEK_END    0x02  /* 从文件末尾 */
+#define OSAL_SEEK_SET 0x00 /* 从文件开头 */
+#define OSAL_SEEK_CUR 0x01 /* 从当前位置 */
+#define OSAL_SEEK_END 0x02 /* 从文件末尾 */
 
 /* fcntl命令 */
-#define OSAL_F_GETFL     0x03  /* 获取文件状态标志 */
-#define OSAL_F_SETFL     0x04  /* 设置文件状态标志 */
-#define OSAL_F_GETFD     0x01  /* 获取文件描述符标志 */
-#define OSAL_F_SETFD     0x02  /* 设置文件描述符标志 */
+#define OSAL_F_GETFL 0x03 /* 获取文件状态标志 */
+#define OSAL_F_SETFL 0x04 /* 设置文件状态标志 */
+#define OSAL_F_GETFD 0x01 /* 获取文件描述符标志 */
+#define OSAL_F_SETFD 0x02 /* 设置文件描述符标志 */
 
 /* access()的mode参数 */
-#define OSAL_F_OK    0x00  /* 文件存在 */
-#define OSAL_R_OK    0x04  /* 可读 */
-#define OSAL_W_OK    0x02  /* 可写 */
-#define OSAL_X_OK    0x01  /* 可执行 */
+#define OSAL_F_OK 0x00 /* 文件存在 */
+#define OSAL_R_OK 0x04 /* 可读 */
+#define OSAL_W_OK 0x02 /* 可写 */
+#define OSAL_X_OK 0x01 /* 可执行 */
 
 /*===========================================================================
  * 文件I/O操作 API

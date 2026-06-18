@@ -21,10 +21,9 @@
 /*
  * OSAL版本信息
  */
-#define OSAL_LITE_VERSION_MAJOR  0x1
-#define OSAL_LITE_VERSION_MINOR  0x0
-#define OSAL_LITE_VERSION_PATCH  0x0
-
+#define OSAL_LITE_VERSION_MAJOR 0x1
+#define OSAL_LITE_VERSION_MINOR 0x0
+#define OSAL_LITE_VERSION_PATCH 0x0
 
 /* IPC - 进程间通信 */
 #include "osal_platform.h"

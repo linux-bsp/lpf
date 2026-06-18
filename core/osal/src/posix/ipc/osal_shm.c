@@ -34,7 +34,12 @@ int32_t OSAL_ftruncate(int32_t fd, osal_off_t length)
     return ftruncate(fd, length);
 }
 
-void* OSAL_mmap(void *addr, osal_size_t length, int32_t prot, int32_t flags, int32_t fd, osal_off_t offset)
+void *OSAL_mmap(void *addr,
+                osal_size_t length,
+                int32_t prot,
+                int32_t flags,
+                int32_t fd,
+                osal_off_t offset)
 {
     return mmap(addr, length, prot, flags, fd, offset);
 }

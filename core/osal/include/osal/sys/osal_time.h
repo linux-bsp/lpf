@@ -16,22 +16,22 @@ extern "C" {
  *===========================================================================*/
 
 /** 毫秒到秒的转换因子 */
-#define OSAL_MSEC_PER_SEC       0x3E8U
+#define OSAL_MSEC_PER_SEC 0x3E8U
 
 /** 微秒到秒的转换因子 */
-#define OSAL_USEC_PER_SEC       0xF4240U
+#define OSAL_USEC_PER_SEC 0xF4240U
 
 /** 纳秒到秒的转换因子 */
-#define OSAL_NSEC_PER_SEC       0x3B9ACA00U
+#define OSAL_NSEC_PER_SEC 0x3B9ACA00U
 
 /** 微秒到毫秒的转换因子 */
-#define OSAL_USEC_PER_MSEC      0x3E8U
+#define OSAL_USEC_PER_MSEC 0x3E8U
 
 /** 纳秒到毫秒的转换因子 */
-#define OSAL_NSEC_PER_MSEC      0xF4240U
+#define OSAL_NSEC_PER_MSEC 0xF4240U
 
 /** 纳秒到微秒的转换因子 */
-#define OSAL_NSEC_PER_USEC      0x3E8U
+#define OSAL_NSEC_PER_USEC 0x3E8U
 
 /*===========================================================================
  * 时间延迟 API

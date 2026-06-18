@@ -7,7 +7,8 @@
 #include <errno.h>
 #include <time.h>
 
-int32_t OSAL_pthread_mutex_init(osal_mutex_t *mutex, const osal_mutexattr_t *attr)
+int32_t OSAL_pthread_mutex_init(osal_mutex_t *mutex,
+                                const osal_mutexattr_t *attr)
 {
     if (mutex == NULL) {
         errno = EINVAL;
@@ -114,7 +115,8 @@ int32_t OSAL_pthread_mutexattr_settype(osal_mutexattr_t *attr, int32_t type)
     return pthread_mutexattr_settype(attr, type);
 }
 
-int32_t OSAL_pthread_mutexattr_gettype(const osal_mutexattr_t *attr, int32_t *type)
+int32_t OSAL_pthread_mutexattr_gettype(const osal_mutexattr_t *attr,
+                                       int32_t *type)
 {
     if (attr == NULL || type == NULL) {
         errno = EINVAL;

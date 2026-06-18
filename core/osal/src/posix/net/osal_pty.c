@@ -11,7 +11,9 @@ int32_t OSAL_openpty(int32_t *master_fd,
                      const void *termios_p,
                      const void *winsize_p)
 {
-    return openpty(master_fd, slave_fd, name,
+    return openpty(master_fd,
+                   slave_fd,
+                   name,
                    (const struct termios *)termios_p,
                    (const struct winsize *)winsize_p);
 }

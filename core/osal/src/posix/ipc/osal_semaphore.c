@@ -88,7 +88,7 @@ int32_t OSAL_sem_timedwait(osal_sem_t *sem, uint32_t timeout_ms)
         }
 
         /* 短暂休眠避免 CPU 占用过高 */
-        usleep(1000);  /* 1ms */
+        usleep(1000); /* 1ms */
     }
 #else
     /* Linux 使用 sem_timedwait */

@@ -21,7 +21,8 @@ int32_t OSAL_socket(int32_t domain, int32_t type, int32_t protocol)
     return result;
 }
 
-int32_t OSAL_bind(int32_t sockfd, const osal_sockaddr_t *addr, osal_size_t addrlen)
+int32_t
+OSAL_bind(int32_t sockfd, const osal_sockaddr_t *addr, osal_size_t addrlen)
 {
     union {
         const osal_sockaddr_t *osal_addr;
@@ -54,7 +55,8 @@ int32_t OSAL_accept(int32_t sockfd, osal_sockaddr_t *addr, osal_size_t *addrlen)
     return result;
 }
 
-int32_t OSAL_connect(int32_t sockfd, const osal_sockaddr_t *addr, osal_size_t addrlen)
+int32_t
+OSAL_connect(int32_t sockfd, const osal_sockaddr_t *addr, osal_size_t addrlen)
 {
     union {
         const osal_sockaddr_t *osal_addr;
@@ -65,18 +67,24 @@ int32_t OSAL_connect(int32_t sockfd, const osal_sockaddr_t *addr, osal_size_t ad
     return connect(sockfd, addr_union.posix_addr, (socklen_t)addrlen);
 }
 
-osal_ssize_t OSAL_send(int32_t sockfd, const void *buf, osal_size_t len, int32_t flags)
+osal_ssize_t
+OSAL_send(int32_t sockfd, const void *buf, osal_size_t len, int32_t flags)
 {
     return send(sockfd, buf, len, flags);
 }
 
-osal_ssize_t OSAL_recv(int32_t sockfd, void *buf, osal_size_t len, int32_t flags)
+osal_ssize_t
+OSAL_recv(int32_t sockfd, void *buf, osal_size_t len, int32_t flags)
 {
     return recv(sockfd, buf, len, flags);
 }
 
-osal_ssize_t OSAL_sendto(int32_t sockfd, const void *buf, osal_size_t len, int32_t flags,
-                  const osal_sockaddr_t *dest_addr, osal_size_t addrlen)
+osal_ssize_t OSAL_sendto(int32_t sockfd,
+                         const void *buf,
+                         osal_size_t len,
+                         int32_t flags,
+                         const osal_sockaddr_t *dest_addr,
+                         osal_size_t addrlen)
 {
     union {
         const osal_sockaddr_t *osal_addr;
@@ -84,11 +92,20 @@ osal_ssize_t OSAL_sendto(int32_t sockfd, const void *buf, osal_size_t len, int32
     } addr_union;
 
     addr_union.osal_addr = dest_addr;
-    return sendto(sockfd, buf, len, flags, addr_union.posix_addr, (socklen_t)addrlen);
+    return sendto(sockfd,
+                  buf,
+                  len,
+                  flags,
+                  addr_union.posix_addr,
+                  (socklen_t)addrlen);
 }
 
-osal_ssize_t OSAL_recvfrom(int32_t sockfd, void *buf, osal_size_t len, int32_t flags,
-                    osal_sockaddr_t *src_addr, osal_size_t *addrlen)
+osal_ssize_t OSAL_recvfrom(int32_t sockfd,
+                           void *buf,
+                           osal_size_t len,
+                           int32_t flags,
+                           osal_sockaddr_t *src_addr,
+                           osal_size_t *addrlen)
 {
     socklen_t slen;
     union {
@@ -99,7 +116,12 @@ osal_ssize_t OSAL_recvfrom(int32_t sockfd, void *buf, osal_size_t len, int32_t f
 
     slen = addrlen ? (socklen_t)(*addrlen) : 0;
     addr_union.osal_addr = src_addr;
-    result = recvfrom(sockfd, buf, len, flags, addr_union.posix_addr, addrlen ? &slen : NULL);
+    result = recvfrom(sockfd,
+                      buf,
+                      len,
+                      flags,
+                      addr_union.posix_addr,
+                      addrlen ? &slen : NULL);
     if (addrlen) {
         *addrlen = (osal_size_t)slen;
     }
@@ -116,14 +138,20 @@ int32_t OSAL_shutdown(int32_t sockfd, int32_t how)
  * Socket选项操作
  *===========================================================================*/
 
-int32_t OSAL_setsockopt(int32_t sockfd, int32_t level, int32_t optname,
-                      const void *optval, osal_size_t optlen)
+int32_t OSAL_setsockopt(int32_t sockfd,
+                        int32_t level,
+                        int32_t optname,
+                        const void *optval,
+                        osal_size_t optlen)
 {
     return setsockopt(sockfd, level, optname, optval, (socklen_t)optlen);
 }
 
-int32_t OSAL_getsockopt(int32_t sockfd, int32_t level, int32_t optname,
-                      void *optval, osal_size_t *optlen)
+int32_t OSAL_getsockopt(int32_t sockfd,
+                        int32_t level,
+                        int32_t optname,
+                        void *optval,
+                        osal_size_t *optlen)
 {
     socklen_t len = (socklen_t)(*optlen);
     int result = getsockopt(sockfd, level, optname, optval, &len);
@@ -185,7 +213,8 @@ int32_t OSAL_inet_pton(int32_t af, const char *src, void *dst)
     return result;
 }
 
-const char *OSAL_inet_ntop(int32_t af, const void *src, char *dst, uint32_t size)
+const char *
+OSAL_inet_ntop(int32_t af, const void *src, char *dst, uint32_t size)
 {
     socklen_t len;
 

@@ -15,12 +15,11 @@
 #ifndef OSAL_STDIO_H
 #define OSAL_STDIO_H
 
-
 /*
  * 标准输入输出
  */
 int32_t OSAL_getchar(void);
-char* OSAL_fgets(char *str, osal_size_t size, void *stream);
+char *OSAL_fgets(char *str, osal_size_t size, void *stream);
 int32_t OSAL_fflush(void *stream);
 
 /*

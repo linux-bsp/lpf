@@ -17,11 +17,11 @@ extern "C" {
  * @brief 线程属性内部结构
  */
 struct osal_thread_attr_s {
-	size_t stack_size;      /* 栈大小，0表示默认 */
-	bool   detached;        /* 是否分离 */
-	int32_t inherit_sched;  /* 是否继承调度属性（0=不继承，1=继承） */
-	int32_t sched_policy;   /* 调度策略（SCHED_OTHER/FIFO/RR） */
-	int32_t sched_priority; /* 调度优先级（1-99） */
+    size_t stack_size; /* 栈大小，0表示默认 */
+    bool detached;     /* 是否分离 */
+    int32_t inherit_sched; /* 是否继承调度属性（0=不继承，1=继承） */
+    int32_t sched_policy;   /* 调度策略（SCHED_OTHER/FIFO/RR） */
+    int32_t sched_priority; /* 调度优先级（1-99） */
 };
 
 #ifdef __cplusplus

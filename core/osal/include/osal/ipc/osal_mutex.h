@@ -18,12 +18,12 @@ extern "C" {
  *===========================================================================*/
 
 #if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
-    /* POSIX 平台 */
-    typedef pthread_mutex_t     osal_mutex_t;
-    typedef pthread_mutexattr_t osal_mutexattr_t;
+/* POSIX 平台 */
+typedef pthread_mutex_t osal_mutex_t;
+typedef pthread_mutexattr_t osal_mutexattr_t;
 #else
-    /* 其他平台（RTOS 等）- 需要提供对应的类型定义 */
-    #error "Unsupported platform - please define mutex types for your platform"
+/* 其他平台（RTOS 等）- 需要提供对应的类型定义 */
+#error "Unsupported platform - please define mutex types for your platform"
 #endif
 
 /*===========================================================================
@@ -38,7 +38,8 @@ extern "C" {
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_mutex_init(osal_mutex_t *mutex, const osal_mutexattr_t *attr);
+int32_t OSAL_pthread_mutex_init(osal_mutex_t *mutex,
+                                const osal_mutexattr_t *attr);
 
 /**
  * @brief 销毁互斥锁
@@ -126,7 +127,8 @@ int32_t OSAL_pthread_mutexattr_settype(osal_mutexattr_t *attr, int32_t type);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_mutexattr_gettype(const osal_mutexattr_t *attr, int32_t *type);
+int32_t OSAL_pthread_mutexattr_gettype(const osal_mutexattr_t *attr,
+                                       int32_t *type);
 
 #ifdef __cplusplus
 }

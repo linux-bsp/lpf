@@ -18,12 +18,13 @@ extern "C" {
  *===========================================================================*/
 
 #if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
-    /* POSIX 平台 */
-    typedef pthread_cond_t     osal_cond_t;
-    typedef pthread_condattr_t osal_condattr_t;
+/* POSIX 平台 */
+typedef pthread_cond_t osal_cond_t;
+typedef pthread_condattr_t osal_condattr_t;
 #else
-    /* 其他平台（RTOS 等）- 需要提供对应的类型定义 */
-    #error "Unsupported platform - please define condition variable types for your platform"
+/* 其他平台（RTOS 等）- 需要提供对应的类型定义 */
+#error \
+    "Unsupported platform - please define condition variable types for your platform"
 #endif
 
 /*===========================================================================
@@ -68,8 +69,9 @@ int32_t OSAL_pthread_cond_wait(osal_cond_t *cond, osal_mutex_t *mutex);
  * @return 0 成功
  * @return -1 失败（ETIMEDOUT 表示超时）
  */
-int32_t OSAL_pthread_cond_timedwait(osal_cond_t *cond, osal_mutex_t *mutex,
-                                     uint32_t timeout_ms);
+int32_t OSAL_pthread_cond_timedwait(osal_cond_t *cond,
+                                    osal_mutex_t *mutex,
+                                    uint32_t timeout_ms);
 
 /**
  * @brief 唤醒一个等待线程

@@ -26,9 +26,9 @@ typedef int32_t osal_shm_t;
  * 标志定义
  *===========================================================================*/
 
-#define OSAL_SHM_CREATE  0x0001  /* 创建共享内存 */
-#define OSAL_SHM_RDWR    0x0002  /* 读写权限 */
-#define OSAL_SHM_RDONLY  0x0004  /* 只读权限 */
+#define OSAL_SHM_CREATE 0x0001 /* 创建共享内存 */
+#define OSAL_SHM_RDWR 0x0002   /* 读写权限 */
+#define OSAL_SHM_RDONLY 0x0004 /* 只读权限 */
 
 /*===========================================================================
  * API 函数
@@ -44,7 +44,10 @@ typedef int32_t osal_shm_t;
  * @return OSAL_SUCCESS 成功
  * @return 其他值 失败
  */
-int32_t OSAL_ShmCreate(const char *name, osal_size_t size, int32_t flags, osal_shm_t *shm);
+int32_t OSAL_ShmCreate(const char *name,
+                       osal_size_t size,
+                       int32_t flags,
+                       osal_shm_t *shm);
 
 /**
  * @brief 映射共享内存到进程地址空间
@@ -57,8 +60,11 @@ int32_t OSAL_ShmCreate(const char *name, osal_size_t size, int32_t flags, osal_s
  * @return OSAL_SUCCESS 成功
  * @return 其他值 失败
  */
-int32_t OSAL_ShmMap(osal_shm_t shm, osal_off_t offset, osal_size_t length,
-                    int32_t flags, void **addr);
+int32_t OSAL_ShmMap(osal_shm_t shm,
+                    osal_off_t offset,
+                    osal_size_t length,
+                    int32_t flags,
+                    void **addr);
 
 /**
  * @brief 解除共享内存映射

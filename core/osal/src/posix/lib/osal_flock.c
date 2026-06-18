@@ -19,10 +19,10 @@
  * @brief 文件锁内部结构
  */
 struct osal_flock_s {
-    int fd;                       /* 锁文件描述符 */
-    char lock_file[256];          /* 锁文件路径 */
+    int fd;                         /* 锁文件描述符 */
+    char lock_file[256];            /* 锁文件路径 */
     osal_flock_type_t current_type; /* 当前锁类型 */
-    bool is_locked;               /* 是否已加锁 */
+    bool is_locked;                 /* 是否已加锁 */
 };
 
 /*===========================================================================
@@ -40,7 +40,7 @@ static int32_t flock_do_lock(int fd, osal_flock_type_t type, int cmd)
     lock.l_type = (type == OSAL_FLOCK_SHARED) ? F_RDLCK : F_WRLCK;
     lock.l_whence = SEEK_SET;
     lock.l_start = 0;
-    lock.l_len = 0;  /* 锁整个文件 */
+    lock.l_len = 0; /* 锁整个文件 */
 
     if (fcntl(fd, cmd, &lock) == -1) {
         if (errno == EACCES || errno == EAGAIN) {
@@ -175,8 +175,9 @@ int32_t OSAL_flock_try_lock(osal_flock_t *flock, osal_flock_type_t type)
 /**
  * @brief 带超时的加锁
  */
-int32_t OSAL_flock_timed_lock(osal_flock_t *flock, osal_flock_type_t type,
-                            uint32_t timeout_ms)
+int32_t OSAL_flock_timed_lock(osal_flock_t *flock,
+                              osal_flock_type_t type,
+                              uint32_t timeout_ms)
 {
     if (!flock) {
         return OSAL_ERR_INVALID_POINTER;
@@ -215,7 +216,7 @@ int32_t OSAL_flock_timed_lock(osal_flock_t *flock, osal_flock_type_t type,
         /* 短暂休眠，避免 CPU 空转 */
         struct timespec sleep_time = {
             .tv_sec = 0,
-            .tv_nsec = 10000000  /* 10ms */
+            .tv_nsec = 10000000 /* 10ms */
         };
         nanosleep(&sleep_time, NULL);
     }
@@ -231,7 +232,7 @@ int32_t OSAL_flock_unlock(osal_flock_t *flock)
     }
 
     if (!flock->is_locked) {
-        return OSAL_SUCCESS;  /* 已经解锁 */
+        return OSAL_SUCCESS; /* 已经解锁 */
     }
 
     int32_t ret = flock_do_unlock(flock->fd);

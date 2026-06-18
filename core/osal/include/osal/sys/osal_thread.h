@@ -19,18 +19,18 @@ extern "C" {
  *===========================================================================*/
 
 #if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
-    /* POSIX 平台 */
-    typedef pthread_t      osal_thread_t;
-    typedef pthread_attr_t osal_threadattr_t;
+/* POSIX 平台 */
+typedef pthread_t osal_thread_t;
+typedef pthread_attr_t osal_threadattr_t;
 
-    /* 调度参数类型（与 osal_sched.h 共享） */
-    #ifndef OSAL_SCHED_PARAM_T_DEFINED
-        #define OSAL_SCHED_PARAM_T_DEFINED
-        typedef struct sched_param osal_sched_param_t;
-    #endif
+/* 调度参数类型（与 osal_sched.h 共享） */
+#ifndef OSAL_SCHED_PARAM_T_DEFINED
+#define OSAL_SCHED_PARAM_T_DEFINED
+typedef struct sched_param osal_sched_param_t;
+#endif
 #else
-    /* 其他平台（RTOS 等）- 需要提供对应的类型定义 */
-    #error "Unsupported platform - please define thread types for your platform"
+/* 其他平台（RTOS 等）- 需要提供对应的类型定义 */
+#error "Unsupported platform - please define thread types for your platform"
 #endif
 
 /*===========================================================================
@@ -124,7 +124,8 @@ int32_t OSAL_pthread_attr_destroy(osal_threadattr_t *attr);
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_attr_setstacksize(osal_threadattr_t *attr, osal_size_t stacksize);
+int32_t OSAL_pthread_attr_setstacksize(osal_threadattr_t *attr,
+                                       osal_size_t stacksize);
 
 /**
  * @brief 获取线程栈大小
@@ -134,17 +135,20 @@ int32_t OSAL_pthread_attr_setstacksize(osal_threadattr_t *attr, osal_size_t stac
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_attr_getstacksize(const osal_threadattr_t *attr, osal_size_t *stacksize);
+int32_t OSAL_pthread_attr_getstacksize(const osal_threadattr_t *attr,
+                                       osal_size_t *stacksize);
 
 /**
  * @brief 设置线程分离状态
  *
  * @param[in] attr 属性指针
- * @param[in] detachstate 分离状态（PTHREAD_CREATE_JOINABLE/PTHREAD_CREATE_DETACHED）
+ * @param[in] detachstate
+ * 分离状态（PTHREAD_CREATE_JOINABLE/PTHREAD_CREATE_DETACHED）
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_attr_setdetachstate(osal_threadattr_t *attr, int32_t detachstate);
+int32_t OSAL_pthread_attr_setdetachstate(osal_threadattr_t *attr,
+                                         int32_t detachstate);
 
 /**
  * @brief 获取线程分离状态
@@ -154,7 +158,8 @@ int32_t OSAL_pthread_attr_setdetachstate(osal_threadattr_t *attr, int32_t detach
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_attr_getdetachstate(const osal_threadattr_t *attr, int32_t *detachstate);
+int32_t OSAL_pthread_attr_getdetachstate(const osal_threadattr_t *attr,
+                                         int32_t *detachstate);
 
 /**
  * @brief 设置线程调度策略
@@ -164,7 +169,8 @@ int32_t OSAL_pthread_attr_getdetachstate(const osal_threadattr_t *attr, int32_t 
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_attr_setschedpolicy(osal_threadattr_t *attr, int32_t policy);
+int32_t OSAL_pthread_attr_setschedpolicy(osal_threadattr_t *attr,
+                                         int32_t policy);
 
 /**
  * @brief 设置线程调度参数
@@ -174,7 +180,8 @@ int32_t OSAL_pthread_attr_setschedpolicy(osal_threadattr_t *attr, int32_t policy
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_attr_setschedparam(osal_threadattr_t *attr, const osal_sched_param_t *param);
+int32_t OSAL_pthread_attr_setschedparam(osal_threadattr_t *attr,
+                                        const osal_sched_param_t *param);
 
 #ifdef __cplusplus
 }

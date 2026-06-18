@@ -11,7 +11,9 @@
 #include <sched.h>
 #include <errno.h>
 
-int32_t OSAL_pthread_setschedparam(osal_thread_t thread, int32_t policy, int32_t priority)
+int32_t OSAL_pthread_setschedparam(osal_thread_t thread,
+                                   int32_t policy,
+                                   int32_t priority)
 {
     osal_sched_param_t param;
     param.sched_priority = priority;
@@ -19,7 +21,9 @@ int32_t OSAL_pthread_setschedparam(osal_thread_t thread, int32_t policy, int32_t
     return pthread_setschedparam(thread, policy, &param);
 }
 
-int32_t OSAL_pthread_getschedparam(osal_thread_t thread, int32_t *policy, int32_t *priority)
+int32_t OSAL_pthread_getschedparam(osal_thread_t thread,
+                                   int32_t *policy,
+                                   int32_t *priority)
 {
     osal_sched_param_t param;
     int pol;

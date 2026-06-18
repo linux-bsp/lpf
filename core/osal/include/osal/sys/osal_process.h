@@ -22,13 +22,13 @@
  *===========================================================================*/
 
 #if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
-    /* POSIX 平台 */
-    typedef pid_t osal_pid_t;      /* 进程ID */
-    typedef uid_t osal_uid_t;      /* 用户ID */
-    typedef gid_t osal_gid_t;      /* 组ID */
+/* POSIX 平台 */
+typedef pid_t osal_pid_t; /* 进程ID */
+typedef uid_t osal_uid_t; /* 用户ID */
+typedef gid_t osal_gid_t; /* 组ID */
 #else
-    /* 其他平台（RTOS 等）- 需要提供对应的类型定义 */
-    #error "Unsupported platform - please define process types for your platform"
+/* 其他平台（RTOS 等）- 需要提供对应的类型定义 */
+#error "Unsupported platform - please define process types for your platform"
 #endif
 
 /*===========================================================================
@@ -45,6 +45,6 @@ int32_t OSAL_execvp(const char *file, char *const argv[]);
 int32_t OSAL_waitpid(osal_pid_t pid, int32_t *status, int32_t options);
 
 /* 等待选项 */
-#define OSAL_WNOHANG  0x01  /* 非阻塞等待 */
+#define OSAL_WNOHANG 0x01 /* 非阻塞等待 */
 
 #endif /* OSAL_PROCESS_H */

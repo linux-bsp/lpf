@@ -6,7 +6,8 @@
 #include <pthread.h>
 #include <errno.h>
 
-int32_t OSAL_pthread_rwlock_init(osal_rwlock_t *rwlock, const osal_rwlockattr_t *attr)
+int32_t OSAL_pthread_rwlock_init(osal_rwlock_t *rwlock,
+                                 const osal_rwlockattr_t *attr)
 {
     if (rwlock == NULL) {
         errno = EINVAL;

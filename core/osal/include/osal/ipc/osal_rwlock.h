@@ -18,12 +18,12 @@ extern "C" {
  *===========================================================================*/
 
 #if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
-    /* POSIX 平台 */
-    typedef pthread_rwlock_t     osal_rwlock_t;
-    typedef pthread_rwlockattr_t osal_rwlockattr_t;
+/* POSIX 平台 */
+typedef pthread_rwlock_t osal_rwlock_t;
+typedef pthread_rwlockattr_t osal_rwlockattr_t;
 #else
-    /* 其他平台（RTOS 等）- 需要提供对应的类型定义 */
-    #error "Unsupported platform - please define rwlock types for your platform"
+/* 其他平台（RTOS 等）- 需要提供对应的类型定义 */
+#error "Unsupported platform - please define rwlock types for your platform"
 #endif
 
 /*===========================================================================
@@ -38,7 +38,8 @@ extern "C" {
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_rwlock_init(osal_rwlock_t *rwlock, const osal_rwlockattr_t *attr);
+int32_t OSAL_pthread_rwlock_init(osal_rwlock_t *rwlock,
+                                 const osal_rwlockattr_t *attr);
 
 /**
  * @brief 销毁读写锁

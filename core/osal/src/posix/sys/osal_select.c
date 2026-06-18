@@ -18,21 +18,26 @@ void OSAL_FD_ZERO(osal_fd_set_t *set)
 void OSAL_FD_SET(int32_t fd, osal_fd_set_t *set)
 {
     if (fd >= 0 && fd < OSAL_FD_SETSIZE) {
-        set->fds_bits[fd / OSAL_FD_BITS_PER_WORD] |= (1U << (fd % OSAL_FD_BITS_PER_WORD));
+        set->fds_bits[fd / OSAL_FD_BITS_PER_WORD] |=
+            (1U << (fd % OSAL_FD_BITS_PER_WORD));
     }
 }
 
 void OSAL_FD_CLR(int32_t fd, osal_fd_set_t *set)
 {
     if (fd >= 0 && fd < OSAL_FD_SETSIZE) {
-        set->fds_bits[fd / OSAL_FD_BITS_PER_WORD] &= ~(1U << (fd % OSAL_FD_BITS_PER_WORD));
+        set->fds_bits[fd / OSAL_FD_BITS_PER_WORD] &=
+            ~(1U << (fd % OSAL_FD_BITS_PER_WORD));
     }
 }
 
 int32_t OSAL_FD_ISSET(int32_t fd, const osal_fd_set_t *set)
 {
     if (fd >= 0 && fd < OSAL_FD_SETSIZE) {
-        return (set->fds_bits[fd / OSAL_FD_BITS_PER_WORD] & (1U << (fd % OSAL_FD_BITS_PER_WORD))) ? 1 : 0;
+        return (set->fds_bits[fd / OSAL_FD_BITS_PER_WORD] &
+                (1U << (fd % OSAL_FD_BITS_PER_WORD)))
+                   ? 1
+                   : 0;
     }
     return 0;
 }
@@ -41,8 +46,11 @@ int32_t OSAL_FD_ISSET(int32_t fd, const osal_fd_set_t *set)
  * select系统调用实现
  *===========================================================================*/
 
-int32_t OSAL_select(int32_t nfds, osal_fd_set_t *readfds, osal_fd_set_t *writefds,
-                  osal_fd_set_t *exceptfds, osal_timeval_t *timeout)
+int32_t OSAL_select(int32_t nfds,
+                    osal_fd_set_t *readfds,
+                    osal_fd_set_t *writefds,
+                    osal_fd_set_t *exceptfds,
+                    osal_timeval_t *timeout)
 {
     struct timeval tv;
     struct timeval *ptv = NULL;
@@ -62,8 +70,11 @@ int32_t OSAL_select(int32_t nfds, osal_fd_set_t *readfds, osal_fd_set_t *writefd
     write_union.osal_set = writefds;
     except_union.osal_set = exceptfds;
 
-    result = select(nfds, read_union.posix_set, write_union.posix_set,
-                    except_union.posix_set, ptv);
+    result = select(nfds,
+                    read_union.posix_set,
+                    write_union.posix_set,
+                    except_union.posix_set,
+                    ptv);
 
     if (timeout && ptv) {
         timeout->tv_sec = tv.tv_sec;
@@ -73,9 +84,12 @@ int32_t OSAL_select(int32_t nfds, osal_fd_set_t *readfds, osal_fd_set_t *writefd
     return result;
 }
 
-int32_t OSAL_pselect(int32_t nfds, osal_fd_set_t *readfds, osal_fd_set_t *writefds,
-                   osal_fd_set_t *exceptfds, const osal_timespec_t *timeout,
-                   const void *sigmask)
+int32_t OSAL_pselect(int32_t nfds,
+                     osal_fd_set_t *readfds,
+                     osal_fd_set_t *writefds,
+                     osal_fd_set_t *exceptfds,
+                     const osal_timespec_t *timeout,
+                     const void *sigmask)
 {
     struct timespec ts;
     struct timespec *pts;
@@ -102,8 +116,12 @@ int32_t OSAL_pselect(int32_t nfds, osal_fd_set_t *readfds, osal_fd_set_t *writef
     except_union.osal_set = exceptfds;
     sigmask_union.osal_mask = sigmask;
 
-    result = pselect(nfds, read_union.posix_set, write_union.posix_set,
-                     except_union.posix_set, pts, sigmask_union.posix_mask);
+    result = pselect(nfds,
+                     read_union.posix_set,
+                     write_union.posix_set,
+                     except_union.posix_set,
+                     pts,
+                     sigmask_union.posix_mask);
 
     return result;
 }

@@ -4,7 +4,7 @@
  * 修复：统一错误码返回，符合 OSAL 规范
  ************************************************************************/
 
-#define _DEFAULT_SOURCE  /* 启用usleep等函数 */
+#define _DEFAULT_SOURCE /* 启用usleep等函数 */
 #include "osal.h"
 #include <unistd.h>
 #include <time.h>
@@ -49,7 +49,8 @@ int64_t OSAL_get_monotonic_time(void)
     if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0)
         return -1;
 
-    return (int64_t)ts.tv_sec * OSAL_USEC_PER_SEC + ts.tv_nsec / OSAL_NSEC_PER_USEC;
+    return (int64_t)ts.tv_sec * OSAL_USEC_PER_SEC +
+           ts.tv_nsec / OSAL_NSEC_PER_USEC;
 }
 
 int64_t OSAL_get_boot_time(void)
@@ -59,7 +60,8 @@ int64_t OSAL_get_boot_time(void)
     if (clock_gettime(CLOCK_BOOTTIME, &ts) != 0)
         return -1;
 
-    return (int64_t)ts.tv_sec * OSAL_USEC_PER_SEC + ts.tv_nsec / OSAL_NSEC_PER_USEC;
+    return (int64_t)ts.tv_sec * OSAL_USEC_PER_SEC +
+           ts.tv_nsec / OSAL_NSEC_PER_USEC;
 #else
     /* macOS不支持CLOCK_BOOTTIME，降级到CLOCK_MONOTONIC */
     return OSAL_get_monotonic_time();

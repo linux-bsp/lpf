@@ -83,7 +83,9 @@ int32_t OSAL_sigwait(const sigset_t *set, int32_t *sig)
     return sigwait(set, sig);
 }
 
-int32_t OSAL_sigaction(int32_t signum, const struct sigaction *act, struct sigaction *oldact)
+int32_t OSAL_sigaction(int32_t signum,
+                       const struct sigaction *act,
+                       struct sigaction *oldact)
 {
     return sigaction(signum, act, oldact);
 }
