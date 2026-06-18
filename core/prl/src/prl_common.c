@@ -7,14 +7,13 @@
 
 #include "prl.h"
 
-
 /* 全局序列号（非静态，供 prl_api.c 访问） */
 osal_atomic_uint32_t g_seq_number;
 
 /* 初始化序列号（需要在模块加载时调用） */
 __attribute__((constructor)) static void prl_init_seq(void)
 {
-	OSAL_atomic_init(&g_seq_number, 0);
+    OSAL_atomic_init(&g_seq_number, 0);
 }
 
 /*===========================================================================
@@ -37,8 +36,11 @@ uint32_t prl_get_timestamp(void)
  * 协议头初始化和验证
  *===========================================================================*/
 
-void prl_init_header(prl_header_t *hdr, uint8_t dev_type, uint8_t msg_type,
-                     uint16_t payload_len, uint8_t flags)
+void prl_init_header(prl_header_t *hdr,
+                     uint8_t dev_type,
+                     uint8_t msg_type,
+                     uint16_t payload_len,
+                     uint8_t flags)
 {
     OSAL_memset(hdr, 0, OSAL_sizeof(prl_header_t));
 
@@ -64,19 +66,19 @@ int prl_validate_header(const prl_header_t *hdr, uint8_t expected_type)
     length = OSAL_ntohs(hdr->length);
 
     if (magic != PRL_MAGIC) {
-        return OSAL_EPROTO;  /* 协议错误：魔数不匹配 */
+        return OSAL_EPROTO; /* 协议错误：魔数不匹配 */
     }
 
     if ((hdr->version >> 4) != PRL_VERSION_MAJOR) {
-        return OSAL_EPROTO;  /* 协议错误：版本不匹配 */
+        return OSAL_EPROTO; /* 协议错误：版本不匹配 */
     }
 
     if (expected_type != 0 && hdr->msg_type != expected_type) {
-        return OSAL_EINVAL;  /* 无效的设备类型 */
+        return OSAL_EINVAL; /* 无效的设备类型 */
     }
 
     if (length > PRL_MAX_PAYLOAD_SIZE) {
-        return OSAL_EINVAL;  /* 无效的长度 */
+        return OSAL_EINVAL; /* 无效的长度 */
     }
 
     return OSAL_SUCCESS;
@@ -103,7 +105,7 @@ void prl_set_packet_crc(uint8_t *packet, size_t total_len)
 bool prl_verify_packet_crc(const uint8_t *packet, size_t total_len)
 {
     const prl_header_t *hdr = (const prl_header_t *)packet;
-    uint16_t received_crc = OSAL_ntohs(hdr->crc16);  /* 转换为主机字节序 */
+    uint16_t received_crc = OSAL_ntohs(hdr->crc16); /* 转换为主机字节序 */
 
     /* 分段计算 CRC，避免动态内存分配
      * CRC 字段位于协议头的偏移 16-17 字节处
@@ -122,12 +124,13 @@ bool prl_verify_packet_crc(const uint8_t *packet, size_t total_len)
     crc = OSAL_crc16_ccitt_update(crc, packet, crc_offset);
 
     /* 第二段：CRC 字段作为 0x0000 处理 */
-    uint8_t zeros[2] = {0x00, 0x00};
+    uint8_t zeros[2] = { 0x00, 0x00 };
     crc = OSAL_crc16_ccitt_update(crc, zeros, OSAL_sizeof(zeros));
 
     /* 第三段：从 CRC 字段之后到报文结束 */
-    crc = OSAL_crc16_ccitt_update(crc, packet + crc_offset + 2,
-                                   total_len - crc_offset - 2);
+    crc = OSAL_crc16_ccitt_update(crc,
+                                  packet + crc_offset + 2,
+                                  total_len - crc_offset - 2);
 
     return (crc == received_crc);
 }

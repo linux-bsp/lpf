@@ -16,33 +16,31 @@
 
 /* ========== Protocol Constants ========== */
 
-#define PRL_MAGIC              0xAA55
-#define PRL_VERSION            0x01
-#define PRL_VERSION_MAJOR      0x00
-#define PRL_VERSION_MINOR      0x01
-#define PRL_HEADER_SIZE        20
-#define PRL_MAX_PAYLOAD_SIZE   1024
-#define PRL_MAX_PACKET_SIZE    (PRL_HEADER_SIZE + PRL_MAX_PAYLOAD_SIZE)
+#define PRL_MAGIC 0xAA55
+#define PRL_VERSION 0x01
+#define PRL_VERSION_MAJOR 0x00
+#define PRL_VERSION_MINOR 0x01
+#define PRL_HEADER_SIZE 20
+#define PRL_MAX_PAYLOAD_SIZE 1024
+#define PRL_MAX_PACKET_SIZE (PRL_HEADER_SIZE + PRL_MAX_PAYLOAD_SIZE)
 
 /* ========== Device Types ========== */
 
-typedef enum {
-	PRL_DEV_TYPE_MCU = 0x01
-} prl_dev_type_t;
+typedef enum { PRL_DEV_TYPE_MCU = 0x01 } prl_dev_type_t;
 
 /* ========== Protocol Header ========== */
 
 typedef struct {
-	uint16_t magic;
-	uint8_t  version;
-	uint8_t  dev_type;
-	uint8_t  msg_type;
-	uint8_t  flags;
-	uint16_t length;
-	uint32_t seq;
-	uint32_t timestamp;
-	uint16_t crc16;
-	uint16_t reserved;
+    uint16_t magic;
+    uint8_t version;
+    uint8_t dev_type;
+    uint8_t msg_type;
+    uint8_t flags;
+    uint16_t length;
+    uint32_t seq;
+    uint32_t timestamp;
+    uint16_t crc16;
+    uint16_t reserved;
 } __attribute__((packed)) prl_header_t;
 
 /* ========== Internal Functions ========== */
