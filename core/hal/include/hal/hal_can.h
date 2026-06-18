@@ -26,10 +26,10 @@ typedef void *hal_can_handle_t;
  * @brief CAN配置结构
  */
 typedef struct {
-    const char *interface; /* CAN接口名，如 "can0", "vcan0" */
-    uint32_t baudrate;     /* 波特率（Hz） */
-    uint32_t rx_timeout;   /* 接收超时（ms） */
-    uint32_t tx_timeout;   /* 发送超时（ms） */
+	const char *interface; /* CAN接口名，如 "can0", "vcan0" */
+	uint32_t baudrate; /* 波特率（Hz） */
+	uint32_t rx_timeout; /* 接收超时（ms） */
+	uint32_t tx_timeout; /* 发送超时（ms） */
 } hal_can_config_t;
 
 /*===========================================================================
@@ -104,8 +104,8 @@ int32_t HAL_CAN_send(hal_can_handle_t handle, const hal_can_frame_t *frame);
  * @note 如果timeout=OS_PEND，则阻塞等待直到收到帧
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t
-HAL_CAN_recv(hal_can_handle_t handle, hal_can_frame_t *frame, int32_t timeout);
+int32_t HAL_CAN_recv(hal_can_handle_t handle, hal_can_frame_t *frame,
+					 int32_t timeout);
 
 /**
  * @brief 设置CAN过滤器
@@ -123,9 +123,8 @@ HAL_CAN_recv(hal_can_handle_t handle, hal_can_frame_t *frame, int32_t timeout);
  * @note 过滤规则：(received_id & filter_mask) == (filter_id & filter_mask)
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_CAN_set_filter(hal_can_handle_t handle,
-                           uint32_t filter_id,
-                           uint32_t filter_mask);
+int32_t HAL_CAN_set_filter(hal_can_handle_t handle, uint32_t filter_id,
+						   uint32_t filter_mask);
 
 #ifdef __cplusplus
 }

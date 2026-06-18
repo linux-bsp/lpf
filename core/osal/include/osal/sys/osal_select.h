@@ -35,16 +35,16 @@
  * 注意：内部实现与平台相关，但接口保持一致
  */
 typedef struct {
-    uint32_t fds_bits[OSAL_FD_SETSIZE /
-                      OSAL_FD_BITS_PER_WORD]; /* 位图，每个bit代表一个fd */
+	uint32_t fds_bits[OSAL_FD_SETSIZE /
+					  OSAL_FD_BITS_PER_WORD]; /* 位图，每个bit代表一个fd */
 } osal_fd_set_t;
 
 /**
  * @brief 时间值结构
  */
 typedef struct {
-    int32_t tv_sec;  /* 秒 */
-    int32_t tv_usec; /* 微秒 */
+	int32_t tv_sec; /* 秒 */
+	int32_t tv_usec; /* 微秒 */
 } osal_timeval_t;
 
 /*===========================================================================
@@ -97,11 +97,9 @@ int32_t OSAL_FD_ISSET(int32_t fd, const osal_fd_set_t *set);
  * - readfds/writefds/exceptfds会被修改，返回时只包含就绪的fd
  * - timeout会被修改为剩余时间（Linux特性，其他系统可能不修改）
  */
-int32_t OSAL_select(int32_t nfds,
-                    osal_fd_set_t *readfds,
-                    osal_fd_set_t *writefds,
-                    osal_fd_set_t *exceptfds,
-                    osal_timeval_t *timeout);
+int32_t OSAL_select(int32_t nfds, osal_fd_set_t *readfds,
+					osal_fd_set_t *writefds, osal_fd_set_t *exceptfds,
+					osal_timeval_t *timeout);
 
 /**
  * @brief pselect系统调用（带信号屏蔽）
@@ -120,15 +118,12 @@ int32_t OSAL_select(int32_t nfds,
  * - sigmask在等待期间临时替换进程的信号屏蔽字
  */
 typedef struct {
-    int32_t tv_sec;  /* 秒 */
-    int32_t tv_nsec; /* 纳秒 */
+	int32_t tv_sec; /* 秒 */
+	int32_t tv_nsec; /* 纳秒 */
 } osal_timespec_t;
 
-int32_t OSAL_pselect(int32_t nfds,
-                     osal_fd_set_t *readfds,
-                     osal_fd_set_t *writefds,
-                     osal_fd_set_t *exceptfds,
-                     const osal_timespec_t *timeout,
-                     const void *sigmask);
+int32_t OSAL_pselect(int32_t nfds, osal_fd_set_t *readfds,
+					 osal_fd_set_t *writefds, osal_fd_set_t *exceptfds,
+					 const osal_timespec_t *timeout, const void *sigmask);
 
 #endif /* OSAL_SELECT_H */

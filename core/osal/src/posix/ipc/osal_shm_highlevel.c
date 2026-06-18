@@ -14,8 +14,8 @@
 
 /* 内部数据结构：保存共享内存的大小信息 */
 typedef struct {
-    int32_t fd;
-    osal_size_t size;
+	int32_t fd;
+	osal_size_t size;
 } shm_context_t;
 
 /* 简单的句柄表（最多支持 32 个并发共享内存） */
@@ -26,146 +26,141 @@ static int shm_table_initialized = 0;
 /* 初始化句柄表 */
 static void init_shm_table(void)
 {
-    if (!shm_table_initialized) {
-        memset(shm_table, 0, sizeof(shm_table));
-        for (int i = 0; i < MAX_SHM_HANDLES; i++) {
-            shm_table[i].fd = -1;
-        }
-        shm_table_initialized = 1;
-    }
+	if (!shm_table_initialized) {
+		memset(shm_table, 0, sizeof(shm_table));
+		for (int i = 0; i < MAX_SHM_HANDLES; i++) {
+			shm_table[i].fd = -1;
+		}
+		shm_table_initialized = 1;
+	}
 }
 
 /* 分配句柄 */
 static int32_t alloc_shm_handle(int32_t fd, osal_size_t size)
 {
-    init_shm_table();
+	init_shm_table();
 
-    for (int32_t i = 0; i < MAX_SHM_HANDLES; i++) {
-        if (shm_table[i].fd == -1) {
-            shm_table[i].fd = fd;
-            shm_table[i].size = size;
-            return i;
-        }
-    }
-    return -1;
+	for (int32_t i = 0; i < MAX_SHM_HANDLES; i++) {
+		if (shm_table[i].fd == -1) {
+			shm_table[i].fd = fd;
+			shm_table[i].size = size;
+			return i;
+		}
+	}
+	return -1;
 }
 
 /* 释放句柄 */
 static void free_shm_handle(int32_t handle)
 {
-    if (handle >= 0 && handle < MAX_SHM_HANDLES) {
-        shm_table[handle].fd = -1;
-        shm_table[handle].size = 0;
-    }
+	if (handle >= 0 && handle < MAX_SHM_HANDLES) {
+		shm_table[handle].fd = -1;
+		shm_table[handle].size = 0;
+	}
 }
 
 /* 获取句柄信息 */
 static shm_context_t *get_shm_context(int32_t handle)
 {
-    if (handle >= 0 && handle < MAX_SHM_HANDLES && shm_table[handle].fd != -1) {
-        return &shm_table[handle];
-    }
-    return NULL;
+	if (handle >= 0 && handle < MAX_SHM_HANDLES && shm_table[handle].fd != -1) {
+		return &shm_table[handle];
+	}
+	return NULL;
 }
 
 /**
  * @brief 创建或打开共享内存
  */
-int32_t OSAL_ShmCreate(const char *name,
-                       osal_size_t size,
-                       int32_t flags,
-                       osal_shm_t *shm)
+int32_t OSAL_ShmCreate(const char *name, osal_size_t size, int32_t flags,
+					   osal_shm_t *shm)
 {
-    int32_t fd;
-    int32_t oflag = 0;
-    mode_t mode = 0666;
+	int32_t fd;
+	int32_t oflag = 0;
+	mode_t mode = 0666;
 
-    if (!name || !shm) {
-        return OSAL_ERR_INVALID_PARAM;
-    }
+	if (!name || !shm) {
+		return OSAL_ERR_INVALID_PARAM;
+	}
 
-    /* 转换标志 */
-    if (flags & OSAL_SHM_CREATE) {
-        oflag |= O_CREAT;
-    }
+	/* 转换标志 */
+	if (flags & OSAL_SHM_CREATE) {
+		oflag |= O_CREAT;
+	}
 
-    if (flags & OSAL_SHM_RDWR) {
-        oflag |= O_RDWR;
-    } else if (flags & OSAL_SHM_RDONLY) {
-        oflag |= O_RDONLY;
-    } else {
-        oflag |= O_RDWR; /* 默认读写 */
-    }
+	if (flags & OSAL_SHM_RDWR) {
+		oflag |= O_RDWR;
+	} else if (flags & OSAL_SHM_RDONLY) {
+		oflag |= O_RDONLY;
+	} else {
+		oflag |= O_RDWR; /* 默认读写 */
+	}
 
-    /* 打开或创建共享内存 */
-    fd = shm_open(name, oflag, mode);
-    if (fd < 0) {
-        return OSAL_ERR_GENERIC;
-    }
+	/* 打开或创建共享内存 */
+	fd = shm_open(name, oflag, mode);
+	if (fd < 0) {
+		return OSAL_ERR_GENERIC;
+	}
 
-    /* 如果创建，设置大小 */
-    if (flags & OSAL_SHM_CREATE) {
-        if (ftruncate(fd, size) < 0) {
-            close(fd);
-            return OSAL_ERR_GENERIC;
-        }
-    }
+	/* 如果创建，设置大小 */
+	if (flags & OSAL_SHM_CREATE) {
+		if (ftruncate(fd, size) < 0) {
+			close(fd);
+			return OSAL_ERR_GENERIC;
+		}
+	}
 
-    /* 分配句柄 */
-    int32_t handle = alloc_shm_handle(fd, size);
-    if (handle < 0) {
-        close(fd);
-        return OSAL_ERR_NO_MEMORY;
-    }
+	/* 分配句柄 */
+	int32_t handle = alloc_shm_handle(fd, size);
+	if (handle < 0) {
+		close(fd);
+		return OSAL_ERR_NO_MEMORY;
+	}
 
-    *shm = handle;
-    return OSAL_SUCCESS;
+	*shm = handle;
+	return OSAL_SUCCESS;
 }
 
 /**
  * @brief 映射共享内存到进程地址空间
  */
-int32_t OSAL_ShmMap(osal_shm_t shm,
-                    osal_off_t offset,
-                    osal_size_t length,
-                    int32_t flags,
-                    void **addr)
+int32_t OSAL_ShmMap(osal_shm_t shm, osal_off_t offset, osal_size_t length,
+					int32_t flags, void **addr)
 {
-    shm_context_t *ctx;
-    int32_t prot = 0;
-    void *mapped_addr;
+	shm_context_t *ctx;
+	int32_t prot = 0;
+	void *mapped_addr;
 
-    if (!addr) {
-        return OSAL_ERR_INVALID_PARAM;
-    }
+	if (!addr) {
+		return OSAL_ERR_INVALID_PARAM;
+	}
 
-    ctx = get_shm_context(shm);
-    if (!ctx) {
-        return OSAL_ERR_INVALID_PARAM;
-    }
+	ctx = get_shm_context(shm);
+	if (!ctx) {
+		return OSAL_ERR_INVALID_PARAM;
+	}
 
-    /* 如果 length 为 0，使用整个共享内存大小 */
-    if (length == 0) {
-        length = ctx->size;
-    }
+	/* 如果 length 为 0，使用整个共享内存大小 */
+	if (length == 0) {
+		length = ctx->size;
+	}
 
-    /* 转换标志 */
-    if (flags & OSAL_SHM_RDWR) {
-        prot = PROT_READ | PROT_WRITE;
-    } else if (flags & OSAL_SHM_RDONLY) {
-        prot = PROT_READ;
-    } else {
-        prot = PROT_READ | PROT_WRITE; /* 默认读写 */
-    }
+	/* 转换标志 */
+	if (flags & OSAL_SHM_RDWR) {
+		prot = PROT_READ | PROT_WRITE;
+	} else if (flags & OSAL_SHM_RDONLY) {
+		prot = PROT_READ;
+	} else {
+		prot = PROT_READ | PROT_WRITE; /* 默认读写 */
+	}
 
-    /* 映射 */
-    mapped_addr = mmap(NULL, length, prot, MAP_SHARED, ctx->fd, offset);
-    if (mapped_addr == MAP_FAILED) {
-        return OSAL_ERR_GENERIC;
-    }
+	/* 映射 */
+	mapped_addr = mmap(NULL, length, prot, MAP_SHARED, ctx->fd, offset);
+	if (mapped_addr == MAP_FAILED) {
+		return OSAL_ERR_GENERIC;
+	}
 
-    *addr = mapped_addr;
-    return OSAL_SUCCESS;
+	*addr = mapped_addr;
+	return OSAL_SUCCESS;
 }
 
 /**
@@ -173,15 +168,15 @@ int32_t OSAL_ShmMap(osal_shm_t shm,
  */
 int32_t OSAL_ShmUnmap(void *addr, osal_size_t length)
 {
-    if (!addr) {
-        return OSAL_ERR_INVALID_PARAM;
-    }
+	if (!addr) {
+		return OSAL_ERR_INVALID_PARAM;
+	}
 
-    if (munmap(addr, length) < 0) {
-        return OSAL_ERR_GENERIC;
-    }
+	if (munmap(addr, length) < 0) {
+		return OSAL_ERR_GENERIC;
+	}
 
-    return OSAL_SUCCESS;
+	return OSAL_SUCCESS;
 }
 
 /**
@@ -189,17 +184,17 @@ int32_t OSAL_ShmUnmap(void *addr, osal_size_t length)
  */
 int32_t OSAL_ShmClose(osal_shm_t shm)
 {
-    shm_context_t *ctx;
+	shm_context_t *ctx;
 
-    ctx = get_shm_context(shm);
-    if (!ctx) {
-        return OSAL_ERR_INVALID_PARAM;
-    }
+	ctx = get_shm_context(shm);
+	if (!ctx) {
+		return OSAL_ERR_INVALID_PARAM;
+	}
 
-    close(ctx->fd);
-    free_shm_handle(shm);
+	close(ctx->fd);
+	free_shm_handle(shm);
 
-    return OSAL_SUCCESS;
+	return OSAL_SUCCESS;
 }
 
 /**
@@ -207,13 +202,13 @@ int32_t OSAL_ShmClose(osal_shm_t shm)
  */
 int32_t OSAL_ShmUnlink(const char *name)
 {
-    if (!name) {
-        return OSAL_ERR_INVALID_PARAM;
-    }
+	if (!name) {
+		return OSAL_ERR_INVALID_PARAM;
+	}
 
-    if (shm_unlink(name) < 0) {
-        return OSAL_ERR_GENERIC;
-    }
+	if (shm_unlink(name) < 0) {
+		return OSAL_ERR_GENERIC;
+	}
 
-    return OSAL_SUCCESS;
+	return OSAL_SUCCESS;
 }

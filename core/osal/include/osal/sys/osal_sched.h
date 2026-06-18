@@ -45,9 +45,8 @@ typedef struct sched_param osal_sched_param_t;
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_setschedparam(osal_thread_t thread,
-                                   int32_t policy,
-                                   int32_t priority);
+int32_t OSAL_pthread_setschedparam(osal_thread_t thread, int32_t policy,
+								   int32_t priority);
 
 /**
  * @brief 获取线程调度策略和优先级
@@ -58,9 +57,8 @@ int32_t OSAL_pthread_setschedparam(osal_thread_t thread,
  * @return 0 成功
  * @return -1 失败
  */
-int32_t OSAL_pthread_getschedparam(osal_thread_t thread,
-                                   int32_t *policy,
-                                   int32_t *priority);
+int32_t OSAL_pthread_getschedparam(osal_thread_t thread, int32_t *policy,
+								   int32_t *priority);
 
 /**
  * @brief 设置线程 CPU 亲和性

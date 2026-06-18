@@ -39,7 +39,7 @@ typedef pthread_rwlockattr_t osal_rwlockattr_t;
  * @return -1 失败
  */
 int32_t OSAL_pthread_rwlock_init(osal_rwlock_t *rwlock,
-                                 const osal_rwlockattr_t *attr);
+								 const osal_rwlockattr_t *attr);
 
 /**
  * @brief 销毁读写锁

@@ -39,7 +39,7 @@ typedef pthread_mutexattr_t osal_mutexattr_t;
  * @return -1 失败
  */
 int32_t OSAL_pthread_mutex_init(osal_mutex_t *mutex,
-                                const osal_mutexattr_t *attr);
+								const osal_mutexattr_t *attr);
 
 /**
  * @brief 销毁互斥锁
@@ -128,7 +128,7 @@ int32_t OSAL_pthread_mutexattr_settype(osal_mutexattr_t *attr, int32_t type);
  * @return -1 失败
  */
 int32_t OSAL_pthread_mutexattr_gettype(const osal_mutexattr_t *attr,
-                                       int32_t *type);
+									   int32_t *type);
 
 #ifdef __cplusplus
 }

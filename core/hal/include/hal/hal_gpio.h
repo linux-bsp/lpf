@@ -16,8 +16,8 @@ extern "C" {
  *===========================================================================*/
 
 typedef enum {
-    HAL_GPIO_DIR_INPUT = 0x00, /* 输入模式 */
-    HAL_GPIO_DIR_OUTPUT = 0x01 /* 输出模式 */
+	HAL_GPIO_DIR_INPUT = 0x00, /* 输入模式 */
+	HAL_GPIO_DIR_OUTPUT = 0x01 /* 输出模式 */
 } hal_gpio_direction_t;
 
 /*===========================================================================
@@ -25,8 +25,8 @@ typedef enum {
  *===========================================================================*/
 
 typedef enum {
-    HAL_GPIO_LEVEL_LOW = 0x00, /* 低电平 */
-    HAL_GPIO_LEVEL_HIGH = 0x01 /* 高电平 */
+	HAL_GPIO_LEVEL_LOW = 0x00, /* 低电平 */
+	HAL_GPIO_LEVEL_HIGH = 0x01 /* 高电平 */
 } hal_gpio_level_t;
 
 /*===========================================================================
@@ -34,10 +34,10 @@ typedef enum {
  *===========================================================================*/
 
 typedef enum {
-    HAL_GPIO_EDGE_NONE = 0x00,    /* 无中断 */
-    HAL_GPIO_EDGE_RISING = 0x01,  /* 上升沿触发 */
-    HAL_GPIO_EDGE_FALLING = 0x02, /* 下降沿触发 */
-    HAL_GPIO_EDGE_BOTH = 0x03     /* 双边沿触发 */
+	HAL_GPIO_EDGE_NONE = 0x00, /* 无中断 */
+	HAL_GPIO_EDGE_RISING = 0x01, /* 上升沿触发 */
+	HAL_GPIO_EDGE_FALLING = 0x02, /* 下降沿触发 */
+	HAL_GPIO_EDGE_BOTH = 0x03 /* 双边沿触发 */
 } hal_gpio_edge_t;
 
 /*===========================================================================
@@ -52,19 +52,19 @@ typedef enum {
  * @param user_data 用户数据指针
  */
 typedef void (*hal_gpio_isr_callback_t)(uint32_t gpio_num,
-                                        hal_gpio_level_t level,
-                                        void *user_data);
+										hal_gpio_level_t level,
+										void *user_data);
 
 /*===========================================================================
  * GPIO配置结构
  *===========================================================================*/
 
 typedef struct {
-    hal_gpio_direction_t direction; /* GPIO方向 */
-    hal_gpio_level_t initial_level; /* 初始电平（仅输出模式有效） */
-    hal_gpio_edge_t edge;           /* 中断触发模式 */
-    hal_gpio_isr_callback_t callback; /* 中断回调函数 */
-    void *user_data;                  /* 用户数据指针 */
+	hal_gpio_direction_t direction; /* GPIO方向 */
+	hal_gpio_level_t initial_level; /* 初始电平（仅输出模式有效） */
+	hal_gpio_edge_t edge; /* 中断触发模式 */
+	hal_gpio_isr_callback_t callback; /* 中断回调函数 */
+	void *user_data; /* 用户数据指针 */
 } hal_gpio_config_t;
 
 /*===========================================================================
@@ -120,7 +120,7 @@ int32_t HAL_GPIO_deinit(uint32_t gpio_num);
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
 int32_t HAL_GPIO_set_direction(uint32_t gpio_num,
-                               hal_gpio_direction_t direction);
+							   hal_gpio_direction_t direction);
 
 /**
  * @brief 获取GPIO方向
@@ -137,7 +137,7 @@ int32_t HAL_GPIO_set_direction(uint32_t gpio_num,
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
 int32_t HAL_GPIO_get_direction(uint32_t gpio_num,
-                               hal_gpio_direction_t *direction);
+							   hal_gpio_direction_t *direction);
 
 /**
  * @brief 设置GPIO输出电平
@@ -190,10 +190,9 @@ int32_t HAL_GPIO_get_level(uint32_t gpio_num, hal_gpio_level_t *level);
  * @note 回调函数在独立的中断监听线程中执行，注意线程安全
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_GPIO_set_interrupt(uint32_t gpio_num,
-                               hal_gpio_edge_t edge,
-                               hal_gpio_isr_callback_t callback,
-                               void *user_data);
+int32_t HAL_GPIO_set_interrupt(uint32_t gpio_num, hal_gpio_edge_t edge,
+							   hal_gpio_isr_callback_t callback,
+							   void *user_data);
 
 /**
  * @brief 使能GPIO中断

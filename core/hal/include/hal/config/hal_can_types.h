@@ -16,10 +16,10 @@
  */
 
 typedef struct {
-    uint32_t can_id;    /* CAN标识符 */
-    uint8_t dlc;        /* 数据长度 (0-8) */
-    uint8_t data[8];    /* 数据字节 */
-    uint32_t timestamp; /* 时间戳 (可选) */
+	uint32_t can_id; /* CAN标识符 */
+	uint8_t dlc; /* 数据长度 (0-8) */
+	uint8_t data[8]; /* 数据字节 */
+	uint32_t timestamp; /* 时间戳 (可选) */
 } hal_can_frame_t;
 
 /*

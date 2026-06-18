@@ -18,27 +18,27 @@ extern "C" {
  * @brief 设备消息编码参数
  */
 typedef struct {
-    uint8_t dev_type;     /**< 设备类型 */
-    uint8_t msg_type;     /**< 消息类型 */
-    uint8_t flags;        /**< 标志位 */
-    const void *payload;  /**< payload 数据 */
-    uint16_t payload_len; /**< payload 长度 */
-    uint8_t *buffer;      /**< 编码后的缓冲区 */
-    size_t buffer_size;   /**< 缓冲区大小 */
+	uint8_t dev_type; /**< 设备类型 */
+	uint8_t msg_type; /**< 消息类型 */
+	uint8_t flags; /**< 标志位 */
+	const void *payload; /**< payload 数据 */
+	uint16_t payload_len; /**< payload 长度 */
+	uint8_t *buffer; /**< 编码后的缓冲区 */
+	size_t buffer_size; /**< 缓冲区大小 */
 } prl_encode_ctx_t;
 
 /**
  * @brief 设备消息解码参数
  */
 typedef struct {
-    const uint8_t *buffer; /**< 编码的数据 */
-    size_t buffer_len;     /**< 数据长度 */
-    uint8_t dev_type;      /**< 设备类型（输出） */
-    uint8_t msg_type;      /**< 消息类型（输出） */
-    uint8_t flags;         /**< 标志位（输出） */
-    void *payload;         /**< 解码后的 payload 缓冲区 */
-    size_t payload_size;   /**< payload 缓冲区大小 */
-    uint32_t payload_len;  /**< 实际 payload 长度（输出） */
+	const uint8_t *buffer; /**< 编码的数据 */
+	size_t buffer_len; /**< 数据长度 */
+	uint8_t dev_type; /**< 设备类型（输出） */
+	uint8_t msg_type; /**< 消息类型（输出） */
+	uint8_t flags; /**< 标志位（输出） */
+	void *payload; /**< 解码后的 payload 缓冲区 */
+	size_t payload_size; /**< payload 缓冲区大小 */
+	uint32_t payload_len; /**< 实际 payload 长度（输出） */
 } prl_decode_ctx_t;
 
 /**

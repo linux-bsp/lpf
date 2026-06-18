@@ -87,11 +87,11 @@ typedef uint32_t osal_id_t;
  * 支持：16位(MSP430/AVR), 32位(ARM32/RISC-V32), 64位(x86_64/ARM64/RISC-V64)
  */
 #if defined(__LP64__) || defined(_WIN64) || defined(__x86_64__) || \
-    defined(__amd64__) || defined(__aarch64__) ||                  \
-    (defined(__riscv) && (__riscv_xlen == 64))
+	defined(__amd64__) || defined(__aarch64__) ||                  \
+	(defined(__riscv) && (__riscv_xlen == 64))
 #define OSAL_PLATFORM_BITS 0x40
 #elif defined(__ILP32__) || defined(_WIN32) || defined(__arm__) || \
-    defined(__i386__) || (defined(__riscv) && (__riscv_xlen == 32))
+	defined(__i386__) || (defined(__riscv) && (__riscv_xlen == 32))
 #define OSAL_PLATFORM_BITS 0x20
 #elif defined(__MSP430__) || defined(__AVR__)
 #define OSAL_PLATFORM_BITS 0x10
@@ -267,11 +267,11 @@ typedef int64_t osal_nsec_t;
 /* 手动实现字节交换 */
 #define OSAL_HTONS(x) ((uint16_t)(((x) >> 8) | ((x) << 8)))
 #define OSAL_HTONL(x)                                     \
-    ((uint32_t)(((x) >> 24) | (((x) & 0x00FF0000) >> 8) | \
-                (((x) & 0x0000FF00) << 8) | ((x) << 24)))
+	((uint32_t)(((x) >> 24) | (((x) & 0x00FF0000) >> 8) | \
+				(((x) & 0x0000FF00) << 8) | ((x) << 24)))
 #define OSAL_HTONLL(x)                                           \
-    ((uint64_t)(((uint64_t)OSAL_HTONL((x) & 0xFFFFFFFF) << 32) | \
-                OSAL_HTONL((x) >> 32)))
+	((uint64_t)(((uint64_t)OSAL_HTONL((x) & 0xFFFFFFFF) << 32) | \
+				OSAL_HTONL((x) >> 32)))
 #define OSAL_NTOHS(x) OSAL_HTONS(x)
 #define OSAL_NTOHL(x) OSAL_HTONL(x)
 #define OSAL_NTOHLL(x) OSAL_HTONLL(x)
@@ -326,8 +326,8 @@ typedef int64_t osal_nsec_t;
 #define OSAL_STATIC_ASSERT_CONCAT_(a, b) a##b
 #define OSAL_STATIC_ASSERT_CONCAT(a, b) OSAL_STATIC_ASSERT_CONCAT_(a, b)
 #define OSAL_STATIC_ASSERT(cond, msg)                           \
-    typedef char OSAL_STATIC_ASSERT_CONCAT(osal_static_assert_, \
-                                           __LINE__)[(cond) ? 1 : -1]
+	typedef char OSAL_STATIC_ASSERT_CONCAT(osal_static_assert_, \
+										   __LINE__)[(cond) ? 1 : -1]
 #endif
 
 /*
@@ -347,15 +347,15 @@ OSAL_STATIC_ASSERT(sizeof(uint64_t) == 0x8, "uint64_must_be_8_bytes");
  */
 #if OSAL_PLATFORM_BITS == 64
 OSAL_STATIC_ASSERT(sizeof(osal_uintptr_t) == 0x8,
-                   "uintptr_must_match_pointer_size");
+				   "uintptr_must_match_pointer_size");
 OSAL_STATIC_ASSERT(sizeof(osal_size_t) == 0x8, "size_must_be_8_bytes_on_64bit");
 #elif OSAL_PLATFORM_BITS == 32
 OSAL_STATIC_ASSERT(sizeof(osal_uintptr_t) == 0x4,
-                   "uintptr_must_match_pointer_size");
+				   "uintptr_must_match_pointer_size");
 OSAL_STATIC_ASSERT(sizeof(osal_size_t) == 0x4, "size_must_be_4_bytes_on_32bit");
 #elif OSAL_PLATFORM_BITS == 16
 OSAL_STATIC_ASSERT(sizeof(osal_uintptr_t) == 0x2,
-                   "uintptr_must_match_pointer_size");
+				   "uintptr_must_match_pointer_size");
 OSAL_STATIC_ASSERT(sizeof(osal_size_t) == 0x2, "size_must_be_2_bytes_on_16bit");
 #endif
 
@@ -390,7 +390,7 @@ OSAL_STATIC_ASSERT(sizeof(osal_size_t) == 0x2, "size_must_be_2_bytes_on_16bit");
  * 通过成员指针获取结构体指针
  */
 #define OSAL_container_of(ptr, type, member) \
-    ((type *)((char *)(ptr) - OSAL_offsetof(type, member)))
+	((type *)((char *)(ptr) - OSAL_offsetof(type, member)))
 
 /*
  * 最小值/最大值宏（类型安全）

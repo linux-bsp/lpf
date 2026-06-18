@@ -17,9 +17,9 @@ void *OSAL_stderr = NULL;
  */
 __attribute__((constructor)) static void init_stdio_streams(void)
 {
-    OSAL_stdin = stdin;
-    OSAL_stdout = stdout;
-    OSAL_stderr = stderr;
+	OSAL_stdin = stdin;
+	OSAL_stdout = stdout;
+	OSAL_stderr = stderr;
 }
 
 /*
@@ -28,27 +28,27 @@ __attribute__((constructor)) static void init_stdio_streams(void)
 
 int32_t OSAL_getchar(void)
 {
-    return getchar();
+	return getchar();
 }
 
 char *OSAL_fgets(char *str, osal_size_t size, void *stream)
 {
-    union {
-        void *osal_stream;
-        FILE *posix_stream;
-    } stream_union;
+	union {
+		void *osal_stream;
+		FILE *posix_stream;
+	} stream_union;
 
-    stream_union.osal_stream = stream;
-    return fgets(str, (int)size, stream_union.posix_stream);
+	stream_union.osal_stream = stream;
+	return fgets(str, (int)size, stream_union.posix_stream);
 }
 
 int32_t OSAL_fflush(void *stream)
 {
-    union {
-        void *osal_stream;
-        FILE *posix_stream;
-    } stream_union;
+	union {
+		void *osal_stream;
+		FILE *posix_stream;
+	} stream_union;
 
-    stream_union.osal_stream = stream;
-    return fflush(stream_union.posix_stream);
+	stream_union.osal_stream = stream;
+	return fflush(stream_union.posix_stream);
 }

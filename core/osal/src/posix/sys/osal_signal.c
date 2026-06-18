@@ -8,84 +8,83 @@
 
 int32_t OSAL_signal(int32_t signum, osal_sighandler_t handler)
 {
-    if (signal(signum, handler) == SIG_ERR) {
-        return -1;
-    }
-    return 0;
+	if (signal(signum, handler) == SIG_ERR) {
+		return -1;
+	}
+	return 0;
 }
 
 int32_t OSAL_kill(osal_pid_t pid, int32_t sig)
 {
-    return kill(pid, sig);
+	return kill(pid, sig);
 }
 
 int32_t OSAL_raise(int32_t sig)
 {
-    return raise(sig);
+	return raise(sig);
 }
 
 int32_t OSAL_sigprocmask(int32_t how, const sigset_t *set, sigset_t *oldset)
 {
-    return sigprocmask(how, set, oldset);
+	return sigprocmask(how, set, oldset);
 }
 
 int32_t OSAL_sigemptyset(sigset_t *set)
 {
-    if (set == NULL) {
-        errno = EINVAL;
-        return -1;
-    }
-    return sigemptyset(set);
+	if (set == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
+	return sigemptyset(set);
 }
 
 int32_t OSAL_sigfillset(sigset_t *set)
 {
-    if (set == NULL) {
-        errno = EINVAL;
-        return -1;
-    }
-    return sigfillset(set);
+	if (set == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
+	return sigfillset(set);
 }
 
 int32_t OSAL_sigaddset(sigset_t *set, int32_t signum)
 {
-    if (set == NULL) {
-        errno = EINVAL;
-        return -1;
-    }
-    return sigaddset(set, signum);
+	if (set == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
+	return sigaddset(set, signum);
 }
 
 int32_t OSAL_sigdelset(sigset_t *set, int32_t signum)
 {
-    if (set == NULL) {
-        errno = EINVAL;
-        return -1;
-    }
-    return sigdelset(set, signum);
+	if (set == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
+	return sigdelset(set, signum);
 }
 
 int32_t OSAL_sigismember(const sigset_t *set, int32_t signum)
 {
-    if (set == NULL) {
-        errno = EINVAL;
-        return -1;
-    }
-    return sigismember(set, signum);
+	if (set == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
+	return sigismember(set, signum);
 }
 
 int32_t OSAL_sigwait(const sigset_t *set, int32_t *sig)
 {
-    if (set == NULL) {
-        errno = EINVAL;
-        return -1;
-    }
-    return sigwait(set, sig);
+	if (set == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
+	return sigwait(set, sig);
 }
 
-int32_t OSAL_sigaction(int32_t signum,
-                       const struct sigaction *act,
-                       struct sigaction *oldact)
+int32_t OSAL_sigaction(int32_t signum, const struct sigaction *act,
+					   struct sigaction *oldact)
 {
-    return sigaction(signum, act, oldact);
+	return sigaction(signum, act, oldact);
 }

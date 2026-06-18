@@ -20,13 +20,13 @@
  *===========================================================================*/
 
 /* 请求的事件（输入） */
-#define OSAL_POLLIN 0x0001  /* 有数据可读 */
+#define OSAL_POLLIN 0x0001 /* 有数据可读 */
 #define OSAL_POLLPRI 0x0002 /* 有紧急数据可读 */
 #define OSAL_POLLOUT 0x0004 /* 可以写入数据 */
 
 /* 返回的事件（输出） */
-#define OSAL_POLLERR 0x0008  /* 发生错误 */
-#define OSAL_POLLHUP 0x0010  /* 挂断 */
+#define OSAL_POLLERR 0x0008 /* 发生错误 */
+#define OSAL_POLLHUP 0x0010 /* 挂断 */
 #define OSAL_POLLNVAL 0x0020 /* 无效的文件描述符 */
 
 /*===========================================================================
@@ -37,9 +37,9 @@
  * @brief poll文件描述符结构
  */
 typedef struct {
-    int32_t fd;      /* 文件描述符 */
-    int16_t events;  /* 请求的事件（OSAL_POLLIN/POLLOUT等） */
-    int16_t revents; /* 返回的事件（由内核填充） */
+	int32_t fd; /* 文件描述符 */
+	int16_t events; /* 请求的事件（OSAL_POLLIN/POLLOUT等） */
+	int16_t revents; /* 返回的事件（由内核填充） */
 } osal_pollfd_t;
 
 /*===========================================================================

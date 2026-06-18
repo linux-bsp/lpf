@@ -7,5 +7,5 @@
 #include "aconfig.h"
 
 const aconfig_config_table_t g_aconfig_table = { .name = "ctest_aconfig",
-                                                 .function_map = NULL,
-                                                 .user_data = NULL };
+												 .function_map = NULL,
+												 .user_data = NULL };

@@ -31,16 +31,16 @@ typedef enum { PRL_DEV_TYPE_MCU = 0x01 } prl_dev_type_t;
 /* ========== Protocol Header ========== */
 
 typedef struct {
-    uint16_t magic;
-    uint8_t version;
-    uint8_t dev_type;
-    uint8_t msg_type;
-    uint8_t flags;
-    uint16_t length;
-    uint32_t seq;
-    uint32_t timestamp;
-    uint16_t crc16;
-    uint16_t reserved;
+	uint16_t magic;
+	uint8_t version;
+	uint8_t dev_type;
+	uint8_t msg_type;
+	uint8_t flags;
+	uint16_t length;
+	uint32_t seq;
+	uint32_t timestamp;
+	uint16_t crc16;
+	uint16_t reserved;
 } __attribute__((packed)) prl_header_t;
 
 /* ========== Internal Functions ========== */

@@ -23,13 +23,13 @@
 
 /* SPI传输消息 */
 typedef struct {
-    const uint8_t *tx_buf; /* 发送缓冲区 (NULL表示只接收) */
-    uint8_t *rx_buf;       /* 接收缓冲区 (NULL表示只发送) */
-    uint32_t len;          /* 传输长度 */
-    uint32_t speed_hz;     /* 传输速率 (0表示使用默认) */
-    uint16_t delay_usecs;  /* 传输后延迟(us) */
-    uint8_t bits_per_word; /* 每字位数 (0表示使用默认) */
-    uint8_t cs_change;     /* 传输后改变CS状态 */
+	const uint8_t *tx_buf; /* 发送缓冲区 (NULL表示只接收) */
+	uint8_t *rx_buf; /* 接收缓冲区 (NULL表示只发送) */
+	uint32_t len; /* 传输长度 */
+	uint32_t speed_hz; /* 传输速率 (0表示使用默认) */
+	uint16_t delay_usecs; /* 传输后延迟(us) */
+	uint8_t bits_per_word; /* 每字位数 (0表示使用默认) */
+	uint8_t cs_change; /* 传输后改变CS状态 */
 } hal_spi_transfer_t;
 
 #endif /* HAL_SPI_TYPES_H */

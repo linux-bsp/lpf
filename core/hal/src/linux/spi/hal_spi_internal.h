@@ -40,17 +40,17 @@
  * - mutex: 互斥锁，保护线程间并发访问
  */
 typedef struct {
-    int32_t fd;            /* SPI设备文件描述符 */
-    char device[256];      /* 设备路径 */
-    uint8_t mode;          /* SPI模式 */
-    uint8_t bits_per_word; /* 每字位数 */
-    uint32_t max_speed_hz; /* 最大传输速率 */
-    uint32_t timeout;      /* 传输超时时间（ms） */
-    bool initialized;      /* 初始化标志 */
+	int32_t fd; /* SPI设备文件描述符 */
+	char device[256]; /* 设备路径 */
+	uint8_t mode; /* SPI模式 */
+	uint8_t bits_per_word; /* 每字位数 */
+	uint32_t max_speed_hz; /* 最大传输速率 */
+	uint32_t timeout; /* 传输超时时间（ms） */
+	bool initialized; /* 初始化标志 */
 
-    /* 双重保护机制 */
-    osal_flock_t *flock; /* 文件锁（进程间保护） */
-    osal_mutex_t mutex;  /* 互斥锁（线程间保护） */
+	/* 双重保护机制 */
+	osal_flock_t *flock; /* 文件锁（进程间保护） */
+	osal_mutex_t mutex; /* 互斥锁（线程间保护） */
 } hal_spi_context_t;
 
 #endif /* HAL_SPI_INTERNAL_H */

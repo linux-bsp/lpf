@@ -76,12 +76,8 @@ int32_t OSAL_ftruncate(int32_t fd, osal_off_t length);
  * @return 映射地址（成功）
  * @return MAP_FAILED（失败）
  */
-void *OSAL_mmap(void *addr,
-                osal_size_t length,
-                int32_t prot,
-                int32_t flags,
-                int32_t fd,
-                osal_off_t offset);
+void *OSAL_mmap(void *addr, osal_size_t length, int32_t prot, int32_t flags,
+				int32_t fd, osal_off_t offset);
 
 /**
  * @brief 解除内存映射

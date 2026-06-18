@@ -48,9 +48,8 @@ typedef struct sched_param osal_sched_param_t;
  * @return -1 失败
  */
 int32_t OSAL_pthread_create(osal_thread_t *thread,
-                            const osal_threadattr_t *attr,
-                            void *(*start_routine)(void *),
-                            void *arg);
+							const osal_threadattr_t *attr,
+							void *(*start_routine)(void *), void *arg);
 
 /**
  * @brief 等待线程结束
@@ -125,7 +124,7 @@ int32_t OSAL_pthread_attr_destroy(osal_threadattr_t *attr);
  * @return -1 失败
  */
 int32_t OSAL_pthread_attr_setstacksize(osal_threadattr_t *attr,
-                                       osal_size_t stacksize);
+									   osal_size_t stacksize);
 
 /**
  * @brief 获取线程栈大小
@@ -136,7 +135,7 @@ int32_t OSAL_pthread_attr_setstacksize(osal_threadattr_t *attr,
  * @return -1 失败
  */
 int32_t OSAL_pthread_attr_getstacksize(const osal_threadattr_t *attr,
-                                       osal_size_t *stacksize);
+									   osal_size_t *stacksize);
 
 /**
  * @brief 设置线程分离状态
@@ -148,7 +147,7 @@ int32_t OSAL_pthread_attr_getstacksize(const osal_threadattr_t *attr,
  * @return -1 失败
  */
 int32_t OSAL_pthread_attr_setdetachstate(osal_threadattr_t *attr,
-                                         int32_t detachstate);
+										 int32_t detachstate);
 
 /**
  * @brief 获取线程分离状态
@@ -159,7 +158,7 @@ int32_t OSAL_pthread_attr_setdetachstate(osal_threadattr_t *attr,
  * @return -1 失败
  */
 int32_t OSAL_pthread_attr_getdetachstate(const osal_threadattr_t *attr,
-                                         int32_t *detachstate);
+										 int32_t *detachstate);
 
 /**
  * @brief 设置线程调度策略
@@ -170,7 +169,7 @@ int32_t OSAL_pthread_attr_getdetachstate(const osal_threadattr_t *attr,
  * @return -1 失败
  */
 int32_t OSAL_pthread_attr_setschedpolicy(osal_threadattr_t *attr,
-                                         int32_t policy);
+										 int32_t policy);
 
 /**
  * @brief 设置线程调度参数
@@ -181,7 +180,7 @@ int32_t OSAL_pthread_attr_setschedpolicy(osal_threadattr_t *attr,
  * @return -1 失败
  */
 int32_t OSAL_pthread_attr_setschedparam(osal_threadattr_t *attr,
-                                        const osal_sched_param_t *param);
+										const osal_sched_param_t *param);
 
 #ifdef __cplusplus
 }

@@ -12,67 +12,67 @@
 
 int32_t OSAL_msleep(uint32_t msec)
 {
-    if (usleep(msec * OSAL_USEC_PER_MSEC) == 0)
-        return OSAL_SUCCESS;
-    return OSAL_ERR_GENERIC;
+	if (usleep(msec * OSAL_USEC_PER_MSEC) == 0)
+		return OSAL_SUCCESS;
+	return OSAL_ERR_GENERIC;
 }
 
 int32_t OSAL_usleep(uint32_t usec)
 {
-    if (usleep(usec) == 0)
-        return OSAL_SUCCESS;
-    return OSAL_ERR_GENERIC;
+	if (usleep(usec) == 0)
+		return OSAL_SUCCESS;
+	return OSAL_ERR_GENERIC;
 }
 
 int32_t OSAL_sleep(uint32_t sec)
 {
-    /* sleep() 返回剩余未睡眠的秒数，0 表示成功 */
-    if (sleep(sec) == 0)
-        return OSAL_SUCCESS;
-    return OSAL_ERR_GENERIC;
+	/* sleep() 返回剩余未睡眠的秒数，0 表示成功 */
+	if (sleep(sec) == 0)
+		return OSAL_SUCCESS;
+	return OSAL_ERR_GENERIC;
 }
 
 int32_t OSAL_nanosleep(uint64_t nsec)
 {
-    struct timespec req;
-    req.tv_sec = nsec / OSAL_NSEC_PER_SEC;
-    req.tv_nsec = nsec % OSAL_NSEC_PER_SEC;
+	struct timespec req;
+	req.tv_sec = nsec / OSAL_NSEC_PER_SEC;
+	req.tv_nsec = nsec % OSAL_NSEC_PER_SEC;
 
-    if (nanosleep(&req, NULL) == 0)
-        return OSAL_SUCCESS;
-    return OSAL_ERR_GENERIC;
+	if (nanosleep(&req, NULL) == 0)
+		return OSAL_SUCCESS;
+	return OSAL_ERR_GENERIC;
 }
 
 int64_t OSAL_get_monotonic_time(void)
 {
-    struct timespec ts;
-    if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0)
-        return -1;
+	struct timespec ts;
+	if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0)
+		return -1;
 
-    return (int64_t)ts.tv_sec * OSAL_USEC_PER_SEC +
-           ts.tv_nsec / OSAL_NSEC_PER_USEC;
+	return (int64_t)ts.tv_sec * OSAL_USEC_PER_SEC +
+		   ts.tv_nsec / OSAL_NSEC_PER_USEC;
 }
 
 int64_t OSAL_get_boot_time(void)
 {
 #ifdef CLOCK_BOOTTIME
-    struct timespec ts;
-    if (clock_gettime(CLOCK_BOOTTIME, &ts) != 0)
-        return -1;
+	struct timespec ts;
+	if (clock_gettime(CLOCK_BOOTTIME, &ts) != 0)
+		return -1;
 
-    return (int64_t)ts.tv_sec * OSAL_USEC_PER_SEC +
-           ts.tv_nsec / OSAL_NSEC_PER_USEC;
+	return (int64_t)ts.tv_sec * OSAL_USEC_PER_SEC +
+		   ts.tv_nsec / OSAL_NSEC_PER_USEC;
 #else
-    /* macOS不支持CLOCK_BOOTTIME，降级到CLOCK_MONOTONIC */
-    return OSAL_get_monotonic_time();
+	/* macOS不支持CLOCK_BOOTTIME，降级到CLOCK_MONOTONIC */
+	return OSAL_get_monotonic_time();
 #endif
 }
 
 int64_t OSAL_get_highres_time(void)
 {
-    struct timespec ts;
-    if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0)
-        return -1;
+	struct timespec ts;
+	if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0)
+		return -1;
 
-    return (int64_t)ts.tv_sec * OSAL_NSEC_PER_SEC + ts.tv_nsec;
+	return (int64_t)ts.tv_sec * OSAL_NSEC_PER_SEC + ts.tv_nsec;
 }

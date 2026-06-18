@@ -168,8 +168,8 @@ int32_t OSAL_snprintf(char *str, osal_size_t size, const char *format, ...);
  * @param ap 参数列表
  * @return 写入的字符数（不包括'\0'）
  */
-int32_t
-OSAL_vsnprintf(char *str, osal_size_t size, const char *format, va_list ap);
+int32_t OSAL_vsnprintf(char *str, osal_size_t size, const char *format,
+					   va_list ap);
 
 /**
  * @brief 从字符串读取格式化输入

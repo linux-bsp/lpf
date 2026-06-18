@@ -27,10 +27,10 @@ typedef void (*fixture_func_t)(void);
 
 /* Test case structure */
 typedef struct {
-    const char *name;
-    test_func_t func;
-    fixture_func_t setup;
-    fixture_func_t teardown;
+	const char *name;
+	test_func_t func;
+	fixture_func_t setup;
+	fixture_func_t teardown;
 } test_case_t;
 
 /**
@@ -39,21 +39,21 @@ typedef struct {
  * TEST_CASE_REF()
  */
 typedef struct {
-    const char *section_name; /**< Section name to identify which suite this
+	const char *section_name; /**< Section name to identify which suite this
                                  belongs to */
-    test_case_t case_info;    /**< Test case information */
+	test_case_t case_info; /**< Test case information */
 } auto_test_case_t;
 
 /* Test suite structure with metadata support */
 typedef struct {
-    const char *suite_name;
-    const char *module_name;
-    const char *layer_name;
-    const test_case_t *cases;
-    uint32_t case_count;
-    fixture_func_t suite_setup;
-    fixture_func_t suite_teardown;
-    test_metadata_t metadata; /**< Test suite metadata (category, tags, timeout,
+	const char *suite_name;
+	const char *module_name;
+	const char *layer_name;
+	const test_case_t *cases;
+	uint32_t case_count;
+	fixture_func_t suite_setup;
+	fixture_func_t suite_teardown;
+	test_metadata_t metadata; /**< Test suite metadata (category, tags, timeout,
                                  description) */
 } test_suite_t;
 
@@ -62,28 +62,27 @@ typedef enum { TEST_RESULT_PASS = 0, TEST_RESULT_FAIL = 1 } test_result_t;
 
 /* Test result record (for detailed summary) */
 typedef struct test_result_node {
-    const char *suite_name;
-    const char *test_name;
-    uint32_t elapsed_ms;
-    struct test_result_node *next;
+	const char *suite_name;
+	const char *test_name;
+	uint32_t elapsed_ms;
+	struct test_result_node *next;
 } test_result_node_t;
 
 /* Test statistics */
 typedef struct {
-    uint32_t total;
-    uint32_t passed;
-    uint32_t failed;
-    uint64_t total_time_ms;       /* Total execution time in milliseconds */
-    uint64_t avg_time_ms;         /* Average execution time per test */
-    const char *failed_tests[64]; /* List of failed test names (legacy) */
-    uint32_t
-        failed_test_count; /* Number of failed tests in the list (legacy) */
+	uint32_t total;
+	uint32_t passed;
+	uint32_t failed;
+	uint64_t total_time_ms; /* Total execution time in milliseconds */
+	uint64_t avg_time_ms; /* Average execution time per test */
+	const char *failed_tests[64]; /* List of failed test names (legacy) */
+	uint32_t failed_test_count; /* Number of failed tests in the list (legacy) */
 
-    /* Separate linked lists for each result type */
-    test_result_node_t *passed_list_head;
-    test_result_node_t *passed_list_tail;
-    test_result_node_t *failed_list_head;
-    test_result_node_t *failed_list_tail;
+	/* Separate linked lists for each result type */
+	test_result_node_t *passed_list_head;
+	test_result_node_t *passed_list_tail;
+	test_result_node_t *failed_list_head;
+	test_result_node_t *failed_list_tail;
 } test_stats_t;
 
 /* Core API - Test Registration */
@@ -94,10 +93,10 @@ int32_t libutest_run_all(void);
 int32_t libutest_run_all_filtered(const test_filter_t *filter);
 int32_t libutest_run_layer(const char *layer_name);
 int32_t libutest_run_layer_filtered(const char *layer_name,
-                                    const test_filter_t *filter);
+									const test_filter_t *filter);
 int32_t libutest_run_module(const char *module_name);
 int32_t libutest_run_module_filtered(const char *module_name,
-                                     const test_filter_t *filter);
+									 const test_filter_t *filter);
 int32_t libutest_run_suite(const char *suite_name);
 int32_t libutest_run_test(const char *suite_name, const char *test_name);
 

@@ -33,24 +33,24 @@ typedef mode_t osal_mode_t;
  *===========================================================================*/
 
 /* 标准文件描述符常量 */
-#define OSAL_STDIN_FILENO 0  /* 标准输入 */
+#define OSAL_STDIN_FILENO 0 /* 标准输入 */
 #define OSAL_STDOUT_FILENO 1 /* 标准输出 */
 #define OSAL_STDERR_FILENO 2 /* 标准错误 */
 
 /* 访问模式 */
 #define OSAL_O_RDONLY 0x0000 /* 只读 */
 #define OSAL_O_WRONLY 0x0001 /* 只写 */
-#define OSAL_O_RDWR 0x0002   /* 读写 */
+#define OSAL_O_RDWR 0x0002 /* 读写 */
 
 /* 文件创建标志 */
 #define OSAL_O_CREAT 0x0040 /* 文件不存在则创建 */
-#define OSAL_O_EXCL 0x0080  /* 与O_CREAT一起使用，文件存在则失败 */
+#define OSAL_O_EXCL 0x0080 /* 与O_CREAT一起使用，文件存在则失败 */
 #define OSAL_O_TRUNC 0x0200 /* 截断文件 */
 #define OSAL_O_APPEND 0x0400 /* 追加模式 */
 
 /* 文件状态标志 */
 #define OSAL_O_NONBLOCK 0x0800 /* 非阻塞模式 */
-#define OSAL_O_NOCTTY 0x8000   /* 不作为控制终端 */
+#define OSAL_O_NOCTTY 0x8000 /* 不作为控制终端 */
 
 /* 文件权限（对应mode_t） */
 #define OSAL_S_IRUSR 0x0100 /* 用户读权限 */

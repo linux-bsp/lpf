@@ -64,25 +64,25 @@ extern "C" {
 
 /* Mock 状态跟踪 */
 typedef struct {
-    const char *func_name; /* 函数名称 */
-    uint32_t call_count;   /* 调用次数 */
-    int32_t return_value;  /* 返回值（整数） */
-    void *return_ptr;      /* 返回值（指针） */
-    bool return_value_set; /* 是否设置了返回值 */
+	const char *func_name; /* 函数名称 */
+	uint32_t call_count; /* 调用次数 */
+	int32_t return_value; /* 返回值（整数） */
+	void *return_ptr; /* 返回值（指针） */
+	bool return_value_set; /* 是否设置了返回值 */
 
-    /* 最后一次调用的参数（通用存储） */
-    void *last_arg1;
-    void *last_arg2;
-    void *last_arg3;
-    void *last_arg4;
+	/* 最后一次调用的参数（通用存储） */
+	void *last_arg1;
+	void *last_arg2;
+	void *last_arg3;
+	void *last_arg4;
 } test_mock_state_t;
 
 /* Mock 注册表 */
 #define TEST_MOCK_MAX_FUNCS 32
 
 typedef struct {
-    test_mock_state_t mocks[TEST_MOCK_MAX_FUNCS];
-    uint32_t mock_count;
+	test_mock_state_t mocks[TEST_MOCK_MAX_FUNCS];
+	uint32_t mock_count;
 } test_mock_registry_t;
 
 /* 全局 mock 注册表 */
@@ -118,12 +118,12 @@ test_mock_state_t *test_mock_get(const char *func_name);
  * @brief 记录函数被调用
  */
 #define TEST_MOCK_CALLED()                                  \
-    do {                                                    \
-        test_mock_state_t *_mock = test_mock_get(__func__); \
-        if (_mock) {                                        \
-            _mock->call_count++;                            \
-        }                                                   \
-    } while (0)
+	do {                                                    \
+		test_mock_state_t *_mock = test_mock_get(__func__); \
+		if (_mock) {                                        \
+			_mock->call_count++;                            \
+		}                                                   \
+	} while (0)
 
 /**
  * @brief 设置 mock 函数的整数返回值
@@ -131,13 +131,13 @@ test_mock_state_t *test_mock_get(const char *func_name);
  * @param value 返回值
  */
 #define TEST_MOCK_SET_RETURN(value)                               \
-    do {                                                          \
-        test_mock_state_t *_mock = test_mock_get(g_current_test); \
-        if (_mock) {                                              \
-            _mock->return_value = (value);                        \
-            _mock->return_value_set = true;                       \
-        }                                                         \
-    } while (0)
+	do {                                                          \
+		test_mock_state_t *_mock = test_mock_get(g_current_test); \
+		if (_mock) {                                              \
+			_mock->return_value = (value);                        \
+			_mock->return_value_set = true;                       \
+		}                                                         \
+	} while (0)
 
 /**
  * @brief 设置 mock 函数的指针返回值
@@ -145,13 +145,13 @@ test_mock_state_t *test_mock_get(const char *func_name);
  * @param ptr 指针返回值
  */
 #define TEST_MOCK_SET_RETURN_PTR(ptr)                             \
-    do {                                                          \
-        test_mock_state_t *_mock = test_mock_get(g_current_test); \
-        if (_mock) {                                              \
-            _mock->return_ptr = (void *)(ptr);                    \
-            _mock->return_value_set = true;                       \
-        }                                                         \
-    } while (0)
+	do {                                                          \
+		test_mock_state_t *_mock = test_mock_get(g_current_test); \
+		if (_mock) {                                              \
+			_mock->return_ptr = (void *)(ptr);                    \
+			_mock->return_value_set = true;                       \
+		}                                                         \
+	} while (0)
 
 /**
  * @brief 获取 mock 函数应该返回的整数值
@@ -159,10 +159,10 @@ test_mock_state_t *test_mock_get(const char *func_name);
  * @return 预设的返回值，如果未设置则返回 0
  */
 #define TEST_MOCK_RETURN_INT()                                        \
-    ({                                                                \
-        test_mock_state_t *_mock = test_mock_get(__func__);           \
-        (_mock && _mock->return_value_set) ? _mock->return_value : 0; \
-    })
+	({                                                                \
+		test_mock_state_t *_mock = test_mock_get(__func__);           \
+		(_mock && _mock->return_value_set) ? _mock->return_value : 0; \
+	})
 
 /**
  * @brief 获取 mock 函数应该返回的指针值
@@ -170,10 +170,10 @@ test_mock_state_t *test_mock_get(const char *func_name);
  * @return 预设的指针，如果未设置则返回 NULL
  */
 #define TEST_MOCK_RETURN_PTR()                                         \
-    ({                                                                 \
-        test_mock_state_t *_mock = test_mock_get(__func__);            \
-        (_mock && _mock->return_value_set) ? _mock->return_ptr : NULL; \
-    })
+	({                                                                 \
+		test_mock_state_t *_mock = test_mock_get(__func__);            \
+		(_mock && _mock->return_value_set) ? _mock->return_ptr : NULL; \
+	})
 
 /**
  * @brief 验证函数被调用
@@ -181,18 +181,18 @@ test_mock_state_t *test_mock_get(const char *func_name);
  * @param func_name 函数名称（不带引号）
  */
 #define TEST_MOCK_VERIFY_CALLED(func_name)                                   \
-    do {                                                                     \
-        test_mock_state_t *_mock = test_mock_get(#func_name);                \
-        if (!_mock || _mock->call_count == 0) {                              \
-            OSAL_printf("[  FAILED  ] %s:%d\n", __FILE__, __LINE__);         \
-            OSAL_printf("            Expected function '%s' to be called\n", \
-                        #func_name);                                         \
-            OSAL_printf("            Actual call count: %u\n",               \
-                        _mock ? _mock->call_count : 0);                      \
-            g_test_failed = true;                                            \
-            return;                                                          \
-        }                                                                    \
-    } while (0)
+	do {                                                                     \
+		test_mock_state_t *_mock = test_mock_get(#func_name);                \
+		if (!_mock || _mock->call_count == 0) {                              \
+			OSAL_printf("[  FAILED  ] %s:%d\n", __FILE__, __LINE__);         \
+			OSAL_printf("            Expected function '%s' to be called\n", \
+						#func_name);                                         \
+			OSAL_printf("            Actual call count: %u\n",               \
+						_mock ? _mock->call_count : 0);                      \
+			g_test_failed = true;                                            \
+			return;                                                          \
+		}                                                                    \
+	} while (0)
 
 /**
  * @brief 验证函数被调用指定次数
@@ -201,19 +201,19 @@ test_mock_state_t *test_mock_get(const char *func_name);
  * @param expected_count 期望的调用次数
  */
 #define TEST_MOCK_VERIFY_CALL_COUNT(func_name, expected_count)             \
-    do {                                                                   \
-        test_mock_state_t *_mock = test_mock_get(#func_name);              \
-        uint32_t _actual = _mock ? _mock->call_count : 0;                  \
-        if (_actual != (expected_count)) {                                 \
-            OSAL_printf("[  FAILED  ] %s:%d\n", __FILE__, __LINE__);       \
-            OSAL_printf("            Function: %s\n", #func_name);         \
-            OSAL_printf("            Expected call count: %u\n",           \
-                        (uint32_t)(expected_count));                       \
-            OSAL_printf("            Actual call count:   %u\n", _actual); \
-            g_test_failed = true;                                          \
-            return;                                                        \
-        }                                                                  \
-    } while (0)
+	do {                                                                   \
+		test_mock_state_t *_mock = test_mock_get(#func_name);              \
+		uint32_t _actual = _mock ? _mock->call_count : 0;                  \
+		if (_actual != (expected_count)) {                                 \
+			OSAL_printf("[  FAILED  ] %s:%d\n", __FILE__, __LINE__);       \
+			OSAL_printf("            Function: %s\n", #func_name);         \
+			OSAL_printf("            Expected call count: %u\n",           \
+						(uint32_t)(expected_count));                       \
+			OSAL_printf("            Actual call count:   %u\n", _actual); \
+			g_test_failed = true;                                          \
+			return;                                                        \
+		}                                                                  \
+	} while (0)
 
 /**
  * @brief 验证函数未被调用
@@ -221,7 +221,7 @@ test_mock_state_t *test_mock_get(const char *func_name);
  * @param func_name 函数名称（不带引号）
  */
 #define TEST_MOCK_VERIFY_NOT_CALLED(func_name) \
-    TEST_MOCK_VERIFY_CALL_COUNT(func_name, 0)
+	TEST_MOCK_VERIFY_CALL_COUNT(func_name, 0)
 
 /**
  * @brief 捕获函数调用的参数（用于 mock 函数内部）
@@ -232,15 +232,15 @@ test_mock_state_t *test_mock_get(const char *func_name);
  * @param arg4 第四个参数（可选）
  */
 #define TEST_MOCK_CAPTURE_ARGS(arg1, arg2, arg3, arg4)      \
-    do {                                                    \
-        test_mock_state_t *_mock = test_mock_get(__func__); \
-        if (_mock) {                                        \
-            _mock->last_arg1 = (void *)(arg1);              \
-            _mock->last_arg2 = (void *)(arg2);              \
-            _mock->last_arg3 = (void *)(arg3);              \
-            _mock->last_arg4 = (void *)(arg4);              \
-        }                                                   \
-    } while (0)
+	do {                                                    \
+		test_mock_state_t *_mock = test_mock_get(__func__); \
+		if (_mock) {                                        \
+			_mock->last_arg1 = (void *)(arg1);              \
+			_mock->last_arg2 = (void *)(arg2);              \
+			_mock->last_arg3 = (void *)(arg3);              \
+			_mock->last_arg4 = (void *)(arg4);              \
+		}                                                   \
+	} while (0)
 
 /**
  * @brief 恢复所有 mock 函数
@@ -273,13 +273,12 @@ test_mock_state_t *test_mock_get(const char *func_name);
  * 注意：这是一个占位符宏，实际的函数替换需要在编译时使用弱符号或链接器脚本
  */
 #define TEST_MOCK_REPLACE(original_func, mock_func)             \
-    do {                                                        \
-        test_mock_register(#mock_func);                         \
-        /* 实际的函数替换需要编译时支持 */        \
-        OSAL_printf("[   INFO   ] Mock registered: %s -> %s\n", \
-                    #original_func,                             \
-                    #mock_func);                                \
-    } while (0)
+	do {                                                        \
+		test_mock_register(#mock_func);                         \
+		/* 实际的函数替换需要编译时支持 */        \
+		OSAL_printf("[   INFO   ] Mock registered: %s -> %s\n", \
+					#original_func, #mock_func);                \
+	} while (0)
 
 #ifdef __cplusplus
 }

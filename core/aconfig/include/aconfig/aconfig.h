@@ -32,9 +32,9 @@ typedef struct aconfig_function_map aconfig_function_map_t;
  * @note 通用配置表，不包含业务特定字段
  */
 typedef struct {
-    const char *name;                           /* 配置表名称 */
-    const aconfig_function_map_t *function_map; /* 功能映射（不透明指针） */
-    const void *user_data;                      /* 用户自定义数据 */
+	const char *name; /* 配置表名称 */
+	const aconfig_function_map_t *function_map; /* 功能映射（不透明指针） */
+	const void *user_data; /* 用户自定义数据 */
 } aconfig_config_table_t;
 
 /**
@@ -42,9 +42,9 @@ typedef struct {
  * @note 通用统计信息
  */
 typedef struct {
-    uint32_t total_functions;    /* 总功能数量 */
-    uint32_t enabled_functions;  /* 启用的功能数量 */
-    uint32_t disabled_functions; /* 禁用的功能数量 */
+	uint32_t total_functions; /* 总功能数量 */
+	uint32_t enabled_functions; /* 启用的功能数量 */
+	uint32_t disabled_functions; /* 禁用的功能数量 */
 } aconfig_statistics_t;
 
 /*===========================================================================

@@ -14,10 +14,10 @@
  * ======================================================================== */
 
 typedef enum {
-    TEST_TC_POWER_ON = 0,
-    TEST_TC_POWER_OFF,
-    TEST_TC_RESET,
-    TEST_TC_MAX
+	TEST_TC_POWER_ON = 0,
+	TEST_TC_POWER_OFF,
+	TEST_TC_RESET,
+	TEST_TC_MAX
 } test_tc_function_t;
 
 /* ========================================================================
@@ -25,10 +25,10 @@ typedef enum {
  * ======================================================================== */
 
 typedef enum {
-    TEST_TM_VOLTAGE = 0,
-    TEST_TM_TEMPERATURE,
-    TEST_TM_STATUS,
-    TEST_TM_MAX
+	TEST_TM_VOLTAGE = 0,
+	TEST_TM_TEMPERATURE,
+	TEST_TM_STATUS,
+	TEST_TM_MAX
 } test_tm_function_t;
 
 #endif /* TEST_ACONFIG_DEFINITIONS_H */

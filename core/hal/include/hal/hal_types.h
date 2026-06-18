@@ -32,7 +32,7 @@ typedef void *hal_handle_t;
  * 各个模块的配置结构可以继承此基类（虽然C不支持继承，但可以作为约定）
  */
 typedef struct {
-    uint32_t reserved; /* 保留字段 */
+	uint32_t reserved; /* 保留字段 */
 } hal_config_base_t;
 
 #ifdef __cplusplus

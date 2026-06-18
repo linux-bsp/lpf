@@ -36,6 +36,6 @@
 /* 设备驱动 - 当前仅保留 MCU 外设类型 */
 #ifdef CONFIG_PDL_MCU_SUPPORT
 #include "pdl_mcu.h" /* MCU（微控制器）驱动 */
-#endif               /* CONFIG_PDL_MCU_SUPPORT */
+#endif /* CONFIG_PDL_MCU_SUPPORT */
 
 #endif /* PDL_H */

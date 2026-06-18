@@ -48,25 +48,24 @@
  * @param data_array 测试数据数组
  */
 #define TEST_CASE_PARAMETERIZED(test_name, data_type, data_array)              \
-    static void test_name##_impl(void *param);                                 \
-    static void test_name(void)                                                \
-    {                                                                          \
-        size_t _test_count = OSAL_sizeof(data_array) / OSAL_sizeof(data_type); \
-        size_t _test_i;                                                        \
-        for (_test_i = 0; _test_i < _test_count; _test_i++) {                  \
-            if (g_test_failed) {                                               \
-                OSAL_printf("[   INFO   ] Skipping remaining %zu "             \
-                            "parameter(s) due to previous failure\n",          \
-                            _test_count - _test_i);                            \
-                return;                                                        \
-            }                                                                  \
-            OSAL_printf("[   RUN    ] Parameter set %zu/%zu\n",                \
-                        _test_i + 1,                                           \
-                        _test_count);                                          \
-            test_name##_impl(&data_array[_test_i]);                            \
-        }                                                                      \
-    }                                                                          \
-    static void test_name##_impl(void *param)
+	static void test_name##_impl(void *param);                                 \
+	static void test_name(void)                                                \
+	{                                                                          \
+		size_t _test_count = OSAL_sizeof(data_array) / OSAL_sizeof(data_type); \
+		size_t _test_i;                                                        \
+		for (_test_i = 0; _test_i < _test_count; _test_i++) {                  \
+			if (g_test_failed) {                                               \
+				OSAL_printf("[   INFO   ] Skipping remaining %zu "             \
+							"parameter(s) due to previous failure\n",          \
+							_test_count - _test_i);                            \
+				return;                                                        \
+			}                                                                  \
+			OSAL_printf("[   RUN    ] Parameter set %zu/%zu\n", _test_i + 1,   \
+						_test_count);                                          \
+			test_name##_impl(&data_array[_test_i]);                            \
+		}                                                                      \
+	}                                                                          \
+	static void test_name##_impl(void *param)
 
 /**
  * @brief 定义参数化测试用例（继续执行版本）
@@ -79,31 +78,29 @@
  * @param data_array 测试数据数组
  */
 #define TEST_CASE_PARAMETERIZED_CONTINUE(test_name, data_type, data_array)     \
-    static void test_name##_impl(void *param);                                 \
-    static void test_name(void)                                                \
-    {                                                                          \
-        size_t _test_count = OSAL_sizeof(data_array) / OSAL_sizeof(data_type); \
-        size_t _test_i;                                                        \
-        size_t _test_failed_count = 0;                                         \
-        for (_test_i = 0; _test_i < _test_count; _test_i++) {                  \
-            bool _test_was_failed = g_test_failed;                             \
-            g_test_failed = false;                                             \
-            OSAL_printf("[   RUN    ] Parameter set %zu/%zu\n",                \
-                        _test_i + 1,                                           \
-                        _test_count);                                          \
-            test_name##_impl(&data_array[_test_i]);                            \
-            if (g_test_failed) {                                               \
-                _test_failed_count++;                                          \
-            }                                                                  \
-            g_test_failed = _test_was_failed || g_test_failed;                 \
-        }                                                                      \
-        if (_test_failed_count > 0) {                                          \
-            OSAL_printf("[   INFO   ] %zu/%zu parameter set(s) failed\n",      \
-                        _test_failed_count,                                    \
-                        _test_count);                                          \
-        }                                                                      \
-    }                                                                          \
-    static void test_name##_impl(void *param)
+	static void test_name##_impl(void *param);                                 \
+	static void test_name(void)                                                \
+	{                                                                          \
+		size_t _test_count = OSAL_sizeof(data_array) / OSAL_sizeof(data_type); \
+		size_t _test_i;                                                        \
+		size_t _test_failed_count = 0;                                         \
+		for (_test_i = 0; _test_i < _test_count; _test_i++) {                  \
+			bool _test_was_failed = g_test_failed;                             \
+			g_test_failed = false;                                             \
+			OSAL_printf("[   RUN    ] Parameter set %zu/%zu\n", _test_i + 1,   \
+						_test_count);                                          \
+			test_name##_impl(&data_array[_test_i]);                            \
+			if (g_test_failed) {                                               \
+				_test_failed_count++;                                          \
+			}                                                                  \
+			g_test_failed = _test_was_failed || g_test_failed;                 \
+		}                                                                      \
+		if (_test_failed_count > 0) {                                          \
+			OSAL_printf("[   INFO   ] %zu/%zu parameter set(s) failed\n",      \
+						_test_failed_count, _test_count);                      \
+		}                                                                      \
+	}                                                                          \
+	static void test_name##_impl(void *param)
 
 /**
  * @brief 在参数化测试中跳过当前参数
@@ -120,10 +117,10 @@
  * @endcode
  */
 #define TEST_SKIP(reason)                         \
-    do {                                          \
-        OSAL_printf("[  SKIPPED ] %s\n", reason); \
-        return;                                   \
-    } while (0)
+	do {                                          \
+		OSAL_printf("[  SKIPPED ] %s\n", reason); \
+		return;                                   \
+	} while (0)
 
 /**
  * @brief 在参数化测试中输出当前参数信息
@@ -132,6 +129,6 @@
  * @param ... 参数
  */
 #define TEST_PARAM_INFO(format, ...) \
-    OSAL_printf("[  PARAM   ] " format "\n", ##__VA_ARGS__)
+	OSAL_printf("[  PARAM   ] " format "\n", ##__VA_ARGS__)
 
 #endif /* TEST_PARAMETERIZED_H */

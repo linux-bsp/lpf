@@ -9,17 +9,17 @@
 
 __attribute__((weak))
 const aconfig_config_table_t g_aconfig_table = { .name = NULL,
-                                                 .function_map = NULL,
-                                                 .user_data = NULL };
+												 .function_map = NULL,
+												 .user_data = NULL };
 
 /**
  * @brief 获取当前配置表
  */
 const aconfig_config_table_t *ACONFIG_GetTable(void)
 {
-    if (NULL == g_aconfig_table.name) {
-        return NULL;
-    }
+	if (NULL == g_aconfig_table.name) {
+		return NULL;
+	}
 
-    return &g_aconfig_table;
+	return &g_aconfig_table;
 }

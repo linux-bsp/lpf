@@ -18,22 +18,22 @@ extern const test_suite_t **test_get_all_suites(uint32_t *count);
 extern uint32_t test_get_layers(const char **layers, uint32_t max_layers);
 extern uint32_t test_get_modules(const char **modules, uint32_t max_modules);
 extern uint32_t test_get_suites_by_layer(const char *layer_name,
-                                         const test_suite_t **suites,
-                                         uint32_t max_suites);
+										 const test_suite_t **suites,
+										 uint32_t max_suites);
 extern uint32_t test_get_suites_by_layer_filtered(const char *layer_name,
-                                                  const test_filter_t *filter,
-                                                  const test_suite_t **suites,
-                                                  uint32_t max_suites);
+												  const test_filter_t *filter,
+												  const test_suite_t **suites,
+												  uint32_t max_suites);
 extern uint32_t test_get_suites_by_module(const char *module_name,
-                                          const test_suite_t **suites,
-                                          uint32_t max_suites);
+										  const test_suite_t **suites,
+										  uint32_t max_suites);
 extern uint32_t test_get_suites_by_module_filtered(const char *module_name,
-                                                   const test_filter_t *filter,
-                                                   const test_suite_t **suites,
-                                                   uint32_t max_suites);
+												   const test_filter_t *filter,
+												   const test_suite_t **suites,
+												   uint32_t max_suites);
 extern uint32_t test_get_filtered_suites(const test_filter_t *filter,
-                                         const test_suite_t **suites,
-                                         uint32_t max_suites);
+										 const test_suite_t **suites,
+										 uint32_t max_suites);
 
 /**
  * Read user input (numeric or special keys)
@@ -41,27 +41,27 @@ extern uint32_t test_get_filtered_suites(const test_filter_t *filter,
  */
 static int32_t read_choice(void)
 {
-    char buffer[16];
-    if (OSAL_fgets(buffer, OSAL_sizeof(buffer), OSAL_stdin) == NULL) {
-        return -1;
-    }
+	char buffer[16];
+	if (OSAL_fgets(buffer, OSAL_sizeof(buffer), OSAL_stdin) == NULL) {
+		return -1;
+	}
 
-    /* Check for special single-character commands */
-    char first_char = buffer[0];
-    if (first_char == 'b' || first_char == 'B') {
-        return -2; /* Back */
-    }
-    if (first_char == 'q' || first_char == 'Q') {
-        return -3; /* Quit */
-    }
+	/* Check for special single-character commands */
+	char first_char = buffer[0];
+	if (first_char == 'b' || first_char == 'B') {
+		return -2; /* Back */
+	}
+	if (first_char == 'q' || first_char == 'Q') {
+		return -3; /* Quit */
+	}
 
-    /* Try parsing as numeric */
-    int32_t choice;
-    if (OSAL_sscanf(buffer, "%d", &choice) != 1) {
-        return -1;
-    }
+	/* Try parsing as numeric */
+	int32_t choice;
+	if (OSAL_sscanf(buffer, "%d", &choice) != 1) {
+		return -1;
+	}
 
-    return choice;
+	return choice;
 }
 
 /**
@@ -69,16 +69,16 @@ static int32_t read_choice(void)
  */
 static void format_timeout(uint32_t timeout_ms, char *buf, uint32_t buf_size)
 {
-    if (timeout_ms == 0) {
-        OSAL_strncpy(buf, "none", buf_size);
-    } else if (timeout_ms < 1000) {
-        OSAL_snprintf(buf, buf_size, "%ums", timeout_ms);
-    } else if (timeout_ms < 60000) {
-        OSAL_snprintf(buf, buf_size, "%.1fs", timeout_ms / 1000.0);
-    } else {
-        OSAL_snprintf(buf, buf_size, "%.1fm", timeout_ms / 60000.0);
-    }
-    buf[buf_size - 1] = '\0';
+	if (timeout_ms == 0) {
+		OSAL_strncpy(buf, "none", buf_size);
+	} else if (timeout_ms < 1000) {
+		OSAL_snprintf(buf, buf_size, "%ums", timeout_ms);
+	} else if (timeout_ms < 60000) {
+		OSAL_snprintf(buf, buf_size, "%.1fs", timeout_ms / 1000.0);
+	} else {
+		OSAL_snprintf(buf, buf_size, "%.1fm", timeout_ms / 60000.0);
+	}
+	buf[buf_size - 1] = '\0';
 }
 
 /**
@@ -86,38 +86,36 @@ static void format_timeout(uint32_t timeout_ms, char *buf, uint32_t buf_size)
  */
 static void display_suite_metadata(const test_suite_t *suite)
 {
-    char tags_buf[128];
-    char timeout_buf[32];
+	char tags_buf[128];
+	char timeout_buf[32];
 
-    test_tags_to_string(suite->metadata.tags, tags_buf, OSAL_sizeof(tags_buf));
-    format_timeout(suite->metadata.timeout_ms,
-                   timeout_buf,
-                   OSAL_sizeof(timeout_buf));
+	test_tags_to_string(suite->metadata.tags, tags_buf, OSAL_sizeof(tags_buf));
+	format_timeout(suite->metadata.timeout_ms, timeout_buf,
+				   OSAL_sizeof(timeout_buf));
 
-    OSAL_printf("    Category: %s | Tags: %s | Timeout: %s\n",
-                test_category_name(suite->metadata.category),
-                suite->metadata.tags ? tags_buf : "none",
-                timeout_buf);
+	OSAL_printf("    Category: %s | Tags: %s | Timeout: %s\n",
+				test_category_name(suite->metadata.category),
+				suite->metadata.tags ? tags_buf : "none", timeout_buf);
 
-    if (suite->metadata.description && suite->metadata.description[0] != '\0') {
-        OSAL_printf("    Description: %s\n", suite->metadata.description);
-    }
+	if (suite->metadata.description && suite->metadata.description[0] != '\0') {
+		OSAL_printf("    Description: %s\n", suite->metadata.description);
+	}
 }
 
 /**
  * Count total tests in suite list
  */
 static uint32_t count_total_tests(const test_suite_t **suites,
-                                  uint32_t suite_count)
+								  uint32_t suite_count)
 {
-    uint32_t total = 0;
-    uint32_t i;
+	uint32_t total = 0;
+	uint32_t i;
 
-    for (i = 0; i < suite_count; i++) {
-        total += suites[i]->case_count;
-    }
+	for (i = 0; i < suite_count; i++) {
+		total += suites[i]->case_count;
+	}
 
-    return total;
+	return total;
 }
 
 /**
@@ -125,52 +123,49 @@ static uint32_t count_total_tests(const test_suite_t **suites,
  */
 static void display_filter_status(const test_filter_t *filter)
 {
-    if (!filter || !filter->enabled) {
-        OSAL_printf("  Filter: None (showing all tests)\n");
-        return;
-    }
+	if (!filter || !filter->enabled) {
+		OSAL_printf("  Filter: None (showing all tests)\n");
+		return;
+	}
 
-    OSAL_printf("  Active Filters:\n");
+	OSAL_printf("  Active Filters:\n");
 
-    if (filter->category_mask != 0) {
-        OSAL_printf("    - Category: ");
-        bool first = true;
-        uint32_t i;
-        for (i = 0; i < TEST_CATEGORY_MAX; i++) {
-            if (filter->category_mask & (1u << i)) {
-                if (!first) {
-                    OSAL_printf(", ");
-                }
-                OSAL_printf("%s", test_category_name((test_category_t)i));
-                first = false;
-            }
-        }
-        OSAL_printf("\n");
-    }
+	if (filter->category_mask != 0) {
+		OSAL_printf("    - Category: ");
+		bool first = true;
+		uint32_t i;
+		for (i = 0; i < TEST_CATEGORY_MAX; i++) {
+			if (filter->category_mask & (1u << i)) {
+				if (!first) {
+					OSAL_printf(", ");
+				}
+				OSAL_printf("%s", test_category_name((test_category_t)i));
+				first = false;
+			}
+		}
+		OSAL_printf("\n");
+	}
 
-    if (filter->include_tags != 0) {
-        char tags_buf[128];
-        test_tags_to_string(filter->include_tags,
-                            tags_buf,
-                            OSAL_sizeof(tags_buf));
-        OSAL_printf("    - Include tags: %s\n", tags_buf);
-    }
+	if (filter->include_tags != 0) {
+		char tags_buf[128];
+		test_tags_to_string(filter->include_tags, tags_buf,
+							OSAL_sizeof(tags_buf));
+		OSAL_printf("    - Include tags: %s\n", tags_buf);
+	}
 
-    if (filter->exclude_tags != 0) {
-        char tags_buf[128];
-        test_tags_to_string(filter->exclude_tags,
-                            tags_buf,
-                            OSAL_sizeof(tags_buf));
-        OSAL_printf("    - Exclude tags: %s\n", tags_buf);
-    }
+	if (filter->exclude_tags != 0) {
+		char tags_buf[128];
+		test_tags_to_string(filter->exclude_tags, tags_buf,
+							OSAL_sizeof(tags_buf));
+		OSAL_printf("    - Exclude tags: %s\n", tags_buf);
+	}
 
-    if (filter->max_timeout_ms > 0) {
-        char timeout_buf[32];
-        format_timeout(filter->max_timeout_ms,
-                       timeout_buf,
-                       OSAL_sizeof(timeout_buf));
-        OSAL_printf("    - Max timeout: %s\n", timeout_buf);
-    }
+	if (filter->max_timeout_ms > 0) {
+		char timeout_buf[32];
+		format_timeout(filter->max_timeout_ms, timeout_buf,
+					   OSAL_sizeof(timeout_buf));
+		OSAL_printf("    - Max timeout: %s\n", timeout_buf);
+	}
 }
 
 /**
@@ -178,46 +173,43 @@ static void display_filter_status(const test_filter_t *filter)
  */
 void libutest_list_all(void)
 {
-    uint32_t suite_count = 0;
-    const test_suite_t **suites = test_get_all_suites(&suite_count);
+	uint32_t suite_count = 0;
+	const test_suite_t **suites = test_get_all_suites(&suite_count);
 
-    OSAL_printf("\nRegistered Test Suites (%u total):\n", suite_count);
-    OSAL_printf("=====================================\n");
+	OSAL_printf("\nRegistered Test Suites (%u total):\n", suite_count);
+	OSAL_printf("=====================================\n");
 
-    uint32_t i;
-    uint32_t total_tests = 0;
+	uint32_t i;
+	uint32_t total_tests = 0;
 
-    /* Get unique layers and modules */
-    const char *layers[MAX_LAYERS];
-    const char *modules[MAX_MODULES];
-    uint32_t layer_count = test_get_layers(layers, MAX_LAYERS);
-    uint32_t module_count = test_get_modules(modules, MAX_MODULES);
+	/* Get unique layers and modules */
+	const char *layers[MAX_LAYERS];
+	const char *modules[MAX_MODULES];
+	uint32_t layer_count = test_get_layers(layers, MAX_LAYERS);
+	uint32_t module_count = test_get_modules(modules, MAX_MODULES);
 
-    for (i = 0; i < suite_count; i++) {
-        const test_suite_t *suite = suites[i];
-        OSAL_printf("\n[%s/%s] %s (%u tests)\n",
-                    suite->layer_name,
-                    suite->module_name,
-                    suite->suite_name,
-                    suite->case_count);
+	for (i = 0; i < suite_count; i++) {
+		const test_suite_t *suite = suites[i];
+		OSAL_printf("\n[%s/%s] %s (%u tests)\n", suite->layer_name,
+					suite->module_name, suite->suite_name, suite->case_count);
 
-        uint32_t j;
+		uint32_t j;
 
-        for (j = 0; j < suite->case_count; j++) {
-            OSAL_printf("  - %s\n", suite->cases[j].name);
-        }
+		for (j = 0; j < suite->case_count; j++) {
+			OSAL_printf("  - %s\n", suite->cases[j].name);
+		}
 
-        total_tests += suite->case_count;
-    }
+		total_tests += suite->case_count;
+	}
 
-    OSAL_printf("\n");
-    OSAL_printf("=====================================\n");
-    OSAL_printf("Summary:\n");
-    OSAL_printf("  Layers:      %u\n", layer_count);
-    OSAL_printf("  Modules:     %u\n", module_count);
-    OSAL_printf("  Suites:      %u\n", suite_count);
-    OSAL_printf("  Test cases:  %u\n", total_tests);
-    OSAL_printf("=====================================\n\n");
+	OSAL_printf("\n");
+	OSAL_printf("=====================================\n");
+	OSAL_printf("Summary:\n");
+	OSAL_printf("  Layers:      %u\n", layer_count);
+	OSAL_printf("  Modules:     %u\n", module_count);
+	OSAL_printf("  Suites:      %u\n", suite_count);
+	OSAL_printf("  Test cases:  %u\n", total_tests);
+	OSAL_printf("=====================================\n\n");
 }
 
 /**
@@ -225,56 +217,54 @@ void libutest_list_all(void)
  */
 void libutest_list_layer(const char *layer_name)
 {
-    const test_suite_t *suites[MAX_SUITES];
-    uint32_t count = test_get_suites_by_layer(layer_name, suites, MAX_SUITES);
+	const test_suite_t *suites[MAX_SUITES];
+	uint32_t count = test_get_suites_by_layer(layer_name, suites, MAX_SUITES);
 
-    OSAL_printf("\nTest Suites in layer %s (%u total):\n", layer_name, count);
-    OSAL_printf("=====================================\n");
+	OSAL_printf("\nTest Suites in layer %s (%u total):\n", layer_name, count);
+	OSAL_printf("=====================================\n");
 
-    uint32_t i;
-    uint32_t total_tests = 0;
+	uint32_t i;
+	uint32_t total_tests = 0;
 
-    /* Get unique modules in this layer */
-    const char *modules[MAX_MODULES];
-    uint32_t module_count = 0;
+	/* Get unique modules in this layer */
+	const char *modules[MAX_MODULES];
+	uint32_t module_count = 0;
 
-    for (i = 0; i < count; i++) {
-        const test_suite_t *suite = suites[i];
-        OSAL_printf("\n[%s] %s (%u tests)\n",
-                    suite->module_name,
-                    suite->suite_name,
-                    suite->case_count);
+	for (i = 0; i < count; i++) {
+		const test_suite_t *suite = suites[i];
+		OSAL_printf("\n[%s] %s (%u tests)\n", suite->module_name,
+					suite->suite_name, suite->case_count);
 
-        uint32_t j;
+		uint32_t j;
 
-        for (j = 0; j < suite->case_count; j++) {
-            OSAL_printf("  - %s\n", suite->cases[j].name);
-        }
+		for (j = 0; j < suite->case_count; j++) {
+			OSAL_printf("  - %s\n", suite->cases[j].name);
+		}
 
-        total_tests += suite->case_count;
+		total_tests += suite->case_count;
 
-        /* Count unique modules */
-        bool found = false;
-        uint32_t k;
-        for (k = 0; k < module_count; k++) {
-            if (0 == OSAL_strcmp(modules[k], suite->module_name)) {
-                found = true;
-                break;
-            }
-        }
-        if (!found && module_count < MAX_MODULES) {
-            modules[module_count++] = suite->module_name;
-        }
-    }
+		/* Count unique modules */
+		bool found = false;
+		uint32_t k;
+		for (k = 0; k < module_count; k++) {
+			if (0 == OSAL_strcmp(modules[k], suite->module_name)) {
+				found = true;
+				break;
+			}
+		}
+		if (!found && module_count < MAX_MODULES) {
+			modules[module_count++] = suite->module_name;
+		}
+	}
 
-    OSAL_printf("\n");
-    OSAL_printf("=====================================\n");
-    OSAL_printf("Summary:\n");
-    OSAL_printf("  Layer:       %s\n", layer_name);
-    OSAL_printf("  Modules:     %u\n", module_count);
-    OSAL_printf("  Suites:      %u\n", count);
-    OSAL_printf("  Test cases:  %u\n", total_tests);
-    OSAL_printf("=====================================\n\n");
+	OSAL_printf("\n");
+	OSAL_printf("=====================================\n");
+	OSAL_printf("Summary:\n");
+	OSAL_printf("  Layer:       %s\n", layer_name);
+	OSAL_printf("  Modules:     %u\n", module_count);
+	OSAL_printf("  Suites:      %u\n", count);
+	OSAL_printf("  Test cases:  %u\n", total_tests);
+	OSAL_printf("=====================================\n\n");
 }
 
 /**
@@ -282,53 +272,53 @@ void libutest_list_layer(const char *layer_name)
  */
 void libutest_list_module(const char *module_name)
 {
-    const test_suite_t *suites[MAX_SUITES];
-    uint32_t count = test_get_suites_by_module(module_name, suites, MAX_SUITES);
+	const test_suite_t *suites[MAX_SUITES];
+	uint32_t count = test_get_suites_by_module(module_name, suites, MAX_SUITES);
 
-    OSAL_printf("\nTest Suites in module %s (%u total):\n", module_name, count);
-    OSAL_printf("=====================================\n");
+	OSAL_printf("\nTest Suites in module %s (%u total):\n", module_name, count);
+	OSAL_printf("=====================================\n");
 
-    uint32_t i;
-    uint32_t total_tests = 0;
+	uint32_t i;
+	uint32_t total_tests = 0;
 
-    /* Get unique layers in this module */
-    const char *layers[MAX_LAYERS];
-    uint32_t layer_count = 0;
+	/* Get unique layers in this module */
+	const char *layers[MAX_LAYERS];
+	uint32_t layer_count = 0;
 
-    for (i = 0; i < count; i++) {
-        const test_suite_t *suite = suites[i];
-        OSAL_printf("\n%s (%u tests)\n", suite->suite_name, suite->case_count);
+	for (i = 0; i < count; i++) {
+		const test_suite_t *suite = suites[i];
+		OSAL_printf("\n%s (%u tests)\n", suite->suite_name, suite->case_count);
 
-        uint32_t j;
+		uint32_t j;
 
-        for (j = 0; j < suite->case_count; j++) {
-            OSAL_printf("  - %s\n", suite->cases[j].name);
-        }
+		for (j = 0; j < suite->case_count; j++) {
+			OSAL_printf("  - %s\n", suite->cases[j].name);
+		}
 
-        total_tests += suite->case_count;
+		total_tests += suite->case_count;
 
-        /* Count unique layers */
-        bool found = false;
-        uint32_t k;
-        for (k = 0; k < layer_count; k++) {
-            if (0 == OSAL_strcmp(layers[k], suite->layer_name)) {
-                found = true;
-                break;
-            }
-        }
-        if (!found && layer_count < MAX_LAYERS) {
-            layers[layer_count++] = suite->layer_name;
-        }
-    }
+		/* Count unique layers */
+		bool found = false;
+		uint32_t k;
+		for (k = 0; k < layer_count; k++) {
+			if (0 == OSAL_strcmp(layers[k], suite->layer_name)) {
+				found = true;
+				break;
+			}
+		}
+		if (!found && layer_count < MAX_LAYERS) {
+			layers[layer_count++] = suite->layer_name;
+		}
+	}
 
-    OSAL_printf("\n");
-    OSAL_printf("=====================================\n");
-    OSAL_printf("Summary:\n");
-    OSAL_printf("  Module:      %s\n", module_name);
-    OSAL_printf("  Layers:      %u\n", layer_count);
-    OSAL_printf("  Suites:      %u\n", count);
-    OSAL_printf("  Test cases:  %u\n", total_tests);
-    OSAL_printf("=====================================\n\n");
+	OSAL_printf("\n");
+	OSAL_printf("=====================================\n");
+	OSAL_printf("Summary:\n");
+	OSAL_printf("  Module:      %s\n", module_name);
+	OSAL_printf("  Layers:      %u\n", layer_count);
+	OSAL_printf("  Suites:      %u\n", count);
+	OSAL_printf("  Test cases:  %u\n", total_tests);
+	OSAL_printf("=====================================\n\n");
 }
 
 /**
@@ -336,46 +326,43 @@ void libutest_list_module(const char *module_name)
  */
 void libutest_list_layers(void)
 {
-    const char *layers[MAX_LAYERS];
-    uint32_t layer_count = test_get_layers(layers, MAX_LAYERS);
+	const char *layers[MAX_LAYERS];
+	uint32_t layer_count = test_get_layers(layers, MAX_LAYERS);
 
-    OSAL_printf("\nAvailable Test Layers (%u total):\n", layer_count);
-    OSAL_printf("=====================================\n");
+	OSAL_printf("\nAvailable Test Layers (%u total):\n", layer_count);
+	OSAL_printf("=====================================\n");
 
-    uint32_t i;
-    for (i = 0; i < layer_count; i++) {
-        /* Count suites and tests in this layer */
-        const test_suite_t *suites[MAX_SUITES];
-        uint32_t suite_count =
-            test_get_suites_by_layer(layers[i], suites, MAX_SUITES);
-        uint32_t test_count = count_total_tests(suites, suite_count);
+	uint32_t i;
+	for (i = 0; i < layer_count; i++) {
+		/* Count suites and tests in this layer */
+		const test_suite_t *suites[MAX_SUITES];
+		uint32_t suite_count =
+			test_get_suites_by_layer(layers[i], suites, MAX_SUITES);
+		uint32_t test_count = count_total_tests(suites, suite_count);
 
-        /* Count modules in this layer */
-        const char *modules[MAX_MODULES];
-        uint32_t module_count = 0;
-        uint32_t j;
-        for (j = 0; j < suite_count; j++) {
-            bool found = false;
-            uint32_t k;
-            for (k = 0; k < module_count; k++) {
-                if (0 == OSAL_strcmp(modules[k], suites[j]->module_name)) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found && module_count < MAX_MODULES) {
-                modules[module_count++] = suites[j]->module_name;
-            }
-        }
+		/* Count modules in this layer */
+		const char *modules[MAX_MODULES];
+		uint32_t module_count = 0;
+		uint32_t j;
+		for (j = 0; j < suite_count; j++) {
+			bool found = false;
+			uint32_t k;
+			for (k = 0; k < module_count; k++) {
+				if (0 == OSAL_strcmp(modules[k], suites[j]->module_name)) {
+					found = true;
+					break;
+				}
+			}
+			if (!found && module_count < MAX_MODULES) {
+				modules[module_count++] = suites[j]->module_name;
+			}
+		}
 
-        OSAL_printf("  %-12s  %2u modules, %2u suites, %3u tests\n",
-                    layers[i],
-                    module_count,
-                    suite_count,
-                    test_count);
-    }
+		OSAL_printf("  %-12s  %2u modules, %2u suites, %3u tests\n", layers[i],
+					module_count, suite_count, test_count);
+	}
 
-    OSAL_printf("=====================================\n\n");
+	OSAL_printf("=====================================\n\n");
 }
 
 /**
@@ -383,62 +370,59 @@ void libutest_list_layers(void)
  */
 void libutest_list_modules(const char *layer_name)
 {
-    const char *modules[MAX_MODULES];
-    uint32_t module_count;
+	const char *modules[MAX_MODULES];
+	uint32_t module_count;
 
-    if (layer_name) {
-        /* Get modules in specific layer */
-        const test_suite_t *layer_suites[MAX_SUITES];
-        uint32_t suite_count =
-            test_get_suites_by_layer(layer_name, layer_suites, MAX_SUITES);
+	if (layer_name) {
+		/* Get modules in specific layer */
+		const test_suite_t *layer_suites[MAX_SUITES];
+		uint32_t suite_count =
+			test_get_suites_by_layer(layer_name, layer_suites, MAX_SUITES);
 
-        OSAL_printf("\nAvailable Modules in layer %s:\n", layer_name);
-        OSAL_printf("=====================================\n");
+		OSAL_printf("\nAvailable Modules in layer %s:\n", layer_name);
+		OSAL_printf("=====================================\n");
 
-        module_count = 0;
-        uint32_t i;
-        for (i = 0; i < suite_count; i++) {
-            bool found = false;
-            uint32_t j;
-            for (j = 0; j < module_count; j++) {
-                if (0 ==
-                    OSAL_strcmp(modules[j], layer_suites[i]->module_name)) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found && module_count < MAX_MODULES) {
-                modules[module_count++] = layer_suites[i]->module_name;
-            }
-        }
-    } else {
-        /* Get all modules */
-        module_count = test_get_modules(modules, MAX_MODULES);
+		module_count = 0;
+		uint32_t i;
+		for (i = 0; i < suite_count; i++) {
+			bool found = false;
+			uint32_t j;
+			for (j = 0; j < module_count; j++) {
+				if (0 ==
+					OSAL_strcmp(modules[j], layer_suites[i]->module_name)) {
+					found = true;
+					break;
+				}
+			}
+			if (!found && module_count < MAX_MODULES) {
+				modules[module_count++] = layer_suites[i]->module_name;
+			}
+		}
+	} else {
+		/* Get all modules */
+		module_count = test_get_modules(modules, MAX_MODULES);
 
-        OSAL_printf("\nAvailable Test Modules (%u total):\n", module_count);
-        OSAL_printf("=====================================\n");
-    }
+		OSAL_printf("\nAvailable Test Modules (%u total):\n", module_count);
+		OSAL_printf("=====================================\n");
+	}
 
-    uint32_t i;
-    for (i = 0; i < module_count; i++) {
-        /* Count suites and tests in this module */
-        const test_suite_t *suites[MAX_SUITES];
-        uint32_t suite_count =
-            test_get_suites_by_module(modules[i], suites, MAX_SUITES);
-        uint32_t test_count = count_total_tests(suites, suite_count);
+	uint32_t i;
+	for (i = 0; i < module_count; i++) {
+		/* Count suites and tests in this module */
+		const test_suite_t *suites[MAX_SUITES];
+		uint32_t suite_count =
+			test_get_suites_by_module(modules[i], suites, MAX_SUITES);
+		uint32_t test_count = count_total_tests(suites, suite_count);
 
-        /* Get layer name(s) */
-        const char *layer =
-            (suite_count > 0) ? suites[0]->layer_name : "unknown";
+		/* Get layer name(s) */
+		const char *layer = (suite_count > 0) ? suites[0]->layer_name :
+												"unknown";
 
-        OSAL_printf("  %-25s  [%s]  %u suites, %3u tests\n",
-                    modules[i],
-                    layer,
-                    suite_count,
-                    test_count);
-    }
+		OSAL_printf("  %-25s  [%s]  %u suites, %3u tests\n", modules[i], layer,
+					suite_count, test_count);
+	}
 
-    OSAL_printf("=====================================\n\n");
+	OSAL_printf("=====================================\n\n");
 }
 
 /**
@@ -446,42 +430,40 @@ void libutest_list_modules(const char *layer_name)
  */
 void libutest_list_suites(const char *layer_name, const char *module_name)
 {
-    const test_suite_t *suites[MAX_SUITES];
-    uint32_t suite_count;
+	const test_suite_t *suites[MAX_SUITES];
+	uint32_t suite_count;
 
-    if (module_name) {
-        /* Filter by module */
-        suite_count =
-            test_get_suites_by_module(module_name, suites, MAX_SUITES);
-        OSAL_printf("\nAvailable Test Suites in module %s:\n", module_name);
-    } else if (layer_name) {
-        /* Filter by layer */
-        suite_count = test_get_suites_by_layer(layer_name, suites, MAX_SUITES);
-        OSAL_printf("\nAvailable Test Suites in layer %s:\n", layer_name);
-    } else {
-        /* Get all suites */
-        uint32_t total_count = 0;
-        const test_suite_t **all_suites = test_get_all_suites(&total_count);
-        suite_count = (total_count < MAX_SUITES) ? total_count : MAX_SUITES;
-        uint32_t i;
-        for (i = 0; i < suite_count; i++) {
-            suites[i] = all_suites[i];
-        }
-        OSAL_printf("\nAvailable Test Suites (%u total):\n", suite_count);
-    }
+	if (module_name) {
+		/* Filter by module */
+		suite_count =
+			test_get_suites_by_module(module_name, suites, MAX_SUITES);
+		OSAL_printf("\nAvailable Test Suites in module %s:\n", module_name);
+	} else if (layer_name) {
+		/* Filter by layer */
+		suite_count = test_get_suites_by_layer(layer_name, suites, MAX_SUITES);
+		OSAL_printf("\nAvailable Test Suites in layer %s:\n", layer_name);
+	} else {
+		/* Get all suites */
+		uint32_t total_count = 0;
+		const test_suite_t **all_suites = test_get_all_suites(&total_count);
+		suite_count = (total_count < MAX_SUITES) ? total_count : MAX_SUITES;
+		uint32_t i;
+		for (i = 0; i < suite_count; i++) {
+			suites[i] = all_suites[i];
+		}
+		OSAL_printf("\nAvailable Test Suites (%u total):\n", suite_count);
+	}
 
-    OSAL_printf("=====================================\n");
+	OSAL_printf("=====================================\n");
 
-    uint32_t i;
-    for (i = 0; i < suite_count; i++) {
-        OSAL_printf("  %-30s  [%s/%s]  %u tests\n",
-                    suites[i]->suite_name,
-                    suites[i]->layer_name,
-                    suites[i]->module_name,
-                    suites[i]->case_count);
-    }
+	uint32_t i;
+	for (i = 0; i < suite_count; i++) {
+		OSAL_printf("  %-30s  [%s/%s]  %u tests\n", suites[i]->suite_name,
+					suites[i]->layer_name, suites[i]->module_name,
+					suites[i]->case_count);
+	}
 
-    OSAL_printf("=====================================\n\n");
+	OSAL_printf("=====================================\n\n");
 }
 
 /**
@@ -489,19 +471,19 @@ void libutest_list_suites(const char *layer_name, const char *module_name)
  */
 void libutest_print_all(void)
 {
-    uint32_t suite_count = 0;
-    const test_suite_t **suites = test_get_all_suites(&suite_count);
+	uint32_t suite_count = 0;
+	const test_suite_t **suites = test_get_all_suites(&suite_count);
 
-    uint32_t i;
+	uint32_t i;
 
-    for (i = 0; i < suite_count; i++) {
-        const test_suite_t *suite = suites[i];
-        uint32_t j;
+	for (i = 0; i < suite_count; i++) {
+		const test_suite_t *suite = suites[i];
+		uint32_t j;
 
-        for (j = 0; j < suite->case_count; j++) {
-            OSAL_printf("%s\n", suite->cases[j].name);
-        }
-    }
+		for (j = 0; j < suite->case_count; j++) {
+			OSAL_printf("%s\n", suite->cases[j].name);
+		}
+	}
 }
 
 /**
@@ -509,19 +491,19 @@ void libutest_print_all(void)
  */
 void libutest_print_layer(const char *layer_name)
 {
-    const test_suite_t *suites[MAX_SUITES];
-    uint32_t count = test_get_suites_by_layer(layer_name, suites, MAX_SUITES);
+	const test_suite_t *suites[MAX_SUITES];
+	uint32_t count = test_get_suites_by_layer(layer_name, suites, MAX_SUITES);
 
-    uint32_t i;
+	uint32_t i;
 
-    for (i = 0; i < count; i++) {
-        const test_suite_t *suite = suites[i];
-        uint32_t j;
+	for (i = 0; i < count; i++) {
+		const test_suite_t *suite = suites[i];
+		uint32_t j;
 
-        for (j = 0; j < suite->case_count; j++) {
-            OSAL_printf("%s\n", suite->cases[j].name);
-        }
-    }
+		for (j = 0; j < suite->case_count; j++) {
+			OSAL_printf("%s\n", suite->cases[j].name);
+		}
+	}
 }
 
 /**
@@ -529,19 +511,19 @@ void libutest_print_layer(const char *layer_name)
  */
 void libutest_print_module(const char *module_name)
 {
-    const test_suite_t *suites[MAX_SUITES];
-    uint32_t count = test_get_suites_by_module(module_name, suites, MAX_SUITES);
+	const test_suite_t *suites[MAX_SUITES];
+	uint32_t count = test_get_suites_by_module(module_name, suites, MAX_SUITES);
 
-    uint32_t i;
+	uint32_t i;
 
-    for (i = 0; i < count; i++) {
-        const test_suite_t *suite = suites[i];
-        uint32_t j;
+	for (i = 0; i < count; i++) {
+		const test_suite_t *suite = suites[i];
+		uint32_t j;
 
-        for (j = 0; j < suite->case_count; j++) {
-            OSAL_printf("%s\n", suite->cases[j].name);
-        }
-    }
+		for (j = 0; j < suite->case_count; j++) {
+			OSAL_printf("%s\n", suite->cases[j].name);
+		}
+	}
 }
 
 /**
@@ -549,101 +531,98 @@ void libutest_print_module(const char *module_name)
  */
 static int32_t menu_select_test(const test_suite_t *suite)
 {
-    while (1) {
-        OSAL_printf("\n=== Test Cases in %s ===\n", suite->suite_name);
-        OSAL_printf("0. Run all tests in this suite\n");
+	while (1) {
+		OSAL_printf("\n=== Test Cases in %s ===\n", suite->suite_name);
+		OSAL_printf("0. Run all tests in this suite\n");
 
-        uint32_t i;
+		uint32_t i;
 
-        for (i = 0; i < suite->case_count; i++) {
-            OSAL_printf("%u. %s\n", i + 1, suite->cases[i].name);
-        }
+		for (i = 0; i < suite->case_count; i++) {
+			OSAL_printf("%u. %s\n", i + 1, suite->cases[i].name);
+		}
 
-        OSAL_printf("%u. Back to suite selection\n", suite->case_count + 1);
-        OSAL_printf("%u. Exit\n", suite->case_count + 2);
-        OSAL_printf("\nEnter your choice (or 'b' for Back, 'q' for Quit): ");
+		OSAL_printf("%u. Back to suite selection\n", suite->case_count + 1);
+		OSAL_printf("%u. Exit\n", suite->case_count + 2);
+		OSAL_printf("\nEnter your choice (or 'b' for Back, 'q' for Quit): ");
 
-        int32_t choice = read_choice();
+		int32_t choice = read_choice();
 
-        if (choice == -2) {
-            /* 'b' or 'B' - Back */
-            return OSAL_SUCCESS;
-        } else if (choice == -3) {
-            /* 'q' or 'Q' - Quit */
-            OSAL_printf("\nExiting...\n");
-            OSAL_exit(0);
-        } else if (0 == choice) {
-            return libutest_run_suite(suite->suite_name);
-        } else if (choice > 0 && choice <= (int32_t)suite->case_count) {
-            return libutest_run_test(suite->suite_name,
-                                     suite->cases[choice - 1].name);
-        } else if (choice == (int32_t)(suite->case_count + 1)) {
-            return OSAL_SUCCESS;
-        } else if (choice == (int32_t)(suite->case_count + 2)) {
-            OSAL_printf("\nExiting...\n");
-            OSAL_exit(0);
-        } else {
-            OSAL_printf("Invalid choice. Please try again.\n");
-        }
-    }
+		if (choice == -2) {
+			/* 'b' or 'B' - Back */
+			return OSAL_SUCCESS;
+		} else if (choice == -3) {
+			/* 'q' or 'Q' - Quit */
+			OSAL_printf("\nExiting...\n");
+			OSAL_exit(0);
+		} else if (0 == choice) {
+			return libutest_run_suite(suite->suite_name);
+		} else if (choice > 0 && choice <= (int32_t)suite->case_count) {
+			return libutest_run_test(suite->suite_name,
+									 suite->cases[choice - 1].name);
+		} else if (choice == (int32_t)(suite->case_count + 1)) {
+			return OSAL_SUCCESS;
+		} else if (choice == (int32_t)(suite->case_count + 2)) {
+			OSAL_printf("\nExiting...\n");
+			OSAL_exit(0);
+		} else {
+			OSAL_printf("Invalid choice. Please try again.\n");
+		}
+	}
 }
 
 /**
  * Interactive menu - select suite
  */
-static int32_t menu_select_suite(const test_suite_t **suites,
-                                 uint32_t count,
-                                 const char *context)
+static int32_t menu_select_suite(const test_suite_t **suites, uint32_t count,
+								 const char *context)
 {
-    while (1) {
-        uint32_t total_tests = count_total_tests(suites, count);
-        OSAL_printf("\n=== Test Suites %s ===\n", context);
-        OSAL_printf("Total: %u suites, %u tests\n", count, total_tests);
-        OSAL_printf("0. Run all suites\n");
+	while (1) {
+		uint32_t total_tests = count_total_tests(suites, count);
+		OSAL_printf("\n=== Test Suites %s ===\n", context);
+		OSAL_printf("Total: %u suites, %u tests\n", count, total_tests);
+		OSAL_printf("0. Run all suites\n");
 
-        uint32_t i;
+		uint32_t i;
 
-        for (i = 0; i < count; i++) {
-            OSAL_printf("%u. %s (%u tests)\n",
-                        i + 1,
-                        suites[i]->suite_name,
-                        suites[i]->case_count);
-            display_suite_metadata(suites[i]);
-        }
+		for (i = 0; i < count; i++) {
+			OSAL_printf("%u. %s (%u tests)\n", i + 1, suites[i]->suite_name,
+						suites[i]->case_count);
+			display_suite_metadata(suites[i]);
+		}
 
-        OSAL_printf("%u. Back\n", count + 1);
-        OSAL_printf("%u. Exit\n", count + 2);
-        OSAL_printf("\nEnter your choice (or 'b' for Back, 'q' for Quit): ");
+		OSAL_printf("%u. Back\n", count + 1);
+		OSAL_printf("%u. Exit\n", count + 2);
+		OSAL_printf("\nEnter your choice (or 'b' for Back, 'q' for Quit): ");
 
-        int32_t choice = read_choice();
+		int32_t choice = read_choice();
 
-        if (choice == -2) {
-            /* 'b' or 'B' - Back */
-            return OSAL_SUCCESS;
-        } else if (choice == -3) {
-            /* 'q' or 'Q' - Quit */
-            OSAL_printf("\nExiting...\n");
-            OSAL_exit(0);
-        } else if (0 == choice) {
-            /* Run all suites */
-            libutest_reset_stats();
-            uint32_t i;
+		if (choice == -2) {
+			/* 'b' or 'B' - Back */
+			return OSAL_SUCCESS;
+		} else if (choice == -3) {
+			/* 'q' or 'Q' - Quit */
+			OSAL_printf("\nExiting...\n");
+			OSAL_exit(0);
+		} else if (0 == choice) {
+			/* Run all suites */
+			libutest_reset_stats();
+			uint32_t i;
 
-            for (i = 0; i < count; i++) {
-                libutest_run_suite(suites[i]->suite_name);
-            }
-            return OSAL_SUCCESS;
-        } else if (choice > 0 && choice <= (int32_t)count) {
-            menu_select_test(suites[choice - 1]);
-        } else if (choice == (int32_t)(count + 1)) {
-            return OSAL_SUCCESS;
-        } else if (choice == (int32_t)(count + 2)) {
-            OSAL_printf("\nExiting...\n");
-            OSAL_exit(0);
-        } else {
-            OSAL_printf("Invalid choice. Please try again.\n");
-        }
-    }
+			for (i = 0; i < count; i++) {
+				libutest_run_suite(suites[i]->suite_name);
+			}
+			return OSAL_SUCCESS;
+		} else if (choice > 0 && choice <= (int32_t)count) {
+			menu_select_test(suites[choice - 1]);
+		} else if (choice == (int32_t)(count + 1)) {
+			return OSAL_SUCCESS;
+		} else if (choice == (int32_t)(count + 2)) {
+			OSAL_printf("\nExiting...\n");
+			OSAL_exit(0);
+		} else {
+			OSAL_printf("Invalid choice. Please try again.\n");
+		}
+	}
 }
 
 /**
@@ -651,77 +630,67 @@ static int32_t menu_select_suite(const test_suite_t **suites,
  */
 static int32_t menu_select_module(const test_filter_t *filter)
 {
-    const char *modules[MAX_MODULES];
-    uint32_t module_count = test_get_modules(modules, MAX_MODULES);
+	const char *modules[MAX_MODULES];
+	uint32_t module_count = test_get_modules(modules, MAX_MODULES);
 
-    while (1) {
-        OSAL_printf("\n=== Select Module ===\n");
+	while (1) {
+		OSAL_printf("\n=== Select Module ===\n");
 
-        uint32_t i;
+		uint32_t i;
 
-        for (i = 0; i < module_count; i++) {
-            /* Count tests in this module (with filter if active) */
-            const test_suite_t *suites[MAX_SUITES];
-            uint32_t count;
-            if (filter && filter->enabled) {
-                count = test_get_suites_by_module_filtered(modules[i],
-                                                           filter,
-                                                           suites,
-                                                           MAX_SUITES);
-            } else {
-                count =
-                    test_get_suites_by_module(modules[i], suites, MAX_SUITES);
-            }
-            uint32_t total_tests = count_total_tests(suites, count);
-            OSAL_printf("%u. %s (%u suites, %u tests)\n",
-                        i + 1,
-                        modules[i],
-                        count,
-                        total_tests);
-        }
+		for (i = 0; i < module_count; i++) {
+			/* Count tests in this module (with filter if active) */
+			const test_suite_t *suites[MAX_SUITES];
+			uint32_t count;
+			if (filter && filter->enabled) {
+				count = test_get_suites_by_module_filtered(modules[i], filter,
+														   suites, MAX_SUITES);
+			} else {
+				count =
+					test_get_suites_by_module(modules[i], suites, MAX_SUITES);
+			}
+			uint32_t total_tests = count_total_tests(suites, count);
+			OSAL_printf("%u. %s (%u suites, %u tests)\n", i + 1, modules[i],
+						count, total_tests);
+		}
 
-        OSAL_printf("%u. Back to main menu\n", module_count + 1);
-        OSAL_printf("%u. Exit\n", module_count + 2);
-        OSAL_printf("\nEnter your choice (or 'b' for Back, 'q' for Quit): ");
+		OSAL_printf("%u. Back to main menu\n", module_count + 1);
+		OSAL_printf("%u. Exit\n", module_count + 2);
+		OSAL_printf("\nEnter your choice (or 'b' for Back, 'q' for Quit): ");
 
-        int32_t choice = read_choice();
+		int32_t choice = read_choice();
 
-        if (choice == -2) {
-            /* 'b' or 'B' - Back */
-            return OSAL_SUCCESS;
-        } else if (choice == -3) {
-            /* 'q' or 'Q' - Quit */
-            OSAL_printf("\nExiting...\n");
-            OSAL_exit(0);
-        } else if (choice > 0 && choice <= (int32_t)module_count) {
-            const test_suite_t *suites[MAX_SUITES];
-            uint32_t count;
-            if (filter && filter->enabled) {
-                count = test_get_suites_by_module_filtered(modules[choice - 1],
-                                                           filter,
-                                                           suites,
-                                                           MAX_SUITES);
-            } else {
-                count = test_get_suites_by_module(modules[choice - 1],
-                                                  suites,
-                                                  MAX_SUITES);
-            }
+		if (choice == -2) {
+			/* 'b' or 'B' - Back */
+			return OSAL_SUCCESS;
+		} else if (choice == -3) {
+			/* 'q' or 'Q' - Quit */
+			OSAL_printf("\nExiting...\n");
+			OSAL_exit(0);
+		} else if (choice > 0 && choice <= (int32_t)module_count) {
+			const test_suite_t *suites[MAX_SUITES];
+			uint32_t count;
+			if (filter && filter->enabled) {
+				count = test_get_suites_by_module_filtered(
+					modules[choice - 1], filter, suites, MAX_SUITES);
+			} else {
+				count = test_get_suites_by_module(modules[choice - 1], suites,
+												  MAX_SUITES);
+			}
 
-            char context[128];
-            OSAL_snprintf(context,
-                          OSAL_sizeof(context),
-                          "in module %s",
-                          modules[choice - 1]);
-            menu_select_suite(suites, count, context);
-        } else if (choice == (int32_t)(module_count + 1)) {
-            return OSAL_SUCCESS;
-        } else if (choice == (int32_t)(module_count + 2)) {
-            OSAL_printf("\nExiting...\n");
-            OSAL_exit(0);
-        } else {
-            OSAL_printf("Invalid choice. Please try again.\n");
-        }
-    }
+			char context[128];
+			OSAL_snprintf(context, OSAL_sizeof(context), "in module %s",
+						  modules[choice - 1]);
+			menu_select_suite(suites, count, context);
+		} else if (choice == (int32_t)(module_count + 1)) {
+			return OSAL_SUCCESS;
+		} else if (choice == (int32_t)(module_count + 2)) {
+			OSAL_printf("\nExiting...\n");
+			OSAL_exit(0);
+		} else {
+			OSAL_printf("Invalid choice. Please try again.\n");
+		}
+	}
 }
 
 /**
@@ -729,76 +698,66 @@ static int32_t menu_select_module(const test_filter_t *filter)
  */
 static int32_t menu_select_layer(const test_filter_t *filter)
 {
-    const char *layers[MAX_LAYERS];
-    uint32_t layer_count = test_get_layers(layers, MAX_LAYERS);
+	const char *layers[MAX_LAYERS];
+	uint32_t layer_count = test_get_layers(layers, MAX_LAYERS);
 
-    while (1) {
-        OSAL_printf("\n=== Select Layer ===\n");
+	while (1) {
+		OSAL_printf("\n=== Select Layer ===\n");
 
-        uint32_t i;
+		uint32_t i;
 
-        for (i = 0; i < layer_count; i++) {
-            /* Count tests in this layer (with filter if active) */
-            const test_suite_t *suites[MAX_SUITES];
-            uint32_t count;
-            if (filter && filter->enabled) {
-                count = test_get_suites_by_layer_filtered(layers[i],
-                                                          filter,
-                                                          suites,
-                                                          MAX_SUITES);
-            } else {
-                count = test_get_suites_by_layer(layers[i], suites, MAX_SUITES);
-            }
-            uint32_t total_tests = count_total_tests(suites, count);
-            OSAL_printf("%u. %s (%u suites, %u tests)\n",
-                        i + 1,
-                        layers[i],
-                        count,
-                        total_tests);
-        }
+		for (i = 0; i < layer_count; i++) {
+			/* Count tests in this layer (with filter if active) */
+			const test_suite_t *suites[MAX_SUITES];
+			uint32_t count;
+			if (filter && filter->enabled) {
+				count = test_get_suites_by_layer_filtered(layers[i], filter,
+														  suites, MAX_SUITES);
+			} else {
+				count = test_get_suites_by_layer(layers[i], suites, MAX_SUITES);
+			}
+			uint32_t total_tests = count_total_tests(suites, count);
+			OSAL_printf("%u. %s (%u suites, %u tests)\n", i + 1, layers[i],
+						count, total_tests);
+		}
 
-        OSAL_printf("%u. Back to main menu\n", layer_count + 1);
-        OSAL_printf("%u. Exit\n", layer_count + 2);
-        OSAL_printf("\nEnter your choice (or 'b' for Back, 'q' for Quit): ");
+		OSAL_printf("%u. Back to main menu\n", layer_count + 1);
+		OSAL_printf("%u. Exit\n", layer_count + 2);
+		OSAL_printf("\nEnter your choice (or 'b' for Back, 'q' for Quit): ");
 
-        int32_t choice = read_choice();
+		int32_t choice = read_choice();
 
-        if (choice == -2) {
-            /* 'b' or 'B' - Back */
-            return OSAL_SUCCESS;
-        } else if (choice == -3) {
-            /* 'q' or 'Q' - Quit */
-            OSAL_printf("\nExiting...\n");
-            OSAL_exit(0);
-        } else if (choice > 0 && choice <= (int32_t)layer_count) {
-            const test_suite_t *suites[MAX_SUITES];
-            uint32_t count;
-            if (filter && filter->enabled) {
-                count = test_get_suites_by_layer_filtered(layers[choice - 1],
-                                                          filter,
-                                                          suites,
-                                                          MAX_SUITES);
-            } else {
-                count = test_get_suites_by_layer(layers[choice - 1],
-                                                 suites,
-                                                 MAX_SUITES);
-            }
+		if (choice == -2) {
+			/* 'b' or 'B' - Back */
+			return OSAL_SUCCESS;
+		} else if (choice == -3) {
+			/* 'q' or 'Q' - Quit */
+			OSAL_printf("\nExiting...\n");
+			OSAL_exit(0);
+		} else if (choice > 0 && choice <= (int32_t)layer_count) {
+			const test_suite_t *suites[MAX_SUITES];
+			uint32_t count;
+			if (filter && filter->enabled) {
+				count = test_get_suites_by_layer_filtered(
+					layers[choice - 1], filter, suites, MAX_SUITES);
+			} else {
+				count = test_get_suites_by_layer(layers[choice - 1], suites,
+												 MAX_SUITES);
+			}
 
-            char context[128];
-            OSAL_snprintf(context,
-                          OSAL_sizeof(context),
-                          "in layer %s",
-                          layers[choice - 1]);
-            menu_select_suite(suites, count, context);
-        } else if (choice == (int32_t)(layer_count + 1)) {
-            return OSAL_SUCCESS;
-        } else if (choice == (int32_t)(layer_count + 2)) {
-            OSAL_printf("\nExiting...\n");
-            OSAL_exit(0);
-        } else {
-            OSAL_printf("Invalid choice. Please try again.\n");
-        }
-    }
+			char context[128];
+			OSAL_snprintf(context, OSAL_sizeof(context), "in layer %s",
+						  layers[choice - 1]);
+			menu_select_suite(suites, count, context);
+		} else if (choice == (int32_t)(layer_count + 1)) {
+			return OSAL_SUCCESS;
+		} else if (choice == (int32_t)(layer_count + 2)) {
+			OSAL_printf("\nExiting...\n");
+			OSAL_exit(0);
+		} else {
+			OSAL_printf("Invalid choice. Please try again.\n");
+		}
+	}
 }
 
 /**
@@ -806,103 +765,101 @@ static int32_t menu_select_layer(const test_filter_t *filter)
  */
 int32_t libutest_interactive_menu_filtered(const test_filter_t *filter)
 {
-    uint32_t suite_count = 0;
-    const test_suite_t **all_suites = test_get_all_suites(&suite_count);
+	uint32_t suite_count = 0;
+	const test_suite_t **all_suites = test_get_all_suites(&suite_count);
 
-    /* Count filtered suites if filter is active */
-    uint32_t visible_suite_count = suite_count;
-    uint32_t visible_test_count = 0;
+	/* Count filtered suites if filter is active */
+	uint32_t visible_suite_count = suite_count;
+	uint32_t visible_test_count = 0;
 
-    if (filter && filter->enabled) {
-        const test_suite_t *filtered_suites[MAX_SUITES];
-        visible_suite_count =
-            test_get_filtered_suites(filter, filtered_suites, MAX_SUITES);
-        visible_test_count =
-            count_total_tests(filtered_suites, visible_suite_count);
-    } else {
-        visible_test_count = count_total_tests(all_suites, suite_count);
-    }
+	if (filter && filter->enabled) {
+		const test_suite_t *filtered_suites[MAX_SUITES];
+		visible_suite_count =
+			test_get_filtered_suites(filter, filtered_suites, MAX_SUITES);
+		visible_test_count =
+			count_total_tests(filtered_suites, visible_suite_count);
+	} else {
+		visible_test_count = count_total_tests(all_suites, suite_count);
+	}
 
-    OSAL_printf("\n========================================\n");
-    OSAL_printf("  ES-Middleware Unit Test Framework\n");
-    OSAL_printf("  Total: %u suites, %u tests\n",
-                suite_count,
-                count_total_tests(all_suites, suite_count));
-    if (filter && filter->enabled) {
-        OSAL_printf("  Filtered: %u suites, %u tests\n",
-                    visible_suite_count,
-                    visible_test_count);
-    }
-    OSAL_printf("========================================\n");
+	OSAL_printf("\n========================================\n");
+	OSAL_printf("  ES-Middleware Unit Test Framework\n");
+	OSAL_printf("  Total: %u suites, %u tests\n", suite_count,
+				count_total_tests(all_suites, suite_count));
+	if (filter && filter->enabled) {
+		OSAL_printf("  Filtered: %u suites, %u tests\n", visible_suite_count,
+					visible_test_count);
+	}
+	OSAL_printf("========================================\n");
 
-    if (filter && filter->enabled) {
-        display_filter_status(filter);
-    }
+	if (filter && filter->enabled) {
+		display_filter_status(filter);
+	}
 
-    while (1) {
-        OSAL_printf("\n=== Main Menu ===\n");
-        OSAL_printf("1. Select by layer\n");
-        OSAL_printf("2. Select by module\n");
-        OSAL_printf("3. List all tests\n");
-        OSAL_printf("4. Run all tests\n");
-        OSAL_printf("5. Exit\n");
-        OSAL_printf("\nEnter your choice (or 'q' for Quit): ");
+	while (1) {
+		OSAL_printf("\n=== Main Menu ===\n");
+		OSAL_printf("1. Select by layer\n");
+		OSAL_printf("2. Select by module\n");
+		OSAL_printf("3. List all tests\n");
+		OSAL_printf("4. Run all tests\n");
+		OSAL_printf("5. Exit\n");
+		OSAL_printf("\nEnter your choice (or 'q' for Quit): ");
 
-        int32_t choice = read_choice();
+		int32_t choice = read_choice();
 
-        switch (choice) {
-        case 1:
-            menu_select_layer(filter);
-            break;
+		switch (choice) {
+		case 1:
+			menu_select_layer(filter);
+			break;
 
-        case 2:
-            menu_select_module(filter);
-            break;
+		case 2:
+			menu_select_module(filter);
+			break;
 
-        case 3:
-            libutest_list_all();
-            break;
+		case 3:
+			libutest_list_all();
+			break;
 
-        case 4: {
-            char confirm;
-            OSAL_printf("Are you sure you want to run all tests? (y/n): ");
-            char buffer[16];
-            if (OSAL_fgets(buffer, OSAL_sizeof(buffer), OSAL_stdin) != NULL) {
-                if (OSAL_sscanf(buffer, " %c", &confirm) == 1) {
-                    if (confirm == 'y' || confirm == 'Y') {
-                        if (filter && filter->enabled) {
-                            libutest_run_all_filtered(filter);
-                        } else {
-                            libutest_run_all();
-                        }
-                    } else {
-                        OSAL_printf("Cancelled.\n");
-                    }
-                } else {
-                    OSAL_printf("Cancelled.\n");
-                }
-            } else {
-                OSAL_printf("Cancelled.\n");
-            }
-            break;
-        }
+		case 4: {
+			char confirm;
+			OSAL_printf("Are you sure you want to run all tests? (y/n): ");
+			char buffer[16];
+			if (OSAL_fgets(buffer, OSAL_sizeof(buffer), OSAL_stdin) != NULL) {
+				if (OSAL_sscanf(buffer, " %c", &confirm) == 1) {
+					if (confirm == 'y' || confirm == 'Y') {
+						if (filter && filter->enabled) {
+							libutest_run_all_filtered(filter);
+						} else {
+							libutest_run_all();
+						}
+					} else {
+						OSAL_printf("Cancelled.\n");
+					}
+				} else {
+					OSAL_printf("Cancelled.\n");
+				}
+			} else {
+				OSAL_printf("Cancelled.\n");
+			}
+			break;
+		}
 
-        case 5:
-            OSAL_printf("\nExiting...\n");
-            return OSAL_SUCCESS;
+		case 5:
+			OSAL_printf("\nExiting...\n");
+			return OSAL_SUCCESS;
 
-        case -3:
-            /* 'q' or 'Q' - Quit */
-            OSAL_printf("\nExiting...\n");
-            return OSAL_SUCCESS;
+		case -3:
+			/* 'q' or 'Q' - Quit */
+			OSAL_printf("\nExiting...\n");
+			return OSAL_SUCCESS;
 
-        default:
-            OSAL_printf("Invalid choice. Please try again.\n");
-            break;
-        }
-    }
+		default:
+			OSAL_printf("Invalid choice. Please try again.\n");
+			break;
+		}
+	}
 
-    return OSAL_SUCCESS;
+	return OSAL_SUCCESS;
 }
 
 /**
@@ -910,5 +867,5 @@ int32_t libutest_interactive_menu_filtered(const test_filter_t *filter)
  */
 int32_t libutest_interactive_menu(void)
 {
-    return libutest_interactive_menu_filtered(NULL);
+	return libutest_interactive_menu_filtered(NULL);
 }

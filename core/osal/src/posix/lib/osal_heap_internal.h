@@ -11,7 +11,7 @@
 
 /* 堆监控配置 */
 #define OSAL_HEAP_THRESHOLD_DEFAULT 0x50U /* 默认内存使用阈值（百分比） */
-#define OSAL_HEAP_PERCENT_MAX 0x64U        /* 百分比最大值 */
+#define OSAL_HEAP_PERCENT_MAX 0x64U /* 百分比最大值 */
 #define OSAL_HEAP_PERCENT_MULTIPLIER 0x64U /* 百分比计算乘数 */
 
 /* 内存单位转换 */

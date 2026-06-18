@@ -24,11 +24,11 @@ typedef void *hal_serial_handle_t;
  * @brief 串口配置结构
  */
 typedef struct {
-    uint32_t baud_rate;   /* 波特率（如9600, 115200） */
-    uint8_t data_bits;    /* 数据位（5, 6, 7, 8） */
-    uint8_t stop_bits;    /* 停止位（1, 2） */
-    uint8_t parity;       /* 校验位（见下面的宏定义） */
-    uint8_t flow_control; /* 流控制（见下面的宏定义） */
+	uint32_t baud_rate; /* 波特率（如9600, 115200） */
+	uint8_t data_bits; /* 数据位（5, 6, 7, 8） */
+	uint8_t stop_bits; /* 停止位（1, 2） */
+	uint8_t parity; /* 校验位（见下面的宏定义） */
+	uint8_t flow_control; /* 流控制（见下面的宏定义） */
 } hal_serial_config_t;
 
 /*===========================================================================
@@ -36,7 +36,7 @@ typedef struct {
  *===========================================================================*/
 
 #define HAL_SERIAL_PARITY_NONE 0x00 /* 无校验 */
-#define HAL_SERIAL_PARITY_ODD 0x01  /* 奇校验 */
+#define HAL_SERIAL_PARITY_ODD 0x01 /* 奇校验 */
 #define HAL_SERIAL_PARITY_EVEN 0x02 /* 偶校验 */
 
 /*===========================================================================
@@ -44,8 +44,8 @@ typedef struct {
  *===========================================================================*/
 
 #define HAL_SERIAL_FLOW_NONE 0x00 /* 无流控 */
-#define HAL_SERIAL_FLOW_HW 0x01   /* 硬件流控（RTS/CTS） */
-#define HAL_SERIAL_FLOW_SW 0x02   /* 软件流控（XON/XOFF） */
+#define HAL_SERIAL_FLOW_HW 0x01 /* 硬件流控（RTS/CTS） */
+#define HAL_SERIAL_FLOW_SW 0x02 /* 软件流控（XON/XOFF） */
 
 /*===========================================================================
  * API函数
@@ -67,9 +67,8 @@ typedef struct {
  *
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_SERIAL_open(const char *device,
-                        const hal_serial_config_t *config,
-                        hal_serial_handle_t *handle);
+int32_t HAL_SERIAL_open(const char *device, const hal_serial_config_t *config,
+						hal_serial_handle_t *handle);
 
 /**
  * @brief 关闭串口设备
@@ -106,10 +105,8 @@ int32_t HAL_SERIAL_close(hal_serial_handle_t handle);
  * @note 返回值可能小于size（部分写入），需要检查返回值
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_SERIAL_write(hal_serial_handle_t handle,
-                         const void *buffer,
-                         uint32_t size,
-                         int32_t timeout);
+int32_t HAL_SERIAL_write(hal_serial_handle_t handle, const void *buffer,
+						 uint32_t size, int32_t timeout);
 
 /**
  * @brief 从串口读取数据
@@ -132,10 +129,8 @@ int32_t HAL_SERIAL_write(hal_serial_handle_t handle,
  * @note 返回值可能小于size（部分读取），需要检查返回值
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
-int32_t HAL_SERIAL_read(hal_serial_handle_t handle,
-                        void *buffer,
-                        uint32_t size,
-                        int32_t timeout);
+int32_t HAL_SERIAL_read(hal_serial_handle_t handle, void *buffer, uint32_t size,
+						int32_t timeout);
 
 /**
  * @brief 刷新串口缓冲区
@@ -167,7 +162,7 @@ int32_t HAL_SERIAL_flush(hal_serial_handle_t handle);
  * @note 线程安全：使用文件锁保护多进程并发访问
  */
 int32_t HAL_SERIAL_set_config(hal_serial_handle_t handle,
-                              const hal_serial_config_t *config);
+							  const hal_serial_config_t *config);
 
 #ifdef __cplusplus
 }

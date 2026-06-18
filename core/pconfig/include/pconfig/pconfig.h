@@ -18,8 +18,8 @@
 #define PCONFIG_H
 
 /* 类型定义 - 按模块组织 */
-#include "pconfig_common.h"   /* 通用基础类型 */
-#include "pconfig_mcu.h"      /* MCU 配置类型 */
+#include "pconfig_common.h" /* 通用基础类型 */
+#include "pconfig_mcu.h" /* MCU 配置类型 */
 #include "pconfig_platform.h" /* 板级配置类型 */
 
 /*===========================================================================
@@ -66,7 +66,7 @@ PCONFIG_Find(const char *platform, const char *product, const char *version);
  * @return OSAL_SUCCESS 成功
  */
 int32_t PCONFIG_list(const pconfig_platform_config_t **configs,
-                     uint32_t *count);
+					 uint32_t *count);
 
 /*===========================================================================
  * 硬件外设配置查询接口（PCONFIG_HW_*）
@@ -83,10 +83,10 @@ int32_t PCONFIG_list(const pconfig_platform_config_t **configs,
 static inline const pconfig_mcu_entry_t *
 PCONFIG_HW_GetMCU(const pconfig_platform_config_t *platform, uint32_t index)
 {
-    if (!platform || !platform->mcu_array || index >= platform->mcu_count) {
-        return NULL;
-    }
-    return &platform->mcu_array[index];
+	if (!platform || !platform->mcu_array || index >= platform->mcu_count) {
+		return NULL;
+	}
+	return &platform->mcu_array[index];
 }
 
 /*===========================================================================

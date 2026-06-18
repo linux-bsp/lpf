@@ -19,15 +19,15 @@
 
 /* I2C传输消息 */
 typedef struct {
-    uint16_t addr;  /* 从设备地址 (7位或10位) */
-    uint16_t flags; /* 传输标志 (读/写) */
-    uint16_t len;   /* 数据长度 */
-    uint8_t *buf;   /* 数据缓冲区 */
+	uint16_t addr; /* 从设备地址 (7位或10位) */
+	uint16_t flags; /* 传输标志 (读/写) */
+	uint16_t len; /* 数据长度 */
+	uint8_t *buf; /* 数据缓冲区 */
 } hal_i2c_msg_t;
 
 /* I2C传输标志 */
-#define I2C_M_RD 0x0001      /* 读操作 */
-#define I2C_M_TEN 0x0010     /* 10位地址 */
+#define I2C_M_RD 0x0001 /* 读操作 */
+#define I2C_M_TEN 0x0010 /* 10位地址 */
 #define I2C_M_NOSTART 0x4000 /* 不发送START */
 
 #endif /* HAL_I2C_TYPES_H */

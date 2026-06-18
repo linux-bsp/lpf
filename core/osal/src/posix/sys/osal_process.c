@@ -16,62 +16,62 @@
 
 void OSAL_exit(int32_t status)
 {
-    exit(status);
+	exit(status);
 }
 
 osal_pid_t OSAL_getpid(void)
 {
-    return getpid();
+	return getpid();
 }
 
 osal_pid_t OSAL_getppid(void)
 {
-    return getppid();
+	return getppid();
 }
 
 void OSAL_abort(void)
 {
-    abort();
+	abort();
 }
 
 osal_pid_t OSAL_fork(void)
 {
-    return fork();
+	return fork();
 }
 
 int32_t OSAL_execvp(const char *file, char *const argv[])
 {
-    return execvp(file, argv);
+	return execvp(file, argv);
 }
 
 int32_t OSAL_waitpid(osal_pid_t pid, int32_t *status, int32_t options)
 {
-    int wait_status;
-    int posix_options = 0;
-    osal_pid_t result;
+	int wait_status;
+	int posix_options = 0;
+	osal_pid_t result;
 
-    /* 转换选项 */
-    if (options & OSAL_WNOHANG) {
-        posix_options |= WNOHANG;
-    }
+	/* 转换选项 */
+	if (options & OSAL_WNOHANG) {
+		posix_options |= WNOHANG;
+	}
 
-    result = waitpid(pid, &wait_status, posix_options);
+	result = waitpid(pid, &wait_status, posix_options);
 
-    if (result > 0) {
-        /* 子进程退出 */
-        if (status != NULL) {
-            *status = WIFEXITED(wait_status) ? WEXITSTATUS(wait_status) : -1;
-        }
-        return (int32_t)result;
-    }
+	if (result > 0) {
+		/* 子进程退出 */
+		if (status != NULL) {
+			*status = WIFEXITED(wait_status) ? WEXITSTATUS(wait_status) : -1;
+		}
+		return (int32_t)result;
+	}
 
-    if (result == 0) {
-        /* 非阻塞模式下子进程未退出 */
-        return 0;
-    }
+	if (result == 0) {
+		/* 非阻塞模式下子进程未退出 */
+		return 0;
+	}
 
-    /* result < 0: 错误 */
-    return -1;
+	/* result < 0: 错误 */
+	return -1;
 }
 
 /*
