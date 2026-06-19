@@ -26,6 +26,7 @@
 #include "ipc/osal_atomic.h"
 #include "ipc/osal_cond.h"
 #include "ipc/osal_mutex.h"
+#include "ipc/osal_rwlock.h"
 #include "ipc/osal_semaphore.h"
 #include "lib/osal_errno.h"
 #include "lib/osal_heap.h"
