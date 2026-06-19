@@ -175,7 +175,8 @@ endif
 
 # Basic helpers built in scripts/
 PHONY += scripts_basic
-# scripts_basic is defined later after config-targets logic
+scripts_basic:
+	$(Q)$(MAKE) $(build)=scripts/basic
 
 # To avoid any implicit rule to kick in, define an empty command.
 scripts/basic/%: scripts_basic ;
@@ -341,9 +342,6 @@ else
 # ===========================================================================
 # Build targets only - this includes all build targets
 # targets and others. In general all targets except *config targets.
-
-scripts_basic:
-	$(Q)$(MAKE) $(build)=scripts/basic
 
 prepare: scripts_basic include/generated/gen_autoconf.h include/generated/gen_version.h
 
@@ -590,9 +588,16 @@ distclean: clean
 # mrproper: Remove everything including kconfig tools
 mrproper: distclean
 	@echo "  CLEAN   kconfig tools"
-	$(Q)$(MAKE) -f $(srctree)/scripts/Makefile.clean obj=$(KCONFIG_DIR)
-	$(Q)find $(KCONFIG_DIR) -type f \( -name '.*.cmd' -o -name '*.o' \) -delete 2>/dev/null || true
-	$(Q)rm -f $(KCONFIG_DIR)/conf $(KCONFIG_DIR)/mconf $(KCONFIG_DIR)/nconf $(KCONFIG_DIR)/gconf $(KCONFIG_DIR)/qconf 2>/dev/null || true
+	$(Q)$(MAKE) -C scripts/basic \
+		srctree=$(abspath $(srctree)) \
+		objtree=$(abspath $(objtree)) \
+		srcroot=$(abspath $(srctree)) \
+		clean
+	$(Q)$(MAKE) -C $(KCONFIG_DIR) \
+		srctree=$(abspath $(srctree)) \
+		objtree=$(abspath $(objtree)) \
+		srcroot=$(abspath $(srctree)) \
+		clean
 
 # ===========================================================================
 # Installation target

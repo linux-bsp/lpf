@@ -258,3 +258,15 @@ $(obj)/%conf-cflags $(obj)/%conf-libs $(obj)/%conf-bin: $(src)/%conf-cfg.sh
 	$(call cmd,conf_cfg)
 
 clean-files += *conf-cflags *conf-libs *conf-bin
+clean-files += lexer.lex.c parser.tab.c parser.tab.h qconf-moc.cc
+clean-files += .*.cmd .*.d lxdialog/.*.cmd lxdialog/.*.d
+
+PHONY += clean
+clean:
+	@echo "  CLEAN   scripts/kconfig"
+	@rm -f conf mconf nconf gconf qconf
+	@rm -f *.o lxdialog/*.o
+	@rm -f .*.cmd .*.d lxdialog/.*.cmd lxdialog/.*.d
+	@rm -f *conf-cflags *conf-libs *conf-bin qconf-moc.cc
+	@rm -f lexer.lex.c parser.tab.c parser.tab.h
+	@rm -rf tests/.cache

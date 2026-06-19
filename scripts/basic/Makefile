@@ -16,3 +16,7 @@ always-y	:= $(hostprogs)
 $(obj)/%.o: $(obj)/fixdep FORCE
 	$(call if_changed_dep,host_cc_o_c)
 
+PHONY += clean
+clean:
+	@echo "  CLEAN   scripts/basic"
+	@rm -f fixdep *.o .*.cmd .*.d

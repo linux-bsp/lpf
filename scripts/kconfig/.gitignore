@@ -4,4 +4,13 @@
 /[gmnq]conf-bin
 /[gmnq]conf-cflags
 /[gmnq]conf-libs
+/lexer.lex.c
+/parser.tab.c
+/parser.tab.h
 /qconf-moc.cc
+.*.d
+.*.cmd
+lxdialog/.*.d
+lxdialog/.*.cmd
+*.o
+lxdialog/*.o
