@@ -1,7 +1,7 @@
 ################# Add include #################
 # 公共头文件目录（对外暴露）
-list(APPEND ADD_INCLUDE "${SDK_PATH}/core/kernel/include")
-list(APPEND ADD_INCLUDE "${SDK_PATH}/core/kernel/include/pdm")
+list(APPEND ADD_INCLUDE "${SDK_PATH}/kernel/include")
+list(APPEND ADD_INCLUDE "${SDK_PATH}/kernel/include/pdm")
 
 # 私有头文件目录（仅内部使用）
 list(APPEND ADD_PRIVATE_INCLUDE "src")
@@ -67,8 +67,8 @@ endif()
 ###############################################
 
 # 注册组件（使用公共函数）
-list(APPEND ADD_INCLUDE "${SDK_PATH}/core/kernel/include")
-list(APPEND ADD_INCLUDE "${SDK_PATH}/core/kernel/include/pdm")
+list(APPEND ADD_INCLUDE "${SDK_PATH}/kernel/include")
+list(APPEND ADD_INCLUDE "${SDK_PATH}/kernel/include/pdm")
 get_filename_component(PARENT_DIR "${CMAKE_CURRENT_SOURCE_DIR}" DIRECTORY)
 list(APPEND ADD_INCLUDE "${PARENT_DIR}")
 

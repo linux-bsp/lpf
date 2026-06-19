@@ -1034,10 +1034,20 @@ endmenu
 endmenu
 
 # ============================================================================
-# Core Components Configuration
+# Module Configuration
 # ============================================================================
 
-source "core/Config.in"
+menu "Modules"
+
+source "user/osal/Config.in"
+source "kernel/hal/Config.in"
+source "kernel/pconfig/Config.in"
+source "kernel/pdm/Config.in"
+source "user/aconfig/Config.in"
+source "user/pdi/Config.in"
+source "user/test_framework/Config.in"
+
+endmenu
 
 # ============================================================================
 # Product-Specific Configuration

@@ -91,7 +91,7 @@ menuconfig PDM_MCU_SUPPORT
 
 	  If unsure, say Y.
 
-source "core/kernel/pdm/src/pdm_mcu/Config.in"
+source "kernel/pdm/src/pdm_mcu/Config.in"
 
 menu "PDM Protocol Configuration"
 

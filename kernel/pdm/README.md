@@ -29,7 +29,7 @@ CONFIG_PDM_PROTOCOL_MCU=y
 ## Layout
 
 ```text
-core/kernel/pdm/
+kernel/pdm/
 ├── Config.in
 ├── CMakeLists.txt
 └── src/
@@ -42,7 +42,7 @@ core/kernel/pdm/
         ├── pdm_mcu_serial.c
         └── pdm_mcu_internal.h
 
-core/kernel/include/pdm/
+kernel/include/pdm/
 ├── pdm.h
 └── pdm_mcu.h
 ```

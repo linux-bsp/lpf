@@ -99,20 +99,20 @@ include(${SDK_PATH}/scripts/cmake/compile.cmake)
 include(${SDK_PATH}/scripts/cmake/ComponentAPI.cmake)
 
 # ==============================================================================
-# Build Core Modules Directly
+# Build Modules Directly
 # ==============================================================================
 
 function(_es_middleware_add_core_component config_var target_name subdir)
     if(DEFINED ${config_var} AND ${config_var} AND NOT TARGET ${target_name})
         add_subdirectory(
-            ${SDK_PATH}/core/${subdir}
-            ${CMAKE_BINARY_DIR}/core/${subdir}
+            ${SDK_PATH}/${subdir}
+            ${CMAKE_BINARY_DIR}/${subdir}
         )
     endif()
 endfunction()
 
 if(CONFIG_LINUX_ONLY)
-    message(STATUS "Building Linux-only core modules")
+    message(STATUS "Building Linux-only modules")
 
     _es_middleware_add_core_component(CONFIG_OSAL osal user/osal)
     _es_middleware_add_core_component(CONFIG_PDI pdi user/pdi)

@@ -1,4 +1,4 @@
-ESMW_ROOT := $(abspath $(src)/../..)
+ESMW_ROOT := $(abspath $(src)/..)
 ESMW_AUTOCONF := $(ESMW_ROOT)/include/config/auto.conf
 ESMW_AUTOCONF_H := $(ESMW_ROOT)/include/generated/gen_autoconf.h
 

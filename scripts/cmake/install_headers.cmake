@@ -80,9 +80,9 @@ function(install_header_tree module_name header_path)
 endfunction()
 
 # Install core module headers based on Kconfig
-install_module_headers(OSAL "core/user/osal")
-install_module_headers(ACONFIG "core/user/aconfig")
-install_module_headers(PDI "core/user/pdi")
-install_header_tree(PDI "core/uapi")
+install_module_headers(OSAL "user/osal")
+install_module_headers(ACONFIG "user/aconfig")
+install_module_headers(PDI "user/pdi")
+install_header_tree(PDI "uapi")
 
 message(STATUS "Headers installation complete")

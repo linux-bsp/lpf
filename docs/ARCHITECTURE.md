@@ -54,7 +54,7 @@ coverage, UAPI definitions when needed, and Kconfig entries.
 
 - Core modules do not depend on product/application code.
 - Dependencies point downward through the layer stack.
-- Product-specific behavior belongs outside `core/`.
+- Product-specific behavior belongs outside shared middleware module directories.
 - Kernel hardware tables are compiled through PCONFIG and consumed by PDM
   through typed accessors.
 - Userspace code must use PDI/UAPI rather than including kernel-internal HAL,

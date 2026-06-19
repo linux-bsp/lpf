@@ -12,6 +12,6 @@ Responsibilities:
 Current peripheral APIs:
 
 - MCU: `pdi_mcu_*` wraps `/dev/pdm_mcu`; ioctl ABI lives in
-  `core/uapi/pdi/pdi_mcu.h`.
+  `uapi/pdi/pdi_mcu.h`.
 
 PDI must not reimplement kernel HAL, PConfig, or PDM business logic.

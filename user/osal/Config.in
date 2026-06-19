@@ -286,7 +286,7 @@ menuconfig OSAL_SIGNAL
 	  Recommended: Enable for Standard/Full profiles, optional for Minimal
 
 # Linux user-space fine-grained configuration
-source "core/user/osal/src/Config.in"
+source "user/osal/src/Config.in"
 
 endmenu
 

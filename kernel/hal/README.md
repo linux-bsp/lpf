@@ -6,7 +6,7 @@ HAL is the kernel-mode Hardware Abstraction Layer used by PDM.
 
 - Builds as `hal.ko` through `make modules`.
 - Exports kernel symbols for the public HAL C API under
-  `core/kernel/include/hal/`.
+  `kernel/include/hal/`.
 - Has no userspace HAL library or userspace HAL test product.
 
 Current kernel implementations:
@@ -48,7 +48,7 @@ _build/modules/pdm.ko
 ## Layout
 
 ```text
-core/kernel/hal/
+kernel/hal/
 ├── Config.in
 ├── Makefile
 ├── CMakeLists.txt      # header-only interface for host-side consumers

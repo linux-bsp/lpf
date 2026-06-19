@@ -1,7 +1,7 @@
 ################# Add include #################
 list(APPEND ADD_INCLUDE "include")
-list(APPEND ADD_INCLUDE "${SDK_PATH}/core/uapi")
-list(APPEND ADD_PUBLIC_HEADER_DIRS "${SDK_PATH}/core/uapi")
+list(APPEND ADD_INCLUDE "${SDK_PATH}/uapi")
+list(APPEND ADD_PUBLIC_HEADER_DIRS "${SDK_PATH}/uapi")
 ###############################################
 
 ############## Add source files ###############

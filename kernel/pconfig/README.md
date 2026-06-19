@@ -44,7 +44,7 @@ pconfig_hw_get_mcu(platform, index);
 
 ## Layering Rules
 
-- `core/kernel/pconfig` defines data structures and read-only query behavior only.
-- `core/kernel/pconfig/configs` owns concrete platform tables.
+- `kernel/pconfig` defines data structures and read-only query behavior only.
+- `kernel/pconfig/configs` owns concrete platform tables.
 - PDM consumes `pconfig_get_board()` and typed accessors; it should not know concrete product table symbols.
 - Runtime code must not register, switch, reload, or mutate PCONFIG tables through core APIs.

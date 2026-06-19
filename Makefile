@@ -67,7 +67,7 @@ DESTDIR ?=
 KERNEL_SRC ?= /lib/modules/$(shell uname -r)/build
 MODULES_BUILD_DIR ?= _build/modules
 override MODULES_BUILD_DIR := $(patsubst %/,%,$(MODULES_BUILD_DIR))
-MODULES_SRC_DIR ?= $(srctree)/core/kernel
+MODULES_SRC_DIR ?= $(srctree)/kernel
 MODULES_OUTPUT_DIR ?= $(MODULES_BUILD_DIR)
 MODULES_LIST ?= $(strip $(if $(CONFIG_OSAL),osal) $(if $(CONFIG_PCONFIG),pconfig) $(if $(CONFIG_HAL),hal) $(if $(CONFIG_PDM),pdm))
 MODULES_ARTIFACTS = $(addprefix $(MODULES_OUTPUT_DIR)/,$(addsuffix .ko,$(MODULES_LIST)))
@@ -425,6 +425,10 @@ modules: _check_config include/generated/gen_autoconf.h include/generated/gen_ve
 	@echo "==================================================================="
 	@echo "Kernel module build completed successfully!"
 	@for artifact in $(MODULES_ARTIFACTS); do \
+		if [ ! -f "$$artifact" ]; then \
+			echo "ERROR: Missing expected artifact: $$artifact"; \
+			exit 1; \
+		fi; \
 		echo "Artifact: $$(readlink -f $$artifact)"; \
 	done
 	@echo "==================================================================="

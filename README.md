@@ -36,7 +36,9 @@ make modules
 
 ```text
 ES-Middleware/
-├── core/          # Reusable middleware layers
+├── kernel/        # Kernel modules and kernel-side headers
+├── user/          # Userspace libraries
+├── uapi/          # Shared userspace/kernel ABI headers
 ├── configs/       # Development defconfigs
 ├── docs/          # Architecture and integration documentation
 └── scripts/       # Kconfig/CMake build support

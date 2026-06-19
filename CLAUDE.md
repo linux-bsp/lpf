@@ -31,7 +31,7 @@ make modules
 ## Layering Rules
 
 - Core modules must not depend on product code.
-- Product/application code belongs outside `core/`.
+- Product/application code belongs outside shared middleware module directories.
 - PDM consumes PCONFIG through typed accessors and owns kernel-side peripheral logic.
 - PDI exposes the userspace API and wraps the PDM ioctl ABI.
 - HAL and OSAL remain platform abstraction layers.

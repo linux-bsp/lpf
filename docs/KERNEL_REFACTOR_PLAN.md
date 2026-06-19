@@ -9,7 +9,7 @@ implemented and verified.
 - HAL is a kernel-only module built as `hal.ko`.
 - PConfig is a standalone kernel module built as `pconfig.ko`.
 - Concrete platform configs are compiled directly into `pconfig.ko` under
-  `core/kernel/pconfig/configs/<product>/<project>/<version>/`.
+  `kernel/pconfig/configs/<product>/<project>/<version>/`.
 - PDM is a kernel module built as `pdm.ko`; peripheral drivers are linked into
   `pdm.ko` and registered through built-in driver registration.
 - PDI remains a userspace library, but it only talks to per-peripheral character
@@ -24,7 +24,7 @@ implemented and verified.
 
 ## Current Completed Work
 
-- [x] Move HAL implementation to kernel-side `core/kernel/hal/src`.
+- [x] Move HAL implementation to kernel-side `kernel/hal/src`.
 - [x] Build HAL as `hal.ko` with module entry in `hal.c`.
 - [x] Remove HAL userspace implementation from the active module path.
 - [x] Rename kernel module entry files from `main.c` to module names.
@@ -36,8 +36,8 @@ implemented and verified.
 - [x] Add `module_init`/`module_exit` for OSAL.
 - [x] Add `module_init`/`module_exit` for PConfig.
 - [x] Build PDM as `pdm.ko` with module entry in `pdm.c`.
-- [x] Split PDI MCU UAPI into `core/uapi/pdi/pdi_mcu.h`.
-- [x] Split userspace PDI MCU wrapper into `core/user/pdi/src/pdi_mcu.c`.
+- [x] Split PDI MCU UAPI into `uapi/pdi/pdi_mcu.h`.
+- [x] Split userspace PDI MCU wrapper into `user/pdi/src/pdi_mcu.c`.
 - [x] Add `/dev/pdm_mcu` character-device ioctl boundary.
 - [x] Change PDM startup to initialize built-in drivers, load PConfig, iterate
       configured devices, and call matching driver `probe`.
@@ -56,7 +56,7 @@ implemented and verified.
 
 - [x] Add a real product/platform PConfig source for the kernel module build.
   - `pconfig.ko` links `g_pconfig_platform_table` from
-    `core/kernel/pconfig/configs`.
+    `kernel/pconfig/configs`.
   - Acceptance: `pconfig_load()` finds a board config and `pconfig.ko` loads.
 - [x] Define the PConfig ownership model.
   - PConfig owns its module lifetime and global config state.
@@ -120,7 +120,7 @@ implemented and verified.
 
 ## Phase 4: Finish PDI/UAPI Split
 
-- [x] MCU UAPI lives in `core/uapi/pdi/pdi_mcu.h`.
+- [x] MCU UAPI lives in `uapi/pdi/pdi_mcu.h`.
 - [x] MCU ioctl definitions are owned by `pdi_mcu.h`.
 - [x] Userspace PDI aggregates per-peripheral headers from `pdi.h`.
 - [ ] Define UAPI rules for all future peripherals.
@@ -174,10 +174,10 @@ implemented and verified.
 
 ## Phase 6: Remove Old Test Infrastructure
 
-- [ ] Decide whether `core/user/test_framework` is retained.
+- [ ] Decide whether `user/test_framework` is retained.
   - The ctest product has been removed.
   - If the test framework is also considered part of ctest, delete it.
-- [ ] Remove `CONFIG_TEST_FRAMEWORK` from `core/Config.in` if deleted.
+- [ ] Remove `CONFIG_TEST_FRAMEWORK` from root `Config.in` if deleted.
 - [ ] Remove `test_framework` from root `CMakeLists.txt` if deleted.
 - [ ] Remove test framework install/build files if deleted.
 - [ ] Update README and docs after deletion.
@@ -186,7 +186,7 @@ implemented and verified.
 ## Phase 7: Clean Build And Feature Selection
 
 - [ ] Remove unused `ccflags-$(CONFIG_...) += -DCONFIG_...` definitions from
-      `core/kernel/Makefile`.
+      `kernel/Makefile`.
   - Keep Kbuild object selection such as `pdm-$(CONFIG_PDM_MCU_SUPPORT)`.
 - [ ] Keep feature selection at object/list registration boundaries.
   - Kconfig selects objects.
@@ -197,7 +197,7 @@ implemented and verified.
   - Prefer generated config constants or module parameters if runtime tuning is
     needed.
 - [ ] Remove or document transitional CMake kernel component logic.
-  - `core/kernel/pdm/CMakeLists.txt` and `pconfig/CMakeLists.txt` still contain
+  - `kernel/pdm/CMakeLists.txt` and `pconfig/CMakeLists.txt` still contain
     static/shared library options.
   - HAL CMake is currently an interface target only.
 - [x] Ensure defconfigs match the current module build model.

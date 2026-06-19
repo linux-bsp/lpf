@@ -1,7 +1,7 @@
 ################# Add include #################
 # 公共头文件目录（对外暴露）
-list(APPEND ADD_INCLUDE "${SDK_PATH}/core/kernel/include")
-list(APPEND ADD_INCLUDE "${SDK_PATH}/core/kernel/include/pconfig")
+list(APPEND ADD_INCLUDE "${SDK_PATH}/kernel/include")
+list(APPEND ADD_INCLUDE "${SDK_PATH}/kernel/include/pconfig")
 
 # 私有头文件目录（仅内部使用）
 list(APPEND ADD_PRIVATE_INCLUDE "src")
