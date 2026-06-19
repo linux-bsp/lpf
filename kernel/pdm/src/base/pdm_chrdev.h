@@ -8,6 +8,8 @@
 
 #include "osal.h"
 
+#include "pdm_status.h"
+
 typedef struct {
 	const char *name;
 	const struct file_operations *fops;
@@ -16,7 +18,6 @@ typedef struct {
 	struct miscdevice miscdev;
 } pdm_chrdev_t;
 
-long pdm_status_to_errno(int32_t status);
 int pdm_chrdev_open(pdm_chrdev_t *chrdev);
 int pdm_chrdev_release(pdm_chrdev_t *chrdev);
 int pdm_chrdev_register(pdm_chrdev_t *chrdev, const char *name,

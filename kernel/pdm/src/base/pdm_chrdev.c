@@ -4,31 +4,6 @@
 
 #include <linux/errno.h>
 
-long pdm_status_to_errno(int32_t status)
-{
-	if (status == OSAL_SUCCESS)
-		return 0;
-
-	if (status == OSAL_ERR_INVALID_PARAM ||
-	    status == OSAL_ERR_INVALID_POINTER ||
-	    status == OSAL_ERR_INVALID_SIZE ||
-	    status == OSAL_ERR_INVALID_ID)
-		return -EINVAL;
-
-	if (status == OSAL_ERR_NO_MEMORY)
-		return -ENOMEM;
-	if (status == OSAL_ERR_TIMEOUT)
-		return -ETIMEDOUT;
-	if (status == OSAL_ERR_BUSY)
-		return -EBUSY;
-	if (status == OSAL_ERR_NOT_SUPPORTED)
-		return -EOPNOTSUPP;
-	if (status == OSAL_ERR_NOT_IMPLEMENTED)
-		return -ENOSYS;
-
-	return -EIO;
-}
-
 int pdm_chrdev_open(pdm_chrdev_t *chrdev)
 {
 	int open_count;

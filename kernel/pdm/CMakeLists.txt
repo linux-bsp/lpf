@@ -12,7 +12,9 @@ list(APPEND ADD_PRIVATE_INCLUDE "src/protocol")
 list(APPEND ADD_SRCS
     "src/pdm.c"
     "src/base/pdm_chrdev.c"
+    "src/base/pdm_driver.c"
     "src/base/pdm_driver_start.c"
+    "src/base/pdm_status.c"
 )
 
 # 根据配置添加子模块源文件
@@ -70,15 +72,6 @@ else()
     message(FATAL_ERROR "PDM requires PCONFIG but CONFIG_PCONFIG is not enabled")
 endif()
 
-###############################################
-
-#### Add compile option for this component ####
-if(CONFIG_PDM_MCU_SUPPORT)
-    list(APPEND ADD_DEFINITIONS -DPDM_MCU_SUPPORT=1)
-endif()
-if(CONFIG_PDM_LED_SUPPORT)
-    list(APPEND ADD_DEFINITIONS -DPDM_LED_SUPPORT=1)
-endif()
 ###############################################
 
 # 注册组件（使用公共函数）
