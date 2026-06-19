@@ -226,13 +226,13 @@ implemented and verified.
 
 ## Phase 9: Verification
 
-- [ ] Run formatting/static checks.
+- [x] Run formatting/static checks.
   - `git diff --check`
   - `./scripts/validate_configs.sh`
-- [ ] Build kernel modules.
+- [x] Build kernel modules.
   - `make kernel_x86_modules_defconfig`
   - `make modules`
-- [ ] Verify module artifact names.
+- [x] Verify module artifact names.
   - `osal.ko`
   - `pconfig.ko`
   - `hal.ko`
