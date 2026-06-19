@@ -1,59 +1,59 @@
-config BR2_PACKAGE_ES_MIDDLEWARE
-	bool "es-middleware"
+config BR2_PACKAGE_LPF
+	bool "lpf"
 	depends on BR2_LINUX_KERNEL
 	depends on BR2_TOOLCHAIN_HAS_THREADS
 	depends on BR2_USE_MMU
 	depends on BR2_INSTALL_LIBSTDCPP
 	help
-	  ES-Middleware is a generic embedded middleware framework
+	  LPF is a generic Linux peripheral framework
 	  with a Kconfig+CMake/Kbuild build system. It provides OSAL,
 	  HAL, PDM, PDI, ACONFIG, and PCONFIG layers for Linux systems.
 
-if BR2_PACKAGE_ES_MIDDLEWARE
+if BR2_PACKAGE_LPF
 
-config BR2_PACKAGE_ES_MIDDLEWARE_DEFCONFIG
+config BR2_PACKAGE_LPF_DEFCONFIG
 	string "Kconfig defconfig to use"
 	default "kernel_x86_modules_defconfig"
 	help
-	  Specify which ES-Middleware configuration to use.
+	  Specify which LPF configuration to use.
 	  Defconfigs are provided under configs/.
 
 choice
 	prompt "Build type"
-	default BR2_PACKAGE_ES_MIDDLEWARE_BUILD_TYPE_RELEASE
+	default BR2_PACKAGE_LPF_BUILD_TYPE_RELEASE
 
-config BR2_PACKAGE_ES_MIDDLEWARE_BUILD_TYPE_RELEASE
+config BR2_PACKAGE_LPF_BUILD_TYPE_RELEASE
 	bool "Release"
 
-config BR2_PACKAGE_ES_MIDDLEWARE_BUILD_TYPE_DEBUG
+config BR2_PACKAGE_LPF_BUILD_TYPE_DEBUG
 	bool "Debug"
 
-config BR2_PACKAGE_ES_MIDDLEWARE_BUILD_TYPE_RELWITHDEBINFO
+config BR2_PACKAGE_LPF_BUILD_TYPE_RELWITHDEBINFO
 	bool "RelWithDebInfo"
 
 endchoice
 
-config BR2_PACKAGE_ES_MIDDLEWARE_BUILD_TYPE
+config BR2_PACKAGE_LPF_BUILD_TYPE
 	string
-	default "Release" if BR2_PACKAGE_ES_MIDDLEWARE_BUILD_TYPE_RELEASE
-	default "Debug" if BR2_PACKAGE_ES_MIDDLEWARE_BUILD_TYPE_DEBUG
-	default "RelWithDebInfo" if BR2_PACKAGE_ES_MIDDLEWARE_BUILD_TYPE_RELWITHDEBINFO
+	default "Release" if BR2_PACKAGE_LPF_BUILD_TYPE_RELEASE
+	default "Debug" if BR2_PACKAGE_LPF_BUILD_TYPE_DEBUG
+	default "RelWithDebInfo" if BR2_PACKAGE_LPF_BUILD_TYPE_RELWITHDEBINFO
 
-config BR2_PACKAGE_ES_MIDDLEWARE_INSTALL_HEADERS
+config BR2_PACKAGE_LPF_INSTALL_HEADERS
 	bool "Install development headers"
 	default n
 	help
 	  Install development headers to $(STAGING_DIR)/usr/include/.
-	  Only needed for packages that depend on ES-Middleware.
+	  Only needed for packages that depend on LPF.
 
-config BR2_PACKAGE_ES_MIDDLEWARE_MENUCONFIG
+config BR2_PACKAGE_LPF_MENUCONFIG
 	bool "Enable interactive menuconfig"
 	help
 	  Add host-kconfig-frontends dependency to enable interactive
-	  configuration via 'make es-middleware-menuconfig'.
+	  configuration via 'make lpf-menuconfig'.
 
-endif # BR2_PACKAGE_ES_MIDDLEWARE
+endif # BR2_PACKAGE_LPF
 
-comment "ES-Middleware needs Linux kernel and a toolchain w/ threads, C++, MMU"
+comment "LPF needs Linux kernel and a toolchain w/ threads, C++, MMU"
 	depends on !BR2_LINUX_KERNEL || !BR2_TOOLCHAIN_HAS_THREADS || \
 		!BR2_USE_MMU || !BR2_INSTALL_LIBSTDCPP

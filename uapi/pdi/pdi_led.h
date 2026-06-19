@@ -1,5 +1,5 @@
 /*
- * ES-Middleware PDI LED UAPI
+ * LPF PDI LED UAPI
  */
 
 #ifndef PDI_LED_H

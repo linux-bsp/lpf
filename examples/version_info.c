@@ -1,5 +1,5 @@
 /*
- * Example program demonstrating ES-Middleware version information usage
+ * Example program demonstrating LPF version information usage
  * Shows how to use OSAL version APIs and convenience macros
  */
 

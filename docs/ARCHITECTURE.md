@@ -1,6 +1,6 @@
-# ES-Middleware Architecture
+# LPF Architecture
 
-ES-Middleware is a Linux-focused middleware framework. It separates kernel
+LPF (Linux Peripheral Framework) separates kernel
 modules from userspace API libraries while keeping Kconfig-driven feature
 selection and CMake-driven source builds.
 
@@ -88,7 +88,7 @@ feature macros.
 
 - Core modules do not depend on product/application code.
 - Dependencies point downward through the layer stack.
-- Product-specific behavior belongs outside shared middleware module directories.
+- Product-specific behavior belongs outside shared framework module directories.
 - Kernel hardware tables are compiled through PCONFIG and consumed by PDM
   through typed accessors.
 - Userspace code must use PDI/UAPI rather than including kernel-internal HAL,

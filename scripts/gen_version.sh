@@ -14,7 +14,7 @@ mkdir -p include/generated
 
 # Extract version from .config or use default
 if [ -f .config ]; then
-    VERSION=$(grep '^CONFIG_ES_MIDDLEWARE_VERSION=' .config | cut -d'"' -f2)
+    VERSION=$(grep '^CONFIG_LPF_VERSION=' .config | cut -d'"' -f2)
 else
     VERSION="unknown"
 fi
@@ -51,60 +51,60 @@ fi
 cat > "$TEMP_FILE" << EOF
 /*
  * Automatically generated file - do not edit
- * ES-Middleware version: ${VERSION}
+ * LPF version: ${VERSION}
  * Generated on: ${BUILD_TIME}
  */
 
-#ifndef __ES_MIDDLEWARE_VERSION_H__
-#define __ES_MIDDLEWARE_VERSION_H__
+#ifndef __LPF_VERSION_H__
+#define __LPF_VERSION_H__
 
 /*
  * Version Information
  */
-#define ES_MIDDLEWARE_VERSION           "${VERSION}"
-#define ES_MIDDLEWARE_VERSION_CODE      ${BUILD_TIMESTAMP}
+#define LPF_VERSION           "${VERSION}"
+#define LPF_VERSION_CODE      ${BUILD_TIMESTAMP}
 
 /*
  * Build Information
  */
-#define ES_MIDDLEWARE_COMPILE_BY        "${BUILD_USER}"
-#define ES_MIDDLEWARE_COMPILE_HOST      "${BUILD_HOST}"
-#define ES_MIDDLEWARE_COMPILER          "${GCC_VERSION}"
+#define LPF_COMPILE_BY        "${BUILD_USER}"
+#define LPF_COMPILE_HOST      "${BUILD_HOST}"
+#define LPF_COMPILER          "${GCC_VERSION}"
 
 /*
  * Timestamps
  */
-#define ES_MIDDLEWARE_COMPILE_TIME      "${BUILD_TIME}"
-#define ES_MIDDLEWARE_COMPILE_TIMESTAMP ${BUILD_TIMESTAMP}
+#define LPF_COMPILE_TIME      "${BUILD_TIME}"
+#define LPF_COMPILE_TIMESTAMP ${BUILD_TIMESTAMP}
 
 /*
  * Platform Information
  */
-#define ES_MIDDLEWARE_BUILD_ARCH        "${ARCH}"
-#define ES_MIDDLEWARE_BUILD_KERNEL      "${KERNEL_VERSION}"
+#define LPF_BUILD_ARCH        "${ARCH}"
+#define LPF_BUILD_KERNEL      "${KERNEL_VERSION}"
 
 /*
  * Git Information
  */
-#define ES_MIDDLEWARE_GIT_COMMIT        "${GIT_COMMIT}${GIT_DIRTY}"
+#define LPF_GIT_COMMIT        "${GIT_COMMIT}${GIT_DIRTY}"
 
 /*
  * Version Banner (similar to Linux kernel banner)
- * Format: ES-Middleware version <version> (<user>@<host>) (<compiler>) <timestamp>
+ * Format: LPF version <version> (<user>@<host>) (<compiler>) <timestamp>
  */
-#define ES_MIDDLEWARE_BANNER \
-    "ES-Middleware version " ES_MIDDLEWARE_VERSION \
-    " (" ES_MIDDLEWARE_COMPILE_BY "@" ES_MIDDLEWARE_COMPILE_HOST ")" \
-    " (" ES_MIDDLEWARE_COMPILER ")" \
-    " " ES_MIDDLEWARE_COMPILE_TIME
+#define LPF_BANNER \
+    "LPF version " LPF_VERSION \
+    " (" LPF_COMPILE_BY "@" LPF_COMPILE_HOST ")" \
+    " (" LPF_COMPILER ")" \
+    " " LPF_COMPILE_TIME
 
 /*
  * Short version string (version + git commit)
  */
-#define ES_MIDDLEWARE_VERSION_STRING \
-    ES_MIDDLEWARE_VERSION "-" ES_MIDDLEWARE_GIT_COMMIT
+#define LPF_VERSION_STRING \
+    LPF_VERSION "-" LPF_GIT_COMMIT
 
-#endif /* __ES_MIDDLEWARE_VERSION_H__ */
+#endif /* __LPF_VERSION_H__ */
 EOF
 
 # Only update if changed (to avoid unnecessary rebuilds)

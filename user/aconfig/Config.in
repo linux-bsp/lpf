@@ -8,10 +8,10 @@ menuconfig ACONFIG
 	  Application Configuration Layer provides read-only access to
 	  product-defined application configuration tables.
 
-	  ACONFIG is the top layer of the ES-Middleware SDK stack, providing:
+	  ACONFIG is the top layer of the LPF SDK stack, providing:
 	  - Business function metadata containers
 	  - Application-level mapping table access
-	  - Separation between product configuration and core middleware logic
+	  - Separation between product configuration and core framework logic
 	  - Query-only configuration management
 
 	  Architecture:

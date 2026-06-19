@@ -1,13 +1,13 @@
 # ============================================================================
-# ES-Middleware SDK Root Configuration
+# LPF SDK Root Configuration
 # ============================================================================
-# This is the root Config.in file for the ES-Middleware kernel-centric SDK.
+# This is the root Config.in file for the LPF kernel-centric SDK.
 # It provides a unified configuration interface for core components.
 # ============================================================================
 
-mainmenu "ES-Middleware SDK Configuration"
+mainmenu "LPF (Linux Peripheral Framework) Configuration"
 
-config ES_MIDDLEWARE_VERSION
+config LPF_VERSION
 	string
 	default "1.0.0"
 
@@ -28,7 +28,7 @@ config PROJECT_NAME
 
 config PROJECT_VERSION
 	string "Project version"
-	default ES_MIDDLEWARE_VERSION
+	default LPF_VERSION
 	help
 	  Project version string.
 
@@ -43,7 +43,7 @@ config LINUX_ONLY
 	  Restrict the SDK to Linux development only.
 
 	  This profile hides non-Linux operating system options. It is
-	  intended for the current kernel-centric middleware direction.
+	  intended for the current kernel-centric peripheral framework direction.
 
 # ============================================================================
 # Build System Configuration
@@ -61,7 +61,7 @@ choice
 	help
 	  Select the target operating system type.
 
-	  ES-Middleware currently supports Linux only.
+	  LPF currently supports Linux only.
 
 config OS_LINUX
 	bool "Linux"

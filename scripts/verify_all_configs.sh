@@ -1,6 +1,6 @@
 #!/bin/bash
 ################################################################################
-# ES-Middleware 配置验证脚本
+# LPF 配置验证脚本
 #
 # 功能：
 # - 自动遍历所有 defconfig 配置
@@ -188,7 +188,7 @@ generate_report() {
 
     cat > "$report_file" << EOF
 ========================================================================
-ES-Middleware 配置验证报告
+LPF 配置验证报告
 ========================================================================
 
 测试时间: $(date '+%Y-%m-%d %H:%M:%S')
@@ -292,7 +292,7 @@ main() {
     cd "$PROJECT_ROOT"
 
     print_separator
-    log_info "ES-Middleware 配置验证脚本"
+    log_info "LPF 配置验证脚本"
     print_separator
     log_info "项目目录: $PROJECT_ROOT"
     log_info "日志目录: $LOG_DIR"

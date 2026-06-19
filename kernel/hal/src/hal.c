@@ -70,12 +70,12 @@ static void hal_builtin_drivers_exit(void)
 void hal_print_version(void)
 {
 	osal_log(OS_LOG_LEVEL_INFO, "HAL",
-		 "module_version=%u.%u.%u middleware_version=%s git=%s build_time=%s build_by=%s@%s compiler=%s arch=%s kernel=%s",
+		 "module_version=%u.%u.%u lpf_version=%s git=%s build_time=%s build_by=%s@%s compiler=%s arch=%s kernel=%s",
 		 HAL_VERSION_MAJOR, HAL_VERSION_MINOR, HAL_VERSION_PATCH,
-		 ES_MIDDLEWARE_VERSION, ES_MIDDLEWARE_GIT_COMMIT,
-		 ES_MIDDLEWARE_COMPILE_TIME, ES_MIDDLEWARE_COMPILE_BY,
-		 ES_MIDDLEWARE_COMPILE_HOST, ES_MIDDLEWARE_COMPILER,
-		 ES_MIDDLEWARE_BUILD_ARCH, ES_MIDDLEWARE_BUILD_KERNEL);
+		 LPF_VERSION, LPF_GIT_COMMIT,
+		 LPF_COMPILE_TIME, LPF_COMPILE_BY,
+		 LPF_COMPILE_HOST, LPF_COMPILER,
+		 LPF_BUILD_ARCH, LPF_BUILD_KERNEL);
 }
 EXPORT_SYMBOL_GPL(hal_print_version);
 
@@ -102,7 +102,7 @@ static void __exit hal_exit(void)
 module_init(hal_init);
 module_exit(hal_exit);
 
-MODULE_AUTHOR("ES-Middleware");
-MODULE_DESCRIPTION("ES-Middleware HAL kernel module");
+MODULE_AUTHOR("LPF");
+MODULE_DESCRIPTION("LPF HAL kernel module");
 MODULE_LICENSE("GPL");
 MODULE_SOFTDEP("pre: osal can can_raw");

@@ -4,7 +4,7 @@ Kernel OSAL wraps Linux kernel APIs needed by kernel HAL, PConfig, and PDM.
 
 It is intentionally separate from `user/osal`, but public OSAL names should
 match userspace where the kernel can provide equivalent or close semantics. This
-keeps shared middleware code largely unaware of whether it is built for
+keeps shared framework code largely unaware of whether it is built for
 userspace or kernel modules.
 
 The aggregation entry is `kernel/include/osal/osal.h`. It includes the

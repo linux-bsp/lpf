@@ -1,5 +1,5 @@
 /*
- * ES-Middleware PDI MCU UAPI
+ * LPF PDI MCU UAPI
  *
  * This header defines the ioctl ABI shared by /dev/pdm_mcu and the
  * userspace PDI MCU client.

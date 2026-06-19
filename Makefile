@@ -1,5 +1,5 @@
 # ==============================================================================
-# ES-Middleware Makefile
+# LPF Makefile
 # ==============================================================================
 # This Makefile provides a clean wrapper layer between user commands and the
 # CMake build system, inspired by Linux kernel and Buildroot architecture.
@@ -22,7 +22,7 @@ VERSION = 1
 PATCHLEVEL = 0
 SUBLEVEL = 0
 EXTRAVERSION =
-NAME = ES-Middleware
+NAME = LPF
 
 # Version string
 export VERSION PATCHLEVEL SUBLEVEL EXTRAVERSION
@@ -44,7 +44,7 @@ ifndef KBUILD_VERBOSE
 endif
 
 # kbuild supports saving output files in a separate directory.
-# For ES-Middleware, we use BUILD_DIR variable for CMake output directory.
+# For LPF, we use BUILD_DIR variable for CMake output directory.
 # This is simpler than full out-of-tree build support.
 
 # Build directory (for CMake build artifacts)
@@ -383,7 +383,7 @@ PHONY += all
 all:
 	@echo ""
 	@echo "==================================================================="
-	@echo "ES-Middleware Full Build"
+	@echo "LPF Full Build"
 	@echo "==================================================================="
 	$(Q)$(MAKE) libs
 	$(Q)$(MAKE) modules
@@ -399,13 +399,13 @@ PHONY += libs
 libs: _check_config _validate_config include/generated/gen_autoconf.h include/generated/gen_version.h _cmake_configure
 	@echo ""
 	@echo "==================================================================="
-	@echo "ES-Middleware Library Build"
+	@echo "LPF Library Build"
 	@echo "==================================================================="
 	@echo ""
 	@echo "Configuration: $(CURDIR)/.config"
 	@echo "Building with CMake..."
 	@echo ""
-	@echo "  BUILD    ES-Middleware libraries"
+	@echo "  BUILD    LPF libraries"
 	$(Q)$(MAKE) -C $(BUILD_DIR) $(PARALLEL_BUILD)
 	@echo ""
 	@echo "==================================================================="
@@ -423,7 +423,7 @@ PHONY += modules
 modules: _check_config include/generated/gen_autoconf.h include/generated/gen_version.h _modules_check_environment _modules_prepare
 	@echo ""
 	@echo "==================================================================="
-	@echo "ES-Middleware Kernel Module Build"
+	@echo "LPF Kernel Module Build"
 	@echo "==================================================================="
 	@echo ""
 	@echo "Kernel source: $(KERNEL_SRC)"
@@ -661,7 +661,7 @@ install_headers:
 PHONY += help list
 
 help:
-	@echo 'ES-Middleware Build System'
+	@echo 'LPF Build System'
 	@echo '===================================='
 	@echo ''
 	@echo 'Configuration targets:'
@@ -750,7 +750,7 @@ list:
 
 PHONY += version
 version:
-	@echo "ES-Middleware SDK"
+	@echo "LPF - Linux Peripheral Framework"
 	@echo "Version: $(VERSION_STRING)"
 	@if [ -d .git ]; then \
 		echo "Git commit: $$(git rev-parse --short HEAD 2>/dev/null || echo 'unknown')"; \

@@ -1,5 +1,5 @@
 # ==============================================================================
-# ES-Middleware SDK Root CMakeLists.txt
+# LPF SDK Root CMakeLists.txt
 # ==============================================================================
 # Clean separation of concerns:
 #   - Makefile:        Configuration management (Kconfig)
@@ -35,7 +35,7 @@ kconfig_load()
 # Project Declaration
 # ==============================================================================
 
-project(es_middleware_sdk C CXX ASM)
+project(lpf_sdk C CXX ASM)
 
 # ==============================================================================
 # Configure Installation Paths (after project())
@@ -101,7 +101,7 @@ include(${SDK_PATH}/scripts/cmake/compile.cmake)
 # Build Modules Directly
 # ==============================================================================
 
-function(_es_middleware_add_core_component config_var target_name subdir)
+function(_lpf_add_core_component config_var target_name subdir)
     if(DEFINED ${config_var} AND ${config_var} AND NOT TARGET ${target_name})
         add_subdirectory(
             ${SDK_PATH}/${subdir}
@@ -113,9 +113,9 @@ endfunction()
 if(CONFIG_LINUX_ONLY)
     message(STATUS "Building Linux-only modules")
 
-    _es_middleware_add_core_component(CONFIG_OSAL osal user/osal)
-    _es_middleware_add_core_component(CONFIG_PDI pdi user/pdi)
-    _es_middleware_add_core_component(CONFIG_ACONFIG aconfig user/aconfig)
+    _lpf_add_core_component(CONFIG_OSAL osal user/osal)
+    _lpf_add_core_component(CONFIG_PDI pdi user/pdi)
+    _lpf_add_core_component(CONFIG_ACONFIG aconfig user/aconfig)
 endif()
 
 # ==============================================================================
@@ -124,7 +124,7 @@ endif()
 
 message(STATUS "")
 message(STATUS "========================================================================")
-message(STATUS "ES-Middleware Configuration Summary")
+message(STATUS "LPF Configuration Summary")
 message(STATUS "========================================================================")
 message(STATUS "SDK Version:    ${SDK_VERSION}")
 message(STATUS "Git Commit:     ${GIT_COMMIT_HASH}")

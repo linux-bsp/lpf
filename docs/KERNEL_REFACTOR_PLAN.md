@@ -1,6 +1,6 @@
 # Kernel Refactor Plan
 
-This document tracks the remaining work for moving ES-Middleware HAL/PConfig/PDM
+This document tracks the remaining work for moving LPF HAL/PConfig/PDM
 to the kernel-module architecture. Update the checkboxes as each part is
 implemented and verified.
 

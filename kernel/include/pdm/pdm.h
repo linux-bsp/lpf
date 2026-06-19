@@ -1,5 +1,5 @@
 /************************************************************************
- * ES-Middleware - Embedded Software - Middleware
+ * LPF - Linux Peripheral Framework
  *
  * 外设驱动层统一头文件
  *

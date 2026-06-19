@@ -1,5 +1,5 @@
 # ==============================================================================
-# Kconfig Configuration Loader for ES-Middleware
+# Kconfig Configuration Loader for LPF
 # ==============================================================================
 # This module provides clean separation between configuration management and
 # build logic, inspired by Kconfig-driven build systems.

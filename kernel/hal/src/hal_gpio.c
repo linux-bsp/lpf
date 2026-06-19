@@ -170,7 +170,7 @@ int32_t hal_gpio_init(uint32_t gpio_num, const hal_gpio_config_t *config)
 			return OSAL_ERR_NO_MEMORY;
 		}
 
-		ret = gpio_request(gpio_num, "es-middleware-hal");
+		ret = gpio_request(gpio_num, "lpf-hal");
 		if (ret < 0) {
 			osal_free(ctx);
 			osal_mutex_unlock(&g_hal_gpio_lock);

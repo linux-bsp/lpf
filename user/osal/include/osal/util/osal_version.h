@@ -2,7 +2,7 @@
  * @file osal_version.h
  * @brief OSAL版本信息和构建信息API
  *
- * 提供ES-Middleware的版本、构建信息查询接口，以及便利宏定义
+ * 提供LPF的版本、构建信息查询接口，以及便利宏定义
  * 类似Linux内核的版本信息机制
  */
 
@@ -19,7 +19,7 @@ extern "C" {
 
 /**
  * @brief 当前软件版本号
- * 可在任何模块中使用，获取ES-Middleware版本
+ * 可在任何模块中使用，获取LPF版本
  */
 #define OSAL_VERSION osal_get_version()
 
@@ -80,7 +80,7 @@ extern "C" {
 const char *osal_get_version_string(void);
 
 /**
- * @brief 获取ES-Middleware版本号
+ * @brief 获取LPF版本号
  * @return 版本号字符串（如 "1.0.0"）
  */
 const char *osal_get_version(void);

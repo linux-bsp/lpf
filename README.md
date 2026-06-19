@@ -1,6 +1,6 @@
-# ES-Middleware SDK
+# LPF - Linux Peripheral Framework
 
-ES-Middleware is a Linux-focused embedded middleware framework built with
+LPF (Linux Peripheral Framework) is a Linux-focused peripheral framework built with
 Kconfig, CMake, and Linux external-module Kbuild support.
 
 ## Current Scope
@@ -41,7 +41,7 @@ Kernel module load order is `osal.ko`, `pconfig.ko`, `hal.ko`, then `pdm.ko`.
 ## Project Layout
 
 ```text
-ES-Middleware/
+LPF/
 ├── kernel/        # Kernel modules and kernel-side headers
 ├── user/          # Userspace libraries
 ├── uapi/          # Shared userspace/kernel ABI headers

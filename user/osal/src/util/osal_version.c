@@ -20,62 +20,62 @@ static char s_build_by_buf[128];
 const char *osal_get_version_string(void)
 {
 	snprintf(s_version_string_buf, sizeof(s_version_string_buf), "OSAL v%s",
-			 ES_MIDDLEWARE_VERSION);
+			 LPF_VERSION);
 	return s_version_string_buf;
 }
 
 const char *osal_get_version(void)
 {
-	return ES_MIDDLEWARE_VERSION;
+	return LPF_VERSION;
 }
 
 const char *osal_get_version_full(void)
 {
-	return ES_MIDDLEWARE_VERSION_STRING;
+	return LPF_VERSION_STRING;
 }
 
 const char *osal_get_git_commit(void)
 {
-	return ES_MIDDLEWARE_GIT_COMMIT;
+	return LPF_GIT_COMMIT;
 }
 
 const char *osal_get_build_time(void)
 {
-	return ES_MIDDLEWARE_COMPILE_TIME;
+	return LPF_COMPILE_TIME;
 }
 
 const char *osal_get_build_by(void)
 {
 	snprintf(s_build_by_buf, sizeof(s_build_by_buf), "%s@%s",
-			 ES_MIDDLEWARE_COMPILE_BY, ES_MIDDLEWARE_COMPILE_HOST);
+			 LPF_COMPILE_BY, LPF_COMPILE_HOST);
 	return s_build_by_buf;
 }
 
 const char *osal_get_compiler(void)
 {
-	return ES_MIDDLEWARE_COMPILER;
+	return LPF_COMPILER;
 }
 
 const char *osal_get_arch(void)
 {
-	return ES_MIDDLEWARE_BUILD_ARCH;
+	return LPF_BUILD_ARCH;
 }
 
 const char *osal_get_kernel(void)
 {
-	return ES_MIDDLEWARE_BUILD_KERNEL;
+	return LPF_BUILD_KERNEL;
 }
 
 const char *osal_get_banner(void)
 {
-	return ES_MIDDLEWARE_BANNER;
+	return LPF_BANNER;
 }
 
 void osal_print_version_info(void)
 {
 	osal_printf(
 		"=================================================================\n");
-	osal_printf("ES-Middleware Version Information\n");
+	osal_printf("LPF Version Information\n");
 	osal_printf(
 		"=================================================================\n");
 	osal_printf("Version:      %s\n", osal_get_version());

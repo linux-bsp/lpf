@@ -1,6 +1,6 @@
-# ES-Middleware Project Context
+# LPF Project Context
 
-ES-Middleware is now a Linux-focused embedded middleware framework. Product-specific satellite/PMC business code has been removed.
+LPF (Linux Peripheral Framework) is now a Linux-focused peripheral framework. Product-specific satellite/PMC business code has been removed.
 
 ## Current Architecture
 
@@ -31,7 +31,7 @@ make modules
 ## Layering Rules
 
 - Core modules must not depend on product code.
-- Product/application code belongs outside shared middleware module directories.
+- Product/application code belongs outside shared framework module directories.
 - PDM consumes PCONFIG through typed accessors and owns kernel-side peripheral logic.
 - PDI exposes the userspace API and wraps the PDM ioctl ABI.
 - HAL and OSAL remain platform abstraction layers.

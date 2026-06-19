@@ -1,9 +1,9 @@
 ################################################################################
 #
-# es-middleware - Local development override
+# lpf - Local development override
 #
 ################################################################################
-# This file allows you to use a local source tree for ES-Middleware development
+# This file allows you to use a local source tree for LPF development
 # instead of fetching from git. This is useful for:
 # - Rapid iteration during development
 # - Testing local changes before pushing to git
@@ -11,18 +11,18 @@
 #
 # Usage:
 #   1. Copy this file to local.mk in the same directory
-#   2. Update ES_MIDDLEWARE_OVERRIDE_SRCDIR to point to your local source
-#   3. Rebuild with: make es-middleware-rebuild
+#   2. Update LPF_OVERRIDE_SRCDIR to point to your local source
+#   3. Rebuild with: make lpf-rebuild
 #
 # Note: local.mk is git-ignored to prevent accidental commits
 ################################################################################
 
 # Override to use local source directory
-ES_MIDDLEWARE_OVERRIDE_SRCDIR = $(TOPDIR)/../ES-Middleware
+LPF_OVERRIDE_SRCDIR = $(TOPDIR)/../LPF
 
 # Optional: Override version for local builds
-# ES_MIDDLEWARE_VERSION = 1.0.0-local-$(shell date +%Y%m%d)
+# LPF_VERSION = 1.0.0-local-$(shell date +%Y%m%d)
 
 # Optional: Use a specific git branch/tag/commit for local testing
-# ES_MIDDLEWARE_VERSION = feature-branch
-# ES_MIDDLEWARE_SITE_METHOD = git
+# LPF_VERSION = feature-branch
+# LPF_SITE_METHOD = git

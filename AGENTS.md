@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-Reusable middleware layers live at the repository top level: `kernel/` holds kernel-side modules such as `osal`, `hal`, `pconfig`, and `pdm`; `user/` holds userspace libraries such as `osal`, `aconfig`, and `pdi`; `uapi/` holds shared userspace/kernel ABI headers. Configuration presets live under `configs/`, build support scripts are under `scripts/`, and generated artifacts are written to `_build/`.
+Reusable framework layers live at the repository top level: `kernel/` holds kernel-side modules such as `osal`, `hal`, `pconfig`, and `pdm`; `user/` holds userspace libraries such as `osal`, `aconfig`, and `pdi`; `uapi/` holds shared userspace/kernel ABI headers. Configuration presets live under `configs/`, build support scripts are under `scripts/`, and generated artifacts are written to `_build/`.
 
 ## Build, Test, and Development Commands
 - `make list` - show available configuration and build targets.

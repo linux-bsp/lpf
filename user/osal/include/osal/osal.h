@@ -1,5 +1,5 @@
 /************************************************************************
- * ES-Middleware - Embedded Software - Middleware
+ * LPF - Linux Peripheral Framework
  *
  * 轻量化操作系统抽象层
  *
