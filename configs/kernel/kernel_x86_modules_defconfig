@@ -1,0 +1,29 @@
+# ============================================================================
+# x86 kernel module build configuration
+# ============================================================================
+
+CONFIG_PROJECT_NAME="x86_modules"
+CONFIG_PROJECT_VERSION="1.0.0"
+
+CONFIG_LINUX_ONLY=y
+CONFIG_OS_LINUX=y
+CONFIG_ARCH_X86_64=y
+CONFIG_PLATFORM_LINUX=y
+
+CONFIG_OSAL=y
+CONFIG_HAL=y
+CONFIG_PCONFIG=y
+CONFIG_PDM=y
+
+CONFIG_HAL_CAN=y
+CONFIG_HAL_UART=y
+CONFIG_HAL_I2C=y
+CONFIG_HAL_SPI=y
+CONFIG_HAL_GPIO=y
+
+CONFIG_PDM_MCU_SUPPORT=y
+CONFIG_PDM_PROTOCOL=y
+CONFIG_PDM_PROTOCOL_MCU=y
+CONFIG_PDM_PROTOCOL_CRC_CHECK=y
+CONFIG_PDM_PROTOCOL_SEQUENCE_CHECK=y
+CONFIG_PDM_PROTOCOL_MAX_PAYLOAD_SIZE=4096

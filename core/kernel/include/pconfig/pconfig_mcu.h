@@ -67,7 +67,7 @@ typedef struct {
 
 		/* 串口配置 */
 		struct {
-			const char *device; /* 串口设备（如/dev/ttyS1） */
+			const char *device; /* 串口设备标识（如ttyS1） */
 			uint32_t baudrate; /* 波特率 */
 			uint8_t data_bits; /* 数据位（5-8） */
 			uint8_t stop_bits; /* 停止位（1-2） */

@@ -1,9 +1,12 @@
 # SPDX-License-Identifier: GPL-2.0
 
-# Object list exported for kernel modules that consume HAL internally.
-ESMW_HAL_OBJS :=
-
-ESMW_HAL_OBJS-$(CONFIG_HAL_CAN) += hal/src/kernel/hal_can_kernel.o
-ESMW_HAL_OBJS-$(CONFIG_HAL_UART) += hal/src/kernel/hal_serial_kernel.o
-
-ESMW_HAL_OBJS += $(ESMW_HAL_OBJS-y)
+# Kbuild fragment for hal.ko.
+ifeq ($(CONFIG_HAL),y)
+obj-m += hal.o
+hal-y := hal/src/hal_main.o
+hal-$(CONFIG_HAL_CAN) += hal/src/hal_can.o
+hal-$(CONFIG_HAL_UART) += hal/src/hal_serial.o
+hal-$(CONFIG_HAL_GPIO) += hal/src/hal_gpio.o
+hal-$(CONFIG_HAL_I2C) += hal/src/hal_i2c.o
+hal-$(CONFIG_HAL_SPI) += hal/src/hal_spi.o
+endif

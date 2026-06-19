@@ -50,8 +50,8 @@ typedef struct {
  * @return OSAL_ERR_NO_DEVICE     CAN接口不存在
  * @return OSAL_ERR_GENERIC       其他错误（如权限不足、资源不足）
  *
- * @note 调用此函数前，确保CAN接口已配置并up（如 ip link set can0 up）
- * @note 线程安全：使用文件锁保护多进程并发访问
+ * @note 调用此函数前，确保CAN接口已由系统配置并处于up状态
+ * @note 线程安全：实现内部使用内核同步原语保护并发访问
  */
 int32_t hal_can_init(const hal_can_config_t *config, hal_can_handle_t *handle);
 
@@ -65,7 +65,7 @@ int32_t hal_can_init(const hal_can_config_t *config, hal_can_handle_t *handle);
  * @return OSAL_SUCCESS           成功
  * @return OSAL_ERR_INVALID_PARAM 句柄无效
  *
- * @note 线程安全：使用文件锁保护多进程并发访问
+ * @note 线程安全：实现内部使用内核同步原语保护并发访问
  */
 int32_t hal_can_deinit(hal_can_handle_t handle);
 
@@ -83,7 +83,7 @@ int32_t hal_can_deinit(hal_can_handle_t handle);
  * @return OSAL_ERR_GENERIC       发送失败（如总线错误、缓冲区满）
  *
  * @note 发送操作使用配置的tx_timeout作为超时时间
- * @note 线程安全：使用文件锁保护多进程并发访问
+ * @note 线程安全：实现内部使用内核同步原语保护并发访问
  */
 int32_t hal_can_send(hal_can_handle_t handle, const hal_can_frame_t *frame);
 
@@ -102,7 +102,7 @@ int32_t hal_can_send(hal_can_handle_t handle, const hal_can_frame_t *frame);
  * @return OSAL_ERR_GENERIC       接收失败（如总线错误）
  *
  * @note 如果timeout=OS_PEND，则阻塞等待直到收到帧
- * @note 线程安全：使用文件锁保护多进程并发访问
+ * @note 线程安全：实现内部使用内核同步原语保护并发访问
  */
 int32_t hal_can_recv(hal_can_handle_t handle, hal_can_frame_t *frame,
 					 int32_t timeout);
@@ -121,7 +121,7 @@ int32_t hal_can_recv(hal_can_handle_t handle, hal_can_frame_t *frame,
  * @return OSAL_ERR_GENERIC       设置失败
  *
  * @note 过滤规则：(received_id & filter_mask) == (filter_id & filter_mask)
- * @note 线程安全：使用文件锁保护多进程并发访问
+ * @note 线程安全：实现内部使用内核同步原语保护并发访问
  */
 int32_t hal_can_set_filter(hal_can_handle_t handle, uint32_t filter_id,
 						   uint32_t filter_mask);

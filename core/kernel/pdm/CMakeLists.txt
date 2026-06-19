@@ -15,7 +15,7 @@ if(CONFIG_PDM_PROTOCOL)
     list(APPEND ADD_SRCS ${PDM_PROTOCOL_SRCS})
 endif()
 
-if(CONFIG_PDM_MCU_SUPPORT)
+if(CONFIG_PDM_MCU_SUPPORT AND TARGET hal)
     file(GLOB PDM_MCU_SRCS "src/pdm_mcu/*.c")
     list(APPEND ADD_SRCS ${PDM_MCU_SRCS})
 endif()
@@ -34,11 +34,10 @@ else()
     message(FATAL_ERROR "PDM requires OSAL but CONFIG_OSAL is not enabled")
 endif()
 
-# HAL 是 Kconfig 强制依赖的（Kconfig: select HAL）
-if(CONFIG_HAL)
+# HAL is kernel-module-only. CMake host builds link the HAL-dependent MCU
+# sources only when a test double/legacy target is explicitly present.
+if(CONFIG_PDM_MCU_SUPPORT AND TARGET hal)
     list(APPEND ADD_REQUIREMENTS hal)
-else()
-    message(FATAL_ERROR "PDM requires HAL but CONFIG_HAL is not enabled")
 endif()
 
 # PCONFIG 是必须的（PDM 使用 PCONFIG 的配置类型）

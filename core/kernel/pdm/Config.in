@@ -86,9 +86,8 @@ menuconfig PDM_MCU_SUPPORT
 
 	  You can enable CAN-based or UART-based MCU support in the submenu.
 
-	  Kernel module builds currently link the MCU core and kernel-safe
-	  HAL transport stubs. The real in-kernel CAN/UART transport
-	  implementations are still pending.
+	  Kernel module builds link the MCU core and use the CAN/UART
+	  transport symbols exported by hal.ko.
 
 	  If unsure, say Y.
 

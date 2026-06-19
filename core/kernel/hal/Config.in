@@ -5,7 +5,7 @@ menuconfig HAL
 	default n
 	depends on OSAL
 	help
-	  Hardware Abstraction Layer provides unified hardware interfaces.
+	  Hardware Abstraction Layer provides kernel-mode hardware interfaces.
 
 	  HAL abstracts Linux hardware access details and provides a
 	  consistent API for kernel-side peripheral drivers.
@@ -41,45 +41,16 @@ config PLATFORM_LINUX
 	help
 	  Enable Linux hardware access support.
 
-	  Uses Linux device interfaces:
-	  - SocketCAN for CAN bus
-	  - sysfs GPIO for GPIO control
-	  - /dev/ttyX for UART/serial
-	  - /dev/i2c-X for I2C bus
-	  - /dev/spidevX.Y for SPI bus
+	  Uses Linux kernel interfaces:
+	  - SocketCAN kernel sockets for CAN bus
+	  - TTY, GPIO, I2C, and SPI kernel subsystems
 
 	  Suitable for: Any Linux system with standard kernel drivers
 	  Examples: AM625, i.MX6/8, Raspberry Pi, x86 Linux
 
 	  Memory: ~10KB driver code
 
-	  Note: Requires appropriate kernel drivers and device nodes.
-
-endmenu
-
-# =============================================================================
-# Build Configuration
-# =============================================================================
-
-menu "Build Configuration"
-
-config HAL_BUILD_STATIC
-	bool "Build static library"
-	default n
-	help
-	  Build libhal.a for CMake-based userspace tests and transitional
-	  host validation.
-
-	  Kernel module builds do not use this option; use make modules.
-
-config HAL_BUILD_SHARED
-	bool "Build shared library"
-	default n
-	help
-	  Build libhal.so for CMake-based userspace tests and transitional
-	  host validation.
-
-	  Kernel module builds do not use this option; use make modules.
+	  Note: Requires appropriate kernel drivers and in-kernel bus support.
 
 endmenu
 
@@ -111,7 +82,7 @@ menuconfig HAL_CAN
 	  - Industrial automation
 	  - Embedded platform communication over CAN
 
-	  Platform support: Linux SocketCAN interface
+	  Platform support: Linux kernel SocketCAN interface
 
 menuconfig HAL_UART
 	bool "UART support"
@@ -136,7 +107,7 @@ menuconfig HAL_UART
 	  - Sensor communication
 	  - Modem control
 
-	  Platform support: Linux /dev/ttyX devices
+	  Platform support: Linux kernel TTY subsystem and character device I/O
 
 menuconfig HAL_I2C
 	bool "I2C support"
@@ -161,7 +132,7 @@ menuconfig HAL_I2C
 	  - Real-time clocks (RTC)
 	  - ADC/DAC converters
 
-	  Platform support: Linux /dev/i2c-X devices
+	  Platform support: Linux kernel I2C adapter transfer API
 
 menuconfig HAL_SPI
 	bool "SPI support"
@@ -186,7 +157,7 @@ menuconfig HAL_SPI
 	  - Display controllers
 	  - High-speed ADCs
 
-	  Platform support: Linux /dev/spidevX.Y devices
+	  Platform support: Linux kernel SPI device transfer API
 
 menuconfig HAL_GPIO
 	bool "GPIO support"
@@ -210,12 +181,9 @@ menuconfig HAL_GPIO
 	  - Chip select signals
 	  - Hardware reset control
 
-	  Platform support: Linux sysfs GPIO (/sys/class/gpio)
+	  Platform support: Linux kernel GPIO and IRQ APIs
 
 endmenu
-
-# Linux HAL fine-grained configuration
-source "core/kernel/hal/src/Config.in"
 
 # =============================================================================
 # Advanced Features

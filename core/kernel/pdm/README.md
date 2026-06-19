@@ -12,9 +12,8 @@ The kernel module currently provides:
 - PDM protocol encode/decode logic linked into `pdm.ko`
 - PDM MCU core and CAN/Serial transport glue linked into `pdm.ko`
 
-The kernel HAL CAN/Serial implementations are currently stubs that return
-`OSAL_ERR_NOT_SUPPORTED`. They provide a kernel-safe link boundary for PDM MCU
-while the real in-kernel transport implementations are developed.
+PDM consumes the exported `hal.ko` CAN and Serial symbols for MCU transport
+hardware access.
 
 ## Configuration
 
@@ -53,5 +52,5 @@ protocol helpers, but userspace must call through PDI/ioctl rather than
 including kernel headers.
 
 MCU transport APIs are linked into `pdm.ko`, but hardware access remains behind
-HAL. Until the kernel HAL CAN/Serial backends are implemented, MCU init fails
-with `OSAL_ERR_NOT_SUPPORTED` from the HAL transport stub.
+HAL. `pdm.ko` depends on `hal.ko` and calls the HAL transport symbols exported
+by that module.

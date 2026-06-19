@@ -1,7 +1,7 @@
 /************************************************************************
  * HAL层 - I2C总线硬件抽象层API
  *
- * 提供统一的I2C总线访问接口（基于Linux /dev/i2c-*）
+ * 提供统一的I2C总线访问接口（面向Linux内核I2C后端）
  ************************************************************************/
 
 #ifndef HAL_I2C_H
@@ -26,7 +26,7 @@ typedef void *hal_i2c_handle_t;
  * @brief I2C配置结构
  */
 typedef struct {
-	const char *device; /* I2C设备路径，如 "/dev/i2c-0" */
+	const char *device; /* I2C控制器标识，如 "i2c-0" */
 	uint32_t timeout; /* 传输超时时间（ms） */
 } hal_i2c_config_t;
 
@@ -37,7 +37,7 @@ typedef struct {
 /**
  * @brief 打开I2C设备
  *
- * 打开指定的I2C总线设备文件。
+ * 打开指定的I2C内核后端。
  *
  * @param[in]  config  I2C配置参数
  * @param[out] handle  返回的I2C句柄
@@ -47,21 +47,21 @@ typedef struct {
  * @return OSAL_ERR_NO_DEVICE     设备不存在
  * @return OSAL_ERR_GENERIC       打开失败
  *
- * @note 线程安全：使用文件锁保护多进程并发访问
+ * @note 线程安全：实现内部使用内核同步原语保护并发访问
  */
 int32_t hal_i2c_open(const hal_i2c_config_t *config, hal_i2c_handle_t *handle);
 
 /**
  * @brief 关闭I2C设备
  *
- * 释放I2C资源，关闭设备文件。
+ * 释放I2C资源，关闭内核后端连接。
  *
  * @param[in] handle I2C句柄
  *
  * @return OSAL_SUCCESS           成功
  * @return OSAL_ERR_INVALID_PARAM 句柄无效
  *
- * @note 线程安全：使用文件锁保护多进程并发访问
+ * @note 线程安全：实现内部使用内核同步原语保护并发访问
  */
 int32_t hal_i2c_close(hal_i2c_handle_t handle);
 
@@ -81,7 +81,7 @@ int32_t hal_i2c_close(hal_i2c_handle_t handle);
  * @return OSAL_ERR_GENERIC       写入失败（如NACK）
  *
  * @note 使用配置的timeout作为超时时间
- * @note 线程安全：使用文件锁保护多进程并发访问
+ * @note 线程安全：实现内部使用内核同步原语保护并发访问
  */
 int32_t hal_i2c_write(hal_i2c_handle_t handle, uint16_t slave_addr,
 					  const uint8_t *buffer, uint32_t size);
@@ -102,7 +102,7 @@ int32_t hal_i2c_write(hal_i2c_handle_t handle, uint16_t slave_addr,
  * @return OSAL_ERR_GENERIC       读取失败（如NACK）
  *
  * @note 使用配置的timeout作为超时时间
- * @note 线程安全：使用文件锁保护多进程并发访问
+ * @note 线程安全：实现内部使用内核同步原语保护并发访问
  */
 int32_t hal_i2c_read(hal_i2c_handle_t handle, uint16_t slave_addr,
 					 uint8_t *buffer, uint32_t size);
@@ -123,7 +123,7 @@ int32_t hal_i2c_read(hal_i2c_handle_t handle, uint16_t slave_addr,
  * @return OSAL_ERR_GENERIC       写入失败
  *
  * @note 内部实现为组合传输：[START][ADDR+W][REG][DATA...][STOP]
- * @note 线程安全：使用文件锁保护多进程并发访问
+ * @note 线程安全：实现内部使用内核同步原语保护并发访问
  */
 int32_t hal_i2c_write_reg(hal_i2c_handle_t handle, uint16_t slave_addr,
 						  uint8_t reg_addr, const uint8_t *buffer,
@@ -146,7 +146,7 @@ int32_t hal_i2c_write_reg(hal_i2c_handle_t handle, uint16_t slave_addr,
  *
  * @note
  * 内部实现为组合传输：[START][ADDR+W][REG][RESTART][ADDR+R][DATA...][STOP]
- * @note 线程安全：使用文件锁保护多进程并发访问
+ * @note 线程安全：实现内部使用内核同步原语保护并发访问
  */
 int32_t hal_i2c_read_reg(hal_i2c_handle_t handle, uint16_t slave_addr,
 						 uint8_t reg_addr, uint8_t *buffer, uint32_t size);
@@ -164,8 +164,8 @@ int32_t hal_i2c_read_reg(hal_i2c_handle_t handle, uint16_t slave_addr,
  * @return OSAL_ERR_INVALID_PARAM 参数无效
  * @return OSAL_ERR_GENERIC       传输失败
  *
- * @note 使用Linux I2C_RDWR ioctl实现原子组合传输
- * @note 线程安全：使用文件锁保护多进程并发访问
+ * @note 使用Linux内核I2C传输接口实现组合传输
+ * @note 线程安全：实现内部使用内核同步原语保护并发访问
  */
 int32_t hal_i2c_transfer(hal_i2c_handle_t handle, hal_i2c_msg_t *msgs,
 						 uint32_t num);

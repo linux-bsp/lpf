@@ -4,6 +4,7 @@
 #include <linux/can/raw.h>
 #include <linux/if.h>
 #include <linux/jiffies.h>
+#include <linux/module.h>
 #include <linux/net.h>
 #include <linux/netdevice.h>
 #include <linux/sched.h>
@@ -25,7 +26,7 @@ typedef struct {
 	uint32_t rx_timeout;
 	uint32_t tx_timeout;
 	bool initialized;
-} hal_can_kernel_context_t;
+} hal_can_context_t;
 
 static int32_t hal_can_errno_to_status(int ret)
 {
@@ -49,7 +50,7 @@ static long hal_can_timeout_to_jiffies(uint32_t timeout_ms)
 	return msecs_to_jiffies(timeout_ms);
 }
 
-static int32_t hal_can_set_socket_timeouts(hal_can_kernel_context_t *ctx)
+static int32_t hal_can_set_socket_timeouts(hal_can_context_t *ctx)
 {
 	struct sock *sk;
 
@@ -63,7 +64,7 @@ static int32_t hal_can_set_socket_timeouts(hal_can_kernel_context_t *ctx)
 	return OSAL_SUCCESS;
 }
 
-static int32_t hal_can_bind_interface(hal_can_kernel_context_t *ctx)
+static int32_t hal_can_bind_interface(hal_can_context_t *ctx)
 {
 	struct net_device *dev;
 	struct sockaddr_can addr = { 0 };
@@ -93,7 +94,7 @@ static int32_t hal_can_bind_interface(hal_can_kernel_context_t *ctx)
 
 int32_t hal_can_init(const hal_can_config_t *config, hal_can_handle_t *handle)
 {
-	hal_can_kernel_context_t *ctx;
+	hal_can_context_t *ctx;
 	int ret;
 
 	if (!config || !handle)
@@ -157,10 +158,11 @@ err_free:
 	osal_free(ctx);
 	return ret;
 }
+EXPORT_SYMBOL_GPL(hal_can_init);
 
 int32_t hal_can_deinit(hal_can_handle_t handle)
 {
-	hal_can_kernel_context_t *ctx = handle;
+	hal_can_context_t *ctx = handle;
 	struct socket *sock;
 
 	if (!ctx)
@@ -183,10 +185,11 @@ int32_t hal_can_deinit(hal_can_handle_t handle)
 
 	return OSAL_SUCCESS;
 }
+EXPORT_SYMBOL_GPL(hal_can_deinit);
 
 int32_t hal_can_send(hal_can_handle_t handle, const hal_can_frame_t *frame)
 {
-	hal_can_kernel_context_t *ctx = handle;
+	hal_can_context_t *ctx = handle;
 	struct can_frame can_frame = { 0 };
 	struct msghdr msg = { 0 };
 	struct kvec iov;
@@ -226,11 +229,12 @@ int32_t hal_can_send(hal_can_handle_t handle, const hal_can_frame_t *frame)
 	LOG_ERROR("HAL_CAN", "send failed: %d", ret);
 	return hal_can_errno_to_status(ret);
 }
+EXPORT_SYMBOL_GPL(hal_can_send);
 
 int32_t hal_can_recv(hal_can_handle_t handle, hal_can_frame_t *frame,
 		     int32_t timeout)
 {
-	hal_can_kernel_context_t *ctx = handle;
+	hal_can_context_t *ctx = handle;
 	struct can_frame can_frame;
 	struct msghdr msg = { 0 };
 	struct kvec iov;
@@ -287,11 +291,12 @@ int32_t hal_can_recv(hal_can_handle_t handle, hal_can_frame_t *frame,
 
 	return hal_can_errno_to_status(ret);
 }
+EXPORT_SYMBOL_GPL(hal_can_recv);
 
 int32_t hal_can_set_filter(hal_can_handle_t handle, uint32_t filter_id,
 			   uint32_t filter_mask)
 {
-	hal_can_kernel_context_t *ctx = handle;
+	hal_can_context_t *ctx = handle;
 	struct can_filter filter;
 	int ret;
 
@@ -321,3 +326,4 @@ int32_t hal_can_set_filter(hal_can_handle_t handle, uint32_t filter_id,
 
 	return OSAL_SUCCESS;
 }
+EXPORT_SYMBOL_GPL(hal_can_set_filter);

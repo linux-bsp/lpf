@@ -5,8 +5,8 @@
 #ifndef HAL_UART_CONFIG_H
 #define HAL_UART_CONFIG_H
 
-/* UART设备 */
-#define HAL_UART_DEVICE "/dev/ttyS0"
+/* UART设备标识 */
+#define HAL_UART_DEVICE "ttyS0"
 
 /* UART波特率 */
 #define HAL_UART_BAUDRATE 0x1C200

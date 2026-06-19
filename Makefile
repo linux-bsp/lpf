@@ -69,7 +69,7 @@ MODULES_BUILD_DIR ?= _build/modules
 override MODULES_BUILD_DIR := $(patsubst %/,%,$(MODULES_BUILD_DIR))
 MODULES_SRC_DIR ?= $(srctree)/core/kernel
 MODULES_OUTPUT_DIR ?= $(MODULES_BUILD_DIR)
-MODULES_LIST ?= $(strip $(if $(CONFIG_OSAL),osal) $(if $(CONFIG_PDM),pdm))
+MODULES_LIST ?= $(strip $(if $(CONFIG_OSAL),osal) $(if $(CONFIG_HAL),hal) $(if $(CONFIG_PDM),pdm))
 MODULES_ARTIFACTS = $(addprefix $(MODULES_OUTPUT_DIR)/,$(addsuffix .ko,$(MODULES_LIST)))
 
 # Parallel build auto-detection
@@ -438,7 +438,7 @@ _modules_check_environment:
 		echo "ERROR: No kernel modules are enabled in the current configuration."; \
 		echo "==================================================================="; \
 		echo ""; \
-		echo "Enable CONFIG_OSAL and/or CONFIG_PDM before invoking make modules."; \
+		echo "Enable CONFIG_OSAL, CONFIG_HAL, and/or CONFIG_PDM before invoking make modules."; \
 		echo "For example, run make menuconfig or load a defconfig that enables"; \
 		echo "the kernel modules you want to build."; \
 		echo "==================================================================="; \
@@ -671,7 +671,7 @@ help:
 	@echo '  KERNEL_SRC=<dir> - Kernel build tree for modules target'
 	@echo '  MODULES_BUILD_DIR=<dir> - Output directory for module artifacts'
 	@echo '  MODULES_SRC_DIR=<dir> - Kernel module source directory'
-	@echo '  MODULES_LIST="<list>" - Expected modules (default: osal pdm)'
+	@echo '  MODULES_LIST="<list>" - Expected modules (default: osal hal pdm)'
 	@echo '  CMAKE_BUILD_TYPE=<type>'
 	@echo '                  - Set build type: Debug, Release, RelWithDebInfo, MinSizeRel'
 	@echo '  CMAKE_INSTALL_PREFIX=<path>'
@@ -691,7 +691,7 @@ help:
 	@echo ''
 	@echo 'Examples:'
 	@echo '  # Standard workflow'
-	@echo '  make tests_x86_full_defconfig'
+	@echo '  make kernel_x86_modules_defconfig'
 	@echo '  make -j$$(nproc)'
 	@echo '  make install DESTDIR=/tmp/staging'
 	@echo ''
@@ -703,7 +703,7 @@ help:
 	@echo '  make V=1'
 	@echo ''
 	@echo '  # Cross-compilation for Buildroot'
-	@echo '  make ctest_x86_minimal_defconfig'
+	@echo '  make kernel_x86_modules_defconfig'
 	@echo '  make CMAKE_TOOLCHAIN_FILE=$$BUILDROOT/host/share/buildroot/toolchainfile.cmake'
 	@echo '  make install DESTDIR=$$BUILDROOT/target'
 	@echo ''

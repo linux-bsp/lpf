@@ -1,7 +1,7 @@
 /************************************************************************
  * HAL层 - SPI总线硬件抽象层API
  *
- * 提供统一的SPI总线访问接口（基于Linux /dev/spidev*）
+ * 提供统一的SPI总线访问接口（面向Linux内核SPI后端）
  ************************************************************************/
 
 #ifndef HAL_SPI_H
@@ -26,7 +26,7 @@ typedef void *hal_spi_handle_t;
  * @brief SPI配置结构
  */
 typedef struct {
-	const char *device; /* SPI设备路径，如 "/dev/spidev0.0" */
+	const char *device; /* SPI控制器/片选标识，如 "spi0.0" */
 	uint8_t mode; /* SPI模式 (0-3)，参见spi_types.h */
 	uint8_t bits_per_word; /* 每字位数（通常为8） */
 	uint32_t max_speed_hz; /* 最大传输速率（Hz） */
@@ -50,21 +50,21 @@ typedef struct {
  * @return OSAL_ERR_NO_DEVICE     设备不存在
  * @return OSAL_ERR_GENERIC       打开失败
  *
- * @note 线程安全：使用文件锁保护多进程并发访问
+ * @note 线程安全：实现内部使用内核同步原语保护并发访问
  */
 int32_t hal_spi_open(const hal_spi_config_t *config, hal_spi_handle_t *handle);
 
 /**
  * @brief 关闭SPI设备
  *
- * 释放SPI资源，关闭设备文件。
+ * 释放SPI资源，关闭内核后端连接。
  *
  * @param[in] handle SPI句柄
  *
  * @return OSAL_SUCCESS           成功
  * @return OSAL_ERR_INVALID_PARAM 句柄无效
  *
- * @note 线程安全：使用文件锁保护多进程并发访问
+ * @note 线程安全：实现内部使用内核同步原语保护并发访问
  */
 int32_t hal_spi_close(hal_spi_handle_t handle);
 
@@ -82,7 +82,7 @@ int32_t hal_spi_close(hal_spi_handle_t handle);
  * @return OSAL_ERR_GENERIC       写入失败
  *
  * @note 使用配置的timeout作为超时时间
- * @note 线程安全：使用文件锁保护多进程并发访问
+ * @note 线程安全：实现内部使用内核同步原语保护并发访问
  */
 int32_t hal_spi_write(hal_spi_handle_t handle, const uint8_t *buffer,
 					  uint32_t size);
@@ -101,7 +101,7 @@ int32_t hal_spi_write(hal_spi_handle_t handle, const uint8_t *buffer,
  * @return OSAL_ERR_GENERIC       读取失败
  *
  * @note 使用配置的timeout作为超时时间
- * @note 线程安全：使用文件锁保护多进程并发访问
+ * @note 线程安全：实现内部使用内核同步原语保护并发访问
  */
 int32_t hal_spi_read(hal_spi_handle_t handle, uint8_t *buffer, uint32_t size);
 
@@ -121,7 +121,7 @@ int32_t hal_spi_read(hal_spi_handle_t handle, uint8_t *buffer, uint32_t size);
  *
  * @note tx_buffer和rx_buffer可以指向同一缓冲区（原地操作）
  * @note 使用配置的timeout作为超时时间
- * @note 线程安全：使用文件锁保护多进程并发访问
+ * @note 线程安全：实现内部使用内核同步原语保护并发访问
  */
 int32_t hal_spi_transfer(hal_spi_handle_t handle, const uint8_t *tx_buffer,
 						 uint8_t *rx_buffer, uint32_t size);
@@ -139,8 +139,8 @@ int32_t hal_spi_transfer(hal_spi_handle_t handle, const uint8_t *tx_buffer,
  * @return OSAL_ERR_INVALID_PARAM 参数无效
  * @return OSAL_ERR_GENERIC       传输失败
  *
- * @note 使用Linux SPI_IOC_MESSAGE(n) ioctl实现批量传输
- * @note 线程安全：使用文件锁保护多进程并发访问
+ * @note 使用Linux内核SPI传输接口实现批量传输
+ * @note 线程安全：实现内部使用内核同步原语保护并发访问
  */
 int32_t hal_spi_transfer_multi(hal_spi_handle_t handle,
 							   hal_spi_transfer_t *transfers, uint32_t num);
@@ -157,7 +157,7 @@ int32_t hal_spi_transfer_multi(hal_spi_handle_t handle,
  * @return OSAL_ERR_INVALID_PARAM 参数无效
  * @return OSAL_ERR_GENERIC       配置失败
  *
- * @note 线程安全：使用文件锁保护多进程并发访问
+ * @note 线程安全：实现内部使用内核同步原语保护并发访问
  */
 int32_t hal_spi_set_config(hal_spi_handle_t handle,
 						   const hal_spi_config_t *config);

@@ -58,7 +58,7 @@ typedef struct {
  *
  * 打开指定的串口设备并配置参数。
  *
- * @param[in]  device  设备路径（如 "/dev/ttyS0", "/dev/ttyUSB0"）
+ * @param[in]  device  内核后端设备标识（如 "ttyS0"）
  * @param[in]  config  串口配置参数
  * @param[out] handle  返回的串口句柄
  *
@@ -67,7 +67,7 @@ typedef struct {
  * @return OSAL_ERR_NO_DEVICE     设备不存在
  * @return OSAL_ERR_GENERIC       打开失败（如权限不足、设备忙）
  *
- * @note 线程安全：使用文件锁保护多进程并发访问
+ * @note 线程安全：实现内部使用内核同步原语保护并发访问
  */
 int32_t hal_serial_open(const char *device, const hal_serial_config_t *config,
 						hal_serial_handle_t *handle);
@@ -75,14 +75,14 @@ int32_t hal_serial_open(const char *device, const hal_serial_config_t *config,
 /**
  * @brief 关闭串口设备
  *
- * 释放串口资源，关闭设备文件。
+ * 释放串口资源，关闭内核后端连接。
  *
  * @param[in] handle 串口句柄
  *
  * @return OSAL_SUCCESS           成功
  * @return OSAL_ERR_INVALID_PARAM 句柄无效
  *
- * @note 线程安全：使用文件锁保护多进程并发访问
+ * @note 线程安全：实现内部使用内核同步原语保护并发访问
  */
 int32_t hal_serial_close(hal_serial_handle_t handle);
 
@@ -105,7 +105,7 @@ int32_t hal_serial_close(hal_serial_handle_t handle);
  * @return OSAL_ERR_GENERIC       写入失败
  *
  * @note 返回值可能小于size（部分写入），需要检查返回值
- * @note 线程安全：使用文件锁保护多进程并发访问
+ * @note 线程安全：实现内部使用内核同步原语保护并发访问
  */
 int32_t hal_serial_write(hal_serial_handle_t handle, const void *buffer,
 						 uint32_t size, int32_t timeout);
@@ -129,7 +129,7 @@ int32_t hal_serial_write(hal_serial_handle_t handle, const void *buffer,
  * @return OSAL_ERR_GENERIC       读取失败
  *
  * @note 返回值可能小于size（部分读取），需要检查返回值
- * @note 线程安全：使用文件锁保护多进程并发访问
+ * @note 线程安全：实现内部使用内核同步原语保护并发访问
  */
 int32_t hal_serial_read(hal_serial_handle_t handle, void *buffer, uint32_t size,
 						int32_t timeout);
@@ -145,7 +145,7 @@ int32_t hal_serial_read(hal_serial_handle_t handle, void *buffer, uint32_t size,
  * @return OSAL_ERR_INVALID_PARAM 句柄无效
  * @return OSAL_ERR_GENERIC       刷新失败
  *
- * @note 线程安全：使用文件锁保护多进程并发访问
+ * @note 线程安全：实现内部使用内核同步原语保护并发访问
  */
 int32_t hal_serial_flush(hal_serial_handle_t handle);
 
@@ -161,7 +161,7 @@ int32_t hal_serial_flush(hal_serial_handle_t handle);
  * @return OSAL_ERR_INVALID_PARAM 参数无效
  * @return OSAL_ERR_GENERIC       配置失败
  *
- * @note 线程安全：使用文件锁保护多进程并发访问
+ * @note 线程安全：实现内部使用内核同步原语保护并发访问
  */
 int32_t hal_serial_set_config(hal_serial_handle_t handle,
 							  const hal_serial_config_t *config);

@@ -11,5 +11,4 @@ pdm-$(CONFIG_PDM_PROTOCOL) += pdm/src/protocol/pdm_protocol_device.o
 pdm-$(CONFIG_PDM_MCU_SUPPORT) += pdm/src/pdm_mcu/pdm_mcu.o
 pdm-$(CONFIG_PDM_MCU_SUPPORT) += pdm/src/pdm_mcu/pdm_mcu_can.o
 pdm-$(CONFIG_PDM_MCU_SUPPORT) += pdm/src/pdm_mcu/pdm_mcu_serial.o
-pdm-$(CONFIG_PDM_MCU_SUPPORT) += $(ESMW_HAL_OBJS)
 endif
