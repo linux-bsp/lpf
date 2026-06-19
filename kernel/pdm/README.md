@@ -89,10 +89,19 @@ Each PDM peripheral exposes
 its own character device, such as `/dev/pdm_mcu`, and each PDI peripheral API
 uses the matching UAPI ioctl header, such as `pdi_mcu.h`.
 
-Procfs is reserved for read-only debug and observability data. Current nodes:
+Procfs is reserved for debug and observability data. Current nodes:
 
 - `/proc/pdm/mcu`
 - `/proc/pdm/led`
+
+Each node supports readback plus simple write commands for kernel-side
+functional checks. Write commands return standard errno values and log command
+results through the kernel log. For example:
+
+- `echo "status 0" > /proc/pdm/mcu`
+- `echo "cmd 0 0x10 0x01 0x02" > /proc/pdm/mcu`
+- `echo "set 0 128" > /proc/pdm/led`
+- `echo "enable 0" > /proc/pdm/led`
 
 MCU transport APIs are linked into `pdm.ko`, but hardware access remains behind
 HAL. `pdm.ko` depends on `hal.ko` and calls the HAL transport symbols exported
