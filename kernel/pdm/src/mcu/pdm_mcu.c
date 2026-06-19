@@ -14,7 +14,7 @@
 #include "pdm_internal.h"
 #include "pdm_protocol.h"
 #include "pdm_mcu_internal.h"
-#include "base/pdm_proc.h"
+#include "pdm_proc.h"
 
 /*===========================================================================
  * MCU上下文

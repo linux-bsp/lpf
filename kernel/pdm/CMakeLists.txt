@@ -4,6 +4,7 @@ list(APPEND ADD_INCLUDE "${SDK_PATH}/kernel/include")
 list(APPEND ADD_INCLUDE "${SDK_PATH}/kernel/include/pdm")
 
 # 私有头文件目录（仅内部使用）
+list(APPEND ADD_PRIVATE_INCLUDE "include")
 list(APPEND ADD_PRIVATE_INCLUDE "src")
 list(APPEND ADD_PRIVATE_INCLUDE "src/protocol")
 ###############################################

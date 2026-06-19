@@ -6,7 +6,7 @@
 #include "pdm.h"
 #include "pdm_internal.h"
 #include "pdm_led_internal.h"
-#include "base/pdm_proc.h"
+#include "pdm_proc.h"
 
 typedef struct {
 	const pconfig_led_config_t *config;

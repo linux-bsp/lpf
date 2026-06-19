@@ -6,7 +6,7 @@
 
 #include "pdi/pdi_mcu.h"
 #include "pdm.h"
-#include "base/pdm_chrdev.h"
+#include "pdm_chrdev.h"
 #include "pdm_mcu_internal.h"
 
 static pdm_chrdev_t g_pdm_mcu_chrdev;

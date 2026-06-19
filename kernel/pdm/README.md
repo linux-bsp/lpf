@@ -36,6 +36,12 @@ CONFIG_PDM_PROTOCOL_MCU=y
 kernel/pdm/
 ├── Config.in
 ├── CMakeLists.txt
+├── include/
+│   ├── pdm_chrdev.h
+│   ├── pdm_driver.h
+│   ├── pdm_internal.h
+│   ├── pdm_proc.h
+│   └── pdm_status.h
 └── src/
     ├── base/
     │   ├── pdm_chrdev.c

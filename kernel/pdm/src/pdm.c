@@ -6,8 +6,8 @@
 #include "osal.h"
 #include "pdm/pdm.h"
 #include "pconfig/pconfig.h"
-#include "base/pdm_driver.h"
-#include "base/pdm_status.h"
+#include "pdm_driver.h"
+#include "pdm_status.h"
 #include "generated/gen_version.h"
 
 static int pdm_probe_devices(void)

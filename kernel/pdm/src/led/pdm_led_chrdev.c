@@ -6,7 +6,7 @@
 
 #include "pdi/pdi_led.h"
 #include "pdm.h"
-#include "base/pdm_chrdev.h"
+#include "pdm_chrdev.h"
 #include "pdm_led_internal.h"
 
 static pdm_chrdev_t g_pdm_led_chrdev;
