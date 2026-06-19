@@ -100,4 +100,6 @@ LPF/
 
 - `docs/ARCHITECTURE.md`: current module architecture and extension flow.
 - `docs/KERNEL_USER_SPLIT.md`: kernel/userspace boundary and include rules.
+- `docs/LPF_LONG_TERM_OPTIMIZATION_PLAN.md`: long-term optimization plan for
+  multi-kernel and multi-SoC deployments.
 - `docs/PDI_UAPI_ABI.md`: PDI ioctl ABI rules for new peripherals.

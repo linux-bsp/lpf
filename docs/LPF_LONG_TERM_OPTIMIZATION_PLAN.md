@@ -1,0 +1,398 @@
+# LPF Long-Term Optimization Plan
+
+## Purpose
+
+LPF is intended to provide one stable framework codebase for different Linux
+kernel versions, different SoC families, and different product platforms. The
+long-term direction is not to fully depend on the Linux native device model as
+the framework center. Instead, LPF should keep a stable upper-layer peripheral
+business model and absorb kernel, SoC, and vendor BSP differences in lower
+adapter layers.
+
+The target positioning is:
+
+```text
+LPF is a Linux peripheral business abstraction framework for multi-kernel,
+multi-SoC, and multi-product deployments.
+```
+
+## Design Principles
+
+- Keep upper layers stable and move kernel or SoC differences downward.
+- Keep an LPF-owned device and peripheral model as the framework center.
+- Use the Linux device model, sysfs, debugfs, and device nodes as integration
+  outputs, not as the only internal architecture.
+- Keep external product logic outside the shared framework.
+- Keep peripheral business behavior in LPF peripheral services.
+- Keep configuration source replaceable.
+- Test backend consistency across kernel versions and SoC adapters.
+
+## Target Architecture
+
+```text
+Application / Product
+        ↓
+PDI - userspace SDK
+        ↓
+LPF UAPI / ioctl
+        ↓
+LPF Peripheral Service Layer
+        ↓
+LPF Core
+        ↓
+LPF Transport Layer
+        ↓
+LPF HAL
+        ↓
+Kernel Compat Layer
+        ↓
+SoC Adapter Layer
+        ↓
+Linux Kernel / Vendor BSP / Hardware
+```
+
+## Phase 1: Architecture Baseline
+
+Goal: lock down the framework concepts before larger code movement.
+
+Work items:
+
+- Define final responsibilities for OSAL, HAL, PCONFIG, PDM, PDI, and UAPI.
+- Reframe PDM as the LPF Peripheral Service Layer.
+- Reframe the current PDM bus as the future LPF Core.
+- Document allowed dependencies and forbidden dependencies for each layer.
+- Document the target directory layout.
+
+Deliverables:
+
+- `docs/LPF_TARGET_ARCHITECTURE.md`
+- `docs/LPF_MODULE_BOUNDARIES.md`
+- `docs/LPF_REFACTOR_ROADMAP.md`
+
+Acceptance criteria:
+
+- Every module has a clear owner and boundary.
+- New code placement can be decided from the documentation.
+- Kernel version logic, SoC logic, and peripheral business logic have separate
+  target layers.
+
+## Phase 2: LPF Core
+
+Goal: upgrade the current PDM bus idea into the formal LPF device management
+core.
+
+Work items:
+
+- Add `kernel/lpf/core/`.
+- Define `lpf_device`.
+- Define `lpf_driver`.
+- Define `lpf_device_id`.
+- Define `lpf_capability`.
+- Define lifecycle state and event handling.
+- Support device registration, driver registration, probe, remove, and state
+  management.
+- Keep internal indexes where useful, but add stable names such as `mcu0` and
+  `led0`.
+- Add capability query support for userspace discovery.
+
+Deliverables:
+
+- `lpf_core.ko`
+- `kernel/include/lpf/lpf_core.h`
+- `kernel/include/lpf/lpf_device.h`
+- `kernel/include/lpf/lpf_driver.h`
+
+Acceptance criteria:
+
+- MCU and LED can both register as LPF devices through LPF Core.
+- Global arrays are no longer the primary device model.
+- Device lifecycle has one consistent framework entry.
+
+## Phase 3: Kernel Compat Layer
+
+Goal: isolate Linux kernel API differences behind explicit compatibility
+wrappers.
+
+Work items:
+
+- Add `kernel/lpf/compat/`.
+- Add feature detection for supported kernel versions.
+- Wrap GPIO API differences.
+- Wrap PWM API differences.
+- Wrap TTY and serdev differences.
+- Wrap procfs, debugfs, and sysfs API differences.
+- Wrap common time, mutex, atomic, workqueue, and usercopy differences where
+  needed.
+- Forbid peripheral business code from using `LINUX_VERSION_CODE` directly.
+
+Deliverables:
+
+- `lpf_compat_gpio.h`
+- `lpf_compat_pwm.h`
+- `lpf_compat_tty.h`
+- `lpf_compat_time.h`
+- A compatibility policy document.
+
+Acceptance criteria:
+
+- Peripheral service code contains no direct kernel-version branching.
+- Selected target kernels compile through the compat layer. Suggested initial
+  targets: 4.19, 5.10, and 6.1.
+
+## Phase 4: SoC Adapter Layer
+
+Goal: isolate SoC and vendor BSP differences behind adapter implementations.
+
+Work items:
+
+- Add `kernel/lpf/soc/`.
+- Define SoC adapter interfaces for GPIO, PWM, I2C, SPI, CAN, UART, and other
+  required hardware capabilities.
+- Provide a generic Linux adapter using standard kernel APIs.
+- Add SoC-specific adapters only under the SoC layer.
+- Prevent vendor BSP calls from entering HAL or peripheral business code.
+
+Deliverables:
+
+- `kernel/include/lpf/lpf_soc_adapter.h`
+- `kernel/lpf/soc/generic_linux/`
+- Future adapter directories such as `soc/am62x/`, `soc/imx8/`, or
+  `soc/rk3568/`.
+
+Acceptance criteria:
+
+- The same LED or MCU business code can compile against different SoC adapters.
+- SoC-specific code is limited to adapter implementations.
+
+## Phase 5: HAL Layering
+
+Goal: keep HAL as LPF's stable hardware abstraction API while moving kernel and
+SoC differences below it.
+
+Work items:
+
+- Keep HAL APIs focused on LPF business needs rather than one-to-one Linux API
+  wrappers.
+- Make HAL call the kernel compat layer and SoC adapter layer internally.
+- Split HAL by capability:
+  - `lpf_hal_gpio`
+  - `lpf_hal_pwm`
+  - `lpf_hal_transport_can`
+  - `lpf_hal_transport_uart`
+  - `lpf_hal_bus_i2c`
+  - `lpf_hal_bus_spi`
+- Remove hard-coded global limits where possible.
+- Add mock HAL backends for tests.
+
+Deliverables:
+
+- HAL API reference.
+- HAL backend selection mechanism.
+- HAL mock backend.
+
+Acceptance criteria:
+
+- Peripheral business code depends only on HAL APIs.
+- HAL behavior stays consistent across supported kernel and SoC backends.
+
+## Phase 6: PCONFIG Multi-Backend Model
+
+Goal: evolve PCONFIG from a compile-time product table into a configuration
+aggregation layer.
+
+Work items:
+
+- Keep the static table backend for product builds.
+- Add a backend abstraction.
+- Add a Device Tree backend.
+- Add a module parameter backend where useful.
+- Add a userspace-loaded configuration backend if runtime configuration is
+  required.
+- Add a board profile backend for product-line selection.
+- Make all backends produce the same `lpf_device_config` model.
+- Move per-device validation into per-device validators.
+
+Deliverables:
+
+- `pconfig_backend_ops`
+- `pconfig_static_backend`
+- `pconfig_dt_backend`
+- `pconfig_validator`
+
+Acceptance criteria:
+
+- The same MCU or LED device can be created from static table or Device Tree.
+- LPF Core and peripheral services do not care where configuration came from.
+
+## Phase 7: Peripheral Service Layer
+
+Goal: make MCU, LED, and future peripherals reusable service implementations
+instead of product-specific drivers.
+
+Work items:
+
+- Move current MCU and LED implementations toward:
+  - `kernel/lpf/peripheral/mcu/`
+  - `kernel/lpf/peripheral/led/`
+- For every peripheral type, define:
+  - probe and remove
+  - capability reporting
+  - state machine
+  - error handling and recovery
+  - debug dump
+  - userspace operation dispatch
+- Move MCU transport into a separate abstraction:
+  - CAN transport
+  - UART transport
+  - future I2C or SPI transport if needed
+
+Deliverables:
+
+- `lpf_mcu.ko`
+- `lpf_led.ko`
+- `lpf_transport_can.ko`
+- `lpf_transport_uart.ko`
+
+Acceptance criteria:
+
+- MCU and LED services do not directly depend on SoC-specific APIs.
+- MCU transport can be replaced without changing MCU business logic.
+- Peripheral state, error, and recovery behavior are consistent.
+
+## Phase 8: UAPI And PDI Separation
+
+Goal: decouple stable ABI headers from userspace SDK APIs.
+
+Work items:
+
+- Keep UAPI headers ABI-only.
+- Move userspace SDK declarations out of UAPI headers.
+- Use this target layout:
+
+```text
+uapi/lpf/lpf_mcu.h
+uapi/lpf/lpf_led.h
+user/pdi/include/pdi/mcu.h
+user/pdi/include/pdi/led.h
+user/pdi/src/mcu.c
+user/pdi/src/led.c
+```
+
+- Add device discovery APIs:
+  - `pdi_list_devices`
+  - `pdi_open_by_name`
+  - `pdi_get_capability`
+- Standardize error mapping in PDI.
+
+Deliverables:
+
+- New UAPI directory layout.
+- New PDI SDK headers.
+- Updated ABI rules document.
+
+Acceptance criteria:
+
+- UAPI headers contain only ioctl constants, fixed-layout structures, and ABI
+  constants.
+- PDI hides ioctl details from application code.
+- Applications can open devices by stable name or capability.
+
+## Phase 9: Device Nodes And Observability
+
+Goal: provide maintainable runtime access and debug visibility.
+
+Work items:
+
+- Introduce a unified LPF character-device layer.
+- Keep aggregated nodes only if they are useful as management nodes.
+- Move toward instance-aware nodes such as:
+
+```text
+/dev/lpf/mcu0
+/dev/lpf/led0
+```
+
+- Move debug-only operations from procfs to debugfs.
+- Add sysfs read-only attributes for:
+  - name
+  - type
+  - state
+  - capability
+  - backend
+  - SoC
+  - error count
+
+Deliverables:
+
+- `lpf_chrdev`
+- `lpf_debugfs`
+- `lpf_sysfs`
+
+Acceptance criteria:
+
+- Every peripheral instance can be inspected independently.
+- Device permissions can be controlled by userspace policy such as udev.
+- Debug interfaces are separate from stable user ABI.
+
+## Phase 10: Test And Validation System
+
+Goal: prove that LPF behaves consistently across kernel versions, SoC adapters,
+and configuration backends.
+
+Work items:
+
+- Add a new test layout:
+
+```text
+tests/kernel/
+tests/user/
+tests/mock/
+tests/integration/
+```
+
+- Add mock HAL backend.
+- Add dummy peripheral service.
+- Add mock MCU transport.
+- Add PDI userspace tests.
+- Add ABI layout checks.
+- Add matrix builds for supported kernel versions.
+
+Acceptance criteria:
+
+- Static config backend is tested.
+- Mock SoC adapter is tested.
+- MCU mock transport is tested.
+- LED mock HAL path is tested.
+- PDI open, operation, and close paths are tested.
+- ABI structure layout changes are detected.
+
+## Recommended Implementation Order
+
+1. Write the target architecture and module boundary documents.
+2. Introduce LPF Core.
+3. Add the kernel compat layer.
+4. Add the SoC adapter layer.
+5. Refactor HAL on top of compat and adapter layers.
+6. Refactor PCONFIG into a multi-backend configuration system.
+7. Migrate LED first as the simplest complete peripheral.
+8. Migrate MCU and split transport handling.
+9. Split UAPI and PDI.
+10. Add debugfs, sysfs, and test coverage.
+
+LED should be migrated before MCU because it is simpler and can validate the
+new model with less protocol and transport complexity. MCU should follow after
+the transport abstraction is in place.
+
+## Final Acceptance Criteria
+
+- One peripheral business codebase compiles across supported kernel versions.
+- One peripheral business codebase works across supported SoC backends.
+- Peripheral business code does not directly depend on Linux kernel API
+  details.
+- Kernel version differences are isolated in the compat layer.
+- SoC and vendor BSP differences are isolated in the adapter layer.
+- Configuration source is replaceable.
+- UAPI and PDI SDK are separated.
+- LPF has a unified device model, lifecycle model, state model, and debug
+  entry.
+- MCU and LED both complete the new architecture path.
