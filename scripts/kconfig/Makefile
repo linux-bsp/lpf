@@ -94,8 +94,13 @@ ifneq ($(wildcard $(srctree)/arch/$(SRCARCH)/configs/$(KBUILD_DEFCONFIG)),)
 	@$(kecho) "*** Default configuration is based on '$(KBUILD_DEFCONFIG)'"
 	$(Q)$< $(silent) --defconfig=arch/$(SRCARCH)/configs/$(KBUILD_DEFCONFIG) $(Kconfig)
 else
+ifeq ($(KBUILD_DEFCONFIG),defconfig)
+	@$(kecho) "*** Default configuration is based on Kconfig defaults"
+	$(Q)$< $(silent) --alldefconfig $(Kconfig)
+else
 	@$(kecho) "*** Default configuration is based on target '$(KBUILD_DEFCONFIG)'"
 	$(Q)$(MAKE) -f $(srctree)/Makefile $(KBUILD_DEFCONFIG)
+endif
 endif
 
 %_defconfig: $(obj)/conf
