@@ -16,6 +16,7 @@ menuconfig PCONFIG
 	  Key features:
 	  - Platform-specific hardware descriptions
 	  - Backend-based configuration loading
+	  - Device Tree backend for SoC/product board descriptions
 	  - Built-in static product tables
 	  - Normalized peripheral configuration list
 	  - Query-only platform configuration API for consumers

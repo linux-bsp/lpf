@@ -263,9 +263,13 @@ Current status:
 - `pconfig_load()`, `pconfig_get_board()`, `pconfig_find()`, and
   `pconfig_list()` now route through the selected backend instead of directly
   reading `g_pconfig_platform_table`.
-- Remaining work: add Device Tree, board-profile, and module-parameter
-  backends; then move backend priority/selection policy out of the hard-coded
-  backend list.
+- Backend selection now supports `backend=auto`, `backend=dt`, and
+  `backend=static`. `auto` tries Device Tree first and falls back to the static
+  table.
+- Started the Device Tree backend. It parses LPF root identity, MCU CAN/Serial,
+  and LED GPIO/PWM entries into the same normalized PCONFIG model.
+- Remaining work: add a documented DTS binding/schema, board-profile backend,
+  product-selection policy, and broader peripheral coverage.
 
 ## Phase 7: Peripheral Service Layer
 

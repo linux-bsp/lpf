@@ -96,10 +96,12 @@ APIs directly.
 
 PCONFIG owns kernel-side platform hardware configuration aggregation. It selects
 a backend, validates the active platform, and exposes enabled device entries in
-one normalized list. The current backend is the built-in static product table;
-future Device Tree, board-profile, or product-selection backends should produce
-the same `pconfig_platform_config_t` and `pconfig_device_config_t` model before
-PDM sees the data.
+one normalized list. Backend selection is controlled by the `backend` module
+parameter: `auto` tries Device Tree first and falls back to the built-in static
+table, while `dt` and `static` require a specific backend. Future
+board-profile or product-selection backends should produce the same
+`pconfig_platform_config_t` and `pconfig_device_config_t` model before PDM sees
+the data.
 
 ### PDM
 

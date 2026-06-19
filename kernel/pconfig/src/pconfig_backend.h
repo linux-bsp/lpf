@@ -20,6 +20,7 @@ typedef struct {
 
 const pconfig_backend_ops_t *pconfig_backend_select(void);
 
+extern const pconfig_backend_ops_t g_pconfig_dt_backend;
 extern const pconfig_backend_ops_t g_pconfig_static_backend;
 
 #endif /* PCONFIG_BACKEND_H */

@@ -17,6 +17,7 @@ endif()
 list(APPEND ADD_SRCS
     "src/pconfig_api.c"
     "src/pconfig_backend.c"
+    "src/pconfig_dt_backend.c"
     "src/pconfig_static_backend.c"
     "src/pconfig_validator.c"
     "configs/pconfig_configs.c"
@@ -30,7 +31,8 @@ endif()
 ###############################################
 
 ###### Add required/dependent components ######
-# PCONFIG 定义硬件配置类型并提供只读查询，业务驱动层依赖它。
+# PCONFIG 定义硬件配置类型、后端选择和只读查询，业务驱动层依赖它。
+# Device Tree backend 在无 CONFIG_OF 的内核上自动不可用，auto 策略回退 static。
 # 依赖关系保持单向：PDM/产品代码 -> PCONFIG -> OSAL。
 
 # OSAL 是必须的（Kconfig: depends on OSAL）

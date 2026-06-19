@@ -4,6 +4,7 @@ ifeq ($(CONFIG_PCONFIG),y)
 obj-m += pconfig.o
 pconfig-y := pconfig/src/pconfig_api.o
 pconfig-y += pconfig/src/pconfig_backend.o
+pconfig-y += pconfig/src/pconfig_dt_backend.o
 pconfig-y += pconfig/src/pconfig_static_backend.o
 pconfig-y += pconfig/src/pconfig_validator.o
 pconfig-y += pconfig/configs/pconfig_configs.o
