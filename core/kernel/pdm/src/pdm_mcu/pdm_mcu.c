@@ -283,6 +283,10 @@ int32_t pdm_mcu_get_version(pdm_mcu_handle_t handle, pdm_mcu_version_t *version)
 		version->major = response[0];
 		version->minor = response[1];
 		version->patch = response[2];
+		version->build = (cmd.response_len >= 4) ? response[3] : 0;
+		scnprintf(version->version_string, sizeof(version->version_string),
+			  "%u.%u.%u.%u", version->major, version->minor,
+			  version->patch, version->build);
 	} else {
 		return OSAL_ERR_GENERIC;
 	}
@@ -312,17 +316,26 @@ int32_t pdm_mcu_get_status(pdm_mcu_handle_t handle, pdm_mcu_status_t *status)
 		return ret;
 	}
 
+	osal_memset(status, 0, sizeof(*status));
+
 	/* 解析状态信息 */
 	if (cmd.response_len >= 1) {
 		status->state = response[0];
-		status->error_code =
-			(cmd.response_len >= 5) ?
-				((uint32_t)response[1] << 24 | (uint32_t)response[2] << 16 |
-				 (uint32_t)response[3] << 8 | response[4]) :
-				0;
+		status->online = (status->state != PDM_MCU_STATE_OFFLINE);
 	} else {
 		return OSAL_ERR_GENERIC;
 	}
+
+	if (cmd.response_len >= 2) {
+		status->error_code = response[1];
+	}
+
+	if (cmd.response_len >= 4) {
+		status->uptime_sec =
+			((uint32_t)response[2] << 8) | (uint32_t)response[3];
+	}
+
+	status->timestamp_us = osal_get_monotonic_time();
 
 	return OSAL_SUCCESS;
 }

@@ -57,7 +57,7 @@ typedef struct {
 	pdm_mcu_state_t state; /* 设备状态 */
 	uint32_t uptime_sec; /* 运行时间 */
 	uint8_t error_code; /* 错误码 */
-	float temperature; /* 温度 */
+	int32_t temperature_milli_celsius; /* 温度（毫摄氏度） */
 	uint16_t voltage_mv; /* 电压（mV） */
 	uint64_t timestamp_us; /* 数据采集时间戳（微秒） */
 } pdm_mcu_status_t;

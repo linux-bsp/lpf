@@ -23,6 +23,7 @@ endif()
 if(CONFIG_PDM_MCU_SUPPORT)
     list(APPEND PDM_SRCS
         "src/pdm_mcu/pdm_mcu.c"
+        "src/pdm_mcu/pdm_mcu_chrdev.c"
         "src/pdm_mcu/pdm_mcu_can.c"
         "src/pdm_mcu/pdm_mcu_serial.c"
     )
