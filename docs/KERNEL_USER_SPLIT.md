@@ -1,6 +1,8 @@
 # Kernel And Userspace Split
 
-The Linux-only direction separates kernel modules from userspace API libraries.
+LPF is Linux-only in its current direction. It separates kernel modules from
+userspace API libraries so hardware access, ioctl ABI definitions, and
+application-facing APIs remain in the right layer.
 
 ## Target Layout
 
@@ -41,6 +43,38 @@ uapi/
   by PDM. It builds as `pconfig.ko`.
 - `user/pdi` provides the application-facing C API and wraps open/ioctl.
 - `uapi/pdi` is the stable ABI shared by `kernel/pdm` and `user/pdi`.
+
+## Boundary Rules
+
+- Kernel code may include `kernel/include/<module>/` and generated headers.
+- Userspace code may include `user/<module>/include/` and `uapi/` headers.
+- Userspace code must not include kernel-internal HAL, PCONFIG, or PDM headers.
+- UAPI headers must not depend on kernel-only types or private framework
+  structures.
+- PDI should marshal data and call ioctl; it should not duplicate PDM or HAL
+  behavior in userspace.
+- Product code should call PDI and ACONFIG rather than reaching into kernel
+  framework internals.
+
+## Device Access Flow
+
+```text
+Application
+    ↓
+PDI userspace API
+    ↓
+/dev/pdm_<peripheral> ioctl
+    ↓
+PDM kernel driver
+    ↓
+PCONFIG + HAL
+    ↓
+Linux kernel subsystem / hardware
+```
+
+Each userspace-visible peripheral should have a matching UAPI header and PDI
+wrapper. For example, MCU uses `/dev/pdm_mcu`, `uapi/pdi/pdi_mcu.h`, and
+`user/pdi/src/pdi_mcu.c`.
 
 The previous userspace test framework was removed with the old ctest product.
 New tests should be added under a new test layout with explicit Kconfig/CMake

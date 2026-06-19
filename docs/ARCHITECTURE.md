@@ -1,8 +1,14 @@
 # LPF Architecture
 
-LPF (Linux Peripheral Framework) separates kernel
-modules from userspace API libraries while keeping Kconfig-driven feature
-selection and CMake-driven source builds.
+LPF (Linux Peripheral Framework) separates kernel modules from userspace API
+libraries while keeping Kconfig-driven feature selection and CMake-driven source
+builds. Its main job is to provide a reusable Linux peripheral access stack:
+platform configuration, kernel hardware access, peripheral drivers, stable UAPI
+headers, and userspace API wrappers.
+
+LPF is intentionally narrower than a general Linux software framework. Product
+logic, service lifecycle, deployment policy, and application behavior stay
+outside the shared framework layers.
 
 ## Layer Order
 
@@ -37,6 +43,49 @@ Linux kernel / hardware
 - PDI provides userspace APIs over the PDM ioctl ABI.
 - ACONFIG stores userspace application-facing configuration mappings.
 
+## Layer Responsibilities
+
+### OSAL
+
+OSAL hides Linux kernel or libc/POSIX API differences from framework code. The
+kernel and userspace implementations are separate, but public names should match
+where the semantics are equivalent.
+
+### HAL
+
+HAL owns Linux hardware subsystem access in kernel mode. Current HAL support
+includes CAN, serial, GPIO, PWM, I2C, and SPI. PDM calls exported HAL symbols;
+userspace does not include or call HAL directly.
+
+### PCONFIG
+
+PCONFIG owns kernel-side platform hardware configuration tables. PDM queries
+typed PCONFIG accessors during probe and binding. Product hardware tables live
+outside core logic and are compiled into the selected configuration.
+
+### PDM
+
+PDM owns kernel-side peripheral devices, driver registration, configured-device
+binding, ioctl dispatch, procfs debug nodes, and protocol helpers. Concrete
+peripheral drivers such as MCU and LED live under PDM.
+
+### UAPI
+
+UAPI headers define the stable ioctl ABI shared between PDM and PDI. They must
+remain valid for both kernel and userspace compilation and should avoid
+kernel-internal types.
+
+### PDI
+
+PDI is the userspace C API layer. It opens the matching `/dev/pdm_*` node,
+marshals requests through UAPI ioctls, and hides ioctl details from
+applications.
+
+### ACONFIG
+
+ACONFIG provides application-facing configuration mapping. It is separate from
+PCONFIG so application function metadata does not leak into hardware tables.
+
 ## Current Peripheral Scope
 
 The current framework keeps one concrete peripheral/device family:
@@ -52,6 +101,14 @@ The current framework keeps one concrete peripheral/device family:
 Other peripheral families can be added later by introducing matching PCONFIG
 types, PDM protocol definitions, PDM kernel implementation, PDI userspace API
 coverage, UAPI definitions when needed, and Kconfig entries.
+
+## Build And Runtime Boundaries
+
+- Userspace libraries are built by CMake from `user/`.
+- Linux kernel modules are built by Kbuild from `kernel/`.
+- Shared ABI headers live in `uapi/`.
+- Generated configuration and version headers are produced under `include/`.
+- Build outputs are written under `_build/`.
 
 ## Kernel Module Load Order
 
@@ -83,6 +140,10 @@ Add the following pieces together:
 Feature selection stays at object/list registration boundaries. Kconfig may
 select which objects are linked, but business logic should not branch on
 feature macros.
+
+Keep kernel/userspace changes aligned. A peripheral exposed to userspace should
+add or update PCONFIG, PDM, UAPI, PDI, and Kconfig coverage together so the ABI
+and build configuration remain consistent.
 
 ## Dependency Rules
 
