@@ -3,7 +3,6 @@
 #include <linux/compat.h>
 #include <linux/fs.h>
 #include <linux/module.h>
-#include <linux/uaccess.h>
 
 #include "pdi/pdi_led.h"
 #include "pdm.h"
@@ -34,11 +33,13 @@ static pdm_led_handle_t pdm_led_open_index(u32 index)
 static long pdm_led_ioctl_get_info(unsigned long arg)
 {
 	struct pdi_led_info info;
+	int32_t ret;
 
 	pdm_led_fill_info(&info);
 
-	if (copy_to_user((void __user *)arg, &info, sizeof(info)))
-		return -EFAULT;
+	ret = osal_copy_to_user((void __user *)arg, &info, sizeof(info));
+	if (ret != OSAL_SUCCESS)
+		return pdm_status_to_errno(ret);
 
 	return 0;
 }
@@ -50,8 +51,10 @@ static long pdm_led_ioctl_get_state(unsigned long arg)
 	pdm_led_handle_t handle;
 	int32_t ret;
 
-	if (copy_from_user(&request, (void __user *)arg, sizeof(request)))
-		return -EFAULT;
+	ret = osal_copy_from_user(&request, (void __user *)arg,
+				  sizeof(request));
+	if (ret != OSAL_SUCCESS)
+		return pdm_status_to_errno(ret);
 
 	handle = pdm_led_open_index(request.index);
 	if (!handle)
@@ -65,8 +68,10 @@ static long pdm_led_ioctl_get_state(unsigned long arg)
 	request.max_brightness = state.max_brightness;
 	request.enabled = state.enabled ? 1U : 0U;
 
-	if (copy_to_user((void __user *)arg, &request, sizeof(request)))
-		return -EFAULT;
+	ret = osal_copy_to_user((void __user *)arg, &request,
+				sizeof(request));
+	if (ret != OSAL_SUCCESS)
+		return pdm_status_to_errno(ret);
 
 	return 0;
 }
@@ -77,8 +82,10 @@ static long pdm_led_ioctl_set_brightness(unsigned long arg)
 	pdm_led_handle_t handle;
 	int32_t ret;
 
-	if (copy_from_user(&request, (void __user *)arg, sizeof(request)))
-		return -EFAULT;
+	ret = osal_copy_from_user(&request, (void __user *)arg,
+				  sizeof(request));
+	if (ret != OSAL_SUCCESS)
+		return pdm_status_to_errno(ret);
 
 	handle = pdm_led_open_index(request.index);
 	if (!handle)
@@ -94,8 +101,9 @@ static long pdm_led_ioctl_enable(unsigned long arg)
 	pdm_led_handle_t handle;
 	int32_t ret;
 
-	if (copy_from_user(&index, (void __user *)arg, sizeof(index)))
-		return -EFAULT;
+	ret = osal_copy_from_user(&index, (void __user *)arg, sizeof(index));
+	if (ret != OSAL_SUCCESS)
+		return pdm_status_to_errno(ret);
 
 	handle = pdm_led_open_index(index);
 	if (!handle)
@@ -111,8 +119,9 @@ static long pdm_led_ioctl_disable(unsigned long arg)
 	pdm_led_handle_t handle;
 	int32_t ret;
 
-	if (copy_from_user(&index, (void __user *)arg, sizeof(index)))
-		return -EFAULT;
+	ret = osal_copy_from_user(&index, (void __user *)arg, sizeof(index));
+	if (ret != OSAL_SUCCESS)
+		return pdm_status_to_errno(ret);
 
 	handle = pdm_led_open_index(index);
 	if (!handle)

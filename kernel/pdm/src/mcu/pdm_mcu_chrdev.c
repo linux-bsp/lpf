@@ -3,7 +3,6 @@
 #include <linux/compat.h>
 #include <linux/fs.h>
 #include <linux/module.h>
-#include <linux/uaccess.h>
 
 #include "pdi/pdi_mcu.h"
 #include "pdm.h"
@@ -34,11 +33,13 @@ static pdm_mcu_handle_t pdm_mcu_open_index(u32 index)
 static long pdm_mcu_ioctl_get_info(unsigned long arg)
 {
 	struct pdi_mcu_info info;
+	int32_t ret;
 
 	pdm_mcu_fill_info(&info);
 
-	if (copy_to_user((void __user *)arg, &info, sizeof(info)))
-		return -EFAULT;
+	ret = osal_copy_to_user((void __user *)arg, &info, sizeof(info));
+	if (ret != OSAL_SUCCESS)
+		return pdm_status_to_errno(ret);
 
 	return 0;
 }
@@ -50,8 +51,10 @@ static long pdm_mcu_ioctl_get_version(unsigned long arg)
 	pdm_mcu_handle_t handle;
 	int32_t ret;
 
-	if (copy_from_user(&request, (void __user *)arg, sizeof(request)))
-		return -EFAULT;
+	ret = osal_copy_from_user(&request, (void __user *)arg,
+				  sizeof(request));
+	if (ret != OSAL_SUCCESS)
+		return pdm_status_to_errno(ret);
 
 	handle = pdm_mcu_open_index(request.index);
 	if (!handle)
@@ -69,8 +72,10 @@ static long pdm_mcu_ioctl_get_version(unsigned long arg)
 	osal_strncpy(request.version_string, version.version_string,
 		     sizeof(request.version_string));
 
-	if (copy_to_user((void __user *)arg, &request, sizeof(request)))
-		return -EFAULT;
+	ret = osal_copy_to_user((void __user *)arg, &request,
+				sizeof(request));
+	if (ret != OSAL_SUCCESS)
+		return pdm_status_to_errno(ret);
 
 	return 0;
 }
@@ -82,8 +87,10 @@ static long pdm_mcu_ioctl_get_status(unsigned long arg)
 	pdm_mcu_handle_t handle;
 	int32_t ret;
 
-	if (copy_from_user(&request, (void __user *)arg, sizeof(request)))
-		return -EFAULT;
+	ret = osal_copy_from_user(&request, (void __user *)arg,
+				  sizeof(request));
+	if (ret != OSAL_SUCCESS)
+		return pdm_status_to_errno(ret);
 
 	handle = pdm_mcu_open_index(request.index);
 	if (!handle)
@@ -102,8 +109,10 @@ static long pdm_mcu_ioctl_get_status(unsigned long arg)
 	request.voltage_mv = status.voltage_mv;
 	request.timestamp_us = status.timestamp_us;
 
-	if (copy_to_user((void __user *)arg, &request, sizeof(request)))
-		return -EFAULT;
+	ret = osal_copy_to_user((void __user *)arg, &request,
+				sizeof(request));
+	if (ret != OSAL_SUCCESS)
+		return pdm_status_to_errno(ret);
 
 	return 0;
 }
@@ -114,8 +123,9 @@ static long pdm_mcu_ioctl_reset(unsigned long arg)
 	pdm_mcu_handle_t handle;
 	int32_t ret;
 
-	if (copy_from_user(&index, (void __user *)arg, sizeof(index)))
-		return -EFAULT;
+	ret = osal_copy_from_user(&index, (void __user *)arg, sizeof(index));
+	if (ret != OSAL_SUCCESS)
+		return pdm_status_to_errno(ret);
 
 	handle = pdm_mcu_open_index(index);
 	if (!handle)
@@ -132,8 +142,10 @@ static long pdm_mcu_ioctl_command(unsigned long arg)
 	uint32_t actual_len = 0;
 	int32_t ret;
 
-	if (copy_from_user(&request, (void __user *)arg, sizeof(request)))
-		return -EFAULT;
+	ret = osal_copy_from_user(&request, (void __user *)arg,
+				  sizeof(request));
+	if (ret != OSAL_SUCCESS)
+		return pdm_status_to_errno(ret);
 
 	if (request.tx_len > sizeof(request.tx_data) ||
 	    request.rx_len > sizeof(request.rx_data))
@@ -152,8 +164,10 @@ static long pdm_mcu_ioctl_command(unsigned long arg)
 		return pdm_status_to_errno(ret);
 
 	request.rx_len = actual_len;
-	if (copy_to_user((void __user *)arg, &request, sizeof(request)))
-		return -EFAULT;
+	ret = osal_copy_to_user((void __user *)arg, &request,
+				sizeof(request));
+	if (ret != OSAL_SUCCESS)
+		return pdm_status_to_errno(ret);
 
 	return 0;
 }
@@ -164,8 +178,10 @@ static long pdm_mcu_ioctl_read_data(unsigned long arg)
 	pdm_mcu_handle_t handle;
 	int32_t ret;
 
-	if (copy_from_user(&request, (void __user *)arg, sizeof(request)))
-		return -EFAULT;
+	ret = osal_copy_from_user(&request, (void __user *)arg,
+				  sizeof(request));
+	if (ret != OSAL_SUCCESS)
+		return pdm_status_to_errno(ret);
 
 	if (request.len > sizeof(request.data))
 		return -EINVAL;
@@ -179,8 +195,10 @@ static long pdm_mcu_ioctl_read_data(unsigned long arg)
 	if (ret != OSAL_SUCCESS)
 		return pdm_status_to_errno(ret);
 
-	if (copy_to_user((void __user *)arg, &request, sizeof(request)))
-		return -EFAULT;
+	ret = osal_copy_to_user((void __user *)arg, &request,
+				sizeof(request));
+	if (ret != OSAL_SUCCESS)
+		return pdm_status_to_errno(ret);
 
 	return 0;
 }
@@ -191,8 +209,10 @@ static long pdm_mcu_ioctl_write_data(unsigned long arg)
 	pdm_mcu_handle_t handle;
 	int32_t ret;
 
-	if (copy_from_user(&request, (void __user *)arg, sizeof(request)))
-		return -EFAULT;
+	ret = osal_copy_from_user(&request, (void __user *)arg,
+				  sizeof(request));
+	if (ret != OSAL_SUCCESS)
+		return pdm_status_to_errno(ret);
 
 	if (request.len > PDI_MCU_MAX_WRITE_SIZE)
 		return -EINVAL;

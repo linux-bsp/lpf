@@ -30,6 +30,7 @@
 #include "lib/osal_heap.h"
 #include "lib/osal_string.h"
 #include "sys/osal_thread.h"
+#include "sys/osal_usercopy.h"
 #include "util/osal_log.h"
 #include "util/osal_crc.h"
 #include "util/osal_version.h"

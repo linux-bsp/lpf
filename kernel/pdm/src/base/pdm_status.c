@@ -9,8 +9,11 @@ long pdm_status_to_errno(int32_t status)
 	if (status <= 0)
 		return status;
 
+	if (status == OSAL_ERR_INVALID_POINTER ||
+	    status == OSAL_ERR_BAD_ADDRESS)
+		return -EFAULT;
+
 	if (status == OSAL_ERR_INVALID_PARAM ||
-	    status == OSAL_ERR_INVALID_POINTER ||
 	    status == OSAL_ERR_INVALID_SIZE ||
 	    status == OSAL_ERR_INVALID_ID)
 		return -EINVAL;
