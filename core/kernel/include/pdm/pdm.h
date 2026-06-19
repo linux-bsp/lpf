@@ -28,6 +28,8 @@
 #define PDM_VERSION_MINOR 0x0
 #define PDM_VERSION_PATCH 0x0
 
+void pdm_print_version(void);
+
 /* 依赖的基础库 */
 #ifdef CONFIG_OSAL
 #include "osal.h"

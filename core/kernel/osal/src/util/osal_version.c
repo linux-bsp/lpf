@@ -5,15 +5,15 @@
 
 #include <linux/module.h>
 
-void osal_print_module_version(const char *module_name)
+void osal_print_version(void)
 {
-	const char *name = module_name ? module_name : "UNKNOWN";
-
-	osal_log(OS_LOG_LEVEL_INFO, name,
-		 "version=%s git=%s build_time=%s build_by=%s@%s compiler=%s arch=%s kernel=%s",
-		 ES_MIDDLEWARE_VERSION, ES_MIDDLEWARE_GIT_COMMIT,
+	osal_log(OS_LOG_LEVEL_INFO, "OSAL",
+		 "module_version=%u.%u.%u middleware_version=%s git=%s build_time=%s build_by=%s@%s compiler=%s arch=%s kernel=%s",
+		 OSAL_LITE_VERSION_MAJOR, OSAL_LITE_VERSION_MINOR,
+		 OSAL_LITE_VERSION_PATCH, ES_MIDDLEWARE_VERSION,
+		 ES_MIDDLEWARE_GIT_COMMIT,
 		 ES_MIDDLEWARE_COMPILE_TIME, ES_MIDDLEWARE_COMPILE_BY,
 		 ES_MIDDLEWARE_COMPILE_HOST, ES_MIDDLEWARE_COMPILER,
 		 ES_MIDDLEWARE_BUILD_ARCH, ES_MIDDLEWARE_BUILD_KERNEL);
 }
-EXPORT_SYMBOL_GPL(osal_print_module_version);
+EXPORT_SYMBOL_GPL(osal_print_version);

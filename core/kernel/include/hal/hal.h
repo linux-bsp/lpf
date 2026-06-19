@@ -20,6 +20,8 @@
 #define HAL_VERSION_MINOR 0x00
 #define HAL_VERSION_PATCH 0x00
 
+void hal_print_version(void);
+
 /* 基础类型定义 - 所有 HAL 模块都需要 */
 #include "hal_types.h"
 

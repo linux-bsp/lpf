@@ -8,12 +8,28 @@
 
 #include "osal.h"
 #include "pconfig/pconfig.h"
+#include "generated/gen_version.h"
+
+#include <linux/module.h>
 
 __attribute__((weak))
 const pconfig_platform_table_t g_pconfig_platform_table = { .configs = NULL,
 															.count = 0,
 															.current_index =
 																0 };
+
+void pconfig_print_version(void)
+{
+	osal_log(OS_LOG_LEVEL_INFO, "PCONFIG",
+		 "module_version=%u.%u.%u middleware_version=%s git=%s build_time=%s build_by=%s@%s compiler=%s arch=%s kernel=%s",
+		 PCONFIG_VERSION_MAJOR, PCONFIG_VERSION_MINOR,
+		 PCONFIG_VERSION_PATCH, ES_MIDDLEWARE_VERSION,
+		 ES_MIDDLEWARE_GIT_COMMIT, ES_MIDDLEWARE_COMPILE_TIME,
+		 ES_MIDDLEWARE_COMPILE_BY, ES_MIDDLEWARE_COMPILE_HOST,
+		 ES_MIDDLEWARE_COMPILER, ES_MIDDLEWARE_BUILD_ARCH,
+		 ES_MIDDLEWARE_BUILD_KERNEL);
+}
+EXPORT_SYMBOL_GPL(pconfig_print_version);
 
 /*===========================================================================
  * 平台配置查询

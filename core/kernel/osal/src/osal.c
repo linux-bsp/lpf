@@ -6,7 +6,7 @@
 
 static int __init osal_init(void)
 {
-	osal_print_module_version("OSAL");
+	osal_print_version();
 	LOG_INFO("OSAL", "loaded");
 	return 0;
 }

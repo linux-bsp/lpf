@@ -17,6 +17,10 @@
 #ifndef PCONFIG_H
 #define PCONFIG_H
 
+#define PCONFIG_VERSION_MAJOR 0x1
+#define PCONFIG_VERSION_MINOR 0x0
+#define PCONFIG_VERSION_PATCH 0x0
+
 /* 类型定义 - 按模块组织 */
 #include "pconfig_common.h" /* 通用基础类型 */
 #include "pconfig_mcu.h" /* MCU 配置类型 */
@@ -109,5 +113,6 @@ int32_t pconfig_validate(const pconfig_platform_config_t *config);
  * @param[in] config 平台配置
  */
 void pconfig_print(const pconfig_platform_config_t *config);
+void pconfig_print_version(void);
 
 #endif /* PCONFIG_H */

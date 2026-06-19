@@ -9,6 +9,13 @@
 #ifndef OSAL_H
 #define OSAL_H
 
+/*
+ * OSAL version information
+ */
+#define OSAL_LITE_VERSION_MAJOR 0x1
+#define OSAL_LITE_VERSION_MINOR 0x0
+#define OSAL_LITE_VERSION_PATCH 0x0
+
 #include <linux/kernel.h>
 #include <linux/ktime.h>
 #include <linux/timekeeping.h>

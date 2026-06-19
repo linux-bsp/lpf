@@ -5,6 +5,6 @@
 #ifndef OSAL_VERSION_H
 #define OSAL_VERSION_H
 
-void osal_print_module_version(const char *module_name);
+void osal_print_version(void);
 
 #endif /* OSAL_VERSION_H */
