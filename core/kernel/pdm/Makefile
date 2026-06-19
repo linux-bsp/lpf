@@ -4,7 +4,6 @@
 ifeq ($(CONFIG_PDM),y)
 obj-m += pdm.o
 pdm-y := pdm/src/pdm.o
-pdm-$(CONFIG_PCONFIG) += $(ESMW_PCONFIG_OBJS)
 pdm-$(CONFIG_PDM_PROTOCOL) += pdm/src/protocol/pdm_protocol.o
 pdm-$(CONFIG_PDM_PROTOCOL) += pdm/src/protocol/pdm_protocol_common.o
 pdm-$(CONFIG_PDM_PROTOCOL) += pdm/src/protocol/pdm_protocol_device.o

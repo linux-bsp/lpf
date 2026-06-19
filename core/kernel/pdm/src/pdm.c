@@ -31,7 +31,7 @@ static int pdm_init_devices(void)
 	int ret;
 
 #ifdef CONFIG_PCONFIG
-	ret = pconfig_init();
+	ret = pconfig_load();
 	if (ret != OSAL_SUCCESS)
 		return -ret;
 
@@ -76,7 +76,7 @@ static void pdm_deinit_devices(void)
 	pdm_mcu_remove_all();
 #endif
 #ifdef CONFIG_PCONFIG
-	pconfig_deinit();
+	pconfig_unload();
 #endif
 }
 
@@ -135,4 +135,4 @@ module_exit(pdm_exit);
 MODULE_AUTHOR("ES-Middleware");
 MODULE_DESCRIPTION("ES-Middleware PDM kernel module");
 MODULE_LICENSE("GPL");
-MODULE_SOFTDEP("pre: osal hal can can_raw");
+MODULE_SOFTDEP("pre: osal pconfig hal can can_raw");

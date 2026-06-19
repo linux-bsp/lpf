@@ -49,8 +49,8 @@ extern const pconfig_platform_table_t g_pconfig_platform_table;
  */
 const pconfig_platform_config_t *pconfig_get_board(void);
 const pconfig_device_config_t *pconfig_get(void);
-int32_t pconfig_init(void);
-void pconfig_deinit(void);
+int32_t pconfig_load(void);
+void pconfig_unload(void);
 
 /**
  * @brief 根据平台和产品名称查找配置
