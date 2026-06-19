@@ -19,6 +19,10 @@ Current peripheral APIs:
 - LED: `pdi_led_*` wraps `/dev/pdm_led`; ioctl ABI lives in
   `uapi/pdi/pdi_led.h`; SDK declarations live in `pdi/led.h`.
 
+`pdi_mcu_open_by_name()` and `pdi_led_open_by_name()` use `/dev/pdm_ctl` to
+validate the LPF stable device name before opening the current aggregated
+peripheral node.
+
 Applications should include `pdi/pdi.h` or the SDK headers under
 `user/pdi/include/pdi/`. UAPI headers under `uapi/pdi/` are ABI-only.
 

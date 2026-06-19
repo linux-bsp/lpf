@@ -18,6 +18,7 @@ typedef struct {
 } pdi_led_context_t;
 
 int32_t pdi_led_open(pdi_led_context_t *ctx, const char *device_path);
+int32_t pdi_led_open_by_name(pdi_led_context_t *ctx, const char *name);
 int32_t pdi_led_close(pdi_led_context_t *ctx);
 int32_t pdi_led_get_info(pdi_led_context_t *ctx, struct pdi_led_info *info);
 int32_t pdi_led_get_state(pdi_led_context_t *ctx,

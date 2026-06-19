@@ -18,6 +18,7 @@ typedef struct {
 } pdi_mcu_context_t;
 
 int32_t pdi_mcu_open(pdi_mcu_context_t *ctx, const char *device_path);
+int32_t pdi_mcu_open_by_name(pdi_mcu_context_t *ctx, const char *name);
 int32_t pdi_mcu_close(pdi_mcu_context_t *ctx);
 int32_t pdi_mcu_get_info(pdi_mcu_context_t *ctx, struct pdi_mcu_info *info);
 int32_t pdi_mcu_get_version(pdi_mcu_context_t *ctx,

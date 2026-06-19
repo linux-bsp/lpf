@@ -353,10 +353,14 @@ Current status:
   snapshots to userspace.
 - Started. PDI now provides `pdi_list_devices`,
   `pdi_get_device_by_name`, and `pdi_get_device_by_capability`.
+- Started `pdi_open_by_name` through type-specific helpers
+  `pdi_mcu_open_by_name` and `pdi_led_open_by_name`; these validate stable LPF
+  names through `/dev/pdm_ctl` before opening the current aggregated peripheral
+  nodes.
 - Started UAPI/PDI separation. MCU and LED UAPI headers are now ABI-only, while
   SDK declarations live under `user/pdi/include/pdi/`.
 - Remaining work: move UAPI headers to the final `uapi/lpf/` namespace, add
-  `pdi_open_by_name`, and standardize PDI error mapping.
+  instance-aware device nodes, and standardize PDI error mapping.
 
 ## Phase 9: Device Nodes And Observability
 

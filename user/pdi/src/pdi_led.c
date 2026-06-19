@@ -3,6 +3,7 @@
  ************************************************************************/
 
 #include "pdi/led.h"
+#include "pdi/pdi_discovery.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -33,6 +34,34 @@ int32_t pdi_led_open(pdi_led_context_t *ctx, const char *device_path)
 	path = (device_path != NULL) ? device_path : PDI_LED_DEFAULT_DEVICE;
 	ctx->fd = open(path, O_RDWR | O_CLOEXEC);
 	return (ctx->fd < 0) ? -1 : 0;
+}
+
+int32_t pdi_led_open_by_name(pdi_led_context_t *ctx, const char *name)
+{
+	pdi_ctl_context_t ctl;
+	struct pdi_ctl_device_info info;
+	int32_t ret;
+
+	if (ctx == NULL || name == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	ret = pdi_ctl_open(&ctl, NULL);
+	if (ret < 0)
+		return ret;
+
+	ret = pdi_get_device_by_name(&ctl, name, &info);
+	(void)pdi_ctl_close(&ctl);
+	if (ret < 0)
+		return ret;
+
+	if (info.type != PDI_CTL_DEVICE_TYPE_LED) {
+		errno = ENODEV;
+		return -1;
+	}
+
+	return pdi_led_open(ctx, NULL);
 }
 
 int32_t pdi_led_close(pdi_led_context_t *ctx)
