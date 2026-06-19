@@ -2,7 +2,7 @@
  * PDI LED user API implementation
  ************************************************************************/
 
-#include "pdi/pdi_led.h"
+#include "pdi/led.h"
 
 #include <errno.h>
 #include <fcntl.h>

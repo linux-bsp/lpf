@@ -43,6 +43,7 @@ kernel PDM character devices and userspace PDI wrappers.
 Add the following pieces together:
 
 - `uapi/pdi/pdi_<peripheral>.h`
+- `user/pdi/include/pdi/<peripheral>.h`
 - `user/pdi/src/pdi_<peripheral>.c`
 - PDI aggregate include from `user/pdi/include/pdi/pdi.h`
 - PDM character device implementation for `/dev/pdm_<peripheral>`

@@ -2,7 +2,7 @@
  * PDI MCU user API implementation
  ************************************************************************/
 
-#include "pdi/pdi_mcu.h"
+#include "pdi/mcu.h"
 
 #include <errno.h>
 #include <fcntl.h>

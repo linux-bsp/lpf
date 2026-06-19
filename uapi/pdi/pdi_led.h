@@ -43,30 +43,4 @@ struct pdi_led_brightness {
 #define PDI_LED_IOC_ENABLE _IOW(PDI_LED_IOC_MAGIC, 0x04, __u32)
 #define PDI_LED_IOC_DISABLE _IOW(PDI_LED_IOC_MAGIC, 0x05, __u32)
 
-#ifndef __KERNEL__
-#include <stdint.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-typedef struct {
-	int fd;
-} pdi_led_context_t;
-
-int32_t pdi_led_open(pdi_led_context_t *ctx, const char *device_path);
-int32_t pdi_led_close(pdi_led_context_t *ctx);
-int32_t pdi_led_get_info(pdi_led_context_t *ctx, struct pdi_led_info *info);
-int32_t pdi_led_get_state(pdi_led_context_t *ctx,
-			  struct pdi_led_state *state);
-int32_t pdi_led_set_brightness(pdi_led_context_t *ctx, uint32_t index,
-			       uint32_t brightness);
-int32_t pdi_led_enable(pdi_led_context_t *ctx, uint32_t index);
-int32_t pdi_led_disable(pdi_led_context_t *ctx, uint32_t index);
-
-#ifdef __cplusplus
-}
-#endif
-#endif /* __KERNEL__ */
-
 #endif /* PDI_LED_H */

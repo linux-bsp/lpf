@@ -15,9 +15,12 @@ Current peripheral APIs:
 - Discovery: `pdi_ctl_*`, `pdi_list_devices`, and lookup helpers wrap
   `/dev/pdm_ctl`; ioctl ABI lives in `uapi/pdi/pdi_ctl.h`.
 - MCU: `pdi_mcu_*` wraps `/dev/pdm_mcu`; ioctl ABI lives in
-  `uapi/pdi/pdi_mcu.h`.
+  `uapi/pdi/pdi_mcu.h`; SDK declarations live in `pdi/mcu.h`.
 - LED: `pdi_led_*` wraps `/dev/pdm_led`; ioctl ABI lives in
-  `uapi/pdi/pdi_led.h`.
+  `uapi/pdi/pdi_led.h`; SDK declarations live in `pdi/led.h`.
+
+Applications should include `pdi/pdi.h` or the SDK headers under
+`user/pdi/include/pdi/`. UAPI headers under `uapi/pdi/` are ABI-only.
 
 UAPI and ABI rules for new peripherals are documented in
 `docs/PDI_UAPI_ABI.md`.
