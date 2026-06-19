@@ -15,6 +15,7 @@ list(APPEND PDM_SRCS
     "src/base/pdm_chrdev.c"
     "src/base/pdm_driver.c"
     "src/base/pdm_driver_start.c"
+    "src/base/pdm_proc.c"
     "src/base/pdm_status.c"
 )
 

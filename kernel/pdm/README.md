@@ -14,6 +14,7 @@ The kernel module currently provides:
   linked into `pdm.ko`
 - PDM LED core and `/dev/pdm_led` ioctl dispatch for GPIO/PWM controlled LEDs
   linked into `pdm.ko`
+- PDM procfs debug nodes under `/proc/pdm/`
 
 PDM consumes exported `hal.ko` symbols for MCU transport and LED GPIO/PWM
 hardware access.
@@ -37,6 +38,9 @@ kernel/pdm/
 ├── CMakeLists.txt
 └── src/
     ├── base/
+    │   ├── pdm_chrdev.c
+    │   ├── pdm_driver.c
+    │   ├── pdm_proc.c
     │   ├── pdm_driver_start.c
     │   └── pdm_driver_end.c
     ├── pdm.c
@@ -64,6 +68,11 @@ kernel/include/pdm/
 `pdm.ko` owns userspace boundaries per peripheral. Each PDM peripheral exposes
 its own character device, such as `/dev/pdm_mcu`, and each PDI peripheral API
 uses the matching UAPI ioctl header, such as `pdi_mcu.h`.
+
+Procfs is reserved for read-only debug and observability data. Current nodes:
+
+- `/proc/pdm/mcu`
+- `/proc/pdm/led`
 
 MCU transport APIs are linked into `pdm.ko`, but hardware access remains behind
 HAL. `pdm.ko` depends on `hal.ko` and calls the HAL transport symbols exported

@@ -14,6 +14,7 @@
 #include "pdm_internal.h"
 #include "pdm_protocol.h"
 #include "pdm_mcu_internal.h"
+#include "base/pdm_proc.h"
 
 /*===========================================================================
  * MCU上下文
@@ -29,6 +30,7 @@ typedef struct {
 static pdm_mcu_context_t *g_mcu_contexts[PDM_MCU_MAX_DEVICES] = { NULL };
 static osal_mutex_t g_registry_mutex;
 static bool g_registry_initialized = false;
+static pdm_proc_entry_t g_pdm_mcu_proc;
 
 static const pdm_driver_t g_pdm_mcu_driver;
 
@@ -105,6 +107,53 @@ static int32_t pdm_mcu_registry_init(void)
 
 	g_registry_initialized = true;
 	return OSAL_SUCCESS;
+}
+
+static const char *pdm_mcu_interface_name(pconfig_mcu_interface_t interface)
+{
+	switch (interface) {
+	case PCONFIG_MCU_INTERFACE_CAN:
+		return "can";
+	case PCONFIG_MCU_INTERFACE_SERIAL:
+		return "serial";
+	default:
+		return "unknown";
+	}
+}
+
+static int pdm_mcu_proc_show(struct seq_file *seq, void *data)
+{
+	uint32_t i;
+
+	(void)data;
+
+	seq_puts(seq, "PDM MCU\n");
+	seq_printf(seq, "max_devices=%u\n", PDM_MCU_MAX_DEVICES);
+	seq_puts(seq, "devices:\n");
+
+	if (!g_registry_initialized) {
+		seq_puts(seq, "  registry=uninitialized\n");
+		return 0;
+	}
+
+	osal_mutex_lock(&g_registry_mutex);
+	for (i = 0; i < OSAL_ARRAY_SIZE(g_mcu_contexts); i++) {
+		const pdm_mcu_context_t *ctx = g_mcu_contexts[i];
+
+		if (!ctx) {
+			seq_printf(seq, "  [%u] present=0\n", i);
+			continue;
+		}
+
+		seq_printf(seq,
+			   "  [%u] present=1 name=%s interface=%s timeout_ms=%u\n",
+			   i, ctx->config->name,
+			   pdm_mcu_interface_name(ctx->config->interface),
+			   ctx->config->cmd_timeout_ms);
+	}
+	osal_mutex_unlock(&g_registry_mutex);
+
+	return 0;
 }
 
 /*===========================================================================
@@ -572,12 +621,21 @@ static int pdm_mcu_driver_init(void)
 		return ret;
 	}
 
+	ret = pdm_proc_register(&g_pdm_mcu_proc, "mcu",
+				pdm_mcu_proc_show, NULL);
+	if (ret) {
+		pdm_mcu_chrdev_unregister();
+		pdm_protocol_deinit();
+		return ret;
+	}
+
 	LOG_INFO("PDM_MCU", "registered");
 	return 0;
 }
 
 static void pdm_mcu_driver_exit(void)
 {
+	pdm_proc_unregister(&g_pdm_mcu_proc);
 	pdm_mcu_chrdev_unregister();
 	pdm_protocol_deinit();
 	LOG_INFO("PDM_MCU", "unregistered");

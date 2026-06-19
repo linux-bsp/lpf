@@ -6,6 +6,7 @@
 #include "pdm.h"
 #include "pdm_internal.h"
 #include "pdm_led_internal.h"
+#include "base/pdm_proc.h"
 
 typedef struct {
 	const pconfig_led_config_t *config;
@@ -19,6 +20,7 @@ typedef struct {
 static pdm_led_context_t *g_led_contexts[PDM_LED_MAX_DEVICES];
 static osal_mutex_t g_led_registry_lock;
 static bool g_led_registry_ready;
+static pdm_proc_entry_t g_pdm_led_proc;
 
 static uint32_t pdm_led_clamp_brightness(const pdm_led_context_t *ctx,
 					 uint32_t brightness)
@@ -88,6 +90,56 @@ static int32_t pdm_led_registry_init(void)
 
 	g_led_registry_ready = true;
 	return OSAL_SUCCESS;
+}
+
+static const char *pdm_led_control_name(pconfig_led_control_t control)
+{
+	switch (control) {
+	case PCONFIG_LED_CONTROL_GPIO:
+		return "gpio";
+	case PCONFIG_LED_CONTROL_PWM:
+		return "pwm";
+	default:
+		return "unknown";
+	}
+}
+
+static int pdm_led_proc_show(struct seq_file *seq, void *data)
+{
+	uint32_t i;
+
+	(void)data;
+
+	seq_puts(seq, "PDM LED\n");
+	seq_printf(seq, "max_devices=%u\n", PDM_LED_MAX_DEVICES);
+	seq_puts(seq, "devices:\n");
+
+	if (!g_led_registry_ready) {
+		seq_puts(seq, "  registry=uninitialized\n");
+		return 0;
+	}
+
+	osal_mutex_lock(&g_led_registry_lock);
+	for (i = 0; i < OSAL_ARRAY_SIZE(g_led_contexts); i++) {
+		pdm_led_context_t *ctx = g_led_contexts[i];
+
+		if (!ctx) {
+			seq_printf(seq, "  [%u] present=0\n", i);
+			continue;
+		}
+
+		osal_mutex_lock(&ctx->lock);
+		seq_printf(seq,
+			   "  [%u] present=1 name=%s control=%s enabled=%u brightness=%u max_brightness=%u\n",
+			   i, ctx->config->name,
+			   pdm_led_control_name(ctx->config->control),
+			   ctx->enabled ? 1U : 0U, ctx->brightness,
+			   ctx->config->max_brightness);
+		osal_mutex_unlock(&ctx->lock);
+	}
+	osal_mutex_unlock(&g_led_registry_lock);
+
+	return 0;
 }
 
 static int32_t pdm_led_init_gpio(pdm_led_context_t *ctx)
@@ -360,12 +412,20 @@ static int pdm_led_driver_init(void)
 	if (ret)
 		return ret;
 
+	ret = pdm_proc_register(&g_pdm_led_proc, "led", pdm_led_proc_show,
+				NULL);
+	if (ret) {
+		pdm_led_chrdev_unregister();
+		return ret;
+	}
+
 	LOG_INFO("PDM_LED", "registered");
 	return 0;
 }
 
 static void pdm_led_driver_exit(void)
 {
+	pdm_proc_unregister(&g_pdm_led_proc);
 	pdm_led_chrdev_unregister();
 	LOG_INFO("PDM_LED", "unregistered");
 }

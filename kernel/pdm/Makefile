@@ -7,6 +7,7 @@ pdm-y := pdm/src/pdm.o
 pdm-y += pdm/src/base/pdm_chrdev.o
 pdm-y += pdm/src/base/pdm_driver.o
 pdm-y += pdm/src/base/pdm_driver_start.o
+pdm-y += pdm/src/base/pdm_proc.o
 pdm-y += pdm/src/base/pdm_status.o
 pdm-$(CONFIG_PDM_PROTOCOL) += pdm/src/protocol/pdm_protocol.o
 pdm-$(CONFIG_PDM_PROTOCOL) += pdm/src/protocol/pdm_protocol_common.o
