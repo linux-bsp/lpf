@@ -16,7 +16,7 @@ typedef struct pdm_driver {
 	int (*init)(void);
 	void (*exit)(void);
 	int32_t (*probe)(const pconfig_device_config_t *device);
-	void (*remove_all)(void);
+	void (*remove)(const pconfig_device_config_t *device);
 } pdm_driver_t;
 
 #define pdm_driver_register(_driver)                                      \

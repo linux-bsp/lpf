@@ -10,6 +10,8 @@ The kernel module currently provides:
 - module load/unload orchestration in `pdm/src/pdm.c`
 - PCONFIG query logic linked into `pdm.ko`
 - PDM protocol encode/decode logic linked into `pdm.ko`
+- PDM-local bus logic for built-in driver registration, configured device
+  binding, and device removal ordering
 - PDM MCU core, `/dev/pdm_mcu` ioctl dispatch, and CAN/Serial transport glue
   linked into `pdm.ko`
 - PDM LED core and `/dev/pdm_led` ioctl dispatch for GPIO/PWM controlled LEDs
@@ -38,12 +40,14 @@ kernel/pdm/
 ├── CMakeLists.txt
 ├── include/
 │   ├── pdm_chrdev.h
+│   ├── pdm_bus.h
 │   ├── pdm_driver.h
 │   ├── pdm_internal.h
 │   ├── pdm_proc.h
 │   └── pdm_status.h
 └── src/
     ├── base/
+    │   ├── pdm_bus.c
     │   ├── pdm_chrdev.c
     │   ├── pdm_driver.c
     │   ├── pdm_proc.c
@@ -71,7 +75,13 @@ kernel/include/pdm/
 
 ## Layering
 
-`pdm.ko` owns userspace boundaries per peripheral. Each PDM peripheral exposes
+`pdm.ko` owns userspace boundaries per peripheral. Built-in PDM drivers register
+through `pdm_driver_register`; during module initialization PDM loads PConfig,
+registers each configured device on its internal bus, and the bus binds each
+device to the matching driver `probe`. On unload, bus devices are removed before
+driver global resources are released.
+
+Each PDM peripheral exposes
 its own character device, such as `/dev/pdm_mcu`, and each PDI peripheral API
 uses the matching UAPI ioctl header, such as `pdi_mcu.h`.
 

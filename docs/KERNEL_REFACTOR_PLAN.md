@@ -12,6 +12,9 @@ implemented and verified.
   `kernel/pconfig/configs/<product>/<project>/<version>/`.
 - PDM is a kernel module built as `pdm.ko`; peripheral drivers are linked into
   `pdm.ko` and registered through built-in driver registration.
+- PDM owns a lightweight internal bus that keeps registered drivers and probed
+  devices in kernel lists. PConfig supplies device instances; the bus matches
+  each instance to a PDM driver and owns remove ordering.
 - PDI remains a userspace library, but it only talks to per-peripheral character
   devices and UAPI headers.
 - Each peripheral owns its own PConfig type, PDM driver, PDI UAPI header, PDI
@@ -42,6 +45,7 @@ implemented and verified.
 - [x] Change PDM startup to initialize built-in drivers, load PConfig, iterate
       configured devices, and call matching driver `probe`.
 - [x] Add PDM built-in driver registration through `pdm_driver_register`.
+- [x] Add a PDM-local virtual bus/list manager for driver and device binding.
 - [x] Keep PDM peripheral drivers linked into `pdm.ko` instead of adding one
       kernel module per peripheral.
 - [x] Add HAL built-in initialization table for HAL subdrivers that need global
@@ -104,15 +108,18 @@ implemented and verified.
   - `pdm_driver_register`.
   - Per-device context table.
   - `probe`.
-  - `remove_all`.
+  - `remove`.
+  - Bus-owned device removal.
   - Character-device registration if userspace access is needed.
 - [ ] Decide whether protocol support is global or per-driver.
   - Current MCU driver initializes the PDM protocol globally.
   - If future peripherals share the protocol layer, move ownership to PDM core
     or introduce protocol reference counting.
-- [ ] Revisit PDM device removal.
+- [x] Revisit PDM device removal.
   - PDM should remove devices before driver exit.
   - PConfig state should remain owned by PConfig.
+  - Implemented with the PDM-local bus: device nodes are removed before driver
+    unregister/exit, and each bound device calls its driver's `remove`.
 - [x] Add LED peripheral support using the established model.
   - Add `pdm_led` implementation.
   - Add `pdm_led_chrdev.c`.

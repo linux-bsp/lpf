@@ -305,29 +305,45 @@ pdm_led_handle_t pdm_led_get(uint32_t index)
 	return handle;
 }
 
-void pdm_led_remove_all(void)
+static void pdm_led_remove_index(uint32_t index)
+{
+	pdm_led_context_t *ctx;
+
+	if (!g_led_registry_ready ||
+	    index >= OSAL_ARRAY_SIZE(g_led_contexts))
+		return;
+
+	osal_mutex_lock(&g_led_registry_lock);
+	ctx = g_led_contexts[index];
+	g_led_contexts[index] = NULL;
+	osal_mutex_unlock(&g_led_registry_lock);
+
+	if (!ctx)
+		return;
+
+	pdm_led_deinit_hw(ctx);
+	if (ctx->lock_ready)
+		osal_mutex_destroy(&ctx->lock);
+	osal_free(ctx);
+}
+
+void pdm_led_remove(const pconfig_device_config_t *device)
+{
+	if (!device || device->device_type != PCONFIG_DEVICE_TYPE_LED)
+		return;
+
+	pdm_led_remove_index(device->index);
+}
+
+static void pdm_led_registry_deinit(void)
 {
 	uint32_t i;
 
 	if (!g_led_registry_ready)
 		return;
 
-	for (i = 0; i < OSAL_ARRAY_SIZE(g_led_contexts); i++) {
-		pdm_led_context_t *ctx;
-
-		osal_mutex_lock(&g_led_registry_lock);
-		ctx = g_led_contexts[i];
-		g_led_contexts[i] = NULL;
-		osal_mutex_unlock(&g_led_registry_lock);
-
-		if (!ctx)
-			continue;
-
-		pdm_led_deinit_hw(ctx);
-		if (ctx->lock_ready)
-			osal_mutex_destroy(&ctx->lock);
-		osal_free(ctx);
-	}
+	for (i = 0; i < OSAL_ARRAY_SIZE(g_led_contexts); i++)
+		pdm_led_remove_index(i);
 
 	osal_mutex_destroy(&g_led_registry_lock);
 	g_led_registry_ready = false;
@@ -425,6 +441,7 @@ static int pdm_led_driver_init(void)
 
 static void pdm_led_driver_exit(void)
 {
+	pdm_led_registry_deinit();
 	pdm_proc_unregister(&g_pdm_led_proc);
 	pdm_led_chrdev_unregister();
 	LOG_INFO("PDM_LED", "unregistered");
@@ -436,7 +453,7 @@ static const pdm_driver_t g_pdm_led_driver = {
 	.init = pdm_led_driver_init,
 	.exit = pdm_led_driver_exit,
 	.probe = pdm_led_probe,
-	.remove_all = pdm_led_remove_all,
+	.remove = pdm_led_remove,
 };
 
 pdm_driver_register(&g_pdm_led_driver);

@@ -13,7 +13,7 @@
 #define PDM_LED_MAX_DEVICES CONFIG_PDM_LED_MAX_DEVICES
 
 int32_t pdm_led_probe(const pconfig_device_config_t *device);
-void pdm_led_remove_all(void);
+void pdm_led_remove(const pconfig_device_config_t *device);
 pdm_led_handle_t pdm_led_get(uint32_t index);
 
 int pdm_led_chrdev_register(void);

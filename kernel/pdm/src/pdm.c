@@ -6,6 +6,7 @@
 #include "osal.h"
 #include "pdm/pdm.h"
 #include "pconfig/pconfig.h"
+#include "pdm_bus.h"
 #include "pdm_driver.h"
 #include "pdm_status.h"
 #include "generated/gen_version.h"
@@ -20,23 +21,11 @@ static int pdm_probe_devices(void)
 		return pdm_status_to_errno(ret);
 
 	device = pconfig_get();
-	if (!device) {
-		pconfig_unload();
+	if (!device)
 		return -ENODEV;
-	}
 
 	for (; device->device_type != PCONFIG_DEVICE_TYPE_INVALID; device++) {
-		const pdm_driver_t *driver;
-
-		driver = pdm_driver_find(device->device_type);
-		if (!driver || !driver->probe) {
-			LOG_ERROR("PDM", "No driver for device type=%u",
-				  device->device_type);
-			ret = -EOPNOTSUPP;
-			goto out_error;
-		}
-
-		ret = driver->probe(device);
+		ret = pdm_bus_register_device(device);
 		if (ret != OSAL_SUCCESS) {
 			ret = pdm_status_to_errno(ret);
 			goto out_error;
@@ -46,7 +35,7 @@ static int pdm_probe_devices(void)
 	return 0;
 
 out_error:
-	pdm_drivers_remove_all();
+	pdm_bus_remove_devices();
 	return ret;
 }
 
@@ -92,7 +81,7 @@ out_registry_deinit:
 
 static void __exit pdm_exit(void)
 {
-	pdm_drivers_remove_all();
+	pdm_bus_remove_devices();
 	pdm_drivers_exit();
 	pdm_driver_registry_deinit();
 	LOG_INFO("PDM", "unloaded");

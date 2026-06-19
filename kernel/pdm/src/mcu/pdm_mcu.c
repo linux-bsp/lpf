@@ -338,28 +338,44 @@ pdm_mcu_handle_t pdm_mcu_get(uint32_t index)
 	return handle;
 }
 
-void pdm_mcu_remove_all(void)
+static void pdm_mcu_remove_index(uint32_t index)
+{
+	pdm_mcu_context_t *ctx;
+
+	if (!g_registry_initialized ||
+	    index >= OSAL_ARRAY_SIZE(g_mcu_contexts))
+		return;
+
+	osal_mutex_lock(&g_registry_mutex);
+	ctx = g_mcu_contexts[index];
+	g_mcu_contexts[index] = NULL;
+	osal_mutex_unlock(&g_registry_mutex);
+
+	if (!ctx)
+		return;
+
+	ctx->ops->deinit(ctx->transport_handle);
+	osal_mutex_destroy(&ctx->mutex);
+	osal_free(ctx);
+}
+
+void pdm_mcu_remove(const pconfig_device_config_t *device)
+{
+	if (!device || device->device_type != PCONFIG_DEVICE_TYPE_MCU)
+		return;
+
+	pdm_mcu_remove_index(device->index);
+}
+
+static void pdm_mcu_registry_deinit(void)
 {
 	uint32_t i;
 
 	if (!g_registry_initialized)
 		return;
 
-	for (i = 0; i < OSAL_ARRAY_SIZE(g_mcu_contexts); i++) {
-		pdm_mcu_context_t *ctx;
-
-		osal_mutex_lock(&g_registry_mutex);
-		ctx = g_mcu_contexts[i];
-		g_mcu_contexts[i] = NULL;
-		osal_mutex_unlock(&g_registry_mutex);
-
-		if (!ctx)
-			continue;
-
-		ctx->ops->deinit(ctx->transport_handle);
-		osal_mutex_destroy(&ctx->mutex);
-		osal_free(ctx);
-	}
+	for (i = 0; i < OSAL_ARRAY_SIZE(g_mcu_contexts); i++)
+		pdm_mcu_remove_index(i);
 
 	osal_mutex_destroy(&g_registry_mutex);
 	g_registry_initialized = false;
@@ -635,6 +651,7 @@ static int pdm_mcu_driver_init(void)
 
 static void pdm_mcu_driver_exit(void)
 {
+	pdm_mcu_registry_deinit();
 	pdm_proc_unregister(&g_pdm_mcu_proc);
 	pdm_mcu_chrdev_unregister();
 	pdm_protocol_deinit();
@@ -647,7 +664,7 @@ static const pdm_driver_t g_pdm_mcu_driver = {
 	.init = pdm_mcu_driver_init,
 	.exit = pdm_mcu_driver_exit,
 	.probe = pdm_mcu_probe,
-	.remove_all = pdm_mcu_remove_all,
+	.remove = pdm_mcu_remove,
 };
 
 pdm_driver_register(&g_pdm_mcu_driver);
