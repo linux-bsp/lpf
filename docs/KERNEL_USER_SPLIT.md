@@ -29,7 +29,7 @@ user/
   pdi/             # userspace API library for PDM
 
 uapi/
-  pdi/             # ioctl ABI shared by PDM and PDI
+  lpf/             # ioctl ABI shared by PDM and PDI
 ```
 
 ## Responsibilities
@@ -42,7 +42,7 @@ uapi/
 - `kernel/pconfig` provides kernel-side platform/product configuration used
   by PDM. It builds as `pconfig.ko`.
 - `user/pdi` provides the application-facing C API and wraps open/ioctl.
-- `uapi/pdi` is the stable ABI shared by `kernel/pdm` and `user/pdi`.
+- `uapi/lpf` is the stable ABI shared by `kernel/pdm` and `user/pdi`.
 
 ## Boundary Rules
 
@@ -73,7 +73,7 @@ Linux kernel subsystem / hardware
 ```
 
 Each userspace-visible peripheral should have a matching UAPI header and PDI
-wrapper. For example, MCU uses `/dev/pdm_mcu`, `uapi/pdi/pdi_mcu.h`, and
+wrapper. For example, MCU uses `/dev/pdm_mcu`, `uapi/lpf/lpf_mcu.h`, and
 `user/pdi/src/pdi_mcu.c`.
 
 The previous userspace test framework was removed with the old ctest product.
@@ -83,7 +83,7 @@ integration.
 ## Include Rules
 
 - Kernel cross-module headers live under `kernel/include/<module>/`.
-- UAPI headers live under `uapi/pdi/` and must be valid for both kernel and
+- UAPI headers live under `uapi/lpf/` and must be valid for both kernel and
   userspace builds.
 - Userspace code must not include non-UAPI kernel headers.
-- PDI/UAPI ABI rules are documented in `docs/PDI_UAPI_ABI.md`.
+- LPF UAPI rules are documented in `docs/LPF_UAPI_ABI.md`.

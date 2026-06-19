@@ -5,7 +5,7 @@
 
 #include "generated/gen_version.h"
 #include "lpf/lpf_core.h"
-#include "pdi/pdi_ctl.h"
+#include "lpf/lpf_ctl.h"
 #include "pdm_chrdev.h"
 #include "pdm_ctl.h"
 #include "pdm/pdm.h"
@@ -25,11 +25,11 @@ static uint32_t pdm_ctl_device_type(lpf_device_type_t type)
 {
 	switch (type) {
 	case LPF_DEVICE_TYPE_MCU:
-		return PDI_CTL_DEVICE_TYPE_MCU;
+		return LPF_CTL_DEVICE_TYPE_MCU;
 	case LPF_DEVICE_TYPE_LED:
-		return PDI_CTL_DEVICE_TYPE_LED;
+		return LPF_CTL_DEVICE_TYPE_LED;
 	default:
-		return PDI_CTL_DEVICE_TYPE_INVALID;
+		return LPF_CTL_DEVICE_TYPE_INVALID;
 	}
 }
 
@@ -37,18 +37,18 @@ static uint32_t pdm_ctl_device_state(lpf_device_state_t state)
 {
 	switch (state) {
 	case LPF_DEVICE_STATE_REGISTERED:
-		return PDI_CTL_DEVICE_STATE_REGISTERED;
+		return LPF_CTL_DEVICE_STATE_REGISTERED;
 	case LPF_DEVICE_STATE_BOUND:
-		return PDI_CTL_DEVICE_STATE_BOUND;
+		return LPF_CTL_DEVICE_STATE_BOUND;
 	case LPF_DEVICE_STATE_ERROR:
-		return PDI_CTL_DEVICE_STATE_ERROR;
+		return LPF_CTL_DEVICE_STATE_ERROR;
 	default:
-		return PDI_CTL_DEVICE_STATE_ERROR;
+		return LPF_CTL_DEVICE_STATE_ERROR;
 	}
 }
 
 static void pdm_ctl_fill_device_info(const lpf_device_info_t *src,
-				     struct pdi_ctl_device_info *dst)
+				     struct lpf_ctl_device_info *dst)
 {
 	osal_memset(dst, 0, sizeof(*dst));
 	dst->type = pdm_ctl_device_type(src->type);
@@ -65,10 +65,10 @@ static void pdm_ctl_fill_device_info(const lpf_device_info_t *src,
 
 static long pdm_ctl_ioctl_get_info(unsigned long arg)
 {
-	struct pdi_ctl_info info;
+	struct lpf_ctl_info info;
 
 	osal_memset(&info, 0, sizeof(info));
-	info.abi_version = PDI_CTL_ABI_VERSION;
+	info.abi_version = LPF_CTL_ABI_VERSION;
 	info.module_version_major = PDM_VERSION_MAJOR;
 	info.module_version_minor = PDM_VERSION_MINOR;
 	info.module_version_patch = PDM_VERSION_PATCH;
@@ -84,7 +84,7 @@ static long pdm_ctl_ioctl_get_info(unsigned long arg)
 
 static long pdm_ctl_ioctl_get_device(unsigned long arg)
 {
-	struct pdi_ctl_device_query query;
+	struct lpf_ctl_device_query query;
 	lpf_device_info_t *infos;
 	uint32_t count;
 	int32_t ret;
@@ -123,7 +123,7 @@ static long pdm_ctl_ioctl_get_device(unsigned long arg)
 
 static long pdm_ctl_ioctl_get_device_by_name(unsigned long arg)
 {
-	struct pdi_ctl_device_name_query query;
+	struct lpf_ctl_device_name_query query;
 	lpf_device_info_t info;
 	int32_t ret;
 
@@ -146,7 +146,7 @@ static long pdm_ctl_ioctl_get_device_by_name(unsigned long arg)
 
 static long pdm_ctl_ioctl_get_device_by_capability(unsigned long arg)
 {
-	struct pdi_ctl_device_query query;
+	struct lpf_ctl_device_query query;
 	lpf_device_info_t info;
 	int32_t ret;
 
@@ -173,13 +173,13 @@ static long pdm_ctl_ioctl(struct file *file, unsigned int cmd,
 	(void)file;
 
 	switch (cmd) {
-	case PDI_CTL_IOC_GET_INFO:
+	case LPF_CTL_IOC_GET_INFO:
 		return pdm_ctl_ioctl_get_info(arg);
-	case PDI_CTL_IOC_GET_DEVICE:
+	case LPF_CTL_IOC_GET_DEVICE:
 		return pdm_ctl_ioctl_get_device(arg);
-	case PDI_CTL_IOC_GET_DEVICE_BY_NAME:
+	case LPF_CTL_IOC_GET_DEVICE_BY_NAME:
 		return pdm_ctl_ioctl_get_device_by_name(arg);
-	case PDI_CTL_IOC_GET_DEVICE_BY_CAPABILITY:
+	case LPF_CTL_IOC_GET_DEVICE_BY_CAPABILITY:
 		return pdm_ctl_ioctl_get_device_by_capability(arg);
 	default:
 		return -ENOTTY;
@@ -220,7 +220,7 @@ static const struct file_operations g_pdm_ctl_fops = {
 
 int pdm_ctl_chrdev_register(void)
 {
-	return pdm_chrdev_register(&g_pdm_ctl_chrdev, PDI_CTL_DEVICE_NAME,
+	return pdm_chrdev_register(&g_pdm_ctl_chrdev, LPF_CTL_DEVICE_NAME,
 				   &g_pdm_ctl_fops);
 }
 

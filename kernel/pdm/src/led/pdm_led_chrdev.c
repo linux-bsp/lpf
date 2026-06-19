@@ -4,17 +4,17 @@
 #include <linux/fs.h>
 #include <linux/module.h>
 
-#include "pdi/pdi_led.h"
+#include "lpf/lpf_led.h"
 #include "pdm.h"
 #include "pdm_chrdev.h"
 #include "pdm_led_internal.h"
 
 static pdm_chrdev_t g_pdm_led_chrdev;
 
-static void pdm_led_fill_info(struct pdi_led_info *info)
+static void pdm_led_fill_info(struct lpf_led_info *info)
 {
 	osal_memset(info, 0, sizeof(*info));
-	info->abi_version = PDI_LED_ABI_VERSION;
+	info->abi_version = LPF_LED_ABI_VERSION;
 	info->module_version_major = PDM_LED_VERSION_MAJOR;
 	info->module_version_minor = PDM_LED_VERSION_MINOR;
 	info->module_version_patch = PDM_LED_VERSION_PATCH;
@@ -32,7 +32,7 @@ static pdm_led_handle_t pdm_led_open_index(u32 index)
 
 static long pdm_led_ioctl_get_info(unsigned long arg)
 {
-	struct pdi_led_info info;
+	struct lpf_led_info info;
 	int32_t ret;
 
 	pdm_led_fill_info(&info);
@@ -46,7 +46,7 @@ static long pdm_led_ioctl_get_info(unsigned long arg)
 
 static long pdm_led_ioctl_get_state(unsigned long arg)
 {
-	struct pdi_led_state request;
+	struct lpf_led_state request;
 	pdm_led_state_t state;
 	pdm_led_handle_t handle;
 	int32_t ret;
@@ -78,7 +78,7 @@ static long pdm_led_ioctl_get_state(unsigned long arg)
 
 static long pdm_led_ioctl_set_brightness(unsigned long arg)
 {
-	struct pdi_led_brightness request;
+	struct lpf_led_brightness request;
 	pdm_led_handle_t handle;
 	int32_t ret;
 
@@ -137,15 +137,15 @@ static long pdm_led_ioctl(struct file *file, unsigned int cmd,
 	(void)file;
 
 	switch (cmd) {
-	case PDI_LED_IOC_GET_INFO:
+	case LPF_LED_IOC_GET_INFO:
 		return pdm_led_ioctl_get_info(arg);
-	case PDI_LED_IOC_GET_STATE:
+	case LPF_LED_IOC_GET_STATE:
 		return pdm_led_ioctl_get_state(arg);
-	case PDI_LED_IOC_SET_BRIGHTNESS:
+	case LPF_LED_IOC_SET_BRIGHTNESS:
 		return pdm_led_ioctl_set_brightness(arg);
-	case PDI_LED_IOC_ENABLE:
+	case LPF_LED_IOC_ENABLE:
 		return pdm_led_ioctl_enable(arg);
-	case PDI_LED_IOC_DISABLE:
+	case LPF_LED_IOC_DISABLE:
 		return pdm_led_ioctl_disable(arg);
 	default:
 		return -ENOTTY;
@@ -189,7 +189,7 @@ static const struct file_operations pdm_led_fops = {
 
 int pdm_led_chrdev_register(void)
 {
-	return pdm_chrdev_register(&g_pdm_led_chrdev, PDI_LED_DEVICE_NAME,
+	return pdm_chrdev_register(&g_pdm_led_chrdev, LPF_LED_DEVICE_NAME,
 				   &pdm_led_fops);
 }
 

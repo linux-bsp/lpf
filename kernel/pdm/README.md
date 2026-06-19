@@ -91,10 +91,10 @@ devices before driver global resources are released.
 
 Each PDM peripheral exposes
 its own character device, such as `/dev/pdm_mcu`, and each PDI peripheral API
-uses the matching UAPI ioctl header, such as `pdi_mcu.h`.
+uses the matching UAPI ioctl header, such as `lpf_mcu.h`.
 
 `/dev/pdm_ctl` is the management node for discovery. It exposes LPF Core device
-snapshots through `uapi/pdi/pdi_ctl.h`, including stable name, type, state,
+snapshots through `uapi/lpf/lpf_ctl.h`, including stable name, type, state,
 driver name, and capability flags. It does not perform peripheral business
 operations.
 

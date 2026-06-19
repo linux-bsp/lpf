@@ -181,8 +181,8 @@ Add the following pieces together:
 - PDM service driver object registered with `lpf_driver_register`.
 - Optional PDM character device `/dev/pdm_<peripheral>` when userspace access
   is needed.
-- UAPI header `uapi/pdi/pdi_<peripheral>.h` following
-  `docs/PDI_UAPI_ABI.md`.
+- UAPI header `uapi/lpf/lpf_<peripheral>.h` following
+  `docs/LPF_UAPI_ABI.md`.
 - Userspace wrapper `user/pdi/src/pdi_<peripheral>.c`.
 - Kbuild object selection for the new PDM driver.
 

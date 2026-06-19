@@ -4,17 +4,17 @@
 #include <linux/fs.h>
 #include <linux/module.h>
 
-#include "pdi/pdi_mcu.h"
+#include "lpf/lpf_mcu.h"
 #include "pdm.h"
 #include "pdm_chrdev.h"
 #include "pdm_mcu_internal.h"
 
 static pdm_chrdev_t g_pdm_mcu_chrdev;
 
-static void pdm_mcu_fill_info(struct pdi_mcu_info *info)
+static void pdm_mcu_fill_info(struct lpf_mcu_info *info)
 {
 	osal_memset(info, 0, sizeof(*info));
-	info->abi_version = PDI_MCU_ABI_VERSION;
+	info->abi_version = LPF_MCU_ABI_VERSION;
 	info->module_version_major = PDM_VERSION_MAJOR;
 	info->module_version_minor = PDM_VERSION_MINOR;
 	info->module_version_patch = PDM_VERSION_PATCH;
@@ -32,7 +32,7 @@ static pdm_mcu_handle_t pdm_mcu_open_index(u32 index)
 
 static long pdm_mcu_ioctl_get_info(unsigned long arg)
 {
-	struct pdi_mcu_info info;
+	struct lpf_mcu_info info;
 	int32_t ret;
 
 	pdm_mcu_fill_info(&info);
@@ -46,7 +46,7 @@ static long pdm_mcu_ioctl_get_info(unsigned long arg)
 
 static long pdm_mcu_ioctl_get_version(unsigned long arg)
 {
-	struct pdi_mcu_version request;
+	struct lpf_mcu_version request;
 	pdm_mcu_version_t version;
 	pdm_mcu_handle_t handle;
 	int32_t ret;
@@ -82,7 +82,7 @@ static long pdm_mcu_ioctl_get_version(unsigned long arg)
 
 static long pdm_mcu_ioctl_get_status(unsigned long arg)
 {
-	struct pdi_mcu_status request;
+	struct lpf_mcu_status request;
 	pdm_mcu_status_t status;
 	pdm_mcu_handle_t handle;
 	int32_t ret;
@@ -137,7 +137,7 @@ static long pdm_mcu_ioctl_reset(unsigned long arg)
 
 static long pdm_mcu_ioctl_command(unsigned long arg)
 {
-	struct pdi_mcu_command request;
+	struct lpf_mcu_command request;
 	pdm_mcu_handle_t handle;
 	uint32_t actual_len = 0;
 	int32_t ret;
@@ -174,7 +174,7 @@ static long pdm_mcu_ioctl_command(unsigned long arg)
 
 static long pdm_mcu_ioctl_read_data(unsigned long arg)
 {
-	struct pdi_mcu_data request;
+	struct lpf_mcu_data request;
 	pdm_mcu_handle_t handle;
 	int32_t ret;
 
@@ -205,7 +205,7 @@ static long pdm_mcu_ioctl_read_data(unsigned long arg)
 
 static long pdm_mcu_ioctl_write_data(unsigned long arg)
 {
-	struct pdi_mcu_data request;
+	struct lpf_mcu_data request;
 	pdm_mcu_handle_t handle;
 	int32_t ret;
 
@@ -214,7 +214,7 @@ static long pdm_mcu_ioctl_write_data(unsigned long arg)
 	if (ret != OSAL_SUCCESS)
 		return pdm_status_to_errno(ret);
 
-	if (request.len > PDI_MCU_MAX_WRITE_SIZE)
+	if (request.len > LPF_MCU_MAX_WRITE_SIZE)
 		return -EINVAL;
 
 	handle = pdm_mcu_open_index(request.index);
@@ -232,19 +232,19 @@ static long pdm_mcu_ioctl(struct file *file, unsigned int cmd,
 	(void)file;
 
 	switch (cmd) {
-	case PDI_MCU_IOC_GET_INFO:
+	case LPF_MCU_IOC_GET_INFO:
 		return pdm_mcu_ioctl_get_info(arg);
-	case PDI_MCU_IOC_GET_VERSION:
+	case LPF_MCU_IOC_GET_VERSION:
 		return pdm_mcu_ioctl_get_version(arg);
-	case PDI_MCU_IOC_GET_STATUS:
+	case LPF_MCU_IOC_GET_STATUS:
 		return pdm_mcu_ioctl_get_status(arg);
-	case PDI_MCU_IOC_RESET:
+	case LPF_MCU_IOC_RESET:
 		return pdm_mcu_ioctl_reset(arg);
-	case PDI_MCU_IOC_COMMAND:
+	case LPF_MCU_IOC_COMMAND:
 		return pdm_mcu_ioctl_command(arg);
-	case PDI_MCU_IOC_READ_DATA:
+	case LPF_MCU_IOC_READ_DATA:
 		return pdm_mcu_ioctl_read_data(arg);
-	case PDI_MCU_IOC_WRITE_DATA:
+	case LPF_MCU_IOC_WRITE_DATA:
 		return pdm_mcu_ioctl_write_data(arg);
 	default:
 		return -ENOTTY;
@@ -288,7 +288,7 @@ static const struct file_operations pdm_mcu_fops = {
 
 int pdm_mcu_chrdev_register(void)
 {
-	return pdm_chrdev_register(&g_pdm_mcu_chrdev, PDI_MCU_DEVICE_NAME,
+	return pdm_chrdev_register(&g_pdm_mcu_chrdev, LPF_MCU_DEVICE_NAME,
 				   &pdm_mcu_fops);
 }
 

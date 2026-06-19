@@ -31,7 +31,7 @@ int32_t pdi_mcu_open(pdi_mcu_context_t *ctx, const char *device_path)
 		return -1;
 	}
 
-	path = (device_path != NULL) ? device_path : PDI_MCU_DEFAULT_DEVICE;
+	path = (device_path != NULL) ? device_path : LPF_MCU_DEFAULT_DEVICE;
 	ctx->fd = open(path, O_RDWR | O_CLOEXEC);
 	return (ctx->fd < 0) ? -1 : 0;
 }
@@ -39,7 +39,7 @@ int32_t pdi_mcu_open(pdi_mcu_context_t *ctx, const char *device_path)
 int32_t pdi_mcu_open_by_name(pdi_mcu_context_t *ctx, const char *name)
 {
 	pdi_ctl_context_t ctl;
-	struct pdi_ctl_device_info info;
+	struct lpf_ctl_device_info info;
 	int32_t ret;
 
 	if (ctx == NULL || name == NULL) {
@@ -56,7 +56,7 @@ int32_t pdi_mcu_open_by_name(pdi_mcu_context_t *ctx, const char *name)
 	if (ret < 0)
 		return ret;
 
-	if (info.type != PDI_CTL_DEVICE_TYPE_MCU) {
+	if (info.type != LPF_CTL_DEVICE_TYPE_MCU) {
 		errno = ENODEV;
 		return -1;
 	}
@@ -78,72 +78,72 @@ int32_t pdi_mcu_close(pdi_mcu_context_t *ctx)
 	return ret;
 }
 
-int32_t pdi_mcu_get_info(pdi_mcu_context_t *ctx, struct pdi_mcu_info *info)
+int32_t pdi_mcu_get_info(pdi_mcu_context_t *ctx, struct lpf_mcu_info *info)
 {
 	if (info == NULL) {
 		errno = EINVAL;
 		return -1;
 	}
 
-	return pdi_mcu_ioctl_checked(ctx, PDI_MCU_IOC_GET_INFO, info);
+	return pdi_mcu_ioctl_checked(ctx, LPF_MCU_IOC_GET_INFO, info);
 }
 
 int32_t pdi_mcu_get_version(pdi_mcu_context_t *ctx,
-			    struct pdi_mcu_version *version)
+			    struct lpf_mcu_version *version)
 {
 	if (version == NULL) {
 		errno = EINVAL;
 		return -1;
 	}
 
-	return pdi_mcu_ioctl_checked(ctx, PDI_MCU_IOC_GET_VERSION, version);
+	return pdi_mcu_ioctl_checked(ctx, LPF_MCU_IOC_GET_VERSION, version);
 }
 
 int32_t pdi_mcu_get_status(pdi_mcu_context_t *ctx,
-			   struct pdi_mcu_status *status)
+			   struct lpf_mcu_status *status)
 {
 	if (status == NULL) {
 		errno = EINVAL;
 		return -1;
 	}
 
-	return pdi_mcu_ioctl_checked(ctx, PDI_MCU_IOC_GET_STATUS, status);
+	return pdi_mcu_ioctl_checked(ctx, LPF_MCU_IOC_GET_STATUS, status);
 }
 
 int32_t pdi_mcu_reset(pdi_mcu_context_t *ctx, uint32_t index)
 {
-	return pdi_mcu_ioctl_checked(ctx, PDI_MCU_IOC_RESET, &index);
+	return pdi_mcu_ioctl_checked(ctx, LPF_MCU_IOC_RESET, &index);
 }
 
 int32_t pdi_mcu_command(pdi_mcu_context_t *ctx,
-			struct pdi_mcu_command *command)
+			struct lpf_mcu_command *command)
 {
 	if (command == NULL) {
 		errno = EINVAL;
 		return -1;
 	}
 
-	return pdi_mcu_ioctl_checked(ctx, PDI_MCU_IOC_COMMAND, command);
+	return pdi_mcu_ioctl_checked(ctx, LPF_MCU_IOC_COMMAND, command);
 }
 
 int32_t pdi_mcu_read_data(pdi_mcu_context_t *ctx,
-			  struct pdi_mcu_data *data)
+			  struct lpf_mcu_data *data)
 {
 	if (data == NULL) {
 		errno = EINVAL;
 		return -1;
 	}
 
-	return pdi_mcu_ioctl_checked(ctx, PDI_MCU_IOC_READ_DATA, data);
+	return pdi_mcu_ioctl_checked(ctx, LPF_MCU_IOC_READ_DATA, data);
 }
 
 int32_t pdi_mcu_write_data(pdi_mcu_context_t *ctx,
-			   const struct pdi_mcu_data *data)
+			   const struct lpf_mcu_data *data)
 {
 	if (data == NULL) {
 		errno = EINVAL;
 		return -1;
 	}
 
-	return pdi_mcu_ioctl_checked(ctx, PDI_MCU_IOC_WRITE_DATA, (void *)data);
+	return pdi_mcu_ioctl_checked(ctx, LPF_MCU_IOC_WRITE_DATA, (void *)data);
 }

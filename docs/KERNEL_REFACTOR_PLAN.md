@@ -25,7 +25,7 @@ device and driver lifecycle instead of adding new PDM-local bus code.
   ordering.
 - PDI remains a userspace library, but it only talks to per-peripheral character
   devices and UAPI headers.
-- Each peripheral owns its own PConfig type, PDM driver, PDI UAPI header, PDI
+- Each peripheral owns its own PConfig type, PDM driver, LPF UAPI header, PDI
   userspace wrapper, character device, and ioctl namespace.
 - Feature selection is handled by Kbuild object selection and registration
   tables, not by business-code `#ifdef CONFIG_*` branches.
@@ -47,7 +47,7 @@ device and driver lifecycle instead of adding new PDM-local bus code.
 - [x] Add `module_init`/`module_exit` for OSAL.
 - [x] Add `module_init`/`module_exit` for PConfig.
 - [x] Build PDM as `pdm.ko` with module entry in `pdm.c`.
-- [x] Split PDI MCU UAPI into `uapi/pdi/pdi_mcu.h`.
+- [x] Split PDI MCU UAPI into `uapi/lpf/lpf_mcu.h`.
 - [x] Split userspace PDI MCU wrapper into `user/pdi/src/pdi_mcu.c`.
 - [x] Add `/dev/pdm_mcu` character-device ioctl boundary.
 - [x] Change PDM startup to initialize built-in drivers, load PConfig, iterate
@@ -140,10 +140,10 @@ device and driver lifecycle instead of adding new PDM-local bus code.
 
 ## Phase 4: Finish PDI/UAPI Split
 
-- [x] MCU UAPI lives in `uapi/pdi/pdi_mcu.h`.
-- [x] MCU ioctl definitions are owned by `pdi_mcu.h`.
-- [x] LED UAPI lives in `uapi/pdi/pdi_led.h`.
-- [x] LED ioctl definitions are owned by `pdi_led.h`.
+- [x] MCU UAPI lives in `uapi/lpf/lpf_mcu.h`.
+- [x] MCU ioctl definitions are owned by `lpf_mcu.h`.
+- [x] LED UAPI lives in `uapi/lpf/lpf_led.h`.
+- [x] LED ioctl definitions are owned by `lpf_led.h`.
 - [x] Userspace PDI aggregates per-peripheral headers from `pdi.h`.
 - [x] Define UAPI rules for all future peripherals.
   - UAPI headers must be usable by both kernel and userspace.
@@ -240,7 +240,7 @@ device and driver lifecycle instead of adding new PDM-local bus code.
   - PConfig type and platform entry.
   - LPF device type/capability mapping.
   - PDM service driver object and LPF Core registration.
-  - PDI UAPI header and userspace wrapper.
+  - LPF UAPI header and userspace wrapper.
   - Kbuild object selection.
 - [x] Document the feature-selection rule.
   - Build/link selection is allowed.

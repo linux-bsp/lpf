@@ -5,7 +5,7 @@
 #ifndef PDI_LED_API_H
 #define PDI_LED_API_H
 
-#include "pdi/pdi_led.h"
+#include "lpf/lpf_led.h"
 
 #include <stdint.h>
 
@@ -20,9 +20,9 @@ typedef struct {
 int32_t pdi_led_open(pdi_led_context_t *ctx, const char *device_path);
 int32_t pdi_led_open_by_name(pdi_led_context_t *ctx, const char *name);
 int32_t pdi_led_close(pdi_led_context_t *ctx);
-int32_t pdi_led_get_info(pdi_led_context_t *ctx, struct pdi_led_info *info);
+int32_t pdi_led_get_info(pdi_led_context_t *ctx, struct lpf_led_info *info);
 int32_t pdi_led_get_state(pdi_led_context_t *ctx,
-			  struct pdi_led_state *state);
+			  struct lpf_led_state *state);
 int32_t pdi_led_set_brightness(pdi_led_context_t *ctx, uint32_t index,
 			       uint32_t brightness);
 int32_t pdi_led_enable(pdi_led_context_t *ctx, uint32_t index);

@@ -30,7 +30,7 @@ int32_t pdi_ctl_open(pdi_ctl_context_t *ctx, const char *device_path)
 		return -1;
 	}
 
-	path = (device_path != NULL) ? device_path : PDI_CTL_DEFAULT_DEVICE;
+	path = (device_path != NULL) ? device_path : LPF_CTL_DEFAULT_DEVICE;
 	ctx->fd = open(path, O_RDWR | O_CLOEXEC);
 	return (ctx->fd < 0) ? -1 : 0;
 }
@@ -49,21 +49,21 @@ int32_t pdi_ctl_close(pdi_ctl_context_t *ctx)
 	return ret;
 }
 
-int32_t pdi_ctl_get_info(pdi_ctl_context_t *ctx, struct pdi_ctl_info *info)
+int32_t pdi_ctl_get_info(pdi_ctl_context_t *ctx, struct lpf_ctl_info *info)
 {
 	if (info == NULL) {
 		errno = EINVAL;
 		return -1;
 	}
 
-	return pdi_ctl_ioctl_checked(ctx, PDI_CTL_IOC_GET_INFO, info);
+	return pdi_ctl_ioctl_checked(ctx, LPF_CTL_IOC_GET_INFO, info);
 }
 
 int32_t pdi_list_devices(pdi_ctl_context_t *ctx,
-			 struct pdi_ctl_device_info *devices,
+			 struct lpf_ctl_device_info *devices,
 			 uint32_t *count)
 {
-	struct pdi_ctl_device_query query;
+	struct lpf_ctl_device_query query;
 	uint32_t requested;
 	uint32_t i;
 	int32_t ret;
@@ -77,7 +77,7 @@ int32_t pdi_list_devices(pdi_ctl_context_t *ctx,
 	for (i = 0; i < requested; i++) {
 		memset(&query, 0, sizeof(query));
 		query.match_index = i;
-		ret = pdi_ctl_ioctl_checked(ctx, PDI_CTL_IOC_GET_DEVICE,
+		ret = pdi_ctl_ioctl_checked(ctx, LPF_CTL_IOC_GET_DEVICE,
 					    &query);
 		if (ret < 0) {
 			if (i == 0)
@@ -94,9 +94,9 @@ int32_t pdi_list_devices(pdi_ctl_context_t *ctx,
 }
 
 int32_t pdi_get_device_by_name(pdi_ctl_context_t *ctx, const char *name,
-			       struct pdi_ctl_device_info *info)
+			       struct lpf_ctl_device_info *info)
 {
-	struct pdi_ctl_device_name_query query;
+	struct lpf_ctl_device_name_query query;
 	int32_t ret;
 
 	if (name == NULL || info == NULL) {
@@ -107,7 +107,7 @@ int32_t pdi_get_device_by_name(pdi_ctl_context_t *ctx, const char *name,
 	memset(&query, 0, sizeof(query));
 	strncpy(query.name, name, sizeof(query.name) - 1U);
 
-	ret = pdi_ctl_ioctl_checked(ctx, PDI_CTL_IOC_GET_DEVICE_BY_NAME,
+	ret = pdi_ctl_ioctl_checked(ctx, LPF_CTL_IOC_GET_DEVICE_BY_NAME,
 				    &query);
 	if (ret < 0)
 		return ret;
@@ -119,12 +119,12 @@ int32_t pdi_get_device_by_name(pdi_ctl_context_t *ctx, const char *name,
 int32_t pdi_get_device_by_capability(pdi_ctl_context_t *ctx,
 				     uint64_t required_capabilities,
 				     uint32_t match_index,
-				     struct pdi_ctl_device_info *info)
+				     struct lpf_ctl_device_info *info)
 {
-	struct pdi_ctl_device_query query;
+	struct lpf_ctl_device_query query;
 	int32_t ret;
 
-	if (info == NULL || required_capabilities == PDI_CTL_DEVICE_CAP_NONE) {
+	if (info == NULL || required_capabilities == LPF_CTL_DEVICE_CAP_NONE) {
 		errno = EINVAL;
 		return -1;
 	}
@@ -134,7 +134,7 @@ int32_t pdi_get_device_by_capability(pdi_ctl_context_t *ctx,
 	query.required_capabilities = required_capabilities;
 
 	ret = pdi_ctl_ioctl_checked(ctx,
-				    PDI_CTL_IOC_GET_DEVICE_BY_CAPABILITY,
+				    LPF_CTL_IOC_GET_DEVICE_BY_CAPABILITY,
 				    &query);
 	if (ret < 0)
 		return ret;

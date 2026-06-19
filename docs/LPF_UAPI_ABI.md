@@ -1,12 +1,14 @@
-# PDI UAPI ABI Rules
+# LPF UAPI ABI Rules
 
-PDI UAPI headers under `uapi/pdi/` define the stable ioctl ABI shared by
-kernel PDM character devices and userspace PDI wrappers.
+LPF UAPI headers under `uapi/lpf/` define the stable ioctl ABI shared by
+kernel PDM character devices and userspace PDI wrappers. PDI owns the
+application-facing SDK; LPF UAPI owns ioctl commands, fixed-layout payloads,
+device-node names, and ABI version constants.
 
 ## Header Rules
 
-- One peripheral owns one UAPI header: `pdi_<peripheral>.h`. Shared management
-  or discovery nodes own explicit control headers such as `pdi_ctl.h`.
+- One peripheral owns one UAPI header: `lpf_<peripheral>.h`. Shared management
+  or discovery nodes own explicit control headers such as `lpf_ctl.h`.
 - The header must compile in both kernel and userspace builds.
 - UAPI structures use Linux fixed-width types such as `__u32`, `__s32`, and
   `__u64`.
@@ -18,7 +20,7 @@ kernel PDM character devices and userspace PDI wrappers.
 
 ## ABI Versioning
 
-- Each peripheral UAPI defines `PDI_<PERIPHERAL>_ABI_VERSION`.
+- Each peripheral UAPI defines `LPF_<PERIPHERAL>_ABI_VERSION`.
 - Each peripheral provides a `GET_INFO` ioctl returning the ABI version and
   module version fields.
 - ABI version format is `0xMMMMmmmm`, where `MMMM` is the major ABI and `mmmm`
@@ -42,14 +44,14 @@ kernel PDM character devices and userspace PDI wrappers.
 
 Add the following pieces together:
 
-- `uapi/pdi/pdi_<peripheral>.h`
+- `uapi/lpf/lpf_<peripheral>.h`
 - `user/pdi/include/pdi/<peripheral>.h`
 - `user/pdi/src/pdi_<peripheral>.c`
 - PDI aggregate include from `user/pdi/include/pdi/pdi.h`
 - PDM character device implementation for `/dev/pdm_<peripheral>`
-- `PDI_<PERIPHERAL>_IOC_GET_INFO`
-- A unique `PDI_<PERIPHERAL>_IOC_MAGIC`
+- `LPF_<PERIPHERAL>_IOC_GET_INFO`
+- A unique `LPF_<PERIPHERAL>_IOC_MAGIC`
 
 Management APIs follow the same ABI rules but should stay separate from
 peripheral business commands. For example, `/dev/pdm_ctl` uses
-`uapi/pdi/pdi_ctl.h` only for device discovery snapshots.
+`uapi/lpf/lpf_ctl.h` only for device discovery snapshots.
