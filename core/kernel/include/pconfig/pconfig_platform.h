@@ -34,6 +34,7 @@ typedef struct {
 	const char *chip_name; /* 芯片名称（如"am6254"） */
 	const char *project_name; /* 项目名称（如"H200_100P"） */
 	const char *product_name; /* 产品名称（如"framework"） */
+	const char *version; /* 配置版本（如"1.0.0"） */
 
 	/* 硬件外设配置数组（直接数组指针） */
 	uint32_t mcu_count; /* MCU外设数量 */

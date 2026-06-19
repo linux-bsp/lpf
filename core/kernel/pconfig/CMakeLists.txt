@@ -16,6 +16,8 @@ endif()
 # PCONFIG 核心源文件
 list(APPEND ADD_SRCS
     "src/pconfig_api.c"
+    "configs/pconfig_configs.c"
+    "configs/kernel/x86_modules/1.0.0/pconfig_kernel_x86_modules.c"
 )
 
 # 添加平台配置源文件（如果有）

@@ -8,6 +8,8 @@ implemented and verified.
 
 - HAL is a kernel-only module built as `hal.ko`.
 - PConfig is a standalone kernel module built as `pconfig.ko`.
+- Concrete platform configs are compiled directly into `pconfig.ko` under
+  `core/kernel/pconfig/configs/<product>/<project>/<version>/`.
 - PDM is a kernel module built as `pdm.ko`; peripheral drivers are linked into
   `pdm.ko` and registered through built-in driver registration.
 - PDI remains a userspace library, but it only talks to per-peripheral character
@@ -47,17 +49,18 @@ implemented and verified.
 - [x] Remove ctest product files from the current tree.
 - [x] Create a tag for the last pure userspace implementation and merge the
       refactor branch back to `master`.
+- [x] Keep concrete platform configuration inside the original PConfig module
+      instead of adding a separate product config kernel module.
 
 ## Phase 1: Make The Current Kernel Modules Loadable
 
-- [ ] Add a real product/platform PConfig source for the kernel module build.
-  - `pconfig.ko` currently has only a weak empty `g_pconfig_platform_table`.
-  - The selected platform table must be linked into `pconfig.ko` by Kbuild.
+- [x] Add a real product/platform PConfig source for the kernel module build.
+  - `pconfig.ko` links `g_pconfig_platform_table` from
+    `core/kernel/pconfig/configs`.
   - Acceptance: `pconfig_load()` finds a board config and `pconfig.ko` loads.
-- [ ] Define the PConfig ownership model.
-  - PConfig should own its module lifetime and global config state.
-  - PDM should not unload PConfig-owned global state unless a reference-counted
-    API is introduced.
+- [x] Define the PConfig ownership model.
+  - PConfig owns its module lifetime and global config state.
+  - PDM reads PConfig and removes only PDM-created devices on exit.
   - Acceptance: unloading `pdm.ko` does not invalidate a loaded `pconfig.ko`
     unexpectedly.
 - [ ] Add a basic module load/unload smoke path.
@@ -197,7 +200,7 @@ implemented and verified.
   - `core/kernel/pdm/CMakeLists.txt` and `pconfig/CMakeLists.txt` still contain
     static/shared library options.
   - HAL CMake is currently an interface target only.
-- [ ] Ensure defconfigs match the final module build model.
+- [x] Ensure defconfigs match the current module build model.
   - `kernel_x86_modules_defconfig` should enable only valid kernel module
     options.
 

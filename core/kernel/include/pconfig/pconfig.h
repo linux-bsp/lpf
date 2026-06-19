@@ -53,16 +53,16 @@ int32_t pconfig_load(void);
 void pconfig_unload(void);
 
 /**
- * @brief 根据平台和产品名称查找配置
+ * @brief 根据产品、项目和版本查找配置
  *
- * @param[in] platform 平台名称（如"ti/am625"）
- * @param[in] product 产品名称（如"framework"）
- * @param[in] version 版本号（如"v1.0"，当前未使用）
+ * @param[in] product 产品名称（如"kernel"）
+ * @param[in] project 项目名称（如"x86_modules"）
+ * @param[in] version 版本号（如"1.0.0"）
  *
  * @return 平台配置指针，失败返回NULL
  */
 const pconfig_platform_config_t *
-pconfig_find(const char *platform, const char *product, const char *version);
+pconfig_find(const char *product, const char *project, const char *version);
 
 /**
  * @brief 列出所有配置

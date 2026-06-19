@@ -201,8 +201,6 @@ static void pdm_remove_devices(void)
 		if (driver_table[i] && driver_table[i]->remove_all)
 			driver_table[i]->remove_all();
 	}
-
-	pconfig_unload();
 }
 
 static int pdm_probe_devices(void)

@@ -14,13 +14,16 @@
 
 #define PCONFIG_MAX_DEVICES 32U
 
-__attribute__((weak))
-const pconfig_platform_table_t g_pconfig_platform_table = { .configs = NULL,
-							    .count = 0,
-							    .current_index = 0 };
-
 static pconfig_device_config_t g_pconfig_devices[PCONFIG_MAX_DEVICES + 1U];
 static bool g_pconfig_initialized;
+
+static bool pconfig_table_is_valid(void)
+{
+	return g_pconfig_platform_table.configs &&
+	       g_pconfig_platform_table.count > 0 &&
+	       g_pconfig_platform_table.current_index <
+		       g_pconfig_platform_table.count;
+}
 
 static int32_t
 pconfig_build_device_list(const pconfig_platform_config_t *platform)
@@ -56,12 +59,8 @@ pconfig_build_device_list(const pconfig_platform_config_t *platform)
 
 const pconfig_platform_config_t *pconfig_get_board(void)
 {
-	if (NULL == g_pconfig_platform_table.configs ||
-	    0u == g_pconfig_platform_table.count ||
-	    g_pconfig_platform_table.current_index >=
-		    g_pconfig_platform_table.count) {
+	if (!pconfig_table_is_valid())
 		return NULL;
-	}
 
 	return g_pconfig_platform_table
 		.configs[g_pconfig_platform_table.current_index];
@@ -74,15 +73,14 @@ const pconfig_device_config_t *pconfig_get(void)
 }
 EXPORT_SYMBOL_GPL(pconfig_get);
 
-const pconfig_platform_config_t *pconfig_find(const char *platform,
-					      const char *product,
-					      const char *version
-					      __attribute__((unused)))
+const pconfig_platform_config_t *pconfig_find(const char *product,
+					      const char *project,
+					      const char *version)
 {
 	uint32_t i;
 	const pconfig_platform_config_t *config;
 
-	if (NULL == platform || NULL == product ||
+	if (NULL == product || NULL == project ||
 	    NULL == g_pconfig_platform_table.configs)
 		return NULL;
 
@@ -91,14 +89,21 @@ const pconfig_platform_config_t *pconfig_find(const char *platform,
 		if (NULL == config)
 			continue;
 
-		if (NULL == config->platform_name || NULL == config->product_name)
-			continue;
-
-		if (0 != osal_strcmp(config->platform_name, platform))
+		if (NULL == config->product_name || NULL == config->project_name)
 			continue;
 
 		if (0 != osal_strcmp(config->product_name, product))
 			continue;
+
+		if (0 != osal_strcmp(config->project_name, project))
+			continue;
+
+		if (version) {
+			if (!config->version)
+				continue;
+			if (0 != osal_strcmp(config->version, version))
+				continue;
+		}
 
 		return config;
 	}
@@ -139,8 +144,15 @@ int32_t pconfig_validate(const pconfig_platform_config_t *config)
 	if (NULL == config)
 		return OSAL_ERR_GENERIC;
 
-	if (NULL == config->platform_name || NULL == config->product_name) {
-		LOG_ERROR("PCONFIG", "Missing platform or product name");
+	if (NULL == config->platform_name || NULL == config->chip_name ||
+	    NULL == config->project_name || NULL == config->product_name ||
+	    NULL == config->version) {
+		LOG_ERROR("PCONFIG", "Missing platform identity");
+		return OSAL_ERR_GENERIC;
+	}
+
+	if (config->mcu_count > 0 && NULL == config->mcu_array) {
+		LOG_ERROR("PCONFIG", "Missing MCU config array");
 		return OSAL_ERR_GENERIC;
 	}
 
@@ -156,7 +168,10 @@ void pconfig_print(const pconfig_platform_config_t *config)
 		return;
 
 	LOG_INFO("PCONFIG", "Platform: %s", config->platform_name);
+	LOG_INFO("PCONFIG", "Chip: %s", config->chip_name);
+	LOG_INFO("PCONFIG", "Project: %s", config->project_name);
 	LOG_INFO("PCONFIG", "Product: %s", config->product_name);
+	LOG_INFO("PCONFIG", "Version: %s", config->version);
 
 	if (config->mcu_array) {
 		for (i = 0; i < config->mcu_count; i++) {
@@ -208,6 +223,7 @@ int32_t pconfig_load(void)
 	if (ret != OSAL_SUCCESS)
 		return ret;
 
+	pconfig_print(platform);
 	g_pconfig_initialized = true;
 	return OSAL_SUCCESS;
 }
