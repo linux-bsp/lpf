@@ -7,6 +7,66 @@
 #include "hal_internal.h"
 #include "generated/gen_version.h"
 
+static bool g_hal_builtin_drivers_ready;
+
+static const hal_builtin_driver_t *hal_builtin_driver_first(void)
+{
+	return &hal_builtin_driver_start + 1;
+}
+
+static const hal_builtin_driver_t *hal_builtin_driver_last(void)
+{
+	return &hal_builtin_driver_end;
+}
+
+static void
+hal_builtin_drivers_exit_range(const hal_builtin_driver_t *end)
+{
+	const hal_builtin_driver_t *first = hal_builtin_driver_first();
+	const hal_builtin_driver_t *driver = end;
+
+	while (driver > first) {
+		driver--;
+		if (driver->exit)
+			driver->exit();
+	}
+}
+
+static int hal_builtin_drivers_init(void)
+{
+	const hal_builtin_driver_t *driver;
+	int ret;
+
+	for (driver = hal_builtin_driver_first();
+	     driver < hal_builtin_driver_last(); driver++) {
+		if (!driver->init)
+			continue;
+
+		ret = driver->init();
+		if (ret) {
+			LOG_ERROR("HAL", "Builtin driver %s init failed: %d",
+				  driver->name ? driver->name : "unknown", ret);
+			hal_builtin_drivers_exit_range(driver);
+			return ret;
+		}
+
+		LOG_INFO("HAL", "Builtin driver %s initialized",
+			 driver->name ? driver->name : "unknown");
+	}
+
+	g_hal_builtin_drivers_ready = true;
+	return 0;
+}
+
+static void hal_builtin_drivers_exit(void)
+{
+	if (!g_hal_builtin_drivers_ready)
+		return;
+
+	hal_builtin_drivers_exit_range(hal_builtin_driver_last());
+	g_hal_builtin_drivers_ready = false;
+}
+
 void hal_print_version(void)
 {
 	osal_log(OS_LOG_LEVEL_INFO, "HAL",
@@ -21,14 +81,13 @@ EXPORT_SYMBOL_GPL(hal_print_version);
 
 static int __init hal_init(void)
 {
-	hal_print_version();
-#ifdef CONFIG_HAL_GPIO
 	int ret;
 
-	ret = hal_gpio_module_init();
+	hal_print_version();
+
+	ret = hal_builtin_drivers_init();
 	if (ret)
 		return ret;
-#endif
 
 	LOG_INFO("HAL", "loaded");
 	return 0;
@@ -36,9 +95,7 @@ static int __init hal_init(void)
 
 static void __exit hal_exit(void)
 {
-#ifdef CONFIG_HAL_GPIO
-	hal_gpio_module_deinit();
-#endif
+	hal_builtin_drivers_exit();
 	LOG_INFO("HAL", "unloaded");
 }
 

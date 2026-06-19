@@ -403,12 +403,14 @@ int32_t hal_gpio_disable_interrupt(uint32_t gpio_num)
 }
 EXPORT_SYMBOL_GPL(hal_gpio_disable_interrupt);
 
-int hal_gpio_module_init(void)
+static int hal_gpio_module_init(void)
 {
 	return osal_mutex_init(&g_hal_gpio_lock, NULL);
 }
 
-void hal_gpio_module_deinit(void)
+static void hal_gpio_module_deinit(void)
 {
 	osal_mutex_destroy(&g_hal_gpio_lock);
 }
+
+HAL_BUILTIN_DRIVER(gpio, hal_gpio_module_init, hal_gpio_module_deinit);
