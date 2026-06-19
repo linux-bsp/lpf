@@ -1122,10 +1122,10 @@ config SANITY_ERROR_TEST_PDI_NO_MODULE
 	depends on TEST_PDI && !PDI
 	prompt "ERROR: PDI tests require PDI module to be enabled"
 
-config SANITY_ERROR_TEST_PRL_NO_MODULE
+config SANITY_ERROR_TEST_PDM_NO_MODULE
 	def_bool y
-	depends on TEST_PRL && !PRL
-	prompt "ERROR: PRL tests require PRL module to be enabled"
+	depends on TEST_PDM && !PDM
+	prompt "ERROR: PDM tests require PDM module to be enabled"
 
 config SANITY_ERROR_TEST_ACONFIG_NO_MODULE
 	def_bool y
@@ -1150,15 +1150,6 @@ config SANITY_ERROR_HAL_GPIO_NO_PLATFORM
 	def_bool y
 	depends on HAL_GPIO && !PLATFORM_LINUX
 	prompt "ERROR: HAL_GPIO requires Linux platform support (PLATFORM_LINUX)"
-
-# ============================================================================
-# PRL Protocol Dependency Checks
-# ============================================================================
-
-config SANITY_ERROR_PRL_NO_OSAL
-	def_bool y
-	depends on PRL && !OSAL
-	prompt "ERROR: PRL requires OSAL to be enabled"
 
 # ============================================================================
 # Security Configuration Checks

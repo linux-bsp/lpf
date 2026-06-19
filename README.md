@@ -1,6 +1,6 @@
 # ES-Middleware SDK
 
-ES-Middleware is a generic embedded middleware framework built with Kconfig and CMake. It provides reusable core layers for embedded Linux, RTOS, and bare-metal targets.
+ES-Middleware is a Linux-focused embedded middleware framework built with Kconfig and CMake. It provides reusable core layers for userspace API libraries and kernel modules.
 
 ## Current Scope
 
@@ -8,7 +8,7 @@ The repository currently contains framework core modules and the core test produ
 
 Current concrete peripheral/device type:
 
-- MCU peripheral type in PCONFIG/PDL/PRL
+- MCU peripheral type in PCONFIG/PDM, exposed to userspace through PDI
 
 The framework keeps the layered extension points so additional peripheral types can be added later without changing the core architecture.
 
@@ -17,8 +17,8 @@ The framework keeps the layered extension points so additional peripheral types 
 - OSAL: operating-system abstraction
 - HAL: hardware abstraction
 - PCONFIG: platform hardware configuration registry
-- PRL: protocol layer for device messages
-- PDL: peripheral driver layer
+- PDM: kernel peripheral driver module
+- PDI: userspace peripheral driver interface library
 - ACONFIG: application configuration layer
 - test_framework: core test infrastructure
 

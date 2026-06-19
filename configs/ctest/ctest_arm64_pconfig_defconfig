@@ -17,13 +17,11 @@ CONFIG_PROJECT_H200_AM625=y
 CONFIG_OSAL=y
 CONFIG_TEST_FRAMEWORK=y
 CONFIG_HAL=y
-CONFIG_PDL=y
 CONFIG_PCONFIG=y
 
 # Build Configuration
 CONFIG_OSAL_BUILD_SHARED=y
 CONFIG_HAL_BUILD_SHARED=y
-CONFIG_PDL_BUILD_SHARED=y
 CONFIG_PCONFIG_BUILD_SHARED=y
 
 # OSAL Features - Required
@@ -72,7 +70,6 @@ CONFIG_TEST_PCONFIG_API=y
 # Other test modules disabled
 # CONFIG_TEST_OSAL is not set
 # CONFIG_TEST_HAL is not set
-# CONFIG_TEST_PDL is not set
 # CONFIG_TEST_ACONFIG is not set
 # CONFIG_TEST_PERFORMANCE is not set
 # CONFIG_TEST_STRESS is not set
@@ -80,17 +77,9 @@ CONFIG_TEST_PCONFIG_API=y
 
 # Products - All Disabled
 
-# HAL - Disabled
-
-# PDL - Disabled
-
-
 # HAL Features - Enable basic features
 CONFIG_HAL_CAN=y
 CONFIG_HAL_GPIO=y
 CONFIG_HAL_I2C=y
 CONFIG_HAL_SPI=y
 CONFIG_HAL_UART=y
-
-# PDL Features - Enable basic modules
-CONFIG_PDL_MCU_SUPPORT=y

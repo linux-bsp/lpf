@@ -1,6 +1,6 @@
 # ES-Middleware Project Context
 
-ES-Middleware is now a generic embedded middleware framework. Product-specific satellite/PMC business code has been removed.
+ES-Middleware is now a Linux-focused embedded middleware framework. Product-specific satellite/PMC business code has been removed.
 
 ## Current Architecture
 
@@ -9,8 +9,8 @@ Core modules:
 - OSAL
 - HAL
 - PCONFIG
-- PRL
-- PDL
+- PDM
+- PDI
 - ACONFIG
 - test_framework
 
@@ -18,7 +18,7 @@ Current concrete peripheral/device family:
 
 - MCU only
 
-The framework is still structured for later peripheral expansion. Add new peripheral families by extending PCONFIG types/accessors, PRL device protocol definitions, PDL public headers/source subdirectories, Kconfig entries, and tests.
+The framework is still structured for later peripheral expansion. Add new peripheral families by extending PCONFIG types/accessors, PDM kernel modules/protocol helpers, PDI userspace APIs, Kconfig entries, and tests.
 
 ## Common Commands
 
@@ -33,6 +33,6 @@ make all
 
 - Core modules must not depend on product code.
 - Product/application code belongs outside `core/`.
-- PDL consumes PCONFIG through typed accessors.
-- PRL owns protocol framing and device-message encode/decode helpers.
+- PDM consumes PCONFIG through typed accessors and owns kernel-side peripheral logic.
+- PDI exposes the userspace API and wraps the PDM ioctl ABI.
 - HAL and OSAL remain platform abstraction layers.
