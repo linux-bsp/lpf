@@ -21,6 +21,7 @@
 typedef enum {
 	PCONFIG_DEVICE_TYPE_INVALID = 0x00,
 	PCONFIG_DEVICE_TYPE_MCU = 0x01,
+	PCONFIG_DEVICE_TYPE_LED = 0x02,
 } pconfig_device_type_t;
 
 typedef struct {

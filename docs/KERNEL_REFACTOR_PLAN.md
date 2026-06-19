@@ -51,6 +51,7 @@ implemented and verified.
       refactor branch back to `master`.
 - [x] Keep concrete platform configuration inside the original PConfig module
       instead of adding a separate product config kernel module.
+- [x] Add HAL PWM support and PDM LED support with GPIO/PWM control.
 
 ## Phase 1: Make The Current Kernel Modules Loadable
 
@@ -70,23 +71,22 @@ implemented and verified.
 
 ## Phase 2: Finish PConfig As A Peripheral Registry
 
-- [ ] Generalize `pconfig_device_type_t` beyond MCU.
+- [x] Generalize `pconfig_device_type_t` beyond MCU.
   - Keep `PCONFIG_DEVICE_TYPE_INVALID`.
-  - Add new device types only with their matching config headers and PDM/PDI
-    users.
-- [ ] Split PConfig per-peripheral types.
+  - LED is added with matching PConfig, PDM, PDI, and UAPI pieces.
+- [x] Split PConfig per-peripheral types.
   - Current: `pconfig_mcu.h`.
-  - Future pattern: `pconfig_xxx.h` for each peripheral.
-- [ ] Extend `pconfig_platform_config_t` for each supported peripheral.
+  - LED follows the `pconfig_xxx.h` pattern.
+- [x] Extend `pconfig_platform_config_t` for each supported peripheral.
   - Use `xxx_count` plus `xxx_array` consistently.
-- [ ] Generalize `pconfig_build_device_list()`.
-  - It currently emits only MCU device entries.
+- [x] Generalize `pconfig_build_device_list()`.
+  - It currently emits MCU and LED device entries.
   - Each enabled config entry should produce one `pconfig_device_config_t`.
-- [ ] Strengthen `pconfig_validate()`.
+- [x] Strengthen `pconfig_validate()`.
   - Validate required platform fields.
   - Validate per-peripheral arrays and counts.
-  - Validate transport-specific settings used by PDM.
-- [ ] Update PConfig debug print output.
+  - LED now validates control type, brightness range, and PWM settings.
+- [x] Update PConfig debug print output.
   - Print all configured peripheral groups, not only MCU.
 
 ## Phase 3: Finish PDM Driver Model
@@ -113,15 +113,17 @@ implemented and verified.
 - [ ] Revisit PDM device removal.
   - PDM should remove devices before driver exit.
   - PConfig state should remain owned by PConfig.
-- [ ] Add future peripheral support using the established model.
-  - Add `pdm_xxx` implementation.
-  - Add `pdm_xxx_chrdev.c` if userspace control is required.
+- [x] Add LED peripheral support using the established model.
+  - Add `pdm_led` implementation.
+  - Add `pdm_led_chrdev.c`.
   - Add matching PConfig and PDI pieces.
 
 ## Phase 4: Finish PDI/UAPI Split
 
 - [x] MCU UAPI lives in `uapi/pdi/pdi_mcu.h`.
 - [x] MCU ioctl definitions are owned by `pdi_mcu.h`.
+- [x] LED UAPI lives in `uapi/pdi/pdi_led.h`.
+- [x] LED ioctl definitions are owned by `pdi_led.h`.
 - [x] Userspace PDI aggregates per-peripheral headers from `pdi.h`.
 - [ ] Define UAPI rules for all future peripherals.
   - UAPI headers must be usable by both kernel and userspace.

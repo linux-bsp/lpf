@@ -12,8 +12,10 @@ The kernel module currently provides:
 - PDM protocol encode/decode logic linked into `pdm.ko`
 - PDM MCU core, `/dev/pdm_mcu` ioctl dispatch, and CAN/Serial transport glue
   linked into `pdm.ko`
+- PDM LED core and `/dev/pdm_led` ioctl dispatch for GPIO/PWM controlled LEDs
+  linked into `pdm.ko`
 
-PDM consumes the exported `hal.ko` CAN and Serial symbols for MCU transport
+PDM consumes exported `hal.ko` symbols for MCU transport and LED GPIO/PWM
 hardware access.
 
 ## Configuration
@@ -22,6 +24,7 @@ hardware access.
 CONFIG_PDM=y
 CONFIG_PCONFIG=y
 CONFIG_PDM_MCU_SUPPORT=y
+CONFIG_PDM_LED_SUPPORT=y
 CONFIG_PDM_PROTOCOL=y
 CONFIG_PDM_PROTOCOL_MCU=y
 ```
@@ -41,9 +44,15 @@ kernel/pdm/
         ├── pdm_mcu_can.c
         ├── pdm_mcu_serial.c
         └── pdm_mcu_internal.h
+    └── pdm_led/
+        ├── Config.in
+        ├── pdm_led.c
+        ├── pdm_led_chrdev.c
+        └── pdm_led_internal.h
 
 kernel/include/pdm/
 ├── pdm.h
+├── pdm_led.h
 └── pdm_mcu.h
 ```
 

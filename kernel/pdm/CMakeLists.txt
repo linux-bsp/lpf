@@ -29,6 +29,13 @@ if(CONFIG_PDM_MCU_SUPPORT AND TARGET hal)
     )
 endif()
 
+if(CONFIG_PDM_LED_SUPPORT AND TARGET hal)
+    list(APPEND ADD_SRCS
+        "src/pdm_led/pdm_led.c"
+        "src/pdm_led/pdm_led_chrdev.c"
+    )
+endif()
+
 list(APPEND ADD_SRCS "src/pdm_driver_end.c")
 ###############################################
 
@@ -51,6 +58,10 @@ if(CONFIG_PDM_MCU_SUPPORT AND TARGET hal)
     list(APPEND ADD_REQUIREMENTS hal)
 endif()
 
+if(CONFIG_PDM_LED_SUPPORT AND TARGET hal)
+    list(APPEND ADD_REQUIREMENTS hal)
+endif()
+
 # PCONFIG 是必须的（PDM 使用 PCONFIG 的配置类型）
 if(CONFIG_PCONFIG)
     list(APPEND ADD_REQUIREMENTS pconfig)
@@ -63,6 +74,9 @@ endif()
 #### Add compile option for this component ####
 if(CONFIG_PDM_MCU_SUPPORT)
     list(APPEND ADD_DEFINITIONS -DPDM_MCU_SUPPORT=1)
+endif()
+if(CONFIG_PDM_LED_SUPPORT)
+    list(APPEND ADD_DEFINITIONS -DPDM_LED_SUPPORT=1)
 endif()
 ###############################################
 

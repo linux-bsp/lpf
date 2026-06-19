@@ -12,6 +12,7 @@
 #define PCONFIG_PLATFORM_H
 
 #include "pconfig_mcu.h"
+#include "pconfig_led.h"
 
 /*===========================================================================
  * 板级配置（顶层）
@@ -39,6 +40,8 @@ typedef struct {
 	/* 硬件外设配置数组（直接数组指针） */
 	uint32_t mcu_count; /* MCU外设数量 */
 	const pconfig_mcu_entry_t *mcu_array; /* MCU外设数组（直接指向数组首元素） */
+	uint32_t led_count; /* LED外设数量 */
+	const pconfig_led_entry_t *led_array; /* LED外设数组 */
 } pconfig_platform_config_t;
 
 typedef struct {

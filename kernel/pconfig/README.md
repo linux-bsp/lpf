@@ -6,7 +6,7 @@ PCONFIG is the platform hardware-configuration query layer. It owns read-only pl
 
 - Read built-in platform configurations (`pconfig_platform_config_t`).
 - Track the current board through a compile-time `current_index` in `g_pconfig_platform_table`.
-- Provide typed accessors for MCU entries.
+- Provide typed accessors for MCU and LED entries.
 - Keep hardware configuration data separate from PDM and application logic.
 
 ## Public API
@@ -36,10 +36,11 @@ configs/<product>/<project>/<version>/
 
 ## Typed Accessors
 
-The current header provides an inline index-based MCU accessor:
+The current header provides inline index-based peripheral accessors:
 
 ```c
 pconfig_hw_get_mcu(platform, index);
+pconfig_hw_get_led(platform, index);
 ```
 
 ## Layering Rules

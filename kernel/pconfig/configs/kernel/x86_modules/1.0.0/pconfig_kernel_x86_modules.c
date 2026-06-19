@@ -10,4 +10,6 @@ const pconfig_platform_config_t g_pconfig_kernel_x86_modules_1_0_0 = {
 	.version = "1.0.0",
 	.mcu_count = 0,
 	.mcu_array = NULL,
+	.led_count = 0,
+	.led_array = NULL,
 };

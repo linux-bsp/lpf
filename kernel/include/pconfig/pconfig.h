@@ -24,6 +24,7 @@
 /* 类型定义 - 按模块组织 */
 #include "pconfig_common.h" /* 通用基础类型 */
 #include "pconfig_mcu.h" /* MCU 配置类型 */
+#include "pconfig_led.h" /* LED 配置类型 */
 #include "pconfig_platform.h" /* 板级配置类型 */
 
 /*===========================================================================
@@ -94,6 +95,15 @@ pconfig_hw_get_mcu(const pconfig_platform_config_t *platform, uint32_t index)
 		return NULL;
 	}
 	return &platform->mcu_array[index];
+}
+
+static inline const pconfig_led_entry_t *
+pconfig_hw_get_led(const pconfig_platform_config_t *platform, uint32_t index)
+{
+	if (!platform || !platform->led_array || index >= platform->led_count) {
+		return NULL;
+	}
+	return &platform->led_array[index];
 }
 
 /*===========================================================================

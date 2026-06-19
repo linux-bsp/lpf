@@ -23,6 +23,7 @@ menuconfig PDM
 
 	  Supported peripherals:
 	  - MCU peripherals
+	  - LED peripherals
 
 	  Dependencies: OSAL, HAL, PCONFIG
 
@@ -92,6 +93,19 @@ menuconfig PDM_MCU_SUPPORT
 	  If unsure, say Y.
 
 source "kernel/pdm/src/pdm_mcu/Config.in"
+
+menuconfig PDM_LED_SUPPORT
+	bool "LED peripheral support"
+	default n
+	select HAL_GPIO
+	select HAL_PWM
+	help
+	  Enable LED peripheral support.
+
+	  LED peripherals can be controlled through GPIO or PWM according to
+	  PConfig entries. The driver exposes /dev/pdm_led for userspace PDI.
+
+source "kernel/pdm/src/pdm_led/Config.in"
 
 menu "PDM Protocol Configuration"
 

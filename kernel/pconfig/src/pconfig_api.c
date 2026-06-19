@@ -52,8 +52,74 @@ pconfig_build_device_list(const pconfig_platform_config_t *platform)
 		out_index++;
 	}
 
+	for (i = 0; i < platform->led_count; i++) {
+		const pconfig_led_entry_t *entry;
+
+		if (out_index >= PCONFIG_MAX_DEVICES) {
+			LOG_ERROR("PCONFIG", "Device list capacity exceeded");
+			return OSAL_ERR_RESOURCE_LIMIT;
+		}
+
+		entry = pconfig_hw_get_led(platform, i);
+		if (NULL == entry || !entry->enabled)
+			continue;
+
+		g_pconfig_devices[out_index].device_type =
+			PCONFIG_DEVICE_TYPE_LED;
+		g_pconfig_devices[out_index].index = i;
+		g_pconfig_devices[out_index].entry = entry;
+		out_index++;
+	}
+
 	g_pconfig_devices[out_index].device_type = PCONFIG_DEVICE_TYPE_INVALID;
 	LOG_INFO("PCONFIG", "Initialized %u device configs", out_index);
+	return OSAL_SUCCESS;
+}
+
+static int32_t pconfig_validate_led_entry(uint32_t index,
+					  const pconfig_led_entry_t *entry)
+{
+	const pconfig_led_config_t *config;
+
+	if (NULL == entry)
+		return OSAL_ERR_INVALID_PARAM;
+
+	if (!entry->enabled)
+		return OSAL_SUCCESS;
+
+	config = &entry->config;
+	if ('\0' == config->name[0]) {
+		LOG_ERROR("PCONFIG", "LED[%u] missing name", index);
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
+	if (0 == config->max_brightness) {
+		LOG_ERROR("PCONFIG", "LED[%u] max brightness is zero", index);
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
+	if (config->default_brightness > config->max_brightness) {
+		LOG_ERROR("PCONFIG", "LED[%u] default brightness exceeds max",
+			  index);
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
+	switch (config->control) {
+	case PCONFIG_LED_CONTROL_GPIO:
+		break;
+	case PCONFIG_LED_CONTROL_PWM:
+		if (NULL == config->hw.pwm.consumer ||
+		    0 == config->hw.pwm.period_ns) {
+			LOG_ERROR("PCONFIG", "LED[%u] invalid PWM config",
+				  index);
+			return OSAL_ERR_INVALID_PARAM;
+		}
+		break;
+	default:
+		LOG_ERROR("PCONFIG", "LED[%u] invalid control type", index);
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
 	return OSAL_SUCCESS;
 }
 
@@ -141,6 +207,9 @@ EXPORT_SYMBOL_GPL(pconfig_list);
 
 int32_t pconfig_validate(const pconfig_platform_config_t *config)
 {
+	uint32_t i;
+	int32_t ret;
+
 	if (NULL == config)
 		return OSAL_ERR_GENERIC;
 
@@ -154,6 +223,17 @@ int32_t pconfig_validate(const pconfig_platform_config_t *config)
 	if (config->mcu_count > 0 && NULL == config->mcu_array) {
 		LOG_ERROR("PCONFIG", "Missing MCU config array");
 		return OSAL_ERR_GENERIC;
+	}
+
+	if (config->led_count > 0 && NULL == config->led_array) {
+		LOG_ERROR("PCONFIG", "Missing LED config array");
+		return OSAL_ERR_GENERIC;
+	}
+
+	for (i = 0; i < config->led_count; i++) {
+		ret = pconfig_validate_led_entry(i, &config->led_array[i]);
+		if (ret != OSAL_SUCCESS)
+			return ret;
 	}
 
 	return OSAL_SUCCESS;
@@ -178,6 +258,15 @@ void pconfig_print(const pconfig_platform_config_t *config)
 			LOG_INFO("PCONFIG", "  MCU[%u]: %s", i,
 				 config->mcu_array[i].description ?
 					 config->mcu_array[i].description :
+					 "N/A");
+		}
+	}
+
+	if (config->led_array) {
+		for (i = 0; i < config->led_count; i++) {
+			LOG_INFO("PCONFIG", "  LED[%u]: %s", i,
+				 config->led_array[i].description ?
+					 config->led_array[i].description :
 					 "N/A");
 		}
 	}

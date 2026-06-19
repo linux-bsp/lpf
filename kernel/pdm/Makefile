@@ -12,5 +12,7 @@ pdm-$(CONFIG_PDM_MCU_SUPPORT) += pdm/src/pdm_mcu/pdm_mcu.o
 pdm-$(CONFIG_PDM_MCU_SUPPORT) += pdm/src/pdm_mcu/pdm_mcu_chrdev.o
 pdm-$(CONFIG_PDM_MCU_SUPPORT) += pdm/src/pdm_mcu/pdm_mcu_can.o
 pdm-$(CONFIG_PDM_MCU_SUPPORT) += pdm/src/pdm_mcu/pdm_mcu_serial.o
+pdm-$(CONFIG_PDM_LED_SUPPORT) += pdm/src/pdm_led/pdm_led.o
+pdm-$(CONFIG_PDM_LED_SUPPORT) += pdm/src/pdm_led/pdm_led_chrdev.o
 pdm-y += pdm/src/pdm_driver_end.o
 endif
