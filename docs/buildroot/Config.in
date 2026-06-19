@@ -6,16 +6,16 @@ config BR2_PACKAGE_ES_MIDDLEWARE
 	help
 	  ES-Middleware is a generic embedded middleware framework
 	  with a Kconfig+CMake build system. It provides OSAL, HAL, PDM,
-	  PDI, PRL, ACONFIG, and PCONFIG layers for Linux systems.
+	  PDI, ACONFIG, and PCONFIG layers for Linux systems.
 
 if BR2_PACKAGE_ES_MIDDLEWARE
 
 config BR2_PACKAGE_ES_MIDDLEWARE_DEFCONFIG
 	string "Kconfig defconfig to use"
-	default "ctest_arm64_minimal_defconfig"
+	default "kernel_x86_modules_defconfig"
 	help
 	  Specify which ES-Middleware configuration to use.
-	  Defconfigs are provided under configs/ctest/.
+	  Defconfigs are provided under configs/.
 
 choice
 	prompt "Build type"

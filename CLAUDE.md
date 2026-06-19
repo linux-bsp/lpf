@@ -24,9 +24,8 @@ The framework is still structured for later peripheral expansion. Add new periph
 
 ```bash
 make list
-make ctest_x86_minimal_defconfig
-make all
-./_build/bin/es-middleware-test --all
+make kernel_x86_modules_defconfig
+make modules
 ```
 
 ## Layering Rules

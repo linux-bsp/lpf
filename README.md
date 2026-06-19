@@ -1,10 +1,12 @@
 # ES-Middleware SDK
 
-ES-Middleware is a Linux-focused embedded middleware framework built with Kconfig and CMake. It provides reusable core layers for userspace API libraries and kernel modules.
+ES-Middleware is a Linux-focused embedded middleware framework built with
+Kconfig, CMake, and Linux external-module Kbuild support.
 
 ## Current Scope
 
-The repository currently contains framework core modules and the core test product. Product-specific satellite/PMC business code has been removed.
+The repository currently contains framework core modules. Product-specific
+satellite/PMC business code and the previous test product have been removed.
 
 Current concrete peripheral/device type:
 
@@ -15,25 +17,19 @@ The framework keeps the layered extension points so additional peripheral types 
 ## Core Layers
 
 - OSAL: operating-system abstraction
-- HAL: hardware abstraction
+- HAL: kernel hardware abstraction module (`hal.ko`)
 - PCONFIG: platform hardware configuration registry
 - PDM: kernel peripheral driver module
 - PDI: userspace peripheral driver interface library
 - ACONFIG: application configuration layer
-- test_framework: core test infrastructure
+- test_framework: userspace test infrastructure retained for future tests
 
 ## Build
 
 ```bash
 make list
-make ctest_x86_minimal_defconfig
-make all
-```
-
-Run the generated test binary:
-
-```bash
-./_build/bin/es-middleware-test --all
+make kernel_x86_modules_defconfig
+make modules
 ```
 
 ## Project Layout
@@ -41,19 +37,15 @@ Run the generated test binary:
 ```text
 ES-Middleware/
 ├── core/          # Reusable middleware layers
-├── products/ctest # Core module test product
-├── configs/ctest  # Test and development defconfigs
+├── configs/       # Development defconfigs
 ├── docs/          # Architecture and integration documentation
 └── scripts/       # Kconfig/CMake build support
 ```
 
 ## Configuration
 
-Defconfigs live under `configs/ctest/` and are named with the `ctest_` prefix, for example:
+Defconfigs live under `configs/`, for example:
 
-- `ctest_x86_minimal_defconfig`
-- `ctest_x86_full_defconfig`
-- `ctest_arm64_minimal_defconfig`
-- `ctest_arm64_full_defconfig`
+- `kernel_x86_modules_defconfig`
 
 Use `make menuconfig` for interactive configuration.

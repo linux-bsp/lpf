@@ -4,13 +4,10 @@ This directory contains a Buildroot package skeleton for building ES-Middleware 
 
 ## Defconfig
 
-Use one of the framework/test defconfigs, for example:
+Use one of the framework defconfigs, for example:
 
 ```text
-ctest_arm64_minimal_defconfig
-ctest_arm64_full_defconfig
-ctest_x86_minimal_defconfig
-ctest_x86_full_defconfig
+kernel_x86_modules_defconfig
 ```
 
 ## Install Modes

@@ -15,9 +15,9 @@ PDI (userspace API)
         ↓
 ioctl / UAPI
         ↓
-PDM
+PDM + PDM protocol
         ↓
-PCONFIG + PRL
+PCONFIG
         ↓
 HAL
         ↓
@@ -32,8 +32,8 @@ Linux kernel / hardware
 - Kernel OSAL wraps Linux kernel APIs used by kernel modules.
 - HAL provides kernel-side hardware access helpers.
 - PCONFIG stores kernel-side platform hardware configuration tables.
-- PRL provides kernel-side packet framing and device-message helpers.
 - PDM provides kernel-side peripheral driver modules.
+- PDM protocol helpers provide kernel-side packet framing owned by PDM.
 - PDI provides userspace APIs over the PDM ioctl ABI.
 - ACONFIG stores userspace application-facing configuration mappings.
 
@@ -42,12 +42,12 @@ Linux kernel / hardware
 The current framework keeps one concrete peripheral/device family:
 
 - MCU configuration in PCONFIG
-- MCU protocol in PRL
+- MCU protocol in PDM
 - MCU driver in PDM
 - Userspace access through PDI
 
 Other peripheral families can be added later by introducing matching PCONFIG
-types, PRL protocol definitions, PDM kernel implementation, PDI userspace API
+types, PDM protocol definitions, PDM kernel implementation, PDI userspace API
 coverage, UAPI definitions when needed, and Kconfig entries.
 
 ## Dependency Rules
@@ -58,4 +58,4 @@ coverage, UAPI definitions when needed, and Kconfig entries.
 - Kernel hardware tables are compiled through PCONFIG and consumed by PDM
   through typed accessors.
 - Userspace code must use PDI/UAPI rather than including kernel-internal HAL,
-  PCONFIG, PRL, or PDM headers.
+  PCONFIG, or PDM headers.
