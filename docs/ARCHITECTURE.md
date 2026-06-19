@@ -46,7 +46,8 @@ Linux kernel / hardware
 - LPF SoC Adapter isolates SoC or vendor BSP differences below HAL.
 - LPF Kernel Compat isolates Linux kernel API differences below the generic
   Linux SoC adapter.
-- PCONFIG stores kernel-side platform hardware configuration tables.
+- PCONFIG selects a kernel-side platform configuration backend and exposes a
+  normalized device list.
 - PDM provides kernel-side peripheral service modules.
 - PDM protocol helpers provide kernel-side packet framing owned by PDM.
 - PDI provides userspace APIs over the PDM ioctl ABI.
@@ -93,9 +94,12 @@ APIs directly.
 
 ### PCONFIG
 
-PCONFIG owns kernel-side platform hardware configuration tables. PDM loads
-PCONFIG and maps enabled entries into LPF device configs. Product hardware
-tables live outside core logic and are compiled into the selected configuration.
+PCONFIG owns kernel-side platform hardware configuration aggregation. It selects
+a backend, validates the active platform, and exposes enabled device entries in
+one normalized list. The current backend is the built-in static product table;
+future Device Tree, board-profile, or product-selection backends should produce
+the same `pconfig_platform_config_t` and `pconfig_device_config_t` model before
+PDM sees the data.
 
 ### PDM
 
@@ -187,8 +191,9 @@ and build configuration remain consistent.
 - Core modules do not depend on product/application code.
 - Dependencies point downward through the layer stack.
 - Product-specific behavior belongs outside shared framework module directories.
-- Kernel hardware tables are compiled through PCONFIG and consumed by PDM
-  through typed accessors, then mapped into LPF Core device configs.
+- Kernel hardware configuration is selected through PCONFIG backends and
+  consumed by PDM through the normalized device list, then mapped into LPF Core
+  device configs.
 - HAL should call LPF SoC Adapter APIs for SoC-backed hardware capabilities.
 - Kernel-version conditionals belong in `kernel/lpf/compat/`.
 - Userspace code must use PDI/UAPI rather than including kernel-internal HAL,

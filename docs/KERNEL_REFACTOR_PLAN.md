@@ -13,7 +13,8 @@ device and driver lifecycle instead of adding new PDM-local bus code.
 
 - HAL is a kernel-only module built as `hal.ko`.
 - PConfig is a standalone kernel module built as `pconfig.ko`.
-- Concrete platform configs are compiled directly into `pconfig.ko` under
+- PConfig selects a configuration backend. The current static backend consumes
+  platform configs compiled under
   `kernel/pconfig/configs/<product>/<project>/<version>/`.
 - LPF Core is a standalone kernel module built as `lpf_core.ko`; it owns the
   framework device and driver registry.
@@ -63,13 +64,15 @@ device and driver lifecycle instead of adding new PDM-local bus code.
       refactor branch back to `master`.
 - [x] Keep concrete platform configuration inside the original PConfig module
       instead of adding a separate product config kernel module.
+- [x] Introduce PCONFIG backend selection and move the original static table
+      behind a static backend.
 - [x] Add HAL PWM support and PDM LED support with GPIO/PWM control.
 
 ## Phase 1: Make The Current Kernel Modules Loadable
 
 - [x] Add a real product/platform PConfig source for the kernel module build.
   - `pconfig.ko` links `g_pconfig_platform_table` from
-    `kernel/pconfig/configs`.
+    `kernel/pconfig/configs` through the static backend.
   - Acceptance: `pconfig_load()` finds a board config and `pconfig.ko` loads.
 - [x] Define the PConfig ownership model.
   - PConfig owns its module lifetime and global config state.

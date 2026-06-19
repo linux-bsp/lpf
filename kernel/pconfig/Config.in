@@ -5,8 +5,9 @@ menuconfig PCONFIG
 	default n
 	depends on OSAL
 	help
-	  Peripheral Configuration Library provides read-only access to
-	  product-defined hardware configuration tables.
+	  Peripheral Configuration Library selects a platform configuration
+	  backend and exposes normalized hardware configuration to LPF kernel
+	  services.
 
 	  PCONFIG describes the physical hardware configuration of a platform
 	  (board variant, peripheral connections, pin mappings, etc.) in a
@@ -14,23 +15,24 @@ menuconfig PCONFIG
 
 	  Key features:
 	  - Platform-specific hardware descriptions
-	  - Board variant tables compiled in by the product
-	  - Peripheral configuration tables
-	  - Query-only platform configuration API
+	  - Backend-based configuration loading
+	  - Built-in static product tables
+	  - Normalized peripheral configuration list
+	  - Query-only platform configuration API for consumers
 
 	  Memory footprint: small code footprint + product configuration data
 
 	  Use cases:
 	  - Fixed product hardware descriptions
-	  - Multi-board product variants selected at build time
+	  - Multi-board product variants selected by a PCONFIG backend
 	  - Hardware abstraction for kernel PDM
 	  - Peripheral lookup by index or platform/product name
 
 	  Dependencies: OSAL (for basic services)
 
 	  Note: Enable OSAL first in "Core Modules" menu.
-	  Runtime code must not register, reload, switch, or mutate PCONFIG data
-	  through core APIs.
+	  PDM and peripheral services must not depend on concrete product table
+	  symbols or backend implementations.
 
 	  Recommended: Enable for products with hardware configuration tables
 

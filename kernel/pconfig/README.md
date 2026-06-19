@@ -1,12 +1,15 @@
 # PCONFIG
 
-PCONFIG is the platform hardware-configuration query layer. It owns read-only platform tables compiled directly into `pconfig.ko` and exposes typed index-based accessors for enabled core device families.
+PCONFIG is the platform hardware-configuration aggregation layer. It selects a
+configuration backend, validates the active platform, and exposes one typed
+device list to PDM and other LPF kernel services.
 
 ## Current Responsibility
 
-- Read built-in platform configurations (`pconfig_platform_config_t`).
-- Track the current board through a compile-time `current_index` in `g_pconfig_platform_table`.
-- Provide typed accessors for MCU and LED entries.
+- Select the active configuration backend.
+- Keep the built-in static table as the first backend implementation.
+- Validate platform identity and per-device configuration.
+- Build a normalized enabled-device list for MCU and LED entries.
 - Keep hardware configuration data separate from PDM and application logic.
 
 ## Public API
@@ -22,7 +25,7 @@ int32_t pconfig_validate(const pconfig_platform_config_t *config);
 void pconfig_print(const pconfig_platform_config_t *config);
 ```
 
-The module provides the table symbol from `configs/pconfig_configs.c`:
+The static backend uses the table symbol from `configs/pconfig_configs.c`:
 
 ```c
 extern const pconfig_platform_table_t g_pconfig_platform_table;
@@ -45,7 +48,11 @@ pconfig_hw_get_led(platform, index);
 
 ## Layering Rules
 
-- `kernel/pconfig` defines data structures and read-only query behavior only.
-- `kernel/pconfig/configs` owns concrete platform tables.
-- PDM consumes `pconfig_get_board()` and typed accessors; it should not know concrete product table symbols.
-- Runtime code must not register, switch, reload, or mutate PCONFIG tables through core APIs.
+- `kernel/pconfig` owns backend selection, validation, and normalized device
+  enumeration.
+- `kernel/pconfig/configs` owns concrete static platform tables.
+- PDM consumes `pconfig_get()` and typed entries; it must not know concrete
+  product table symbols or backend implementations.
+- New configuration sources should be added as PCONFIG backends. They must
+  produce the same `pconfig_platform_config_t` and `pconfig_device_config_t`
+  model before PDM sees them.

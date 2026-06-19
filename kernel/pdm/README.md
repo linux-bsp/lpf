@@ -9,7 +9,7 @@ protocol helpers.
 The kernel module currently provides:
 
 - module load/unload orchestration in `pdm/src/pdm.c`
-- PCONFIG query logic linked into `pdm.ko`
+- PCONFIG normalized-device query logic linked into `pdm.ko`
 - PDM protocol package/parse helpers linked into `pdm.ko`; peripheral drivers
   pass a device type, message type, and payload to produce or parse standard
   protocol frames
@@ -80,10 +80,11 @@ kernel/include/pdm/
 
 `pdm.ko` owns userspace boundaries per peripheral. Built-in PDM peripheral
 services register as LPF drivers through LPF Core; during module initialization
-PDM loads PConfig, maps each enabled PConfig entry into an `lpf_device_config_t`,
-and registers it with LPF Core. LPF Core then binds the configured device to the
-matching service `probe`. On unload, LPF Core removes devices before driver
-global resources are released.
+PDM loads PConfig, maps each enabled normalized PConfig device entry into an
+`lpf_device_config_t`, and registers it with LPF Core. PDM must not depend on
+the concrete PCONFIG backend that produced the entries. LPF Core then binds the
+configured device to the matching service `probe`. On unload, LPF Core removes
+devices before driver global resources are released.
 
 Each PDM peripheral exposes
 its own character device, such as `/dev/pdm_mcu`, and each PDI peripheral API

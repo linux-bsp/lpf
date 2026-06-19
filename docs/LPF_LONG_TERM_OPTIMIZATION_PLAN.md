@@ -256,6 +256,17 @@ Acceptance criteria:
 - The same MCU or LED device can be created from static table or Device Tree.
 - LPF Core and peripheral services do not care where configuration came from.
 
+Current status:
+
+- Started. PCONFIG now has a backend abstraction, a static table backend, and
+  a separate per-device validator/descriptor file.
+- `pconfig_load()`, `pconfig_get_board()`, `pconfig_find()`, and
+  `pconfig_list()` now route through the selected backend instead of directly
+  reading `g_pconfig_platform_table`.
+- Remaining work: add Device Tree, board-profile, and module-parameter
+  backends; then move backend priority/selection policy out of the hard-coded
+  backend list.
+
 ## Phase 7: Peripheral Service Layer
 
 Goal: make MCU, LED, and future peripherals reusable service implementations
