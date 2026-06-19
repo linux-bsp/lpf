@@ -8,6 +8,7 @@ osal-y += osal/src/ipc/osal_mutex.o
 osal-y += osal/src/lib/osal_errno.o
 osal-y += osal/src/lib/osal_heap.o
 osal-y += osal/src/lib/osal_string.o
+osal-y += osal/src/sys/osal_time.o
 osal-y += osal/src/sys/osal_thread.o
 osal-y += osal/src/sys/osal_usercopy.o
 osal-y += osal/src/util/osal_crc.o

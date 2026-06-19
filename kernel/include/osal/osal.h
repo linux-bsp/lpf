@@ -17,7 +17,6 @@
 #define OSAL_LITE_VERSION_PATCH 0x0
 
 #include <linux/kernel.h>
-#include <linux/ktime.h>
 #include <linux/timekeeping.h>
 #include <linux/types.h>
 #include <linux/byteorder/generic.h>
@@ -29,6 +28,7 @@
 #include "lib/osal_errno.h"
 #include "lib/osal_heap.h"
 #include "lib/osal_string.h"
+#include "sys/osal_time.h"
 #include "sys/osal_thread.h"
 #include "sys/osal_usercopy.h"
 #include "util/osal_log.h"
@@ -52,11 +52,6 @@ static inline int32_t osal_get_local_time(OS_time_t *time_struct)
 	time_struct->microsecs = (uint32_t)(ts.tv_nsec / NSEC_PER_USEC);
 
 	return OSAL_SUCCESS;
-}
-
-static inline uint64_t osal_get_monotonic_time(void)
-{
-	return (uint64_t)(ktime_get_ns() / NSEC_PER_USEC);
 }
 
 static inline uint16_t osal_htons(uint16_t hostshort)
