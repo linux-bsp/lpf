@@ -14,6 +14,25 @@
 
 #define PCONFIG_MAX_DEVICES 32U
 
+typedef uint32_t (*pconfig_device_count_fn)(
+	const pconfig_platform_config_t *platform);
+typedef const void *(*pconfig_device_entry_fn)(
+	const pconfig_platform_config_t *platform, uint32_t index);
+typedef bool (*pconfig_device_enabled_fn)(const void *entry);
+typedef int32_t (*pconfig_device_validate_fn)(uint32_t index,
+					      const void *entry);
+typedef void (*pconfig_device_print_fn)(uint32_t index, const void *entry);
+
+typedef struct {
+	const char *name;
+	pconfig_device_type_t type;
+	pconfig_device_count_fn count;
+	pconfig_device_entry_fn entry;
+	pconfig_device_enabled_fn enabled;
+	pconfig_device_validate_fn validate;
+	pconfig_device_print_fn print;
+} pconfig_device_descriptor_t;
+
 static pconfig_device_config_t g_pconfig_devices[PCONFIG_MAX_DEVICES + 1U];
 static bool g_pconfig_initialized;
 
@@ -25,69 +44,154 @@ static bool pconfig_table_is_valid(void)
 		       g_pconfig_platform_table.count;
 }
 
-static int32_t
-pconfig_build_device_list(const pconfig_platform_config_t *platform)
+static uint32_t pconfig_mcu_count(const pconfig_platform_config_t *platform)
 {
-	uint32_t out_index = 0;
-	uint32_t i;
+	return platform->mcu_count;
+}
 
-	osal_memset(g_pconfig_devices, 0, sizeof(g_pconfig_devices));
+static const void *pconfig_mcu_entry(const pconfig_platform_config_t *platform,
+				     uint32_t index)
+{
+	return pconfig_hw_get_mcu(platform, index);
+}
 
-	for (i = 0; i < platform->mcu_count; i++) {
-		const pconfig_mcu_entry_t *entry;
+static bool pconfig_mcu_enabled(const void *entry)
+{
+	const pconfig_mcu_entry_t *mcu = entry;
 
-		if (out_index >= PCONFIG_MAX_DEVICES) {
-			LOG_ERROR("PCONFIG", "Device list capacity exceeded");
-			return OSAL_ERR_RESOURCE_LIMIT;
-		}
+	return mcu && mcu->enabled;
+}
 
-		entry = pconfig_hw_get_mcu(platform, i);
-		if (NULL == entry || !entry->enabled)
-			continue;
+static bool pconfig_mcu_parity_valid(pconfig_mcu_parity_t parity)
+{
+	return parity == PCONFIG_MCU_PARITY_NONE ||
+	       parity == PCONFIG_MCU_PARITY_ODD ||
+	       parity == PCONFIG_MCU_PARITY_EVEN;
+}
 
-		g_pconfig_devices[out_index].device_type =
-			PCONFIG_DEVICE_TYPE_MCU;
-		g_pconfig_devices[out_index].index = i;
-		g_pconfig_devices[out_index].entry = entry;
-		out_index++;
+static bool
+pconfig_mcu_flow_control_valid(pconfig_mcu_flow_control_t flow_control)
+{
+	return flow_control == PCONFIG_MCU_FLOW_NONE ||
+	       flow_control == PCONFIG_MCU_FLOW_HW ||
+	       flow_control == PCONFIG_MCU_FLOW_SW;
+}
+
+static int32_t pconfig_validate_mcu_can(uint32_t index,
+					const pconfig_mcu_config_t *config)
+{
+	if (NULL == config->hw.can.device || 0 == config->hw.can.bitrate) {
+		LOG_ERROR("PCONFIG", "MCU[%u] invalid CAN config", index);
+		return OSAL_ERR_INVALID_PARAM;
 	}
 
-	for (i = 0; i < platform->led_count; i++) {
-		const pconfig_led_entry_t *entry;
-
-		if (out_index >= PCONFIG_MAX_DEVICES) {
-			LOG_ERROR("PCONFIG", "Device list capacity exceeded");
-			return OSAL_ERR_RESOURCE_LIMIT;
-		}
-
-		entry = pconfig_hw_get_led(platform, i);
-		if (NULL == entry || !entry->enabled)
-			continue;
-
-		g_pconfig_devices[out_index].device_type =
-			PCONFIG_DEVICE_TYPE_LED;
-		g_pconfig_devices[out_index].index = i;
-		g_pconfig_devices[out_index].entry = entry;
-		out_index++;
+	if (0 == config->hw.can.rx_timeout || 0 == config->hw.can.tx_timeout) {
+		LOG_ERROR("PCONFIG", "MCU[%u] invalid CAN timeout", index);
+		return OSAL_ERR_INVALID_PARAM;
 	}
 
-	g_pconfig_devices[out_index].device_type = PCONFIG_DEVICE_TYPE_INVALID;
-	LOG_INFO("PCONFIG", "Initialized %u device configs", out_index);
 	return OSAL_SUCCESS;
 }
 
-static int32_t pconfig_validate_led_entry(uint32_t index,
-					  const pconfig_led_entry_t *entry)
+static int32_t pconfig_validate_mcu_serial(uint32_t index,
+					   const pconfig_mcu_config_t *config)
 {
-	const pconfig_led_config_t *config;
+	if (NULL == config->hw.serial.device ||
+	    0 == config->hw.serial.baudrate) {
+		LOG_ERROR("PCONFIG", "MCU[%u] invalid serial config", index);
+		return OSAL_ERR_INVALID_PARAM;
+	}
 
-	if (NULL == entry)
+	if (config->hw.serial.data_bits < 5 ||
+	    config->hw.serial.data_bits > 8 ||
+	    config->hw.serial.stop_bits < 1 ||
+	    config->hw.serial.stop_bits > 2) {
+		LOG_ERROR("PCONFIG", "MCU[%u] invalid serial frame config",
+			  index);
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
+	if (!pconfig_mcu_parity_valid(config->hw.serial.parity) ||
+	    !pconfig_mcu_flow_control_valid(config->hw.serial.flow_control)) {
+		LOG_ERROR("PCONFIG", "MCU[%u] invalid serial mode", index);
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
+	return OSAL_SUCCESS;
+}
+
+static int32_t pconfig_validate_mcu_entry(uint32_t index, const void *entry)
+{
+	const pconfig_mcu_entry_t *mcu = entry;
+	const pconfig_mcu_config_t *config;
+
+	if (NULL == mcu)
 		return OSAL_ERR_INVALID_PARAM;
 
-	if (!entry->enabled)
+	if (!mcu->enabled)
 		return OSAL_SUCCESS;
 
-	config = &entry->config;
+	config = &mcu->config;
+	if ('\0' == config->name[0]) {
+		LOG_ERROR("PCONFIG", "MCU[%u] missing name", index);
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
+	if (0 == config->cmd_timeout_ms) {
+		LOG_ERROR("PCONFIG", "MCU[%u] invalid command timeout", index);
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
+	switch (config->interface) {
+	case PCONFIG_MCU_INTERFACE_CAN:
+		return pconfig_validate_mcu_can(index, config);
+	case PCONFIG_MCU_INTERFACE_SERIAL:
+		return pconfig_validate_mcu_serial(index, config);
+	default:
+		LOG_ERROR("PCONFIG", "MCU[%u] unsupported interface", index);
+		return OSAL_ERR_NOT_SUPPORTED;
+	}
+}
+
+static void pconfig_print_mcu_entry(uint32_t index, const void *entry)
+{
+	const pconfig_mcu_entry_t *mcu = entry;
+
+	LOG_INFO("PCONFIG", "  MCU[%u]: %s", index,
+		 mcu && mcu->description ? mcu->description : "N/A");
+}
+
+static uint32_t pconfig_led_count(const pconfig_platform_config_t *platform)
+{
+	return platform->led_count;
+}
+
+static const void *pconfig_led_entry(const pconfig_platform_config_t *platform,
+				     uint32_t index)
+{
+	return pconfig_hw_get_led(platform, index);
+}
+
+static bool pconfig_led_enabled(const void *entry)
+{
+	const pconfig_led_entry_t *led = entry;
+
+	return led && led->enabled;
+}
+
+static int32_t pconfig_validate_led_entry(uint32_t index,
+					  const void *entry)
+{
+	const pconfig_led_entry_t *led = entry;
+	const pconfig_led_config_t *config;
+
+	if (NULL == led)
+		return OSAL_ERR_INVALID_PARAM;
+
+	if (!led->enabled)
+		return OSAL_SUCCESS;
+
+	config = &led->config;
 	if ('\0' == config->name[0]) {
 		LOG_ERROR("PCONFIG", "LED[%u] missing name", index);
 		return OSAL_ERR_INVALID_PARAM;
@@ -120,6 +224,77 @@ static int32_t pconfig_validate_led_entry(uint32_t index,
 		return OSAL_ERR_INVALID_PARAM;
 	}
 
+	return OSAL_SUCCESS;
+}
+
+static void pconfig_print_led_entry(uint32_t index, const void *entry)
+{
+	const pconfig_led_entry_t *led = entry;
+
+	LOG_INFO("PCONFIG", "  LED[%u]: %s", index,
+		 led && led->description ? led->description : "N/A");
+}
+
+static const pconfig_device_descriptor_t g_pconfig_device_descriptors[] = {
+	{
+		.name = "MCU",
+		.type = PCONFIG_DEVICE_TYPE_MCU,
+		.count = pconfig_mcu_count,
+		.entry = pconfig_mcu_entry,
+		.enabled = pconfig_mcu_enabled,
+		.validate = pconfig_validate_mcu_entry,
+		.print = pconfig_print_mcu_entry,
+	},
+	{
+		.name = "LED",
+		.type = PCONFIG_DEVICE_TYPE_LED,
+		.count = pconfig_led_count,
+		.entry = pconfig_led_entry,
+		.enabled = pconfig_led_enabled,
+		.validate = pconfig_validate_led_entry,
+		.print = pconfig_print_led_entry,
+	},
+};
+
+static int32_t
+pconfig_build_device_list(const pconfig_platform_config_t *platform)
+{
+	uint32_t out_index = 0;
+	uint32_t desc_index;
+
+	osal_memset(g_pconfig_devices, 0, sizeof(g_pconfig_devices));
+
+	for (desc_index = 0;
+	     desc_index < OSAL_ARRAY_SIZE(g_pconfig_device_descriptors);
+	     desc_index++) {
+		const pconfig_device_descriptor_t *desc;
+		uint32_t count;
+		uint32_t i;
+
+		desc = &g_pconfig_device_descriptors[desc_index];
+		count = desc->count(platform);
+		for (i = 0; i < count; i++) {
+			const void *entry;
+
+			if (out_index >= PCONFIG_MAX_DEVICES) {
+				LOG_ERROR("PCONFIG",
+					  "Device list capacity exceeded");
+				return OSAL_ERR_RESOURCE_LIMIT;
+			}
+
+			entry = desc->entry(platform, i);
+			if (!desc->enabled(entry))
+				continue;
+
+			g_pconfig_devices[out_index].device_type = desc->type;
+			g_pconfig_devices[out_index].index = i;
+			g_pconfig_devices[out_index].entry = entry;
+			out_index++;
+		}
+	}
+
+	g_pconfig_devices[out_index].device_type = PCONFIG_DEVICE_TYPE_INVALID;
+	LOG_INFO("PCONFIG", "Initialized %u device configs", out_index);
 	return OSAL_SUCCESS;
 }
 
@@ -207,6 +382,7 @@ EXPORT_SYMBOL_GPL(pconfig_list);
 
 int32_t pconfig_validate(const pconfig_platform_config_t *config)
 {
+	uint32_t desc_index;
 	uint32_t i;
 	int32_t ret;
 
@@ -230,10 +406,19 @@ int32_t pconfig_validate(const pconfig_platform_config_t *config)
 		return OSAL_ERR_GENERIC;
 	}
 
-	for (i = 0; i < config->led_count; i++) {
-		ret = pconfig_validate_led_entry(i, &config->led_array[i]);
-		if (ret != OSAL_SUCCESS)
-			return ret;
+	for (desc_index = 0;
+	     desc_index < OSAL_ARRAY_SIZE(g_pconfig_device_descriptors);
+	     desc_index++) {
+		const pconfig_device_descriptor_t *desc;
+		uint32_t count;
+
+		desc = &g_pconfig_device_descriptors[desc_index];
+		count = desc->count(config);
+		for (i = 0; i < count; i++) {
+			ret = desc->validate(i, desc->entry(config, i));
+			if (ret != OSAL_SUCCESS)
+				return ret;
+		}
 	}
 
 	return OSAL_SUCCESS;
@@ -242,7 +427,7 @@ EXPORT_SYMBOL_GPL(pconfig_validate);
 
 void pconfig_print(const pconfig_platform_config_t *config)
 {
-	uint32_t i;
+	uint32_t desc_index;
 
 	if (NULL == config)
 		return;
@@ -253,22 +438,17 @@ void pconfig_print(const pconfig_platform_config_t *config)
 	LOG_INFO("PCONFIG", "Product: %s", config->product_name);
 	LOG_INFO("PCONFIG", "Version: %s", config->version);
 
-	if (config->mcu_array) {
-		for (i = 0; i < config->mcu_count; i++) {
-			LOG_INFO("PCONFIG", "  MCU[%u]: %s", i,
-				 config->mcu_array[i].description ?
-					 config->mcu_array[i].description :
-					 "N/A");
-		}
-	}
+	for (desc_index = 0;
+	     desc_index < OSAL_ARRAY_SIZE(g_pconfig_device_descriptors);
+	     desc_index++) {
+		const pconfig_device_descriptor_t *desc;
+		uint32_t count;
+		uint32_t i;
 
-	if (config->led_array) {
-		for (i = 0; i < config->led_count; i++) {
-			LOG_INFO("PCONFIG", "  LED[%u]: %s", i,
-				 config->led_array[i].description ?
-					 config->led_array[i].description :
-					 "N/A");
-		}
+		desc = &g_pconfig_device_descriptors[desc_index];
+		count = desc->count(config);
+		for (i = 0; i < count; i++)
+			desc->print(i, desc->entry(config, i));
 	}
 }
 EXPORT_SYMBOL_GPL(pconfig_print);
