@@ -25,7 +25,6 @@ user/
   osal/            # userspace OSAL library
   aconfig/         # userspace application configuration
   pdi/             # userspace API library for PDM
-  test_framework/  # userspace-only test support library
 
 uapi/
   pdi/             # ioctl ABI shared by PDM and PDI
@@ -41,8 +40,11 @@ uapi/
 - `kernel/pconfig` provides kernel-side platform/product configuration used
   by PDM. It builds as `pconfig.ko`.
 - `user/pdi` provides the application-facing C API and wraps open/ioctl.
-- `user/test_framework` provides userspace-only test infrastructure.
 - `uapi/pdi` is the stable ABI shared by `kernel/pdm` and `user/pdi`.
+
+The previous userspace test framework was removed with the old ctest product.
+New tests should be added under a new test layout with explicit Kconfig/CMake
+integration.
 
 ## Include Rules
 

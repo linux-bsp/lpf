@@ -12,11 +12,11 @@ Core modules:
 - PDM
 - PDI
 - ACONFIG
-- test_framework
 
 Current concrete peripheral/device family:
 
-- MCU only
+- MCU
+- LED
 
 The framework is still structured for later peripheral expansion. Add new peripheral families by extending PCONFIG types/accessors, PDM kernel modules/protocol helpers, PDI userspace APIs, Kconfig entries, and tests.
 

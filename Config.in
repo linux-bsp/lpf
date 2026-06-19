@@ -1045,7 +1045,6 @@ source "kernel/pconfig/Config.in"
 source "kernel/pdm/Config.in"
 source "user/aconfig/Config.in"
 source "user/pdi/Config.in"
-source "user/test_framework/Config.in"
 
 endmenu
 

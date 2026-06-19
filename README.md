@@ -22,7 +22,10 @@ The framework keeps the layered extension points so additional peripheral types 
 - PDM: kernel peripheral driver module
 - PDI: userspace peripheral driver interface library
 - ACONFIG: application configuration layer
-- test_framework: userspace test infrastructure retained for future tests
+
+The previous userspace test framework has been removed. New tests should be
+introduced with a fresh layout and matching Kconfig/CMake integration when the
+new test plan is ready.
 
 ## Build
 
