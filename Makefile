@@ -379,30 +379,46 @@ include/generated/gen_version.h: ;
 endif
 
 # The all: target is the default when no target is given on the command line.
-# It requires .config to exist, otherwise it will fail with an error message.
+# Build userspace libraries first, then kernel modules. Keep these serialized
+# because both paths refresh generated version/config headers.
 PHONY += all
-all: _check_config _validate_config include/generated/gen_autoconf.h include/generated/gen_version.h _cmake_configure
+all:
 	@echo ""
 	@echo "==================================================================="
-	@echo "ES-Middleware Build System"
+	@echo "ES-Middleware Full Build"
+	@echo "==================================================================="
+	$(Q)$(MAKE) libs
+	$(Q)$(MAKE) modules
+	@echo ""
+	@echo "==================================================================="
+	@echo "Full build completed successfully!"
+	@echo "==================================================================="
+	@echo "Library output: $(BUILD_DIR)/lib/"
+	@echo "Module output:  $(MODULES_OUTPUT_DIR)/"
+	@echo ""
+
+PHONY += libs
+libs: _check_config _validate_config include/generated/gen_autoconf.h include/generated/gen_version.h _cmake_configure
+	@echo ""
+	@echo "==================================================================="
+	@echo "ES-Middleware Library Build"
 	@echo "==================================================================="
 	@echo ""
 	@echo "Configuration: $(CURDIR)/.config"
 	@echo "Building with CMake..."
 	@echo ""
-	@echo "  BUILD    ES-Middleware SDK"
+	@echo "  BUILD    ES-Middleware libraries"
 	$(Q)$(MAKE) -C $(BUILD_DIR) $(PARALLEL_BUILD)
 	@echo ""
 	@echo "==================================================================="
-	@echo "Build completed successfully!"
+	@echo "Library build completed successfully!"
 	@echo "==================================================================="
 	@echo "Output directory: $(BUILD_DIR)"
-	@echo "Binaries: $(BUILD_DIR)/bin/"
 	@echo "Libraries: $(BUILD_DIR)/lib/"
 	@echo ""
 	@echo "Next steps:"
-	@echo "  make install              - Install to system"
-	@echo "  make install DESTDIR=/tmp - Stage installation"
+	@echo "  make modules              - Build kernel modules"
+	@echo "  make install              - Install libraries to system"
 	@echo ""
 
 PHONY += modules
@@ -590,7 +606,7 @@ install:
 		echo "===================================================================";\
 		echo "Build directory: $(BUILD_DIR)";\
 		echo "";\
-		echo "Please run 'make all' first to build the project.";\
+		echo "Please run 'make libs' or 'make all' first to build the libraries.";\
 		echo "===================================================================";\
 		echo "";\
 		exit 1;\
@@ -616,7 +632,7 @@ install_headers:
 		echo "===================================================================";\
 		echo "Build directory: $(BUILD_DIR)";\
 		echo "";\
-		echo "Please run 'make all' first to build the project.";\
+		echo "Please run 'make libs' or 'make all' first to configure the build directory.";\
 		echo "===================================================================";\
 		echo "";\
 		exit 1;\
@@ -656,10 +672,11 @@ help:
 	@echo '  <board>_defconfig - Load specific board configuration from configs/'
 	@echo ''
 	@echo 'Build targets:'
-	@echo '  all             - Build all configured targets (default)'
+	@echo '  all             - Build libraries and kernel modules (default)'
+	@echo '  libs            - Build userspace libraries via CMake'
+	@echo '  modules         - Build kernel modules via kbuild'
 	@echo '  install         - Install binaries and libraries'
 	@echo '  install_headers - Install development headers only'
-	@echo '  modules         - Build kernel modules via kbuild'
 	@echo '  clean           - Remove build artifacts'
 	@echo '  distclean       - Remove build artifacts and configuration'
 	@echo '  mrproper        - Same as distclean'
@@ -696,7 +713,7 @@ help:
 	@echo 'Examples:'
 	@echo '  # Standard workflow'
 	@echo '  make kernel_x86_modules_defconfig'
-	@echo '  make -j$$(nproc)'
+	@echo '  make all'
 	@echo '  make install DESTDIR=/tmp/staging'
 	@echo ''
 	@echo '  # Interactive configuration'
@@ -704,7 +721,7 @@ help:
 	@echo '  make'
 	@echo ''
 	@echo '  # Verbose build'
-	@echo '  make V=1'
+	@echo '  make V=1 all'
 	@echo ''
 	@echo '  # Cross-compilation for Buildroot'
 	@echo '  make kernel_x86_modules_defconfig'
