@@ -11,6 +11,7 @@ The aggregation entry is `core/kernel/include/osal/osal.h`. It includes the
 kernel-backed OSAL subsets currently available:
 
 - `lib/osal_heap.h`: allocation, free, realloc, and allocation statistics.
+- `lib/osal_errno.h`: errno-compatible status codes and status name helpers.
 - `lib/osal_string.h`: memory, string, formatting, and basic conversion APIs.
 - `ipc/osal_mutex.h`: mutex and mutex attribute wrappers.
 - `ipc/osal_atomic.h`: 32-bit, 64-bit, and boolean atomics.

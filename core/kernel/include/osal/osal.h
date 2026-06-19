@@ -15,7 +15,6 @@
 #include <linux/types.h>
 #include <linux/byteorder/generic.h>
 
-#include "osal_kernel.h"
 #include "osal_platform.h"
 #include "osal_types.h"
 #include "ipc/osal_atomic.h"
