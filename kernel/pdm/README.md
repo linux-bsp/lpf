@@ -15,9 +15,9 @@ The kernel module currently provides:
   protocol frames
 - built-in peripheral-service registration through LPF Core
 - configured-device binding and device removal ordering owned by LPF Core
-- PDM MCU core, `/dev/pdm_mcu` ioctl dispatch, and CAN/Serial transport glue
+- PDM MCU core, `/dev/lpf/mcuN` ioctl dispatch, and CAN/Serial transport glue
   linked into `pdm.ko`
-- PDM LED core and `/dev/pdm_led` ioctl dispatch for GPIO/PWM controlled LEDs
+- PDM LED core and `/dev/lpf/ledN` ioctl dispatch for GPIO/PWM controlled LEDs
   linked into `pdm.ko`
 - PDM control node `/dev/pdm_ctl` for LPF device discovery snapshots
 - PDM procfs debug nodes under `/proc/pdm/`
@@ -89,9 +89,9 @@ the concrete PCONFIG backend that produced the entries. LPF Core then binds the
 configured device to the matching service `probe`. On unload, LPF Core removes
 devices before driver global resources are released.
 
-Each PDM peripheral exposes
-its own character device, such as `/dev/pdm_mcu`, and each PDI peripheral API
-uses the matching UAPI ioctl header, such as `lpf_mcu.h`.
+Each PDM peripheral instance exposes its own character device, such as
+`/dev/lpf/mcu0`, and each PDI peripheral API uses the matching UAPI ioctl
+header, such as `lpf_mcu.h`.
 
 `/dev/pdm_ctl` is the management node for discovery. It exposes LPF Core device
 snapshots through `uapi/lpf/lpf_ctl.h`, including stable name, type, state,

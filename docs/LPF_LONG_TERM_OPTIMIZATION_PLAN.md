@@ -404,8 +404,9 @@ Acceptance criteria:
 
 Current status:
 
-- Started. `/dev/pdm_ctl` is the first management node and exposes discovery
-  only; peripheral operations remain under `/dev/pdm_mcu` and `/dev/pdm_led`.
+- Started. `/dev/pdm_ctl` remains the management/discovery node, and
+  configured peripheral instances now expose `/dev/lpf/mcuN` and
+  `/dev/lpf/ledN` nodes. Remaining observability work is sysfs/debugfs.
 
 ## Phase 10: Test And Validation System
 

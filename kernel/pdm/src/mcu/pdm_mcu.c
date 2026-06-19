@@ -32,6 +32,8 @@ static bool g_registry_initialized = false;
 
 static const pdm_driver_t g_pdm_mcu_driver;
 
+static void pdm_mcu_remove_index(uint32_t index);
+
 /*===========================================================================
  * 内部辅助函数
  *===========================================================================*/
@@ -264,12 +266,23 @@ int32_t pdm_mcu_probe(const lpf_device_t *device)
 {
 	const pconfig_mcu_entry_t *entry;
 	pdm_mcu_handle_t handle = NULL;
+	int32_t ret;
 
 	if (!device || device->config.type != LPF_DEVICE_TYPE_MCU)
 		return OSAL_ERR_INVALID_PARAM;
 
 	entry = (const pconfig_mcu_entry_t *)device->config.entry;
-	return pdm_mcu_init_from_entry(device->config.index, entry, &handle);
+	ret = pdm_mcu_init_from_entry(device->config.index, entry, &handle);
+	if (ret != OSAL_SUCCESS)
+		return ret;
+
+	ret = pdm_mcu_chrdev_register_device(device);
+	if (ret) {
+		pdm_mcu_remove_index(device->config.index);
+		return OSAL_ERR_GENERIC;
+	}
+
+	return OSAL_SUCCESS;
 }
 
 pdm_mcu_handle_t pdm_mcu_get(uint32_t index)
@@ -342,6 +355,7 @@ void pdm_mcu_remove(const lpf_device_t *device)
 	if (!device || device->config.type != LPF_DEVICE_TYPE_MCU)
 		return;
 
+	pdm_mcu_chrdev_unregister_device(device);
 	pdm_mcu_remove_index(device->config.index);
 }
 

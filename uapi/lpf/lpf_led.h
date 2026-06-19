@@ -9,8 +9,8 @@
 #include <linux/types.h>
 
 #define LPF_LED_ABI_VERSION 0x00010000U
-#define LPF_LED_DEVICE_NAME "pdm_led"
-#define LPF_LED_DEFAULT_DEVICE "/dev/pdm_led"
+#define LPF_LED_DEVICE_NAME "lpf_led"
+#define LPF_LED_DEFAULT_DEVICE "/dev/lpf/led0"
 
 struct lpf_led_info {
 	__u32 abi_version;

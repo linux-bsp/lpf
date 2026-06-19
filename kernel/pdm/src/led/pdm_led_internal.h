@@ -31,6 +31,8 @@ int32_t pdm_led_debug_get(uint32_t index, pdm_led_debug_info_t *info);
 
 int pdm_led_chrdev_register(void);
 void pdm_led_chrdev_unregister(void);
+int pdm_led_chrdev_register_device(const lpf_device_t *device);
+void pdm_led_chrdev_unregister_device(const lpf_device_t *device);
 int pdm_led_proc_register(void);
 void pdm_led_proc_unregister(void);
 

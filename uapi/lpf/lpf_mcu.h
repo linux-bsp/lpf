@@ -1,7 +1,7 @@
 /*
  * LPF MCU UAPI
  *
- * This header defines the ioctl ABI shared by /dev/pdm_mcu and the
+ * This header defines the ioctl ABI shared by /dev/lpf/mcuN and the
  * userspace PDI MCU client.
  */
 
@@ -12,8 +12,8 @@
 #include <linux/types.h>
 
 #define LPF_MCU_ABI_VERSION 0x00010000U
-#define LPF_MCU_DEVICE_NAME "pdm_mcu"
-#define LPF_MCU_DEFAULT_DEVICE "/dev/pdm_mcu"
+#define LPF_MCU_DEVICE_NAME "lpf_mcu"
+#define LPF_MCU_DEFAULT_DEVICE "/dev/lpf/mcu0"
 #define LPF_MCU_MAX_TRANSFER_SIZE 256U
 #define LPF_MCU_MAX_WRITE_SIZE 248U
 

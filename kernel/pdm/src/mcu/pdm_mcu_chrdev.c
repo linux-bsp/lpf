@@ -9,7 +9,30 @@
 #include "pdm_chrdev.h"
 #include "pdm_mcu_internal.h"
 
-static pdm_chrdev_t g_pdm_mcu_chrdev;
+static pdm_chrdev_t g_pdm_mcu_chrdevs[PDM_MCU_MAX_DEVICES];
+
+static pdm_chrdev_t *pdm_mcu_chrdev_from_file(struct file *file)
+{
+	return pdm_chrdev_from_file(file);
+}
+
+static uint32_t pdm_mcu_file_index(struct file *file)
+{
+	pdm_chrdev_t *chrdev = pdm_mcu_chrdev_from_file(file);
+
+	return pdm_chrdev_index(chrdev);
+}
+
+static uint32_t pdm_mcu_open_count(void)
+{
+	uint32_t open_count = 0;
+	uint32_t i;
+
+	for (i = 0; i < OSAL_ARRAY_SIZE(g_pdm_mcu_chrdevs); i++)
+		open_count += pdm_chrdev_open_count(&g_pdm_mcu_chrdevs[i]);
+
+	return open_count;
+}
 
 static void pdm_mcu_fill_info(struct lpf_mcu_info *info)
 {
@@ -18,7 +41,7 @@ static void pdm_mcu_fill_info(struct lpf_mcu_info *info)
 	info->module_version_major = PDM_VERSION_MAJOR;
 	info->module_version_minor = PDM_VERSION_MINOR;
 	info->module_version_patch = PDM_VERSION_PATCH;
-	info->open_count = pdm_chrdev_open_count(&g_pdm_mcu_chrdev);
+	info->open_count = pdm_mcu_open_count();
 	info->max_devices = PDM_MCU_MAX_DEVICES;
 }
 
@@ -44,7 +67,7 @@ static long pdm_mcu_ioctl_get_info(unsigned long arg)
 	return 0;
 }
 
-static long pdm_mcu_ioctl_get_version(unsigned long arg)
+static long pdm_mcu_ioctl_get_version(struct file *file, unsigned long arg)
 {
 	struct lpf_mcu_version request;
 	pdm_mcu_version_t version;
@@ -56,6 +79,7 @@ static long pdm_mcu_ioctl_get_version(unsigned long arg)
 	if (ret != OSAL_SUCCESS)
 		return pdm_status_to_errno(ret);
 
+	request.index = pdm_mcu_file_index(file);
 	handle = pdm_mcu_open_index(request.index);
 	if (!handle)
 		return -ENODEV;
@@ -80,7 +104,7 @@ static long pdm_mcu_ioctl_get_version(unsigned long arg)
 	return 0;
 }
 
-static long pdm_mcu_ioctl_get_status(unsigned long arg)
+static long pdm_mcu_ioctl_get_status(struct file *file, unsigned long arg)
 {
 	struct lpf_mcu_status request;
 	pdm_mcu_status_t status;
@@ -92,6 +116,7 @@ static long pdm_mcu_ioctl_get_status(unsigned long arg)
 	if (ret != OSAL_SUCCESS)
 		return pdm_status_to_errno(ret);
 
+	request.index = pdm_mcu_file_index(file);
 	handle = pdm_mcu_open_index(request.index);
 	if (!handle)
 		return -ENODEV;
@@ -117,7 +142,7 @@ static long pdm_mcu_ioctl_get_status(unsigned long arg)
 	return 0;
 }
 
-static long pdm_mcu_ioctl_reset(unsigned long arg)
+static long pdm_mcu_ioctl_reset(struct file *file, unsigned long arg)
 {
 	u32 index;
 	pdm_mcu_handle_t handle;
@@ -127,6 +152,7 @@ static long pdm_mcu_ioctl_reset(unsigned long arg)
 	if (ret != OSAL_SUCCESS)
 		return pdm_status_to_errno(ret);
 
+	index = pdm_mcu_file_index(file);
 	handle = pdm_mcu_open_index(index);
 	if (!handle)
 		return -ENODEV;
@@ -135,7 +161,7 @@ static long pdm_mcu_ioctl_reset(unsigned long arg)
 	return pdm_status_to_errno(ret);
 }
 
-static long pdm_mcu_ioctl_command(unsigned long arg)
+static long pdm_mcu_ioctl_command(struct file *file, unsigned long arg)
 {
 	struct lpf_mcu_command request;
 	pdm_mcu_handle_t handle;
@@ -153,6 +179,7 @@ static long pdm_mcu_ioctl_command(unsigned long arg)
 	if (request.command > 0xFFU)
 		return -EINVAL;
 
+	request.index = pdm_mcu_file_index(file);
 	handle = pdm_mcu_open_index(request.index);
 	if (!handle)
 		return -ENODEV;
@@ -172,7 +199,7 @@ static long pdm_mcu_ioctl_command(unsigned long arg)
 	return 0;
 }
 
-static long pdm_mcu_ioctl_read_data(unsigned long arg)
+static long pdm_mcu_ioctl_read_data(struct file *file, unsigned long arg)
 {
 	struct lpf_mcu_data request;
 	pdm_mcu_handle_t handle;
@@ -186,6 +213,7 @@ static long pdm_mcu_ioctl_read_data(unsigned long arg)
 	if (request.len > sizeof(request.data))
 		return -EINVAL;
 
+	request.index = pdm_mcu_file_index(file);
 	handle = pdm_mcu_open_index(request.index);
 	if (!handle)
 		return -ENODEV;
@@ -203,7 +231,7 @@ static long pdm_mcu_ioctl_read_data(unsigned long arg)
 	return 0;
 }
 
-static long pdm_mcu_ioctl_write_data(unsigned long arg)
+static long pdm_mcu_ioctl_write_data(struct file *file, unsigned long arg)
 {
 	struct lpf_mcu_data request;
 	pdm_mcu_handle_t handle;
@@ -217,6 +245,7 @@ static long pdm_mcu_ioctl_write_data(unsigned long arg)
 	if (request.len > LPF_MCU_MAX_WRITE_SIZE)
 		return -EINVAL;
 
+	request.index = pdm_mcu_file_index(file);
 	handle = pdm_mcu_open_index(request.index);
 	if (!handle)
 		return -ENODEV;
@@ -235,17 +264,17 @@ static long pdm_mcu_ioctl(struct file *file, unsigned int cmd,
 	case LPF_MCU_IOC_GET_INFO:
 		return pdm_mcu_ioctl_get_info(arg);
 	case LPF_MCU_IOC_GET_VERSION:
-		return pdm_mcu_ioctl_get_version(arg);
+		return pdm_mcu_ioctl_get_version(file, arg);
 	case LPF_MCU_IOC_GET_STATUS:
-		return pdm_mcu_ioctl_get_status(arg);
+		return pdm_mcu_ioctl_get_status(file, arg);
 	case LPF_MCU_IOC_RESET:
-		return pdm_mcu_ioctl_reset(arg);
+		return pdm_mcu_ioctl_reset(file, arg);
 	case LPF_MCU_IOC_COMMAND:
-		return pdm_mcu_ioctl_command(arg);
+		return pdm_mcu_ioctl_command(file, arg);
 	case LPF_MCU_IOC_READ_DATA:
-		return pdm_mcu_ioctl_read_data(arg);
+		return pdm_mcu_ioctl_read_data(file, arg);
 	case LPF_MCU_IOC_WRITE_DATA:
-		return pdm_mcu_ioctl_write_data(arg);
+		return pdm_mcu_ioctl_write_data(file, arg);
 	default:
 		return -ENOTTY;
 	}
@@ -261,18 +290,28 @@ static long pdm_mcu_compat_ioctl(struct file *file, unsigned int cmd,
 
 static int pdm_mcu_open(struct inode *inode, struct file *file)
 {
-	(void)inode;
-	(void)file;
+	pdm_chrdev_t *chrdev;
 
-	return pdm_chrdev_open(&g_pdm_mcu_chrdev);
+	(void)inode;
+
+	chrdev = pdm_mcu_chrdev_from_file(file);
+	if (!chrdev)
+		return -ENODEV;
+
+	return pdm_chrdev_open(chrdev);
 }
 
 static int pdm_mcu_release(struct inode *inode, struct file *file)
 {
-	(void)inode;
-	(void)file;
+	pdm_chrdev_t *chrdev;
 
-	return pdm_chrdev_release(&g_pdm_mcu_chrdev);
+	(void)inode;
+
+	chrdev = pdm_mcu_chrdev_from_file(file);
+	if (!chrdev)
+		return -ENODEV;
+
+	return pdm_chrdev_release(chrdev);
 }
 
 static const struct file_operations pdm_mcu_fops = {
@@ -288,11 +327,48 @@ static const struct file_operations pdm_mcu_fops = {
 
 int pdm_mcu_chrdev_register(void)
 {
-	return pdm_chrdev_register(&g_pdm_mcu_chrdev, LPF_MCU_DEVICE_NAME,
-				   &pdm_mcu_fops);
+	return 0;
 }
 
 void pdm_mcu_chrdev_unregister(void)
 {
-	pdm_chrdev_unregister(&g_pdm_mcu_chrdev);
+	uint32_t i;
+
+	for (i = 0; i < OSAL_ARRAY_SIZE(g_pdm_mcu_chrdevs); i++)
+		pdm_chrdev_unregister(&g_pdm_mcu_chrdevs[i]);
+}
+
+int pdm_mcu_chrdev_register_device(const lpf_device_t *device)
+{
+	char name[PDM_CHRDEV_NAME_LEN];
+	char nodename[PDM_CHRDEV_NAME_LEN];
+	uint32_t index;
+
+	if (!device || device->config.type != LPF_DEVICE_TYPE_MCU)
+		return -EINVAL;
+
+	index = device->config.index;
+	if (index >= OSAL_ARRAY_SIZE(g_pdm_mcu_chrdevs))
+		return -EINVAL;
+
+	osal_snprintf(name, sizeof(name), "lpf_mcu%u", index);
+	osal_snprintf(nodename, sizeof(nodename), "lpf/mcu%u", index);
+
+	return pdm_chrdev_register_instance(&g_pdm_mcu_chrdevs[index],
+					    name, nodename, index,
+					    &pdm_mcu_fops);
+}
+
+void pdm_mcu_chrdev_unregister_device(const lpf_device_t *device)
+{
+	uint32_t index;
+
+	if (!device || device->config.type != LPF_DEVICE_TYPE_MCU)
+		return;
+
+	index = device->config.index;
+	if (index >= OSAL_ARRAY_SIZE(g_pdm_mcu_chrdevs))
+		return;
+
+	pdm_chrdev_unregister(&g_pdm_mcu_chrdevs[index]);
 }

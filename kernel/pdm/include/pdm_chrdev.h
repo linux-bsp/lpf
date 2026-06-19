@@ -10,19 +10,29 @@
 
 #include "pdm_status.h"
 
+#define PDM_CHRDEV_NAME_LEN 64U
+
 typedef struct {
-	const char *name;
+	char name[PDM_CHRDEV_NAME_LEN];
+	char nodename[PDM_CHRDEV_NAME_LEN];
 	const struct file_operations *fops;
 	osal_mutex_t lock;
 	osal_atomic_uint32_t open_count;
 	struct miscdevice miscdev;
+	uint32_t index;
+	bool registered;
 } pdm_chrdev_t;
 
 int pdm_chrdev_open(pdm_chrdev_t *chrdev);
 int pdm_chrdev_release(pdm_chrdev_t *chrdev);
 int pdm_chrdev_register(pdm_chrdev_t *chrdev, const char *name,
 			const struct file_operations *fops);
+int pdm_chrdev_register_instance(pdm_chrdev_t *chrdev, const char *name,
+				 const char *nodename, uint32_t index,
+				 const struct file_operations *fops);
 void pdm_chrdev_unregister(pdm_chrdev_t *chrdev);
+pdm_chrdev_t *pdm_chrdev_from_file(struct file *file);
 uint32_t pdm_chrdev_open_count(const pdm_chrdev_t *chrdev);
+uint32_t pdm_chrdev_index(const pdm_chrdev_t *chrdev);
 
 #endif /* PDM_CHRDEV_H */

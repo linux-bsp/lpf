@@ -103,6 +103,8 @@ int32_t pdm_mcu_debug_get(uint32_t index, pdm_mcu_debug_info_t *info);
 
 int pdm_mcu_chrdev_register(void);
 void pdm_mcu_chrdev_unregister(void);
+int pdm_mcu_chrdev_register_device(const lpf_device_t *device);
+void pdm_mcu_chrdev_unregister_device(const lpf_device_t *device);
 int pdm_mcu_proc_register(void);
 void pdm_mcu_proc_unregister(void);
 

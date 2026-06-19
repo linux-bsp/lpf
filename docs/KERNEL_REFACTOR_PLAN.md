@@ -49,7 +49,7 @@ device and driver lifecycle instead of adding new PDM-local bus code.
 - [x] Build PDM as `pdm.ko` with module entry in `pdm.c`.
 - [x] Split PDI MCU UAPI into `uapi/lpf/lpf_mcu.h`.
 - [x] Split userspace PDI MCU wrapper into `user/pdi/src/pdi_mcu.c`.
-- [x] Add `/dev/pdm_mcu` character-device ioctl boundary.
+- [x] Add `/dev/lpf/mcuN` character-device ioctl boundary.
 - [x] Change PDM startup to initialize built-in drivers, load PConfig, iterate
       configured devices, and call matching driver `probe`.
 - [x] Add PDM built-in driver registration through LPF Core.
@@ -260,7 +260,7 @@ device and driver lifecycle instead of adding new PDM-local bus code.
   - `hal.ko`
   - `pdm.ko`
 - [ ] Run module load/unload smoke test on a compatible kernel.
-- [ ] Verify `/dev/pdm_mcu` appears when MCU is configured.
+- [ ] Verify `/dev/lpf/mcuN` appears when MCU is configured.
 - [ ] Verify each PDI ioctl returns expected status on configured and
       unconfigured devices.
 - [ ] Add rewritten tests when the new test plan is ready.

@@ -80,7 +80,7 @@ menuconfig PDM_LED_SUPPORT
 	  Enable LED peripheral support.
 
 	  LED peripherals can be controlled through GPIO or PWM according to
-	  PConfig entries. The driver exposes /dev/pdm_led for userspace PDI.
+	  PConfig entries. The driver exposes /dev/lpf/ledN for userspace PDI.
 
 source "kernel/pdm/src/led/Config.in"
 

@@ -112,7 +112,7 @@ PDM owns kernel-side peripheral business behavior, ioctl dispatch, procfs debug
 nodes, and protocol helpers. Concrete peripheral services such as MCU and LED
 live under PDM and register with LPF Core for device lifecycle handling. PDM
 also exposes `/dev/pdm_ctl` as the management/discovery ioctl node; business
-operations stay on peripheral nodes such as `/dev/pdm_mcu` and `/dev/pdm_led`.
+operations stay on instance nodes such as `/dev/lpf/mcu0` and `/dev/lpf/led0`.
 
 ### UAPI
 
@@ -179,8 +179,8 @@ Add the following pieces together:
 - PCONFIG type and platform config array entry.
 - LPF device type and capability mapping for the PCONFIG entry.
 - PDM service driver object registered with `lpf_driver_register`.
-- Optional PDM character device `/dev/pdm_<peripheral>` when userspace access
-  is needed.
+- Optional PDM instance character device `/dev/lpf/<peripheral><index>` when
+  userspace access is needed.
 - UAPI header `uapi/lpf/lpf_<peripheral>.h` following
   `docs/LPF_UAPI_ABI.md`.
 - Userspace wrapper `user/pdi/src/pdi_<peripheral>.c`.

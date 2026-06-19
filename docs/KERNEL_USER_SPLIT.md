@@ -63,7 +63,7 @@ Application
     ↓
 PDI userspace API
     ↓
-/dev/pdm_<peripheral> ioctl
+/dev/lpf/<peripheral><index> ioctl
     ↓
 PDM kernel driver
     ↓
@@ -73,7 +73,7 @@ Linux kernel subsystem / hardware
 ```
 
 Each userspace-visible peripheral should have a matching UAPI header and PDI
-wrapper. For example, MCU uses `/dev/pdm_mcu`, `uapi/lpf/lpf_mcu.h`, and
+wrapper. For example, MCU uses `/dev/lpf/mcu0`, `uapi/lpf/lpf_mcu.h`, and
 `user/pdi/src/pdi_mcu.c`.
 
 The previous userspace test framework was removed with the old ctest product.

@@ -48,7 +48,7 @@ Add the following pieces together:
 - `user/pdi/include/pdi/<peripheral>.h`
 - `user/pdi/src/pdi_<peripheral>.c`
 - PDI aggregate include from `user/pdi/include/pdi/pdi.h`
-- PDM character device implementation for `/dev/pdm_<peripheral>`
+- PDM character device implementation for `/dev/lpf/<peripheral><index>`
 - `LPF_<PERIPHERAL>_IOC_GET_INFO`
 - A unique `LPF_<PERIPHERAL>_IOC_MAGIC`
 

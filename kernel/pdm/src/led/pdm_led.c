@@ -20,6 +20,8 @@ static pdm_led_context_t *g_led_contexts[PDM_LED_MAX_DEVICES];
 static osal_mutex_t g_led_registry_lock;
 static bool g_led_registry_ready;
 
+static void pdm_led_remove_index(uint32_t index);
+
 static uint32_t pdm_led_clamp_brightness(const pdm_led_context_t *ctx,
 					 uint32_t brightness)
 {
@@ -231,12 +233,23 @@ int32_t pdm_led_probe(const lpf_device_t *device)
 {
 	const pconfig_led_entry_t *entry;
 	pdm_led_handle_t handle = NULL;
+	int32_t ret;
 
 	if (!device || device->config.type != LPF_DEVICE_TYPE_LED)
 		return OSAL_ERR_INVALID_PARAM;
 
 	entry = (const pconfig_led_entry_t *)device->config.entry;
-	return pdm_led_init_from_entry(device->config.index, entry, &handle);
+	ret = pdm_led_init_from_entry(device->config.index, entry, &handle);
+	if (ret != OSAL_SUCCESS)
+		return ret;
+
+	ret = pdm_led_chrdev_register_device(device);
+	if (ret) {
+		pdm_led_remove_index(device->config.index);
+		return OSAL_ERR_GENERIC;
+	}
+
+	return OSAL_SUCCESS;
 }
 
 pdm_led_handle_t pdm_led_get(uint32_t index)
@@ -311,6 +324,7 @@ void pdm_led_remove(const lpf_device_t *device)
 	if (!device || device->config.type != LPF_DEVICE_TYPE_LED)
 		return;
 
+	pdm_led_chrdev_unregister_device(device);
 	pdm_led_remove_index(device->config.index);
 }
 

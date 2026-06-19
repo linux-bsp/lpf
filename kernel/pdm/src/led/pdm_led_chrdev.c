@@ -9,7 +9,30 @@
 #include "pdm_chrdev.h"
 #include "pdm_led_internal.h"
 
-static pdm_chrdev_t g_pdm_led_chrdev;
+static pdm_chrdev_t g_pdm_led_chrdevs[PDM_LED_MAX_DEVICES];
+
+static pdm_chrdev_t *pdm_led_chrdev_from_file(struct file *file)
+{
+	return pdm_chrdev_from_file(file);
+}
+
+static uint32_t pdm_led_file_index(struct file *file)
+{
+	pdm_chrdev_t *chrdev = pdm_led_chrdev_from_file(file);
+
+	return pdm_chrdev_index(chrdev);
+}
+
+static uint32_t pdm_led_open_count(void)
+{
+	uint32_t open_count = 0;
+	uint32_t i;
+
+	for (i = 0; i < OSAL_ARRAY_SIZE(g_pdm_led_chrdevs); i++)
+		open_count += pdm_chrdev_open_count(&g_pdm_led_chrdevs[i]);
+
+	return open_count;
+}
 
 static void pdm_led_fill_info(struct lpf_led_info *info)
 {
@@ -18,7 +41,7 @@ static void pdm_led_fill_info(struct lpf_led_info *info)
 	info->module_version_major = PDM_LED_VERSION_MAJOR;
 	info->module_version_minor = PDM_LED_VERSION_MINOR;
 	info->module_version_patch = PDM_LED_VERSION_PATCH;
-	info->open_count = pdm_chrdev_open_count(&g_pdm_led_chrdev);
+	info->open_count = pdm_led_open_count();
 	info->max_devices = PDM_LED_MAX_DEVICES;
 }
 
@@ -44,7 +67,7 @@ static long pdm_led_ioctl_get_info(unsigned long arg)
 	return 0;
 }
 
-static long pdm_led_ioctl_get_state(unsigned long arg)
+static long pdm_led_ioctl_get_state(struct file *file, unsigned long arg)
 {
 	struct lpf_led_state request;
 	pdm_led_state_t state;
@@ -56,6 +79,7 @@ static long pdm_led_ioctl_get_state(unsigned long arg)
 	if (ret != OSAL_SUCCESS)
 		return pdm_status_to_errno(ret);
 
+	request.index = pdm_led_file_index(file);
 	handle = pdm_led_open_index(request.index);
 	if (!handle)
 		return -ENODEV;
@@ -76,7 +100,7 @@ static long pdm_led_ioctl_get_state(unsigned long arg)
 	return 0;
 }
 
-static long pdm_led_ioctl_set_brightness(unsigned long arg)
+static long pdm_led_ioctl_set_brightness(struct file *file, unsigned long arg)
 {
 	struct lpf_led_brightness request;
 	pdm_led_handle_t handle;
@@ -87,6 +111,7 @@ static long pdm_led_ioctl_set_brightness(unsigned long arg)
 	if (ret != OSAL_SUCCESS)
 		return pdm_status_to_errno(ret);
 
+	request.index = pdm_led_file_index(file);
 	handle = pdm_led_open_index(request.index);
 	if (!handle)
 		return -ENODEV;
@@ -95,7 +120,7 @@ static long pdm_led_ioctl_set_brightness(unsigned long arg)
 	return pdm_status_to_errno(ret);
 }
 
-static long pdm_led_ioctl_enable(unsigned long arg)
+static long pdm_led_ioctl_enable(struct file *file, unsigned long arg)
 {
 	u32 index;
 	pdm_led_handle_t handle;
@@ -105,6 +130,7 @@ static long pdm_led_ioctl_enable(unsigned long arg)
 	if (ret != OSAL_SUCCESS)
 		return pdm_status_to_errno(ret);
 
+	index = pdm_led_file_index(file);
 	handle = pdm_led_open_index(index);
 	if (!handle)
 		return -ENODEV;
@@ -113,7 +139,7 @@ static long pdm_led_ioctl_enable(unsigned long arg)
 	return pdm_status_to_errno(ret);
 }
 
-static long pdm_led_ioctl_disable(unsigned long arg)
+static long pdm_led_ioctl_disable(struct file *file, unsigned long arg)
 {
 	u32 index;
 	pdm_led_handle_t handle;
@@ -123,6 +149,7 @@ static long pdm_led_ioctl_disable(unsigned long arg)
 	if (ret != OSAL_SUCCESS)
 		return pdm_status_to_errno(ret);
 
+	index = pdm_led_file_index(file);
 	handle = pdm_led_open_index(index);
 	if (!handle)
 		return -ENODEV;
@@ -140,13 +167,13 @@ static long pdm_led_ioctl(struct file *file, unsigned int cmd,
 	case LPF_LED_IOC_GET_INFO:
 		return pdm_led_ioctl_get_info(arg);
 	case LPF_LED_IOC_GET_STATE:
-		return pdm_led_ioctl_get_state(arg);
+		return pdm_led_ioctl_get_state(file, arg);
 	case LPF_LED_IOC_SET_BRIGHTNESS:
-		return pdm_led_ioctl_set_brightness(arg);
+		return pdm_led_ioctl_set_brightness(file, arg);
 	case LPF_LED_IOC_ENABLE:
-		return pdm_led_ioctl_enable(arg);
+		return pdm_led_ioctl_enable(file, arg);
 	case LPF_LED_IOC_DISABLE:
-		return pdm_led_ioctl_disable(arg);
+		return pdm_led_ioctl_disable(file, arg);
 	default:
 		return -ENOTTY;
 	}
@@ -162,18 +189,28 @@ static long pdm_led_compat_ioctl(struct file *file, unsigned int cmd,
 
 static int pdm_led_open(struct inode *inode, struct file *file)
 {
-	(void)inode;
-	(void)file;
+	pdm_chrdev_t *chrdev;
 
-	return pdm_chrdev_open(&g_pdm_led_chrdev);
+	(void)inode;
+
+	chrdev = pdm_led_chrdev_from_file(file);
+	if (!chrdev)
+		return -ENODEV;
+
+	return pdm_chrdev_open(chrdev);
 }
 
 static int pdm_led_release(struct inode *inode, struct file *file)
 {
-	(void)inode;
-	(void)file;
+	pdm_chrdev_t *chrdev;
 
-	return pdm_chrdev_release(&g_pdm_led_chrdev);
+	(void)inode;
+
+	chrdev = pdm_led_chrdev_from_file(file);
+	if (!chrdev)
+		return -ENODEV;
+
+	return pdm_chrdev_release(chrdev);
 }
 
 static const struct file_operations pdm_led_fops = {
@@ -189,11 +226,48 @@ static const struct file_operations pdm_led_fops = {
 
 int pdm_led_chrdev_register(void)
 {
-	return pdm_chrdev_register(&g_pdm_led_chrdev, LPF_LED_DEVICE_NAME,
-				   &pdm_led_fops);
+	return 0;
 }
 
 void pdm_led_chrdev_unregister(void)
 {
-	pdm_chrdev_unregister(&g_pdm_led_chrdev);
+	uint32_t i;
+
+	for (i = 0; i < OSAL_ARRAY_SIZE(g_pdm_led_chrdevs); i++)
+		pdm_chrdev_unregister(&g_pdm_led_chrdevs[i]);
+}
+
+int pdm_led_chrdev_register_device(const lpf_device_t *device)
+{
+	char name[PDM_CHRDEV_NAME_LEN];
+	char nodename[PDM_CHRDEV_NAME_LEN];
+	uint32_t index;
+
+	if (!device || device->config.type != LPF_DEVICE_TYPE_LED)
+		return -EINVAL;
+
+	index = device->config.index;
+	if (index >= OSAL_ARRAY_SIZE(g_pdm_led_chrdevs))
+		return -EINVAL;
+
+	osal_snprintf(name, sizeof(name), "lpf_led%u", index);
+	osal_snprintf(nodename, sizeof(nodename), "lpf/led%u", index);
+
+	return pdm_chrdev_register_instance(&g_pdm_led_chrdevs[index],
+					    name, nodename, index,
+					    &pdm_led_fops);
+}
+
+void pdm_led_chrdev_unregister_device(const lpf_device_t *device)
+{
+	uint32_t index;
+
+	if (!device || device->config.type != LPF_DEVICE_TYPE_LED)
+		return;
+
+	index = device->config.index;
+	if (index >= OSAL_ARRAY_SIZE(g_pdm_led_chrdevs))
+		return;
+
+	pdm_chrdev_unregister(&g_pdm_led_chrdevs[index]);
 }

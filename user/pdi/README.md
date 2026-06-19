@@ -14,14 +14,14 @@ Current peripheral APIs:
 
 - Discovery: `pdi_ctl_*`, `pdi_list_devices`, and lookup helpers wrap
   `/dev/pdm_ctl`; ioctl ABI lives in `uapi/lpf/lpf_ctl.h`.
-- MCU: `pdi_mcu_*` wraps `/dev/pdm_mcu`; ioctl ABI lives in
+- MCU: `pdi_mcu_*` wraps `/dev/lpf/mcuN`; ioctl ABI lives in
   `uapi/lpf/lpf_mcu.h`; SDK declarations live in `pdi/mcu.h`.
-- LED: `pdi_led_*` wraps `/dev/pdm_led`; ioctl ABI lives in
+- LED: `pdi_led_*` wraps `/dev/lpf/ledN`; ioctl ABI lives in
   `uapi/lpf/lpf_led.h`; SDK declarations live in `pdi/led.h`.
 
 `pdi_mcu_open_by_name()` and `pdi_led_open_by_name()` use `/dev/pdm_ctl` to
-validate the LPF stable device name before opening the current aggregated
-peripheral node.
+validate the LPF stable device name, then open the matching instance node by
+the discovered index.
 
 Applications should include `pdi/pdi.h` or the SDK headers under
 `user/pdi/include/pdi/`. UAPI headers under `uapi/lpf/` are ABI-only.

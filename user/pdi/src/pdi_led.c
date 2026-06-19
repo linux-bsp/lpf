@@ -8,8 +8,11 @@
 
 #include <fcntl.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
+
+#define PDI_LED_DEVICE_PATH_LEN 64U
 
 static int32_t pdi_led_ioctl_checked(pdi_led_context_t *ctx,
 				     unsigned long request, void *arg)
@@ -41,6 +44,7 @@ int32_t pdi_led_open_by_name(pdi_led_context_t *ctx, const char *name)
 {
 	pdi_ctl_context_t ctl;
 	struct lpf_ctl_device_info info;
+	char path[PDI_LED_DEVICE_PATH_LEN];
 	int32_t ret;
 
 	if (pdi_check_ptr(ctx) < 0)
@@ -60,7 +64,11 @@ int32_t pdi_led_open_by_name(pdi_led_context_t *ctx, const char *name)
 	if (info.type != LPF_CTL_DEVICE_TYPE_LED)
 		return pdi_fail_no_device();
 
-	return pdi_led_open(ctx, NULL);
+	ret = snprintf(path, sizeof(path), "/dev/lpf/led%u", info.index);
+	if (ret < 0 || (size_t)ret >= sizeof(path))
+		return pdi_fail_invalid_arg();
+
+	return pdi_led_open(ctx, path);
 }
 
 int32_t pdi_led_close(pdi_led_context_t *ctx)
