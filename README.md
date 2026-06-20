@@ -54,8 +54,8 @@ APIs from higher layers, but non-Linux ports are outside the current direction.
 - Generated build artifacts under `_build/`.
 
 The previous userspace test product has been removed. New tests now live under
-`tests/` with CMake/CTest integration; the first coverage is UAPI ABI layout
-checking.
+`tests/` with CMake/CTest integration. Current coverage includes UAPI ABI
+layout checks and PDI userspace API validation/error-path smoke tests.
 
 ## Quick Start
 

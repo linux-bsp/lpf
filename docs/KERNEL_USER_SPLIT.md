@@ -77,8 +77,8 @@ wrapper. For example, MCU uses `/dev/lpf/mcu0`, `uapi/lpf/lpf_mcu.h`, and
 `user/pdi/src/pdi_mcu.c`.
 
 The previous userspace test product was removed. New tests live under
-`tests/` with explicit CMake/CTest integration; UAPI layout checks currently
-run through `make tests`.
+`tests/` with explicit CMake/CTest integration; UAPI layout checks and PDI
+userspace smoke tests currently run through `make tests`.
 
 ## Include Rules
 

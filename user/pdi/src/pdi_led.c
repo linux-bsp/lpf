@@ -32,6 +32,7 @@ int32_t pdi_led_open(pdi_led_context_t *ctx, const char *device_path)
 	if (pdi_check_ptr(ctx) < 0)
 		return PDI_FAILURE;
 
+	ctx->fd = -1;
 	path = (device_path != NULL) ? device_path : LPF_LED_DEFAULT_DEVICE;
 	ctx->fd = open(path, O_RDWR | O_CLOEXEC);
 	if (ctx->fd < 0)
@@ -49,6 +50,7 @@ int32_t pdi_led_open_by_name(pdi_led_context_t *ctx, const char *name)
 
 	if (pdi_check_ptr(ctx) < 0)
 		return PDI_FAILURE;
+	ctx->fd = -1;
 	if (pdi_check_ptr(name) < 0)
 		return PDI_FAILURE;
 

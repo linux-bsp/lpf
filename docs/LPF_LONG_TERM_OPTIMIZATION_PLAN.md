@@ -456,8 +456,11 @@ Current status:
 - Done. UAPI ABI layout checks now compile and run through CTest, covering
   LPF control, MCU, and LED UAPI structure sizes, field offsets, ABI versions,
   and ioctl command encodings.
+- Started. PDI userspace tests now cover open/close context validation,
+  missing-device failures, stable-name input validation, and basic
+  validation/error paths for control, MCU, and LED APIs.
 - Remaining work: add mock HAL/backend coverage, dummy peripheral services,
-  PDI behavior tests, and multi-kernel matrix builds.
+  mock ioctl operation-path PDI tests, and multi-kernel matrix builds.
 
 ## Recommended Implementation Order
 
