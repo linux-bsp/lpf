@@ -354,9 +354,9 @@ int pdm_mcu_chrdev_register_device(const lpf_device_t *device)
 	osal_snprintf(name, sizeof(name), "lpf_mcu%u", index);
 	osal_snprintf(nodename, sizeof(nodename), "lpf/mcu%u", index);
 
-	return pdm_chrdev_register_instance(&g_pdm_mcu_chrdevs[index],
-					    name, nodename, index,
-					    &pdm_mcu_fops);
+	return pdm_chrdev_register_lpf_device(&g_pdm_mcu_chrdevs[index],
+					      name, nodename, device,
+					      &pdm_mcu_fops);
 }
 
 void pdm_mcu_chrdev_unregister_device(const lpf_device_t *device)

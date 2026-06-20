@@ -406,7 +406,12 @@ Current status:
 
 - Started. `/dev/pdm_ctl` remains the management/discovery node, and
   configured peripheral instances now expose `/dev/lpf/mcuN` and
-  `/dev/lpf/ledN` nodes. Remaining observability work is sysfs/debugfs.
+  `/dev/lpf/ledN` nodes.
+- Started. Instance character devices now expose read-only sysfs attributes:
+  `name`, `type`, `index`, `state`, `capabilities`, `driver`, `soc`,
+  `last_error`, and `open_count`.
+- Remaining observability work: move debug-only procfs operations to debugfs
+  and add true runtime error counters in the PDM operation paths.
 
 ## Phase 10: Test And Validation System
 

@@ -93,6 +93,18 @@ Each PDM peripheral instance exposes its own character device, such as
 `/dev/lpf/mcu0`, and each PDI peripheral API uses the matching UAPI ioctl
 header, such as `lpf_mcu.h`.
 
+Instance character devices expose read-only sysfs attributes for inspection:
+
+- `name`
+- `type`
+- `index`
+- `state`
+- `capabilities`
+- `driver`
+- `soc`
+- `last_error`
+- `open_count`
+
 `/dev/pdm_ctl` is the management node for discovery. It exposes LPF Core device
 snapshots through `uapi/lpf/lpf_ctl.h`, including stable name, type, state,
 driver name, and capability flags. It does not perform peripheral business

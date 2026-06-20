@@ -253,9 +253,9 @@ int pdm_led_chrdev_register_device(const lpf_device_t *device)
 	osal_snprintf(name, sizeof(name), "lpf_led%u", index);
 	osal_snprintf(nodename, sizeof(nodename), "lpf/led%u", index);
 
-	return pdm_chrdev_register_instance(&g_pdm_led_chrdevs[index],
-					    name, nodename, index,
-					    &pdm_led_fops);
+	return pdm_chrdev_register_lpf_device(&g_pdm_led_chrdevs[index],
+					      name, nodename, device,
+					      &pdm_led_fops);
 }
 
 void pdm_led_chrdev_unregister_device(const lpf_device_t *device)
