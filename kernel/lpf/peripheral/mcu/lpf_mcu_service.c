@@ -9,7 +9,7 @@
 
 #include "osal.h"
 #include "lpf/config/lpf_config.h"
-#include "lpf/peripheral/lpf_peripheral_internal.h"
+#include "lpf/runtime/lpf_runtime_internal.h"
 #include "lpf/protocol/lpf_protocol.h"
 #include "lpf_mcu_internal.h"
 
@@ -724,5 +724,5 @@ static void lpf_mcu_service_unregister(void)
 	lpf_driver_unregister(&g_lpf_mcu_driver);
 }
 
-lpf_peripheral_register(mcu_service, lpf_mcu_service_register,
+lpf_runtime_register(mcu_service, lpf_mcu_service_register,
 			lpf_mcu_service_unregister);

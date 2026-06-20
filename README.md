@@ -34,12 +34,12 @@ APIs from higher layers, but non-Linux ports are outside the current direction.
 
 - OSAL: operating-system abstraction
 - LPF HW: framework-owned hardware access APIs linked into
-  `lpf_peripheral_runtime.ko`
+  `lpf_runtime.ko`
 - LPF Runtime Config: platform hardware configuration registry linked into
-  `lpf_peripheral_runtime.ko`
+  `lpf_runtime.ko`
 - LPF Core: framework device model and shared kernel infrastructure
-- LPF Peripheral Runtime: integrated kernel module for reusable peripheral
-  services (`lpf_peripheral_runtime.ko`)
+- LPF Runtime: integrated kernel module for reusable peripheral
+  services (`lpf_runtime.ko`)
 - PDI: userspace peripheral driver interface library
 - ACONFIG: application configuration layer
 
@@ -94,11 +94,11 @@ make modules
 ```
 
 That preset also builds `lpf_hw_mock_selftest.ko`; loading it after `osal.ko`,
-`lpf_core.ko`, and `lpf_peripheral_runtime.ko` runs LPF HW
+`lpf_core.ko`, and `lpf_runtime.ko` runs LPF HW
 GPIO/PWM/CAN/UART/I2C/SPI checks through the mock SoC adapter.
 
 Kernel module load order is `osal.ko`, `lpf_core.ko`, then
-`lpf_peripheral_runtime.ko`.
+`lpf_runtime.ko`.
 
 Generated libraries are written under `_build/lib/`. Kernel modules are written
 under `_build/modules/`.

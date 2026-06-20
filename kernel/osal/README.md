@@ -1,7 +1,7 @@
 # Kernel OSAL
 
 Kernel OSAL wraps Linux kernel APIs needed by LPF HW, LPF runtime config, LPF Core,
-and LPF peripheral runtime.
+and LPF runtime.
 
 It is intentionally separate from `user/osal`, but public OSAL names should
 match userspace where the kernel can provide equivalent or close semantics. This

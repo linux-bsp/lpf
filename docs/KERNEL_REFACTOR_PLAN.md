@@ -1,7 +1,7 @@
 # Kernel Refactor Plan
 
 This document tracks the remaining work for moving LPF HW, LPF runtime config,
-and the LPF peripheral runtime to the kernel-module architecture. Update the checkboxes
+and the LPF runtime to the kernel-module architecture. Update the checkboxes
 as each part is implemented and verified.
 
 Note: this is the historical kernel-module refactor tracker. The long-term LPF
@@ -12,16 +12,16 @@ use LPF Core for device and driver lifecycle instead of adding local bus code.
 ## Target Architecture
 
 - LPF HW hardware access objects are linked into
-  `lpf_peripheral_runtime.ko`; the old standalone hardware module has been
+  `lpf_runtime.ko`; the old standalone hardware module has been
   removed.
-- Runtime config is linked into `lpf_peripheral_runtime.ko`.
+- Runtime config is linked into `lpf_runtime.ko`.
 - Runtime config selects a configuration backend. The current static backend
   consumes platform configs compiled under
   `kernel/lpf/config/configs/<product>/<project>/<version>/`.
 - LPF Core is a standalone kernel module built as `lpf_core.ko`; it owns the
   framework device and driver registry.
-- LPF peripheral runtime is a kernel module built as
-  `lpf_peripheral_runtime.ko`; current LPF peripheral services are linked into
+- LPF runtime is a kernel module built as
+  `lpf_runtime.ko`; current LPF peripheral services are linked into
   that integrated module while their code lives under `kernel/lpf/peripheral/`.
 - Runtime config supplies device instances; the LPF peripheral configuration
   entry maps those instances into LPF device configs, and LPF Core matches each
@@ -40,34 +40,34 @@ use LPF Core for device and driver lifecycle instead of adding local bus code.
 
 - [x] Move hardware access implementation to kernel-side `kernel/lpf/hw`.
 - [x] Remove the old standalone hardware module; link LPF HW hardware access
-      objects into `lpf_peripheral_runtime.ko`.
+      objects into `lpf_runtime.ko`.
 - [x] Remove old userspace hardware access implementation from the active
       module path.
 - [x] Rename kernel module entry files from `main.c` to module names.
 - [x] Move hardware access source files under the LPF tree.
 - [x] Add per-module version printing for OSAL, LPF HW, runtime config, and the
-      LPF peripheral runtime.
+      LPF runtime.
 - [x] Keep OSAL version printing in `osal.c` instead of a separate
       `osal_version.c`.
 - [x] Add `module_init`/`module_exit` for OSAL.
 - [x] Add runtime config load/unload integration.
-- [x] Build the LPF peripheral runtime as `lpf_peripheral_runtime.ko` with
-      module entry in `lpf_peripheral_module.c`.
+- [x] Build the LPF runtime as `lpf_runtime.ko` with
+      module entry in `lpf_runtime_module.c`.
 - [x] Split PDI MCU UAPI into `uapi/lpf/lpf_mcu.h`.
 - [x] Split userspace PDI MCU wrapper into `user/pdi/src/pdi_mcu.c`.
 - [x] Add `/dev/lpf/mcuN` character-device ioctl boundary.
-- [x] Make the LPF peripheral runtime entry own service registration,
+- [x] Make the LPF runtime entry own service registration,
       configured-device probing, and LPF Core binding.
 - [x] Add built-in peripheral service registration through LPF Core.
 - [x] Move built-in peripheral service registration into
-      `kernel/lpf/peripheral/lpf_peripheral.c`.
+      `kernel/lpf/runtime/lpf_runtime.c`.
 - [x] Move runtime config-to-LPF device config mapping into
-      `kernel/lpf/peripheral/lpf_peripheral_config.c`.
+      `kernel/lpf/runtime/lpf_runtime_config.c`.
 - [x] Move LPF Core/peripheral initialization sequencing behind
-      `lpf_peripheral_runtime_init()`.
+      `lpf_runtime_init()`.
 - [x] Replace the local virtual bus/list manager with LPF Core for driver and
       device binding.
-- [x] Keep LPF peripheral services linked into `lpf_peripheral_runtime.ko`
+- [x] Keep LPF peripheral services linked into `lpf_runtime.ko`
       instead of adding one kernel module per peripheral.
 - [x] Add LPF HW built-in initialization table for hardware access
       paths that need runtime initialization.
@@ -84,19 +84,19 @@ use LPF Core for device and driver lifecycle instead of adding local bus code.
 
 - [x] Add a real product/platform runtime config source for the kernel module
       build.
-  - `lpf_peripheral_runtime.ko` links `g_lpf_config_platform_table` from
+  - `lpf_runtime.ko` links `g_lpf_config_platform_table` from
     `kernel/lpf/config/configs` through the static backend.
   - Acceptance: runtime config load finds a board config during
-    `lpf_peripheral_runtime.ko` initialization.
+    `lpf_runtime.ko` initialization.
 - [x] Define the runtime config ownership model.
-  - Runtime config lifetime follows `lpf_peripheral_runtime.ko`.
+  - Runtime config lifetime follows `lpf_runtime.ko`.
   - LPF peripheral configuration reads LPF runtime config and LPF Core removes registered
     devices on exit.
-  - Acceptance: unloading `lpf_peripheral_runtime.ko` removes LPF devices
+  - Acceptance: unloading `lpf_runtime.ko` removes LPF devices
     before unloading runtime config.
 - [ ] Add a basic module load/unload smoke path.
   - Target order: `osal.ko`, `lpf_core.ko`,
-    `lpf_peripheral_runtime.ko`.
+    `lpf_runtime.ko`.
   - Acceptance: all modules load and unload cleanly on the target kernel with
     the selected defconfig.
 
@@ -126,7 +126,7 @@ use LPF Core for device and driver lifecycle instead of adding local bus code.
 - [x] Keep the current `init` and `probe` split.
   - `init`: register global resources for an LPF peripheral service type.
   - `probe`: create per-device instances from LPF runtime config entries.
-- [x] Audit LPF peripheral runtime error-code conversion.
+- [x] Audit LPF runtime error-code conversion.
   - Avoid double-negating OSAL status values.
   - Kernel entry points should return Linux negative errno.
   - Internal OSAL-style APIs should return `OSAL_SUCCESS` or positive OSAL
@@ -145,8 +145,8 @@ use LPF Core for device and driver lifecycle instead of adding local bus code.
   - It has no independent module lifecycle; MCU, FPGA, and future peripheral
     drivers call it to package payloads into standard protocol frames and parse
     received raw frames back into device type, message type, and payload data.
-- [x] Revisit LPF peripheral runtime device removal.
-  - LPF peripheral runtime should remove devices before driver exit.
+- [x] Revisit LPF runtime device removal.
+  - LPF runtime should remove devices before driver exit.
   - Runtime config state should remain owned by runtime config.
   - Implemented with LPF Core: device nodes are removed before driver
     unregister/exit, and each bound device calls its driver's `remove`.
@@ -227,7 +227,7 @@ use LPF Core for device and driver lifecycle instead of adding local bus code.
 - [x] Remove unused `ccflags-$(CONFIG_...) += -DCONFIG_...` definitions from
       `kernel/Makefile`.
   - Keep Kbuild object selection such as
-    `lpf_peripheral_runtime-$(CONFIG_LPF_MCU_SERVICE)`.
+    `lpf_runtime-$(CONFIG_LPF_MCU_SERVICE)`.
 - [x] Keep feature selection at object/list registration boundaries.
   - Kconfig selects objects.
   - Linked objects register themselves.
@@ -254,9 +254,9 @@ use LPF Core for device and driver lifecycle instead of adding local bus code.
       behavior.
 - [x] Document module load order and dependencies.
   - OSAL before LPF Core.
-  - LPF Core before LPF peripheral runtime.
+  - LPF Core before LPF runtime.
   - Runtime config and LPF HW hardware access are linked into
-    `lpf_peripheral_runtime.ko`.
+    `lpf_runtime.ko`.
 - [x] Document how to add a new peripheral.
   - LPF runtime config type and platform entry.
   - LPF device type/capability mapping.
@@ -278,7 +278,7 @@ use LPF Core for device and driver lifecycle instead of adding local bus code.
 - [x] Verify module artifact names.
   - `osal.ko`
   - `lpf_core.ko`
-  - `lpf_peripheral_runtime.ko`
+  - `lpf_runtime.ko`
   - The old standalone hardware module is no longer produced.
 - [ ] Run module load/unload smoke test on a compatible kernel.
 - [ ] Verify `/dev/lpf/mcuN` appears when MCU is configured.

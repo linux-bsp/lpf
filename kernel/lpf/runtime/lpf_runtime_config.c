@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0
 
-#include "lpf/peripheral/lpf_peripheral.h"
+#include "lpf/runtime/lpf_runtime.h"
 
 #include "lpf/core/lpf_core.h"
-#include "lpf/peripheral/lpf_peripheral_internal.h"
+#include "lpf/runtime/lpf_runtime_internal.h"
 #include "lpf/config/lpf_config.h"
 
 static int32_t lpf_peripheral_make_mcu_config(
@@ -84,7 +84,7 @@ static int32_t lpf_peripheral_make_device_config(
 	}
 }
 
-int32_t lpf_peripheral_probe_devices(void)
+int32_t lpf_runtime_probe_devices(void)
 {
 	const lpf_config_device_config_t *device;
 	int32_t ret;

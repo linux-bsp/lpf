@@ -1,14 +1,14 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-Reusable framework layers live at the repository top level: `kernel/` holds kernel-side modules such as `osal` and `lpf`; `kernel/lpf/hw` holds LPF-owned hardware access objects linked into `lpf_peripheral_runtime.ko`; `kernel/lpf/config` holds LPF runtime configuration objects linked into `lpf_peripheral_runtime.ko`; `user/` holds userspace libraries such as `osal`, `aconfig`, and `pdi`; `uapi/` holds shared userspace/kernel ABI headers. Configuration presets live under `configs/`, build support scripts are under `scripts/`, and generated artifacts are written to `_build/`.
+Reusable framework layers live at the repository top level: `kernel/` holds kernel-side modules such as `osal` and `lpf`; `kernel/lpf/hw` holds LPF-owned hardware access objects linked into `lpf_runtime.ko`; `kernel/lpf/config` holds LPF runtime configuration objects linked into `lpf_runtime.ko`; `user/` holds userspace libraries such as `osal`, `aconfig`, and `pdi`; `uapi/` holds shared userspace/kernel ABI headers. Configuration presets live under `configs/`, build support scripts are under `scripts/`, and generated artifacts are written to `_build/`.
 
 ## Build, Test, and Development Commands
 - `make list` - show available configuration and build targets.
 - `make kernel_x86_modules_defconfig` - load a baseline kernel-module configuration.
 - `make menuconfig` - open the interactive Kconfig editor.
 - `make all` - configure and build the selected target.
-- `make modules` - build enabled kernel modules such as `osal.ko`, `lpf_core.ko`, and `lpf_peripheral_runtime.ko`.
+- `make modules` - build enabled kernel modules such as `osal.ko`, `lpf_core.ko`, and `lpf_runtime.ko`.
 - `make clean` - remove build outputs.
 
 ## Coding Style & Naming Conventions

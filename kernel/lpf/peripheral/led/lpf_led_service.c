@@ -4,7 +4,7 @@
 #include "lpf/config/lpf_config.h"
 #include "lpf/core/lpf_driver.h"
 #include "lpf/hw/lpf_hw.h"
-#include "lpf/peripheral/lpf_peripheral_internal.h"
+#include "lpf/runtime/lpf_runtime_internal.h"
 #include "lpf_led_internal.h"
 
 typedef struct lpf_led_context {
@@ -518,5 +518,5 @@ static void lpf_led_service_unregister(void)
 	lpf_driver_unregister(&g_lpf_led_driver);
 }
 
-lpf_peripheral_register(led_service, lpf_led_service_register,
+lpf_runtime_register(led_service, lpf_led_service_register,
 			lpf_led_service_unregister);

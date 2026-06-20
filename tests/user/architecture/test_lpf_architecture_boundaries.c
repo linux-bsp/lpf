@@ -160,10 +160,10 @@ out:
 static int test_peripheral_layer_dependencies(void)
 {
 	static const source_file_t files[] = {
-		{ "lpf_peripheral.c",
-		  "kernel/lpf/peripheral/lpf_peripheral.c" },
-		{ "lpf_peripheral_config.c",
-		  "kernel/lpf/peripheral/lpf_peripheral_config.c" },
+		{ "lpf_runtime.c",
+		  "kernel/lpf/runtime/lpf_runtime.c" },
+		{ "lpf_runtime_config.c",
+		  "kernel/lpf/runtime/lpf_runtime_config.c" },
 		{ "lpf_mcu_service.c",
 		  "kernel/lpf/peripheral/mcu/lpf_mcu_service.c" },
 		{ "lpf_mcu_chrdev.c",

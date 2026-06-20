@@ -295,7 +295,7 @@ Current status:
 
 ## Phase 6: Runtime Configuration Layer
 
-Goal: move runtime configuration responsibilities into the LPF peripheral runtime as its
+Goal: move runtime configuration responsibilities into the LPF runtime as its
 configuration input layer, while keeping backend-based configuration loading.
 
 Work items:
@@ -327,7 +327,7 @@ Acceptance criteria:
 - The same MCU or LED device can be created from static table or Device Tree.
 - LPF Core and peripheral services do not care where configuration came from.
 - Module builds no longer produce a standalone configuration module.
-- Runtime config unloads when `lpf_peripheral_runtime.ko` unloads.
+- Runtime config unloads when `lpf_runtime.ko` unloads.
 
 Current status:
 
@@ -343,7 +343,7 @@ Current status:
   and LED GPIO/PWM entries into the same normalized LPF config model through a
   reusable parser below the Linux OF adapter.
 - Done. LPF runtime config backend objects are linked into
-  `lpf_peripheral_runtime.ko`, and the standalone configuration module boundary
+  `lpf_runtime.ko`, and the standalone configuration module boundary
   has been removed from the build.
 - Done. Runtime config source files now live under `kernel/lpf/config/`,
   public runtime config headers live under `kernel/include/lpf/config/`, and
@@ -405,10 +405,10 @@ Current status:
   with public kernel service headers under `kernel/include/lpf/peripheral/`.
 - Started. MCU and LED services register as LPF drivers and expose
   `/dev/lpf/mcuN` and `/dev/lpf/ledN`; both remain integrated through
-  `lpf_peripheral_runtime.ko` so deployment does not fragment into one KO per
+  `lpf_runtime.ko` so deployment does not fragment into one KO per
   peripheral.
 - Done. Unified peripheral service registration lives in
-  `kernel/lpf/peripheral/lpf_peripheral.c`; the LPF peripheral runtime entry
+  `kernel/lpf/runtime/lpf_runtime.c`; the LPF runtime entry
   calls that service entry instead of registering MCU/LED services directly in
   the module shell.
 - Done. MCU and LED runtime service contexts are kept in dynamic
@@ -417,15 +417,15 @@ Current status:
   tables and legacy info fields, and service probe paths no longer enforce
   those node-table limits directly.
 - Done. Runtime config-to-LPF device mapping lives in
-  `kernel/lpf/peripheral/lpf_peripheral_config.c`; the LPF peripheral runtime
+  `kernel/lpf/runtime/lpf_runtime_config.c`; the LPF runtime
   calls the LPF peripheral probe entry instead of owning per-device capability
   mapping in the module shell.
 - Done. LPF Core initialization, peripheral service registration, and
-  configured-device probing are now wrapped by the LPF peripheral runtime
+  configured-device probing are now wrapped by the LPF runtime
   entry.
 - Done. The obsolete public header for the old module shell has been removed;
   runtime version
-  reporting is now owned by the LPF peripheral runtime entry.
+  reporting is now owned by the LPF runtime entry.
 - Started. MCU CAN/UART implementations have moved behind
   `kernel/lpf/transport/mcu/` and are selected through the LPF MCU transport
   registry instead of direct service dependencies.
@@ -434,9 +434,9 @@ Current status:
   `kernel/include/lpf/protocol/` and encode/decode symbols exported by
   `lpf_core.ko`.
 - Done. The old compatibility shell has been renamed to the integrated LPF
-  peripheral runtime module `lpf_peripheral_runtime.ko`; the legacy module
+  runtime module `lpf_runtime.ko`; the legacy module
   entry has been removed.
-- Remaining work: continue hardening the integrated LPF peripheral runtime
+- Remaining work: continue hardening the integrated LPF runtime
   boundary while keeping services inside the framework module instead of
   splitting per-peripheral KOs.
 
@@ -566,7 +566,7 @@ Current status:
   `lpf_sysfs`, and `lpf_debugfs`.
 - Done. The control/discovery character device implementation has moved from
   the old module shell into LPF Core as `kernel/lpf/core/lpf_ctl.c`; LPF
-  peripheral runtime no longer owns `/dev/lpf_ctl` registration.
+  runtime no longer owns `/dev/lpf_ctl` registration.
 - Done. Procfs and OSAL-status-to-errno helpers have been extracted into LPF
   helpers, and migrated peripheral services no longer depend on legacy
   proc/status wrappers.
@@ -643,9 +643,9 @@ Current status:
   normalized mock platform equivalence without requiring live OF support from
   the host kernel.
 - Done. `LPF_CONFIG_OF_SELFTEST` adds a runtime self-test inside
-  `lpf_peripheral_runtime.ko`; the self-test object is linked by
+  `lpf_runtime.ko`; the self-test object is linked by
   `obj-$(CONFIG_LPF_CONFIG_OF_SELFTEST)` and contributes an entry to the LPF
-  peripheral runtime entry section. It provides live Linux OF coverage of the
+  runtime entry section. It provides live Linux OF coverage of the
   Device Tree backend in a `CONFIG_OF`/`CONFIG_OF_DYNAMIC` kernel matrix, while
   skipping cleanly on kernels without live OF support.
 - Done. Architecture-boundary tests now guard the MCU/LED dynamic service

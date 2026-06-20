@@ -2,7 +2,7 @@
 
 This directory contains the `lpf_config_*` source and type names for the LPF
 runtime configuration layer. The code is linked into
-`lpf_peripheral_runtime.ko` instead of being built as a standalone config
+`lpf_runtime.ko` instead of being built as a standalone config
 module.
 
 The runtime configuration layer selects a configuration backend, validates the
@@ -23,7 +23,7 @@ runtime.
 ## Backend Selection
 
 Runtime config supports a `backend` module parameter on
-`lpf_peripheral_runtime.ko`:
+`lpf_runtime.ko`:
 
 ```text
 backend=auto    # default: try dt, then static

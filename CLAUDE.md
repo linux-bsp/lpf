@@ -9,7 +9,7 @@ Core modules:
 - OSAL
 - LPF HW
 - LPF Core
-- LPF Peripheral Runtime
+- LPF Runtime
 - LPF Runtime Config
 - PDI
 - ACONFIG
@@ -33,7 +33,7 @@ make modules
 
 - Core modules must not depend on product code.
 - Product/application code belongs outside shared framework module directories.
-- LPF peripheral runtime hosts runtime config loading and kernel-side peripheral services.
+- LPF runtime hosts runtime config loading and kernel-side peripheral services.
 - PDI exposes the userspace API and wraps LPF UAPI ioctl ABIs.
 - LPF HW owns framework hardware access above the SoC adapter; OSAL remains
   the operating-system abstraction layer.

@@ -16,7 +16,7 @@ kernel/
       config/      # runtime config type headers
       core/        # LPF Core model and shared node headers
       hw/          # LPF HW API headers
-      peripheral/  # LPF peripheral runtime and service headers
+      peripheral/  # LPF runtime and service headers
       protocol/    # LPF protocol headers
       soc/         # LPF SoC adapter headers
       transport/   # LPF transport registry headers
@@ -26,7 +26,7 @@ kernel/
     core/          # LPF device model and shared node infrastructure
     hw/            # LPF-owned hardware access APIs linked into runtime
     protocol/      # LPF protocol helpers linked into lpf_core.ko
-    peripheral/    # framework-owned peripheral runtime and services
+    peripheral/    # framework-owned runtime and services
 
 user/
   osal/            # userspace OSAL library
@@ -42,16 +42,16 @@ uapi/
 - `kernel/osal` wraps Linux kernel APIs and builds `osal.ko`.
 - `kernel/lpf/core` owns the LPF device model, control/discovery node, and
   shared chrdev/sysfs/debugfs helpers.
-- `kernel/lpf/peripheral` owns the framework peripheral runtime, integrated
+- `kernel/lpf/peripheral` owns the framework runtime, integrated
   module entry, runtime configuration loading, and service implementations;
-  current service paths are linked into `lpf_peripheral_runtime.ko`.
+  current service paths are linked into `lpf_runtime.ko`.
 - `kernel/lpf/protocol` provides kernel-side LPF protocol helpers through
   `lpf_core.ko` for services that need framed communication.
 - `kernel/lpf/hw` provides LPF-owned hardware access APIs used by LPF
   peripheral services. The objects are linked into
-  `lpf_peripheral_runtime.ko`.
+  `lpf_runtime.ko`.
 - `kernel/lpf/config` provides LPF runtime config source files and type headers.
-  The objects are linked into `lpf_peripheral_runtime.ko` rather than a
+  The objects are linked into `lpf_runtime.ko` rather than a
   standalone module.
 - `user/pdi` provides the application-facing C API and wraps open/ioctl.
 - `uapi/lpf` is the stable ABI shared by LPF kernel nodes and `user/pdi`.

@@ -14,7 +14,7 @@ menuconfig LPF_CORE
 	  It also contains the initial kernel compatibility wrappers and
 	  selected SoC adapter used by LPF hardware access paths.
 
-	  Required by the LPF peripheral runtime and services.
+	  Required by the LPF runtime and services.
 
 	  If unsure, say Y when enabling LPF peripheral services.
 
@@ -89,13 +89,13 @@ config LPF_PROTOCOL_MAX_PAYLOAD_SIZE
 
 endmenu
 
-menuconfig LPF_PERIPHERAL_RUNTIME
-	tristate "LPF peripheral runtime module"
+menuconfig LPF_RUNTIME
+	tristate "LPF runtime module"
 	default m
 	depends on LPF_CORE
 	depends on m
 	help
-	  Build the integrated LPF peripheral runtime module. This module hosts
+	  Build the integrated LPF runtime module. This module hosts
 	  the reusable LPF peripheral services selected below and the runtime
 	  configuration backend used to create LPF devices. It keeps framework
 	  services in one runtime boundary instead of splitting one kernel
@@ -106,7 +106,7 @@ menuconfig LPF_PERIPHERAL_RUNTIME
 menuconfig LPF_MCU_SERVICE
 	bool "LPF MCU peripheral service"
 	default n
-	depends on LPF_PERIPHERAL_RUNTIME
+	depends on LPF_RUNTIME
 	select LPF_PROTOCOL
 	select LPF_PROTOCOL_MCU
 	select LPF_HW_CAN
@@ -122,7 +122,7 @@ source "kernel/lpf/transport/mcu/Config.in"
 menuconfig LPF_LED_SERVICE
 	bool "LPF LED peripheral service"
 	default n
-	depends on LPF_PERIPHERAL_RUNTIME
+	depends on LPF_RUNTIME
 	select LPF_HW_GPIO
 	select LPF_HW_PWM
 	help
@@ -148,11 +148,11 @@ config LPF_DUMMY_SERVICE_SELFTEST
 config LPF_CONFIG_OF_SELFTEST
 	bool "Build LPF Device Tree config runtime self-test"
 	default n
-	depends on LPF_PERIPHERAL_RUNTIME && LPF_SOC_ADAPTER_MOCK
+	depends on LPF_RUNTIME && LPF_SOC_ADAPTER_MOCK
 	help
 	  Link the LPF Device Tree config self-test into
-	  lpf_peripheral_runtime.ko. The test contributes an entry to the LPF
-	  peripheral runtime entry section and validates the LPF Device Tree
+	  lpf_runtime.ko. The test contributes an entry to the LPF
+	  runtime entry section and validates the LPF Device Tree
 	  parser through Linux OF accessors on kernels with CONFIG_OF and
 	  CONFIG_OF_DYNAMIC enabled. Kernels without live OF support skip the
 	  runtime overlay check, so the same mock defconfig can be used in a

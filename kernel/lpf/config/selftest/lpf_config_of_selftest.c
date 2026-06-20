@@ -2,7 +2,7 @@
 
 #include "osal.h"
 #include "lpf/config/lpf_config.h"
-#include "lpf/peripheral/lpf_peripheral_internal.h"
+#include "lpf/runtime/lpf_runtime_internal.h"
 #include "lpf_config_dt_parser.h"
 #include "lpf_config_normalizer.h"
 
@@ -562,5 +562,5 @@ static void lpf_config_of_selftest_exit(void)
 	pr_info("LPF:CONFIG_OF_SELFTEST: unloaded\n");
 }
 
-lpf_peripheral_register(config_of_selftest, lpf_config_of_selftest_init,
+lpf_runtime_register(config_of_selftest, lpf_config_of_selftest_init,
 			lpf_config_of_selftest_exit);

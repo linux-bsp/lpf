@@ -59,14 +59,14 @@ The current module boundary is:
 ```text
 osal.ko
 lpf_core.ko
-lpf_peripheral_runtime.ko
+lpf_runtime.ko
 ```
 
 `lpf_core.ko` hosts the LPF device model, discovery control node, shared
 chrdev/sysfs/debugfs/proc helpers, protocol helpers, kernel compat wrappers, and
 the selected SoC adapter.
 
-`lpf_peripheral_runtime.ko` hosts runtime configuration, LPF HW objects,
+`lpf_runtime.ko` hosts runtime configuration, LPF HW objects,
 peripheral services, transports, and configured-device probing. It should remain
 an integrated framework runtime instead of splitting one kernel module per
 peripheral service.

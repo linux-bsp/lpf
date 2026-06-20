@@ -4,7 +4,7 @@
 set -eu
 
 module_dir=${LPF_MODULE_DIR:-_build/modules}
-required_modules="osal lpf_core lpf_peripheral_runtime lpf_hw_mock_selftest lpf_dummy_service_selftest"
+required_modules="osal lpf_core lpf_runtime lpf_hw_mock_selftest lpf_dummy_service_selftest"
 loaded_modules=
 
 log()

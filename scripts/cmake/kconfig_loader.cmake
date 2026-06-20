@@ -247,7 +247,7 @@ function(kconfig_print_summary)
         PRODUCT_FRAMEWORK
         PRODUCT_SAMPLE
         OSAL
-        LPF_PERIPHERAL_RUNTIME
+        LPF_RUNTIME
         PDI
         ACONFIG
     )

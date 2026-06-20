@@ -1,7 +1,7 @@
 # LPF HW
 
 LPF HW is the framework-owned hardware access layer used by LPF peripheral
-services and transports. It is linked into `lpf_peripheral_runtime.ko`; it does
+services and transports. It is linked into `lpf_runtime.ko`; it does
 not build as a standalone kernel module.
 
 ## Scope
@@ -44,7 +44,7 @@ Expected runtime artifacts:
 ```text
 _build/modules/osal.ko
 _build/modules/lpf_core.ko
-_build/modules/lpf_peripheral_runtime.ko
+_build/modules/lpf_runtime.ko
 ```
 
 `kernel_x86_mock_modules_defconfig` additionally builds
@@ -63,7 +63,7 @@ sudo make mock-modules-smoke
 ```
 
 The smoke target loads `osal.ko`, `lpf_core.ko`,
-`lpf_peripheral_runtime.ko`, `lpf_hw_mock_selftest.ko`, and
+`lpf_runtime.ko`, `lpf_hw_mock_selftest.ko`, and
 `lpf_dummy_service_selftest.ko` in order, then unloads them in reverse order.
 It refuses to run if any target module is already loaded, so it does not take
 ownership of modules started by another test or by a developer shell.
