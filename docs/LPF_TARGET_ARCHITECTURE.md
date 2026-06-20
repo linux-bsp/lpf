@@ -88,7 +88,7 @@ Adding a new peripheral family should add matching pieces together:
 - Runtime config type and backend parsing.
 - LPF device type and capability mapping.
 - Peripheral service driver registered with LPF Core.
-- Optional transport implementation under `kernel/lpf/transport/`.
+- Optional transport implementation under `kernel/lpf-runtime/transport/`.
 - Optional LPF HW capability if the peripheral needs a reusable hardware API.
 - UAPI header when userspace access is needed.
 - PDI wrapper when application-facing C APIs are needed.

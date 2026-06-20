@@ -98,13 +98,13 @@ static int test_service_context_registries(void)
 	int failures = 0;
 
 	mcu_service = read_source_file(
-		"kernel/lpf/peripheral/mcu/lpf_mcu_service.c");
+		"kernel/lpf-runtime/peripheral/mcu/lpf_mcu_service.c");
 	led_service = read_source_file(
-		"kernel/lpf/peripheral/led/lpf_led_service.c");
+		"kernel/lpf-runtime/peripheral/led/lpf_led_service.c");
 	mcu_chrdev = read_source_file(
-		"kernel/lpf/peripheral/mcu/lpf_mcu_chrdev.c");
+		"kernel/lpf-runtime/peripheral/mcu/lpf_mcu_chrdev.c");
 	led_chrdev = read_source_file(
-		"kernel/lpf/peripheral/led/lpf_led_chrdev.c");
+		"kernel/lpf-runtime/peripheral/led/lpf_led_chrdev.c");
 
 	if (!mcu_service || !led_service || !mcu_chrdev || !led_chrdev) {
 		fprintf(stderr, "failed to read peripheral service sources\n");
@@ -161,27 +161,27 @@ static int test_peripheral_layer_dependencies(void)
 {
 	static const source_file_t files[] = {
 		{ "lpf_runtime.c",
-		  "kernel/lpf/runtime/lpf_runtime.c" },
+		  "kernel/lpf-runtime/runtime/lpf_runtime.c" },
 		{ "lpf_runtime_config.c",
-		  "kernel/lpf/runtime/lpf_runtime_config.c" },
+		  "kernel/lpf-runtime/runtime/lpf_runtime_config.c" },
 		{ "lpf_mcu_service.c",
-		  "kernel/lpf/peripheral/mcu/lpf_mcu_service.c" },
+		  "kernel/lpf-runtime/peripheral/mcu/lpf_mcu_service.c" },
 		{ "lpf_mcu_chrdev.c",
-		  "kernel/lpf/peripheral/mcu/lpf_mcu_chrdev.c" },
+		  "kernel/lpf-runtime/peripheral/mcu/lpf_mcu_chrdev.c" },
 		{ "lpf_mcu_proc.c",
-		  "kernel/lpf/peripheral/mcu/lpf_mcu_proc.c" },
+		  "kernel/lpf-runtime/peripheral/mcu/lpf_mcu_proc.c" },
 		{ "lpf_led_service.c",
-		  "kernel/lpf/peripheral/led/lpf_led_service.c" },
+		  "kernel/lpf-runtime/peripheral/led/lpf_led_service.c" },
 		{ "lpf_led_chrdev.c",
-		  "kernel/lpf/peripheral/led/lpf_led_chrdev.c" },
+		  "kernel/lpf-runtime/peripheral/led/lpf_led_chrdev.c" },
 		{ "lpf_led_proc.c",
-		  "kernel/lpf/peripheral/led/lpf_led_proc.c" },
+		  "kernel/lpf-runtime/peripheral/led/lpf_led_proc.c" },
 		{ "lpf_mcu_transport.c",
-		  "kernel/lpf/transport/mcu/lpf_mcu_transport.c" },
+		  "kernel/lpf-runtime/transport/mcu/lpf_mcu_transport.c" },
 		{ "lpf_mcu_transport_can.c",
-		  "kernel/lpf/transport/mcu/lpf_mcu_transport_can.c" },
+		  "kernel/lpf-runtime/transport/mcu/lpf_mcu_transport_can.c" },
 		{ "lpf_mcu_transport_uart.c",
-		  "kernel/lpf/transport/mcu/lpf_mcu_transport_uart.c" },
+		  "kernel/lpf-runtime/transport/mcu/lpf_mcu_transport_uart.c" },
 	};
 	static const char *forbidden_tokens[] = {
 		"lpf/soc/",

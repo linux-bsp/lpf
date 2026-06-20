@@ -62,7 +62,7 @@ explicitly documented as a transitional compatibility path.
 ### LPF SoC Adapter
 
 - May call LPF Kernel Compat APIs or vendor BSP APIs.
-- Must keep SoC-specific code under `kernel/lpf/soc/`.
+- Must keep SoC-specific code under `kernel/lpf-core/soc/`.
 - Must not contain peripheral business behavior.
 
 ### LPF Kernel Compat

@@ -1,6 +1,6 @@
 set(LPF_MCU_TRANSPORT_REGISTRY_SOURCES
     test_lpf_mcu_transport_registry.c
-    "${SDK_PATH}/kernel/lpf/transport/mcu/lpf_mcu_transport.c"
+    "${SDK_PATH}/kernel/lpf-runtime/transport/mcu/lpf_mcu_transport.c"
 )
 
 add_executable(lpf_mcu_transport_registry_all_test

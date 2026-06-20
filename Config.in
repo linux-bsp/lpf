@@ -535,8 +535,8 @@ endmenu
 menu "Modules"
 
 source "user/osal/Config.in"
-source "kernel/lpf/Config.in"
-source "kernel/lpf/hw/Config.in"
+source "kernel/lpf-core/Config.in"
+source "kernel/lpf-runtime/Config.in"
 source "user/aconfig/Config.in"
 source "user/pdi/Config.in"
 

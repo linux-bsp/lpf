@@ -103,13 +103,13 @@ exposes read-only snapshots of the LPF device model through
 The SoC adapter layer owns hardware backend differences below LPF hardware
 access APIs. The current default backend is `generic-linux`, which calls LPF
 kernel compat wrappers for CAN, serial, GPIO, PWM, I2C, and SPI. Kconfig
-selects the default backend built into `lpf_core.ko`; `kernel/lpf/soc/mock/`
+selects the default backend built into `lpf_core.ko`; `kernel/lpf-core/soc/mock/`
 provides a deterministic mock backend for development and framework tests that
 should not require live hardware. The mock preset can also build
 `lpf_hw_mock_selftest.ko`, which runs LPF HW operation-path checks over
 the mock backend, and `lpf_dummy_service_selftest.ko`, which runs LPF Core
 dummy service lifecycle checks. Future SoC-specific adapters should live under
-`kernel/lpf/soc/` and must keep vendor BSP calls out of hardware access APIs
+`kernel/lpf-core/soc/` and must keep vendor BSP calls out of hardware access APIs
 and LPF peripheral services. Public kernel-internal SoC adapter headers live
 under `kernel/include/lpf/soc/`.
 
@@ -118,7 +118,7 @@ under `kernel/include/lpf/soc/`.
 The compat layer wraps Linux kernel API details that may vary across kernel
 versions. Public kernel-internal compat headers live under
 `kernel/include/lpf/compat/`. GPIO, PWM, I2C, and SPI wrappers currently live
-under `kernel/lpf/compat/`, along with CAN and serial wrappers. Peripheral
+under `kernel/lpf-core/compat/`, along with CAN and serial wrappers. Peripheral
 services and LPF HW business-facing APIs should not use `LINUX_VERSION_CODE` or
 vendor BSP APIs directly.
 
@@ -142,10 +142,10 @@ LPF peripheral services own kernel-side peripheral business behavior, ioctl
 dispatch, state, error handling, and debug command handlers. Services register
 with LPF Core for device lifecycle handling and use LPF chrdev/sysfs/debugfs
 helpers for runtime nodes. MCU and LED services now live under
-`kernel/lpf/peripheral/` and expose instance nodes such as `/dev/lpf/mcu0` and
+`kernel/lpf-runtime/peripheral/` and expose instance nodes such as `/dev/lpf/mcu0` and
 `/dev/lpf/led0`; they remain integrated through
 `lpf_runtime.ko` rather than being split into one KO per peripheral.
-`kernel/lpf/runtime/lpf_runtime.c` owns the unified runtime
+`kernel/lpf-runtime/runtime/lpf_runtime.c` owns the unified runtime
 entry used by the integration module. Public kernel-internal peripheral headers
 live under `kernel/include/lpf/peripheral/`.
 
@@ -153,7 +153,7 @@ live under `kernel/include/lpf/peripheral/`.
 
 LPF transport implementations own reusable communication backends used by
 peripheral services. The current MCU CAN and UART transports live under
-`kernel/lpf/transport/mcu/` and are selected by normalized LPF_CONFIG interface
+`kernel/lpf-runtime/transport/mcu/` and are selected by normalized LPF_CONFIG interface
 type. MCU service code uses the transport registry instead of depending on
 CAN/UART implementation symbols directly. Public kernel-internal MCU transport
 headers live under `kernel/include/lpf/transport/mcu/`.
@@ -162,7 +162,7 @@ headers live under `kernel/include/lpf/transport/mcu/`.
 
 LPF protocol helpers own reusable kernel-side packet framing for peripheral
 services that need a standard message envelope. The current implementation
-lives under `kernel/lpf/protocol/`, exports encode/decode entry points from
+lives under `kernel/lpf-core/protocol/`, exports encode/decode entry points from
 `lpf_core.ko`, and keeps protocol constants and MCU message definitions under
 `kernel/include/lpf/protocol/`.
 
@@ -289,7 +289,7 @@ coverage together so the ABI and build configuration remain consistent.
   then mapped into LPF Core device configs.
 - LPF HW APIs should call LPF SoC Adapter APIs for SoC-backed hardware
   capabilities.
-- Kernel-version conditionals belong in `kernel/lpf/compat/` or
+- Kernel-version conditionals belong in `kernel/lpf-core/compat/` or
   `kernel/include/lpf/compat/lpf_compat_*` helper headers.
 - Userspace code must use PDI/UAPI rather than including kernel-internal LPF HW,
   LPF_CONFIG, LPF Core, or LPF peripheral headers.

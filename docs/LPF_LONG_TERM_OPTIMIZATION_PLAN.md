@@ -85,7 +85,7 @@ management core.
 
 Work items:
 
-- Add `kernel/lpf/core/`.
+- Add `kernel/lpf-core/core/`.
 - Define `lpf_device`.
 - Define `lpf_driver`.
 - Define `lpf_device_id`.
@@ -144,7 +144,7 @@ wrappers.
 
 Work items:
 
-- Add `kernel/lpf/compat/`.
+- Add `kernel/lpf-core/compat/`.
 - Add feature detection for supported kernel versions.
 - Wrap GPIO API differences.
 - Wrap PWM API differences.
@@ -172,7 +172,7 @@ Acceptance criteria:
 Current status:
 
 - Started. CAN, serial, GPIO, PWM, I2C, and SPI Linux API wrappers now live
-  under `kernel/lpf/compat/`.
+  under `kernel/lpf-core/compat/`.
 - Started. Kernel compatibility public headers now live under
   `kernel/include/lpf/compat/` so include paths reflect the LPF layer boundary.
 - Started. `docs/LPF_KERNEL_COMPAT_POLICY.md` defines the supported kernel
@@ -191,7 +191,7 @@ Goal: isolate SoC and vendor BSP differences behind adapter implementations.
 
 Work items:
 
-- Add `kernel/lpf/soc/`.
+- Add `kernel/lpf-core/soc/`.
 - Define SoC adapter interfaces for GPIO, PWM, I2C, SPI, CAN, UART, and other
   required hardware capabilities.
 - Provide a generic Linux adapter using standard kernel APIs.
@@ -201,7 +201,7 @@ Work items:
 Deliverables:
 
 - `kernel/include/lpf/soc/lpf_soc_adapter.h`
-- `kernel/lpf/soc/generic_linux/`
+- `kernel/lpf-core/soc/generic_linux/`
 - Future adapter directories such as `soc/am62x/`, `soc/imx8/`, or
   `soc/rk3568/`.
 
@@ -214,8 +214,8 @@ Current status:
 
 - Started. `kernel/include/lpf/soc/lpf_soc_adapter.h` defines the initial CAN,
   serial, GPIO, PWM, I2C, and SPI adapter interfaces.
-- `kernel/lpf/soc/generic_linux/` provides the default Linux backend.
-- Started. `kernel/lpf/soc/mock/` provides a Kconfig-selectable mock SoC
+- `kernel/lpf-core/soc/generic_linux/` provides the default Linux backend.
+- Started. `kernel/lpf-core/soc/mock/` provides a Kconfig-selectable mock SoC
   backend for GPIO, PWM, I2C, SPI, CAN, and serial paths, with
   `kernel_x86_mock_modules_defconfig` as a no-hardware module build preset.
 - Done. The mock SoC backend allocates mock GPIO, PWM, I2C, SPI, CAN, and
@@ -231,7 +231,7 @@ the SoC adapter layer.
 
 Work items:
 
-- Add `kernel/lpf/hw/` for LPF-internal hardware capability APIs.
+- Add `kernel/lpf-runtime/hw/` for LPF-internal hardware capability APIs.
 - Migrate useful hardware state/context handling into:
   - `lpf_hw_gpio`
   - `lpf_hw_pwm`
@@ -250,7 +250,7 @@ Work items:
 
 Deliverables:
 
-- `kernel/lpf/hw/`
+- `kernel/lpf-runtime/hw/`
 - `kernel/include/lpf/hw/`
 - LPF HW API reference.
 - Removal of the old standalone hardware access directory from the repository.
@@ -264,7 +264,7 @@ Acceptance criteria:
 
 Current status:
 
-- Done. `kernel/lpf/hw/` now owns LPF-internal hardware access APIs for GPIO,
+- Done. `kernel/lpf-runtime/hw/` now owns LPF-internal hardware access APIs for GPIO,
   PWM, CAN, UART, I2C, and SPI.
 - Started. LPF HW public kernel-internal headers now live under
   `kernel/include/lpf/hw/` so consumers include the HW layer explicitly.
@@ -310,7 +310,7 @@ Work items:
 - Make all backends produce the same `lpf_device_config` model.
 - Move per-device validation into per-device validators.
 - Delete the standalone configuration Kconfig/module boundary.
-- Move source layout to `kernel/lpf/config/`.
+- Move source layout to `kernel/lpf-runtime/config/`.
 - Rename public-internal APIs and types to `lpf_config_*` after the module
   boundary is removed.
 
@@ -345,7 +345,7 @@ Current status:
 - Done. LPF runtime config backend objects are linked into
   `lpf_runtime.ko`, and the standalone configuration module boundary
   has been removed from the build.
-- Done. Runtime config source files now live under `kernel/lpf/config/`,
+- Done. Runtime config source files now live under `kernel/lpf-runtime/config/`,
   public runtime config headers live under `kernel/include/lpf/config/`, and
   APIs/types use the `lpf_config_*` namespace.
 - Done. The static backend now supports runtime product selection by compiled
@@ -372,8 +372,8 @@ instead of product-specific drivers.
 Work items:
 
 - Move current MCU and LED implementations toward:
-  - `kernel/lpf/peripheral/mcu/`
-  - `kernel/lpf/peripheral/led/`
+  - `kernel/lpf-runtime/peripheral/mcu/`
+  - `kernel/lpf-runtime/peripheral/led/`
 - For every peripheral type, define:
   - probe and remove
   - capability reporting
@@ -388,9 +388,9 @@ Work items:
 
 Deliverables:
 
-- `kernel/lpf/peripheral/mcu/`
-- `kernel/lpf/peripheral/led/`
-- `kernel/lpf/transport/mcu/`
+- `kernel/lpf-runtime/peripheral/mcu/`
+- `kernel/lpf-runtime/peripheral/led/`
+- `kernel/lpf-runtime/transport/mcu/`
 - Unified service registration in the existing framework integration module.
 
 Acceptance criteria:
@@ -401,14 +401,14 @@ Acceptance criteria:
 
 Current status:
 
-- Started. MCU and LED service code now live under `kernel/lpf/peripheral/`
+- Started. MCU and LED service code now live under `kernel/lpf-runtime/peripheral/`
   with public kernel service headers under `kernel/include/lpf/peripheral/`.
 - Started. MCU and LED services register as LPF drivers and expose
   `/dev/lpf/mcuN` and `/dev/lpf/ledN`; both remain integrated through
   `lpf_runtime.ko` so deployment does not fragment into one KO per
   peripheral.
 - Done. Unified peripheral service registration lives in
-  `kernel/lpf/runtime/lpf_runtime.c`; the LPF runtime entry
+  `kernel/lpf-runtime/runtime/lpf_runtime.c`; the LPF runtime entry
   calls that service entry instead of registering MCU/LED services directly in
   the module shell.
 - Done. MCU and LED runtime service contexts are kept in dynamic
@@ -417,7 +417,7 @@ Current status:
   tables and legacy info fields, and service probe paths no longer enforce
   those node-table limits directly.
 - Done. Runtime config-to-LPF device mapping lives in
-  `kernel/lpf/runtime/lpf_runtime_config.c`; the LPF runtime
+  `kernel/lpf-runtime/runtime/lpf_runtime_config.c`; the LPF runtime
   calls the LPF peripheral probe entry instead of owning per-device capability
   mapping in the module shell.
 - Done. LPF Core initialization, peripheral service registration, and
@@ -427,10 +427,10 @@ Current status:
   runtime version
   reporting is now owned by the LPF runtime entry.
 - Started. MCU CAN/UART implementations have moved behind
-  `kernel/lpf/transport/mcu/` and are selected through the LPF MCU transport
+  `kernel/lpf-runtime/transport/mcu/` and are selected through the LPF MCU transport
   registry instead of direct service dependencies.
 - Done. The framed peripheral protocol has moved into the LPF protocol layer
-  under `kernel/lpf/protocol/`, with public protocol headers under
+  under `kernel/lpf-core/protocol/`, with public protocol headers under
   `kernel/include/lpf/protocol/` and encode/decode symbols exported by
   `lpf_core.ko`.
 - Done. The old compatibility shell has been renamed to the integrated LPF
@@ -562,10 +562,10 @@ Current status:
   also map reported `OFFLINE` and `ERROR` states into Core runtime health.
 - Started. Legacy local character-device, sysfs, and debugfs helper
   implementations have been extracted into LPF infrastructure under
-  `kernel/lpf/core/` and are linked into `lpf_core.ko` as `lpf_chrdev`,
+  `kernel/lpf-core/core/` and are linked into `lpf_core.ko` as `lpf_chrdev`,
   `lpf_sysfs`, and `lpf_debugfs`.
 - Done. The control/discovery character device implementation has moved from
-  the old module shell into LPF Core as `kernel/lpf/core/lpf_ctl.c`; LPF
+  the old module shell into LPF Core as `kernel/lpf-core/core/lpf_ctl.c`; LPF
   runtime no longer owns `/dev/lpf_ctl` registration.
 - Done. Procfs and OSAL-status-to-errno helpers have been extracted into LPF
   helpers, and migrated peripheral services no longer depend on legacy

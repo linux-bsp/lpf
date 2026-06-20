@@ -35,4 +35,4 @@ memory, pty/terminal, select/poll, generic file, and generic socket APIs.
 
 LPF HW uses the LPF SoC Adapter for hardware access instead of hiding Linux
 subsystem details behind generic OSAL wrappers. Current examples are CAN,
-UART, GPIO, PWM, I2C, and SPI paths below `kernel/lpf/hw/`.
+UART, GPIO, PWM, I2C, and SPI paths below `kernel/lpf-runtime/hw/`.

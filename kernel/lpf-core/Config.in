@@ -1,0 +1,92 @@
+# LPF Core Configuration
+
+menuconfig LPF_CORE
+	tristate "LPF core device model"
+	default m
+	depends on OSAL
+	depends on m
+	help
+	  LPF Core owns the framework device and driver registry used by
+	  peripheral services. It provides a stable LPF device model above
+	  kernel-version and SoC-specific adapter layers, plus snapshot device
+	  discovery by stable name and capability.
+
+	  It also contains the initial kernel compatibility wrappers and
+	  selected SoC adapter used by LPF hardware access paths.
+
+	  Required by the LPF runtime and services.
+
+	  If unsure, say Y when enabling LPF peripheral services.
+
+if LPF_CORE
+
+choice
+	prompt "Default LPF SoC adapter"
+	default LPF_SOC_ADAPTER_GENERIC_LINUX
+	help
+	  Select the SoC adapter registered by LPF Core during module
+	  initialization. Product builds should normally use the generic Linux
+	  backend or a future SoC-specific backend. Test builds can select the
+	  mock backend to validate LPF HW and peripheral-service paths without
+	  live hardware.
+
+config LPF_SOC_ADAPTER_GENERIC_LINUX
+	bool "Generic Linux SoC adapter"
+	help
+	  Use standard Linux kernel subsystem wrappers for GPIO, PWM, I2C, SPI,
+	  CAN, and serial access.
+
+config LPF_SOC_ADAPTER_MOCK
+	bool "Mock SoC adapter"
+	help
+	  Use an in-kernel mock backend for GPIO, PWM, I2C, SPI, CAN, and
+	  serial access. This is intended for framework tests and development
+	  builds that need deterministic behavior without real peripherals.
+
+endchoice
+
+menu "LPF Protocol Configuration"
+
+config LPF_PROTOCOL
+	bool "LPF peripheral protocol support"
+	default n
+	help
+	  Enable the LPF-owned protocol encoder/decoder used by peripheral
+	  services that need framed communication.
+
+	  The protocol layer is part of LPF infrastructure and is linked into
+	  lpf_core.ko so services hosted by the integrated LPF peripheral
+	  runtime can share the same packet framing implementation.
+
+config LPF_PROTOCOL_MCU
+	bool "MCU protocol messages"
+	default n
+	depends on LPF_PROTOCOL
+	help
+	  Enable MCU message definitions for the LPF peripheral protocol.
+
+config LPF_PROTOCOL_CRC_CHECK
+	bool "Enable CRC16 checksum"
+	default y
+	depends on LPF_PROTOCOL
+	help
+	  Enable CRC16-CCITT checksum support for protocol packets.
+
+config LPF_PROTOCOL_SEQUENCE_CHECK
+	bool "Enable sequence number check"
+	default y
+	depends on LPF_PROTOCOL
+	help
+	  Enable sequence number helpers for packet ordering.
+
+config LPF_PROTOCOL_MAX_PAYLOAD_SIZE
+	int "Maximum protocol payload size (bytes)"
+	default 4096
+	range 256 65536
+	depends on LPF_PROTOCOL
+	help
+	  Maximum payload size for LPF protocol packets.
+
+endmenu
+
+endif # LPF_CORE

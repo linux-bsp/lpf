@@ -1,0 +1,82 @@
+# LPF Runtime Configuration
+
+menuconfig LPF_RUNTIME
+	tristate "LPF runtime module"
+	default m
+	depends on LPF_CORE
+	depends on m
+	help
+	  Build the integrated LPF runtime module. This module hosts
+	  the reusable LPF peripheral services selected below and the runtime
+	  configuration backend used to create LPF devices. It keeps framework
+	  services in one runtime boundary instead of splitting one kernel
+	  module per peripheral.
+
+	  If unsure, say Y when enabling LPF peripheral services.
+
+if LPF_RUNTIME
+
+source "kernel/lpf-runtime/hw/Config.in"
+
+menuconfig LPF_MCU_SERVICE
+	bool "LPF MCU peripheral service"
+	default n
+	depends on LPF_RUNTIME
+	select LPF_PROTOCOL
+	select LPF_PROTOCOL_MCU
+	select LPF_HW_CAN
+	select LPF_HW_UART
+	help
+	  Enable the LPF MCU peripheral service. MCU instances are created from
+	  normalized LPF_CONFIG entries and exposed through LPF device lifecycle,
+	  /dev/lpf/mcuN, sysfs attributes, and debugfs commands.
+
+source "kernel/lpf-runtime/peripheral/mcu/Config.in"
+source "kernel/lpf-runtime/transport/mcu/Config.in"
+
+menuconfig LPF_LED_SERVICE
+	bool "LPF LED peripheral service"
+	default n
+	depends on LPF_RUNTIME
+	select LPF_HW_GPIO
+	select LPF_HW_PWM
+	help
+	  Enable the LPF LED peripheral service. LED instances are created from
+	  normalized LPF_CONFIG entries and exposed through LPF device lifecycle,
+	  /dev/lpf/ledN, sysfs attributes, and debugfs commands.
+
+source "kernel/lpf-runtime/peripheral/led/Config.in"
+
+menu "LPF Runtime Test Configuration"
+
+config LPF_CONFIG_OF_SELFTEST
+	bool "Build LPF Device Tree config runtime self-test"
+	default n
+	depends on LPF_SOC_ADAPTER_MOCK
+	help
+	  Link the LPF Device Tree config self-test into
+	  lpf_runtime.ko. The test contributes an entry to the LPF
+	  runtime entry section and validates the LPF Device Tree
+	  parser through Linux OF accessors on kernels with CONFIG_OF and
+	  CONFIG_OF_DYNAMIC enabled. Kernels without live OF support skip the
+	  runtime overlay check, so the same mock defconfig can be used in a
+	  broader kernel matrix.
+
+endmenu
+
+endif # LPF_RUNTIME
+
+menu "LPF Core Test Configuration"
+
+config LPF_DUMMY_SERVICE_SELFTEST
+	tristate "Build LPF dummy service self-test module"
+	default n
+	depends on LPF_CORE && LPF_SOC_ADAPTER_MOCK
+	depends on m
+	help
+	  Build lpf_dummy_service_selftest.ko. Loading this module registers
+	  a temporary dummy LPF driver and device to validate LPF Core
+	  lifecycle, discovery, capability lookup, state/error transitions,
+	  event delivery, and removal cleanup without requiring live hardware.
+
+endmenu

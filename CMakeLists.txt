@@ -116,7 +116,7 @@ if(CONFIG_LINUX_ONLY)
     message(STATUS "Building Linux-only modules")
 
     _lpf_add_core_component(CONFIG_OSAL osal user/osal)
-    _lpf_add_core_component(CONFIG_LPF_CORE lpf_core kernel/lpf)
+    _lpf_add_core_component(CONFIG_LPF_CORE lpf_core kernel/lpf-core)
     _lpf_add_core_component(CONFIG_PDI pdi user/pdi)
     _lpf_add_core_component(CONFIG_ACONFIG aconfig user/aconfig)
 endif()

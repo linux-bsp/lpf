@@ -22,11 +22,17 @@ kernel/
       transport/   # LPF transport registry headers
   osal/
     src/           # builds osal.ko
-  lpf/
+  lpf-core/
     core/          # LPF device model and shared node infrastructure
-    hw/            # LPF-owned hardware access APIs linked into runtime
     protocol/      # LPF protocol helpers linked into lpf_core.ko
-    peripheral/    # framework-owned runtime and services
+    compat/        # Linux kernel compatibility wrappers
+    soc/           # SoC adapter backends
+  lpf-runtime/
+    config/        # runtime configuration backends and tables
+    hw/            # LPF-owned hardware access APIs linked into runtime
+    runtime/       # lpf_runtime.ko entry and orchestration
+    peripheral/    # framework-owned runtime services
+    transport/     # reusable peripheral transport implementations
 
 user/
   osal/            # userspace OSAL library
@@ -40,17 +46,17 @@ uapi/
 ## Responsibilities
 
 - `kernel/osal` wraps Linux kernel APIs and builds `osal.ko`.
-- `kernel/lpf/core` owns the LPF device model, control/discovery node, and
+- `kernel/lpf-core/core` owns the LPF device model, control/discovery node, and
   shared chrdev/sysfs/debugfs helpers.
-- `kernel/lpf/peripheral` owns the framework runtime, integrated
+- `kernel/lpf-runtime/peripheral` owns the framework runtime, integrated
   module entry, runtime configuration loading, and service implementations;
   current service paths are linked into `lpf_runtime.ko`.
-- `kernel/lpf/protocol` provides kernel-side LPF protocol helpers through
+- `kernel/lpf-core/protocol` provides kernel-side LPF protocol helpers through
   `lpf_core.ko` for services that need framed communication.
-- `kernel/lpf/hw` provides LPF-owned hardware access APIs used by LPF
+- `kernel/lpf-runtime/hw` provides LPF-owned hardware access APIs used by LPF
   peripheral services. The objects are linked into
   `lpf_runtime.ko`.
-- `kernel/lpf/config` provides LPF runtime config source files and type headers.
+- `kernel/lpf-runtime/config` provides LPF runtime config source files and type headers.
   The objects are linked into `lpf_runtime.ko` rather than a
   standalone module.
 - `user/pdi` provides the application-facing C API and wraps open/ioctl.

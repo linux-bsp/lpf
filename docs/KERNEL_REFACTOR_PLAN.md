@@ -17,12 +17,12 @@ use LPF Core for device and driver lifecycle instead of adding local bus code.
 - Runtime config is linked into `lpf_runtime.ko`.
 - Runtime config selects a configuration backend. The current static backend
   consumes platform configs compiled under
-  `kernel/lpf/config/configs/<product>/<project>/<version>/`.
+  `kernel/lpf-runtime/config/configs/<product>/<project>/<version>/`.
 - LPF Core is a standalone kernel module built as `lpf_core.ko`; it owns the
   framework device and driver registry.
 - LPF runtime is a kernel module built as
   `lpf_runtime.ko`; current LPF peripheral services are linked into
-  that integrated module while their code lives under `kernel/lpf/peripheral/`.
+  that integrated module while their code lives under `kernel/lpf-runtime/peripheral/`.
 - Runtime config supplies device instances; the LPF peripheral configuration
   entry maps those instances into LPF device configs, and LPF Core matches each
   instance to a driver and owns remove ordering.
@@ -38,7 +38,7 @@ use LPF Core for device and driver lifecycle instead of adding local bus code.
 
 ## Current Completed Work
 
-- [x] Move hardware access implementation to kernel-side `kernel/lpf/hw`.
+- [x] Move hardware access implementation to kernel-side `kernel/lpf-runtime/hw`.
 - [x] Remove the old standalone hardware module; link LPF HW hardware access
       objects into `lpf_runtime.ko`.
 - [x] Remove old userspace hardware access implementation from the active
@@ -60,9 +60,9 @@ use LPF Core for device and driver lifecycle instead of adding local bus code.
       configured-device probing, and LPF Core binding.
 - [x] Add built-in peripheral service registration through LPF Core.
 - [x] Move built-in peripheral service registration into
-      `kernel/lpf/runtime/lpf_runtime.c`.
+      `kernel/lpf-runtime/runtime/lpf_runtime.c`.
 - [x] Move runtime config-to-LPF device config mapping into
-      `kernel/lpf/runtime/lpf_runtime_config.c`.
+      `kernel/lpf-runtime/runtime/lpf_runtime_config.c`.
 - [x] Move LPF Core/peripheral initialization sequencing behind
       `lpf_runtime_init()`.
 - [x] Replace the local virtual bus/list manager with LPF Core for driver and
@@ -85,7 +85,7 @@ use LPF Core for device and driver lifecycle instead of adding local bus code.
 - [x] Add a real product/platform runtime config source for the kernel module
       build.
   - `lpf_runtime.ko` links `g_lpf_config_platform_table` from
-    `kernel/lpf/config/configs` through the static backend.
+    `kernel/lpf-runtime/config/configs` through the static backend.
   - Acceptance: runtime config load finds a board config during
     `lpf_runtime.ko` initialization.
 - [x] Define the runtime config ownership model.
@@ -141,7 +141,7 @@ use LPF Core for device and driver lifecycle instead of adding local bus code.
   - Character-device registration if userspace access is needed.
 - [x] Decide whether protocol support is global or per-driver.
   - LPF protocol is a common peripheral communication protocol library under
-    `kernel/lpf/protocol`.
+    `kernel/lpf-core/protocol`.
   - It has no independent module lifecycle; MCU, FPGA, and future peripheral
     drivers call it to package payloads into standard protocol frames and parse
     received raw frames back into device type, message type, and payload data.

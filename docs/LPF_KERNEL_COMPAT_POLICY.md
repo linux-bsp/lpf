@@ -18,7 +18,7 @@ implemented in LPF compat wrappers before the product enables that target.
 ## Rules
 
 - Linux version and feature checks belong in `kernel/include/lpf/compat/lpf_compat_*`
-  headers or `kernel/lpf/compat/` source files.
+  headers or `kernel/lpf-core/compat/` source files.
 - Peripheral services, LPF HW, transports, runtime config, and LPF Core business
   logic must not add direct `LINUX_VERSION_CODE` checks.
 - Use feature-style helpers such as `LPF_KERNEL_HAS_SYSFS_EMIT` instead of

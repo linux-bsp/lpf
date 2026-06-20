@@ -5,17 +5,23 @@ LPF_AUTOCONF_H := $(LPF_ROOT)/include/generated/gen_autoconf.h
 -include $(LPF_AUTOCONF)
 
 include $(src)/osal/Makefile
-include $(src)/lpf/Makefile
+include $(src)/lpf-core/Makefile
+include $(src)/lpf-runtime/Makefile
 
 ccflags-y += -I$(src)/include
 ccflags-y += -I$(LPF_ROOT)/include
 ccflags-y += -I$(src)/include/lpf
 ccflags-y += -I$(src)/include/osal
-ccflags-y += -I$(src)/lpf/config/src
-ccflags-y += -I$(src)/lpf/hw
-ccflags-y += -I$(src)/lpf/peripheral/mcu
-ccflags-y += -I$(src)/lpf/peripheral/led
-ccflags-y += -I$(src)/lpf/transport/mcu
+ccflags-y += -I$(src)/lpf-core/core
+ccflags-y += -I$(src)/lpf-core/protocol
+ccflags-y += -I$(src)/lpf-core/compat
+ccflags-y += -I$(src)/lpf-core/soc
+ccflags-y += -I$(src)/lpf-runtime/include
+ccflags-y += -I$(src)/lpf-runtime/config/src
+ccflags-y += -I$(src)/lpf-runtime/hw
+ccflags-y += -I$(src)/lpf-runtime/peripheral/mcu
+ccflags-y += -I$(src)/lpf-runtime/peripheral/led
+ccflags-y += -I$(src)/lpf-runtime/transport/mcu
 ccflags-y += -I$(src)/../uapi
 
 ifneq ($(wildcard $(LPF_AUTOCONF_H)),)
