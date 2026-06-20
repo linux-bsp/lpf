@@ -427,6 +427,13 @@ static int pdm_led_driver_init(void)
 		return ret;
 	}
 
+	ret = pdm_led_debugfs_register();
+	if (ret) {
+		pdm_led_proc_unregister();
+		pdm_led_chrdev_unregister();
+		return ret;
+	}
+
 	LOG_INFO("PDM_LED", "registered");
 	return 0;
 }
@@ -434,6 +441,7 @@ static int pdm_led_driver_init(void)
 static void pdm_led_driver_exit(void)
 {
 	pdm_led_registry_deinit();
+	pdm_led_debugfs_unregister();
 	pdm_led_proc_unregister();
 	pdm_led_chrdev_unregister();
 	LOG_INFO("PDM_LED", "unregistered");
@@ -442,7 +450,7 @@ static void pdm_led_driver_exit(void)
 static const pdm_driver_t g_pdm_led_driver = {
 	.name = "led",
 	.type = LPF_DEVICE_TYPE_LED,
-	.capabilities = LPF_DEVICE_CAP_USER_IOCTL | LPF_DEVICE_CAP_DEBUG_PROCFS,
+	.capabilities = LPF_DEVICE_CAP_USER_IOCTL | LPF_DEVICE_CAP_DEBUGFS,
 	.init = pdm_led_driver_init,
 	.exit = pdm_led_driver_exit,
 	.probe = pdm_led_probe,

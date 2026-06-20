@@ -21,7 +21,7 @@ static int32_t pdm_make_lpf_mcu_config(const pconfig_device_config_t *device,
 	if (!entry)
 		return OSAL_ERR_INVALID_PARAM;
 
-	capabilities = LPF_DEVICE_CAP_USER_IOCTL | LPF_DEVICE_CAP_DEBUG_PROCFS;
+	capabilities = LPF_DEVICE_CAP_USER_IOCTL | LPF_DEVICE_CAP_DEBUGFS;
 	switch (entry->config.interface) {
 	case PCONFIG_MCU_INTERFACE_CAN:
 		capabilities |= LPF_DEVICE_CAP_TRANSPORT_CAN;
@@ -51,7 +51,7 @@ static int32_t pdm_make_lpf_led_config(const pconfig_device_config_t *device,
 	if (!entry)
 		return OSAL_ERR_INVALID_PARAM;
 
-	capabilities = LPF_DEVICE_CAP_USER_IOCTL | LPF_DEVICE_CAP_DEBUG_PROCFS;
+	capabilities = LPF_DEVICE_CAP_USER_IOCTL | LPF_DEVICE_CAP_DEBUGFS;
 	switch (entry->config.control) {
 	case PCONFIG_LED_CONTROL_GPIO:
 		capabilities |= LPF_DEVICE_CAP_CONTROL_GPIO;

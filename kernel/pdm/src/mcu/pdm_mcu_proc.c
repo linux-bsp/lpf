@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 
 #include "pdm_mcu_internal.h"
+#include "pdm_debugfs.h"
 #include "pdm_proc.h"
 #include "pdm_status.h"
 
@@ -10,6 +11,7 @@
 #include <linux/string.h>
 
 static pdm_proc_entry_t g_pdm_mcu_proc;
+static pdm_debugfs_entry_t g_pdm_mcu_debugfs;
 
 static void pdm_mcu_proc_format_bytes(const uint8_t *data, uint32_t size,
 				      char *buffer, uint32_t buffer_size)
@@ -136,14 +138,6 @@ static int pdm_mcu_proc_show(struct seq_file *seq, void *data)
 			   info.cmd_timeout_ms);
 	}
 
-	seq_puts(seq, "write_commands:\n");
-	seq_puts(seq, "  version <index>\n");
-	seq_puts(seq, "  status <index>\n");
-	seq_puts(seq, "  reset <index>\n");
-	seq_puts(seq, "  cmd <index> <cmd> [byte...]\n");
-	seq_puts(seq, "  read <index> <addr> <len>\n");
-	seq_puts(seq, "  write <index> <addr> <byte...>\n");
-
 	return 0;
 }
 
@@ -158,7 +152,7 @@ static int pdm_mcu_proc_do_version(pdm_mcu_handle_t handle, uint32_t index)
 		return pdm_status_to_errno(ret);
 
 	LOG_INFO("PDM_MCU",
-		 "proc version index=%u version=%u.%u.%u.%u string=%s",
+		 "debugfs version index=%u version=%u.%u.%u.%u string=%s",
 		 index, version.major, version.minor, version.patch,
 		 version.build, version.version_string);
 	return 0;
@@ -175,7 +169,7 @@ static int pdm_mcu_proc_do_status(pdm_mcu_handle_t handle, uint32_t index)
 		return pdm_status_to_errno(ret);
 
 	LOG_INFO("PDM_MCU",
-		 "proc status index=%u online=%u state=%u uptime=%u error=%u temp_mc=%d voltage_mv=%u timestamp_us=%llu",
+		 "debugfs status index=%u online=%u state=%u uptime=%u error=%u temp_mc=%d voltage_mv=%u timestamp_us=%llu",
 		 index, status.online ? 1U : 0U, status.state,
 		 status.uptime_sec, status.error_code,
 		 status.temperature_milli_celsius, status.voltage_mv,
@@ -190,7 +184,7 @@ static int pdm_mcu_proc_do_reset(pdm_mcu_handle_t handle, uint32_t index)
 	if (ret != OSAL_SUCCESS)
 		return pdm_status_to_errno(ret);
 
-	LOG_INFO("PDM_MCU", "proc reset index=%u success", index);
+	LOG_INFO("PDM_MCU", "debugfs reset index=%u success", index);
 	return 0;
 }
 
@@ -222,7 +216,7 @@ static int pdm_mcu_proc_do_cmd(pdm_mcu_handle_t handle, uint32_t index,
 	pdm_mcu_proc_format_bytes(response, response_len, response_hex,
 				  sizeof(response_hex));
 	LOG_INFO("PDM_MCU",
-		 "proc cmd index=%u cmd=0x%02x tx_len=%u rx_len=%u rx=[%s]",
+		 "debugfs cmd index=%u cmd=0x%02x tx_len=%u rx_len=%u rx=[%s]",
 		 index, command, request_len, response_len, response_hex);
 	return 0;
 }
@@ -243,7 +237,7 @@ static int pdm_mcu_proc_do_read(pdm_mcu_handle_t handle, uint32_t index,
 
 	pdm_mcu_proc_format_bytes(data, size, data_hex, sizeof(data_hex));
 	LOG_INFO("PDM_MCU",
-		 "proc read index=%u addr=0x%08x len=%u data=[%s]",
+		 "debugfs read index=%u addr=0x%08x len=%u data=[%s]",
 		 index, address, size, data_hex);
 	return 0;
 }
@@ -266,7 +260,7 @@ static int pdm_mcu_proc_do_write(pdm_mcu_handle_t handle, uint32_t index,
 	if (ret != OSAL_SUCCESS)
 		return pdm_status_to_errno(ret);
 
-	LOG_INFO("PDM_MCU", "proc write index=%u addr=0x%08x len=%u",
+	LOG_INFO("PDM_MCU", "debugfs write index=%u addr=0x%08x len=%u",
 		 index, address, size);
 	return 0;
 }
@@ -335,11 +329,21 @@ static int pdm_mcu_proc_write(char *command, size_t count, void *data)
 int pdm_mcu_proc_register(void)
 {
 	return pdm_proc_register(&g_pdm_mcu_proc, "mcu",
-				 pdm_mcu_proc_show, pdm_mcu_proc_write,
-				 NULL);
+				 pdm_mcu_proc_show, NULL, NULL);
 }
 
 void pdm_mcu_proc_unregister(void)
 {
 	pdm_proc_unregister(&g_pdm_mcu_proc);
+}
+
+int pdm_mcu_debugfs_register(void)
+{
+	return pdm_debugfs_register(&g_pdm_mcu_debugfs, "mcu",
+				    pdm_mcu_proc_write, NULL);
+}
+
+void pdm_mcu_debugfs_unregister(void)
+{
+	pdm_debugfs_unregister(&g_pdm_mcu_debugfs);
 }

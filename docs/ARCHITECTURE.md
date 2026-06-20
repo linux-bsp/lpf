@@ -108,11 +108,12 @@ the data.
 
 ### PDM
 
-PDM owns kernel-side peripheral business behavior, ioctl dispatch, procfs debug
-nodes, and protocol helpers. Concrete peripheral services such as MCU and LED
-live under PDM and register with LPF Core for device lifecycle handling. PDM
-also exposes `/dev/pdm_ctl` as the management/discovery ioctl node; business
-operations stay on instance nodes such as `/dev/lpf/mcu0` and `/dev/lpf/led0`.
+PDM owns kernel-side peripheral business behavior, ioctl dispatch, read-only
+procfs status nodes, debugfs command nodes, and protocol helpers. Concrete
+peripheral services such as MCU and LED live under PDM and register with LPF
+Core for device lifecycle handling. PDM also exposes `/dev/pdm_ctl` as the
+management/discovery ioctl node; business operations stay on instance nodes
+such as `/dev/lpf/mcu0` and `/dev/lpf/led0`.
 
 ### UAPI
 
@@ -193,6 +194,16 @@ feature macros.
 Keep kernel/userspace changes aligned. A peripheral exposed to userspace should
 add or update PCONFIG, PDM, UAPI, PDI, and Kconfig coverage together so the ABI
 and build configuration remain consistent.
+
+## Runtime Interfaces
+
+- `/dev/pdm_ctl` is the management/discovery node.
+- `/dev/lpf/<peripheral><index>` nodes are the stable per-instance business ABI.
+- `/sys/class/misc/<device>/` attributes are read-only per-instance sysfs
+  inspection data.
+- `/proc/pdm/*` nodes are read-only PDM status snapshots.
+- `/sys/kernel/debug/pdm/*` nodes are debug-only command entry points and must
+  not be treated as stable product ABI.
 
 ## Dependency Rules
 

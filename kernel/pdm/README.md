@@ -20,7 +20,8 @@ The kernel module currently provides:
 - PDM LED core and `/dev/lpf/ledN` ioctl dispatch for GPIO/PWM controlled LEDs
   linked into `pdm.ko`
 - PDM control node `/dev/pdm_ctl` for LPF device discovery snapshots
-- PDM procfs debug nodes under `/proc/pdm/`
+- PDM read-only procfs status nodes under `/proc/pdm/`
+- PDM debugfs command nodes under `/sys/kernel/debug/pdm/`
 
 PDM consumes exported `hal.ko` symbols for MCU transport and LED GPIO/PWM
 hardware access.
@@ -46,6 +47,7 @@ kernel/pdm/
 ├── include/
 │   ├── pdm_chrdev.h
 │   ├── pdm_ctl.h
+│   ├── pdm_debugfs.h
 │   ├── pdm_driver.h
 │   ├── pdm_internal.h
 │   ├── pdm_proc.h
@@ -54,6 +56,7 @@ kernel/pdm/
     ├── base/
     │   ├── pdm_chrdev.c
     │   ├── pdm_ctl_chrdev.c
+    │   ├── pdm_debugfs.c
     │   ├── pdm_driver.c
     │   ├── pdm_proc.c
     │   └── pdm_status.c
@@ -110,19 +113,24 @@ snapshots through `uapi/lpf/lpf_ctl.h`, including stable name, type, state,
 driver name, and capability flags. It does not perform peripheral business
 operations.
 
-Procfs is reserved for debug and observability data. Current nodes:
+Procfs is reserved for read-only observability data. Current nodes:
 
 - `/proc/pdm/mcu`
 - `/proc/pdm/led`
 
-Each node supports readback plus simple write commands for kernel-side
-functional checks. Write commands return standard errno values and log command
-results through the kernel log. For example:
+Debug-only operations are exposed through debugfs so they are separate from
+stable userspace ABI and read-only status files. Current command nodes:
 
-- `echo "status 0" > /proc/pdm/mcu`
-- `echo "cmd 0 0x10 0x01 0x02" > /proc/pdm/mcu`
-- `echo "set 0 128" > /proc/pdm/led`
-- `echo "enable 0" > /proc/pdm/led`
+- `/sys/kernel/debug/pdm/mcu`
+- `/sys/kernel/debug/pdm/led`
+
+Debugfs write commands return standard errno values and log command results
+through the kernel log. For example:
+
+- `echo "status 0" > /sys/kernel/debug/pdm/mcu`
+- `echo "cmd 0 0x10 0x01 0x02" > /sys/kernel/debug/pdm/mcu`
+- `echo "set 0 128" > /sys/kernel/debug/pdm/led`
+- `echo "enable 0" > /sys/kernel/debug/pdm/led`
 
 MCU transport APIs are linked into `pdm.ko`, but hardware access remains behind
 HAL. `pdm.ko` depends on `lpf_core.ko` and `hal.ko`, and calls the HAL transport

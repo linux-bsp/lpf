@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 
 #include "pdm_led_internal.h"
+#include "pdm_debugfs.h"
 #include "pdm_proc.h"
 #include "pdm_status.h"
 
@@ -10,6 +11,7 @@
 #include <linux/string.h>
 
 static pdm_proc_entry_t g_pdm_led_proc;
+static pdm_debugfs_entry_t g_pdm_led_debugfs;
 
 static char *pdm_led_proc_next_token(char **cursor)
 {
@@ -86,12 +88,6 @@ static int pdm_led_proc_show(struct seq_file *seq, void *data)
 			   info.max_brightness);
 	}
 
-	seq_puts(seq, "write_commands:\n");
-	seq_puts(seq, "  state <index>\n");
-	seq_puts(seq, "  enable <index>\n");
-	seq_puts(seq, "  disable <index>\n");
-	seq_puts(seq, "  set <index> <brightness>\n");
-
 	return 0;
 }
 
@@ -106,7 +102,7 @@ static int pdm_led_proc_do_state(pdm_led_handle_t handle, uint32_t index)
 		return pdm_status_to_errno(ret);
 
 	LOG_INFO("PDM_LED",
-		 "proc state index=%u enabled=%u brightness=%u max_brightness=%u",
+		 "debugfs state index=%u enabled=%u brightness=%u max_brightness=%u",
 		 index, state.enabled ? 1U : 0U, state.brightness,
 		 state.max_brightness);
 	return 0;
@@ -144,7 +140,7 @@ static int pdm_led_proc_write(char *command, size_t count, void *data)
 		status = pdm_led_enable(handle);
 		if (status != OSAL_SUCCESS)
 			return pdm_status_to_errno(status);
-		LOG_INFO("PDM_LED", "proc enable index=%u success", index);
+		LOG_INFO("PDM_LED", "debugfs enable index=%u success", index);
 		return 0;
 	}
 
@@ -152,7 +148,7 @@ static int pdm_led_proc_write(char *command, size_t count, void *data)
 		status = pdm_led_disable(handle);
 		if (status != OSAL_SUCCESS)
 			return pdm_status_to_errno(status);
-		LOG_INFO("PDM_LED", "proc disable index=%u success", index);
+		LOG_INFO("PDM_LED", "debugfs disable index=%u success", index);
 		return 0;
 	}
 
@@ -165,7 +161,7 @@ static int pdm_led_proc_write(char *command, size_t count, void *data)
 		if (status != OSAL_SUCCESS)
 			return pdm_status_to_errno(status);
 		LOG_INFO("PDM_LED",
-			 "proc set index=%u brightness=%u success",
+			 "debugfs set index=%u brightness=%u success",
 			 index, brightness);
 		return 0;
 	}
@@ -176,10 +172,21 @@ static int pdm_led_proc_write(char *command, size_t count, void *data)
 int pdm_led_proc_register(void)
 {
 	return pdm_proc_register(&g_pdm_led_proc, "led",
-				 pdm_led_proc_show, pdm_led_proc_write, NULL);
+				 pdm_led_proc_show, NULL, NULL);
 }
 
 void pdm_led_proc_unregister(void)
 {
 	pdm_proc_unregister(&g_pdm_led_proc);
+}
+
+int pdm_led_debugfs_register(void)
+{
+	return pdm_debugfs_register(&g_pdm_led_debugfs, "led",
+				    pdm_led_proc_write, NULL);
+}
+
+void pdm_led_debugfs_unregister(void)
+{
+	pdm_debugfs_unregister(&g_pdm_led_debugfs);
 }

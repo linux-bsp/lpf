@@ -629,6 +629,13 @@ static int pdm_mcu_driver_init(void)
 		return ret;
 	}
 
+	ret = pdm_mcu_debugfs_register();
+	if (ret) {
+		pdm_mcu_proc_unregister();
+		pdm_mcu_chrdev_unregister();
+		return ret;
+	}
+
 	LOG_INFO("PDM_MCU", "registered");
 	return 0;
 }
@@ -636,6 +643,7 @@ static int pdm_mcu_driver_init(void)
 static void pdm_mcu_driver_exit(void)
 {
 	pdm_mcu_registry_deinit();
+	pdm_mcu_debugfs_unregister();
 	pdm_mcu_proc_unregister();
 	pdm_mcu_chrdev_unregister();
 	LOG_INFO("PDM_MCU", "unregistered");
@@ -644,7 +652,7 @@ static void pdm_mcu_driver_exit(void)
 static const pdm_driver_t g_pdm_mcu_driver = {
 	.name = "mcu",
 	.type = LPF_DEVICE_TYPE_MCU,
-	.capabilities = LPF_DEVICE_CAP_USER_IOCTL | LPF_DEVICE_CAP_DEBUG_PROCFS,
+	.capabilities = LPF_DEVICE_CAP_USER_IOCTL | LPF_DEVICE_CAP_DEBUGFS,
 	.init = pdm_mcu_driver_init,
 	.exit = pdm_mcu_driver_exit,
 	.probe = pdm_mcu_probe,

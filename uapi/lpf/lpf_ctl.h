@@ -34,7 +34,7 @@ enum lpf_ctl_device_state {
 #define LPF_CTL_DEVICE_CAP_CONTROL_GPIO   (1ULL << 8)
 #define LPF_CTL_DEVICE_CAP_CONTROL_PWM    (1ULL << 9)
 #define LPF_CTL_DEVICE_CAP_USER_IOCTL     (1ULL << 16)
-#define LPF_CTL_DEVICE_CAP_DEBUG_PROCFS   (1ULL << 17)
+#define LPF_CTL_DEVICE_CAP_DEBUGFS        (1ULL << 17)
 
 struct lpf_ctl_info {
 	__u32 abi_version;

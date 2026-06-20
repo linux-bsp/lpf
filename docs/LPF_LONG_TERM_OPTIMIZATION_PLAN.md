@@ -410,8 +410,11 @@ Current status:
 - Started. Instance character devices now expose read-only sysfs attributes:
   `name`, `type`, `index`, `state`, `capabilities`, `driver`, `soc`,
   `last_error`, and `open_count`.
-- Remaining observability work: move debug-only procfs operations to debugfs
-  and add true runtime error counters in the PDM operation paths.
+- Done. Debug-only MCU and LED write commands now live under debugfs:
+  `/sys/kernel/debug/pdm/mcu` and `/sys/kernel/debug/pdm/led`; `/proc/pdm/mcu`
+  and `/proc/pdm/led` are read-only status snapshots.
+- Remaining observability work: add true runtime error counters in the PDM
+  operation paths.
 
 ## Phase 10: Test And Validation System
 
