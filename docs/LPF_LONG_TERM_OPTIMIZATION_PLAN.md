@@ -339,6 +339,8 @@ Current status:
   config and CTest, with coverage proving the mock static platform and a
   Device Tree-equivalent platform produce the same service-visible device
   model.
+- Done. The normalized runtime device list is now allocated from the active
+  platform's enabled-device count instead of a fixed global capacity.
 - Remaining work: add a board-profile backend and broader peripheral coverage.
 
 ## Phase 7: Peripheral Service Layer

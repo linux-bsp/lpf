@@ -293,6 +293,33 @@ static int test_disabled_entries_keep_source_index(void)
 	return 0;
 }
 
+static int test_count_only_reports_enabled_devices(void)
+{
+	uint32_t count = 0;
+
+	if (lpf_config_normalize_devices(
+		    &g_lpf_config_kernel_x86_mock_modules_1_0_0, NULL,
+		    &count) != OSAL_SUCCESS)
+		return 201;
+
+	return count == 3U ? 0 : 202;
+}
+
+static int test_exact_capacity_requires_sentinel_slot(void)
+{
+	lpf_config_device_config_t devices[3];
+	uint32_t count = OSAL_ARRAY_SIZE(devices);
+
+	if (lpf_config_normalize_devices(
+		    &g_lpf_config_kernel_x86_mock_modules_1_0_0, devices,
+		    &count) != OSAL_ERR_RESOURCE_LIMIT)
+		return 301;
+	if (count != 3U)
+		return 302;
+
+	return 0;
+}
+
 int main(void)
 {
 	int ret;
@@ -301,5 +328,13 @@ int main(void)
 	if (ret)
 		return ret;
 
-	return test_disabled_entries_keep_source_index();
+	ret = test_disabled_entries_keep_source_index();
+	if (ret)
+		return ret;
+
+	ret = test_count_only_reports_enabled_devices();
+	if (ret)
+		return ret;
+
+	return test_exact_capacity_requires_sentinel_slot();
 }

@@ -151,6 +151,8 @@ lpf_config_hw_get_led(platform, index);
 - `kernel/lpf/config/configs` owns concrete static platform tables.
 - LPF peripheral configuration consumes `lpf_config_get()` and typed entries; it
   must not know concrete product table symbols or backend implementations.
+- `lpf_config_get()` returns a normalized enabled-device list sized from the
+  active platform, with an `LPF_CONFIG_DEVICE_TYPE_INVALID` sentinel entry.
 - New configuration sources should be added as runtime config backends. They must
   produce the same `lpf_config_platform_config_t` and `lpf_config_device_config_t`
   model before LPF peripheral configuration sees them.
