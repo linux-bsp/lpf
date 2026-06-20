@@ -1,8 +1,8 @@
 # PDM
 
-PDM is the Peripheral Driver Module. It currently owns module orchestration,
-configured-device probe orchestration, and the management/discovery node. LPF
-peripheral services are layered under `kernel/lpf/peripheral/` but remain integrated
+PDM is the Peripheral Driver Module. It currently owns module load/unload
+entry points and the management/discovery node. LPF peripheral runtime and
+services are layered under `kernel/lpf/peripheral/` but remain integrated
 through `pdm.ko` during the current migration stage so runtime deployment does
 not fragment into one KO per peripheral.
 
@@ -11,8 +11,8 @@ not fragment into one KO per peripheral.
 The kernel module currently provides:
 
 - module load/unload orchestration in `pdm/src/pdm.c`
-- LPF peripheral configuration logic linked into `pdm.ko`
-- LPF peripheral-service registration through `lpf_peripheral_services_init()`
+- LPF peripheral runtime and configuration logic linked into `pdm.ko`
+- LPF peripheral runtime initialization through `lpf_peripheral_runtime_init()`
 - configured-device binding and device removal ordering owned by LPF Core
 - LPF MCU service, `/dev/lpf/mcuN` ioctl dispatch, and CAN/Serial transport
   glue linked into `pdm.ko`
@@ -57,6 +57,7 @@ kernel/pdm/
 kernel/lpf/peripheral/
 ├── lpf_peripheral.c
 ├── lpf_peripheral_config.c
+├── lpf_peripheral_internal.h
 ├── mcu/
 │   ├── Config.in
 │   ├── lpf_mcu_service.c
@@ -97,14 +98,14 @@ kernel/include/pdm/
 ## Layering
 
 `pdm.ko` links the current framework-hosted LPF peripheral service paths.
-LPF peripheral services register as LPF drivers through LPF Core via
-`lpf_peripheral_services_init()`. During module initialization PDM calls the LPF
-peripheral configured-device probe entry. That entry loads PConfig, maps each
-enabled normalized PConfig device entry into an `lpf_device_config_t`, and
-registers it with LPF Core. PDM does not depend on the concrete PCONFIG backend
-or on per-device capability mapping. LPF Core then binds the configured device
-to the matching service `probe`. On unload, LPF Core removes devices before
-driver global resources are released.
+During module initialization PDM calls `lpf_peripheral_runtime_init()`. The LPF
+peripheral runtime initializes LPF Core, registers peripheral services, loads
+PConfig, maps each enabled normalized PConfig device entry into an
+`lpf_device_config_t`, and registers it with LPF Core. PDM does not depend on
+the concrete PCONFIG backend, service registration order, or per-device
+capability mapping. LPF Core then binds the configured device to the matching
+service `probe`. On unload, LPF Core removes devices before driver global
+resources are released.
 
 Each LPF peripheral instance exposes its own character device, such as
 `/dev/lpf/mcu0`, and each PDI peripheral API uses the matching UAPI ioctl
@@ -131,8 +132,8 @@ Instance character devices expose read-only sysfs attributes for inspection:
 command failures for the specific instance.
 
 MCU and LED service implementations live under `kernel/lpf/peripheral/`.
-They are registered through the LPF peripheral service entry while the
-framework module boundary is being cleaned up.
+They are registered through the LPF peripheral runtime while the framework
+module boundary is being cleaned up.
 
 `/dev/pdm_ctl` is the management node for discovery. It exposes LPF Core device
 snapshots through `uapi/lpf/lpf_ctl.h`, including stable name, type, state,

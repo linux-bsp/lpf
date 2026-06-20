@@ -50,13 +50,16 @@ device and driver lifecycle instead of adding new PDM-local bus code.
 - [x] Split PDI MCU UAPI into `uapi/lpf/lpf_mcu.h`.
 - [x] Split userspace PDI MCU wrapper into `user/pdi/src/pdi_mcu.c`.
 - [x] Add `/dev/lpf/mcuN` character-device ioctl boundary.
-- [x] Change PDM startup to initialize LPF peripheral services, call the LPF
-      peripheral configured-device probe entry, and let LPF Core bind devices.
+- [x] Change PDM startup to call the LPF peripheral runtime entry and let LPF
+      own service registration, configured-device probing, and LPF Core
+      binding.
 - [x] Add built-in peripheral service registration through LPF Core.
 - [x] Move built-in peripheral service registration out of PDM-local wrappers
       into `kernel/lpf/peripheral/lpf_peripheral.c`.
 - [x] Move PCONFIG-to-LPF device config mapping out of `pdm.c` and into
       `kernel/lpf/peripheral/lpf_peripheral_config.c`.
+- [x] Move LPF Core/peripheral initialization sequencing out of `pdm.c` and
+      behind `lpf_peripheral_runtime_init()`.
 - [x] Replace the PDM-local virtual bus/list manager with LPF Core for driver
       and device binding.
 - [x] Keep PDM peripheral drivers linked into `pdm.ko` instead of adding one

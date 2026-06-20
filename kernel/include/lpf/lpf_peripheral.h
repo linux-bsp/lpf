@@ -5,8 +5,7 @@
 
 #include "osal.h"
 
-int32_t lpf_peripheral_services_init(void);
-void lpf_peripheral_services_exit(void);
-int32_t lpf_peripheral_probe_devices(void);
+int32_t lpf_peripheral_runtime_init(void);
+void lpf_peripheral_runtime_exit(void);
 
 #endif /* LPF_PERIPHERAL_H */

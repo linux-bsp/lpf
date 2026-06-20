@@ -3,6 +3,7 @@
 #include "lpf/lpf_peripheral.h"
 
 #include "lpf/lpf_core.h"
+#include "lpf_peripheral_internal.h"
 #include "pconfig/pconfig.h"
 
 static int32_t lpf_peripheral_make_mcu_config(

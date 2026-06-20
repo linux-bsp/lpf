@@ -3,7 +3,6 @@
 #include <linux/module.h>
 
 #include "osal.h"
-#include "lpf/lpf_core.h"
 #include "lpf/lpf_errno.h"
 #include "lpf/lpf_peripheral.h"
 #include "pdm/pdm.h"
@@ -28,23 +27,13 @@ static int __init pdm_init(void)
 
 	pdm_print_version();
 
-	ret = lpf_core_init();
+	ret = lpf_peripheral_runtime_init();
 	if (ret != OSAL_SUCCESS)
 		return lpf_status_to_errno(ret);
-
-	ret = lpf_peripheral_services_init();
-	if (ret != OSAL_SUCCESS)
-		return lpf_status_to_errno(ret);
-
-	ret = lpf_peripheral_probe_devices();
-	if (ret != OSAL_SUCCESS) {
-		lpf_peripheral_services_exit();
-		return lpf_status_to_errno(ret);
-	}
 
 	ret = pdm_ctl_chrdev_register();
 	if (ret) {
-		lpf_peripheral_services_exit();
+		lpf_peripheral_runtime_exit();
 		return ret;
 	}
 
@@ -55,7 +44,7 @@ static int __init pdm_init(void)
 static void __exit pdm_exit(void)
 {
 	pdm_ctl_chrdev_unregister();
-	lpf_peripheral_services_exit();
+	lpf_peripheral_runtime_exit();
 	LOG_INFO("PDM", "unloaded");
 }
 

@@ -127,7 +127,7 @@ helpers for runtime nodes. MCU and LED services now live under
 `kernel/lpf/peripheral/` and expose instance nodes such as `/dev/lpf/mcu0` and
 `/dev/lpf/led0`; they remain integrated through the current PDM-hosted
 framework module boundary rather than being split into one KO per peripheral.
-`kernel/lpf/peripheral/lpf_peripheral.c` owns the unified service registration
+`kernel/lpf/peripheral/lpf_peripheral.c` owns the unified peripheral runtime
 entry used by the integration module.
 
 ### LPF Transports
@@ -148,10 +148,10 @@ lives under `kernel/lpf/protocol/`, exports encode/decode entry points from
 
 ### PDM
 
-PDM owns `/dev/pdm_ctl` management/discovery ioctl node and framework module
-orchestration. It calls the LPF peripheral service and configured-device probe
-entries rather than owning per-service registration or PCONFIG-to-LPF mapping
-logic itself.
+PDM owns `/dev/pdm_ctl` management/discovery ioctl node and module load/unload
+entry points. It calls the LPF peripheral runtime entry rather than owning LPF
+Core initialization order, per-service registration, configured-device probing,
+or PCONFIG-to-LPF mapping logic itself.
 Business operations stay on LPF instance nodes such as `/dev/lpf/mcu0` and
 `/dev/lpf/led0`; LPF service status snapshots live under `/proc/lpf/`.
 
@@ -211,10 +211,10 @@ hal.ko
 pdm.ko
 ```
 
-`pdm.ko` consumes PConfig entries and HAL symbols, registers the current
-framework-hosted peripheral services, maps enabled PConfig entries to LPF
-devices, and lets LPF Core probe the matching registered service for each
-configured peripheral.
+`pdm.ko` hosts the current LPF peripheral runtime. The runtime consumes PConfig
+entries and HAL symbols, registers the current framework-hosted peripheral
+services, maps enabled PConfig entries to LPF devices, and lets LPF Core probe
+the matching registered service for each configured peripheral.
 
 ## Adding A Peripheral
 

@@ -338,15 +338,17 @@ Current status:
 - Done. PCONFIG-to-LPF device mapping has moved from `pdm.c` into
   `kernel/lpf/peripheral/lpf_peripheral_config.c`; PDM now calls the LPF
   peripheral probe entry instead of owning per-device capability mapping.
+- Done. LPF Core initialization, peripheral service registration, and
+  configured-device probing are now wrapped by the LPF peripheral runtime
+  entry; PDM calls one runtime entry instead of owning the sequence directly.
 - Started. MCU CAN/UART implementations have moved behind
   `kernel/lpf/transport/mcu/` and are selected through the LPF MCU transport
   registry instead of direct service dependencies.
 - Done. The framed peripheral protocol has moved from PDM into the LPF protocol
   layer under `kernel/lpf/protocol/`, with public protocol headers under
   `kernel/include/lpf/` and encode/decode symbols exported by `lpf_core.ko`.
-- Remaining work: continue moving framework orchestration details out of PDM
-  while keeping peripheral services integrated through the framework module
-  boundary.
+- Remaining work: continue reducing the PDM compatibility shell while keeping
+  peripheral services integrated through the framework module boundary.
 
 ## Phase 8: UAPI And PDI Separation
 
