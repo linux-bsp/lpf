@@ -158,15 +158,21 @@ Deliverables:
 Acceptance criteria:
 
 - Peripheral service code contains no direct kernel-version branching.
-- Selected target kernels compile through the compat layer. Suggested initial
-  targets: 4.19, 5.10, and 6.1.
+- Selected target kernels compile through the compat layer. The current baseline
+  is Linux 5.10 and newer; older kernels require explicit fallback work before
+  being enabled.
 
 Current status:
 
 - Started. CAN, serial, GPIO, PWM, I2C, and SPI Linux API wrappers now live
   under `kernel/lpf/compat/`.
-- Remaining work: add explicit kernel-version feature detection and migrate
-  procfs/debugfs/sysfs, workqueue, and usercopy differences.
+- Started. `docs/LPF_KERNEL_COMPAT_POLICY.md` defines the supported kernel
+  baseline and validation policy.
+- Started. `lpf_compat_features.h` defines feature gates for supported kernels,
+  and sysfs emission now goes through `lpf_compat_sysfs_emit()`.
+- Remaining work: add matrix validation for selected kernels and introduce
+  additional wrappers when workqueue, usercopy, or lower kernel baselines need
+  API fallbacks.
 
 ## Phase 4: SoC Adapter Layer
 
@@ -317,6 +323,10 @@ Current status:
   table index or by product/project/version identity fields.
 - Done. The current Device Tree format is documented as
   `docs/devicetree/bindings/lpf/linux-peripheral-framework.yaml`.
+- Done. The backend-agnostic device-list normalizer is now shared by runtime
+  config and CTest, with coverage proving the mock static platform and a
+  Device Tree-equivalent platform produce the same service-visible device
+  model.
 - Remaining work: add a board-profile backend and broader peripheral coverage.
 
 ## Phase 7: Peripheral Service Layer

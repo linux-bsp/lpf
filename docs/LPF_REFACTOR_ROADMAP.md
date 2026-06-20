@@ -30,17 +30,20 @@ the target direction.
 ### Batch 2: Configuration Coverage
 
 - [x] Add static MCU/LED sample entries for the mock build preset.
-- [ ] Add tests proving the same normalized device model is produced from static and
-  Device Tree backends.
+- [x] Add backend-agnostic normalizer tests proving static and
+  Device Tree-equivalent platform models produce the same service-visible device
+  list.
+- [ ] Add kernel/OF-level tests proving the Device Tree backend parser produces
+  the same platform model.
 - [ ] Add a board-profile backend only if there is a real product-line selection
   need that static identity selectors cannot cover.
 
 ### Batch 3: Compat Policy
 
-- Add a compatibility policy document.
-- Introduce explicit feature-detection helpers for supported kernels.
-- Move procfs/debugfs/sysfs API differences behind compat wrappers where needed.
-- Validate the selected kernel version targets in CI or a documented local
+- [x] Add a compatibility policy document.
+- [x] Introduce explicit feature-detection helpers for supported kernels.
+- [x] Move procfs/debugfs/sysfs API differences behind compat wrappers where needed.
+- [ ] Validate the selected kernel version targets in CI or a documented local
   matrix.
 
 ### Batch 4: Lifecycle And State Hardening

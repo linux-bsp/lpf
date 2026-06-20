@@ -5,6 +5,12 @@
 #include <linux/errno.h>
 #include <linux/fs.h>
 
+#include "lpf/lpf_compat_features.h"
+
+#if !LPF_KERNEL_HAS_PROC_OPS
+#error "LPF procfs requires proc_ops; add a compat fallback before lowering the kernel baseline"
+#endif
+
 #define LPF_PROC_ROOT_NAME "lpf"
 
 static struct proc_dir_entry *g_lpf_proc_root;

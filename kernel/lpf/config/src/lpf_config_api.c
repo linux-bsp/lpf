@@ -9,6 +9,7 @@
 #include "osal.h"
 #include "lpf/lpf_config.h"
 #include "lpf_config_backend.h"
+#include "lpf_config_normalizer.h"
 #include "lpf_config_validator.h"
 #include "generated/gen_version.h"
 
@@ -17,49 +18,6 @@
 static lpf_config_device_config_t g_lpf_config_devices[LPF_CONFIG_MAX_DEVICES + 1U];
 static const lpf_config_backend_ops_t *g_lpf_config_backend;
 static bool g_lpf_config_initialized;
-
-static int32_t
-lpf_config_build_device_list(const lpf_config_platform_config_t *platform)
-{
-	const lpf_config_device_descriptor_t *descriptors;
-	uint32_t descriptor_count;
-	uint32_t out_index = 0;
-	uint32_t desc_index;
-
-	osal_memset(g_lpf_config_devices, 0, sizeof(g_lpf_config_devices));
-
-	descriptors = lpf_config_device_descriptors(&descriptor_count);
-	for (desc_index = 0; desc_index < descriptor_count; desc_index++) {
-		const lpf_config_device_descriptor_t *desc;
-		uint32_t count;
-		uint32_t i;
-
-		desc = &descriptors[desc_index];
-		count = desc->count(platform);
-		for (i = 0; i < count; i++) {
-			const void *entry;
-
-			if (out_index >= LPF_CONFIG_MAX_DEVICES) {
-				LOG_ERROR("LPF_CONFIG",
-					  "Device list capacity exceeded");
-				return OSAL_ERR_RESOURCE_LIMIT;
-			}
-
-			entry = desc->entry(platform, i);
-			if (!desc->enabled(entry))
-				continue;
-
-			g_lpf_config_devices[out_index].device_type = desc->type;
-			g_lpf_config_devices[out_index].index = i;
-			g_lpf_config_devices[out_index].entry = entry;
-			out_index++;
-		}
-	}
-
-	g_lpf_config_devices[out_index].device_type = LPF_CONFIG_DEVICE_TYPE_INVALID;
-	LOG_INFO("LPF_CONFIG", "Initialized %u device configs", out_index);
-	return OSAL_SUCCESS;
-}
 
 const lpf_config_platform_config_t *lpf_config_get_board(void)
 {
@@ -242,8 +200,18 @@ int32_t lpf_config_load(void)
 		return ret;
 	}
 
-	ret = lpf_config_build_device_list(platform);
+	{
+		uint32_t device_count = OSAL_ARRAY_SIZE(g_lpf_config_devices);
+
+		ret = lpf_config_normalize_devices(platform, g_lpf_config_devices,
+						   &device_count);
+		if (ret == OSAL_SUCCESS)
+			LOG_INFO("LPF_CONFIG", "Initialized %u device configs",
+				 device_count);
+	}
 	if (ret != OSAL_SUCCESS) {
+		if (ret == OSAL_ERR_RESOURCE_LIMIT)
+			LOG_ERROR("LPF_CONFIG", "Device list capacity exceeded");
 		if (g_lpf_config_backend->unload)
 			g_lpf_config_backend->unload();
 		g_lpf_config_backend = NULL;

@@ -69,7 +69,8 @@ explicitly documented as a transitional compatibility path.
 
 - May include Linux kernel headers and wrap kernel API differences.
 - Should be the default location for `LINUX_VERSION_CODE` and equivalent
-  version/feature handling.
+  version/feature handling. Use `lpf_compat_features.h` feature gates rather
+  than raw version checks outside the compat layer.
 - Must not contain peripheral business behavior.
 
 ### Runtime Config

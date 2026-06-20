@@ -272,6 +272,7 @@ coverage together so the ABI and build configuration remain consistent.
   then mapped into LPF Core device configs.
 - LPF HW APIs should call LPF SoC Adapter APIs for SoC-backed hardware
   capabilities.
-- Kernel-version conditionals belong in `kernel/lpf/compat/`.
+- Kernel-version conditionals belong in `kernel/lpf/compat/` or
+  `kernel/include/lpf/lpf_compat_*` helper headers.
 - Userspace code must use PDI/UAPI rather than including kernel-internal LPF HW,
   LPF_CONFIG, LPF Core, or LPF peripheral headers.

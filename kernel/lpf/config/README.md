@@ -15,7 +15,8 @@ runtime.
 - Keep the built-in static table as the first backend implementation.
 - Parse LPF Device Tree configuration when an LPF DT node is present.
 - Validate platform identity and per-device configuration.
-- Build a normalized enabled-device list for MCU and LED entries.
+- Build a normalized enabled-device list for MCU and LED entries through the
+  shared `lpf_config_normalize_devices()` helper.
 - Keep hardware configuration data separate from LPF peripheral service and
   application logic.
 
@@ -144,6 +145,9 @@ lpf_config_hw_get_led(platform, index);
 
 - Runtime config owns backend selection, validation, and normalized device
   enumeration.
+- `lpf_config_normalize_devices()` is backend-agnostic; static, Device Tree, and
+  future backends must converge to equivalent `lpf_config_platform_config_t`
+  input before this step.
 - `kernel/lpf/config/configs` owns concrete static platform tables.
 - LPF peripheral configuration consumes `lpf_config_get()` and typed entries; it
   must not know concrete product table symbols or backend implementations.

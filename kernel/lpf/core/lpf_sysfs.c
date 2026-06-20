@@ -3,6 +3,7 @@
 #include "lpf_sysfs.h"
 
 #include "lpf/lpf_chrdev.h"
+#include "lpf/lpf_compat_sysfs.h"
 
 static ssize_t name_show(struct device *dev,
 			 struct device_attribute *attr, char *buf)
@@ -11,9 +12,9 @@ static ssize_t name_show(struct device *dev,
 
 	(void)attr;
 	if (!chrdev)
-		return sysfs_emit(buf, "\n");
+		return lpf_compat_sysfs_emit(buf, "\n");
 
-	return sysfs_emit(buf, "%s\n", chrdev->info.name);
+	return lpf_compat_sysfs_emit(buf, "%s\n", chrdev->info.name);
 }
 
 static ssize_t type_show(struct device *dev,
@@ -23,9 +24,9 @@ static ssize_t type_show(struct device *dev,
 
 	(void)attr;
 	if (!chrdev)
-		return sysfs_emit(buf, "0\n");
+		return lpf_compat_sysfs_emit(buf, "0\n");
 
-	return sysfs_emit(buf, "%u\n", chrdev->info.type);
+	return lpf_compat_sysfs_emit(buf, "%u\n", chrdev->info.type);
 }
 
 static ssize_t index_show(struct device *dev,
@@ -35,9 +36,9 @@ static ssize_t index_show(struct device *dev,
 
 	(void)attr;
 	if (!chrdev)
-		return sysfs_emit(buf, "0\n");
+		return lpf_compat_sysfs_emit(buf, "0\n");
 
-	return sysfs_emit(buf, "%u\n", chrdev->index);
+	return lpf_compat_sysfs_emit(buf, "%u\n", chrdev->index);
 }
 
 static ssize_t state_show(struct device *dev,
@@ -47,9 +48,9 @@ static ssize_t state_show(struct device *dev,
 
 	(void)attr;
 	if (!chrdev)
-		return sysfs_emit(buf, "0\n");
+		return lpf_compat_sysfs_emit(buf, "0\n");
 
-	return sysfs_emit(buf, "%u\n", chrdev->info.state);
+	return lpf_compat_sysfs_emit(buf, "%u\n", chrdev->info.state);
 }
 
 static ssize_t capabilities_show(struct device *dev,
@@ -59,10 +60,11 @@ static ssize_t capabilities_show(struct device *dev,
 
 	(void)attr;
 	if (!chrdev)
-		return sysfs_emit(buf, "0x0\n");
+		return lpf_compat_sysfs_emit(buf, "0x0\n");
 
-	return sysfs_emit(buf, "0x%llx\n",
-			  (unsigned long long)chrdev->info.capabilities);
+	return lpf_compat_sysfs_emit(
+		buf, "0x%llx\n",
+		(unsigned long long)chrdev->info.capabilities);
 }
 
 static ssize_t driver_show(struct device *dev,
@@ -72,9 +74,9 @@ static ssize_t driver_show(struct device *dev,
 
 	(void)attr;
 	if (!chrdev)
-		return sysfs_emit(buf, "\n");
+		return lpf_compat_sysfs_emit(buf, "\n");
 
-	return sysfs_emit(buf, "%s\n", chrdev->info.driver_name);
+	return lpf_compat_sysfs_emit(buf, "%s\n", chrdev->info.driver_name);
 }
 
 static ssize_t soc_show(struct device *dev,
@@ -84,9 +86,9 @@ static ssize_t soc_show(struct device *dev,
 
 	(void)attr;
 	if (!chrdev)
-		return sysfs_emit(buf, "\n");
+		return lpf_compat_sysfs_emit(buf, "\n");
 
-	return sysfs_emit(buf, "%s\n", chrdev->soc_name);
+	return lpf_compat_sysfs_emit(buf, "%s\n", chrdev->soc_name);
 }
 
 static ssize_t last_error_show(struct device *dev,
@@ -96,9 +98,9 @@ static ssize_t last_error_show(struct device *dev,
 
 	(void)attr;
 	if (!chrdev)
-		return sysfs_emit(buf, "0\n");
+		return lpf_compat_sysfs_emit(buf, "0\n");
 
-	return sysfs_emit(buf, "%d\n", chrdev->info.last_error);
+	return lpf_compat_sysfs_emit(buf, "%d\n", chrdev->info.last_error);
 }
 
 static ssize_t error_count_show(struct device *dev,
@@ -108,9 +110,10 @@ static ssize_t error_count_show(struct device *dev,
 
 	(void)attr;
 	if (!chrdev)
-		return sysfs_emit(buf, "0\n");
+		return lpf_compat_sysfs_emit(buf, "0\n");
 
-	return sysfs_emit(buf, "%u\n", lpf_chrdev_error_count(chrdev));
+	return lpf_compat_sysfs_emit(buf, "%u\n",
+				     lpf_chrdev_error_count(chrdev));
 }
 
 static ssize_t open_count_show(struct device *dev,
@@ -120,9 +123,10 @@ static ssize_t open_count_show(struct device *dev,
 
 	(void)attr;
 	if (!chrdev)
-		return sysfs_emit(buf, "0\n");
+		return lpf_compat_sysfs_emit(buf, "0\n");
 
-	return sysfs_emit(buf, "%u\n", lpf_chrdev_open_count(chrdev));
+	return lpf_compat_sysfs_emit(buf, "%u\n",
+				     lpf_chrdev_open_count(chrdev));
 }
 
 static DEVICE_ATTR_RO(name);

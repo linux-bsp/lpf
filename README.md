@@ -62,8 +62,9 @@ APIs from higher layers, but non-Linux ports are outside the current direction.
 
 The previous userspace test product has been removed. New tests now live under
 `tests/` with CMake/CTest integration. Current coverage includes UAPI ABI
-layout checks, PDI userspace API validation/error-path smoke tests, and
-syscall-mocked PDI ioctl operation-path tests.
+layout checks, runtime config normalization checks, PDI userspace API
+validation/error-path smoke tests, and syscall-mocked PDI ioctl operation-path
+tests.
 
 ## Quick Start
 
@@ -130,6 +131,8 @@ LPF/
 - `docs/LPF_TARGET_ARCHITECTURE.md`: target layered architecture.
 - `docs/LPF_MODULE_BOUNDARIES.md`: allowed dependencies and forbidden shortcuts.
 - `docs/LPF_REFACTOR_ROADMAP.md`: staged cleanup roadmap.
+- `docs/LPF_KERNEL_COMPAT_POLICY.md`: supported kernel baseline and compat
+  feature-gate rules.
 - `docs/KERNEL_USER_SPLIT.md`: kernel/userspace boundary and include rules.
 - `docs/LPF_LONG_TERM_OPTIMIZATION_PLAN.md`: long-term optimization plan for
   multi-kernel and multi-SoC deployments.
