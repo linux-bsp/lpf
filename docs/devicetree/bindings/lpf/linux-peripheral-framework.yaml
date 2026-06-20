@@ -1,0 +1,266 @@
+# SPDX-License-Identifier: GPL-2.0
+%YAML 1.2
+---
+$id: http://lpf.local/schemas/lpf/linux-peripheral-framework.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Linux Peripheral Framework Runtime Configuration
+
+maintainers:
+  - LPF maintainers
+
+description: |
+  LPF runtime configuration describes product, project, and peripheral instance
+  data consumed by lpf_peripheral_runtime.ko. The Device Tree backend converts
+  the nodes below into the same normalized lpf_config model used by the static
+  backend.
+
+properties:
+  compatible:
+    oneOf:
+      - const: lpf,linux-peripheral-framework
+      - const: linux-peripheral-framework
+        deprecated: true
+      - const: lpf,platform-config
+        deprecated: true
+
+  platform-name:
+    $ref: /schemas/types.yaml#/definitions/string
+    description: Platform family name.
+
+  chip-name:
+    $ref: /schemas/types.yaml#/definitions/string
+    description: SoC or chip name.
+
+  project-name:
+    $ref: /schemas/types.yaml#/definitions/string
+    description: Product project line.
+
+  product-name:
+    $ref: /schemas/types.yaml#/definitions/string
+    description: Product identifier.
+
+  config-version:
+    $ref: /schemas/types.yaml#/definitions/string
+    description: Configuration schema/content version used by the product.
+
+  mcu:
+    type: object
+    additionalProperties: false
+    description: MCU peripheral instances.
+    patternProperties:
+      "^[a-zA-Z0-9][a-zA-Z0-9,_-]*$":
+        $ref: "#/$defs/mcu-node"
+
+  led:
+    type: object
+    additionalProperties: false
+    description: LED peripheral instances.
+    patternProperties:
+      "^[a-zA-Z0-9][a-zA-Z0-9,_-]*$":
+        $ref: "#/$defs/led-node"
+
+required:
+  - compatible
+  - platform-name
+  - chip-name
+  - project-name
+  - product-name
+  - config-version
+
+additionalProperties: false
+
+$defs:
+  mcu-node:
+    type: object
+    additionalProperties: false
+    properties:
+      label:
+        $ref: /schemas/types.yaml#/definitions/string
+        description: Stable LPF device name such as mcu0.
+
+      interface:
+        enum:
+          - can
+          - serial
+        default: can
+
+      device:
+        $ref: /schemas/types.yaml#/definitions/string
+        description: CAN interface name or UART device identifier.
+
+      bitrate:
+        $ref: /schemas/types.yaml#/definitions/uint32
+        default: 500000
+
+      rx-timeout-ms:
+        $ref: /schemas/types.yaml#/definitions/uint32
+        default: 1000
+
+      tx-timeout-ms:
+        $ref: /schemas/types.yaml#/definitions/uint32
+        default: 1000
+
+      tx-id:
+        $ref: /schemas/types.yaml#/definitions/uint32
+        default: 0
+
+      rx-id:
+        $ref: /schemas/types.yaml#/definitions/uint32
+        default: 0
+
+      baudrate:
+        $ref: /schemas/types.yaml#/definitions/uint32
+        default: 115200
+
+      data-bits:
+        $ref: /schemas/types.yaml#/definitions/uint32
+        minimum: 5
+        maximum: 8
+        default: 8
+
+      stop-bits:
+        $ref: /schemas/types.yaml#/definitions/uint32
+        minimum: 1
+        maximum: 2
+        default: 1
+
+      parity:
+        enum:
+          - none
+          - odd
+          - even
+        default: none
+
+      flow-control:
+        enum:
+          - none
+          - hw
+          - sw
+        default: none
+
+      cmd-timeout-ms:
+        $ref: /schemas/types.yaml#/definitions/uint32
+        default: 1000
+
+      retry-count:
+        $ref: /schemas/types.yaml#/definitions/uint32
+        default: 3
+
+    required:
+      - label
+      - interface
+      - device
+
+  led-node:
+    type: object
+    additionalProperties: false
+    properties:
+      label:
+        $ref: /schemas/types.yaml#/definitions/string
+        description: Stable LPF device name such as led0 or status.
+
+      control:
+        enum:
+          - gpio
+          - pwm
+        default: gpio
+
+      max-brightness:
+        $ref: /schemas/types.yaml#/definitions/uint32
+        default: 255
+
+      default-brightness:
+        $ref: /schemas/types.yaml#/definitions/uint32
+        default: 0
+
+      gpio:
+        $ref: /schemas/types.yaml#/definitions/uint32
+        description: LPF GPIO number for gpio-controlled LEDs.
+
+      pin-mux:
+        $ref: /schemas/types.yaml#/definitions/uint32
+        default: 0
+
+      active-low:
+        type: boolean
+
+      pull-up:
+        type: boolean
+
+      pull-down:
+        type: boolean
+
+      consumer:
+        $ref: /schemas/types.yaml#/definitions/string
+        description: PWM consumer name for pwm-controlled LEDs.
+
+      period-ns:
+        $ref: /schemas/types.yaml#/definitions/uint32
+        description: PWM period in nanoseconds.
+
+      polarity-inversed:
+        type: boolean
+
+    required:
+      - label
+      - control
+      - max-brightness
+
+examples:
+  - |
+    lpf {
+        compatible = "lpf,linux-peripheral-framework";
+        platform-name = "linux";
+        chip-name = "am6254";
+        project-name = "h200";
+        product-name = "gateway";
+        config-version = "1.0.0";
+
+        mcu {
+            mcu0 {
+                label = "mcu0";
+                interface = "can";
+                device = "can0";
+                bitrate = <500000>;
+                rx-timeout-ms = <1000>;
+                tx-timeout-ms = <1000>;
+                tx-id = <0x100>;
+                rx-id = <0x101>;
+                cmd-timeout-ms = <1000>;
+                retry-count = <3>;
+            };
+
+            mcu1 {
+                label = "mcu1";
+                interface = "serial";
+                device = "ttyS1";
+                baudrate = <115200>;
+                data-bits = <8>;
+                stop-bits = <1>;
+                parity = "none";
+                flow-control = "none";
+            };
+        };
+
+        led {
+            status {
+                label = "status";
+                control = "gpio";
+                gpio = <42>;
+                active-low;
+                max-brightness = <1>;
+                default-brightness = <0>;
+            };
+
+            panel {
+                label = "panel";
+                control = "pwm";
+                consumer = "backlight";
+                period-ns = <1000000>;
+                max-brightness = <255>;
+                default-brightness = <32>;
+            };
+        };
+    };
+...

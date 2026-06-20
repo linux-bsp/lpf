@@ -78,12 +78,14 @@ Concrete configs live under:
 configs/<product>/<project>/<version>/
 ```
 
-The Device Tree backend looks for `/lpf`, `linux-peripheral-framework`, or
-`lpf,platform-config`. The root node provides platform identity:
+The Device Tree backend looks for `/lpf`,
+`lpf,linux-peripheral-framework`, `linux-peripheral-framework`, or
+`lpf,platform-config`. New DTS files should use
+`lpf,linux-peripheral-framework`. The root node provides platform identity:
 
 ```dts
 lpf {
-    compatible = "linux-peripheral-framework";
+    compatible = "lpf,linux-peripheral-framework";
     platform-name = "linux";
     chip-name = "am6254";
     project-name = "h200";
@@ -120,6 +122,9 @@ lpf {
 
 MCU supports `interface = "can"` and `interface = "serial"`. LED supports
 `control = "gpio"` and `control = "pwm"`.
+
+The formal binding is documented in
+`docs/devicetree/bindings/lpf/linux-peripheral-framework.yaml`.
 
 ## Typed Accessors
 

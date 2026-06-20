@@ -312,8 +312,9 @@ Current status:
   the `lpf_config_*` namespace.
 - Done. The static backend now supports runtime product selection by compiled
   table index or by product/project/version identity fields.
-- Remaining work: add a documented DTS binding/schema, board-profile backend,
-  and broader peripheral coverage.
+- Done. The current Device Tree format is documented as
+  `docs/devicetree/bindings/lpf/linux-peripheral-framework.yaml`.
+- Remaining work: add a board-profile backend and broader peripheral coverage.
 
 ## Phase 7: Peripheral Service Layer
 

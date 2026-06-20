@@ -5,9 +5,47 @@
 
 #include <linux/of.h>
 
-#define LPF_CONFIG_DT_COMPATIBLE "linux-peripheral-framework"
-#define LPF_CONFIG_DT_LEGACY_COMPATIBLE "lpf,platform-config"
 #define LPF_CONFIG_DT_ROOT_PATH "/lpf"
+#define LPF_CONFIG_DT_COMPATIBLE "lpf,linux-peripheral-framework"
+#define LPF_CONFIG_DT_LEGACY_COMPATIBLE "linux-peripheral-framework"
+#define LPF_CONFIG_DT_OLD_COMPATIBLE "lpf,platform-config"
+
+#define LPF_CONFIG_DT_GROUP_MCU "mcu"
+#define LPF_CONFIG_DT_GROUP_LED "led"
+
+#define LPF_CONFIG_DT_PROP_PLATFORM_NAME "platform-name"
+#define LPF_CONFIG_DT_PROP_CHIP_NAME "chip-name"
+#define LPF_CONFIG_DT_PROP_PROJECT_NAME "project-name"
+#define LPF_CONFIG_DT_PROP_PRODUCT_NAME "product-name"
+#define LPF_CONFIG_DT_PROP_CONFIG_VERSION "config-version"
+
+#define LPF_CONFIG_DT_PROP_LABEL "label"
+#define LPF_CONFIG_DT_PROP_INTERFACE "interface"
+#define LPF_CONFIG_DT_PROP_DEVICE "device"
+#define LPF_CONFIG_DT_PROP_BITRATE "bitrate"
+#define LPF_CONFIG_DT_PROP_RX_TIMEOUT_MS "rx-timeout-ms"
+#define LPF_CONFIG_DT_PROP_TX_TIMEOUT_MS "tx-timeout-ms"
+#define LPF_CONFIG_DT_PROP_TX_ID "tx-id"
+#define LPF_CONFIG_DT_PROP_RX_ID "rx-id"
+#define LPF_CONFIG_DT_PROP_BAUDRATE "baudrate"
+#define LPF_CONFIG_DT_PROP_DATA_BITS "data-bits"
+#define LPF_CONFIG_DT_PROP_STOP_BITS "stop-bits"
+#define LPF_CONFIG_DT_PROP_PARITY "parity"
+#define LPF_CONFIG_DT_PROP_FLOW_CONTROL "flow-control"
+#define LPF_CONFIG_DT_PROP_CMD_TIMEOUT_MS "cmd-timeout-ms"
+#define LPF_CONFIG_DT_PROP_RETRY_COUNT "retry-count"
+
+#define LPF_CONFIG_DT_PROP_CONTROL "control"
+#define LPF_CONFIG_DT_PROP_MAX_BRIGHTNESS "max-brightness"
+#define LPF_CONFIG_DT_PROP_DEFAULT_BRIGHTNESS "default-brightness"
+#define LPF_CONFIG_DT_PROP_GPIO "gpio"
+#define LPF_CONFIG_DT_PROP_PIN_MUX "pin-mux"
+#define LPF_CONFIG_DT_PROP_ACTIVE_LOW "active-low"
+#define LPF_CONFIG_DT_PROP_PULL_UP "pull-up"
+#define LPF_CONFIG_DT_PROP_PULL_DOWN "pull-down"
+#define LPF_CONFIG_DT_PROP_CONSUMER "consumer"
+#define LPF_CONFIG_DT_PROP_PERIOD_NS "period-ns"
+#define LPF_CONFIG_DT_PROP_POLARITY_INVERSED "polarity-inversed"
 
 typedef struct {
 	lpf_config_platform_config_t platform;
@@ -75,7 +113,11 @@ static struct device_node *lpf_config_dt_find_root(void)
 	if (root)
 		return root;
 
-	return of_find_compatible_node(NULL, NULL, LPF_CONFIG_DT_LEGACY_COMPATIBLE);
+	root = of_find_compatible_node(NULL, NULL, LPF_CONFIG_DT_LEGACY_COMPATIBLE);
+	if (root)
+		return root;
+
+	return of_find_compatible_node(NULL, NULL, LPF_CONFIG_DT_OLD_COMPATIBLE);
 }
 
 static struct device_node *lpf_config_dt_find_child(const struct device_node *root,
@@ -165,21 +207,27 @@ static int32_t lpf_config_dt_parse_mcu_can(struct device_node *node,
 	const char *device;
 	int32_t ret;
 
-	ret = lpf_config_dt_read_string(node, "device", &device, NULL);
+	ret = lpf_config_dt_read_string(node, LPF_CONFIG_DT_PROP_DEVICE,
+					&device, NULL);
 	if (ret != OSAL_SUCCESS)
 		return ret;
 
 	config->hw.can.device = device;
 	config->hw.can.bitrate =
-		lpf_config_dt_read_u32_default(node, "bitrate", 500000U);
+		lpf_config_dt_read_u32_default(
+			node, LPF_CONFIG_DT_PROP_BITRATE, 500000U);
 	config->hw.can.rx_timeout =
-		lpf_config_dt_read_u32_default(node, "rx-timeout-ms", 1000U);
+		lpf_config_dt_read_u32_default(
+			node, LPF_CONFIG_DT_PROP_RX_TIMEOUT_MS, 1000U);
 	config->hw.can.tx_timeout =
-		lpf_config_dt_read_u32_default(node, "tx-timeout-ms", 1000U);
+		lpf_config_dt_read_u32_default(
+			node, LPF_CONFIG_DT_PROP_TX_TIMEOUT_MS, 1000U);
 	config->hw.can.tx_id =
-		lpf_config_dt_read_u32_default(node, "tx-id", 0U);
+		lpf_config_dt_read_u32_default(
+			node, LPF_CONFIG_DT_PROP_TX_ID, 0U);
 	config->hw.can.rx_id =
-		lpf_config_dt_read_u32_default(node, "rx-id", 0U);
+		lpf_config_dt_read_u32_default(
+			node, LPF_CONFIG_DT_PROP_RX_ID, 0U);
 	return OSAL_SUCCESS;
 }
 
@@ -191,20 +239,25 @@ static int32_t lpf_config_dt_parse_mcu_serial(struct device_node *node,
 	const char *flow_control = NULL;
 	int32_t ret;
 
-	ret = lpf_config_dt_read_string(node, "device", &device, NULL);
+	ret = lpf_config_dt_read_string(node, LPF_CONFIG_DT_PROP_DEVICE,
+					&device, NULL);
 	if (ret != OSAL_SUCCESS)
 		return ret;
 
-	(void)of_property_read_string(node, "parity", &parity);
-	(void)of_property_read_string(node, "flow-control", &flow_control);
+	(void)of_property_read_string(node, LPF_CONFIG_DT_PROP_PARITY, &parity);
+	(void)of_property_read_string(node, LPF_CONFIG_DT_PROP_FLOW_CONTROL,
+				      &flow_control);
 
 	config->hw.serial.device = device;
 	config->hw.serial.baudrate =
-		lpf_config_dt_read_u32_default(node, "baudrate", 115200U);
+		lpf_config_dt_read_u32_default(
+			node, LPF_CONFIG_DT_PROP_BAUDRATE, 115200U);
 	config->hw.serial.data_bits =
-		(uint8_t)lpf_config_dt_read_u32_default(node, "data-bits", 8U);
+		(uint8_t)lpf_config_dt_read_u32_default(
+			node, LPF_CONFIG_DT_PROP_DATA_BITS, 8U);
 	config->hw.serial.stop_bits =
-		(uint8_t)lpf_config_dt_read_u32_default(node, "stop-bits", 1U);
+		(uint8_t)lpf_config_dt_read_u32_default(
+			node, LPF_CONFIG_DT_PROP_STOP_BITS, 1U);
 	config->hw.serial.parity = lpf_config_dt_parse_parity(parity);
 	config->hw.serial.flow_control =
 		lpf_config_dt_parse_flow_control(flow_control);
@@ -218,11 +271,13 @@ static int32_t lpf_config_dt_parse_mcu_entry(struct device_node *node,
 	const char *interface = NULL;
 	int32_t ret;
 
-	ret = lpf_config_dt_read_string(node, "label", &name, node->name);
+	ret = lpf_config_dt_read_string(node, LPF_CONFIG_DT_PROP_LABEL, &name,
+					node->name);
 	if (ret != OSAL_SUCCESS)
 		return ret;
 
-	(void)of_property_read_string(node, "interface", &interface);
+	(void)of_property_read_string(node, LPF_CONFIG_DT_PROP_INTERFACE,
+				      &interface);
 
 	entry->description = lpf_config_dt_string_or_default(name, "mcu");
 	entry->enabled = true;
@@ -231,9 +286,11 @@ static int32_t lpf_config_dt_parse_mcu_entry(struct device_node *node,
 	entry->config.name[sizeof(entry->config.name) - 1U] = '\0';
 	entry->config.interface = lpf_config_dt_parse_mcu_interface(interface);
 	entry->config.cmd_timeout_ms =
-		lpf_config_dt_read_u32_default(node, "cmd-timeout-ms", 1000U);
+		lpf_config_dt_read_u32_default(
+			node, LPF_CONFIG_DT_PROP_CMD_TIMEOUT_MS, 1000U);
 	entry->config.retry_count =
-		lpf_config_dt_read_u32_default(node, "retry-count", 3U);
+		lpf_config_dt_read_u32_default(
+			node, LPF_CONFIG_DT_PROP_RETRY_COUNT, 3U);
 
 	switch (entry->config.interface) {
 	case LPF_CONFIG_MCU_INTERFACE_CAN:
@@ -253,7 +310,7 @@ static int32_t lpf_config_dt_parse_mcu_group(struct device_node *root)
 	uint32_t index = 0;
 	int32_t ret = OSAL_SUCCESS;
 
-	group = lpf_config_dt_find_child(root, "mcu");
+	group = lpf_config_dt_find_child(root, LPF_CONFIG_DT_GROUP_MCU);
 	if (!group)
 		return OSAL_SUCCESS;
 
@@ -294,11 +351,13 @@ static int32_t lpf_config_dt_parse_led_entry(struct device_node *node,
 	const char *control = NULL;
 	int32_t ret;
 
-	ret = lpf_config_dt_read_string(node, "label", &name, node->name);
+	ret = lpf_config_dt_read_string(node, LPF_CONFIG_DT_PROP_LABEL, &name,
+					node->name);
 	if (ret != OSAL_SUCCESS)
 		return ret;
 
-	(void)of_property_read_string(node, "control", &control);
+	(void)of_property_read_string(node, LPF_CONFIG_DT_PROP_CONTROL,
+				      &control);
 
 	entry->description = lpf_config_dt_string_or_default(name, "led");
 	entry->enabled = true;
@@ -307,34 +366,43 @@ static int32_t lpf_config_dt_parse_led_entry(struct device_node *node,
 	entry->config.name[sizeof(entry->config.name) - 1U] = '\0';
 	entry->config.control = lpf_config_dt_parse_led_control(control);
 	entry->config.max_brightness =
-		lpf_config_dt_read_u32_default(node, "max-brightness", 255U);
+		lpf_config_dt_read_u32_default(
+			node, LPF_CONFIG_DT_PROP_MAX_BRIGHTNESS, 255U);
 	entry->config.default_brightness =
-		lpf_config_dt_read_u32_default(node, "default-brightness", 0U);
+		lpf_config_dt_read_u32_default(
+			node, LPF_CONFIG_DT_PROP_DEFAULT_BRIGHTNESS, 0U);
 
 	switch (entry->config.control) {
 	case LPF_CONFIG_LED_CONTROL_GPIO:
 		entry->config.hw.gpio.gpio_num =
-			lpf_config_dt_read_u32_default(node, "gpio", 0U);
+			lpf_config_dt_read_u32_default(
+				node, LPF_CONFIG_DT_PROP_GPIO, 0U);
 		entry->config.hw.gpio.pin_mux =
-			lpf_config_dt_read_u32_default(node, "pin-mux", 0U);
+			lpf_config_dt_read_u32_default(
+				node, LPF_CONFIG_DT_PROP_PIN_MUX, 0U);
 		entry->config.hw.gpio.active_low =
-			lpf_config_dt_read_bool_default(node, "active-low", false);
+			lpf_config_dt_read_bool_default(
+				node, LPF_CONFIG_DT_PROP_ACTIVE_LOW, false);
 		entry->config.hw.gpio.pull_up =
-			lpf_config_dt_read_bool_default(node, "pull-up", false);
+			lpf_config_dt_read_bool_default(
+				node, LPF_CONFIG_DT_PROP_PULL_UP, false);
 		entry->config.hw.gpio.pull_down =
-			lpf_config_dt_read_bool_default(node, "pull-down", false);
+			lpf_config_dt_read_bool_default(
+				node, LPF_CONFIG_DT_PROP_PULL_DOWN, false);
 		break;
 	case LPF_CONFIG_LED_CONTROL_PWM:
-		ret = lpf_config_dt_read_string(node, "consumer",
+		ret = lpf_config_dt_read_string(node, LPF_CONFIG_DT_PROP_CONSUMER,
 					     &entry->config.hw.pwm.consumer,
 					     NULL);
 		if (ret != OSAL_SUCCESS)
 			return ret;
 		entry->config.hw.pwm.period_ns =
-			lpf_config_dt_read_u32_default(node, "period-ns", 0U);
+			lpf_config_dt_read_u32_default(
+				node, LPF_CONFIG_DT_PROP_PERIOD_NS, 0U);
 		entry->config.hw.pwm.polarity_inversed =
 			lpf_config_dt_read_bool_default(
-				node, "polarity-inversed", false);
+				node, LPF_CONFIG_DT_PROP_POLARITY_INVERSED,
+				false);
 		break;
 	default:
 		return OSAL_ERR_NOT_SUPPORTED;
@@ -351,7 +419,7 @@ static int32_t lpf_config_dt_parse_led_group(struct device_node *root)
 	uint32_t index = 0;
 	int32_t ret = OSAL_SUCCESS;
 
-	group = lpf_config_dt_find_child(root, "led");
+	group = lpf_config_dt_find_child(root, LPF_CONFIG_DT_GROUP_LED);
 	if (!group)
 		return OSAL_SUCCESS;
 
@@ -411,31 +479,31 @@ static int32_t lpf_config_dt_load(void)
 
 	osal_memset(&g_lpf_config_dt, 0, sizeof(g_lpf_config_dt));
 
-	ret = lpf_config_dt_read_string(root, "platform-name",
+	ret = lpf_config_dt_read_string(root, LPF_CONFIG_DT_PROP_PLATFORM_NAME,
 				     &g_lpf_config_dt.platform.platform_name,
 				     "linux");
 	if (ret != OSAL_SUCCESS)
 		goto out_error;
 
-	ret = lpf_config_dt_read_string(root, "chip-name",
+	ret = lpf_config_dt_read_string(root, LPF_CONFIG_DT_PROP_CHIP_NAME,
 				     &g_lpf_config_dt.platform.chip_name,
 				     "unknown");
 	if (ret != OSAL_SUCCESS)
 		goto out_error;
 
-	ret = lpf_config_dt_read_string(root, "project-name",
+	ret = lpf_config_dt_read_string(root, LPF_CONFIG_DT_PROP_PROJECT_NAME,
 				     &g_lpf_config_dt.platform.project_name,
 				     "default");
 	if (ret != OSAL_SUCCESS)
 		goto out_error;
 
-	ret = lpf_config_dt_read_string(root, "product-name",
+	ret = lpf_config_dt_read_string(root, LPF_CONFIG_DT_PROP_PRODUCT_NAME,
 				     &g_lpf_config_dt.platform.product_name,
 				     "lpf");
 	if (ret != OSAL_SUCCESS)
 		goto out_error;
 
-	ret = lpf_config_dt_read_string(root, "config-version",
+	ret = lpf_config_dt_read_string(root, LPF_CONFIG_DT_PROP_CONFIG_VERSION,
 				     &g_lpf_config_dt.platform.version,
 				     "1.0.0");
 	if (ret != OSAL_SUCCESS)
