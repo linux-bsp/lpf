@@ -49,12 +49,14 @@ endif
 
 # Build directory (for CMake build artifacts)
 BUILD_DIR ?= _build
+TEST_BUILD_DIR ?= _build/tests
 
 # Kconfig directory
 KCONFIG_DIR := scripts/kconfig
 
 # Normalize BUILD_DIR
 override BUILD_DIR := $(patsubst %/,%,$(BUILD_DIR))
+override TEST_BUILD_DIR := $(patsubst %/,%,$(TEST_BUILD_DIR))
 
 # CMake configuration
 CMAKE ?= cmake
@@ -419,6 +421,37 @@ libs: _check_config _validate_config include/generated/gen_autoconf.h include/ge
 	@echo "  make install              - Install libraries to system"
 	@echo ""
 
+PHONY += tests
+tests: _check_config _validate_config include/generated/gen_autoconf.h include/generated/gen_version.h
+	@echo ""
+	@echo "==================================================================="
+	@echo "LPF Test Build"
+	@echo "==================================================================="
+	@echo ""
+	@echo "Configuration: $(CURDIR)/.config"
+	@echo "Test output:   $(TEST_BUILD_DIR)"
+	@echo ""
+	@echo "  CMAKE    Configuring test build"
+	$(Q)mkdir -p $(TEST_BUILD_DIR)
+	$(Q)cd $(TEST_BUILD_DIR) && $(CMAKE) \
+		-DCMAKE_BUILD_TYPE=$(CMAKE_BUILD_TYPE) \
+		-DCMAKE_INSTALL_PREFIX=$(CMAKE_INSTALL_PREFIX) \
+		-DCONFIG_FILE=$(abspath $(CURDIR)/.config) \
+		-DAUTOCONF_H=$(abspath $(CURDIR)/include/generated/gen_autoconf.h) \
+		-DLPF_BUILD_TESTS=ON \
+		$(if $(CMAKE_TOOLCHAIN_FILE),-DCMAKE_TOOLCHAIN_FILE=$(CMAKE_TOOLCHAIN_FILE)) \
+		$(CMAKE_EXTRA_FLAGS) \
+		$(CURDIR)
+	@echo "  BUILD    LPF tests"
+	$(Q)$(MAKE) -C $(TEST_BUILD_DIR) $(PARALLEL_BUILD)
+	@echo "  CTEST    LPF tests"
+	$(Q)cd $(TEST_BUILD_DIR) && ctest --output-on-failure
+	@echo ""
+	@echo "==================================================================="
+	@echo "Test build completed successfully!"
+	@echo "==================================================================="
+	@echo ""
+
 PHONY += modules
 modules: _check_config include/generated/gen_autoconf.h include/generated/gen_version.h _modules_check_environment _modules_prepare
 	@echo ""
@@ -680,6 +713,7 @@ help:
 	@echo '  all             - Build libraries and kernel modules (default)'
 	@echo '  libs            - Build userspace libraries via CMake'
 	@echo '  modules         - Build kernel modules via kbuild'
+	@echo '  tests           - Build and run LPF test targets'
 	@echo '  install         - Install binaries and libraries'
 	@echo '  install_headers - Install development headers only'
 	@echo '  clean           - Remove build artifacts'
@@ -694,6 +728,7 @@ help:
 	@echo 'Build options:'
 	@echo '  V=0|1           - 0: quiet build (default), 1: verbose'
 	@echo '  BUILD_DIR=<dir> - Use custom build directory (default: _build)'
+	@echo '  TEST_BUILD_DIR=<dir> - Use custom test build directory (default: _build/tests)'
 	@echo '  KERNEL_SRC=<dir> - Kernel build tree for modules target'
 	@echo '  MODULES_BUILD_DIR=<dir> - Output directory for module artifacts'
 	@echo '  MODULES_SRC_DIR=<dir> - Kernel module source directory'

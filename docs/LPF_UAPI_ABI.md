@@ -55,3 +55,15 @@ Add the following pieces together:
 Management APIs follow the same ABI rules but should stay separate from
 peripheral business commands. For example, `/dev/pdm_ctl` uses
 `uapi/lpf/lpf_ctl.h` only for device discovery snapshots.
+
+## ABI Layout Checks
+
+UAPI structure sizes, key field offsets, ABI versions, and ioctl command
+encodings are checked by the CTest target under `tests/user/abi/`. Run:
+
+```bash
+make tests
+```
+
+When a UAPI layout changes intentionally, update the ABI version and the
+matching layout assertions in the same change.

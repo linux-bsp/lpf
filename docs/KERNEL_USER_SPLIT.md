@@ -76,9 +76,9 @@ Each userspace-visible peripheral should have a matching UAPI header and PDI
 wrapper. For example, MCU uses `/dev/lpf/mcu0`, `uapi/lpf/lpf_mcu.h`, and
 `user/pdi/src/pdi_mcu.c`.
 
-The previous userspace test framework was removed with the old ctest product.
-New tests should be added under a new test layout with explicit Kconfig/CMake
-integration.
+The previous userspace test product was removed. New tests live under
+`tests/` with explicit CMake/CTest integration; UAPI layout checks currently
+run through `make tests`.
 
 ## Include Rules
 

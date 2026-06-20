@@ -37,6 +37,8 @@ kconfig_load()
 
 project(lpf_sdk C CXX ASM)
 
+option(LPF_BUILD_TESTS "Build LPF test targets" OFF)
+
 # ==============================================================================
 # Configure Installation Paths (after project())
 # ==============================================================================
@@ -117,6 +119,11 @@ if(CONFIG_LINUX_ONLY)
     _lpf_add_core_component(CONFIG_LPF_CORE lpf_core kernel/lpf)
     _lpf_add_core_component(CONFIG_PDI pdi user/pdi)
     _lpf_add_core_component(CONFIG_ACONFIG aconfig user/aconfig)
+endif()
+
+if(LPF_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(${SDK_PATH}/tests ${CMAKE_BINARY_DIR}/tests)
 endif()
 
 # ==============================================================================

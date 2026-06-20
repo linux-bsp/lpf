@@ -53,9 +53,9 @@ APIs from higher layers, but non-Linux ports are outside the current direction.
 - Generic Linux application framework behavior unrelated to peripheral access.
 - Generated build artifacts under `_build/`.
 
-The previous userspace test framework has been removed. New tests should be
-introduced with a fresh layout and matching Kconfig/CMake integration when the
-new test plan is ready.
+The previous userspace test product has been removed. New tests now live under
+`tests/` with CMake/CTest integration; the first coverage is UAPI ABI layout
+checking.
 
 ## Quick Start
 
@@ -69,6 +69,12 @@ To build only the kernel modules:
 
 ```bash
 make modules
+```
+
+To build and run the current test targets:
+
+```bash
+make tests
 ```
 
 Kernel module load order is `osal.ko`, `pconfig.ko`, `hal.ko`, then `pdm.ko`.
@@ -93,6 +99,7 @@ LPF/
 ├── uapi/          # Shared userspace/kernel ABI headers
 ├── configs/       # Development defconfigs
 ├── docs/          # Architecture and integration documentation
+├── tests/         # ABI, mock, and integration test targets
 └── scripts/       # Kconfig/CMake build support
 ```
 
@@ -102,4 +109,4 @@ LPF/
 - `docs/KERNEL_USER_SPLIT.md`: kernel/userspace boundary and include rules.
 - `docs/LPF_LONG_TERM_OPTIMIZATION_PLAN.md`: long-term optimization plan for
   multi-kernel and multi-SoC deployments.
-- `docs/PDI_UAPI_ABI.md`: PDI ioctl ABI rules for new peripherals.
+- `docs/LPF_UAPI_ABI.md`: PDI ioctl ABI rules for new peripherals.

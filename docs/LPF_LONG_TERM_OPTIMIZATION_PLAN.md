@@ -448,6 +448,17 @@ Acceptance criteria:
 - PDI open, operation, and close paths are tested.
 - ABI structure layout changes are detected.
 
+Current status:
+
+- Started. Added the top-level `make tests` entry and CMake/CTest integration.
+- Started. Added the `tests/` layout with `tests/user/abi/` as the first
+  active test area.
+- Done. UAPI ABI layout checks now compile and run through CTest, covering
+  LPF control, MCU, and LED UAPI structure sizes, field offsets, ABI versions,
+  and ioctl command encodings.
+- Remaining work: add mock HAL/backend coverage, dummy peripheral services,
+  PDI behavior tests, and multi-kernel matrix builds.
+
 ## Recommended Implementation Order
 
 1. Write the target architecture and module boundary documents.
