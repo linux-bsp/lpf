@@ -1,7 +1,7 @@
 # LPF Runtime Config
 
-This directory currently contains the transitional `lpf_config_*` source and type
-names for the LPF runtime configuration layer. The code is linked into
+This directory contains the `lpf_config_*` source and type names for the LPF
+runtime configuration layer. The code is linked into
 `lpf_peripheral_runtime.ko` instead of being built as a standalone config
 module.
 
@@ -34,6 +34,24 @@ Explicit backend selection fails if the requested backend is not available.
 `auto` is intended for product builds where DT-capable SoC kernels should use
 board data from firmware while x86 or lab module builds still fall back to the
 compiled static table.
+
+## Static Config Selection
+
+The static backend supports product-line selection without exposing concrete
+table symbols to peripheral services:
+
+```text
+config_index=N          # select by compiled table index
+config_product=name     # match product-name
+config_project=name     # match project-name
+config_version=x.y.z    # match config-version
+```
+
+If `config_index` is omitted, the backend first tries the identity selectors.
+If no selector is provided, it falls back to
+`g_lpf_config_platform_table.current_index`. When both `config_index` and
+identity selectors are provided, the selected table entry must also match the
+identity fields.
 
 ## Public API
 

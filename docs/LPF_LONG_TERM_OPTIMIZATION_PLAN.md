@@ -310,8 +310,10 @@ Current status:
 - Done. Runtime config source files now live under `kernel/lpf/config/`, public
   kernel-internal headers live under `kernel/include/lpf/`, and APIs/types use
   the `lpf_config_*` namespace.
+- Done. The static backend now supports runtime product selection by compiled
+  table index or by product/project/version identity fields.
 - Remaining work: add a documented DTS binding/schema, board-profile backend,
-  product-selection policy, and broader peripheral coverage.
+  and broader peripheral coverage.
 
 ## Phase 7: Peripheral Service Layer
 
