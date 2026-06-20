@@ -485,6 +485,21 @@ modules: _check_config include/generated/gen_autoconf.h include/generated/gen_ve
 	@echo "==================================================================="
 	@echo ""
 
+PHONY += mock-modules-smoke
+mock-modules-smoke:
+	@echo ""
+	@echo "==================================================================="
+	@echo "LPF Mock Kernel Module Smoke Test"
+	@echo "==================================================================="
+	@echo ""
+	$(Q)LPF_MODULE_DIR="$(abspath $(MODULES_OUTPUT_DIR))" \
+		$(CONFIG_SHELL) $(srctree)/scripts/lpf_mock_module_smoke.sh
+	@echo ""
+	@echo "==================================================================="
+	@echo "Mock kernel module smoke test completed successfully!"
+	@echo "==================================================================="
+	@echo ""
+
 PHONY += _modules_check_environment
 _modules_check_environment:
 	@if [ -z "$(strip $(MODULES_LIST))" ]; then \
@@ -717,6 +732,8 @@ help:
 	@echo '  all             - Build libraries and kernel modules (default)'
 	@echo '  libs            - Build userspace libraries via CMake'
 	@echo '  modules         - Build kernel modules via kbuild'
+	@echo '  mock-modules-smoke'
+	@echo '                  - Load/unload mock kernel modules and LPF HW selftest'
 	@echo '  tests           - Build and run LPF test targets'
 	@echo '  install         - Install binaries and libraries'
 	@echo '  install_headers - Install development headers only'

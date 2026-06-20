@@ -600,8 +600,9 @@ Current status:
   HW and peripheral-service integration paths without live hardware.
 - Done. `LPF_HW_MOCK_SELFTEST` builds a load-time kernel self-test module for
   LPF HW operation paths over the mock SoC backend.
-- Remaining work: add dummy peripheral services, module-load automation for
-  mock self-tests, and multi-kernel matrix builds.
+- Started. `make mock-modules-smoke` now automates the mock module load/unload
+  sequence and runs `lpf_hw_mock_selftest.ko`.
+- Remaining work: add dummy peripheral services and multi-kernel matrix builds.
 
 ## Recommended Implementation Order
 

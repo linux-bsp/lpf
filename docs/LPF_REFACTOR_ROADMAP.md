@@ -57,7 +57,7 @@ the target direction.
 
 - [ ] Add dummy peripheral service tests.
 - [x] Add mock MCU transport tests.
-- [ ] Add module-load automation for mock SoC and LPF HW selftests.
+- [x] Add module-load automation for mock SoC and LPF HW selftests.
 - [ ] Add ABI and PDI coverage for new peripherals as they are introduced.
 
 ## Guardrails
