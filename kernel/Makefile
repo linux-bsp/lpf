@@ -11,6 +11,7 @@ ccflags-y += -I$(src)/include
 ccflags-y += -I$(LPF_ROOT)/include
 ccflags-y += -I$(src)/include/lpf
 ccflags-y += -I$(src)/include/osal
+ccflags-y += -I$(src)/lpf/config/src
 ccflags-y += -I$(src)/lpf/hw
 ccflags-y += -I$(src)/lpf/peripheral/mcu
 ccflags-y += -I$(src)/lpf/peripheral/led

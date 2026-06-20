@@ -642,6 +642,12 @@ Current status:
 - Done. Device Tree parser tests now cover DT-style property parsing and
   normalized mock platform equivalence without requiring live OF support from
   the host kernel.
+- Done. `LPF_CONFIG_OF_SELFTEST` adds a runtime self-test inside
+  `lpf_peripheral_runtime.ko`; the self-test object is linked by
+  `obj-$(CONFIG_LPF_CONFIG_OF_SELFTEST)` and contributes an entry to the LPF
+  peripheral runtime entry section. It provides live Linux OF coverage of the
+  Device Tree backend in a `CONFIG_OF`/`CONFIG_OF_DYNAMIC` kernel matrix, while
+  skipping cleanly on kernels without live OF support.
 - Done. Architecture-boundary tests now guard the MCU/LED dynamic service
   context registry model, UAPI/PDI separation, and peripheral-layer dependency
   direction.

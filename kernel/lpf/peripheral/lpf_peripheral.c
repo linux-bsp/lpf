@@ -4,14 +4,12 @@
 
 #include "lpf/core/lpf_core.h"
 #include "lpf/hw/lpf_hw.h"
-#include "lpf/peripheral/led/lpf_led_service.h"
-#include "lpf/peripheral/mcu/lpf_mcu_service.h"
 #include "lpf/config/lpf_config.h"
-#include "lpf_peripheral_internal.h"
+#include "lpf/peripheral/lpf_peripheral_internal.h"
 #include "generated/gen_version.h"
 
 static bool g_lpf_peripheral_runtime_ready;
-static bool g_lpf_peripheral_services_ready;
+static bool g_lpf_peripheral_entries_ready;
 
 void lpf_peripheral_runtime_print_version(void)
 {
@@ -26,62 +24,68 @@ void lpf_peripheral_runtime_print_version(void)
 		 LPF_BUILD_ARCH, LPF_BUILD_KERNEL);
 }
 
-static int32_t lpf_peripheral_register_services(void)
+static const lpf_peripheral_entry_t *lpf_peripheral_entry_first(void)
 {
-	int32_t ret;
+	return &lpf_peripheral_entry_start + 1;
+}
 
-#ifdef CONFIG_LPF_MCU_SERVICE
-	ret = lpf_mcu_service_register();
-	if (ret != OSAL_SUCCESS)
-		return ret;
-#endif
+static const lpf_peripheral_entry_t *lpf_peripheral_entry_last(void)
+{
+	return &lpf_peripheral_entry_end;
+}
 
-#ifdef CONFIG_LPF_LED_SERVICE
-	ret = lpf_led_service_register();
-	if (ret != OSAL_SUCCESS) {
-#ifdef CONFIG_LPF_MCU_SERVICE
-		lpf_mcu_service_unregister();
-#endif
-		return ret;
+static void
+lpf_peripheral_entries_exit_range(const lpf_peripheral_entry_t *end)
+{
+	const lpf_peripheral_entry_t *entry;
+
+	entry = end;
+	while (entry > lpf_peripheral_entry_first()) {
+		entry--;
+		if (entry->exit)
+			entry->exit();
 	}
-#endif
-
-	return OSAL_SUCCESS;
 }
 
-static void lpf_peripheral_unregister_services(void)
+static int32_t lpf_peripheral_entries_init(void)
 {
-#ifdef CONFIG_LPF_LED_SERVICE
-	lpf_led_service_unregister();
-#endif
-#ifdef CONFIG_LPF_MCU_SERVICE
-	lpf_mcu_service_unregister();
-#endif
-}
-
-static int32_t lpf_peripheral_services_init(void)
-{
+	const lpf_peripheral_entry_t *entry;
 	int32_t ret;
 
-	if (g_lpf_peripheral_services_ready)
+	if (g_lpf_peripheral_entries_ready)
 		return OSAL_SUCCESS;
 
-	ret = lpf_peripheral_register_services();
-	if (ret != OSAL_SUCCESS)
-		return ret;
+	for (entry = lpf_peripheral_entry_first();
+	     entry < lpf_peripheral_entry_last(); entry++) {
+		if (!entry->init)
+			continue;
 
-	g_lpf_peripheral_services_ready = true;
+		ret = entry->init();
+		if (ret != OSAL_SUCCESS) {
+			LOG_ERROR("LPF-PERIPHERAL",
+				  "peripheral entry %s init failed: %d",
+				  entry->name ? entry->name : "unknown",
+				  ret);
+			lpf_peripheral_entries_exit_range(entry);
+			return ret;
+		}
+
+		LOG_INFO("LPF-PERIPHERAL", "peripheral entry %s initialized",
+			 entry->name ? entry->name : "unknown");
+	}
+
+	g_lpf_peripheral_entries_ready = true;
 	return OSAL_SUCCESS;
 }
 
-static void lpf_peripheral_services_exit(void)
+static void lpf_peripheral_entries_exit(void)
 {
-	if (!g_lpf_peripheral_services_ready)
+	if (!g_lpf_peripheral_entries_ready)
 		return;
 
 	lpf_device_unregister_all();
-	lpf_peripheral_unregister_services();
-	g_lpf_peripheral_services_ready = false;
+	lpf_peripheral_entries_exit_range(lpf_peripheral_entry_last());
+	g_lpf_peripheral_entries_ready = false;
 }
 
 int32_t lpf_peripheral_runtime_init(void)
@@ -99,7 +103,7 @@ int32_t lpf_peripheral_runtime_init(void)
 	if (ret != OSAL_SUCCESS)
 		return ret;
 
-	ret = lpf_peripheral_services_init();
+	ret = lpf_peripheral_entries_init();
 	if (ret != OSAL_SUCCESS) {
 		lpf_hw_runtime_exit();
 		return ret;
@@ -107,7 +111,7 @@ int32_t lpf_peripheral_runtime_init(void)
 
 	ret = lpf_peripheral_probe_devices();
 	if (ret != OSAL_SUCCESS) {
-		lpf_peripheral_services_exit();
+		lpf_peripheral_entries_exit();
 		lpf_config_unload();
 		lpf_hw_runtime_exit();
 		return ret;
@@ -122,7 +126,7 @@ void lpf_peripheral_runtime_exit(void)
 	if (!g_lpf_peripheral_runtime_ready)
 		return;
 
-	lpf_peripheral_services_exit();
+	lpf_peripheral_entries_exit();
 	lpf_config_unload();
 	lpf_hw_runtime_exit();
 	g_lpf_peripheral_runtime_ready = false;

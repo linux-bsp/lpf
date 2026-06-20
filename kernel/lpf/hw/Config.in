@@ -62,8 +62,9 @@ config LPF_HW_PWM
 	  Enable the LPF HW PWM control path used by peripheral services.
 
 config LPF_HW_MOCK_SELFTEST
-	bool "Build LPF HW mock backend self-test module"
+	tristate "Build LPF HW mock backend self-test module"
 	depends on LPF_SOC_ADAPTER_MOCK && LPF_PERIPHERAL_RUNTIME
+	depends on m
 	select LPF_HW_CAN
 	select LPF_HW_UART
 	select LPF_HW_I2C

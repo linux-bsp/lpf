@@ -38,8 +38,12 @@ the target direction.
   list.
 - [x] Add Device Tree backend parser tests proving parsed DT-style nodes produce
   the same platform model.
-- [ ] Add kernel/OF overlay tests for the Device Tree backend in a
+- [x] Add kernel/OF overlay tests for the Device Tree backend in a
   `CONFIG_OF`-enabled target matrix.
+  - `LPF_CONFIG_OF_SELFTEST` links a runtime self-test entry into
+    `lpf_peripheral_runtime.ko`. It skips on kernels without live OF support
+    and exercises the Linux OF path when the selected matrix kernel enables
+    `CONFIG_OF` and `CONFIG_OF_DYNAMIC`.
 - [ ] Add a board-profile backend only if there is a real product-line selection
   need that static identity selectors cannot cover.
 

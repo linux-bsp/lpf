@@ -98,8 +98,6 @@ typedef struct {
  *       3. 检查配置是否启用
  *       4. 将 LPF_CONFIG 配置转换为 LPF HW 配置并初始化硬件
  */
-int32_t lpf_mcu_service_register(void);
-void lpf_mcu_service_unregister(void);
 lpf_mcu_handle_t lpf_mcu_get(uint32_t index);
 int32_t lpf_mcu_init(uint32_t index, lpf_mcu_handle_t *handle);
 

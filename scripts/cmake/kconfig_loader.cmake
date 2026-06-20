@@ -44,8 +44,9 @@ function(_kconfig_parse_line line)
         # Remove quotes from string values
         string(REGEX REPLACE "^\"(.*)\"$" "\\1" config_value "${config_value}")
 
-        # Convert y/n to ON/OFF for CMake boolean logic
-        if(config_value STREQUAL "y")
+        # Convert y/m/n to ON/ON/OFF for CMake boolean logic. The raw
+        # module-vs-built-in distinction is only meaningful to Kbuild.
+        if(config_value STREQUAL "y" OR config_value STREQUAL "m")
             set(config_value ON)
         elseif(config_value STREQUAL "n")
             set(config_value OFF)

@@ -72,11 +72,11 @@ override MODULES_BUILD_DIR := $(patsubst %/,%,$(MODULES_BUILD_DIR))
 MODULES_SRC_DIR ?= $(srctree)/kernel
 MODULES_OUTPUT_DIR ?= $(MODULES_BUILD_DIR)
 MODULES_LIST ?= $(strip \
-	$(if $(CONFIG_OSAL),osal) \
-	$(if $(CONFIG_LPF_CORE),lpf_core) \
-	$(if $(CONFIG_LPF_PERIPHERAL_RUNTIME),lpf_peripheral_runtime) \
-	$(if $(CONFIG_LPF_HW_MOCK_SELFTEST),lpf_hw_mock_selftest) \
-	$(if $(CONFIG_LPF_DUMMY_SERVICE_SELFTEST),lpf_dummy_service_selftest))
+	$(if $(filter y m,$(CONFIG_OSAL)),osal) \
+	$(if $(filter y m,$(CONFIG_LPF_CORE)),lpf_core) \
+	$(if $(filter y m,$(CONFIG_LPF_PERIPHERAL_RUNTIME)),lpf_peripheral_runtime) \
+	$(if $(filter y m,$(CONFIG_LPF_HW_MOCK_SELFTEST)),lpf_hw_mock_selftest) \
+	$(if $(filter y m,$(CONFIG_LPF_DUMMY_SERVICE_SELFTEST)),lpf_dummy_service_selftest))
 MODULES_ARTIFACTS = $(addprefix $(MODULES_OUTPUT_DIR)/,$(addsuffix .ko,$(MODULES_LIST)))
 
 # Parallel build auto-detection

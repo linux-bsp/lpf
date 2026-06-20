@@ -35,8 +35,8 @@ LPF device discovery is provided by the LPF Core control node `/dev/lpf_ctl`.
 ## Configuration
 
 ```text
-CONFIG_LPF_PERIPHERAL_RUNTIME=y
-CONFIG_LPF_CORE=y
+CONFIG_LPF_PERIPHERAL_RUNTIME=m
+CONFIG_LPF_CORE=m
 CONFIG_LPF_MCU_SERVICE=y
 CONFIG_LPF_MCU_MAX_DEVICES=4
 CONFIG_LPF_LED_SERVICE=y
@@ -114,13 +114,17 @@ kernel/include/lpf/
 `lpf_peripheral_runtime.ko` links the current framework-hosted LPF peripheral
 service paths. During module initialization the runtime module calls
 `lpf_peripheral_runtime_init()`. The LPF
-peripheral runtime initializes LPF Core, registers peripheral services, loads
-runtime config, maps each enabled normalized runtime config device entry into an
-`lpf_device_config_t`, and registers it with LPF Core. The module entry does not
-depend on the concrete runtime config backend, service registration order, or
-per-device capability mapping. LPF Core then binds the configured device to the
-matching service `probe`. On unload, LPF Core removes devices before driver
-global resources are released.
+peripheral runtime initializes LPF Core, walks the linked LPF peripheral entry
+section, and initializes each entry. Feature objects such as MCU, LED, or
+runtime selftests are selected with Kbuild `obj-$(CONFIG_...)`; if an object is
+not linked, its section entry is absent and the runtime has no feature-specific
+branch to maintain. The runtime then loads runtime config, maps each enabled
+normalized runtime config device entry into an `lpf_device_config_t`, and
+registers it with LPF Core. The module entry does not depend on the concrete
+runtime config backend, service registration order, or per-device capability
+mapping. LPF Core then binds the configured device to the matching service
+`probe`. On unload, LPF Core removes devices before driver global resources are
+released.
 
 Each LPF peripheral instance exposes its own character device, such as
 `/dev/lpf/mcu0`, and each PDI peripheral API uses the matching UAPI ioctl
@@ -161,8 +165,12 @@ and `error_count` remain as historical diagnostics. MCU status queries also map
 reported `OFFLINE` and `ERROR` MCU states into LPF Core runtime health.
 
 MCU and LED service implementations live under `kernel/lpf/peripheral/`.
-They are registered through the LPF peripheral runtime while the framework
-module boundary is being cleaned up.
+They contribute entries to the LPF peripheral runtime section while the
+framework module boundary is being cleaned up.
+New framework-hosted features should declare a file-local runtime entry with
+`lpf_peripheral_register(feature_name, feature_init, feature_exit)` and add the
+object with `lpf_peripheral_runtime-$(CONFIG_LPF_FEATURE) += ...` so Kconfig
+selects whether the feature is linked into `lpf_peripheral_runtime.ko`.
 
 `/dev/lpf_ctl` is the management node for discovery. It is implemented by LPF
 Core and exposes LPF Core device snapshots through `uapi/lpf/lpf_ctl.h`,
@@ -204,7 +212,7 @@ need framed communication.
 
 ## Mock Selftest
 
-Mock module builds can enable `CONFIG_LPF_DUMMY_SERVICE_SELFTEST=y` to build
+Mock module builds can enable `CONFIG_LPF_DUMMY_SERVICE_SELFTEST=m` to build
 `lpf_dummy_service_selftest.ko`. Loading it registers a temporary dummy driver
 and device through LPF Core, then validates lifecycle events, discovery,
 capability lookup, error/recovery state transitions, and unregister cleanup.

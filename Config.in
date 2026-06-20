@@ -51,6 +51,15 @@ config LINUX_ONLY
 
 menu "Build System Configuration"
 
+config MODULES
+	bool "Enable loadable module support"
+	default y
+	modules
+	help
+	  Enable Kconfig tristate module values. LPF kernel products are built
+	  as external loadable modules, so top-level kernel module targets use
+	  =m while features linked into those modules remain bool options.
+
 # ============================================================================
 # Platform Configuration (Top Level)
 # ============================================================================

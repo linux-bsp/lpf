@@ -28,7 +28,7 @@ CONFIG_LPF_HW_I2C=y
 CONFIG_LPF_HW_SPI=y
 ```
 
-The mock preset can also enable `CONFIG_LPF_HW_MOCK_SELFTEST=y`, which builds
+The mock preset can also enable `CONFIG_LPF_HW_MOCK_SELFTEST=m`, which builds
 `lpf_hw_mock_selftest.ko` for operation-path checks against the mock SoC
 adapter.
 
