@@ -3,8 +3,8 @@
 #ifndef LPF_CORE_H
 #define LPF_CORE_H
 
-#include "lpf/lpf_device.h"
-#include "lpf/lpf_driver.h"
+#include "lpf/core/lpf_device.h"
+#include "lpf/core/lpf_driver.h"
 
 typedef struct lpf_device_handle lpf_device_handle_t;
 

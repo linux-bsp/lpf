@@ -3,7 +3,7 @@
 #ifndef LPF_DRIVER_H
 #define LPF_DRIVER_H
 
-#include "lpf/lpf_device.h"
+#include "lpf/core/lpf_device.h"
 
 typedef struct lpf_driver {
 	const char *name;

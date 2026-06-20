@@ -95,7 +95,8 @@ character devices, instance sysfs attributes, and debugfs command files so
 peripheral services do not duplicate node lifecycle code.
 The LPF control/discovery node `/dev/lpf_ctl` is implemented in LPF Core and
 exposes read-only snapshots of the LPF device model through
-`uapi/lpf/lpf_ctl.h`.
+`uapi/lpf/lpf_ctl.h`. Public kernel-internal LPF Core headers live under
+`kernel/include/lpf/core/`.
 
 ### LPF SoC Adapter
 
@@ -145,7 +146,8 @@ helpers for runtime nodes. MCU and LED services now live under
 `/dev/lpf/led0`; they remain integrated through
 `lpf_peripheral_runtime.ko` rather than being split into one KO per peripheral.
 `kernel/lpf/peripheral/lpf_peripheral.c` owns the unified peripheral runtime
-entry used by the integration module.
+entry used by the integration module. Public kernel-internal peripheral headers
+live under `kernel/include/lpf/peripheral/`.
 
 ### LPF Transports
 

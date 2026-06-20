@@ -4,8 +4,8 @@
 #define LPF_LED_INTERNAL_H
 
 #include "lpf/config/lpf_config.h"
-#include "lpf/lpf_core.h"
-#include "lpf/lpf_led_service.h"
+#include "lpf/core/lpf_core.h"
+#include "lpf/peripheral/led/lpf_led_service.h"
 
 #ifndef CONFIG_LPF_LED_MAX_DEVICES
 #define CONFIG_LPF_LED_MAX_DEVICES 8

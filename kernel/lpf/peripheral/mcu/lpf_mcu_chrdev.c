@@ -5,7 +5,7 @@
 #include <linux/module.h>
 
 #include "lpf/lpf_mcu.h"
-#include "lpf/lpf_chrdev.h"
+#include "lpf/core/lpf_chrdev.h"
 #include "lpf/lpf_errno.h"
 #include "lpf_mcu_internal.h"
 

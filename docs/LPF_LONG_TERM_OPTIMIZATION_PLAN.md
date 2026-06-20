@@ -100,9 +100,9 @@ Work items:
 Deliverables:
 
 - `lpf_core.ko`
-- `kernel/include/lpf/lpf_core.h`
-- `kernel/include/lpf/lpf_device.h`
-- `kernel/include/lpf/lpf_driver.h`
+- `kernel/include/lpf/core/lpf_core.h`
+- `kernel/include/lpf/core/lpf_device.h`
+- `kernel/include/lpf/core/lpf_driver.h`
 
 Acceptance criteria:
 
@@ -113,7 +113,7 @@ Acceptance criteria:
 Current status:
 
 - Started. `lpf_core.ko` now owns the LPF driver and device registry.
-- `kernel/include/lpf/lpf_device.h` and `lpf_driver.h` define the first device,
+- `kernel/include/lpf/core/lpf_device.h` and `lpf_driver.h` define the first device,
   driver, and capability model.
 - LPF peripheral configuration maps LPF_CONFIG entries into
   `lpf_device_config_t`; MCU/LED services register through LPF Core.
@@ -379,7 +379,7 @@ Acceptance criteria:
 Current status:
 
 - Started. MCU and LED service code now live under `kernel/lpf/peripheral/`
-  with public kernel service headers at `kernel/include/lpf/`.
+  with public kernel service headers under `kernel/include/lpf/peripheral/`.
 - Started. MCU and LED services register as LPF drivers and expose
   `/dev/lpf/mcuN` and `/dev/lpf/ledN`; both remain integrated through
   `lpf_peripheral_runtime.ko` so deployment does not fragment into one KO per

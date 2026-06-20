@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0
 
 #include "lpf_led_internal.h"
-#include "lpf/lpf_debugfs.h"
+#include "lpf/core/lpf_debugfs.h"
 #include "lpf/lpf_errno.h"
-#include "lpf/lpf_proc.h"
+#include "lpf/core/lpf_proc.h"
 
 #include <linux/errno.h>
 #include <linux/kernel.h>

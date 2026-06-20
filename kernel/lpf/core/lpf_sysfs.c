@@ -2,7 +2,7 @@
 
 #include "lpf_sysfs.h"
 
-#include "lpf/lpf_chrdev.h"
+#include "lpf/core/lpf_chrdev.h"
 #include "lpf/compat/lpf_compat_sysfs.h"
 
 static bool lpf_sysfs_get_info(struct device *dev, lpf_device_info_t *info)

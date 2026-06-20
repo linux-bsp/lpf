@@ -2,7 +2,7 @@
 
 #include "osal.h"
 #include "lpf/config/lpf_config.h"
-#include "lpf/lpf_driver.h"
+#include "lpf/core/lpf_driver.h"
 #include "lpf/hw/lpf_hw.h"
 #include "lpf_led_internal.h"
 

@@ -4,7 +4,7 @@
 
 #include "osal.h"
 #include "lpf/lpf_errno.h"
-#include "lpf/lpf_peripheral.h"
+#include "lpf/peripheral/lpf_peripheral.h"
 
 static int __init lpf_peripheral_module_init(void)
 {

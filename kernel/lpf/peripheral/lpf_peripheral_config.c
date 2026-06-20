@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0
 
-#include "lpf/lpf_peripheral.h"
+#include "lpf/peripheral/lpf_peripheral.h"
 
-#include "lpf/lpf_core.h"
+#include "lpf/core/lpf_core.h"
 #include "lpf_peripheral_internal.h"
 #include "lpf/config/lpf_config.h"
 

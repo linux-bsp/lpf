@@ -7,7 +7,7 @@
 #include <linux/miscdevice.h>
 
 #include "osal.h"
-#include "lpf/lpf_core.h"
+#include "lpf/core/lpf_core.h"
 
 #define LPF_CHRDEV_NAME_LEN 64U
 #define LPF_CHRDEV_SOC_NAME_LEN 64U

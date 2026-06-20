@@ -10,9 +10,9 @@
 #define LPF_MCU_INTERNAL_H
 
 #include "osal.h"
-#include "lpf/lpf_core.h"
+#include "lpf/core/lpf_core.h"
 #include "lpf/config/lpf_config.h"
-#include "lpf/lpf_mcu_service.h"
+#include "lpf/peripheral/mcu/lpf_mcu_service.h"
 #include "lpf/transport/mcu/lpf_mcu_transport.h"
 
 #ifndef CONFIG_LPF_MCU_MAX_DEVICES

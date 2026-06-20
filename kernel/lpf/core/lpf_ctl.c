@@ -5,8 +5,8 @@
 #include <linux/errno.h>
 #include <linux/fs.h>
 
-#include "lpf/lpf_chrdev.h"
-#include "lpf/lpf_core.h"
+#include "lpf/core/lpf_chrdev.h"
+#include "lpf/core/lpf_core.h"
 #include "lpf/lpf_ctl.h"
 
 #define LPF_CTL_VERSION_MAJOR 0x01

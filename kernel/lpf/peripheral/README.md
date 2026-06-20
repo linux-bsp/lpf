@@ -81,12 +81,21 @@ kernel/lpf/protocol/
 
 kernel/include/lpf/
 ├── lpf_errno.h
-├── lpf_peripheral.h
-├── lpf_led_service.h
-├── lpf_mcu_service.h
-├── lpf_proc.h
+├── core/
+│   ├── lpf_core.h
+│   ├── lpf_device.h
+│   ├── lpf_driver.h
+│   ├── lpf_chrdev.h
+│   ├── lpf_proc.h
+│   └── lpf_debugfs.h
 ├── config/
 │   └── lpf_config*.h
+├── peripheral/
+│   ├── lpf_peripheral.h
+│   ├── led/
+│   │   └── lpf_led_service.h
+│   └── mcu/
+│       └── lpf_mcu_service.h
 ├── protocol/
 │   ├── lpf_protocol.h
 │   └── lpf_protocol_mcu.h

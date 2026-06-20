@@ -12,10 +12,14 @@ kernel/
   include/
     osal/          # kernel-side cross-module OSAL headers
     lpf/           # kernel-side cross-module LPF headers and layer subdirs
+      compat/      # Linux kernel compatibility headers
       config/      # runtime config type headers
+      core/        # LPF Core model and shared node headers
       hw/          # LPF HW API headers
+      peripheral/  # LPF peripheral runtime and service headers
       protocol/    # LPF protocol headers
       soc/         # LPF SoC adapter headers
+      transport/   # LPF transport registry headers
   osal/
     src/           # builds osal.ko
   lpf/

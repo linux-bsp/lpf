@@ -4,7 +4,7 @@
 #include <linux/module.h>
 #include <linux/notifier.h>
 
-#include "lpf/lpf_core.h"
+#include "lpf/core/lpf_core.h"
 #include "lpf/soc/lpf_soc_adapter.h"
 #include "lpf_ctl_internal.h"
 

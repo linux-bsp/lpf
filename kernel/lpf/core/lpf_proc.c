@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 
-#include "lpf/lpf_proc.h"
+#include "lpf/core/lpf_proc.h"
 
 #include <linux/errno.h>
 #include <linux/fs.h>

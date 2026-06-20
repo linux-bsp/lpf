@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 
-#include "lpf/lpf_chrdev.h"
+#include "lpf/core/lpf_chrdev.h"
 
 #include <linux/container_of.h>
 #include <linux/device.h>

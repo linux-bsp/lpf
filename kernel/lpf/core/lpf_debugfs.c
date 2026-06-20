@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 
-#include "lpf/lpf_debugfs.h"
+#include "lpf/core/lpf_debugfs.h"
 
 #include <linux/debugfs.h>
 #include <linux/errno.h>
