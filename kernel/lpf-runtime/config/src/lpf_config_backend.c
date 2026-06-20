@@ -7,11 +7,11 @@
 
 static char *lpf_config_backend_name = "auto";
 module_param_named(backend, lpf_config_backend_name, charp, 0444);
-MODULE_PARM_DESC(backend, "LPF_CONFIG backend: auto, dt, or static");
+MODULE_PARM_DESC(backend, "LPF_CONFIG backend: auto, static, or dt");
 
 static const lpf_config_backend_ops_t *const g_lpf_config_backends[] = {
-	&g_lpf_config_dt_backend,
 	&g_lpf_config_static_backend,
+	&g_lpf_config_dt_backend,
 };
 
 static const lpf_config_backend_ops_t *
@@ -36,12 +36,30 @@ lpf_config_backend_find_by_name(const char *name)
 	return NULL;
 }
 
+bool lpf_config_backend_is_auto(void)
+{
+	return !lpf_config_backend_name ||
+	       0 == osal_strcmp(lpf_config_backend_name, "auto");
+}
+
+uint32_t lpf_config_backend_count(void)
+{
+	return OSAL_ARRAY_SIZE(g_lpf_config_backends);
+}
+
+const lpf_config_backend_ops_t *lpf_config_backend_at(uint32_t index)
+{
+	if (index >= OSAL_ARRAY_SIZE(g_lpf_config_backends))
+		return NULL;
+
+	return g_lpf_config_backends[index];
+}
+
 const lpf_config_backend_ops_t *lpf_config_backend_select(void)
 {
 	uint32_t i;
 
-	if (lpf_config_backend_name &&
-	    0 != osal_strcmp(lpf_config_backend_name, "auto")) {
+	if (!lpf_config_backend_is_auto()) {
 		const lpf_config_backend_ops_t *backend;
 
 		backend = lpf_config_backend_find_by_name(lpf_config_backend_name);

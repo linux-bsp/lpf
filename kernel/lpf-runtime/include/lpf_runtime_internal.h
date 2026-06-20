@@ -27,7 +27,7 @@ typedef struct {
 
 typedef struct {
 	lpf_config_device_type_t type;
-	int32_t (*probe)(const lpf_config_platform_config_t *platform);
+	int32_t (*probe)(const lpf_config_device_node_t *node);
 } lpf_runtime_config_driver_t;
 
 #define lpf_runtime_entry_register(_class, _id, _init, _exit)         \

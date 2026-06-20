@@ -9,4 +9,8 @@ int32_t lpf_config_normalize_devices(
 	const lpf_config_platform_config_t *platform,
 	lpf_config_device_config_t *devices, uint32_t *count);
 
+int32_t lpf_config_build_device_nodes(
+	const lpf_config_platform_config_t *platform,
+	lpf_config_device_node_t *nodes, uint32_t *count);
+
 #endif /* LPF_CONFIG_NORMALIZER_H */

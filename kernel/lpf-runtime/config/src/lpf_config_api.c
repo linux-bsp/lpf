@@ -9,11 +9,14 @@
 #include "osal.h"
 #include "lpf/config/lpf_config.h"
 #include "lpf_config_backend.h"
+#include "lpf_config_normalizer.h"
 #include "lpf_config_validator.h"
 #include "generated/gen_version.h"
 
 static const lpf_config_backend_ops_t *g_lpf_config_backend;
 static bool g_lpf_config_initialized;
+static lpf_config_device_node_t *g_lpf_config_device_nodes;
+static uint32_t g_lpf_config_device_node_count;
 
 const lpf_config_platform_config_t *lpf_config_get_board(void)
 {
@@ -23,6 +26,18 @@ const lpf_config_platform_config_t *lpf_config_get_board(void)
 	return g_lpf_config_backend->active();
 }
 EXPORT_SYMBOL_GPL(lpf_config_get_board);
+
+const lpf_config_device_node_t *lpf_config_get_device_nodes(uint32_t *count)
+{
+	if (count)
+		*count = g_lpf_config_device_node_count;
+
+	if (!g_lpf_config_initialized)
+		return NULL;
+
+	return g_lpf_config_device_nodes;
+}
+EXPORT_SYMBOL_GPL(lpf_config_get_device_nodes);
 
 const lpf_config_platform_config_t *lpf_config_find(const char *product,
 					      const char *project,
@@ -51,6 +66,126 @@ int32_t lpf_config_list(const lpf_config_platform_config_t **configs, uint32_t *
 	return backend->list(configs, count);
 }
 EXPORT_SYMBOL_GPL(lpf_config_list);
+
+static void lpf_config_clear_device_nodes(void)
+{
+	osal_free(g_lpf_config_device_nodes);
+	g_lpf_config_device_nodes = NULL;
+	g_lpf_config_device_node_count = 0;
+}
+
+static int32_t lpf_config_cache_device_nodes(
+	const lpf_config_platform_config_t *platform)
+{
+	lpf_config_device_node_t *nodes;
+	uint32_t count = 0;
+	int32_t ret;
+
+	ret = lpf_config_build_device_nodes(platform, NULL, &count);
+	if (ret != OSAL_SUCCESS)
+		return ret;
+
+	lpf_config_clear_device_nodes();
+	if (count == 0)
+		return OSAL_SUCCESS;
+
+	nodes = osal_zalloc(sizeof(*nodes) * (count + 1U));
+	if (!nodes)
+		return OSAL_ERR_NO_MEMORY;
+
+	g_lpf_config_device_node_count = count + 1U;
+	ret = lpf_config_build_device_nodes(platform, nodes,
+					    &g_lpf_config_device_node_count);
+	if (ret != OSAL_SUCCESS) {
+		osal_free(nodes);
+		g_lpf_config_device_node_count = 0;
+		return ret;
+	}
+
+	g_lpf_config_device_nodes = nodes;
+	return OSAL_SUCCESS;
+}
+
+static void lpf_config_unload_backend(const lpf_config_backend_ops_t *backend)
+{
+	lpf_config_clear_device_nodes();
+	if (backend && backend->unload)
+		backend->unload();
+	if (g_lpf_config_backend == backend)
+		g_lpf_config_backend = NULL;
+}
+
+static int32_t lpf_config_try_backend(
+	const lpf_config_backend_ops_t *backend)
+{
+	const lpf_config_platform_config_t *platform;
+	int32_t ret;
+
+	if (!backend || !backend->load || !backend->active)
+		return OSAL_ERR_INVALID_PARAM;
+
+	if (backend->available && !backend->available())
+		return OSAL_ERR_NOT_SUPPORTED;
+
+	ret = backend->load();
+	if (ret != OSAL_SUCCESS)
+		return ret;
+
+	g_lpf_config_backend = backend;
+	platform = lpf_config_get_board();
+	if (!platform) {
+		ret = OSAL_ERR_GENERIC;
+		goto out_unload;
+	}
+
+	ret = lpf_config_validate(platform);
+	if (ret != OSAL_SUCCESS) {
+		LOG_ERROR("LPF_CONFIG", "Invalid platform config from %s",
+			  backend->name ? backend->name : "unknown");
+		goto out_unload;
+	}
+
+	ret = lpf_config_cache_device_nodes(platform);
+	if (ret != OSAL_SUCCESS) {
+		LOG_ERROR("LPF_CONFIG", "Failed to build device nodes from %s",
+			  backend->name ? backend->name : "unknown");
+		goto out_unload;
+	}
+
+	LOG_INFO("LPF_CONFIG", "Backend: %s",
+		 backend->name ? backend->name : "unknown");
+	lpf_config_print(platform);
+	return OSAL_SUCCESS;
+
+out_unload:
+	lpf_config_unload_backend(backend);
+	return ret;
+}
+
+static int32_t lpf_config_load_auto(void)
+{
+	int32_t last_ret = OSAL_ERR_GENERIC;
+	uint32_t i;
+
+	for (i = 0; i < lpf_config_backend_count(); i++) {
+		const lpf_config_backend_ops_t *backend;
+		int32_t ret;
+
+		backend = lpf_config_backend_at(i);
+		if (!backend)
+			continue;
+
+		ret = lpf_config_try_backend(backend);
+		if (ret == OSAL_SUCCESS)
+			return OSAL_SUCCESS;
+
+		last_ret = ret;
+		LOG_WARN("LPF_CONFIG", "Backend %s unavailable: %d",
+			 backend->name ? backend->name : "unknown", ret);
+	}
+
+	return last_ret;
+}
 
 int32_t lpf_config_validate(const lpf_config_platform_config_t *config)
 {
@@ -142,7 +277,6 @@ EXPORT_SYMBOL_GPL(lpf_config_print_version);
 
 int32_t lpf_config_load(void)
 {
-	const lpf_config_platform_config_t *platform;
 	const lpf_config_backend_ops_t *backend;
 	int32_t ret;
 
@@ -151,46 +285,29 @@ int32_t lpf_config_load(void)
 
 	lpf_config_print_version();
 
+	if (lpf_config_backend_is_auto()) {
+		ret = lpf_config_load_auto();
+		if (ret != OSAL_SUCCESS) {
+			LOG_ERROR("LPF_CONFIG", "No usable config backend");
+			return ret;
+		}
+
+		g_lpf_config_initialized = true;
+		return OSAL_SUCCESS;
+	}
+
 	backend = lpf_config_backend_select();
 	if (NULL == backend) {
 		LOG_ERROR("LPF_CONFIG", "No available config backend");
 		return OSAL_ERR_GENERIC;
 	}
 
-	if (!backend->load || !backend->active) {
-		LOG_ERROR("LPF_CONFIG", "Invalid config backend");
-		return OSAL_ERR_INVALID_PARAM;
-	}
-
-	ret = backend->load();
+	ret = lpf_config_try_backend(backend);
 	if (ret != OSAL_SUCCESS) {
 		LOG_ERROR("LPF_CONFIG", "Config backend load failed");
 		return ret;
 	}
 
-	g_lpf_config_backend = backend;
-	LOG_INFO("LPF_CONFIG", "Backend: %s",
-		 g_lpf_config_backend->name ? g_lpf_config_backend->name : "unknown");
-
-	platform = lpf_config_get_board();
-	if (NULL == platform) {
-		LOG_ERROR("LPF_CONFIG", "No active platform config");
-		if (g_lpf_config_backend->unload)
-			g_lpf_config_backend->unload();
-		g_lpf_config_backend = NULL;
-		return OSAL_ERR_GENERIC;
-	}
-
-	ret = lpf_config_validate(platform);
-	if (ret != OSAL_SUCCESS) {
-		LOG_ERROR("LPF_CONFIG", "Invalid platform config");
-		if (g_lpf_config_backend->unload)
-			g_lpf_config_backend->unload();
-		g_lpf_config_backend = NULL;
-		return ret;
-	}
-
-	lpf_config_print(platform);
 	g_lpf_config_initialized = true;
 	return OSAL_SUCCESS;
 }
@@ -198,9 +315,7 @@ EXPORT_SYMBOL_GPL(lpf_config_load);
 
 void lpf_config_unload(void)
 {
-	if (g_lpf_config_backend && g_lpf_config_backend->unload)
-		g_lpf_config_backend->unload();
-	g_lpf_config_backend = NULL;
+	lpf_config_unload_backend(g_lpf_config_backend);
 	g_lpf_config_initialized = false;
 	LOG_INFO("LPF_CONFIG", "Deinitialized");
 }

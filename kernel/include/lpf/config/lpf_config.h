@@ -41,6 +41,8 @@ const lpf_config_platform_config_t *lpf_config_get_board(void);
 int32_t lpf_config_load(void);
 void lpf_config_unload(void);
 
+const lpf_config_device_node_t *lpf_config_get_device_nodes(uint32_t *count);
+
 /**
  * @brief 根据产品、项目和版本查找配置
  *

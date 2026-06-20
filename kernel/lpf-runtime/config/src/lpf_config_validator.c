@@ -21,6 +21,13 @@ static bool lpf_config_mcu_enabled(const void *entry)
 	return mcu && mcu->enabled;
 }
 
+static const char *lpf_config_mcu_node_name(const void *entry)
+{
+	const lpf_config_mcu_entry_t *mcu = entry;
+
+	return mcu ? mcu->config.name : NULL;
+}
+
 static bool lpf_config_mcu_parity_valid(lpf_config_mcu_parity_t parity)
 {
 	return parity == LPF_CONFIG_MCU_PARITY_NONE ||
@@ -138,6 +145,13 @@ static bool lpf_config_led_enabled(const void *entry)
 	return led && led->enabled;
 }
 
+static const char *lpf_config_led_node_name(const void *entry)
+{
+	const lpf_config_led_entry_t *led = entry;
+
+	return led ? led->config.name : NULL;
+}
+
 static int32_t lpf_config_validate_led_entry(uint32_t index,
 					  const void *entry)
 {
@@ -197,19 +211,25 @@ static void lpf_config_print_led_entry(uint32_t index, const void *entry)
 static const lpf_config_device_descriptor_t g_lpf_config_device_descriptors[] = {
 	{
 		.name = "MCU",
+		.compatible = "lpf,mcu",
 		.type = LPF_CONFIG_DEVICE_TYPE_MCU,
+		.payload_size = sizeof(lpf_config_mcu_entry_t),
 		.count = lpf_config_mcu_count,
 		.entry = lpf_config_mcu_entry,
 		.enabled = lpf_config_mcu_enabled,
+		.node_name = lpf_config_mcu_node_name,
 		.validate = lpf_config_validate_mcu_entry,
 		.print = lpf_config_print_mcu_entry,
 	},
 	{
 		.name = "LED",
+		.compatible = "lpf,led",
 		.type = LPF_CONFIG_DEVICE_TYPE_LED,
+		.payload_size = sizeof(lpf_config_led_entry_t),
 		.count = lpf_config_led_count,
 		.entry = lpf_config_led_entry,
 		.enabled = lpf_config_led_enabled,
+		.node_name = lpf_config_led_node_name,
 		.validate = lpf_config_validate_led_entry,
 		.print = lpf_config_print_led_entry,
 	},

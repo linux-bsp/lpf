@@ -6,17 +6,18 @@ runtime configuration layer. The code is linked into
 module.
 
 The runtime configuration layer selects a configuration backend, validates the
-active platform, and exposes the active platform table to LPF runtime config
-drivers.
+active platform, and exposes a configured-device node table to LPF runtime
+config drivers.
 
 ## Current Responsibility
 
 - Select the active configuration backend.
-- Keep the built-in static table as the first backend implementation.
-- Parse LPF Device Tree configuration when an LPF DT node is present.
+- Prefer the built-in static table in `backend=auto`.
+- Fall back to LPF Device Tree configuration when static config is unavailable
+  or invalid.
 - Validate platform identity and per-device configuration.
-- Provide the active platform table; peripheral-owned runtime config drivers
-  parse their own typed entries and register LPF devices.
+- Provide the active configured-device node table; peripheral-owned runtime
+  config drivers parse their own typed node payloads and register LPF devices.
 - Keep hardware configuration data separate from LPF peripheral service and
   application logic.
 
@@ -26,15 +27,15 @@ Runtime config supports a `backend` module parameter on
 `lpf_runtime.ko`:
 
 ```text
-backend=auto    # default: try dt, then static
-backend=dt      # require Device Tree backend
+backend=auto    # default: try static, then dt
 backend=static  # require built-in static table backend
+backend=dt      # require Device Tree backend
 ```
 
-Explicit backend selection fails if the requested backend is not available.
-`auto` is intended for product builds where DT-capable SoC kernels should use
-board data from firmware while x86 or lab module builds still fall back to the
-compiled static table.
+Explicit backend selection fails if the requested backend is not available,
+cannot load, or fails validation. It does not fall back to another backend.
+`auto` is intended for product and lab builds where custom static configuration
+can override board firmware data while DT remains available as a fallback source.
 
 ## Static Config Selection
 
@@ -139,9 +140,22 @@ property parsing through `lpf_config_dt_parser.c`. This keeps the normalized
 Device Tree parser testable without requiring the host kernel to expose live OF
 overlay support.
 
-## Typed Accessors
+## Device Nodes
 
-The current header provides inline index-based peripheral accessors:
+`lpf_config_load()` validates the active board config and exposes an ordered
+readonly node table through:
+
+```c
+lpf_config_get_device_nodes(&count);
+```
+
+Each node carries a device type, source index, name, status, compatible string,
+typed payload pointer, and payload size. The current static backend still stores
+source data in per-peripheral arrays, but runtime probing consumes the generic
+node table.
+
+The current header also keeps inline index-based peripheral accessors for
+service-owned typed payload lookups and compatibility:
 
 ```c
 lpf_config_hw_get_mcu(platform, index);
@@ -150,15 +164,16 @@ lpf_config_hw_get_led(platform, index);
 
 ## Layering Rules
 
-- Runtime config owns backend selection, validation, and normalized device
+- Runtime config owns backend selection, validation, and configured-device node
   enumeration.
-- `lpf_config_normalize_devices()` is retained as a backend-agnostic helper for
-  tests and comparisons. Runtime device registration is owned by runtime config
-  drivers registered by each peripheral service.
+- `lpf_config_normalize_devices()` is retained as a compatibility helper for
+  tests and comparisons. Runtime probing uses `lpf_config_get_device_nodes()`.
+- Runtime device registration is owned by runtime config drivers registered by
+  each peripheral service. Runtime walks nodes generically and dispatches each
+  enabled node to the matching config driver.
 - `kernel/lpf-runtime/config/configs` owns concrete static platform tables.
-- LPF peripheral configuration consumes `lpf_config_get_board()` and its own
-  typed entries; it must not know concrete product table symbols or backend
-  implementations.
+- LPF peripheral configuration consumes its own typed node payloads; it must not
+  know concrete product table symbols or backend implementations.
 - New configuration sources should be added as runtime config backends. They must
-  produce the same `lpf_config_platform_config_t` model before LPF peripheral
-  configuration sees them.
+  produce the same board-description model before LPF peripheral configuration
+  sees them.

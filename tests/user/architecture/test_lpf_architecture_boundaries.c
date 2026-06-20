@@ -90,6 +90,22 @@ static int expect_not_contains(const char *file_name, const char *content,
 	return 1;
 }
 
+static int expect_ordered_contains(const char *file_name, const char *content,
+				   const char *first, const char *second)
+{
+	const char *first_pos;
+	const char *second_pos;
+
+	first_pos = strstr(content, first);
+	second_pos = strstr(content, second);
+	if (first_pos && second_pos && first_pos < second_pos)
+		return 0;
+
+	fprintf(stderr, "%s: expected %s before %s\n", file_name, first,
+		second);
+	return 1;
+}
+
 static int expect_path_absent(const char *relative_path)
 {
 	char path[1024];
@@ -331,6 +347,7 @@ static int test_static_config_sources_are_version_named(void)
 {
 	char *config_makefile;
 	char *config_header;
+	char *config_backend;
 	char *config_static_header;
 	char *static_backend;
 	char *static_table;
@@ -340,6 +357,8 @@ static int test_static_config_sources_are_version_named(void)
 
 	config_makefile = read_source_file("kernel/lpf-runtime/config/Makefile");
 	config_header = read_source_file("kernel/include/lpf/config/lpf_config.h");
+	config_backend = read_source_file(
+		"kernel/lpf-runtime/config/src/lpf_config_backend.c");
 	config_static_header = read_source_file(
 		"kernel/lpf-runtime/config/src/lpf_config_static.h");
 	static_backend = read_source_file(
@@ -350,8 +369,9 @@ static int test_static_config_sources_are_version_named(void)
 		"kernel/lpf-runtime/config/configs/kernel/x86_modules/lpf_config_kernel_x86_modules_v1.c");
 	mock_config = read_source_file(
 		"kernel/lpf-runtime/config/configs/kernel/x86_mock_modules/lpf_config_kernel_x86_mock_modules_v1.c");
-	if (!config_makefile || !config_header || !config_static_header ||
-	    !static_backend || !static_table || !x86_config || !mock_config) {
+	if (!config_makefile || !config_header || !config_backend ||
+	    !config_static_header || !static_backend || !static_table ||
+	    !x86_config || !mock_config) {
 		fprintf(stderr, "failed to read static config sources\n");
 		failures = 1;
 		goto out;
@@ -374,6 +394,10 @@ static int test_static_config_sources_are_version_named(void)
 	failures += expect_contains(
 		"config/Makefile", config_makefile,
 		"lpf-runtime/config/configs/lpf_config_configs.o");
+	failures += expect_ordered_contains("lpf_config_backend.c",
+					    config_backend,
+					    "&g_lpf_config_static_backend",
+					    "&g_lpf_config_dt_backend");
 	failures += expect_not_contains("config/Makefile", config_makefile,
 					"/1.0.0/");
 	failures += expect_not_contains("lpf_config.h", config_header,
@@ -397,6 +421,7 @@ out:
 	free(static_table);
 	free(static_backend);
 	free(config_static_header);
+	free(config_backend);
 	free(config_header);
 	free(config_makefile);
 	return failures ? 1 : 0;
@@ -551,12 +576,18 @@ static int test_runtime_config_mapping_is_registered(void)
 
 	failures += expect_contains("lpf_runtime_config.c", runtime_config,
 				    "lpf_runtime_config_driver_first");
+	failures += expect_contains("lpf_runtime_config.c", runtime_config,
+				    "lpf_config_get_device_nodes");
 	failures += expect_not_contains("lpf_runtime_config.c", runtime_config,
 					"LPF_CONFIG_DEVICE_TYPE_MCU");
 	failures += expect_not_contains("lpf_runtime_config.c", runtime_config,
 					"LPF_CONFIG_DEVICE_TYPE_LED");
 	failures += expect_not_contains("lpf_runtime_config.c", runtime_config,
 					"lpf_config_get()");
+	failures += expect_not_contains("lpf_runtime_config.c", runtime_config,
+					"mcu_count");
+	failures += expect_not_contains("lpf_runtime_config.c", runtime_config,
+					"led_count");
 	failures += expect_contains("lpf_mcu_config_driver.c", mcu_driver,
 				    "lpf_runtime_config_driver_register");
 	failures += expect_contains("lpf_led_config_driver.c", led_driver,
@@ -566,9 +597,17 @@ static int test_runtime_config_mapping_is_registered(void)
 	failures += expect_contains("lpf_led_config_driver.c", led_driver,
 				    "lpf_device_register");
 	failures += expect_contains("lpf_mcu_config_driver.c", mcu_driver,
-				    "lpf_config_hw_get_mcu");
+				    "lpf_config_device_node_t");
 	failures += expect_contains("lpf_led_config_driver.c", led_driver,
-				    "lpf_config_hw_get_led");
+				    "lpf_config_device_node_t");
+	failures += expect_not_contains("lpf_mcu_config_driver.c", mcu_driver,
+					"lpf_config_hw_get_mcu");
+	failures += expect_not_contains("lpf_led_config_driver.c", led_driver,
+					"lpf_config_hw_get_led");
+	failures += expect_not_contains("lpf_mcu_config_driver.c", mcu_driver,
+					"mcu_count");
+	failures += expect_not_contains("lpf_led_config_driver.c", led_driver,
+					"led_count");
 
 out:
 	free(led_driver);

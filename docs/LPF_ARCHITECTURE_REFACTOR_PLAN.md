@@ -39,6 +39,8 @@ In this model:
 - `lpf_runtime/config/` owns board-description loading and validation. Static C
   tables, product configuration, or a future Device Tree backend are different
   backends behind the same board-description model.
+- `backend=auto` tries custom static configuration first, then falls back to
+  Device Tree. Explicit backend selection is strict and does not fall back.
 - `configs` are treated as DTS-like board descriptions, not as runtime driver
   logic. They should describe what devices exist and carry typed payloads, while
   peripheral config drivers decide how to translate those payloads into LPF
@@ -97,14 +99,13 @@ parser, or driver-core internals.
    - Target-level verification still needs to confirm devtmpfs/udev ownership
      and read-only observability surfaces on product-like kernels.
 
-6. **Board config shape is still not node-oriented**
-   - The static platform config still exposes per-peripheral arrays such as MCU
-     and LED arrays.
-   - Runtime config drivers currently receive the whole platform config and
-     walk their own arrays.
-   - The next step should move toward a DTS-like configured-device node table:
-     runtime traverses nodes generically, dispatches by type or compatible, and
-     peripheral config drivers parse only the nodes they own.
+6. **Board config shape is still partially transitional**
+   - Fixed for runtime probing by introducing a generic configured-device node
+     table and making runtime traverse nodes instead of peripheral arrays.
+   - The static platform config still stores source data in per-peripheral
+     arrays such as MCU and LED arrays.
+   - A future cleanup can move static config authoring itself closer to a
+     first-class node table if that reduces duplication.
 
 ## Refactor Phases
 
@@ -193,22 +194,28 @@ Acceptance:
 
 ### Phase 7: Make Configs DTS-Like Device Descriptions
 
-- [ ] Introduce a generic readonly config device-node descriptor that carries
+- [x] Introduce a generic readonly config device-node descriptor that carries
       stable fields such as type, name, index, enabled/status, compatible
       string, typed payload pointer, and payload size.
-- [ ] Build or expose the active platform config as an ordered device-node
+- [x] Build or expose the active platform config as an ordered device-node
       table during `lpf_config_load()`.
-- [ ] Keep existing static C configs as the first backend, but make their data
+- [x] Keep existing static C configs as the first backend, but make their data
       consumable through the generic node table.
-- [ ] Change runtime config drivers to parse one matching node at a time rather
+- [x] Make auto backend selection try static config first and fall back to
+      Device Tree without exposing the source to runtime config drivers.
+- [x] Change runtime config drivers to parse one matching node at a time rather
       than receiving and scanning the whole platform config.
-- [ ] Make `lpf_runtime_probe_devices()` walk configured nodes generically and
+- [x] Make `lpf_runtime_probe_devices()` walk configured nodes generically and
       dispatch each node to a registered runtime config driver by type or
       compatible.
-- [ ] Keep MCU and LED payload structs module-owned or config-owned as needed,
+- [x] Keep MCU and LED payload structs module-owned or config-owned as needed,
       but prevent runtime core from knowing peripheral-specific arrays.
-- [ ] Add architecture tests that reject new central MCU/LED-style mapping in
+- [x] Add architecture tests that reject new central MCU/LED-style mapping in
       runtime core.
+- [ ] Decide whether static config authoring should move from per-peripheral
+      arrays to first-class node tables after target smoke validation.
+- [ ] Add compatible-string dispatch when multiple drivers need to bind the
+      same LPF config device type.
 
 Acceptance:
 - Adding a new peripheral requires adding its config type/payload, config

@@ -31,33 +31,25 @@ static int32_t lpf_mcu_make_device_config(
 	return OSAL_SUCCESS;
 }
 
-static int32_t lpf_mcu_probe_config(const lpf_config_platform_config_t *platform)
+static int32_t lpf_mcu_probe_config(const lpf_config_device_node_t *node)
 {
-	uint32_t i;
+	const lpf_config_mcu_entry_t *entry;
+	lpf_device_config_t config;
+	int32_t ret;
 
-	if (!platform)
+	if (!node || node->device_type != LPF_CONFIG_DEVICE_TYPE_MCU)
 		return OSAL_ERR_INVALID_PARAM;
 
-	for (i = 0; i < platform->mcu_count; i++) {
-		const lpf_config_mcu_entry_t *entry;
-		lpf_device_config_t config;
-		int32_t ret;
+	entry = (const lpf_config_mcu_entry_t *)node->payload;
+	if (!entry || !entry->enabled)
+		return OSAL_SUCCESS;
 
-		entry = lpf_config_hw_get_mcu(platform, i);
-		if (!entry || !entry->enabled)
-			continue;
+	osal_memset(&config, 0, sizeof(config));
+	ret = lpf_mcu_make_device_config(entry, node->index, &config);
+	if (ret != OSAL_SUCCESS)
+		return ret;
 
-		osal_memset(&config, 0, sizeof(config));
-		ret = lpf_mcu_make_device_config(entry, i, &config);
-		if (ret != OSAL_SUCCESS)
-			return ret;
-
-		ret = lpf_device_register(&config);
-		if (ret != OSAL_SUCCESS)
-			return ret;
-	}
-
-	return OSAL_SUCCESS;
+	return lpf_device_register(&config);
 }
 
 lpf_runtime_config_driver_register(mcu, LPF_CONFIG_DEVICE_TYPE_MCU,

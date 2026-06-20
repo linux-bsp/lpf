@@ -18,7 +18,10 @@ typedef struct {
 			uint32_t *count);
 } lpf_config_backend_ops_t;
 
+bool lpf_config_backend_is_auto(void);
 const lpf_config_backend_ops_t *lpf_config_backend_select(void);
+const lpf_config_backend_ops_t *lpf_config_backend_at(uint32_t index);
+uint32_t lpf_config_backend_count(void);
 
 extern const lpf_config_backend_ops_t g_lpf_config_dt_backend;
 extern const lpf_config_backend_ops_t g_lpf_config_static_backend;

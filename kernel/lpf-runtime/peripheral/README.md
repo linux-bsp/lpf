@@ -123,13 +123,14 @@ peripheral entry section, and initializes each entry. Feature objects such as
 MCU, LED, or runtime selftests are selected with Kbuild `obj-$(CONFIG_...)`; if
 an object is not linked, its section entry is absent and the runtime has no
 feature-specific branch to maintain. The runtime then loads runtime config,
-maps each enabled normalized runtime config device entry into an
-`lpf_device_config_t`, and registers it with LPF Core. If entry initialization
-fails, already initialized entries and LPF HW are unwound. If configured-device
-probing fails, already registered devices are unregistered before config and HW
-cleanup. LPF Core then binds the configured device to the matching service
-`probe`. On unload, LPF Core removes devices before driver global resources are
-released.
+walks enabled configured-device nodes, and dispatches each node to the matching
+peripheral config driver. That config driver parses its typed node payload,
+creates an `lpf_device_config_t`, and registers it with LPF Core. If entry
+initialization fails, already initialized entries and LPF HW are unwound. If
+configured-device probing fails, already registered devices are unregistered
+before config and HW cleanup. LPF Core then binds the configured device to the
+matching service `probe`. On unload, LPF Core removes devices before driver
+global resources are released.
 
 Each LPF peripheral instance exposes its own character device, such as
 `/dev/lpf/mcu0`, and each PDI peripheral API uses the matching UAPI ioctl

@@ -127,10 +127,11 @@ vendor BSP APIs directly.
 
 LPF runtime config owns kernel-side platform hardware configuration
 aggregation. It selects a backend, validates the active platform, and exposes
-enabled device entries in one normalized list. Backend selection is controlled
-by the `backend` module parameter on `lpf_runtime.ko`: `auto` tries
-Device Tree first and falls back to the built-in static table, while `dt` and
-`static` require a specific backend. The source still uses transitional
+enabled configured-device nodes in one normalized list. Backend selection is
+controlled by the `backend` module parameter on `lpf_runtime.ko`: `auto` tries
+the built-in static table first and falls back to Device Tree, while `static`
+and `dt` require a specific backend and do not fall back. The source still uses
+transitional
 `lpf_config_*` names, but the code is linked into the LPF runtime
 instead of a standalone config module. Future board-profile or product-selection
 backends should produce the same runtime config model before LPF peripheral

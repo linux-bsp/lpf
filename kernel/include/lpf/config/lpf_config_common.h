@@ -24,11 +24,23 @@ typedef enum {
 	LPF_CONFIG_DEVICE_TYPE_LED = 0x02,
 } lpf_config_device_type_t;
 
+typedef enum {
+	LPF_CONFIG_NODE_STATUS_DISABLED = 0,
+	LPF_CONFIG_NODE_STATUS_OKAY = 1,
+} lpf_config_node_status_t;
+
 typedef struct {
 	lpf_config_device_type_t device_type;
 	uint32_t index;
+	const char *name;
+	const char *compatible;
+	lpf_config_node_status_t status;
+	const void *payload;
 	const void *entry;
-} lpf_config_device_config_t;
+	uint32_t payload_size;
+} lpf_config_device_node_t;
+
+typedef lpf_config_device_node_t lpf_config_device_config_t;
 
 /*===========================================================================
  * GPIO配置（LPF_CONFIG 层扩展）

@@ -109,6 +109,20 @@ static int test_static_and_dt_equivalent_normalize_same(void)
 		return 20;
 	if (dt_devices[dt_count].device_type != LPF_CONFIG_DEVICE_TYPE_INVALID)
 		return 21;
+	if (static_devices[0].status != LPF_CONFIG_NODE_STATUS_OKAY ||
+	    test_lpf_config_string_equal(static_devices[0].name, "mcu0") ||
+	    test_lpf_config_string_equal(static_devices[0].compatible,
+					 "lpf,mcu") ||
+	    static_devices[0].payload != static_devices[0].entry ||
+	    static_devices[0].payload_size != sizeof(lpf_config_mcu_entry_t))
+		return 22;
+	if (static_devices[1].status != LPF_CONFIG_NODE_STATUS_OKAY ||
+	    test_lpf_config_string_equal(static_devices[1].name, "status") ||
+	    test_lpf_config_string_equal(static_devices[1].compatible,
+					 "lpf,led") ||
+	    static_devices[1].payload != static_devices[1].entry ||
+	    static_devices[1].payload_size != sizeof(lpf_config_led_entry_t))
+		return 23;
 
 	return 0;
 }
