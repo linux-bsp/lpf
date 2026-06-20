@@ -23,9 +23,33 @@ static uint32_t lpf_mcu_file_index(struct file *file)
 	return lpf_chrdev_index(chrdev);
 }
 
-static void lpf_mcu_record_file_error(struct file *file, long ret)
+static bool lpf_mcu_ioctl_is_runtime_cmd(unsigned int cmd)
 {
-	if (lpf_errno_is_runtime_error(ret))
+	switch (cmd) {
+	case LPF_MCU_IOC_GET_VERSION:
+	case LPF_MCU_IOC_GET_STATUS:
+	case LPF_MCU_IOC_RESET:
+	case LPF_MCU_IOC_COMMAND:
+	case LPF_MCU_IOC_READ_DATA:
+	case LPF_MCU_IOC_WRITE_DATA:
+		return true;
+	default:
+		return false;
+	}
+}
+
+static void lpf_mcu_record_file_result(struct file *file, unsigned int cmd,
+				       long ret)
+{
+	if (!lpf_mcu_ioctl_is_runtime_cmd(cmd))
+		return;
+
+	if (cmd == LPF_MCU_IOC_GET_STATUS && ret == 0)
+		return;
+
+	if (ret == 0)
+		lpf_chrdev_record_recovery(lpf_mcu_chrdev_from_file(file));
+	else if (lpf_errno_is_runtime_error(ret))
 		lpf_chrdev_record_error(lpf_mcu_chrdev_from_file(file), (int)ret);
 }
 
@@ -139,6 +163,7 @@ static long lpf_mcu_ioctl_get_status(struct file *file, unsigned long arg)
 	request.temperature_milli_celsius = status.temperature_milli_celsius;
 	request.voltage_mv = status.voltage_mv;
 	request.timestamp_us = status.timestamp_us;
+	lpf_mcu_chrdev_record_status(request.index, &status);
 
 	ret = osal_copy_to_user((void __user *)arg, &request,
 				sizeof(request));
@@ -295,7 +320,7 @@ static long lpf_mcu_ioctl(struct file *file, unsigned int cmd,
 		break;
 	}
 
-	lpf_mcu_record_file_error(file, ret);
+	lpf_mcu_record_file_result(file, cmd, ret);
 	return ret;
 }
 
@@ -386,4 +411,33 @@ void lpf_mcu_chrdev_record_error(uint32_t index, int error)
 		return;
 
 	lpf_chrdev_record_error(&g_lpf_mcu_chrdevs[index], error);
+}
+
+void lpf_mcu_chrdev_record_recovery(uint32_t index)
+{
+	if (index >= OSAL_ARRAY_SIZE(g_lpf_mcu_chrdevs))
+		return;
+
+	lpf_chrdev_record_recovery(&g_lpf_mcu_chrdevs[index]);
+}
+
+void lpf_mcu_chrdev_record_status(uint32_t index,
+				  const lpf_mcu_status_t *status)
+{
+	if (!status)
+		return;
+	if (index >= OSAL_ARRAY_SIZE(g_lpf_mcu_chrdevs))
+		return;
+
+	if (!status->online || status->state == LPF_MCU_STATE_OFFLINE) {
+		lpf_chrdev_record_error(&g_lpf_mcu_chrdevs[index], -ENODEV);
+		return;
+	}
+
+	if (status->state == LPF_MCU_STATE_ERROR) {
+		lpf_chrdev_record_error(&g_lpf_mcu_chrdevs[index], -EIO);
+		return;
+	}
+
+	lpf_chrdev_record_recovery(&g_lpf_mcu_chrdevs[index]);
 }

@@ -125,12 +125,14 @@ Current status:
   event notification for register, bind, state, error, remove start, and remove
   completion. Runtime errors recorded through LPF instance character devices
   now move the Core device state to `ERROR` and update discovery snapshots from
-  the same Core state.
+  the same Core state. Successful instance runtime operations recover devices
+  from `ERROR` to `BOUND` while preserving `last_error` and `error_count` as
+  history.
 - Started runtime integration. LPF instance character devices acquire an LPF
   active device handle on open and release it on close, so LPF Core removal
   waits for active instance users before invoking peripheral `remove`.
-- Remaining work: define the final userspace event delivery model and deepen
-  the state/recovery model used by peripheral services.
+- Remaining work: define the final userspace event delivery model and extend
+  service-specific health mapping as new peripherals are introduced.
 
 ## Phase 3: Kernel Compat Layer
 
@@ -515,7 +517,9 @@ Current status:
   Core `state`, `last_error`, and `error_count`; instance sysfs refreshes these
   attributes from the same Core snapshot used by discovery. Caller-side ABI
   errors such as invalid commands or malformed arguments remain syscall
-  failures and do not mark instance runtime health.
+  failures and do not mark instance runtime health. Successful runtime
+  operations recover an instance from `ERROR` to `BOUND`; MCU status queries
+  also map reported `OFFLINE` and `ERROR` states into Core runtime health.
 - Started. Legacy local character-device, sysfs, and debugfs helper
   implementations have been extracted into LPF infrastructure under
   `kernel/lpf/core/` and are linked into `lpf_core.ko` as `lpf_chrdev`,

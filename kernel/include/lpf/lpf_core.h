@@ -57,6 +57,7 @@ int32_t lpf_device_set_state(lpf_device_type_t type, uint32_t index,
 			     lpf_device_state_t state, int32_t status);
 void lpf_device_record_error(lpf_device_type_t type, uint32_t index,
 			     int32_t error);
+int32_t lpf_device_record_recovery(lpf_device_type_t type, uint32_t index);
 int32_t lpf_device_event_subscribe(lpf_device_event_callback_t callback,
 				   void *user_data);
 void lpf_device_event_unsubscribe(lpf_device_event_callback_t callback,

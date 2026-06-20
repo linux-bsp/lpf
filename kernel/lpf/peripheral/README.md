@@ -134,7 +134,10 @@ Instance character devices expose read-only sysfs attributes for inspection:
 `state`, `last_error`, and `error_count` are updated from runtime ioctl and
 debugfs operation failures for the specific instance through LPF Core. Caller
 ABI failures such as unsupported commands or malformed arguments are returned to
-the caller and are not treated as peripheral runtime health changes.
+the caller and are not treated as peripheral runtime health changes. Successful
+runtime operations recover an instance from `ERROR` to `BOUND`; `last_error`
+and `error_count` remain as historical diagnostics. MCU status queries also map
+reported `OFFLINE` and `ERROR` MCU states into LPF Core runtime health.
 
 MCU and LED service implementations live under `kernel/lpf/peripheral/`.
 They are registered through the LPF peripheral runtime while the framework

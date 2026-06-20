@@ -323,6 +323,32 @@ void lpf_chrdev_record_error(lpf_chrdev_t *chrdev, int error)
 }
 EXPORT_SYMBOL_GPL(lpf_chrdev_record_error);
 
+void lpf_chrdev_record_recovery(lpf_chrdev_t *chrdev)
+{
+	lpf_device_type_t type;
+	uint32_t index;
+
+	if (!chrdev)
+		return;
+	if (!chrdev->registered)
+		return;
+
+	osal_mutex_lock(&chrdev->lock);
+	type = chrdev->info.type;
+	index = chrdev->info.index;
+	osal_mutex_unlock(&chrdev->lock);
+
+	if (type == LPF_DEVICE_TYPE_INVALID)
+		return;
+
+	if (lpf_device_record_recovery(type, index) == OSAL_SUCCESS) {
+		osal_mutex_lock(&chrdev->lock);
+		(void)lpf_chrdev_refresh_info_locked(chrdev);
+		osal_mutex_unlock(&chrdev->lock);
+	}
+}
+EXPORT_SYMBOL_GPL(lpf_chrdev_record_recovery);
+
 uint32_t lpf_chrdev_index(const lpf_chrdev_t *chrdev)
 {
 	if (!chrdev)

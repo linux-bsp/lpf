@@ -38,6 +38,9 @@ void lpf_mcu_chrdev_unregister(void);
 int lpf_mcu_chrdev_register_device(const lpf_device_t *device);
 void lpf_mcu_chrdev_unregister_device(const lpf_device_t *device);
 void lpf_mcu_chrdev_record_error(uint32_t index, int error);
+void lpf_mcu_chrdev_record_recovery(uint32_t index);
+void lpf_mcu_chrdev_record_status(uint32_t index,
+				  const lpf_mcu_status_t *status);
 int lpf_mcu_proc_register(void);
 void lpf_mcu_proc_unregister(void);
 int lpf_mcu_debugfs_register(void);

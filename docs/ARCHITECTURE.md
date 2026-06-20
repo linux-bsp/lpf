@@ -258,6 +258,9 @@ coverage together so the ABI and build configuration remain consistent.
   inspection data, including runtime `state`, `last_error`, and `error_count`.
 - LPF discovery snapshots report the same runtime `state`, `last_error`, and
   `error_count` values for management clients.
+- Runtime operation failures mark the instance `ERROR`; later successful
+  runtime operations recover it to `BOUND` while keeping `last_error` and
+  `error_count` as historical diagnostics.
 - Caller-side ABI errors such as malformed arguments or unsupported ioctl
   commands are returned to the caller without marking peripheral runtime
   health.

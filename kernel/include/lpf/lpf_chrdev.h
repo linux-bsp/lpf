@@ -43,6 +43,7 @@ int lpf_chrdev_get_info(lpf_chrdev_t *chrdev, lpf_device_info_t *info);
 uint32_t lpf_chrdev_open_count(const lpf_chrdev_t *chrdev);
 uint32_t lpf_chrdev_error_count(const lpf_chrdev_t *chrdev);
 void lpf_chrdev_record_error(lpf_chrdev_t *chrdev, int error);
+void lpf_chrdev_record_recovery(lpf_chrdev_t *chrdev);
 uint32_t lpf_chrdev_index(const lpf_chrdev_t *chrdev);
 
 #endif /* LPF_CHRDEV_H */

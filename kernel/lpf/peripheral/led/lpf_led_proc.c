@@ -182,7 +182,9 @@ static int lpf_led_proc_write(char *command, size_t count, void *data)
 	ret = -EINVAL;
 
 out:
-	if (lpf_errno_is_runtime_error(ret))
+	if (ret == 0)
+		lpf_led_chrdev_record_recovery(index);
+	else if (lpf_errno_is_runtime_error(ret))
 		lpf_led_chrdev_record_error(index, ret);
 	return ret;
 }

@@ -23,9 +23,28 @@ static uint32_t lpf_led_file_index(struct file *file)
 	return lpf_chrdev_index(chrdev);
 }
 
-static void lpf_led_record_file_error(struct file *file, long ret)
+static bool lpf_led_ioctl_is_runtime_cmd(unsigned int cmd)
 {
-	if (lpf_errno_is_runtime_error(ret))
+	switch (cmd) {
+	case LPF_LED_IOC_GET_STATE:
+	case LPF_LED_IOC_SET_BRIGHTNESS:
+	case LPF_LED_IOC_ENABLE:
+	case LPF_LED_IOC_DISABLE:
+		return true;
+	default:
+		return false;
+	}
+}
+
+static void lpf_led_record_file_result(struct file *file, unsigned int cmd,
+				       long ret)
+{
+	if (!lpf_led_ioctl_is_runtime_cmd(cmd))
+		return;
+
+	if (ret == 0)
+		lpf_chrdev_record_recovery(lpf_led_chrdev_from_file(file));
+	else if (lpf_errno_is_runtime_error(ret))
 		lpf_chrdev_record_error(lpf_led_chrdev_from_file(file), (int)ret);
 }
 
@@ -192,7 +211,7 @@ static long lpf_led_ioctl(struct file *file, unsigned int cmd,
 		break;
 	}
 
-	lpf_led_record_file_error(file, ret);
+	lpf_led_record_file_result(file, cmd, ret);
 	return ret;
 }
 
@@ -283,4 +302,12 @@ void lpf_led_chrdev_record_error(uint32_t index, int error)
 		return;
 
 	lpf_chrdev_record_error(&g_lpf_led_chrdevs[index], error);
+}
+
+void lpf_led_chrdev_record_recovery(uint32_t index)
+{
+	if (index >= OSAL_ARRAY_SIZE(g_lpf_led_chrdevs))
+		return;
+
+	lpf_chrdev_record_recovery(&g_lpf_led_chrdevs[index]);
 }

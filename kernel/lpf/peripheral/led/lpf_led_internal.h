@@ -32,6 +32,7 @@ void lpf_led_chrdev_unregister(void);
 int lpf_led_chrdev_register_device(const lpf_device_t *device);
 void lpf_led_chrdev_unregister_device(const lpf_device_t *device);
 void lpf_led_chrdev_record_error(uint32_t index, int error);
+void lpf_led_chrdev_record_recovery(uint32_t index);
 int lpf_led_proc_register(void);
 void lpf_led_proc_unregister(void);
 int lpf_led_debugfs_register(void);

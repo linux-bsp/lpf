@@ -935,6 +935,40 @@ void lpf_device_record_error(lpf_device_type_t type, uint32_t index,
 }
 EXPORT_SYMBOL_GPL(lpf_device_record_error);
 
+int32_t lpf_device_record_recovery(lpf_device_type_t type, uint32_t index)
+{
+	lpf_device_node_t *device_node;
+	lpf_device_event_t event;
+	bool emit_event = false;
+
+	if (type == LPF_DEVICE_TYPE_INVALID)
+		return OSAL_ERR_INVALID_PARAM;
+	if (!g_lpf_core_ready)
+		return OSAL_ERR_INVALID_STATE;
+
+	osal_mutex_lock(&g_lpf_core_lock);
+	device_node = lpf_find_device_node_locked(type, index);
+	if (!device_node) {
+		osal_mutex_unlock(&g_lpf_core_lock);
+		return OSAL_ERR_NAME_NOT_FOUND;
+	}
+
+	if (device_node->device.state == LPF_DEVICE_STATE_ERROR) {
+		device_node->device.state = LPF_DEVICE_STATE_BOUND;
+		lpf_make_device_event(&device_node->device,
+				      LPF_DEVICE_EVENT_STATE_CHANGED,
+				      OSAL_SUCCESS, &event);
+		emit_event = true;
+	}
+	osal_mutex_unlock(&g_lpf_core_lock);
+
+	if (emit_event)
+		lpf_emit_device_event(&event);
+
+	return OSAL_SUCCESS;
+}
+EXPORT_SYMBOL_GPL(lpf_device_record_recovery);
+
 int32_t lpf_device_event_subscribe(lpf_device_event_callback_t callback,
 				   void *user_data)
 {

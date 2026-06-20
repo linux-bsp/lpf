@@ -174,6 +174,7 @@ static int lpf_mcu_proc_do_status(lpf_mcu_handle_t handle, uint32_t index)
 		 status.uptime_sec, status.error_code,
 		 status.temperature_milli_celsius, status.voltage_mv,
 		 (unsigned long long)status.timestamp_us);
+	lpf_mcu_chrdev_record_status(index, &status);
 	return 0;
 }
 
@@ -273,6 +274,7 @@ static int lpf_mcu_proc_write(char *command, size_t count, void *data)
 	uint32_t index;
 	uint32_t value;
 	uint32_t size;
+	bool recover_on_success = false;
 	int ret;
 
 	(void)count;
@@ -293,6 +295,7 @@ static int lpf_mcu_proc_write(char *command, size_t count, void *data)
 	}
 
 	if (!strcmp(op, "version")) {
+		recover_on_success = true;
 		ret = lpf_mcu_proc_do_version(handle, index);
 		goto out;
 	}
@@ -303,6 +306,7 @@ static int lpf_mcu_proc_write(char *command, size_t count, void *data)
 	}
 
 	if (!strcmp(op, "reset")) {
+		recover_on_success = true;
 		ret = lpf_mcu_proc_do_reset(handle, index);
 		goto out;
 	}
@@ -311,6 +315,7 @@ static int lpf_mcu_proc_write(char *command, size_t count, void *data)
 		ret = lpf_mcu_proc_parse_u32(&cursor, &value);
 		if (ret)
 			goto out;
+		recover_on_success = true;
 		ret = lpf_mcu_proc_do_cmd(handle, index, value, &cursor);
 		goto out;
 	}
@@ -322,6 +327,7 @@ static int lpf_mcu_proc_write(char *command, size_t count, void *data)
 		ret = lpf_mcu_proc_parse_u32(&cursor, &size);
 		if (ret)
 			goto out;
+		recover_on_success = true;
 		ret = lpf_mcu_proc_do_read(handle, index, value, size);
 		goto out;
 	}
@@ -330,6 +336,7 @@ static int lpf_mcu_proc_write(char *command, size_t count, void *data)
 		ret = lpf_mcu_proc_parse_u32(&cursor, &value);
 		if (ret)
 			goto out;
+		recover_on_success = true;
 		ret = lpf_mcu_proc_do_write(handle, index, value, &cursor);
 		goto out;
 	}
@@ -337,7 +344,9 @@ static int lpf_mcu_proc_write(char *command, size_t count, void *data)
 	ret = -EINVAL;
 
 out:
-	if (lpf_errno_is_runtime_error(ret))
+	if (ret == 0 && recover_on_success)
+		lpf_mcu_chrdev_record_recovery(index);
+	else if (lpf_errno_is_runtime_error(ret))
 		lpf_mcu_chrdev_record_error(index, ret);
 	return ret;
 }
