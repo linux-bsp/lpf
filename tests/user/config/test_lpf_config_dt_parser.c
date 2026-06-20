@@ -9,7 +9,7 @@
 #include <string.h>
 
 extern const lpf_config_platform_config_t
-	g_lpf_config_kernel_x86_mock_modules_1_0_0;
+	g_lpf_config_kernel_x86_mock_modules_v1;
 
 typedef enum {
 	FAKE_DT_PROP_STRING,
@@ -257,7 +257,7 @@ static int test_fake_dt_parser_matches_mock_static_config(void)
 	}
 
 	if (test_lpf_config_normalize_platform(
-		    &g_lpf_config_kernel_x86_mock_modules_1_0_0, static_devices,
+		    &g_lpf_config_kernel_x86_mock_modules_v1, static_devices,
 		    &static_count) != OSAL_SUCCESS) {
 		ret = 4;
 		goto out_clear;

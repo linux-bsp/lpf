@@ -2,7 +2,7 @@ add_executable(lpf_config_normalizer_test
     test_lpf_config_normalizer.c
     test_lpf_config_compare.c
     "${SDK_PATH}/kernel/lpf-runtime/config/src/lpf_config_normalizer.c"
-    "${SDK_PATH}/kernel/lpf-runtime/config/configs/kernel/x86_mock_modules/1.0.0/lpf_config_kernel_x86_mock_modules.c"
+    "${SDK_PATH}/kernel/lpf-runtime/config/configs/kernel/x86_mock_modules/lpf_config_kernel_x86_mock_modules_v1.c"
 )
 
 target_include_directories(lpf_config_normalizer_test PRIVATE
@@ -19,7 +19,7 @@ add_executable(lpf_config_dt_parser_test
     test_lpf_config_compare.c
     "${SDK_PATH}/kernel/lpf-runtime/config/src/lpf_config_dt_parser.c"
     "${SDK_PATH}/kernel/lpf-runtime/config/src/lpf_config_normalizer.c"
-    "${SDK_PATH}/kernel/lpf-runtime/config/configs/kernel/x86_mock_modules/1.0.0/lpf_config_kernel_x86_mock_modules.c"
+    "${SDK_PATH}/kernel/lpf-runtime/config/configs/kernel/x86_mock_modules/lpf_config_kernel_x86_mock_modules_v1.c"
     "${SDK_PATH}/user/osal/src/lib/osal_string.c"
 )
 

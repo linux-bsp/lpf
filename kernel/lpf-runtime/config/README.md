@@ -81,8 +81,11 @@ extern const lpf_config_platform_table_t g_lpf_config_platform_table;
 Concrete configs live under:
 
 ```text
-configs/<product>/<project>/<version>/
+configs/<product>/<project>/lpf_config_<product>_<project>_vN.c
 ```
+
+Configuration version identity remains in the table data (`.version`); source
+paths should not add a separate version-number directory.
 
 The Device Tree backend looks for `/lpf`,
 `lpf,linux-peripheral-framework`, `linux-peripheral-framework`, or

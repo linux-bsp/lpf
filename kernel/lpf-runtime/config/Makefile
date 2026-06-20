@@ -8,5 +8,5 @@ lpf_runtime-y += lpf-runtime/config/src/lpf_config_static_backend.o
 lpf_runtime-y += lpf-runtime/config/src/lpf_config_normalizer.o
 lpf_runtime-y += lpf-runtime/config/src/lpf_config_validator.o
 lpf_runtime-y += lpf-runtime/config/configs/lpf_config_configs.o
-lpf_runtime-y += lpf-runtime/config/configs/kernel/x86_modules/1.0.0/lpf_config_kernel_x86_modules.o
-lpf_runtime-y += lpf-runtime/config/configs/kernel/x86_mock_modules/1.0.0/lpf_config_kernel_x86_mock_modules.o
+lpf_runtime-y += lpf-runtime/config/configs/kernel/x86_modules/lpf_config_kernel_x86_modules_v1.o
+lpf_runtime-y += lpf-runtime/config/configs/kernel/x86_mock_modules/lpf_config_kernel_x86_mock_modules_v1.o

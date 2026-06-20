@@ -5,7 +5,7 @@
 #include "test_lpf_config_compare.h"
 
 extern const lpf_config_platform_config_t
-	g_lpf_config_kernel_x86_mock_modules_1_0_0;
+	g_lpf_config_kernel_x86_mock_modules_v1;
 
 static const lpf_config_mcu_entry_t g_dt_equivalent_mcus[] = {
 	{
@@ -87,7 +87,7 @@ static int test_static_and_dt_equivalent_normalize_same(void)
 	uint32_t i;
 
 	if (test_lpf_config_normalize_platform(
-		    &g_lpf_config_kernel_x86_mock_modules_1_0_0, static_devices,
+		    &g_lpf_config_kernel_x86_mock_modules_v1, static_devices,
 		    &static_count) != OSAL_SUCCESS)
 		return 1;
 	if (test_lpf_config_normalize_platform(&g_dt_equivalent_platform,
@@ -186,7 +186,7 @@ static int test_count_only_reports_enabled_devices(void)
 	uint32_t count = 0;
 
 	if (lpf_config_normalize_devices(
-		    &g_lpf_config_kernel_x86_mock_modules_1_0_0, NULL,
+		    &g_lpf_config_kernel_x86_mock_modules_v1, NULL,
 		    &count) != OSAL_SUCCESS)
 		return 201;
 
@@ -199,7 +199,7 @@ static int test_exact_capacity_requires_sentinel_slot(void)
 	uint32_t count = OSAL_ARRAY_SIZE(devices);
 
 	if (lpf_config_normalize_devices(
-		    &g_lpf_config_kernel_x86_mock_modules_1_0_0, devices,
+		    &g_lpf_config_kernel_x86_mock_modules_v1, devices,
 		    &count) != OSAL_ERR_RESOURCE_LIMIT)
 		return 301;
 	if (count != 3U)

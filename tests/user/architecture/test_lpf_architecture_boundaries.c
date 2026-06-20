@@ -327,6 +327,38 @@ out:
 	return failures ? 1 : 0;
 }
 
+static int test_static_config_sources_are_version_named(void)
+{
+	char *config_makefile;
+	int failures = 0;
+
+	config_makefile = read_source_file("kernel/lpf-runtime/config/Makefile");
+	if (!config_makefile) {
+		fprintf(stderr, "failed to read config Makefile\n");
+		return 1;
+	}
+
+	failures += expect_path_absent(
+		"kernel/lpf-runtime/config/configs/kernel/x86_modules/1.0.0");
+	failures += expect_path_absent(
+		"kernel/lpf-runtime/config/configs/kernel/x86_mock_modules/1.0.0");
+	failures += expect_path_present(
+		"kernel/lpf-runtime/config/configs/kernel/x86_modules/lpf_config_kernel_x86_modules_v1.c");
+	failures += expect_path_present(
+		"kernel/lpf-runtime/config/configs/kernel/x86_mock_modules/lpf_config_kernel_x86_mock_modules_v1.c");
+	failures += expect_contains(
+		"config/Makefile", config_makefile,
+		"lpf-runtime/config/configs/kernel/x86_modules/lpf_config_kernel_x86_modules_v1.o");
+	failures += expect_contains(
+		"config/Makefile", config_makefile,
+		"lpf-runtime/config/configs/kernel/x86_mock_modules/lpf_config_kernel_x86_mock_modules_v1.o");
+	failures += expect_not_contains("config/Makefile", config_makefile,
+					"/1.0.0/");
+
+	free(config_makefile);
+	return failures ? 1 : 0;
+}
+
 static int test_peripheral_layer_dependencies(void)
 {
 	static const source_file_t files[] = {
@@ -636,6 +668,7 @@ int main(void)
 	ret += test_service_context_registries();
 	ret += test_mcu_transport_is_service_owned();
 	ret += test_hw_sources_are_capability_grouped();
+	ret += test_static_config_sources_are_version_named();
 	ret += test_peripheral_layer_dependencies();
 	ret += test_uapi_headers_are_abi_only();
 	ret += test_soc_adapter_header_dependencies();

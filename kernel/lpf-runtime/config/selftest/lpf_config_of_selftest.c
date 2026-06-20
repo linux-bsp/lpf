@@ -7,7 +7,7 @@
 #include "lpf_config_normalizer.h"
 
 extern const lpf_config_platform_config_t
-	g_lpf_config_kernel_x86_mock_modules_1_0_0;
+	g_lpf_config_kernel_x86_mock_modules_v1;
 
 #define LPF_CONFIG_OF_SELFTEST_DEVICE_CAPACITY 8U
 
@@ -273,7 +273,7 @@ static int32_t lpf_config_of_selftest_compare_to_static(
 	int32_t ret;
 
 	ret = lpf_config_of_selftest_normalize(
-		&g_lpf_config_kernel_x86_mock_modules_1_0_0, static_devices,
+		&g_lpf_config_kernel_x86_mock_modules_v1, static_devices,
 		&static_count);
 	if (ret != OSAL_SUCCESS)
 		return ret;

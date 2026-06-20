@@ -63,7 +63,7 @@ static const lpf_config_led_entry_t
 	};
 
 const lpf_config_platform_config_t
-	g_lpf_config_kernel_x86_mock_modules_1_0_0 = {
+	g_lpf_config_kernel_x86_mock_modules_v1 = {
 		.platform_name = "linux",
 		.chip_name = "x86_64",
 		.project_name = "x86_mock_modules",
