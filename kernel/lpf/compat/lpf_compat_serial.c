@@ -11,7 +11,7 @@
 #include <linux/tty_ldisc.h>
 #include <linux/wait.h>
 
-#include "lpf/lpf_compat_serial.h"
+#include "lpf/compat/lpf_compat_serial.h"
 
 typedef struct {
 	struct file *file;

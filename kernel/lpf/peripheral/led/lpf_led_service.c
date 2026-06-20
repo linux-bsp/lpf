@@ -3,7 +3,7 @@
 #include "osal.h"
 #include "lpf_config.h"
 #include "lpf/lpf_driver.h"
-#include "lpf/lpf_hw.h"
+#include "lpf/hw/lpf_hw.h"
 #include "lpf_led_internal.h"
 
 typedef struct lpf_led_context {

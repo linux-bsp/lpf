@@ -3,7 +3,7 @@
 #include <linux/module.h>
 
 #include "osal.h"
-#include "lpf/lpf_hw_gpio.h"
+#include "lpf/hw/lpf_hw_gpio.h"
 #include "lpf_hw_internal.h"
 #include "lpf/lpf_soc_adapter.h"
 

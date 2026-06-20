@@ -3,7 +3,7 @@
 #ifndef LPF_HW_TRANSPORT_CAN_H
 #define LPF_HW_TRANSPORT_CAN_H
 
-#include "lpf/lpf_hw_types.h"
+#include "lpf/hw/lpf_hw_types.h"
 
 int32_t lpf_hw_transport_can_init(
 	const lpf_can_config_t *config,

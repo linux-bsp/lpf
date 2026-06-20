@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-2.0
 
-#include "lpf/lpf_compat_can.h"
-#include "lpf/lpf_compat_gpio.h"
-#include "lpf/lpf_compat_i2c.h"
-#include "lpf/lpf_compat_pwm.h"
-#include "lpf/lpf_compat_serial.h"
-#include "lpf/lpf_compat_spi.h"
+#include "lpf/compat/lpf_compat_can.h"
+#include "lpf/compat/lpf_compat_gpio.h"
+#include "lpf/compat/lpf_compat_i2c.h"
+#include "lpf/compat/lpf_compat_pwm.h"
+#include "lpf/compat/lpf_compat_serial.h"
+#include "lpf/compat/lpf_compat_spi.h"
 #include "lpf/lpf_soc_adapter.h"
 
 const lpf_soc_adapter_t g_lpf_soc_generic_linux_adapter = {

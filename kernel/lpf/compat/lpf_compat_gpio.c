@@ -5,8 +5,8 @@
 #include <linux/irq.h>
 #include <linux/module.h>
 
-#include "lpf/lpf_compat_errno.h"
-#include "lpf/lpf_compat_gpio.h"
+#include "lpf/compat/lpf_compat_errno.h"
+#include "lpf/compat/lpf_compat_gpio.h"
 
 typedef struct {
 	uint32_t gpio_num;

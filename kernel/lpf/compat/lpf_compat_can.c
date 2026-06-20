@@ -14,7 +14,7 @@
 #include <net/net_namespace.h>
 #include <net/sock.h>
 
-#include "lpf/lpf_compat_can.h"
+#include "lpf/compat/lpf_compat_can.h"
 
 typedef struct {
 	struct socket *sock;

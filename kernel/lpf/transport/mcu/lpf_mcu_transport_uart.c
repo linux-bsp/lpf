@@ -9,7 +9,7 @@
 
 #include "osal.h"
 #include "lpf_config.h"
-#include "lpf/lpf_hw_transport_uart.h"
+#include "lpf/hw/lpf_hw_transport_uart.h"
 #include "lpf/lpf_mcu_transport.h"
 
 /*===========================================================================

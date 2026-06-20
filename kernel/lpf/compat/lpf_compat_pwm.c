@@ -3,8 +3,8 @@
 #include <linux/module.h>
 #include <linux/pwm.h>
 
-#include "lpf/lpf_compat_errno.h"
-#include "lpf/lpf_compat_pwm.h"
+#include "lpf/compat/lpf_compat_errno.h"
+#include "lpf/compat/lpf_compat_pwm.h"
 
 static void lpf_compat_pwm_fill_state(const struct pwm_state *src,
 				      lpf_pwm_state_t *dst)

@@ -3,7 +3,7 @@
 #include <linux/module.h>
 
 #include "osal.h"
-#include "lpf/lpf_hw_bus_i2c.h"
+#include "lpf/hw/lpf_hw_bus_i2c.h"
 #include "lpf/lpf_soc_adapter.h"
 
 typedef struct {

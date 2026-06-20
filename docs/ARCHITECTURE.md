@@ -70,7 +70,8 @@ LPF HW is the framework-owned hardware access layer linked into
 `lpf_peripheral_runtime.ko`. It owns the kernel-side `lpf_hw_*` APIs consumed
 by LPF peripheral services and transports. Current support includes CAN, UART,
 GPIO, PWM, I2C, and SPI. LPF HW calls the LPF SoC Adapter instead of Linux
-subsystem or vendor BSP APIs directly.
+subsystem or vendor BSP APIs directly. Public kernel-internal LPF HW headers
+live under `kernel/include/lpf/hw/`.
 
 ### LPF Core
 
@@ -113,10 +114,11 @@ and LPF peripheral services.
 ### LPF Kernel Compat
 
 The compat layer wraps Linux kernel API details that may vary across kernel
-versions. GPIO, PWM, I2C, and SPI wrappers currently live under
-`kernel/lpf/compat/`, along with CAN and serial wrappers. Peripheral services
-and LPF HW business-facing APIs should not use `LINUX_VERSION_CODE` or vendor BSP
-APIs directly.
+versions. Public kernel-internal compat headers live under
+`kernel/include/lpf/compat/`. GPIO, PWM, I2C, and SPI wrappers currently live
+under `kernel/lpf/compat/`, along with CAN and serial wrappers. Peripheral
+services and LPF HW business-facing APIs should not use `LINUX_VERSION_CODE` or
+vendor BSP APIs directly.
 
 ### LPF Runtime Config
 
@@ -283,6 +285,6 @@ coverage together so the ABI and build configuration remain consistent.
 - LPF HW APIs should call LPF SoC Adapter APIs for SoC-backed hardware
   capabilities.
 - Kernel-version conditionals belong in `kernel/lpf/compat/` or
-  `kernel/include/lpf/lpf_compat_*` helper headers.
+  `kernel/include/lpf/compat/lpf_compat_*` helper headers.
 - Userspace code must use PDI/UAPI rather than including kernel-internal LPF HW,
   LPF_CONFIG, LPF Core, or LPF peripheral headers.

@@ -3,7 +3,7 @@
 #include <linux/module.h>
 
 #include "osal.h"
-#include "lpf/lpf_hw_transport_can.h"
+#include "lpf/hw/lpf_hw_transport_can.h"
 #include "lpf/lpf_soc_adapter.h"
 
 static void lpf_hw_transport_can_fill_lpf_config(const lpf_can_config_t *src,

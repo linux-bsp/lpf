@@ -3,7 +3,7 @@
 #ifndef LPF_SOC_ADAPTER_H
 #define LPF_SOC_ADAPTER_H
 
-#include "lpf/lpf_hw_types.h"
+#include "lpf/hw/lpf_hw_types.h"
 
 typedef struct {
 	int32_t (*request)(uint32_t gpio_num, const char *label);

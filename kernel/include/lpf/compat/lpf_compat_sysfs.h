@@ -3,7 +3,7 @@
 #ifndef LPF_COMPAT_SYSFS_H
 #define LPF_COMPAT_SYSFS_H
 
-#include "lpf/lpf_compat_features.h"
+#include "lpf/compat/lpf_compat_features.h"
 
 #include <linux/kernel.h>
 #include <linux/sysfs.h>

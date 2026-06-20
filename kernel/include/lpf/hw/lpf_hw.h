@@ -3,13 +3,13 @@
 #ifndef LPF_HW_H
 #define LPF_HW_H
 
-#include "lpf/lpf_hw_types.h"
-#include "lpf/lpf_hw_gpio.h"
-#include "lpf/lpf_hw_pwm.h"
-#include "lpf/lpf_hw_transport_can.h"
-#include "lpf/lpf_hw_transport_uart.h"
-#include "lpf/lpf_hw_bus_i2c.h"
-#include "lpf/lpf_hw_bus_spi.h"
+#include "lpf/hw/lpf_hw_types.h"
+#include "lpf/hw/lpf_hw_gpio.h"
+#include "lpf/hw/lpf_hw_pwm.h"
+#include "lpf/hw/lpf_hw_transport_can.h"
+#include "lpf/hw/lpf_hw_transport_uart.h"
+#include "lpf/hw/lpf_hw_bus_i2c.h"
+#include "lpf/hw/lpf_hw_bus_spi.h"
 
 #define LPF_HW_VERSION_MAJOR 0x01
 #define LPF_HW_VERSION_MINOR 0x00

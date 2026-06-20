@@ -3,7 +3,7 @@
 #include <linux/module.h>
 
 #include "osal.h"
-#include "lpf/lpf_hw.h"
+#include "lpf/hw/lpf_hw.h"
 #include "lpf_hw_internal.h"
 #include "generated/gen_version.h"
 

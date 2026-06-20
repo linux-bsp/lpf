@@ -5,7 +5,7 @@
 #include <linux/errno.h>
 #include <linux/fs.h>
 
-#include "lpf/lpf_compat_features.h"
+#include "lpf/compat/lpf_compat_features.h"
 
 #if !LPF_KERNEL_HAS_PROC_OPS
 #error "LPF procfs requires proc_ops; add a compat fallback before lowering the kernel baseline"

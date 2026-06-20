@@ -17,7 +17,7 @@ implemented in LPF compat wrappers before the product enables that target.
 
 ## Rules
 
-- Linux version and feature checks belong in `kernel/include/lpf/lpf_compat_*`
+- Linux version and feature checks belong in `kernel/include/lpf/compat/lpf_compat_*`
   headers or `kernel/lpf/compat/` source files.
 - Peripheral services, LPF HW, transports, runtime config, and LPF Core business
   logic must not add direct `LINUX_VERSION_CODE` checks.
@@ -30,13 +30,13 @@ implemented in LPF compat wrappers before the product enables that target.
 
 ## Current Feature Gates
 
-`kernel/include/lpf/lpf_compat_features.h` defines the supported kernel baseline
+`kernel/include/lpf/compat/lpf_compat_features.h` defines the supported kernel baseline
 and currently detected feature gates:
 
 - `LPF_KERNEL_HAS_PROC_OPS`
 - `LPF_KERNEL_HAS_SYSFS_EMIT`
 
-`kernel/include/lpf/lpf_compat_sysfs.h` wraps sysfs text emission through
+`kernel/include/lpf/compat/lpf_compat_sysfs.h` wraps sysfs text emission through
 `lpf_compat_sysfs_emit()`. New sysfs attributes should use this wrapper rather
 than calling `sysfs_emit()` directly.
 

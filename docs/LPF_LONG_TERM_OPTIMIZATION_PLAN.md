@@ -156,10 +156,10 @@ Work items:
 
 Deliverables:
 
-- `lpf_compat_gpio.h`
-- `lpf_compat_pwm.h`
-- `lpf_compat_tty.h`
-- `lpf_compat_time.h`
+- `kernel/include/lpf/compat/lpf_compat_gpio.h`
+- `kernel/include/lpf/compat/lpf_compat_pwm.h`
+- `kernel/include/lpf/compat/lpf_compat_tty.h`
+- `kernel/include/lpf/compat/lpf_compat_time.h`
 - A compatibility policy document.
 
 Acceptance criteria:
@@ -173,6 +173,8 @@ Current status:
 
 - Started. CAN, serial, GPIO, PWM, I2C, and SPI Linux API wrappers now live
   under `kernel/lpf/compat/`.
+- Started. Kernel compatibility public headers now live under
+  `kernel/include/lpf/compat/` so include paths reflect the LPF layer boundary.
 - Started. `docs/LPF_KERNEL_COMPAT_POLICY.md` defines the supported kernel
   baseline and validation policy.
 - Started. `lpf_compat_features.h` defines feature gates for supported kernels,
@@ -244,6 +246,7 @@ Work items:
 Deliverables:
 
 - `kernel/lpf/hw/`
+- `kernel/include/lpf/hw/`
 - LPF HW API reference.
 - Removal of the old standalone hardware access directory from the repository.
 
@@ -258,6 +261,8 @@ Current status:
 
 - Done. `kernel/lpf/hw/` now owns LPF-internal hardware access APIs for GPIO,
   PWM, CAN, UART, I2C, and SPI.
+- Started. LPF HW public kernel-internal headers now live under
+  `kernel/include/lpf/hw/` so consumers include the HW layer explicitly.
 - Done. LPF peripheral services and MCU transports call `lpf_hw_*` APIs.
 - Done. LPF HW paths call LPF SoC Adapter APIs instead of Linux subsystem APIs
   directly.
@@ -323,9 +328,9 @@ Current status:
 - Done. LPF runtime config backend objects are linked into
   `lpf_peripheral_runtime.ko`, and the standalone configuration module boundary
   has been removed from the build.
-- Done. Runtime config source files now live under `kernel/lpf/config/`, public
-  kernel-internal headers live under `kernel/include/lpf/`, and APIs/types use
-  the `lpf_config_*` namespace.
+- Done. Runtime config source files now live under `kernel/lpf/config/`,
+  top-level runtime config headers live under `kernel/include/lpf/`, and
+  APIs/types use the `lpf_config_*` namespace.
 - Done. The static backend now supports runtime product selection by compiled
   table index or by product/project/version identity fields.
 - Done. The current Device Tree format is documented as

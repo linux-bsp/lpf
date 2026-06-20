@@ -3,7 +3,7 @@
 #include "lpf/lpf_peripheral.h"
 
 #include "lpf/lpf_core.h"
-#include "lpf/lpf_hw.h"
+#include "lpf/hw/lpf_hw.h"
 #include "lpf/lpf_led_service.h"
 #include "lpf/lpf_mcu_service.h"
 #include "lpf/lpf_config.h"

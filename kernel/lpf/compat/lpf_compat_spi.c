@@ -4,8 +4,8 @@
 #include <linux/module.h>
 #include <linux/spi/spi.h>
 
-#include "lpf/lpf_compat_errno.h"
-#include "lpf/lpf_compat_spi.h"
+#include "lpf/compat/lpf_compat_errno.h"
+#include "lpf/compat/lpf_compat_spi.h"
 
 static struct spi_device *lpf_compat_spi_find_device(const char *name)
 {

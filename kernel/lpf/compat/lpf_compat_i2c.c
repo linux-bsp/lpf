@@ -3,8 +3,8 @@
 #include <linux/i2c.h>
 #include <linux/module.h>
 
-#include "lpf/lpf_compat_errno.h"
-#include "lpf/lpf_compat_i2c.h"
+#include "lpf/compat/lpf_compat_errno.h"
+#include "lpf/compat/lpf_compat_i2c.h"
 
 static bool lpf_compat_i2c_parse_adapter_id(const char *device,
 					    int *adapter_id)
