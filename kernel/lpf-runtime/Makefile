@@ -10,7 +10,6 @@ include $(src)/lpf-runtime/hw/selftest/Makefile
 include $(src)/lpf-runtime/runtime/Makefile
 include $(src)/lpf-runtime/peripheral/mcu/Makefile
 include $(src)/lpf-runtime/peripheral/led/Makefile
-include $(src)/lpf-runtime/transport/mcu/Makefile
 include $(src)/lpf-runtime/config/selftest/Makefile
 lpf_runtime-y += lpf-runtime/runtime/lpf_runtime_entry_end.o
 include $(src)/lpf-runtime/peripheral/selftest/Makefile

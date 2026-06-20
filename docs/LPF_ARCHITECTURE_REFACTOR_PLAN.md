@@ -8,9 +8,9 @@ architecture-driven checklist.
 
 LPF's current direction is sound: `lpf_core.ko` owns the device and driver
 lifecycle, while `lpf_runtime.ko` hosts runtime configuration, LPF HW,
-peripheral services, transports, and configured-device probing. The remaining
-work is to remove transitional coupling and make new peripherals or SoC
-backends extensible without editing central runtime files.
+peripheral services, service-owned transport backends, and configured-device
+probing. The remaining work is to remove transitional coupling and make new
+peripherals or SoC backends extensible without editing central runtime files.
 
 ## Current Architecture Strengths
 
@@ -18,8 +18,8 @@ backends extensible without editing central runtime files.
   `lpf_runtime.ko`.
 - Source layout now follows module ownership with `kernel/lpf-core/` and
   `kernel/lpf-runtime/`.
-- Kbuild object selection is used for trim-friendly services, transports, HW
-  paths, and runtime self-tests.
+- Kbuild object selection is used for trim-friendly services, service-owned
+  transport backends, HW paths, and runtime self-tests.
 - LPF Core provides one device/driver lifecycle, discovery snapshots,
   reference-counted device handles, state/error tracking, and shared node
   helpers.

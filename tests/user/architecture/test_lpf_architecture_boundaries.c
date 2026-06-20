@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #ifndef SDK_SOURCE_DIR
 #define SDK_SOURCE_DIR "."
@@ -86,6 +87,24 @@ static int expect_not_contains(const char *file_name, const char *content,
 
 	fprintf(stderr, "%s: forbidden token present: %s\n", file_name,
 		needle);
+	return 1;
+}
+
+static int expect_path_absent(const char *relative_path)
+{
+	char path[1024];
+	struct stat st;
+	int ret;
+
+	ret = snprintf(path, sizeof(path), "%s/%s", SDK_SOURCE_DIR,
+		       relative_path);
+	if (ret < 0 || (size_t)ret >= sizeof(path))
+		return 1;
+
+	if (stat(path, &st) != 0)
+		return errno == ENOENT ? 0 : 1;
+
+	fprintf(stderr, "forbidden path present: %s\n", relative_path);
 	return 1;
 }
 
@@ -190,6 +209,44 @@ out:
 	return failures ? 1 : 0;
 }
 
+static int test_mcu_transport_is_service_owned(void)
+{
+	char *mcu_internal;
+	char *mcu_makefile;
+	int failures = 0;
+
+	mcu_internal = read_source_file(
+		"kernel/lpf-runtime/peripheral/mcu/lpf_mcu_internal.h");
+	mcu_makefile = read_source_file(
+		"kernel/lpf-runtime/peripheral/mcu/Makefile");
+
+	if (!mcu_internal || !mcu_makefile) {
+		fprintf(stderr, "failed to read MCU transport ownership sources\n");
+		failures = 1;
+		goto out;
+	}
+
+	failures += expect_path_absent("kernel/lpf-runtime/transport/mcu");
+	failures += expect_path_absent("kernel/include/lpf/transport/mcu");
+	failures += expect_contains("lpf_mcu_internal.h", mcu_internal,
+				    "#include \"lpf_mcu_transport.h\"");
+	failures += expect_not_contains("lpf_mcu_internal.h", mcu_internal,
+					"lpf/transport/mcu");
+	failures += expect_contains("mcu/Makefile", mcu_makefile,
+				    "lpf-runtime/peripheral/mcu/lpf_mcu_transport.o");
+	failures += expect_contains(
+		"mcu/Makefile", mcu_makefile,
+		"lpf-runtime/peripheral/mcu/lpf_mcu_transport_can.o");
+	failures += expect_contains(
+		"mcu/Makefile", mcu_makefile,
+		"lpf-runtime/peripheral/mcu/lpf_mcu_transport_uart.o");
+
+out:
+	free(mcu_makefile);
+	free(mcu_internal);
+	return failures ? 1 : 0;
+}
+
 static int test_peripheral_layer_dependencies(void)
 {
 	static const source_file_t files[] = {
@@ -210,11 +267,11 @@ static int test_peripheral_layer_dependencies(void)
 		{ "lpf_led_proc.c",
 		  "kernel/lpf-runtime/peripheral/led/lpf_led_proc.c" },
 		{ "lpf_mcu_transport.c",
-		  "kernel/lpf-runtime/transport/mcu/lpf_mcu_transport.c" },
+		  "kernel/lpf-runtime/peripheral/mcu/lpf_mcu_transport.c" },
 		{ "lpf_mcu_transport_can.c",
-		  "kernel/lpf-runtime/transport/mcu/lpf_mcu_transport_can.c" },
+		  "kernel/lpf-runtime/peripheral/mcu/lpf_mcu_transport_can.c" },
 		{ "lpf_mcu_transport_uart.c",
-		  "kernel/lpf-runtime/transport/mcu/lpf_mcu_transport_uart.c" },
+		  "kernel/lpf-runtime/peripheral/mcu/lpf_mcu_transport_uart.c" },
 	};
 	static const char *forbidden_tokens[] = {
 		"lpf/soc/",
@@ -497,6 +554,7 @@ int main(void)
 	int ret = 0;
 
 	ret += test_service_context_registries();
+	ret += test_mcu_transport_is_service_owned();
 	ret += test_peripheral_layer_dependencies();
 	ret += test_uapi_headers_are_abi_only();
 	ret += test_soc_adapter_header_dependencies();

@@ -21,7 +21,6 @@ ccflags-y += -I$(src)/lpf-runtime/config/src
 ccflags-y += -I$(src)/lpf-runtime/hw
 ccflags-y += -I$(src)/lpf-runtime/peripheral/mcu
 ccflags-y += -I$(src)/lpf-runtime/peripheral/led
-ccflags-y += -I$(src)/lpf-runtime/transport/mcu
 ccflags-y += -I$(src)/../uapi
 
 ifneq ($(wildcard $(LPF_AUTOCONF_H)),)

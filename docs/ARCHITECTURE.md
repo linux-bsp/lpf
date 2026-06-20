@@ -68,10 +68,10 @@ where the semantics are equivalent.
 
 LPF HW is the framework-owned hardware access layer linked into
 `lpf_runtime.ko`. It owns the kernel-side `lpf_hw_*` APIs consumed
-by LPF peripheral services and transports. Current support includes CAN, UART,
-GPIO, PWM, I2C, and SPI. LPF HW calls the LPF SoC Adapter instead of Linux
-subsystem or vendor BSP APIs directly. Public kernel-internal LPF HW headers
-live under `kernel/include/lpf/hw/`.
+by LPF peripheral services and their service-owned transport backends. Current
+support includes CAN, UART, GPIO, PWM, I2C, and SPI. LPF HW calls the LPF SoC
+Adapter instead of Linux subsystem or vendor BSP APIs directly. Public
+kernel-internal LPF HW headers live under `kernel/include/lpf/hw/`.
 
 ### LPF Core
 
@@ -139,24 +139,16 @@ under `kernel/include/lpf/config/`.
 ### LPF Peripheral Services
 
 LPF peripheral services own kernel-side peripheral business behavior, ioctl
-dispatch, state, error handling, and debug command handlers. Services register
-with LPF Core for device lifecycle handling and use LPF chrdev/sysfs/debugfs
-helpers for runtime nodes. MCU and LED services now live under
-`kernel/lpf-runtime/peripheral/` and expose instance nodes such as `/dev/lpf/mcu0` and
-`/dev/lpf/led0`; they remain integrated through
-`lpf_runtime.ko` rather than being split into one KO per peripheral.
+dispatch, state, error handling, debug command handlers, and service-specific
+transport backends. Services register with LPF Core for device lifecycle
+handling and use LPF chrdev/sysfs/debugfs helpers for runtime nodes. MCU and
+LED services now live under `kernel/lpf-runtime/peripheral/` and expose
+instance nodes such as `/dev/lpf/mcu0` and `/dev/lpf/led0`; they remain
+integrated through `lpf_runtime.ko` rather than being split into one KO per
+peripheral.
 `kernel/lpf-runtime/runtime/lpf_runtime.c` owns the unified runtime
 entry used by the integration module. Public kernel-internal peripheral headers
 live under `kernel/include/lpf/peripheral/`.
-
-### LPF Transports
-
-LPF transport implementations own reusable communication backends used by
-peripheral services. The current MCU CAN and UART transports live under
-`kernel/lpf-runtime/transport/mcu/` and are selected by normalized LPF_CONFIG interface
-type. MCU service code uses the transport registry instead of depending on
-CAN/UART implementation symbols directly. Public kernel-internal MCU transport
-headers live under `kernel/include/lpf/transport/mcu/`.
 
 ### LPF Protocol
 
@@ -200,7 +192,7 @@ The current framework keeps one concrete peripheral/device family:
 - MCU configuration in LPF runtime config
 - MCU protocol in LPF protocol
 - MCU service in LPF peripheral layer
-- MCU CAN/UART transport in LPF transport layer
+- MCU CAN/UART transport backends in the MCU peripheral implementation
 - Userspace access through PDI
 - LED configuration in LPF runtime config
 - LED service in LPF peripheral layer

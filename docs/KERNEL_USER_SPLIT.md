@@ -19,7 +19,6 @@ kernel/
       peripheral/  # LPF runtime and service headers
       protocol/    # LPF protocol headers
       soc/         # LPF SoC adapter headers
-      transport/   # LPF transport registry headers
   osal/
     src/           # builds osal.ko
   lpf-core/
@@ -31,8 +30,7 @@ kernel/
     config/        # runtime configuration backends and tables
     hw/            # LPF-owned hardware access APIs linked into runtime
     runtime/       # lpf_runtime.ko entry and orchestration
-    peripheral/    # framework-owned runtime services
-    transport/     # reusable peripheral transport implementations
+    peripheral/    # framework-owned runtime services and service backends
 
 user/
   osal/            # userspace OSAL library

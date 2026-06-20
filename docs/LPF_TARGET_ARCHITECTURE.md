@@ -26,8 +26,6 @@ LPF Peripheral Service Layer
         ↓
 LPF Core
         ↓
-LPF Transport Layer
-        ↓
 LPF HW API
         ↓
 LPF SoC Adapter Layer
@@ -43,12 +41,10 @@ Linux Kernel / Vendor BSP / Hardware
 - PDI owns userspace C APIs and hides ioctl details from applications.
 - UAPI owns fixed ABI structures, ioctl constants, and ABI version constants.
 - LPF Peripheral Services own reusable MCU, LED, and future peripheral business
-  behavior.
+  behavior, including service-specific transport backends.
 - LPF Core owns the LPF device and driver model, lifecycle, discovery, kernel
   event notification, and shared runtime node helpers.
-- LPF Transport owns reusable communication backends such as MCU CAN and UART.
-- LPF HW owns framework hardware capability APIs consumed by services and
-  transports.
+- LPF HW owns framework hardware capability APIs consumed by services.
 - LPF SoC Adapter owns SoC and vendor BSP backend differences.
 - LPF Kernel Compat owns Linux kernel API-version differences.
 
@@ -66,10 +62,10 @@ lpf_runtime.ko
 chrdev/sysfs/debugfs/proc helpers, protocol helpers, kernel compat wrappers, and
 the selected SoC adapter.
 
-`lpf_runtime.ko` hosts runtime configuration, LPF HW objects,
-peripheral services, transports, and configured-device probing. It should remain
-an integrated framework runtime instead of splitting one kernel module per
-peripheral service.
+`lpf_runtime.ko` hosts runtime configuration, LPF HW objects, peripheral
+services, service-owned transport backends, and configured-device probing. It
+should remain an integrated framework runtime instead of splitting one kernel
+module per peripheral service.
 
 Core lifecycle ownership is module-scoped: only `lpf_core.ko` module
 initialization and exit create or destroy Core global state. Public Core APIs
@@ -99,7 +95,8 @@ Adding a new peripheral family should add matching pieces together:
 - Runtime config type and backend parsing.
 - LPF device type and capability mapping.
 - Peripheral service driver registered with LPF Core.
-- Optional transport implementation under `kernel/lpf-runtime/transport/`.
+- Optional service-specific transport implementation under the owning
+  peripheral directory.
 - Optional LPF HW capability if the peripheral needs a reusable hardware API.
 - UAPI header when userspace access is needed.
 - PDI wrapper when application-facing C APIs are needed.

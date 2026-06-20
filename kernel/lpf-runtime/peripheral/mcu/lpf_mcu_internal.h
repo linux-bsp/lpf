@@ -13,7 +13,7 @@
 #include "lpf/core/lpf_core.h"
 #include "lpf/config/lpf_config.h"
 #include "lpf/peripheral/mcu/lpf_mcu_service.h"
-#include "lpf/transport/mcu/lpf_mcu_transport.h"
+#include "lpf_mcu_transport.h"
 
 #ifndef CONFIG_LPF_MCU_MAX_DEVICES
 #define CONFIG_LPF_MCU_MAX_DEVICES 4

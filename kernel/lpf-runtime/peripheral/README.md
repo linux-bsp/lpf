@@ -39,6 +39,8 @@ CONFIG_LPF_RUNTIME=m
 CONFIG_LPF_CORE=m
 CONFIG_LPF_MCU_SERVICE=y
 CONFIG_LPF_MCU_MAX_DEVICES=4
+CONFIG_LPF_MCU_TRANSPORT_CAN=y
+CONFIG_LPF_MCU_TRANSPORT_UART=y
 CONFIG_LPF_LED_SERVICE=y
 CONFIG_LPF_LED_MAX_DEVICES=8
 CONFIG_LPF_PROTOCOL=y
@@ -61,6 +63,10 @@ kernel/lpf-runtime/peripheral/
 │   ├── lpf_mcu_service.c
 │   ├── lpf_mcu_chrdev.c
 │   ├── lpf_mcu_proc.c
+│   ├── lpf_mcu_transport.c
+│   ├── lpf_mcu_transport_can.c
+│   ├── lpf_mcu_transport_uart.c
+│   ├── lpf_mcu_transport.h
 │   └── lpf_mcu_internal.h
 └── led/
     ├── Config.in
@@ -74,12 +80,6 @@ kernel/lpf-runtime/runtime/
 ├── lpf_runtime_entry_start.c
 ├── lpf_runtime_entry_end.c
 └── lpf_runtime_module.c
-kernel/lpf-runtime/transport/
-└── mcu/
-    ├── Config.in
-    ├── lpf_mcu_transport.c
-    ├── lpf_mcu_transport_can.c
-    └── lpf_mcu_transport_uart.c
 kernel/lpf-core/protocol/
 ├── lpf_protocol.c
 ├── lpf_protocol_common.c
@@ -106,9 +106,6 @@ kernel/include/lpf/
 ├── protocol/
 │   ├── lpf_protocol.h
 │   └── lpf_protocol_mcu.h
-├── transport/
-│   └── mcu/
-│       └── lpf_mcu_transport.h
 └── ...
 ```
 
@@ -214,10 +211,10 @@ For example:
 - `echo "set 0 128" > /sys/kernel/debug/lpf/led`
 - `echo "enable 0" > /sys/kernel/debug/lpf/led`
 
-MCU transport implementations live under `kernel/lpf-runtime/transport/mcu/` and are
-selected through `lpf_mcu_transport_get()`. They are still linked into
-`lpf_runtime.ko`, but the MCU service no longer directly depends on
-CAN or UART implementation symbols. Hardware access remains behind LPF HW.
+MCU transport implementations live with the MCU service under
+`kernel/lpf-runtime/peripheral/mcu/` and are selected through
+`lpf_mcu_transport_get()`. They remain MCU-owned implementation details linked
+into `lpf_runtime.ko`; hardware access stays behind LPF HW.
 
 The protocol layer under `kernel/lpf-core/protocol/` is a common LPF-owned
 peripheral communication protocol linked into `lpf_core.ko`. It does not own

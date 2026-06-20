@@ -5,7 +5,7 @@
 Dependencies should point downward through the LPF stack:
 
 ```text
-Product → ACONFIG/PDI → UAPI → Peripheral Service → Core/Transport
+Product → ACONFIG/PDI → UAPI → Peripheral Service → Core
         → LPF HW → SoC Adapter → Kernel Compat → Linux Kernel
 ```
 
@@ -31,16 +31,11 @@ explicitly documented as a transitional compatibility path.
 ### LPF Peripheral Services
 
 - May use LPF Core device/driver APIs.
-- May use LPF HW APIs and LPF transport APIs.
+- May use LPF HW APIs.
 - May use LPF runtime config typed entries as configuration input.
 - May use shared LPF chrdev, sysfs, procfs, and debugfs helpers.
-- Must not call SoC adapter, compat, vendor BSP, or Linux hardware subsystem APIs
-  directly.
-
-### LPF Transport
-
-- May use LPF HW APIs.
-- May consume normalized LPF runtime config transport fields.
+- May own service-specific transport backends under the peripheral directory
+  when the backend is not shared by multiple peripheral families.
 - Must not call SoC adapter, compat, vendor BSP, or Linux hardware subsystem APIs
   directly.
 
