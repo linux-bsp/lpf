@@ -3,16 +3,13 @@
 #include "pdm_driver.h"
 #include "pdm_status.h"
 
+#include "lpf/lpf_led_service.h"
+
 static bool g_pdm_drivers_ready;
 
 #ifdef CONFIG_PDM_MCU_SUPPORT
 int32_t pdm_mcu_driver_register(void);
 void pdm_mcu_driver_unregister(void);
-#endif
-
-#ifdef CONFIG_PDM_LED_SUPPORT
-int32_t pdm_led_driver_register(void);
-void pdm_led_driver_unregister(void);
 #endif
 
 int32_t pdm_register_builtin_drivers(void)
@@ -25,8 +22,8 @@ int32_t pdm_register_builtin_drivers(void)
 		return ret;
 #endif
 
-#ifdef CONFIG_PDM_LED_SUPPORT
-	ret = pdm_led_driver_register();
+#ifdef CONFIG_LPF_LED_SERVICE
+	ret = lpf_led_service_register();
 	if (ret != OSAL_SUCCESS) {
 #ifdef CONFIG_PDM_MCU_SUPPORT
 		pdm_mcu_driver_unregister();
@@ -40,8 +37,8 @@ int32_t pdm_register_builtin_drivers(void)
 
 void pdm_unregister_builtin_drivers(void)
 {
-#ifdef CONFIG_PDM_LED_SUPPORT
-	pdm_led_driver_unregister();
+#ifdef CONFIG_LPF_LED_SERVICE
+	lpf_led_service_unregister();
 #endif
 #ifdef CONFIG_PDM_MCU_SUPPORT
 	pdm_mcu_driver_unregister();

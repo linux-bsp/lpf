@@ -66,7 +66,7 @@ device and driver lifecycle instead of adding new PDM-local bus code.
       instead of adding a separate product config kernel module.
 - [x] Introduce PCONFIG backend selection and move the original static table
       behind a static backend.
-- [x] Add HAL PWM support and PDM LED support with GPIO/PWM control.
+- [x] Add HAL PWM support and LPF LED service support with GPIO/PWM control.
 
 ## Phase 1: Make The Current Kernel Modules Loadable
 
@@ -134,8 +134,8 @@ device and driver lifecycle instead of adding new PDM-local bus code.
   - Implemented with LPF Core: device nodes are removed before driver
     unregister/exit, and each bound device calls its driver's `remove`.
 - [x] Add LED peripheral support using the established model.
-  - Add `pdm_led` implementation.
-  - Add `pdm_led_chrdev.c`.
+  - Add LPF LED service implementation.
+  - Add LPF LED chrdev implementation.
   - Add matching PConfig and PDI pieces.
 
 ## Phase 4: Finish PDI/UAPI Split

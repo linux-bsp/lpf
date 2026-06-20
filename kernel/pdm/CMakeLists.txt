@@ -7,6 +7,7 @@ list(APPEND ADD_INCLUDE "${SDK_PATH}/kernel/include/pdm")
 list(APPEND ADD_PRIVATE_INCLUDE "include")
 list(APPEND ADD_PRIVATE_INCLUDE "src")
 list(APPEND ADD_PRIVATE_INCLUDE "src/protocol")
+list(APPEND ADD_PRIVATE_INCLUDE "${SDK_PATH}/kernel/lpf/peripheral/led")
 ###############################################
 
 ############## Add source files ###############
@@ -36,11 +37,11 @@ if(CONFIG_PDM_MCU_SUPPORT AND TARGET hal)
     )
 endif()
 
-if(CONFIG_PDM_LED_SUPPORT AND TARGET hal)
+if(CONFIG_LPF_LED_SERVICE AND TARGET hal)
     list(APPEND ADD_SRCS
-        "src/led/pdm_led.c"
-        "src/led/pdm_led_chrdev.c"
-        "src/led/pdm_led_proc.c"
+        "../lpf/peripheral/led/lpf_led_service.c"
+        "../lpf/peripheral/led/lpf_led_chrdev.c"
+        "../lpf/peripheral/led/lpf_led_proc.c"
     )
 endif()
 
@@ -71,7 +72,7 @@ if(CONFIG_PDM_MCU_SUPPORT AND TARGET hal)
     list(APPEND ADD_REQUIREMENTS hal)
 endif()
 
-if(CONFIG_PDM_LED_SUPPORT AND TARGET hal)
+if(CONFIG_LPF_LED_SERVICE AND TARGET hal)
     list(APPEND ADD_REQUIREMENTS hal)
 endif()
 

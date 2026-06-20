@@ -15,7 +15,7 @@ pdm-$(CONFIG_PDM_MCU_SUPPORT) += pdm/src/mcu/pdm_mcu_chrdev.o
 pdm-$(CONFIG_PDM_MCU_SUPPORT) += pdm/src/mcu/pdm_mcu_proc.o
 pdm-$(CONFIG_PDM_MCU_SUPPORT) += pdm/src/mcu/pdm_mcu_can.o
 pdm-$(CONFIG_PDM_MCU_SUPPORT) += pdm/src/mcu/pdm_mcu_serial.o
-pdm-$(CONFIG_PDM_LED_SUPPORT) += pdm/src/led/pdm_led.o
-pdm-$(CONFIG_PDM_LED_SUPPORT) += pdm/src/led/pdm_led_chrdev.o
-pdm-$(CONFIG_PDM_LED_SUPPORT) += pdm/src/led/pdm_led_proc.o
+pdm-$(CONFIG_LPF_LED_SERVICE) += lpf/peripheral/led/lpf_led_service.o
+pdm-$(CONFIG_LPF_LED_SERVICE) += lpf/peripheral/led/lpf_led_chrdev.o
+pdm-$(CONFIG_LPF_LED_SERVICE) += lpf/peripheral/led/lpf_led_proc.o
 endif

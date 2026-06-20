@@ -324,6 +324,17 @@ Acceptance criteria:
 - MCU transport can be replaced without changing MCU business logic.
 - Peripheral state, error, and recovery behavior are consistent.
 
+Current status:
+
+- Started. LED service code has moved from the old LED service directory to
+  `kernel/lpf/peripheral/led/` with a public kernel service header at
+  `kernel/include/lpf/lpf_led_service.h`.
+- Started. The LED service registers as an LPF driver and exposes
+  `/dev/lpf/ledN`; it is still linked into `pdm.ko` until peripheral services
+  are split into standalone modules.
+- Remaining work: move MCU into the LPF peripheral layer, split MCU transport,
+  and promote LED/MCU services into standalone LPF peripheral modules.
+
 ## Phase 8: UAPI And PDI Separation
 
 Goal: decouple stable ABI headers from userspace SDK APIs.
@@ -430,7 +441,7 @@ Current status:
   `name`, `type`, `index`, `state`, `capabilities`, `driver`, `soc`,
   `last_error`, `error_count`, and `open_count`.
 - Done. Debug-only MCU and LED write commands now live under debugfs:
-  `/sys/kernel/debug/pdm/mcu` and `/sys/kernel/debug/pdm/led`; `/proc/pdm/mcu`
+  `/sys/kernel/debug/pdm/mcu` and `/sys/kernel/debug/lpf/led`; `/proc/pdm/mcu`
   and `/proc/pdm/led` are read-only status snapshots.
 - Done. Runtime ioctl and debugfs command failures update each instance's
   `last_error` and `error_count` sysfs attributes.

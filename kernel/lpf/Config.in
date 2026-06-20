@@ -44,4 +44,17 @@ config LPF_SOC_ADAPTER_MOCK
 
 endchoice
 
+menuconfig LPF_LED_SERVICE
+	bool "LPF LED peripheral service"
+	default n
+	depends on PDM && HAL && PCONFIG
+	select HAL_GPIO
+	select HAL_PWM
+	help
+	  Enable the LPF LED peripheral service. LED instances are created from
+	  normalized PCONFIG entries and exposed through LPF device lifecycle,
+	  /dev/lpf/ledN, sysfs attributes, and debugfs commands.
+
+source "kernel/lpf/peripheral/led/Config.in"
+
 endif # LPF_CORE

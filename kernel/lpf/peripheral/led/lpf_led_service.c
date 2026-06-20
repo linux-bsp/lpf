@@ -3,9 +3,8 @@
 #include "osal.h"
 #include "hal.h"
 #include "pconfig.h"
-#include "pdm.h"
-#include "pdm_internal.h"
-#include "pdm_led_internal.h"
+#include "lpf/lpf_driver.h"
+#include "lpf_led_internal.h"
 
 typedef struct {
 	const pconfig_led_config_t *config;
@@ -14,15 +13,15 @@ typedef struct {
 	uint32_t brightness;
 	bool enabled;
 	bool lock_ready;
-} pdm_led_context_t;
+} lpf_led_context_t;
 
-static pdm_led_context_t *g_led_contexts[PDM_LED_MAX_DEVICES];
+static lpf_led_context_t *g_led_contexts[LPF_LED_MAX_DEVICES];
 static osal_mutex_t g_led_registry_lock;
 static bool g_led_registry_ready;
 
-static void pdm_led_remove_index(uint32_t index);
+static void lpf_led_remove_index(uint32_t index);
 
-static uint32_t pdm_led_clamp_brightness(const pdm_led_context_t *ctx,
+static uint32_t lpf_led_clamp_brightness(const lpf_led_context_t *ctx,
 					 uint32_t brightness)
 {
 	if (brightness > ctx->config->max_brightness)
@@ -31,7 +30,7 @@ static uint32_t pdm_led_clamp_brightness(const pdm_led_context_t *ctx,
 	return brightness;
 }
 
-static hal_gpio_level_t pdm_led_gpio_level(const pconfig_led_config_t *config,
+static hal_gpio_level_t lpf_led_gpio_level(const pconfig_led_config_t *config,
 					   bool enabled)
 {
 	bool active = enabled;
@@ -42,15 +41,15 @@ static hal_gpio_level_t pdm_led_gpio_level(const pconfig_led_config_t *config,
 	return active ? HAL_GPIO_LEVEL_HIGH : HAL_GPIO_LEVEL_LOW;
 }
 
-static int32_t pdm_led_apply_gpio(pdm_led_context_t *ctx)
+static int32_t lpf_led_apply_gpio(lpf_led_context_t *ctx)
 {
 	hal_gpio_level_t level;
 
-	level = pdm_led_gpio_level(ctx->config, ctx->enabled);
+	level = lpf_led_gpio_level(ctx->config, ctx->enabled);
 	return hal_gpio_set_level(ctx->config->hw.gpio.gpio_num, level);
 }
 
-static int32_t pdm_led_apply_pwm(pdm_led_context_t *ctx)
+static int32_t lpf_led_apply_pwm(lpf_led_context_t *ctx)
 {
 	hal_pwm_state_t state;
 	uint64_t duty;
@@ -68,19 +67,19 @@ static int32_t pdm_led_apply_pwm(pdm_led_context_t *ctx)
 	return hal_pwm_apply(ctx->pwm, &state);
 }
 
-static int32_t pdm_led_apply(pdm_led_context_t *ctx)
+static int32_t lpf_led_apply(lpf_led_context_t *ctx)
 {
 	switch (ctx->config->control) {
 	case PCONFIG_LED_CONTROL_GPIO:
-		return pdm_led_apply_gpio(ctx);
+		return lpf_led_apply_gpio(ctx);
 	case PCONFIG_LED_CONTROL_PWM:
-		return pdm_led_apply_pwm(ctx);
+		return lpf_led_apply_pwm(ctx);
 	default:
 		return OSAL_ERR_INVALID_PARAM;
 	}
 }
 
-static int32_t pdm_led_registry_init(void)
+static int32_t lpf_led_registry_init(void)
 {
 	if (g_led_registry_ready)
 		return OSAL_SUCCESS;
@@ -92,12 +91,12 @@ static int32_t pdm_led_registry_init(void)
 	return OSAL_SUCCESS;
 }
 
-static int32_t pdm_led_init_gpio(pdm_led_context_t *ctx)
+static int32_t lpf_led_init_gpio(lpf_led_context_t *ctx)
 {
 	hal_gpio_config_t gpio_config;
 
 	gpio_config.direction = HAL_GPIO_DIR_OUTPUT;
-	gpio_config.initial_level = pdm_led_gpio_level(ctx->config,
+	gpio_config.initial_level = lpf_led_gpio_level(ctx->config,
 						       ctx->enabled);
 	gpio_config.edge = HAL_GPIO_EDGE_NONE;
 	gpio_config.callback = NULL;
@@ -106,7 +105,7 @@ static int32_t pdm_led_init_gpio(pdm_led_context_t *ctx)
 	return hal_gpio_init(ctx->config->hw.gpio.gpio_num, &gpio_config);
 }
 
-static int32_t pdm_led_init_pwm(pdm_led_context_t *ctx)
+static int32_t lpf_led_init_pwm(lpf_led_context_t *ctx)
 {
 	hal_pwm_config_t pwm_config;
 
@@ -123,7 +122,7 @@ static int32_t pdm_led_init_pwm(pdm_led_context_t *ctx)
 	return hal_pwm_init(&pwm_config, &ctx->pwm);
 }
 
-static void pdm_led_deinit_hw(pdm_led_context_t *ctx)
+static void lpf_led_deinit_hw(lpf_led_context_t *ctx)
 {
 	if (!ctx)
 		return;
@@ -142,11 +141,11 @@ static void pdm_led_deinit_hw(pdm_led_context_t *ctx)
 	}
 }
 
-static int32_t pdm_led_init_from_entry(uint32_t index,
+static int32_t lpf_led_init_from_entry(uint32_t index,
 				       const pconfig_led_entry_t *entry,
-				       pdm_led_handle_t *handle)
+				       lpf_led_handle_t *handle)
 {
-	pdm_led_context_t *ctx;
+	lpf_led_context_t *ctx;
 	int32_t ret;
 
 	if (!handle || !entry || !entry->enabled ||
@@ -156,7 +155,7 @@ static int32_t pdm_led_init_from_entry(uint32_t index,
 	if (entry->config.max_brightness == 0)
 		return OSAL_ERR_INVALID_PARAM;
 
-	ret = pdm_led_registry_init();
+	ret = lpf_led_registry_init();
 	if (ret != OSAL_SUCCESS)
 		return ret;
 
@@ -173,7 +172,7 @@ static int32_t pdm_led_init_from_entry(uint32_t index,
 		return OSAL_ERR_NO_MEMORY;
 
 	ctx->config = &entry->config;
-	ctx->brightness = pdm_led_clamp_brightness(ctx,
+	ctx->brightness = lpf_led_clamp_brightness(ctx,
 						   entry->config.default_brightness);
 	ctx->enabled = ctx->brightness > 0;
 
@@ -186,10 +185,10 @@ static int32_t pdm_led_init_from_entry(uint32_t index,
 
 	switch (entry->config.control) {
 	case PCONFIG_LED_CONTROL_GPIO:
-		ret = pdm_led_init_gpio(ctx);
+		ret = lpf_led_init_gpio(ctx);
 		break;
 	case PCONFIG_LED_CONTROL_PWM:
-		ret = pdm_led_init_pwm(ctx);
+		ret = lpf_led_init_pwm(ctx);
 		break;
 	default:
 		ret = OSAL_ERR_INVALID_PARAM;
@@ -198,7 +197,7 @@ static int32_t pdm_led_init_from_entry(uint32_t index,
 	if (ret != OSAL_SUCCESS)
 		goto out_free;
 
-	ret = pdm_led_apply(ctx);
+	ret = lpf_led_apply(ctx);
 	if (ret != OSAL_SUCCESS)
 		goto out_hw;
 
@@ -206,7 +205,7 @@ static int32_t pdm_led_init_from_entry(uint32_t index,
 	if (g_led_contexts[index]) {
 		*handle = g_led_contexts[index];
 		osal_mutex_unlock(&g_led_registry_lock);
-		pdm_led_deinit_hw(ctx);
+		lpf_led_deinit_hw(ctx);
 		goto out_free_success;
 	}
 	g_led_contexts[index] = ctx;
@@ -216,7 +215,7 @@ static int32_t pdm_led_init_from_entry(uint32_t index,
 	return OSAL_SUCCESS;
 
 out_hw:
-	pdm_led_deinit_hw(ctx);
+	lpf_led_deinit_hw(ctx);
 out_free:
 	if (ctx->lock_ready)
 		osal_mutex_destroy(&ctx->lock);
@@ -229,32 +228,32 @@ out_free_success:
 	return OSAL_SUCCESS;
 }
 
-int32_t pdm_led_probe(const lpf_device_t *device)
+int32_t lpf_led_probe(const lpf_device_t *device)
 {
 	const pconfig_led_entry_t *entry;
-	pdm_led_handle_t handle = NULL;
+	lpf_led_handle_t handle = NULL;
 	int32_t ret;
 
 	if (!device || device->config.type != LPF_DEVICE_TYPE_LED)
 		return OSAL_ERR_INVALID_PARAM;
 
 	entry = (const pconfig_led_entry_t *)device->config.entry;
-	ret = pdm_led_init_from_entry(device->config.index, entry, &handle);
+	ret = lpf_led_init_from_entry(device->config.index, entry, &handle);
 	if (ret != OSAL_SUCCESS)
 		return ret;
 
-	ret = pdm_led_chrdev_register_device(device);
+	ret = lpf_led_chrdev_register_device(device);
 	if (ret) {
-		pdm_led_remove_index(device->config.index);
+		lpf_led_remove_index(device->config.index);
 		return OSAL_ERR_GENERIC;
 	}
 
 	return OSAL_SUCCESS;
 }
 
-pdm_led_handle_t pdm_led_get(uint32_t index)
+lpf_led_handle_t lpf_led_get(uint32_t index)
 {
-	pdm_led_handle_t handle = NULL;
+	lpf_led_handle_t handle = NULL;
 
 	if (!g_led_registry_ready || index >= OSAL_ARRAY_SIZE(g_led_contexts))
 		return NULL;
@@ -266,9 +265,9 @@ pdm_led_handle_t pdm_led_get(uint32_t index)
 	return handle;
 }
 
-int32_t pdm_led_debug_get(uint32_t index, pdm_led_debug_info_t *info)
+int32_t lpf_led_debug_get(uint32_t index, lpf_led_debug_info_t *info)
 {
-	pdm_led_context_t *ctx;
+	lpf_led_context_t *ctx;
 
 	if (!info || index >= OSAL_ARRAY_SIZE(g_led_contexts))
 		return OSAL_ERR_INVALID_PARAM;
@@ -297,9 +296,9 @@ int32_t pdm_led_debug_get(uint32_t index, pdm_led_debug_info_t *info)
 	return OSAL_SUCCESS;
 }
 
-static void pdm_led_remove_index(uint32_t index)
+static void lpf_led_remove_index(uint32_t index)
 {
-	pdm_led_context_t *ctx;
+	lpf_led_context_t *ctx;
 
 	if (!g_led_registry_ready ||
 	    index >= OSAL_ARRAY_SIZE(g_led_contexts))
@@ -313,22 +312,22 @@ static void pdm_led_remove_index(uint32_t index)
 	if (!ctx)
 		return;
 
-	pdm_led_deinit_hw(ctx);
+	lpf_led_deinit_hw(ctx);
 	if (ctx->lock_ready)
 		osal_mutex_destroy(&ctx->lock);
 	osal_free(ctx);
 }
 
-void pdm_led_remove(const lpf_device_t *device)
+void lpf_led_remove(const lpf_device_t *device)
 {
 	if (!device || device->config.type != LPF_DEVICE_TYPE_LED)
 		return;
 
-	pdm_led_chrdev_unregister_device(device);
-	pdm_led_remove_index(device->config.index);
+	lpf_led_chrdev_unregister_device(device);
+	lpf_led_remove_index(device->config.index);
 }
 
-static void pdm_led_registry_deinit(void)
+static void lpf_led_registry_deinit(void)
 {
 	uint32_t i;
 
@@ -336,33 +335,34 @@ static void pdm_led_registry_deinit(void)
 		return;
 
 	for (i = 0; i < OSAL_ARRAY_SIZE(g_led_contexts); i++)
-		pdm_led_remove_index(i);
+		lpf_led_remove_index(i);
 
 	osal_mutex_destroy(&g_led_registry_lock);
 	g_led_registry_ready = false;
 }
 
-int32_t pdm_led_set_brightness(pdm_led_handle_t handle, uint32_t brightness)
+int32_t lpf_led_set_brightness(lpf_led_handle_t handle, uint32_t brightness)
 {
-	pdm_led_context_t *ctx = handle;
+	lpf_led_context_t *ctx = handle;
 	int32_t ret;
 
 	if (!ctx)
 		return OSAL_ERR_INVALID_PARAM;
 
 	osal_mutex_lock(&ctx->lock);
-	ctx->brightness = pdm_led_clamp_brightness(ctx, brightness);
+	ctx->brightness = lpf_led_clamp_brightness(ctx, brightness);
 	ctx->enabled = ctx->brightness > 0;
-	ret = pdm_led_apply(ctx);
+	ret = lpf_led_apply(ctx);
 	osal_mutex_unlock(&ctx->lock);
 
 	return ret;
 }
-EXPORT_SYMBOL_GPL(pdm_led_set_brightness);
+EXPORT_SYMBOL_GPL(lpf_led_set_brightness);
 
-int32_t pdm_led_get_state(pdm_led_handle_t handle, pdm_led_state_t *state)
+int32_t lpf_led_get_state(lpf_led_handle_t handle,
+			  lpf_led_service_state_t *state)
 {
-	pdm_led_context_t *ctx = handle;
+	lpf_led_context_t *ctx = handle;
 
 	if (!ctx || !state)
 		return OSAL_ERR_INVALID_PARAM;
@@ -375,11 +375,11 @@ int32_t pdm_led_get_state(pdm_led_handle_t handle, pdm_led_state_t *state)
 
 	return OSAL_SUCCESS;
 }
-EXPORT_SYMBOL_GPL(pdm_led_get_state);
+EXPORT_SYMBOL_GPL(lpf_led_get_state);
 
-int32_t pdm_led_enable(pdm_led_handle_t handle)
+int32_t lpf_led_enable(lpf_led_handle_t handle)
 {
-	pdm_led_context_t *ctx = handle;
+	lpf_led_context_t *ctx = handle;
 	int32_t ret;
 
 	if (!ctx)
@@ -389,16 +389,16 @@ int32_t pdm_led_enable(pdm_led_handle_t handle)
 	ctx->enabled = true;
 	if (ctx->brightness == 0)
 		ctx->brightness = ctx->config->max_brightness;
-	ret = pdm_led_apply(ctx);
+	ret = lpf_led_apply(ctx);
 	osal_mutex_unlock(&ctx->lock);
 
 	return ret;
 }
-EXPORT_SYMBOL_GPL(pdm_led_enable);
+EXPORT_SYMBOL_GPL(lpf_led_enable);
 
-int32_t pdm_led_disable(pdm_led_handle_t handle)
+int32_t lpf_led_disable(lpf_led_handle_t handle)
 {
-	pdm_led_context_t *ctx = handle;
+	lpf_led_context_t *ctx = handle;
 	int32_t ret;
 
 	if (!ctx)
@@ -406,63 +406,63 @@ int32_t pdm_led_disable(pdm_led_handle_t handle)
 
 	osal_mutex_lock(&ctx->lock);
 	ctx->enabled = false;
-	ret = pdm_led_apply(ctx);
+	ret = lpf_led_apply(ctx);
 	osal_mutex_unlock(&ctx->lock);
 
 	return ret;
 }
-EXPORT_SYMBOL_GPL(pdm_led_disable);
+EXPORT_SYMBOL_GPL(lpf_led_disable);
 
-static int pdm_led_driver_init(void)
+static int lpf_led_driver_init(void)
 {
 	int ret;
 
-	ret = pdm_led_chrdev_register();
+	ret = lpf_led_chrdev_register();
 	if (ret)
 		return ret;
 
-	ret = pdm_led_proc_register();
+	ret = lpf_led_proc_register();
 	if (ret) {
-		pdm_led_chrdev_unregister();
+		lpf_led_chrdev_unregister();
 		return ret;
 	}
 
-	ret = pdm_led_debugfs_register();
+	ret = lpf_led_debugfs_register();
 	if (ret) {
-		pdm_led_proc_unregister();
-		pdm_led_chrdev_unregister();
+		lpf_led_proc_unregister();
+		lpf_led_chrdev_unregister();
 		return ret;
 	}
 
-	LOG_INFO("PDM_LED", "registered");
+	LOG_INFO("LPF_LED", "registered");
 	return 0;
 }
 
-static void pdm_led_driver_exit(void)
+static void lpf_led_driver_exit(void)
 {
-	pdm_led_registry_deinit();
-	pdm_led_debugfs_unregister();
-	pdm_led_proc_unregister();
-	pdm_led_chrdev_unregister();
-	LOG_INFO("PDM_LED", "unregistered");
+	lpf_led_registry_deinit();
+	lpf_led_debugfs_unregister();
+	lpf_led_proc_unregister();
+	lpf_led_chrdev_unregister();
+	LOG_INFO("LPF_LED", "unregistered");
 }
 
-static const pdm_driver_t g_pdm_led_driver = {
+static const lpf_driver_t g_lpf_led_driver = {
 	.name = "led",
 	.type = LPF_DEVICE_TYPE_LED,
 	.capabilities = LPF_DEVICE_CAP_USER_IOCTL | LPF_DEVICE_CAP_DEBUGFS,
-	.init = pdm_led_driver_init,
-	.exit = pdm_led_driver_exit,
-	.probe = pdm_led_probe,
-	.remove = pdm_led_remove,
+	.init = lpf_led_driver_init,
+	.exit = lpf_led_driver_exit,
+	.probe = lpf_led_probe,
+	.remove = lpf_led_remove,
 };
 
-int32_t pdm_led_driver_register(void)
+int32_t lpf_led_service_register(void)
 {
-	return lpf_driver_register(&g_pdm_led_driver);
+	return lpf_driver_register(&g_lpf_led_driver);
 }
 
-void pdm_led_driver_unregister(void)
+void lpf_led_service_unregister(void)
 {
-	lpf_driver_unregister(&g_pdm_led_driver);
+	lpf_driver_unregister(&g_lpf_led_driver);
 }

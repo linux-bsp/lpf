@@ -71,19 +71,6 @@ menuconfig PDM_MCU_SUPPORT
 
 source "kernel/pdm/src/mcu/Config.in"
 
-menuconfig PDM_LED_SUPPORT
-	bool "LED peripheral support"
-	default n
-	select HAL_GPIO
-	select HAL_PWM
-	help
-	  Enable LED peripheral support.
-
-	  LED peripherals can be controlled through GPIO or PWM according to
-	  PConfig entries. The driver exposes /dev/lpf/ledN for userspace PDI.
-
-source "kernel/pdm/src/led/Config.in"
-
 menu "PDM Protocol Configuration"
 
 config PDM_PROTOCOL

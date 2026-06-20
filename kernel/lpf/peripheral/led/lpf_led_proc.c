@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 
-#include "pdm_led_internal.h"
-#include "pdm_debugfs.h"
+#include "lpf_led_internal.h"
+#include "lpf/lpf_debugfs.h"
 #include "pdm_proc.h"
 #include "pdm_status.h"
 
@@ -10,10 +10,10 @@
 #include <linux/kstrtox.h>
 #include <linux/string.h>
 
-static pdm_proc_entry_t g_pdm_led_proc;
-static pdm_debugfs_entry_t g_pdm_led_debugfs;
+static pdm_proc_entry_t g_lpf_led_proc;
+static lpf_debugfs_entry_t g_lpf_led_debugfs;
 
-static char *pdm_led_proc_next_token(char **cursor)
+static char *lpf_led_proc_next_token(char **cursor)
 {
 	char *token;
 
@@ -25,9 +25,9 @@ static char *pdm_led_proc_next_token(char **cursor)
 	return NULL;
 }
 
-static int pdm_led_proc_parse_u32(char **cursor, uint32_t *value)
+static int lpf_led_proc_parse_u32(char **cursor, uint32_t *value)
 {
-	char *token = pdm_led_proc_next_token(cursor);
+	char *token = lpf_led_proc_next_token(cursor);
 
 	if (!token)
 		return -EINVAL;
@@ -35,15 +35,15 @@ static int pdm_led_proc_parse_u32(char **cursor, uint32_t *value)
 	return kstrtou32(token, 0, value);
 }
 
-static pdm_led_handle_t pdm_led_proc_get_handle(uint32_t index)
+static lpf_led_handle_t lpf_led_proc_get_handle(uint32_t index)
 {
-	if (index >= PDM_LED_MAX_DEVICES)
+	if (index >= LPF_LED_MAX_DEVICES)
 		return NULL;
 
-	return pdm_led_get(index);
+	return lpf_led_get(index);
 }
 
-static const char *pdm_led_control_name(pconfig_led_control_t control)
+static const char *lpf_led_control_name(pconfig_led_control_t control)
 {
 	switch (control) {
 	case PCONFIG_LED_CONTROL_GPIO:
@@ -55,20 +55,20 @@ static const char *pdm_led_control_name(pconfig_led_control_t control)
 	}
 }
 
-static int pdm_led_proc_show(struct seq_file *seq, void *data)
+static int lpf_led_proc_show(struct seq_file *seq, void *data)
 {
-	pdm_led_debug_info_t info;
+	lpf_led_debug_info_t info;
 	uint32_t i;
 	int32_t ret;
 
 	(void)data;
 
-	seq_puts(seq, "PDM LED\n");
-	seq_printf(seq, "max_devices=%u\n", PDM_LED_MAX_DEVICES);
+	seq_puts(seq, "LPF LED\n");
+	seq_printf(seq, "max_devices=%u\n", LPF_LED_MAX_DEVICES);
 	seq_puts(seq, "devices:\n");
 
-	for (i = 0; i < PDM_LED_MAX_DEVICES; i++) {
-		ret = pdm_led_debug_get(i, &info);
+	for (i = 0; i < LPF_LED_MAX_DEVICES; i++) {
+		ret = lpf_led_debug_get(i, &info);
 		if (ret == OSAL_ERR_INVALID_STATE) {
 			seq_puts(seq, "  registry=uninitialized\n");
 			return 0;
@@ -83,7 +83,7 @@ static int pdm_led_proc_show(struct seq_file *seq, void *data)
 
 		seq_printf(seq,
 			   "  [%u] present=1 name=%s control=%s enabled=%u brightness=%u max_brightness=%u\n",
-			   i, info.name, pdm_led_control_name(info.control),
+			   i, info.name, lpf_led_control_name(info.control),
 			   info.enabled ? 1U : 0U, info.brightness,
 			   info.max_brightness);
 	}
@@ -91,26 +91,26 @@ static int pdm_led_proc_show(struct seq_file *seq, void *data)
 	return 0;
 }
 
-static int pdm_led_proc_do_state(pdm_led_handle_t handle, uint32_t index)
+static int lpf_led_proc_do_state(lpf_led_handle_t handle, uint32_t index)
 {
-	pdm_led_state_t state;
+	lpf_led_service_state_t state;
 	int32_t ret;
 
 	osal_memset(&state, 0, sizeof(state));
-	ret = pdm_led_get_state(handle, &state);
+	ret = lpf_led_get_state(handle, &state);
 	if (ret != OSAL_SUCCESS)
 		return pdm_status_to_errno(ret);
 
-	LOG_INFO("PDM_LED",
+	LOG_INFO("LPF_LED",
 		 "debugfs state index=%u enabled=%u brightness=%u max_brightness=%u",
 		 index, state.enabled ? 1U : 0U, state.brightness,
 		 state.max_brightness);
 	return 0;
 }
 
-static int pdm_led_proc_write(char *command, size_t count, void *data)
+static int lpf_led_proc_write(char *command, size_t count, void *data)
 {
-	pdm_led_handle_t handle;
+	lpf_led_handle_t handle;
 	char *cursor = command;
 	char *op;
 	uint32_t index;
@@ -121,58 +121,58 @@ static int pdm_led_proc_write(char *command, size_t count, void *data)
 	(void)count;
 	(void)data;
 
-	op = pdm_led_proc_next_token(&cursor);
+	op = lpf_led_proc_next_token(&cursor);
 	if (!op)
 		return -EINVAL;
 
-	ret = pdm_led_proc_parse_u32(&cursor, &index);
+	ret = lpf_led_proc_parse_u32(&cursor, &index);
 	if (ret)
 		return ret;
 
-	handle = pdm_led_proc_get_handle(index);
+	handle = lpf_led_proc_get_handle(index);
 	if (!handle) {
-		pdm_led_chrdev_record_error(index, -ENODEV);
+		lpf_led_chrdev_record_error(index, -ENODEV);
 		return -ENODEV;
 	}
 
 	if (!strcmp(op, "state")) {
-		ret = pdm_led_proc_do_state(handle, index);
+		ret = lpf_led_proc_do_state(handle, index);
 		goto out;
 	}
 
 	if (!strcmp(op, "enable") || !strcmp(op, "on")) {
-		status = pdm_led_enable(handle);
+		status = lpf_led_enable(handle);
 		if (status != OSAL_SUCCESS) {
 			ret = pdm_status_to_errno(status);
 			goto out;
 		}
-		LOG_INFO("PDM_LED", "debugfs enable index=%u success", index);
+		LOG_INFO("LPF_LED", "debugfs enable index=%u success", index);
 		ret = 0;
 		goto out;
 	}
 
 	if (!strcmp(op, "disable") || !strcmp(op, "off")) {
-		status = pdm_led_disable(handle);
+		status = lpf_led_disable(handle);
 		if (status != OSAL_SUCCESS) {
 			ret = pdm_status_to_errno(status);
 			goto out;
 		}
-		LOG_INFO("PDM_LED", "debugfs disable index=%u success", index);
+		LOG_INFO("LPF_LED", "debugfs disable index=%u success", index);
 		ret = 0;
 		goto out;
 	}
 
 	if (!strcmp(op, "set") || !strcmp(op, "brightness")) {
-		ret = pdm_led_proc_parse_u32(&cursor, &brightness);
+		ret = lpf_led_proc_parse_u32(&cursor, &brightness);
 		if (ret)
 			goto out;
 
-		status = pdm_led_set_brightness(handle, brightness);
+		status = lpf_led_set_brightness(handle, brightness);
 		if (status != OSAL_SUCCESS) {
 			ret = pdm_status_to_errno(status);
 			goto out;
 		}
-		LOG_INFO("PDM_LED",
+		LOG_INFO("LPF_LED",
 			 "debugfs set index=%u brightness=%u success",
 			 index, brightness);
 		ret = 0;
@@ -183,28 +183,28 @@ static int pdm_led_proc_write(char *command, size_t count, void *data)
 
 out:
 	if (ret)
-		pdm_led_chrdev_record_error(index, ret);
+		lpf_led_chrdev_record_error(index, ret);
 	return ret;
 }
 
-int pdm_led_proc_register(void)
+int lpf_led_proc_register(void)
 {
-	return pdm_proc_register(&g_pdm_led_proc, "led",
-				 pdm_led_proc_show, NULL, NULL);
+	return pdm_proc_register(&g_lpf_led_proc, "led",
+				 lpf_led_proc_show, NULL, NULL);
 }
 
-void pdm_led_proc_unregister(void)
+void lpf_led_proc_unregister(void)
 {
-	pdm_proc_unregister(&g_pdm_led_proc);
+	pdm_proc_unregister(&g_lpf_led_proc);
 }
 
-int pdm_led_debugfs_register(void)
+int lpf_led_debugfs_register(void)
 {
-	return pdm_debugfs_register(&g_pdm_led_debugfs, "led",
-				    pdm_led_proc_write, NULL);
+	return lpf_debugfs_register(&g_lpf_led_debugfs, "lpf", "led",
+				    lpf_led_proc_write, NULL);
 }
 
-void pdm_led_debugfs_unregister(void)
+void lpf_led_debugfs_unregister(void)
 {
-	pdm_debugfs_unregister(&g_pdm_led_debugfs);
+	lpf_debugfs_unregister(&g_lpf_led_debugfs);
 }

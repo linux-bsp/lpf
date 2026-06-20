@@ -21,7 +21,7 @@ PDI (userspace API)
         ↓
 ioctl / UAPI
         ↓
-PDM peripheral services + PDM protocol
+LPF peripheral services + PDM protocol
         ↓
 LPF Core + PCONFIG mapping
         ↓
@@ -48,7 +48,9 @@ Linux kernel / hardware
   Linux SoC adapter.
 - PCONFIG selects a kernel-side platform configuration backend and exposes a
   normalized device list.
-- PDM provides kernel-side peripheral service modules.
+- LPF peripheral services provide kernel-side peripheral business behavior.
+- PDM registers built-in kernel services and owns the current management node
+  and PDM protocol helpers.
 - PDM protocol helpers provide kernel-side packet framing owned by PDM.
 - PDI provides userspace APIs over the PDM ioctl ABI.
 - ACONFIG stores userspace application-facing configuration mappings.
@@ -116,14 +118,21 @@ board-profile or product-selection backends should produce the same
 `pconfig_platform_config_t` and `pconfig_device_config_t` model before PDM sees
 the data.
 
+### LPF Peripheral Services
+
+LPF peripheral services own kernel-side peripheral business behavior, ioctl
+dispatch, state, error handling, and debug command handlers. Services register
+with LPF Core for device lifecycle handling and use LPF chrdev/sysfs/debugfs
+helpers for runtime nodes. The LED service now lives under
+`kernel/lpf/peripheral/led/` and exposes instance nodes such as
+`/dev/lpf/led0`; during the current migration stage it is still linked into
+`pdm.ko`.
+
 ### PDM
 
-PDM owns kernel-side peripheral business behavior, ioctl dispatch, read-only
-procfs status content, debugfs command handlers, and protocol helpers. Concrete
-peripheral services such as MCU and LED live under PDM and register with LPF
-Core for device lifecycle handling. PDM uses the LPF chrdev/sysfs/debugfs
-helpers for runtime nodes and exposes `/dev/pdm_ctl` as the
-management/discovery ioctl node; business operations stay on instance nodes
+PDM owns the current built-in service registration path, `/dev/pdm_ctl`
+management/discovery ioctl node, read-only `/proc/pdm/` status root, and
+PDM-internal protocol helpers. Business operations stay on LPF instance nodes
 such as `/dev/lpf/mcu0` and `/dev/lpf/led0`.
 
 ### UAPI
@@ -153,7 +162,7 @@ The current framework keeps one concrete peripheral/device family:
 - MCU driver in PDM
 - Userspace access through PDI
 - LED configuration in PCONFIG
-- LED driver in PDM
+- LED service in LPF peripheral layer
 - Userspace access through PDI
 
 Other peripheral families can be added later by introducing matching PCONFIG
