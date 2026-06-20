@@ -29,19 +29,6 @@
 #include "lpf/config/lpf_config_platform.h" /* 板级配置类型 */
 
 /*===========================================================================
- * 产品配置入口
- *===========================================================================*/
-
-/**
- * @brief 内置静态配置后端使用的平台配置表
- *
- * 产品或测试目标通过 LPF_CONFIG_EXTRA_SRCS 编译进该符号。该符号只属于
- * LPF_CONFIG static backend；其他配置来源应实现独立 backend，不应让 LPF
- * peripheral configuration 直接依赖具体表符号。
- */
-extern const lpf_config_platform_table_t g_lpf_config_platform_table;
-
-/*===========================================================================
  * 板级配置查询
  *===========================================================================*/
 
@@ -51,7 +38,6 @@ extern const lpf_config_platform_table_t g_lpf_config_platform_table;
  * @return 平台配置指针，失败返回NULL
  */
 const lpf_config_platform_config_t *lpf_config_get_board(void);
-const lpf_config_device_config_t *lpf_config_get(void);
 int32_t lpf_config_load(void);
 void lpf_config_unload(void);
 

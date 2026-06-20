@@ -330,12 +330,31 @@ out:
 static int test_static_config_sources_are_version_named(void)
 {
 	char *config_makefile;
+	char *config_header;
+	char *config_static_header;
+	char *static_backend;
+	char *static_table;
+	char *x86_config;
+	char *mock_config;
 	int failures = 0;
 
 	config_makefile = read_source_file("kernel/lpf-runtime/config/Makefile");
-	if (!config_makefile) {
-		fprintf(stderr, "failed to read config Makefile\n");
-		return 1;
+	config_header = read_source_file("kernel/include/lpf/config/lpf_config.h");
+	config_static_header = read_source_file(
+		"kernel/lpf-runtime/config/src/lpf_config_static.h");
+	static_backend = read_source_file(
+		"kernel/lpf-runtime/config/src/lpf_config_static_backend.c");
+	static_table = read_source_file(
+		"kernel/lpf-runtime/config/configs/lpf_config_configs.c");
+	x86_config = read_source_file(
+		"kernel/lpf-runtime/config/configs/kernel/x86_modules/lpf_config_kernel_x86_modules_v1.c");
+	mock_config = read_source_file(
+		"kernel/lpf-runtime/config/configs/kernel/x86_mock_modules/lpf_config_kernel_x86_mock_modules_v1.c");
+	if (!config_makefile || !config_header || !config_static_header ||
+	    !static_backend || !static_table || !x86_config || !mock_config) {
+		fprintf(stderr, "failed to read static config sources\n");
+		failures = 1;
+		goto out;
 	}
 
 	failures += expect_path_absent(
@@ -352,9 +371,33 @@ static int test_static_config_sources_are_version_named(void)
 	failures += expect_contains(
 		"config/Makefile", config_makefile,
 		"lpf-runtime/config/configs/kernel/x86_mock_modules/lpf_config_kernel_x86_mock_modules_v1.o");
+	failures += expect_contains(
+		"config/Makefile", config_makefile,
+		"lpf-runtime/config/configs/lpf_config_configs.o");
 	failures += expect_not_contains("config/Makefile", config_makefile,
 					"/1.0.0/");
+	failures += expect_not_contains("lpf_config.h", config_header,
+					"g_lpf_config_platform_table");
+	failures += expect_contains("lpf_config_static.h", config_static_header,
+				    "lpf_config_static_table_t");
+	failures += expect_contains("lpf_config_configs.c", static_table,
+				    "g_lpf_config_platform_table");
+	failures += expect_contains("lpf_config_static_backend.c", static_backend,
+				    "g_lpf_config_platform_table");
+	failures += expect_not_contains("lpf_config_kernel_x86_modules_v1.c",
+					x86_config,
+					"g_lpf_config_platform_table");
+	failures += expect_not_contains("lpf_config_kernel_x86_mock_modules_v1.c",
+					mock_config,
+					"g_lpf_config_platform_table");
 
+out:
+	free(mock_config);
+	free(x86_config);
+	free(static_table);
+	free(static_backend);
+	free(config_static_header);
+	free(config_header);
 	free(config_makefile);
 	return failures ? 1 : 0;
 }
@@ -489,37 +532,47 @@ static int test_soc_adapter_header_dependencies(void)
 static int test_runtime_config_mapping_is_registered(void)
 {
 	char *runtime_config;
-	char *mcu_mapper;
-	char *led_mapper;
+	char *mcu_driver;
+	char *led_driver;
 	int failures = 0;
 
 	runtime_config = read_source_file(
 		"kernel/lpf-runtime/runtime/lpf_runtime_config.c");
-	mcu_mapper = read_source_file(
-		"kernel/lpf-runtime/peripheral/mcu/lpf_mcu_config_mapper.c");
-	led_mapper = read_source_file(
-		"kernel/lpf-runtime/peripheral/led/lpf_led_config_mapper.c");
+	mcu_driver = read_source_file(
+		"kernel/lpf-runtime/peripheral/mcu/lpf_mcu_config_driver.c");
+	led_driver = read_source_file(
+		"kernel/lpf-runtime/peripheral/led/lpf_led_config_driver.c");
 
-	if (!runtime_config || !mcu_mapper || !led_mapper) {
-		fprintf(stderr, "failed to read runtime config mapper sources\n");
+	if (!runtime_config || !mcu_driver || !led_driver) {
+		fprintf(stderr, "failed to read runtime config driver sources\n");
 		failures = 1;
 		goto out;
 	}
 
 	failures += expect_contains("lpf_runtime_config.c", runtime_config,
-				    "lpf_runtime_config_mapper_first");
+				    "lpf_runtime_config_driver_first");
 	failures += expect_not_contains("lpf_runtime_config.c", runtime_config,
 					"LPF_CONFIG_DEVICE_TYPE_MCU");
 	failures += expect_not_contains("lpf_runtime_config.c", runtime_config,
 					"LPF_CONFIG_DEVICE_TYPE_LED");
-	failures += expect_contains("lpf_mcu_config_mapper.c", mcu_mapper,
-				    "lpf_runtime_config_mapper_register");
-	failures += expect_contains("lpf_led_config_mapper.c", led_mapper,
-				    "lpf_runtime_config_mapper_register");
+	failures += expect_not_contains("lpf_runtime_config.c", runtime_config,
+					"lpf_config_get()");
+	failures += expect_contains("lpf_mcu_config_driver.c", mcu_driver,
+				    "lpf_runtime_config_driver_register");
+	failures += expect_contains("lpf_led_config_driver.c", led_driver,
+				    "lpf_runtime_config_driver_register");
+	failures += expect_contains("lpf_mcu_config_driver.c", mcu_driver,
+				    "lpf_device_register");
+	failures += expect_contains("lpf_led_config_driver.c", led_driver,
+				    "lpf_device_register");
+	failures += expect_contains("lpf_mcu_config_driver.c", mcu_driver,
+				    "lpf_config_hw_get_mcu");
+	failures += expect_contains("lpf_led_config_driver.c", led_driver,
+				    "lpf_config_hw_get_led");
 
 out:
-	free(led_mapper);
-	free(mcu_mapper);
+	free(led_driver);
+	free(mcu_driver);
 	free(runtime_config);
 	return failures ? 1 : 0;
 }

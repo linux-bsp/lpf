@@ -6,6 +6,6 @@ const lpf_runtime_entry_t lpf_runtime_entry_end
 	__attribute__((used, aligned(sizeof(void *)),
 		       section(LPF_RUNTIME_ENTRY_SECTION))) = {};
 
-const lpf_runtime_config_mapper_t lpf_runtime_config_mapper_end
+const lpf_runtime_config_driver_t lpf_runtime_config_driver_end
 	__attribute__((used, aligned(sizeof(void *)),
-		       section(LPF_RUNTIME_CONFIG_MAPPER_SECTION))) = {};
+		       section(LPF_RUNTIME_CONFIG_DRIVER_SECTION))) = {};

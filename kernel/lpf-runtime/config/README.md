@@ -6,8 +6,8 @@ runtime configuration layer. The code is linked into
 module.
 
 The runtime configuration layer selects a configuration backend, validates the
-active platform, and exposes one typed device list to the LPF peripheral
-runtime.
+active platform, and exposes the active platform table to LPF runtime config
+drivers.
 
 ## Current Responsibility
 
@@ -15,8 +15,8 @@ runtime.
 - Keep the built-in static table as the first backend implementation.
 - Parse LPF Device Tree configuration when an LPF DT node is present.
 - Validate platform identity and per-device configuration.
-- Build a normalized enabled-device list for MCU and LED entries through the
-  shared `lpf_config_normalize_devices()` helper.
+- Provide the active platform table; peripheral-owned runtime config drivers
+  parse their own typed entries and register LPF devices.
 - Keep hardware configuration data separate from LPF peripheral service and
   application logic.
 
@@ -53,7 +53,7 @@ For kernel builds, `CONFIG_PROJECT_NAME` and `CONFIG_PROJECT_VERSION` from the
 selected defconfig are used as default project/version selectors when the
 matching module parameters are omitted. Module parameters override those
 generated defaults. If no effective selector is available, the backend falls
-back to `g_lpf_config_platform_table.current_index`.
+back to the first linked static config entry.
 
 An explicit `config_index` selects that table entry directly. If `config_index`
 is combined with explicit identity module parameters, the selected table entry
@@ -63,7 +63,6 @@ must also match those fields.
 
 ```c
 const lpf_config_platform_config_t *lpf_config_get_board(void);
-const lpf_config_device_config_t *lpf_config_get(void);
 const lpf_config_platform_config_t *lpf_config_find(const char *product,
                                              const char *project,
                                              const char *version);
@@ -72,10 +71,10 @@ int32_t lpf_config_validate(const lpf_config_platform_config_t *config);
 void lpf_config_print(const lpf_config_platform_config_t *config);
 ```
 
-The static backend uses the table symbol from `configs/lpf_config_configs.c`:
+The static backend uses a private initialized table:
 
 ```c
-extern const lpf_config_platform_table_t g_lpf_config_platform_table;
+extern const lpf_config_static_table_t g_lpf_config_platform_table;
 ```
 
 Concrete configs live under:
@@ -153,14 +152,13 @@ lpf_config_hw_get_led(platform, index);
 
 - Runtime config owns backend selection, validation, and normalized device
   enumeration.
-- `lpf_config_normalize_devices()` is backend-agnostic; static, Device Tree, and
-  future backends must converge to equivalent `lpf_config_platform_config_t`
-  input before this step.
+- `lpf_config_normalize_devices()` is retained as a backend-agnostic helper for
+  tests and comparisons. Runtime device registration is owned by runtime config
+  drivers registered by each peripheral service.
 - `kernel/lpf-runtime/config/configs` owns concrete static platform tables.
-- LPF peripheral configuration consumes `lpf_config_get()` and typed entries; it
-  must not know concrete product table symbols or backend implementations.
-- `lpf_config_get()` returns a normalized enabled-device list sized from the
-  active platform, with an `LPF_CONFIG_DEVICE_TYPE_INVALID` sentinel entry.
+- LPF peripheral configuration consumes `lpf_config_get_board()` and its own
+  typed entries; it must not know concrete product table symbols or backend
+  implementations.
 - New configuration sources should be added as runtime config backends. They must
-  produce the same `lpf_config_platform_config_t` and `lpf_config_device_config_t`
-  model before LPF peripheral configuration sees them.
+  produce the same `lpf_config_platform_config_t` model before LPF peripheral
+  configuration sees them.

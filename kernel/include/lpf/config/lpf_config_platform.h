@@ -44,10 +44,4 @@ typedef struct {
 	const lpf_config_led_entry_t *led_array; /* LED外设数组 */
 } lpf_config_platform_config_t;
 
-typedef struct {
-	const lpf_config_platform_config_t *const *configs;
-	uint32_t count;
-	uint32_t current_index;
-} lpf_config_platform_table_t;
-
 #endif /* LPF_CONFIG_PLATFORM_H */

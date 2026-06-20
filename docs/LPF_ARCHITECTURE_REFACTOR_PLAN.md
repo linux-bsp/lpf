@@ -81,12 +81,14 @@ Acceptance:
 
 ### Phase 2: Decentralize Runtime Device Mapping
 
-- [x] Define a runtime config mapper entry type.
-- [x] Add a section-registration helper for config-to-device mappers.
-- [x] Move MCU mapping into the MCU service/config object.
-- [x] Move LED mapping into the LED service/config object.
-- [x] Make `lpf_runtime_probe_devices()` use registered mappers instead of a
-      switch over known device types.
+- [x] Define a runtime config driver entry type.
+- [x] Add a section-registration helper for config-to-device drivers.
+- [x] Move MCU config parsing and device registration into the MCU
+      service/config object.
+- [x] Move LED config parsing and device registration into the LED
+      service/config object.
+- [x] Make `lpf_runtime_probe_devices()` use registered config drivers instead
+      of a switch or a central normalized-device list.
 
 Acceptance:
 - Adding a new peripheral does not require editing

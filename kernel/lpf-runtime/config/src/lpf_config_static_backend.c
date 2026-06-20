@@ -2,6 +2,7 @@
 
 #include "osal.h"
 #include "lpf_config_backend.h"
+#include "lpf_config_static.h"
 
 #include <linux/moduleparam.h>
 
