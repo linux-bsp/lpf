@@ -3,7 +3,7 @@
 #include <linux/module.h>
 
 #include "osal.h"
-#include "lpf/hw/lpf_hw_bus_spi.h"
+#include "lpf/hw/lpf_hw_spi.h"
 #include "lpf/soc/lpf_soc_adapter.h"
 
 typedef struct {

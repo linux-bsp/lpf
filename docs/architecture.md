@@ -243,7 +243,7 @@ Add the following pieces together:
 - Optional LPF instance character device `/dev/lpf/<peripheral><index>` when
   userspace access is needed.
 - UAPI header `uapi/lpf/lpf_<peripheral>.h` following
-  `docs/LPF_UAPI_ABI.md`.
+  `docs/lpf_uapi_abi.md`.
 - Userspace wrapper `user/pdi/src/pdi_<peripheral>.c`.
 - Kbuild object selection for the new LPF service inside
   `lpf_runtime.ko`.

@@ -3,7 +3,7 @@
 #include <linux/module.h>
 
 #include "osal.h"
-#include "lpf/hw/lpf_hw_transport_uart.h"
+#include "lpf/hw/lpf_hw_uart.h"
 #include "lpf/soc/lpf_soc_adapter.h"
 
 static void lpf_hw_transport_uart_fill_lpf_config(const lpf_serial_config_t *src,

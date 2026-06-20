@@ -3,20 +3,8 @@
 #include "osal.h"
 #include "lpf/config/lpf_config.h"
 #include "lpf/core/lpf_driver.h"
-#include "lpf/hw/lpf_hw.h"
 #include "lpf_runtime_internal.h"
 #include "lpf_led_internal.h"
-
-typedef struct lpf_led_context {
-	const lpf_config_led_config_t *config;
-	lpf_hw_pwm_handle_t pwm;
-	osal_mutex_t lock;
-	uint32_t brightness;
-	bool enabled;
-	bool lock_ready;
-	uint32_t index;
-	struct lpf_led_context *next;
-} lpf_led_context_t;
 
 static lpf_led_context_t *g_led_context_list;
 static osal_mutex_t g_led_registry_lock;
@@ -33,53 +21,15 @@ static uint32_t lpf_led_clamp_brightness(const lpf_led_context_t *ctx,
 	return brightness;
 }
 
-static lpf_gpio_level_t lpf_led_gpio_level(const lpf_config_led_config_t *config,
-					   bool enabled)
-{
-	bool active = enabled;
-
-	if (config->hw.gpio.active_low)
-		active = !active;
-
-	return active ? LPF_GPIO_LEVEL_HIGH : LPF_GPIO_LEVEL_LOW;
-}
-
-static int32_t lpf_led_apply_gpio(lpf_led_context_t *ctx)
-{
-	lpf_gpio_level_t level;
-
-	level = lpf_led_gpio_level(ctx->config, ctx->enabled);
-	return lpf_hw_gpio_set_level(ctx->config->hw.gpio.gpio_num, level);
-}
-
-static int32_t lpf_led_apply_pwm(lpf_led_context_t *ctx)
-{
-	lpf_pwm_state_t state;
-	uint64_t duty;
-
-	if (ctx->config->max_brightness == 0)
-		return OSAL_ERR_INVALID_PARAM;
-
-	duty = (uint64_t)ctx->config->hw.pwm.period_ns * ctx->brightness;
-	duty /= ctx->config->max_brightness;
-
-	state.period_ns = ctx->config->hw.pwm.period_ns;
-	state.duty_ns = (uint32_t)duty;
-	state.enabled = ctx->enabled && ctx->brightness > 0;
-	state.polarity_inversed = ctx->config->hw.pwm.polarity_inversed;
-	return lpf_hw_pwm_apply(ctx->pwm, &state);
-}
-
 static int32_t lpf_led_apply(lpf_led_context_t *ctx)
 {
-	switch (ctx->config->control) {
-	case LPF_CONFIG_LED_CONTROL_GPIO:
-		return lpf_led_apply_gpio(ctx);
-	case LPF_CONFIG_LED_CONTROL_PWM:
-		return lpf_led_apply_pwm(ctx);
-	default:
+	const lpf_led_control_ops_t *ops;
+
+	ops = lpf_led_control_get(ctx->config->control);
+	if (!ops || !ops->apply)
 		return OSAL_ERR_INVALID_PARAM;
-	}
+
+	return ops->apply(ctx);
 }
 
 static int32_t lpf_led_registry_init(void)
@@ -94,54 +44,16 @@ static int32_t lpf_led_registry_init(void)
 	return OSAL_SUCCESS;
 }
 
-static int32_t lpf_led_init_gpio(lpf_led_context_t *ctx)
-{
-	lpf_gpio_config_t gpio_config;
-
-	gpio_config.direction = LPF_GPIO_DIR_OUTPUT;
-	gpio_config.initial_level = lpf_led_gpio_level(ctx->config,
-						       ctx->enabled);
-	gpio_config.edge = LPF_GPIO_EDGE_NONE;
-	gpio_config.callback = NULL;
-	gpio_config.user_data = NULL;
-
-	return lpf_hw_gpio_init(ctx->config->hw.gpio.gpio_num, &gpio_config);
-}
-
-static int32_t lpf_led_init_pwm(lpf_led_context_t *ctx)
-{
-	lpf_pwm_config_t pwm_config;
-
-	if (!ctx->config->hw.pwm.consumer ||
-	    ctx->config->hw.pwm.period_ns == 0)
-		return OSAL_ERR_INVALID_PARAM;
-
-	pwm_config.consumer = ctx->config->hw.pwm.consumer;
-	pwm_config.period_ns = ctx->config->hw.pwm.period_ns;
-	pwm_config.duty_ns = 0;
-	pwm_config.enabled = false;
-	pwm_config.polarity_inversed = ctx->config->hw.pwm.polarity_inversed;
-
-	return lpf_hw_pwm_init(&pwm_config, &ctx->pwm);
-}
-
 static void lpf_led_deinit_hw(lpf_led_context_t *ctx)
 {
+	const lpf_led_control_ops_t *ops;
+
 	if (!ctx)
 		return;
 
-	switch (ctx->config->control) {
-	case LPF_CONFIG_LED_CONTROL_GPIO:
-		lpf_hw_gpio_deinit(ctx->config->hw.gpio.gpio_num);
-		break;
-	case LPF_CONFIG_LED_CONTROL_PWM:
-		if (ctx->pwm)
-			lpf_hw_pwm_deinit(ctx->pwm);
-		ctx->pwm = NULL;
-		break;
-	default:
-		break;
-	}
+	ops = lpf_led_control_get(ctx->config->control);
+	if (ops && ops->deinit)
+		ops->deinit(ctx);
 }
 
 static lpf_led_context_t *lpf_led_find_context_locked(uint32_t index)
@@ -235,16 +147,15 @@ static int32_t lpf_led_init_from_entry(uint32_t index,
 	}
 	ctx->lock_ready = true;
 
-	switch (entry->config.control) {
-	case LPF_CONFIG_LED_CONTROL_GPIO:
-		ret = lpf_led_init_gpio(ctx);
-		break;
-	case LPF_CONFIG_LED_CONTROL_PWM:
-		ret = lpf_led_init_pwm(ctx);
-		break;
-	default:
-		ret = OSAL_ERR_INVALID_PARAM;
-		break;
+	{
+		const lpf_led_control_ops_t *ops;
+
+		ops = lpf_led_control_get(entry->config.control);
+		if (!ops || !ops->init) {
+			ret = OSAL_ERR_INVALID_PARAM;
+			goto out_free;
+		}
+		ret = ops->init(ctx);
 	}
 	if (ret != OSAL_SUCCESS)
 		goto out_free;
@@ -274,6 +185,19 @@ out_free:
 		osal_mutex_destroy(&ctx->lock);
 	osal_free(ctx);
 	return ret;
+}
+
+const lpf_led_control_ops_t *
+lpf_led_control_get(lpf_config_led_control_t control)
+{
+	switch (control) {
+	case LPF_CONFIG_LED_CONTROL_GPIO:
+		return &lpf_led_gpio_ops;
+	case LPF_CONFIG_LED_CONTROL_PWM:
+		return &lpf_led_pwm_ops;
+	default:
+		return NULL;
+	}
 }
 
 int32_t lpf_led_probe(const lpf_device_t *device)

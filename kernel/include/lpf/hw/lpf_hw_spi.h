@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 
-#ifndef LPF_HW_BUS_SPI_H
-#define LPF_HW_BUS_SPI_H
+#ifndef LPF_HW_SPI_H
+#define LPF_HW_SPI_H
 
 #include "lpf/types/lpf_spi_types.h"
 
@@ -21,4 +21,4 @@ int32_t lpf_hw_bus_spi_transfer_multi(lpf_hw_bus_spi_handle_t handle,
 int32_t lpf_hw_bus_spi_set_config(lpf_hw_bus_spi_handle_t handle,
 				  const lpf_spi_config_t *config);
 
-#endif /* LPF_HW_BUS_SPI_H */
+#endif /* LPF_HW_SPI_H */

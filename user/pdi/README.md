@@ -43,7 +43,7 @@ that boundary to validate ioctl marshaling and operation paths without live LPF
 device nodes.
 
 UAPI and ABI rules for new peripherals are documented in
-`docs/LPF_UAPI_ABI.md`.
+`docs/lpf_uapi_abi.md`.
 
 PDI must not reimplement kernel LPF HW, LPF runtime config, or LPF peripheral service
 logic.

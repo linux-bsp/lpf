@@ -179,6 +179,8 @@ static int test_service_context_registries(void)
 {
 	char *mcu_service;
 	char *led_service;
+	char *led_internal;
+	char *led_makefile;
 	char *mcu_chrdev;
 	char *led_chrdev;
 	int failures = 0;
@@ -187,12 +189,17 @@ static int test_service_context_registries(void)
 		"kernel/lpf-runtime/peripheral/mcu/lpf_mcu_service.c");
 	led_service = read_source_file(
 		"kernel/lpf-runtime/peripheral/led/lpf_led_service.c");
+	led_internal = read_source_file(
+		"kernel/lpf-runtime/peripheral/led/lpf_led_internal.h");
+	led_makefile = read_source_file(
+		"kernel/lpf-runtime/peripheral/led/Makefile");
 	mcu_chrdev = read_source_file(
 		"kernel/lpf-runtime/peripheral/mcu/lpf_mcu_chrdev.c");
 	led_chrdev = read_source_file(
 		"kernel/lpf-runtime/peripheral/led/lpf_led_chrdev.c");
 
-	if (!mcu_service || !led_service || !mcu_chrdev || !led_chrdev) {
+	if (!mcu_service || !led_service || !led_internal || !led_makefile ||
+	    !mcu_chrdev || !led_chrdev) {
 		fprintf(stderr, "failed to read peripheral service sources\n");
 		failures = 1;
 		goto out;
@@ -214,7 +221,7 @@ static int test_service_context_registries(void)
 					"LPF_MCU_MAX_DEVICES");
 
 	failures += expect_contains(
-		"lpf_led_service.c", led_service,
+		"lpf_led_internal.h", led_internal,
 		"struct lpf_led_context *next;");
 	failures += expect_contains(
 		"lpf_led_service.c", led_service,
@@ -227,6 +234,14 @@ static int test_service_context_registries(void)
 					"[LPF_LED_MAX_DEVICES]");
 	failures += expect_not_contains("lpf_led_service.c", led_service,
 					"LPF_LED_MAX_DEVICES");
+	failures += expect_not_contains("lpf_led_service.c", led_service,
+					"lpf_hw_gpio_");
+	failures += expect_not_contains("lpf_led_service.c", led_service,
+					"lpf_hw_pwm_");
+	failures += expect_contains("led/Makefile", led_makefile,
+				    "lpf-runtime/peripheral/led/lpf_led_gpio.o");
+	failures += expect_contains("led/Makefile", led_makefile,
+				    "lpf-runtime/peripheral/led/lpf_led_pwm.o");
 
 	failures += expect_contains(
 		"lpf_mcu_chrdev.c", mcu_chrdev,
@@ -238,6 +253,8 @@ static int test_service_context_registries(void)
 out:
 	free(led_chrdev);
 	free(mcu_chrdev);
+	free(led_makefile);
+	free(led_internal);
 	free(led_service);
 	free(mcu_service);
 	return failures ? 1 : 0;
@@ -270,10 +287,10 @@ static int test_mcu_transport_is_service_owned(void)
 				    "lpf-runtime/peripheral/mcu/lpf_mcu_transport.o");
 	failures += expect_contains(
 		"mcu/Makefile", mcu_makefile,
-		"lpf-runtime/peripheral/mcu/lpf_mcu_transport_can.o");
+		"lpf-runtime/peripheral/mcu/lpf_mcu_can.o");
 	failures += expect_contains(
 		"mcu/Makefile", mcu_makefile,
-		"lpf-runtime/peripheral/mcu/lpf_mcu_transport_uart.o");
+		"lpf-runtime/peripheral/mcu/lpf_mcu_uart.o");
 
 out:
 	free(mcu_makefile);
@@ -305,10 +322,16 @@ static int test_hw_sources_are_capability_grouped(void)
 	failures += expect_path_absent("kernel/lpf-runtime/hw/lpf_hw_pwm.c");
 	failures += expect_path_absent("kernel/lpf-runtime/hw/lpf_hw_bus_i2c.c");
 	failures += expect_path_absent("kernel/lpf-runtime/hw/lpf_hw_bus_spi.c");
+	failures += expect_path_absent("kernel/lpf-runtime/hw/i2c/lpf_hw_bus_i2c.c");
+	failures += expect_path_absent("kernel/lpf-runtime/hw/spi/lpf_hw_bus_spi.c");
 	failures += expect_path_absent(
 		"kernel/lpf-runtime/hw/lpf_hw_transport_can.c");
 	failures += expect_path_absent(
 		"kernel/lpf-runtime/hw/lpf_hw_transport_uart.c");
+	failures += expect_path_absent(
+		"kernel/lpf-runtime/hw/can/lpf_hw_transport_can.c");
+	failures += expect_path_absent(
+		"kernel/lpf-runtime/hw/uart/lpf_hw_transport_uart.c");
 	failures += expect_path_absent("kernel/lpf-runtime/hw/bus/i2c");
 	failures += expect_path_absent("kernel/lpf-runtime/hw/bus/spi");
 	failures += expect_path_absent("kernel/lpf-runtime/hw/transport/can");
@@ -321,15 +344,15 @@ static int test_hw_sources_are_capability_grouped(void)
 	failures += expect_contains("hw/Makefile", hw_makefile,
 				    "lpf-runtime/hw/pwm/lpf_hw_pwm.o");
 	failures += expect_contains("hw/Makefile", hw_makefile,
-				    "lpf-runtime/hw/i2c/lpf_hw_bus_i2c.o");
+				    "lpf-runtime/hw/i2c/lpf_hw_i2c.o");
 	failures += expect_contains("hw/Makefile", hw_makefile,
-				    "lpf-runtime/hw/spi/lpf_hw_bus_spi.o");
+				    "lpf-runtime/hw/spi/lpf_hw_spi.o");
 	failures += expect_contains(
 		"hw/Makefile", hw_makefile,
-		"lpf-runtime/hw/can/lpf_hw_transport_can.o");
+		"lpf-runtime/hw/can/lpf_hw_can.o");
 	failures += expect_contains(
 		"hw/Makefile", hw_makefile,
-		"lpf-runtime/hw/uart/lpf_hw_transport_uart.o");
+		"lpf-runtime/hw/uart/lpf_hw_uart.o");
 
 	failures += expect_contains("lpf_hw.c", hw_core,
 				    "#include \"lpf_hw_internal.h\"");
@@ -463,16 +486,20 @@ static int test_peripheral_layer_dependencies(void)
 		  "kernel/lpf-runtime/peripheral/mcu/lpf_mcu_proc.c" },
 		{ "lpf_led_service.c",
 		  "kernel/lpf-runtime/peripheral/led/lpf_led_service.c" },
+		{ "lpf_led_gpio.c",
+		  "kernel/lpf-runtime/peripheral/led/lpf_led_gpio.c" },
+		{ "lpf_led_pwm.c",
+		  "kernel/lpf-runtime/peripheral/led/lpf_led_pwm.c" },
 		{ "lpf_led_chrdev.c",
 		  "kernel/lpf-runtime/peripheral/led/lpf_led_chrdev.c" },
 		{ "lpf_led_proc.c",
 		  "kernel/lpf-runtime/peripheral/led/lpf_led_proc.c" },
 		{ "lpf_mcu_transport.c",
 		  "kernel/lpf-runtime/peripheral/mcu/lpf_mcu_transport.c" },
-		{ "lpf_mcu_transport_can.c",
-		  "kernel/lpf-runtime/peripheral/mcu/lpf_mcu_transport_can.c" },
-		{ "lpf_mcu_transport_uart.c",
-		  "kernel/lpf-runtime/peripheral/mcu/lpf_mcu_transport_uart.c" },
+		{ "lpf_mcu_can.c",
+		  "kernel/lpf-runtime/peripheral/mcu/lpf_mcu_can.c" },
+		{ "lpf_mcu_uart.c",
+		  "kernel/lpf-runtime/peripheral/mcu/lpf_mcu_uart.c" },
 	};
 	static const char *forbidden_tokens[] = {
 		"lpf/soc/",
@@ -807,7 +834,7 @@ static int test_no_separate_bus_layer(void)
 	char *peripheral_readme;
 	int failures = 0;
 
-	plan = read_source_file("docs/LPF_ARCHITECTURE_REFACTOR_PLAN.md");
+	plan = read_source_file("docs/lpf_architecture_refactor_plan.md");
 	peripheral_readme = read_source_file(
 		"kernel/lpf-runtime/peripheral/README.md");
 	if (!plan || !peripheral_readme) {
@@ -818,7 +845,7 @@ static int test_no_separate_bus_layer(void)
 
 	failures += expect_path_absent("kernel/lpf-core/bus");
 	failures += expect_path_absent("kernel/lpf-runtime/bus");
-	failures += expect_contains("LPF_ARCHITECTURE_REFACTOR_PLAN.md", plan,
+	failures += expect_contains("lpf_architecture_refactor_plan.md", plan,
 				    "do not create extra");
 	failures += expect_contains("peripheral/README.md", peripheral_readme,
 				    "does not expose a separate physical bus layer");
@@ -891,7 +918,7 @@ static int test_pdi_coverage_tracks_discovery_paths(void)
 	int failures = 0;
 
 	pdi_mock = read_source_file("tests/user/pdi/test_pdi_ioctl_mock.c");
-	plan = read_source_file("docs/LPF_ARCHITECTURE_REFACTOR_PLAN.md");
+	plan = read_source_file("docs/lpf_architecture_refactor_plan.md");
 	if (!pdi_mock || !plan) {
 		fprintf(stderr, "failed to read PDI coverage sources\n");
 		failures = 1;
@@ -912,7 +939,7 @@ static int test_pdi_coverage_tracks_discovery_paths(void)
 				    "pdi_mcu_get_info");
 	failures += expect_contains("test_pdi_ioctl_mock.c", pdi_mock,
 				    "pdi_led_get_info");
-	failures += expect_contains("LPF_ARCHITECTURE_REFACTOR_PLAN.md",
+	failures += expect_contains("lpf_architecture_refactor_plan.md",
 				    plan, "Add ABI/PDI coverage for current");
 
 out:

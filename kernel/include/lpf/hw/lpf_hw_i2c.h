@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 
-#ifndef LPF_HW_BUS_I2C_H
-#define LPF_HW_BUS_I2C_H
+#ifndef LPF_HW_I2C_H
+#define LPF_HW_I2C_H
 
 #include "lpf/types/lpf_i2c_types.h"
 
@@ -23,4 +23,4 @@ int32_t lpf_hw_bus_i2c_read_reg(lpf_hw_bus_i2c_handle_t handle,
 int32_t lpf_hw_bus_i2c_transfer(lpf_hw_bus_i2c_handle_t handle,
 				lpf_i2c_msg_t *msgs, uint32_t num);
 
-#endif /* LPF_HW_BUS_I2C_H */
+#endif /* LPF_HW_I2C_H */

@@ -8,10 +8,10 @@ services and service-owned transport backends. It is linked into
 
 - `lpf_hw_gpio`: GPIO request, direction, level, and interrupt helpers.
 - `lpf_hw_pwm`: PWM acquire, apply, state, enable, and disable helpers.
-- `lpf_hw_transport_can`: CAN transport open, send, receive, and filtering.
-- `lpf_hw_transport_uart`: UART transport open, read, write, flush, and config.
-- `lpf_hw_bus_i2c`: I2C open, read/write, register access, and transfer.
-- `lpf_hw_bus_spi`: SPI open, read/write, transfer, and config.
+- `lpf_hw_can`: CAN transport open, send, receive, and filtering.
+- `lpf_hw_uart`: UART transport open, read, write, flush, and config.
+- `lpf_hw_i2c`: I2C open, read/write, register access, and transfer.
+- `lpf_hw_spi`: SPI open, read/write, transfer, and config.
 
 All LPF HW implementations call the LPF SoC Adapter. Vendor BSP and
 kernel-version conditionals belong below the SoC adapter or compat layer, not
@@ -30,13 +30,13 @@ kernel/lpf-runtime/hw/
 ├── pwm/
 │   └── lpf_hw_pwm.c
 ├── i2c/
-│   └── lpf_hw_bus_i2c.c
+│   └── lpf_hw_i2c.c
 ├── spi/
-│   └── lpf_hw_bus_spi.c
+│   └── lpf_hw_spi.c
 ├── can/
-│   └── lpf_hw_transport_can.c
+│   └── lpf_hw_can.c
 └── uart/
-    └── lpf_hw_transport_uart.c
+    └── lpf_hw_uart.c
 ```
 
 The public LPF HW API remains under `kernel/include/lpf/hw/`. Private HW

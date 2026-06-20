@@ -3,12 +3,12 @@
 #include <linux/module.h>
 
 #include "osal.h"
-#include "lpf/hw/lpf_hw_transport_can.h"
+#include "lpf/hw/lpf_hw_can.h"
 #include "lpf/hw/lpf_hw_gpio.h"
-#include "lpf/hw/lpf_hw_bus_i2c.h"
+#include "lpf/hw/lpf_hw_i2c.h"
 #include "lpf/hw/lpf_hw_pwm.h"
-#include "lpf/hw/lpf_hw_transport_uart.h"
-#include "lpf/hw/lpf_hw_bus_spi.h"
+#include "lpf/hw/lpf_hw_uart.h"
+#include "lpf/hw/lpf_hw_spi.h"
 
 #define LPF_HW_MOCK_SELFTEST_GPIO 7U
 #define LPF_HW_MOCK_SELFTEST_HIGH_GPIO 300U

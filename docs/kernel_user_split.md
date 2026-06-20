@@ -123,4 +123,4 @@ validated without requiring live LPF device nodes.
 - UAPI headers live under `uapi/lpf/` and must be valid for both kernel and
   userspace builds.
 - Userspace code must not include non-UAPI kernel headers.
-- LPF UAPI rules are documented in `docs/LPF_UAPI_ABI.md`.
+- LPF UAPI rules are documented in `docs/lpf_uapi_abi.md`.

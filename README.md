@@ -127,13 +127,13 @@ LPF/
 
 ## Documentation
 
-- `docs/ARCHITECTURE.md`: current module architecture and extension flow.
-- `docs/LPF_TARGET_ARCHITECTURE.md`: target layered architecture.
-- `docs/LPF_MODULE_BOUNDARIES.md`: allowed dependencies and forbidden shortcuts.
-- `docs/LPF_REFACTOR_ROADMAP.md`: staged cleanup roadmap.
-- `docs/LPF_KERNEL_COMPAT_POLICY.md`: supported kernel baseline and compat
+- `docs/architecture.md`: current module architecture and extension flow.
+- `docs/lpf_target_architecture.md`: target layered architecture.
+- `docs/lpf_module_boundaries.md`: allowed dependencies and forbidden shortcuts.
+- `docs/lpf_refactor_roadmap.md`: staged cleanup roadmap.
+- `docs/lpf_kernel_compat_policy.md`: supported kernel baseline and compat
   feature-gate rules.
-- `docs/KERNEL_USER_SPLIT.md`: kernel/userspace boundary and include rules.
-- `docs/LPF_LONG_TERM_OPTIMIZATION_PLAN.md`: long-term optimization plan for
+- `docs/kernel_user_split.md`: kernel/userspace boundary and include rules.
+- `docs/lpf_long_term_optimization_plan.md`: long-term optimization plan for
   multi-kernel and multi-SoC deployments.
-- `docs/LPF_UAPI_ABI.md`: UAPI ABI and PDI wrapper rules for new peripherals.
+- `docs/lpf_uapi_abi.md`: UAPI ABI and PDI wrapper rules for new peripherals.
