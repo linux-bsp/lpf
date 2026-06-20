@@ -3,11 +3,10 @@
 #include "lpf/config/lpf_config.h"
 #include "lpf_config_dt_parser.h"
 #include "lpf_config_normalizer.h"
+#include "test_lpf_config_compare.h"
 
 #include <stdlib.h>
 #include <string.h>
-
-#define TEST_DEVICE_CAPACITY 8U
 
 extern const lpf_config_platform_config_t
 	g_lpf_config_kernel_x86_mock_modules_1_0_0;
@@ -224,110 +223,12 @@ static const fake_dt_node_t g_fake_root = {
 	.child_count = OSAL_ARRAY_SIZE(g_fake_root_children),
 };
 
-static int expect_string_equal(const char *left, const char *right)
-{
-	if (!left || !right)
-		return left == right ? 0 : -1;
-
-	return strcmp(left, right);
-}
-
-static int compare_mcu_entries(const lpf_config_mcu_entry_t *left,
-			       const lpf_config_mcu_entry_t *right)
-{
-	const lpf_config_mcu_config_t *a = &left->config;
-	const lpf_config_mcu_config_t *b = &right->config;
-
-	if (left->enabled != right->enabled)
-		return -1;
-	if (expect_string_equal(a->name, b->name))
-		return -1;
-	if (a->interface != b->interface)
-		return -1;
-
-	if (a->interface != LPF_CONFIG_MCU_INTERFACE_CAN)
-		return -1;
-	if (expect_string_equal(a->hw.can.device, b->hw.can.device))
-		return -1;
-
-	return a->hw.can.bitrate == b->hw.can.bitrate &&
-		       a->hw.can.rx_timeout == b->hw.can.rx_timeout &&
-		       a->hw.can.tx_timeout == b->hw.can.tx_timeout &&
-		       a->hw.can.tx_id == b->hw.can.tx_id &&
-		       a->hw.can.rx_id == b->hw.can.rx_id &&
-		       a->cmd_timeout_ms == b->cmd_timeout_ms &&
-		       a->retry_count == b->retry_count ?
-		       0 :
-		       -1;
-}
-
-static int compare_led_entries(const lpf_config_led_entry_t *left,
-			       const lpf_config_led_entry_t *right)
-{
-	const lpf_config_led_config_t *a = &left->config;
-	const lpf_config_led_config_t *b = &right->config;
-
-	if (left->enabled != right->enabled)
-		return -1;
-	if (expect_string_equal(a->name, b->name))
-		return -1;
-	if (a->control != b->control ||
-	    a->max_brightness != b->max_brightness ||
-	    a->default_brightness != b->default_brightness)
-		return -1;
-
-	switch (a->control) {
-	case LPF_CONFIG_LED_CONTROL_GPIO:
-		return a->hw.gpio.gpio_num == b->hw.gpio.gpio_num &&
-			       a->hw.gpio.pin_mux == b->hw.gpio.pin_mux &&
-			       a->hw.gpio.active_low == b->hw.gpio.active_low &&
-			       a->hw.gpio.pull_up == b->hw.gpio.pull_up &&
-			       a->hw.gpio.pull_down == b->hw.gpio.pull_down ?
-			       0 :
-			       -1;
-	case LPF_CONFIG_LED_CONTROL_PWM:
-		if (expect_string_equal(a->hw.pwm.consumer,
-					b->hw.pwm.consumer))
-			return -1;
-		return a->hw.pwm.period_ns == b->hw.pwm.period_ns &&
-			       a->hw.pwm.polarity_inversed ==
-				       b->hw.pwm.polarity_inversed ?
-			       0 :
-			       -1;
-	default:
-		return -1;
-	}
-}
-
-static int compare_devices(const lpf_config_device_config_t *left,
-			   const lpf_config_device_config_t *right)
-{
-	if (left->device_type != right->device_type || left->index != right->index)
-		return -1;
-
-	switch (left->device_type) {
-	case LPF_CONFIG_DEVICE_TYPE_MCU:
-		return compare_mcu_entries(left->entry, right->entry);
-	case LPF_CONFIG_DEVICE_TYPE_LED:
-		return compare_led_entries(left->entry, right->entry);
-	default:
-		return -1;
-	}
-}
-
-static int normalize_platform(const lpf_config_platform_config_t *platform,
-			      lpf_config_device_config_t *devices,
-			      uint32_t *count)
-{
-	*count = TEST_DEVICE_CAPACITY;
-	return lpf_config_normalize_devices(platform, devices, count);
-}
-
 static int test_fake_dt_parser_matches_mock_static_config(void)
 {
 	lpf_config_dt_parse_result_t parsed;
-	lpf_config_device_config_t static_devices[TEST_DEVICE_CAPACITY];
-	lpf_config_device_config_t dt_devices[TEST_DEVICE_CAPACITY];
+	lpf_config_device_config_t
+		static_devices[TEST_LPF_CONFIG_DEVICE_CAPACITY];
+	lpf_config_device_config_t dt_devices[TEST_LPF_CONFIG_DEVICE_CAPACITY];
 	uint32_t static_count;
 	uint32_t dt_count;
 	uint32_t i;
@@ -337,12 +238,15 @@ static int test_fake_dt_parser_matches_mock_static_config(void)
 					 &parsed) != OSAL_SUCCESS)
 		return 1;
 
-	if (expect_string_equal(parsed.platform.platform_name, "linux") ||
-	    expect_string_equal(parsed.platform.chip_name, "x86_64") ||
-	    expect_string_equal(parsed.platform.project_name,
-				"x86_mock_modules") ||
-	    expect_string_equal(parsed.platform.product_name, "kernel") ||
-	    expect_string_equal(parsed.platform.version, "1.0.0")) {
+	if (test_lpf_config_string_equal(parsed.platform.platform_name,
+					 "linux") ||
+	    test_lpf_config_string_equal(parsed.platform.chip_name,
+					 "x86_64") ||
+	    test_lpf_config_string_equal(parsed.platform.project_name,
+					 "x86_mock_modules") ||
+	    test_lpf_config_string_equal(parsed.platform.product_name,
+					 "kernel") ||
+	    test_lpf_config_string_equal(parsed.platform.version, "1.0.0")) {
 		ret = 2;
 		goto out_clear;
 	}
@@ -352,14 +256,15 @@ static int test_fake_dt_parser_matches_mock_static_config(void)
 		goto out_clear;
 	}
 
-	if (normalize_platform(&g_lpf_config_kernel_x86_mock_modules_1_0_0,
-			       static_devices, &static_count) != OSAL_SUCCESS) {
+	if (test_lpf_config_normalize_platform(
+		    &g_lpf_config_kernel_x86_mock_modules_1_0_0, static_devices,
+		    &static_count) != OSAL_SUCCESS) {
 		ret = 4;
 		goto out_clear;
 	}
 
-	if (normalize_platform(&parsed.platform, dt_devices,
-			       &dt_count) != OSAL_SUCCESS) {
+	if (test_lpf_config_normalize_platform(&parsed.platform, dt_devices,
+					       &dt_count) != OSAL_SUCCESS) {
 		ret = 5;
 		goto out_clear;
 	}
@@ -370,7 +275,8 @@ static int test_fake_dt_parser_matches_mock_static_config(void)
 	}
 
 	for (i = 0; i < static_count; i++) {
-		if (compare_devices(&static_devices[i], &dt_devices[i])) {
+		if (test_lpf_config_compare_devices(&static_devices[i],
+						    &dt_devices[i])) {
 			ret = 10 + (int)i;
 			goto out_clear;
 		}
