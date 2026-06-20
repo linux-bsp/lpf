@@ -44,7 +44,7 @@ static void lpf_copy_device_info(const lpf_device_t *device,
 				 lpf_device_info_t *info);
 
 static lpf_driver_node_t *
-lpf_find_driver_node_locked(lpf_device_type_t type)
+lpf_match_driver_by_type_locked(lpf_device_type_t type)
 {
 	lpf_driver_node_t *driver_node;
 
@@ -454,7 +454,7 @@ int32_t lpf_driver_register(const lpf_driver_t *driver)
 		return OSAL_ERR_INVALID_STATE;
 
 	osal_mutex_lock(&g_lpf_core_lock);
-	if (lpf_find_driver_node_locked(driver->type)) {
+	if (lpf_match_driver_by_type_locked(driver->type)) {
 		osal_mutex_unlock(&g_lpf_core_lock);
 		return OSAL_ERR_ALREADY_EXISTS;
 	}
@@ -475,7 +475,7 @@ int32_t lpf_driver_register(const lpf_driver_t *driver)
 	driver_node->driver = driver;
 
 	osal_mutex_lock(&g_lpf_core_lock);
-	if (lpf_find_driver_node_locked(driver->type)) {
+	if (lpf_match_driver_by_type_locked(driver->type)) {
 		osal_mutex_unlock(&g_lpf_core_lock);
 		if (driver->exit)
 			driver->exit();
@@ -533,7 +533,7 @@ int32_t lpf_device_register(const lpf_device_config_t *config)
 		osal_mutex_unlock(&g_lpf_core_lock);
 		return OSAL_ERR_ALREADY_EXISTS;
 	}
-	driver_node = lpf_find_driver_node_locked(config->type);
+	driver_node = lpf_match_driver_by_type_locked(config->type);
 	driver = driver_node ? driver_node->driver : NULL;
 	osal_mutex_unlock(&g_lpf_core_lock);
 

@@ -31,9 +31,13 @@ typedef enum {
 typedef uint64_t lpf_capability_t;
 
 typedef struct {
+	/* Match key used to find the registered LPF driver. */
 	lpf_device_type_t type;
+	/* Stable instance index within one LPF device type. */
 	uint32_t index;
+	/* Typed configuration payload owned by the runtime config driver. */
 	const void *entry;
+	/* Optional configured name; Core falls back to driver name + index. */
 	const char *name;
 	lpf_capability_t capabilities;
 } lpf_device_config_t;

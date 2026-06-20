@@ -43,6 +43,9 @@ explicitly documented as a transitional compatibility path.
 
 - May own LPF device/driver lifecycle, discovery, events, and shared runtime node
   helpers.
+- Acts as the LPF-owned device model / pseudo bus. Matching is by
+  `lpf_device_type_t`; `lpf_device_register()` binds a configured device to the
+  already registered driver with the same type and calls `probe()`.
 - May own reusable infrastructure wrappers for chrdev, sysfs, procfs, and
   debugfs.
 - Owns its global lifecycle in `lpf_core.ko` module init/exit; public Core APIs
@@ -75,11 +78,11 @@ explicitly documented as a transitional compatibility path.
 
 ### Runtime Config
 
-- Owns backend selection, validation, and normalized device list generation.
+- Owns backend selection, validation, and configured-device node generation.
 - Backends may read static tables, Device Tree, module parameters, or future
   board-profile sources.
-- LPF Core and peripheral services must consume normalized config output, not
-  concrete backend symbols.
+- Runtime config drivers must consume configured-device nodes, not concrete
+  backend symbols. LPF Core consumes only `lpf_device_config_t`.
 
 ## Forbidden Patterns
 

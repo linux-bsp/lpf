@@ -74,6 +74,12 @@ such as driver registration, device registration, and event subscription require
 `osal.ko` and `lpf_core.ko`; if Core is not ready, runtime initialization fails
 instead of initializing Core implicitly.
 
+LPF Core matching is type-based in v1: one `lpf_driver_t` owns one
+`lpf_device_type_t`, and `lpf_device_register()` binds a configured device to
+the registered driver with the same type before calling `probe()`.
+Compatible-string matching belongs in runtime config only if multiple config
+drivers need to share one LPF config device type in the future.
+
 ## Runtime Access Model
 
 - `/dev/lpf_ctl` is the Core-owned control and discovery node.

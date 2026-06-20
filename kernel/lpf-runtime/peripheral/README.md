@@ -32,6 +32,26 @@ operation handlers. LPF protocol encode/decode helpers are also provided by
 `lpf_core.ko` for services that need framed communication.
 LPF device discovery is provided by the LPF Core control node `/dev/lpf_ctl`.
 
+## LPF Device Model
+
+LPF Core is the LPF-owned device model / pseudo bus. It does not expose a separate physical bus layer, and peripheral services should not create one.
+The current match rule is intentionally simple: one registered `lpf_driver_t`
+owns one `lpf_device_type_t`, and `lpf_device_register()` binds a configured
+device to the driver with the same type before calling `probe()`.
+
+Configured-device probing follows this order:
+
+1. `lpf_core.ko` initializes the LPF device model.
+2. `lpf_runtime.ko` initializes runtime core entries and LPF HW.
+3. Peripheral services register their `lpf_driver_t` objects with LPF Core.
+4. Runtime config loads the active board description and exposes device nodes.
+5. Runtime walks enabled config nodes and dispatches them to peripheral config
+   drivers.
+6. Each peripheral config driver creates an `lpf_device_config_t` and calls
+   `lpf_device_register()`.
+7. LPF Core matches by LPF device type and calls the peripheral service
+   `probe()`.
+
 ## Configuration
 
 ```text

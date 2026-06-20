@@ -86,9 +86,24 @@ PDI userspace API
     ↓
 LPF peripheral service
     ↓
-LPF runtime config + LPF Core + LPF HW APIs
+LPF Core device model + LPF HW APIs
     ↓
 Linux kernel subsystem / hardware
+```
+
+Kernel-side device creation is driven by runtime config before userspace opens
+an instance node:
+
+```text
+static config / Device Tree
+    ↓
+configured-device node table
+    ↓
+peripheral config driver
+    ↓
+lpf_device_register()
+    ↓
+LPF Core type match + service probe
 ```
 
 Each userspace-visible peripheral should have a matching UAPI header and PDI

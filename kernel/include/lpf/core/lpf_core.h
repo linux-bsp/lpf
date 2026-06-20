@@ -6,6 +6,12 @@
 #include "lpf/core/lpf_device.h"
 #include "lpf/core/lpf_driver.h"
 
+/*
+ * LPF Core is the LPF-owned device model. Runtime/peripheral code registers
+ * LPF drivers and configured LPF devices here.
+ * Core matches devices to drivers by LPF device type and calls probe/remove.
+ */
+
 typedef struct lpf_device_handle lpf_device_handle_t;
 
 typedef enum {
@@ -30,6 +36,7 @@ int32_t lpf_driver_register(const lpf_driver_t *driver);
 void lpf_driver_unregister(const lpf_driver_t *driver);
 void lpf_driver_unregister_all(void);
 
+/* Registers one configured LPF device and binds it to the matching driver. */
 int32_t lpf_device_register(const lpf_device_config_t *config);
 void lpf_device_unregister_all(void);
 const lpf_device_t *lpf_device_find(lpf_device_type_t type, uint32_t index);

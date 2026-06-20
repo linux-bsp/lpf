@@ -226,16 +226,16 @@ Acceptance:
 
 ### Phase 8: Document And Harden The LPF Driver Model
 
-- [ ] Document LPF Core as the LPF device model / pseudo bus in the runtime and
+- [x] Document LPF Core as the LPF device model / pseudo bus in the runtime and
       peripheral README files.
-- [ ] Document the expected ordering: core init, peripheral driver
+- [x] Document the expected ordering: core init, peripheral driver
       registration, config load, device-node traversal, device registration,
       Core match, and driver probe.
-- [ ] Define match rules explicitly: initially by LPF device type, with a path
+- [x] Define match rules explicitly: initially by LPF device type, with a path
       to add compatible-string matching only when needed.
-- [ ] Audit exported Core APIs so names and comments reflect device-model
+- [x] Audit exported Core APIs so names and comments reflect device-model
       ownership rather than ad hoc registries.
-- [ ] Avoid introducing a separate physical `bus` or `transport` layer unless a
+- [x] Avoid introducing a separate physical `bus` or `transport` layer unless a
       concrete future requirement needs it.
 
 Acceptance:

@@ -47,7 +47,7 @@ Linux kernel / hardware
 - LPF Kernel Compat isolates Linux kernel API differences below the generic
   Linux SoC adapter.
 - LPF runtime config selects a kernel-side platform configuration backend and
-  exposes a normalized device list to the runtime.
+  exposes configured-device nodes to the runtime.
 - LPF peripheral services provide kernel-side peripheral business behavior.
 - LPF protocol helpers provide kernel-side packet framing for services that use
   framed peripheral communication.
@@ -127,12 +127,11 @@ vendor BSP APIs directly.
 
 LPF runtime config owns kernel-side platform hardware configuration
 aggregation. It selects a backend, validates the active platform, and exposes
-enabled configured-device nodes in one normalized list. Backend selection is
+enabled configured-device nodes in one ordered table. Backend selection is
 controlled by the `backend` module parameter on `lpf_runtime.ko`: `auto` tries
 the built-in static table first and falls back to Device Tree, while `static`
 and `dt` require a specific backend and do not fall back. The source still uses
-transitional
-`lpf_config_*` names, but the code is linked into the LPF runtime
+transitional `lpf_config_*` names, but the code is linked into the LPF runtime
 instead of a standalone config module. Future board-profile or product-selection
 backends should produce the same runtime config model before LPF peripheral
 configuration sees the data. Public kernel-internal runtime config headers live
@@ -165,7 +164,7 @@ lives under `kernel/lpf-core/protocol/`, exports encode/decode entry points from
 `lpf_runtime.ko` owns the current integration module load/unload
 entry points. It calls the LPF runtime entry, which owns LPF Core
 initialization order, per-service registration, configured-device probing, and
-runtime config-to-LPF mapping orchestration.
+runtime config node-to-LPF-device orchestration.
 Business operations stay on LPF instance nodes such as `/dev/lpf/mcu0` and
 `/dev/lpf/led0`; LPF service status snapshots live under `/proc/lpf/`.
 
@@ -226,16 +225,18 @@ lpf_runtime.ko
 
 `lpf_runtime.ko` hosts the current LPF runtime. The
 runtime includes the configuration backend and LPF HW hardware access objects,
-consumes runtime config entries, registers the current framework-hosted
-peripheral services, maps enabled config entries to LPF devices, and lets LPF
-Core probe the matching registered service for each configured peripheral.
+registers the current framework-hosted peripheral services, walks enabled
+configured-device nodes, dispatches each node to a peripheral config driver,
+and lets LPF Core probe the matching registered service for each configured
+peripheral.
 
 ## Adding A Peripheral
 
 Add the following pieces together:
 
-- Runtime config type and platform config array entry.
-- LPF device type and capability mapping for the runtime config entry.
+- Runtime config type and configured-device node payload.
+- LPF config device-node payload and runtime config driver.
+- LPF device type and capability mapping for the configured node.
 - LPF service driver object registered with `lpf_driver_register`.
 - Optional LPF instance character device `/dev/lpf/<peripheral><index>` when
   userspace access is needed.
@@ -281,8 +282,8 @@ coverage together so the ABI and build configuration remain consistent.
 - Core modules do not depend on product/application code.
 - Dependencies point downward through the layer stack.
 - Product-specific behavior belongs outside shared framework module directories.
-- Kernel hardware configuration is selected through LPF runtime config backends and
-  consumed by LPF peripheral configuration through the normalized device list,
+- Kernel hardware configuration is selected through LPF runtime config backends,
+  consumed by LPF peripheral config drivers through configured-device nodes,
   then mapped into LPF Core device configs.
 - LPF HW APIs should call LPF SoC Adapter APIs for SoC-backed hardware
   capabilities.

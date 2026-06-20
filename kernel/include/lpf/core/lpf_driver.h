@@ -7,6 +7,7 @@
 
 typedef struct lpf_driver {
 	const char *name;
+	/* Match key used by LPF Core. One driver owns one LPF device type. */
 	lpf_device_type_t type;
 	lpf_capability_t capabilities;
 	int (*init)(void);

@@ -663,16 +663,21 @@ out:
 static int test_core_lifecycle_is_module_owned(void)
 {
 	char *core_header;
+	char *driver_header;
+	char *device_header;
 	char *core_source;
 	char *runtime_source;
 	int failures = 0;
 
 	core_header = read_source_file("kernel/include/lpf/core/lpf_core.h");
+	driver_header = read_source_file("kernel/include/lpf/core/lpf_driver.h");
+	device_header = read_source_file("kernel/include/lpf/core/lpf_device.h");
 	core_source = read_source_file("kernel/lpf-core/core/lpf_core.c");
 	runtime_source = read_source_file(
 		"kernel/lpf-runtime/runtime/lpf_runtime.c");
 
-	if (!core_header || !core_source || !runtime_source) {
+	if (!core_header || !driver_header || !device_header || !core_source ||
+	    !runtime_source) {
 		fprintf(stderr, "failed to read core lifecycle sources\n");
 		failures = 1;
 		goto out;
@@ -707,10 +712,22 @@ static int test_core_lifecycle_is_module_owned(void)
 		"lpf_core_init");
 	failures += expect_not_contains("lpf_runtime.c", runtime_source,
 					"lpf_core_init");
+	failures += expect_contains("lpf_core.h", core_header,
+				    "LPF-owned device model");
+	failures += expect_contains("lpf_core.h", core_header,
+				    "matches devices to drivers by LPF device type");
+	failures += expect_contains("lpf_driver.h", driver_header,
+				    "Match key used by LPF Core");
+	failures += expect_contains("lpf_device.h", device_header,
+				    "Match key used to find the registered LPF driver");
+	failures += expect_contains("lpf_core.c", core_source,
+				    "lpf_match_driver_by_type_locked");
 
 out:
 	free(runtime_source);
 	free(core_source);
+	free(device_header);
+	free(driver_header);
 	free(core_header);
 	return failures ? 1 : 0;
 }
@@ -753,6 +770,34 @@ out:
 	return failures ? 1 : 0;
 }
 
+static int test_no_separate_bus_layer(void)
+{
+	char *plan;
+	char *peripheral_readme;
+	int failures = 0;
+
+	plan = read_source_file("docs/LPF_ARCHITECTURE_REFACTOR_PLAN.md");
+	peripheral_readme = read_source_file(
+		"kernel/lpf-runtime/peripheral/README.md");
+	if (!plan || !peripheral_readme) {
+		fprintf(stderr, "failed to read bus-layer policy docs\n");
+		failures = 1;
+		goto out;
+	}
+
+	failures += expect_path_absent("kernel/lpf-core/bus");
+	failures += expect_path_absent("kernel/lpf-runtime/bus");
+	failures += expect_contains("LPF_ARCHITECTURE_REFACTOR_PLAN.md", plan,
+				    "do not create extra");
+	failures += expect_contains("peripheral/README.md", peripheral_readme,
+				    "does not expose a separate physical bus layer");
+
+out:
+	free(peripheral_readme);
+	free(plan);
+	return failures ? 1 : 0;
+}
+
 int main(void)
 {
 	int ret = 0;
@@ -768,6 +813,7 @@ int main(void)
 	ret += test_runtime_entries_are_classed();
 	ret += test_core_lifecycle_is_module_owned();
 	ret += test_instance_devnode_mode_policy();
+	ret += test_no_separate_bus_layer();
 
 	return ret ? EXIT_FAILURE : EXIT_SUCCESS;
 }
