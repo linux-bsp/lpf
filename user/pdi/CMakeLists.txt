@@ -8,6 +8,7 @@ list(APPEND ADD_PUBLIC_HEADER_DIRS "${SDK_PATH}/uapi")
 list(APPEND ADD_SRCS "src/pdi_discovery.c")
 list(APPEND ADD_SRCS "src/pdi_mcu.c")
 list(APPEND ADD_SRCS "src/pdi_led.c")
+list(APPEND ADD_SRCS "src/pdi_syscall.c")
 ###############################################
 
 ###### Add required/dependent components ######

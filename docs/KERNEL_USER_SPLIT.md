@@ -78,7 +78,9 @@ wrapper. For example, MCU uses `/dev/lpf/mcu0`, `uapi/lpf/lpf_mcu.h`, and
 
 The previous userspace test product was removed. New tests live under
 `tests/` with explicit CMake/CTest integration; UAPI layout checks and PDI
-userspace smoke tests currently run through `make tests`.
+userspace smoke tests currently run through `make tests`. PDI operation-path
+tests use an internal syscall mock boundary so ioctl marshaling can be
+validated without requiring live LPF device nodes.
 
 ## Include Rules
 

@@ -459,8 +459,12 @@ Current status:
 - Started. PDI userspace tests now cover open/close context validation,
   missing-device failures, stable-name input validation, and basic
   validation/error paths for control, MCU, and LED APIs.
+- Done. PDI operation-path tests now use an internal syscall mock boundary to
+  validate stable-name discovery, generated instance-node paths, MCU ioctl
+  payloads, LED ioctl payloads, and close handling without requiring live LPF
+  device nodes.
 - Remaining work: add mock HAL/backend coverage, dummy peripheral services,
-  mock ioctl operation-path PDI tests, and multi-kernel matrix builds.
+  and multi-kernel matrix builds.
 
 ## Recommended Implementation Order
 

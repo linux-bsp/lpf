@@ -55,7 +55,8 @@ APIs from higher layers, but non-Linux ports are outside the current direction.
 
 The previous userspace test product has been removed. New tests now live under
 `tests/` with CMake/CTest integration. Current coverage includes UAPI ABI
-layout checks and PDI userspace API validation/error-path smoke tests.
+layout checks, PDI userspace API validation/error-path smoke tests, and
+syscall-mocked PDI ioctl operation-path tests.
 
 ## Quick Start
 

@@ -4,11 +4,10 @@
 
 #include "pdi/pdi_discovery.h"
 #include "pdi_error.h"
+#include "pdi_syscall.h"
 
 #include <fcntl.h>
 #include <string.h>
-#include <sys/ioctl.h>
-#include <unistd.h>
 
 static int32_t pdi_ctl_ioctl_checked(pdi_ctl_context_t *ctx,
 				     unsigned long request, void *arg)
@@ -18,7 +17,7 @@ static int32_t pdi_ctl_ioctl_checked(pdi_ctl_context_t *ctx,
 	if (pdi_check_fd(ctx->fd) < 0)
 		return PDI_FAILURE;
 
-	return pdi_result_from_syscall(ioctl(ctx->fd, request, arg));
+	return pdi_result_from_syscall(pdi_syscall_ioctl(ctx->fd, request, arg));
 }
 
 int32_t pdi_ctl_open(pdi_ctl_context_t *ctx, const char *device_path)
@@ -30,7 +29,7 @@ int32_t pdi_ctl_open(pdi_ctl_context_t *ctx, const char *device_path)
 
 	ctx->fd = -1;
 	path = (device_path != NULL) ? device_path : LPF_CTL_DEFAULT_DEVICE;
-	ctx->fd = open(path, O_RDWR | O_CLOEXEC);
+	ctx->fd = pdi_syscall_open(path, O_RDWR | O_CLOEXEC);
 	if (ctx->fd < 0)
 		return PDI_FAILURE;
 
@@ -46,7 +45,7 @@ int32_t pdi_ctl_close(pdi_ctl_context_t *ctx)
 	if (pdi_check_fd(ctx->fd) < 0)
 		return PDI_FAILURE;
 
-	ret = close(ctx->fd);
+	ret = pdi_syscall_close(ctx->fd);
 	ctx->fd = -1;
 	return pdi_result_from_syscall(ret);
 }

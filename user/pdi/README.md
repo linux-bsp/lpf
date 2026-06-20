@@ -31,6 +31,11 @@ Internal validation maps null pointers to `EINVAL`, invalid or closed contexts
 to `EBADF`, and stable-name type mismatches to `ENODEV`. System call failures
 from `open`, `ioctl`, and `close` preserve the kernel/libc `errno` value.
 
+The PDI implementation routes `open`, `ioctl`, and `close` through an internal
+syscall boundary. Production builds use libc directly, while tests can replace
+that boundary to validate ioctl marshaling and operation paths without live LPF
+device nodes.
+
 UAPI and ABI rules for new peripherals are documented in
 `docs/LPF_UAPI_ABI.md`.
 
