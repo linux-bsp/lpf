@@ -265,6 +265,9 @@ coverage together so the ABI and build configuration remain consistent.
 - `/dev/lpf_ctl` is a synchronous snapshot and lookup ABI; LPF v1 does not
   expose asynchronous userspace device events.
 - `/dev/lpf/<peripheral><index>` nodes are the stable per-instance business ABI.
+- `/dev/lpf/<peripheral><index>` node permissions are controlled by
+  `CONFIG_LPF_INSTANCE_DEVNODE_MODE`, which defaults to `0660`; products should
+  use udev, devtmpfs policy, or init scripts to assign the intended group.
 - `/sys/class/misc/<device>/` attributes are read-only per-instance sysfs
   inspection data, including runtime `state`, `last_error`, and `error_count`.
 - LPF discovery snapshots report the same runtime `state`, `last_error`, and

@@ -26,9 +26,6 @@ typedef struct {
 typedef void (*lpf_device_event_callback_t)(
 	const lpf_device_event_t *event, void *user_data);
 
-int32_t lpf_core_init(void);
-void lpf_core_deinit(void);
-
 int32_t lpf_driver_register(const lpf_driver_t *driver);
 void lpf_driver_unregister(const lpf_driver_t *driver);
 void lpf_driver_unregister_all(void);

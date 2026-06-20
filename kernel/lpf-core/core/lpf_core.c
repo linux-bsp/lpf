@@ -303,7 +303,7 @@ static void lpf_make_device_name(lpf_device_t *device,
 		      device->config.index);
 }
 
-int32_t lpf_core_init(void)
+static int32_t lpf_core_init(void)
 {
 	int32_t ret;
 
@@ -349,8 +349,6 @@ int32_t lpf_core_init(void)
 
 	return OSAL_SUCCESS;
 }
-EXPORT_SYMBOL_GPL(lpf_core_init);
-
 void lpf_device_unregister_all(void)
 {
 	lpf_device_node_t *device_node;
@@ -431,7 +429,7 @@ void lpf_driver_unregister_all(void)
 }
 EXPORT_SYMBOL_GPL(lpf_driver_unregister_all);
 
-void lpf_core_deinit(void)
+static void lpf_core_deinit(void)
 {
 	if (!g_lpf_core_ready)
 		return;
@@ -445,8 +443,6 @@ void lpf_core_deinit(void)
 	osal_mutex_destroy(&g_lpf_core_lock);
 	g_lpf_core_ready = false;
 }
-EXPORT_SYMBOL_GPL(lpf_core_deinit);
-
 int32_t lpf_driver_register(const lpf_driver_t *driver)
 {
 	lpf_driver_node_t *driver_node;
@@ -454,9 +450,8 @@ int32_t lpf_driver_register(const lpf_driver_t *driver)
 
 	if (!driver || driver->type == LPF_DEVICE_TYPE_INVALID || !driver->probe)
 		return OSAL_ERR_INVALID_PARAM;
-
-	if (lpf_core_init() != OSAL_SUCCESS)
-		return OSAL_ERR_GENERIC;
+	if (!g_lpf_core_ready)
+		return OSAL_ERR_INVALID_STATE;
 
 	osal_mutex_lock(&g_lpf_core_lock);
 	if (lpf_find_driver_node_locked(driver->type)) {
@@ -530,9 +525,8 @@ int32_t lpf_device_register(const lpf_device_config_t *config)
 
 	if (!config || config->type == LPF_DEVICE_TYPE_INVALID)
 		return OSAL_ERR_INVALID_PARAM;
-
-	if (lpf_core_init() != OSAL_SUCCESS)
-		return OSAL_ERR_GENERIC;
+	if (!g_lpf_core_ready)
+		return OSAL_ERR_INVALID_STATE;
 
 	osal_mutex_lock(&g_lpf_core_lock);
 	if (lpf_find_device_node_locked(config->type, config->index)) {
@@ -977,10 +971,8 @@ int32_t lpf_device_event_subscribe(lpf_device_event_callback_t callback,
 
 	if (!callback)
 		return OSAL_ERR_INVALID_PARAM;
-
-	ret = lpf_core_init();
-	if (ret != OSAL_SUCCESS)
-		return ret;
+	if (!g_lpf_core_ready)
+		return OSAL_ERR_INVALID_STATE;
 
 	subscriber = osal_zalloc(sizeof(*subscriber));
 	if (!subscriber)

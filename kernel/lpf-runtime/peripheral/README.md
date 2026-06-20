@@ -120,16 +120,17 @@ module implementation.
 
 `lpf_runtime.ko` links the current framework-hosted LPF peripheral
 service paths. During module initialization the runtime module calls
-`lpf_runtime_init()`. The LPF
-runtime initializes LPF Core, walks the linked LPF peripheral entry
-section, and initializes each entry. Feature objects such as MCU, LED, or
-runtime selftests are selected with Kbuild `obj-$(CONFIG_...)`; if an object is
-not linked, its section entry is absent and the runtime has no feature-specific
-branch to maintain. The runtime then loads runtime config, maps each enabled
-normalized runtime config device entry into an `lpf_device_config_t`, and
-registers it with LPF Core. The module entry does not depend on the concrete
-runtime config backend, service registration order, or per-device capability
-mapping. LPF Core then binds the configured device to the matching service
+`lpf_runtime_init()`. `lpf_runtime.ko` depends on `lpf_core.ko`; it does not
+initialize Core itself. The runtime initializes LPF HW, walks the linked LPF
+peripheral entry section, and initializes each entry. Feature objects such as
+MCU, LED, or runtime selftests are selected with Kbuild `obj-$(CONFIG_...)`; if
+an object is not linked, its section entry is absent and the runtime has no
+feature-specific branch to maintain. The runtime then loads runtime config,
+maps each enabled normalized runtime config device entry into an
+`lpf_device_config_t`, and registers it with LPF Core. If entry initialization
+fails, already initialized entries and LPF HW are unwound. If configured-device
+probing fails, already registered devices are unregistered before config and HW
+cleanup. LPF Core then binds the configured device to the matching service
 `probe`. On unload, LPF Core removes devices before driver global resources are
 released.
 
@@ -140,6 +141,12 @@ LPF Core active-device handle, and closing the file releases it. Device removal
 therefore stops new opens first, waits for active instance handles to drain,
 and then calls the peripheral service `remove` callback. The concrete node
 implementation is shared through `lpf_chrdev`.
+
+Instance node permissions are set by `CONFIG_LPF_INSTANCE_DEVNODE_MODE`, which
+defaults to `0660`. Product builds should keep the framework default
+conservative and assign group ownership with udev, devtmpfs policy, or their
+init system. Development-only builds can override the mode when broad local
+access is intentional.
 
 MCU and LED services keep their runtime operation contexts in service-owned
 dynamic registries keyed by LPF device index. The current

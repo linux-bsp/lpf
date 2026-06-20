@@ -71,12 +71,23 @@ peripheral services, transports, and configured-device probing. It should remain
 an integrated framework runtime instead of splitting one kernel module per
 peripheral service.
 
+Core lifecycle ownership is module-scoped: only `lpf_core.ko` module
+initialization and exit create or destroy Core global state. Public Core APIs
+such as driver registration, device registration, and event subscription require
+`lpf_core.ko` to be loaded first. `lpf_runtime.ko` declares a soft dependency on
+`osal.ko` and `lpf_core.ko`; if Core is not ready, runtime initialization fails
+instead of initializing Core implicitly.
+
 ## Runtime Access Model
 
 - `/dev/lpf_ctl` is the Core-owned control and discovery node.
 - `/dev/lpf_ctl` exposes synchronous device snapshots; LPF v1 keeps device
   event notification kernel-only.
 - `/dev/lpf/<type><index>` is the per-instance business ABI.
+- Per-instance LPF nodes default to `0660` through
+  `CONFIG_LPF_INSTANCE_DEVNODE_MODE`; products should assign group ownership
+  with udev, devtmpfs policy, or their init system rather than broadening the
+  framework default.
 - Sysfs attributes are read-only runtime inspection data.
 - Debugfs files are debug command channels and are not stable product ABI.
 - Procfs files are read-only service status snapshots.

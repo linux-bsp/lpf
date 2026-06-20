@@ -20,6 +20,18 @@ menuconfig LPF_CORE
 
 if LPF_CORE
 
+config LPF_INSTANCE_DEVNODE_MODE
+	string "LPF instance device node mode"
+	default "0660"
+	help
+	  Octal permission mode applied to per-instance LPF misc device nodes
+	  under /dev/lpf/, such as /dev/lpf/mcu0 and /dev/lpf/led0.
+
+	  Product builds should keep this conservative and assign device group
+	  ownership with udev, devtmpfs policy, or the product init system.
+	  Development-only builds that intentionally need broad local access can
+	  override this to "0666".
+
 choice
 	prompt "Default LPF SoC adapter"
 	default LPF_SOC_ADAPTER_GENERIC_LINUX

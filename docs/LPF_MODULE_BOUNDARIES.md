@@ -50,6 +50,11 @@ explicitly documented as a transitional compatibility path.
   helpers.
 - May own reusable infrastructure wrappers for chrdev, sysfs, procfs, and
   debugfs.
+- Owns its global lifecycle in `lpf_core.ko` module init/exit; public Core APIs
+  must require initialized state instead of calling Core init implicitly.
+- Owns shared LPF character-device node policy. Instance nodes under
+  `/dev/lpf/` use `CONFIG_LPF_INSTANCE_DEVNODE_MODE`, while product-specific
+  ownership such as group assignment belongs in udev/devtmpfs/init policy.
 - Must not depend on concrete runtime config backends or product tables.
 
 ### LPF HW

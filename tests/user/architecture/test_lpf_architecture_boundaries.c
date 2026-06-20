@@ -89,6 +89,39 @@ static int expect_not_contains(const char *file_name, const char *content,
 	return 1;
 }
 
+static int expect_range_not_contains(const char *file_name,
+				     const char *content,
+				     const char *start_token,
+				     const char *end_token,
+				     const char *needle)
+{
+	const char *start;
+	const char *end;
+	const char *found;
+
+	start = strstr(content, start_token);
+	if (!start) {
+		fprintf(stderr, "%s: missing range start: %s\n", file_name,
+			start_token);
+		return 1;
+	}
+
+	end = strstr(start, end_token);
+	if (!end) {
+		fprintf(stderr, "%s: missing range end: %s\n", file_name,
+			end_token);
+		return 1;
+	}
+
+	found = strstr(start, needle);
+	if (!found || found >= end)
+		return 0;
+
+	fprintf(stderr, "%s: forbidden token present in range %s: %s\n",
+		file_name, start_token, needle);
+	return 1;
+}
+
 static int test_service_context_registries(void)
 {
 	char *mcu_service;
@@ -366,6 +399,99 @@ out:
 	return failures ? 1 : 0;
 }
 
+static int test_core_lifecycle_is_module_owned(void)
+{
+	char *core_header;
+	char *core_source;
+	char *runtime_source;
+	int failures = 0;
+
+	core_header = read_source_file("kernel/include/lpf/core/lpf_core.h");
+	core_source = read_source_file("kernel/lpf-core/core/lpf_core.c");
+	runtime_source = read_source_file(
+		"kernel/lpf-runtime/runtime/lpf_runtime.c");
+
+	if (!core_header || !core_source || !runtime_source) {
+		fprintf(stderr, "failed to read core lifecycle sources\n");
+		failures = 1;
+		goto out;
+	}
+
+	failures += expect_not_contains("lpf_core.h", core_header,
+					"lpf_core_init");
+	failures += expect_not_contains("lpf_core.h", core_header,
+					"lpf_core_deinit");
+	failures += expect_contains("lpf_core.c", core_source,
+				    "static int32_t lpf_core_init(void)");
+	failures += expect_contains("lpf_core.c", core_source,
+				    "static void lpf_core_deinit(void)");
+	failures += expect_not_contains("lpf_core.c", core_source,
+					"EXPORT_SYMBOL_GPL(lpf_core_init)");
+	failures += expect_not_contains("lpf_core.c", core_source,
+					"EXPORT_SYMBOL_GPL(lpf_core_deinit)");
+	failures += expect_range_not_contains(
+		"lpf_core.c", core_source,
+		"int32_t lpf_driver_register(const lpf_driver_t *driver)",
+		"EXPORT_SYMBOL_GPL(lpf_driver_register);",
+		"lpf_core_init");
+	failures += expect_range_not_contains(
+		"lpf_core.c", core_source,
+		"int32_t lpf_device_register(const lpf_device_config_t *config)",
+		"EXPORT_SYMBOL_GPL(lpf_device_register);",
+		"lpf_core_init");
+	failures += expect_range_not_contains(
+		"lpf_core.c", core_source,
+		"int32_t lpf_device_event_subscribe",
+		"EXPORT_SYMBOL_GPL(lpf_device_event_subscribe);",
+		"lpf_core_init");
+	failures += expect_not_contains("lpf_runtime.c", runtime_source,
+					"lpf_core_init");
+
+out:
+	free(runtime_source);
+	free(core_source);
+	free(core_header);
+	return failures ? 1 : 0;
+}
+
+static int test_instance_devnode_mode_policy(void)
+{
+	char *core_config;
+	char *chrdev_source;
+	int failures = 0;
+
+	core_config = read_source_file("kernel/lpf-core/Config.in");
+	chrdev_source = read_source_file("kernel/lpf-core/core/lpf_chrdev.c");
+
+	if (!core_config || !chrdev_source) {
+		fprintf(stderr, "failed to read instance devnode policy sources\n");
+		failures = 1;
+		goto out;
+	}
+
+	failures += expect_contains("Config.in", core_config,
+				    "config LPF_INSTANCE_DEVNODE_MODE");
+	failures += expect_contains("Config.in", core_config,
+				    "default \"0660\"");
+	failures += expect_contains("lpf_chrdev.c", chrdev_source,
+				    "CONFIG_LPF_INSTANCE_DEVNODE_MODE");
+	failures += expect_contains("lpf_chrdev.c", chrdev_source,
+				    "LPF_INSTANCE_DEVNODE_MODE_FALLBACK 0660");
+	failures += expect_contains("lpf_chrdev.c", chrdev_source,
+				    "lpf_chrdev_parse_mode");
+	failures += expect_contains("lpf_chrdev.c", chrdev_source,
+				    "lpf_chrdev_instance_mode()");
+	failures += expect_contains("lpf_chrdev.c", chrdev_source,
+				    "LPF_CTL_DEVNODE_MODE");
+	failures += expect_not_contains("lpf_chrdev.c", chrdev_source,
+					"chrdev->miscdev.mode = 0666;");
+
+out:
+	free(chrdev_source);
+	free(core_config);
+	return failures ? 1 : 0;
+}
+
 int main(void)
 {
 	int ret = 0;
@@ -376,6 +502,8 @@ int main(void)
 	ret += test_soc_adapter_header_dependencies();
 	ret += test_runtime_config_mapping_is_registered();
 	ret += test_runtime_entries_are_classed();
+	ret += test_core_lifecycle_is_module_owned();
+	ret += test_instance_devnode_mode_policy();
 
 	return ret ? EXIT_FAILURE : EXIT_SUCCESS;
 }

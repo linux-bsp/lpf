@@ -9,10 +9,50 @@
 #include "lpf/soc/lpf_soc_adapter.h"
 #include "lpf_sysfs.h"
 
+#ifndef CONFIG_LPF_INSTANCE_DEVNODE_MODE
+#define CONFIG_LPF_INSTANCE_DEVNODE_MODE "0660"
+#endif
+
+#define LPF_CTL_DEVNODE_MODE 0666
+#define LPF_INSTANCE_DEVNODE_MODE_FALLBACK 0660
+
 typedef struct {
 	lpf_chrdev_t *chrdev;
 	lpf_device_handle_t *device_handle;
 } lpf_chrdev_file_ctx_t;
+
+static bool lpf_chrdev_parse_mode(const char *text, umode_t *mode)
+{
+	const char *cursor;
+	umode_t value = 0;
+
+	if (!text || !mode || !text[0])
+		return false;
+
+	for (cursor = text; *cursor; cursor++) {
+		if (*cursor < '0' || *cursor > '7')
+			return false;
+
+		value = (value << 3) | (umode_t)(*cursor - '0');
+		if (value > 0777)
+			return false;
+	}
+
+	*mode = value;
+	return true;
+}
+
+static umode_t lpf_chrdev_instance_mode(void)
+{
+	umode_t mode;
+
+	if (lpf_chrdev_parse_mode(CONFIG_LPF_INSTANCE_DEVNODE_MODE, &mode))
+		return mode;
+
+	LOG_WARN_ONCE("LPF", "invalid instance devnode mode %s; using 0660",
+		      CONFIG_LPF_INSTANCE_DEVNODE_MODE);
+	return LPF_INSTANCE_DEVNODE_MODE_FALLBACK;
+}
 
 static lpf_chrdev_t *lpf_chrdev_from_private_data(void *private_data)
 {
@@ -210,7 +250,8 @@ int lpf_chrdev_register_lpf_device(lpf_chrdev_t *chrdev, const char *name,
 	chrdev->miscdev.fops = fops;
 	chrdev->miscdev.nodename = nodename ? chrdev->nodename : NULL;
 	chrdev->miscdev.groups = lpf_chrdev_sysfs_groups();
-	chrdev->miscdev.mode = 0666;
+	chrdev->miscdev.mode = nodename ? lpf_chrdev_instance_mode() :
+					   LPF_CTL_DEVNODE_MODE;
 
 	ret = misc_register(&chrdev->miscdev);
 	if (ret) {

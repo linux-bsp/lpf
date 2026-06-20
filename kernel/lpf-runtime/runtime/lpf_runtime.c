@@ -132,10 +132,6 @@ int32_t lpf_runtime_init(void)
 	if (g_lpf_runtime_ready)
 		return OSAL_SUCCESS;
 
-	ret = lpf_core_init();
-	if (ret != OSAL_SUCCESS)
-		return ret;
-
 	ret = lpf_hw_runtime_init();
 	if (ret != OSAL_SUCCESS)
 		return ret;

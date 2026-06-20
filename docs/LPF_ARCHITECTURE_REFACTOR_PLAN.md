@@ -45,15 +45,17 @@ backends extensible without editing central runtime files.
      class order and reverse declaration order within each class.
 
 4. **Core lifecycle ownership is blurred**
-   - LPF Core module initialization and public registration APIs can both call
-     `lpf_core_init()`.
-   - Public APIs should check readiness instead of implicitly owning module
-     initialization.
+   - Fixed by making Core init/deinit private to `lpf_core.ko` module
+     init/exit.
+   - Public Core APIs now require initialized Core state and return invalid
+     state instead of implicitly creating Core global state.
 
 5. **Product security policy is not explicit**
-   - LPF instance misc devices currently default to broad permissions.
-   - Device mode should be configurable and default conservatively for product
-     builds.
+   - Fixed for instance misc devices by adding a configurable
+     `CONFIG_LPF_INSTANCE_DEVNODE_MODE` policy with a conservative `0660`
+     default.
+   - Target-level verification still needs to confirm devtmpfs/udev ownership
+     and read-only observability surfaces on product-like kernels.
 
 ## Refactor Phases
 
@@ -105,10 +107,10 @@ Acceptance:
 
 ### Phase 4: Harden Core Lifecycle And Runtime Ownership
 
-- [ ] Make LPF Core public registration APIs require initialized Core state.
-- [ ] Keep module init/exit as the only owner of Core init/deinit.
-- [ ] Audit runtime failure paths for symmetric cleanup.
-- [ ] Document module load order and failure behavior.
+- [x] Make LPF Core public registration APIs require initialized Core state.
+- [x] Keep module init/exit as the only owner of Core init/deinit.
+- [x] Audit runtime failure paths for symmetric cleanup.
+- [x] Document module load order and failure behavior.
 
 Acceptance:
 - No public Core registration API implicitly initializes Core.
@@ -116,9 +118,9 @@ Acceptance:
 
 ### Phase 5: Productization And Security
 
-- [ ] Make LPF instance device node permissions configurable.
-- [ ] Default product builds to a conservative mode such as `0660`.
-- [ ] Document udev or product policy integration.
+- [x] Make LPF instance device node permissions configurable.
+- [x] Default product builds to a conservative mode such as `0660`.
+- [x] Document udev or product policy integration.
 - [ ] Verify `/dev/lpf/*`, sysfs, procfs, and debugfs behavior on a real or
       target-like kernel.
 
