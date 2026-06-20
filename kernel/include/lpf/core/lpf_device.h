@@ -19,6 +19,7 @@ typedef enum {
 	LPF_DEVICE_TYPE_INVALID = 0x00,
 	LPF_DEVICE_TYPE_MCU = 0x01,
 	LPF_DEVICE_TYPE_LED = 0x02,
+	LPF_DEVICE_TYPE_DUMMY = 0x7F,
 } lpf_device_type_t;
 
 typedef enum {

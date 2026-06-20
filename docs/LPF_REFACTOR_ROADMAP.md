@@ -55,9 +55,9 @@ the target direction.
 
 ### Batch 5: Test System Expansion
 
-- [ ] Add dummy peripheral service tests.
+- [x] Add dummy peripheral service tests.
 - [x] Add mock MCU transport tests.
-- [x] Add module-load automation for mock SoC and LPF HW selftests.
+- [x] Add module-load automation for mock SoC and LPF selftests.
 - [ ] Add ABI and PDI coverage for new peripherals as they are introduced.
 
 ## Guardrails

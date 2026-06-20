@@ -107,8 +107,8 @@ selects the default backend built into `lpf_core.ko`; `kernel/lpf/soc/mock/`
 provides a deterministic mock backend for development and framework tests that
 should not require live hardware. The mock preset can also build
 `lpf_hw_mock_selftest.ko`, which runs LPF HW operation-path checks over
-the mock backend when loaded after
-`lpf_peripheral_runtime.ko`. Future SoC-specific adapters should live under
+the mock backend, and `lpf_dummy_service_selftest.ko`, which runs LPF Core
+dummy service lifecycle checks. Future SoC-specific adapters should live under
 `kernel/lpf/soc/` and must keep vendor BSP calls out of hardware access APIs
 and LPF peripheral services. Public kernel-internal SoC adapter headers live
 under `kernel/include/lpf/soc/`.

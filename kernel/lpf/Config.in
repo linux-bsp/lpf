@@ -129,4 +129,18 @@ menuconfig LPF_LED_SERVICE
 
 source "kernel/lpf/peripheral/led/Config.in"
 
+menu "LPF Test Configuration"
+
+config LPF_DUMMY_SERVICE_SELFTEST
+	bool "Build LPF dummy service self-test module"
+	default n
+	depends on LPF_SOC_ADAPTER_MOCK
+	help
+	  Build lpf_dummy_service_selftest.ko. Loading this module registers
+	  a temporary dummy LPF driver and device to validate LPF Core
+	  lifecycle, discovery, capability lookup, state/error transitions,
+	  event delivery, and removal cleanup without requiring live hardware.
+
+endmenu
+
 endif # LPF_CORE

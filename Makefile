@@ -75,7 +75,8 @@ MODULES_LIST ?= $(strip \
 	$(if $(CONFIG_OSAL),osal) \
 	$(if $(CONFIG_LPF_CORE),lpf_core) \
 	$(if $(CONFIG_LPF_PERIPHERAL_RUNTIME),lpf_peripheral_runtime) \
-	$(if $(CONFIG_LPF_HW_MOCK_SELFTEST),lpf_hw_mock_selftest))
+	$(if $(CONFIG_LPF_HW_MOCK_SELFTEST),lpf_hw_mock_selftest) \
+	$(if $(CONFIG_LPF_DUMMY_SERVICE_SELFTEST),lpf_dummy_service_selftest))
 MODULES_ARTIFACTS = $(addprefix $(MODULES_OUTPUT_DIR)/,$(addsuffix .ko,$(MODULES_LIST)))
 
 # Parallel build auto-detection
@@ -733,7 +734,7 @@ help:
 	@echo '  libs            - Build userspace libraries via CMake'
 	@echo '  modules         - Build kernel modules via kbuild'
 	@echo '  mock-modules-smoke'
-	@echo '                  - Load/unload mock kernel modules and LPF HW selftest'
+	@echo '                  - Load/unload mock kernel modules and LPF selftests'
 	@echo '  tests           - Build and run LPF test targets'
 	@echo '  install         - Install binaries and libraries'
 	@echo '  install_headers - Install development headers only'
@@ -753,7 +754,7 @@ help:
 	@echo '  KERNEL_SRC=<dir> - Kernel build tree for modules target'
 	@echo '  MODULES_BUILD_DIR=<dir> - Output directory for module artifacts'
 	@echo '  MODULES_SRC_DIR=<dir> - Kernel module source directory'
-	@echo '  MODULES_LIST="<list>" - Expected modules (default: osal lpf_core lpf_peripheral_runtime)'
+	@echo '  MODULES_LIST="<list>" - Expected modules derived from enabled kernel module options'
 	@echo '  CMAKE_BUILD_TYPE=<type>'
 	@echo '                  - Set build type: Debug, Release, RelWithDebInfo, MinSizeRel'
 	@echo '  CMAKE_INSTALL_PREFIX=<path>'

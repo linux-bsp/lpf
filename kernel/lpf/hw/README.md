@@ -48,12 +48,13 @@ _build/modules/lpf_peripheral_runtime.ko
 ```
 
 `kernel_x86_mock_modules_defconfig` additionally builds
-`_build/modules/lpf_hw_mock_selftest.ko`.
+`_build/modules/lpf_hw_mock_selftest.ko` and
+`_build/modules/lpf_dummy_service_selftest.ko`.
 
 ## Mock Module Smoke Test
 
 The mock preset can run a load/unload smoke path that exercises the mock SoC
-backend and LPF HW self-test module:
+backend, LPF HW self-test module, and LPF Core dummy service self-test module:
 
 ```bash
 make kernel_x86_mock_modules_defconfig
@@ -62,7 +63,7 @@ sudo make mock-modules-smoke
 ```
 
 The smoke target loads `osal.ko`, `lpf_core.ko`,
-`lpf_peripheral_runtime.ko`, and `lpf_hw_mock_selftest.ko` in order, then
-unloads them in reverse order. It refuses to run if any target module is
-already loaded, so it does not take ownership of modules started by another
-test or by a developer shell.
+`lpf_peripheral_runtime.ko`, `lpf_hw_mock_selftest.ko`, and
+`lpf_dummy_service_selftest.ko` in order, then unloads them in reverse order.
+It refuses to run if any target module is already loaded, so it does not take
+ownership of modules started by another test or by a developer shell.

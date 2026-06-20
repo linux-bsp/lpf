@@ -271,6 +271,9 @@ Current status:
   been removed.
 - Done. `lpf_hw_mock_selftest.ko` exercises LPF HW GPIO, PWM, CAN, UART, I2C,
   and SPI operation paths over the mock SoC backend when the module is loaded.
+- Done. `lpf_dummy_service_selftest.ko` exercises LPF Core dummy service
+  lifecycle, discovery, capability lookup, error/recovery state transitions,
+  event delivery, and removal cleanup when loaded in the mock module preset.
 - Started. LPF HW GPIO no longer uses a fixed global GPIO table; requested GPIO
   contexts are tracked dynamically by GPIO number.
 - Remaining work: continue removing hard-coded global limits where they are not
@@ -601,8 +604,13 @@ Current status:
 - Done. `LPF_HW_MOCK_SELFTEST` builds a load-time kernel self-test module for
   LPF HW operation paths over the mock SoC backend.
 - Started. `make mock-modules-smoke` now automates the mock module load/unload
-  sequence and runs `lpf_hw_mock_selftest.ko`.
-- Remaining work: add dummy peripheral services and multi-kernel matrix builds.
+  sequence and runs `lpf_hw_mock_selftest.ko` plus
+  `lpf_dummy_service_selftest.ko`.
+- Done. `LPF_DUMMY_SERVICE_SELFTEST` builds a load-time kernel self-test module
+  for LPF Core dummy service lifecycle, discovery, state, event, and cleanup
+  coverage.
+- Remaining work: add multi-kernel matrix builds and extend ABI/PDI coverage as
+  new peripherals are introduced.
 
 ## Recommended Implementation Order
 

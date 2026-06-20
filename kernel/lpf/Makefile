@@ -60,4 +60,9 @@ ifeq ($(CONFIG_LPF_HW_MOCK_SELFTEST),y)
 obj-m += lpf_hw_mock_selftest.o
 lpf_hw_mock_selftest-y := lpf/hw/selftest/lpf_hw_mock_selftest.o
 endif
+
+ifeq ($(CONFIG_LPF_DUMMY_SERVICE_SELFTEST),y)
+obj-m += lpf_dummy_service_selftest.o
+lpf_dummy_service_selftest-y := lpf/peripheral/selftest/lpf_dummy_service_selftest.o
+endif
 endif

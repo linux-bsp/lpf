@@ -20,6 +20,8 @@ The runtime module currently provides:
   LEDs linked into `lpf_peripheral_runtime.ko`
 - LPF read-only procfs status nodes under `/proc/lpf/`
 - LPF debugfs command nodes under `/sys/kernel/debug/lpf/`
+- optional `lpf_dummy_service_selftest.ko` for mock-build LPF Core service
+  lifecycle coverage
 
 LPF peripheral services consume `lpf_hw_*` APIs for MCU transport and LED
 GPIO/PWM hardware access. Those hardware access objects are linked into
@@ -56,6 +58,8 @@ kernel/lpf/peripheral/
 ├── lpf_peripheral_config.c
 ├── lpf_peripheral_internal.h
 ├── lpf_peripheral_module.c
+├── selftest/
+│   └── lpf_dummy_service_selftest.c
 ├── mcu/
 │   ├── Config.in
 │   ├── lpf_mcu_service.c
@@ -194,3 +198,11 @@ The protocol layer under `kernel/lpf/protocol/` is a common LPF-owned
 peripheral communication protocol linked into `lpf_core.ko`. It does not own
 module lifecycle; concrete peripheral services such as MCU call it when they
 need framed communication.
+
+## Mock Selftest
+
+Mock module builds can enable `CONFIG_LPF_DUMMY_SERVICE_SELFTEST=y` to build
+`lpf_dummy_service_selftest.ko`. Loading it registers a temporary dummy driver
+and device through LPF Core, then validates lifecycle events, discovery,
+capability lookup, error/recovery state transitions, and unregister cleanup.
+It is a test module only and is not linked into `lpf_peripheral_runtime.ko`.
