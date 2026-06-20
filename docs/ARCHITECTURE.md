@@ -86,9 +86,10 @@ The SoC adapter layer owns hardware backend differences below HAL. The current
 default backend is `generic-linux`, which calls LPF kernel compat wrappers for
 CAN, serial, GPIO, PWM, I2C, and SPI. Kconfig selects the default backend built
 into `lpf_core.ko`; `kernel/lpf/soc/mock/` provides a deterministic mock backend
-for development and framework tests that should not require live hardware.
-Future SoC-specific adapters should live under `kernel/lpf/soc/` and must keep
-vendor BSP calls out of HAL and PDM.
+for development and framework tests that should not require live hardware. The
+mock preset can also build `hal_mock_selftest.ko`, which runs HAL operation-path
+checks over the mock backend when loaded. Future SoC-specific adapters should
+live under `kernel/lpf/soc/` and must keep vendor BSP calls out of HAL and PDM.
 
 ### LPF Kernel Compat
 

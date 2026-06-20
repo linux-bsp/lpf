@@ -232,8 +232,11 @@ Current status:
   APIs instead of Linux subsystem APIs directly.
 - Started. HAL paths can now be built against the mock SoC backend through the
   `LPF_SOC_ADAPTER_MOCK` Kconfig option.
-- Remaining work: remove hard-coded GPIO table limits and add runtime HAL path
-  tests over the mock backend.
+- Started. `hal_mock_selftest.ko` now exercises HAL GPIO, PWM, CAN, serial,
+  I2C, and SPI operation paths over the mock SoC backend when the module is
+  loaded.
+- Remaining work: remove hard-coded GPIO table limits and extend mock backend
+  tests with failure injection and CI/module-load automation.
 
 ## Phase 6: PCONFIG Multi-Backend Model
 
@@ -471,8 +474,10 @@ Current status:
 - Started. Added a Kconfig-selectable mock SoC backend and
   `kernel_x86_mock_modules_defconfig` so kernel module builds can validate HAL
   and peripheral-service integration paths without live hardware.
-- Remaining work: add runtime mock HAL/backend tests, dummy peripheral
-  services, and multi-kernel matrix builds.
+- Started. `HAL_MOCK_SELFTEST` builds a load-time kernel self-test module for
+  HAL operation paths over the mock SoC backend.
+- Remaining work: add dummy peripheral services, module-load automation for
+  mock self-tests, and multi-kernel matrix builds.
 
 ## Recommended Implementation Order
 

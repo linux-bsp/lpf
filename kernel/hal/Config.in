@@ -202,4 +202,23 @@ menuconfig HAL_PWM
 
 endmenu
 
+menu "Self Test Configuration"
+
+config HAL_MOCK_SELFTEST
+	bool "Build HAL mock backend self-test module"
+	depends on LPF_SOC_ADAPTER_MOCK
+	select HAL_CAN
+	select HAL_UART
+	select HAL_I2C
+	select HAL_SPI
+	select HAL_GPIO
+	select HAL_PWM
+	help
+	  Build hal_mock_selftest.ko. Loading this module runs HAL GPIO,
+	  PWM, CAN, serial, I2C, and SPI operation checks through the mock
+	  SoC adapter. It is intended for development and CI configurations
+	  that need no live hardware.
+
+endmenu
+
 endif # HAL

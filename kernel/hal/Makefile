@@ -13,3 +13,8 @@ hal-$(CONFIG_HAL_I2C) += hal/src/hal_i2c.o
 hal-$(CONFIG_HAL_SPI) += hal/src/hal_spi.o
 hal-y += hal/src/hal_builtin_end.o
 endif
+
+ifeq ($(CONFIG_HAL_MOCK_SELFTEST),y)
+obj-m += hal_mock_selftest.o
+hal_mock_selftest-y := hal/selftest/hal_mock_selftest.o
+endif

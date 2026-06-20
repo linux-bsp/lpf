@@ -78,6 +78,17 @@ To build and run the current test targets:
 make tests
 ```
 
+To build the no-hardware kernel mock preset:
+
+```bash
+make kernel_x86_mock_modules_defconfig
+make modules
+```
+
+That preset also builds `hal_mock_selftest.ko`; loading it after `osal.ko`,
+`lpf_core.ko`, and `hal.ko` runs HAL GPIO/PWM/CAN/Serial/I2C/SPI checks through
+the mock SoC adapter.
+
 Kernel module load order is `osal.ko`, `pconfig.ko`, `hal.ko`, then `pdm.ko`.
 
 Generated libraries are written under `_build/lib/`. Kernel modules are written

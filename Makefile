@@ -71,7 +71,13 @@ MODULES_BUILD_DIR ?= _build/modules
 override MODULES_BUILD_DIR := $(patsubst %/,%,$(MODULES_BUILD_DIR))
 MODULES_SRC_DIR ?= $(srctree)/kernel
 MODULES_OUTPUT_DIR ?= $(MODULES_BUILD_DIR)
-MODULES_LIST ?= $(strip $(if $(CONFIG_OSAL),osal) $(if $(CONFIG_LPF_CORE),lpf_core) $(if $(CONFIG_PCONFIG),pconfig) $(if $(CONFIG_HAL),hal) $(if $(CONFIG_PDM),pdm))
+MODULES_LIST ?= $(strip \
+	$(if $(CONFIG_OSAL),osal) \
+	$(if $(CONFIG_LPF_CORE),lpf_core) \
+	$(if $(CONFIG_PCONFIG),pconfig) \
+	$(if $(CONFIG_HAL),hal) \
+	$(if $(CONFIG_PDM),pdm) \
+	$(if $(CONFIG_HAL_MOCK_SELFTEST),hal_mock_selftest))
 MODULES_ARTIFACTS = $(addprefix $(MODULES_OUTPUT_DIR)/,$(addsuffix .ko,$(MODULES_LIST)))
 
 # Parallel build auto-detection
