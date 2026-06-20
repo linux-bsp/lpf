@@ -4,7 +4,13 @@
 
 #include "lpf/lpf_soc_adapter.h"
 
+#if defined(CONFIG_LPF_SOC_ADAPTER_MOCK)
+extern const lpf_soc_adapter_t g_lpf_soc_mock_adapter;
+#define LPF_SOC_DEFAULT_ADAPTER g_lpf_soc_mock_adapter
+#else
 extern const lpf_soc_adapter_t g_lpf_soc_generic_linux_adapter;
+#define LPF_SOC_DEFAULT_ADAPTER g_lpf_soc_generic_linux_adapter
+#endif
 
 static osal_mutex_t g_lpf_soc_lock;
 static bool g_lpf_soc_ready;
@@ -35,7 +41,7 @@ int32_t lpf_soc_adapter_init(void)
 		return ret;
 
 	g_lpf_soc_ready = true;
-	ret = lpf_soc_adapter_register(&g_lpf_soc_generic_linux_adapter);
+	ret = lpf_soc_adapter_register(&LPF_SOC_DEFAULT_ADAPTER);
 	if (ret != OSAL_SUCCESS) {
 		g_lpf_soc_ready = false;
 		osal_mutex_destroy(&g_lpf_soc_lock);

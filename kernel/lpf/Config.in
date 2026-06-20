@@ -11,8 +11,37 @@ menuconfig LPF_CORE
 	  discovery by stable name and capability.
 
 	  It also contains the initial kernel compatibility wrappers and
-	  default generic-Linux SoC adapter used by HAL backends.
+	  selected SoC adapter used by HAL backends.
 
 	  Required by PDM and future LPF peripheral service modules.
 
 	  If unsure, say Y when enabling LPF peripheral services.
+
+if LPF_CORE
+
+choice
+	prompt "Default LPF SoC adapter"
+	default LPF_SOC_ADAPTER_GENERIC_LINUX
+	help
+	  Select the SoC adapter registered by LPF Core during module
+	  initialization. Product builds should normally use the generic Linux
+	  backend or a future SoC-specific backend. Test builds can select the
+	  mock backend to validate HAL and peripheral-service paths without
+	  live hardware.
+
+config LPF_SOC_ADAPTER_GENERIC_LINUX
+	bool "Generic Linux SoC adapter"
+	help
+	  Use standard Linux kernel subsystem wrappers for GPIO, PWM, I2C, SPI,
+	  CAN, and serial access.
+
+config LPF_SOC_ADAPTER_MOCK
+	bool "Mock SoC adapter"
+	help
+	  Use an in-kernel mock backend for GPIO, PWM, I2C, SPI, CAN, and
+	  serial access. This is intended for framework tests and development
+	  builds that need deterministic behavior without real peripherals.
+
+endchoice
+
+endif # LPF_CORE

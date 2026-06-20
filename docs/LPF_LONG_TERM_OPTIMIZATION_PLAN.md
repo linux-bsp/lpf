@@ -189,6 +189,9 @@ Current status:
 - Started. `kernel/include/lpf/lpf_soc_adapter.h` defines the initial CAN,
   serial, GPIO, PWM, I2C, and SPI adapter interfaces.
 - `kernel/lpf/soc/generic_linux/` provides the default Linux backend.
+- Started. `kernel/lpf/soc/mock/` provides a Kconfig-selectable mock SoC
+  backend for GPIO, PWM, I2C, SPI, CAN, and serial paths, with
+  `kernel_x86_mock_modules_defconfig` as a no-hardware module build preset.
 - Remaining work: extend the interface to pinctrl, clocks, resets, and SoC
   identity, then add target SoC adapters.
 
@@ -227,8 +230,10 @@ Current status:
 
 - Started. HAL CAN, serial, GPIO, PWM, I2C, and SPI now call LPF SoC Adapter
   APIs instead of Linux subsystem APIs directly.
-- Remaining work: remove hard-coded GPIO table limits; add mock HAL or mock SoC
-  backends for tests.
+- Started. HAL paths can now be built against the mock SoC backend through the
+  `LPF_SOC_ADAPTER_MOCK` Kconfig option.
+- Remaining work: remove hard-coded GPIO table limits and add runtime HAL path
+  tests over the mock backend.
 
 ## Phase 6: PCONFIG Multi-Backend Model
 
@@ -463,8 +468,11 @@ Current status:
   validate stable-name discovery, generated instance-node paths, MCU ioctl
   payloads, LED ioctl payloads, and close handling without requiring live LPF
   device nodes.
-- Remaining work: add mock HAL/backend coverage, dummy peripheral services,
-  and multi-kernel matrix builds.
+- Started. Added a Kconfig-selectable mock SoC backend and
+  `kernel_x86_mock_modules_defconfig` so kernel module builds can validate HAL
+  and peripheral-service integration paths without live hardware.
+- Remaining work: add runtime mock HAL/backend tests, dummy peripheral
+  services, and multi-kernel matrix builds.
 
 ## Recommended Implementation Order
 

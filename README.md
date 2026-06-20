@@ -88,6 +88,7 @@ under `_build/modules/`.
 Defconfigs live under `configs/`, for example:
 
 - `kernel_x86_modules_defconfig`
+- `kernel_x86_mock_modules_defconfig`
 
 Use `make menuconfig` for interactive configuration.
 
