@@ -110,7 +110,7 @@ menuconfig LPF_MCU_SERVICE
 	select LPF_HW_UART
 	help
 	  Enable the LPF MCU peripheral service. MCU instances are created from
-	  normalized PCONFIG entries and exposed through LPF device lifecycle,
+	  normalized LPF_CONFIG entries and exposed through LPF device lifecycle,
 	  /dev/lpf/mcuN, sysfs attributes, and debugfs commands.
 
 source "kernel/lpf/peripheral/mcu/Config.in"
@@ -124,7 +124,7 @@ menuconfig LPF_LED_SERVICE
 	select LPF_HW_PWM
 	help
 	  Enable the LPF LED peripheral service. LED instances are created from
-	  normalized PCONFIG entries and exposed through LPF device lifecycle,
+	  normalized LPF_CONFIG entries and exposed through LPF device lifecycle,
 	  /dev/lpf/ledN, sysfs attributes, and debugfs commands.
 
 source "kernel/lpf/peripheral/led/Config.in"

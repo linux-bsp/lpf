@@ -8,7 +8,7 @@
  ************************************************************************/
 
 #include "osal.h"
-#include "pconfig.h"
+#include "lpf_config.h"
 #include "lpf/lpf_hw_transport_can.h"
 #include "lpf/lpf_mcu_transport.h"
 
@@ -29,7 +29,7 @@ typedef struct {
 /**
  * @brief 初始化CAN通信
  */
-static int32_t lpf_mcu_transport_can_open(const pconfig_mcu_config_t *mcu_cfg,
+static int32_t lpf_mcu_transport_can_open(const lpf_config_mcu_config_t *mcu_cfg,
 					  lpf_mcu_transport_handle_t *handle)
 {
 	lpf_mcu_can_context_t *ctx;
@@ -200,7 +200,7 @@ static int32_t lpf_mcu_transport_can_transfer(
  * @brief CAN接口的ops结构定义（导出供lpf_mcu.c使用）
  */
 const lpf_mcu_transport_ops_t lpf_mcu_transport_can_ops = {
-	.interface = PCONFIG_MCU_INTERFACE_CAN,
+	.interface = LPF_CONFIG_MCU_INTERFACE_CAN,
 	.name = "can",
 	.open = lpf_mcu_transport_can_open,
 	.close = lpf_mcu_transport_can_close,

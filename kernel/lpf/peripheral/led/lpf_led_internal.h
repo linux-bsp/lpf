@@ -3,7 +3,7 @@
 #ifndef LPF_LED_INTERNAL_H
 #define LPF_LED_INTERNAL_H
 
-#include "pconfig.h"
+#include "lpf_config.h"
 #include "lpf/lpf_core.h"
 #include "lpf/lpf_led_service.h"
 
@@ -16,7 +16,7 @@
 typedef struct {
 	bool present;
 	char name[64];
-	pconfig_led_control_t control;
+	lpf_config_led_control_t control;
 	bool enabled;
 	uint32_t brightness;
 	uint32_t max_brightness;

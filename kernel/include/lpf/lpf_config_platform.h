@@ -1,5 +1,5 @@
 /************************************************************************
- * PCONFIG 平台配置类型定义
+ * LPF_CONFIG 平台配置类型定义
  *
  * 功能：
  * - 板级配置（顶层）
@@ -8,11 +8,11 @@
  * - 汇总所有外设配置，形成完整的板级配置
  ************************************************************************/
 
-#ifndef PCONFIG_PLATFORM_H
-#define PCONFIG_PLATFORM_H
+#ifndef LPF_CONFIG_PLATFORM_H
+#define LPF_CONFIG_PLATFORM_H
 
-#include "pconfig_mcu.h"
-#include "pconfig_led.h"
+#include "lpf_config_mcu.h"
+#include "lpf_config_led.h"
 
 /*===========================================================================
  * 板级配置（顶层）
@@ -39,15 +39,15 @@ typedef struct {
 
 	/* 硬件外设配置数组（直接数组指针） */
 	uint32_t mcu_count; /* MCU外设数量 */
-	const pconfig_mcu_entry_t *mcu_array; /* MCU外设数组（直接指向数组首元素） */
+	const lpf_config_mcu_entry_t *mcu_array; /* MCU外设数组（直接指向数组首元素） */
 	uint32_t led_count; /* LED外设数量 */
-	const pconfig_led_entry_t *led_array; /* LED外设数组 */
-} pconfig_platform_config_t;
+	const lpf_config_led_entry_t *led_array; /* LED外设数组 */
+} lpf_config_platform_config_t;
 
 typedef struct {
-	const pconfig_platform_config_t *const *configs;
+	const lpf_config_platform_config_t *const *configs;
 	uint32_t count;
 	uint32_t current_index;
-} pconfig_platform_table_t;
+} lpf_config_platform_table_t;
 
-#endif /* PCONFIG_PLATFORM_H */
+#endif /* LPF_CONFIG_PLATFORM_H */

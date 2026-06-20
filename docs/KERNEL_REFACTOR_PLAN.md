@@ -1,7 +1,7 @@
 # Kernel Refactor Plan
 
-This document tracks the remaining work for moving LPF HW, PConfig, and the
-LPF peripheral runtime to the kernel-module architecture. Update the checkboxes
+This document tracks the remaining work for moving LPF HW, LPF runtime config,
+and the LPF peripheral runtime to the kernel-module architecture. Update the checkboxes
 as each part is implemented and verified.
 
 Note: this is the historical kernel-module refactor tracker. The long-term LPF
@@ -17,7 +17,7 @@ use LPF Core for device and driver lifecycle instead of adding local bus code.
 - Runtime config is linked into `lpf_peripheral_runtime.ko`.
 - Runtime config selects a configuration backend. The current static backend
   consumes platform configs compiled under
-  `kernel/pconfig/configs/<product>/<project>/<version>/`.
+  `kernel/lpf/config/configs/<product>/<project>/<version>/`.
 - LPF Core is a standalone kernel module built as `lpf_core.ko`; it owns the
   framework device and driver registry.
 - LPF peripheral runtime is a kernel module built as
@@ -61,7 +61,7 @@ use LPF Core for device and driver lifecycle instead of adding local bus code.
 - [x] Add built-in peripheral service registration through LPF Core.
 - [x] Move built-in peripheral service registration into
       `kernel/lpf/peripheral/lpf_peripheral.c`.
-- [x] Move PCONFIG-to-LPF device config mapping into
+- [x] Move runtime config-to-LPF device config mapping into
       `kernel/lpf/peripheral/lpf_peripheral_config.c`.
 - [x] Move LPF Core/peripheral initialization sequencing behind
       `lpf_peripheral_runtime_init()`.
@@ -76,7 +76,7 @@ use LPF Core for device and driver lifecycle instead of adding local bus code.
       refactor branch back to `master`.
 - [x] Keep concrete platform configuration inside runtime config instead of
       adding a separate product config kernel module.
-- [x] Introduce PCONFIG backend selection and move the original static table
+- [x] Introduce LPF_CONFIG backend selection and move the original static table
       behind a static backend.
 - [x] Add LPF HW PWM support and LPF LED service support with GPIO/PWM control.
 
@@ -84,13 +84,13 @@ use LPF Core for device and driver lifecycle instead of adding local bus code.
 
 - [x] Add a real product/platform runtime config source for the kernel module
       build.
-  - `lpf_peripheral_runtime.ko` links `g_pconfig_platform_table` from
-    `kernel/pconfig/configs` through the static backend.
+  - `lpf_peripheral_runtime.ko` links `g_lpf_config_platform_table` from
+    `kernel/lpf/config/configs` through the static backend.
   - Acceptance: runtime config load finds a board config during
     `lpf_peripheral_runtime.ko` initialization.
 - [x] Define the runtime config ownership model.
   - Runtime config lifetime follows `lpf_peripheral_runtime.ko`.
-  - LPF peripheral configuration reads PConfig and LPF Core removes registered
+  - LPF peripheral configuration reads LPF runtime config and LPF Core removes registered
     devices on exit.
   - Acceptance: unloading `lpf_peripheral_runtime.ko` removes LPF devices
     before unloading runtime config.
@@ -100,32 +100,32 @@ use LPF Core for device and driver lifecycle instead of adding local bus code.
   - Acceptance: all modules load and unload cleanly on the target kernel with
     the selected defconfig.
 
-## Phase 2: Finish PConfig As A Peripheral Registry
+## Phase 2: Finish LPF Runtime Config As A Peripheral Registry
 
-- [x] Generalize `pconfig_device_type_t` beyond MCU.
-  - Keep `PCONFIG_DEVICE_TYPE_INVALID`.
-  - LED is added with matching PConfig, LPF peripheral service, PDI, and UAPI
+- [x] Generalize `lpf_config_device_type_t` beyond MCU.
+  - Keep `LPF_CONFIG_DEVICE_TYPE_INVALID`.
+  - LED is added with matching LPF runtime config, LPF peripheral service, PDI, and UAPI
     pieces.
-- [x] Split PConfig per-peripheral types.
-  - Current: `pconfig_mcu.h`.
-  - LED follows the `pconfig_xxx.h` pattern.
-- [x] Extend `pconfig_platform_config_t` for each supported peripheral.
+- [x] Split LPF runtime config per-peripheral types.
+  - Current: `lpf_config_mcu.h`.
+  - LED follows the `lpf_config_xxx.h` pattern.
+- [x] Extend `lpf_config_platform_config_t` for each supported peripheral.
   - Use `xxx_count` plus `xxx_array` consistently.
-- [x] Generalize `pconfig_build_device_list()`.
+- [x] Generalize `lpf_config_build_device_list()`.
   - It currently emits MCU and LED device entries.
-  - Each enabled config entry should produce one `pconfig_device_config_t`.
-- [x] Strengthen `pconfig_validate()`.
+  - Each enabled config entry should produce one `lpf_config_device_config_t`.
+- [x] Strengthen `lpf_config_validate()`.
   - Validate required platform fields.
   - Validate per-peripheral arrays and counts.
   - LED now validates control type, brightness range, and PWM settings.
-- [x] Update PConfig debug print output.
+- [x] Update LPF runtime config debug print output.
   - Print all configured peripheral groups, not only MCU.
 
 ## Phase 3: Finish LPF Peripheral Service Model
 
 - [x] Keep the current `init` and `probe` split.
   - `init`: register global resources for an LPF peripheral service type.
-  - `probe`: create per-device instances from PConfig entries.
+  - `probe`: create per-device instances from LPF runtime config entries.
 - [x] Audit LPF peripheral runtime error-code conversion.
   - Avoid double-negating OSAL status values.
   - Kernel entry points should return Linux negative errno.
@@ -153,7 +153,7 @@ use LPF Core for device and driver lifecycle instead of adding local bus code.
 - [x] Add LED peripheral support using the established model.
   - Add LPF LED service implementation.
   - Add LPF LED chrdev implementation.
-  - Add matching PConfig and PDI pieces.
+  - Add matching LPF runtime config and PDI pieces.
 
 ## Phase 4: Finish PDI/UAPI Split
 
@@ -166,7 +166,7 @@ use LPF Core for device and driver lifecycle instead of adding local bus code.
   - UAPI headers must be usable by both kernel and userspace.
   - Use fixed-width Linux UAPI types in ioctl structures.
   - Keep ioctl magic and command numbers per peripheral.
-  - Avoid exposing kernel-only LPF runtime, LPF HW, or PConfig types through PDI.
+  - Avoid exposing kernel-only LPF runtime, LPF HW, or runtime config types through PDI.
 - [x] Add version/ABI compatibility policy for each PDI peripheral.
   - Keep an ABI version field or `GET_INFO` command.
   - Define compatibility expectations for structure growth.
@@ -206,7 +206,7 @@ use LPF Core for device and driver lifecycle instead of adding local bus code.
   - Examples: process, environment, signal, POSIX shared memory, pty.
   - Unsupported APIs should either be absent from kernel OSAL or return
     `OSAL_ERR_NOT_SUPPORTED` with clear documentation.
-- [x] Replace remaining direct kernel primitives in LPF runtime/PConfig where
+- [x] Replace remaining direct kernel primitives in LPF runtime/config where
       OSAL equivalents are intended.
   - Keep direct Linux subsystem calls inside the SoC adapter or compat layer
     where they are the hardware implementation detail.
@@ -237,7 +237,7 @@ use LPF Core for device and driver lifecycle instead of adding local bus code.
   - Prefer generated config constants or module parameters if runtime tuning is
     needed.
 - [x] Remove or document transitional CMake kernel component logic.
-  - Removed LPF runtime/PConfig static/shared transitional Kconfig and CMake
+  - Removed LPF runtime/config static/shared transitional Kconfig and CMake
     branches.
   - Old hardware access CMake metadata has been removed; kernel module output
     is produced by Kbuild.
@@ -258,7 +258,7 @@ use LPF Core for device and driver lifecycle instead of adding local bus code.
   - Runtime config and LPF HW hardware access are linked into
     `lpf_peripheral_runtime.ko`.
 - [x] Document how to add a new peripheral.
-  - PConfig type and platform entry.
+  - LPF runtime config type and platform entry.
   - LPF device type/capability mapping.
   - LPF service driver object and LPF Core registration.
   - LPF UAPI header and userspace wrapper.

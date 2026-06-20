@@ -1,18 +1,18 @@
 /************************************************************************
- * PCONFIG MCU 配置类型定义
+ * LPF_CONFIG MCU 配置类型定义
  *
  * 功能：
  * - MCU外设配置类型（完整定义）
  *
  * 说明：
- * - 配置类型由 PCONFIG 定义，LPF peripheral configuration 使用
+ * - 配置类型由 LPF_CONFIG 定义，LPF peripheral configuration 使用
  * - 避免循环依赖
  ************************************************************************/
 
-#ifndef PCONFIG_MCU_H
-#define PCONFIG_MCU_H
+#ifndef LPF_CONFIG_MCU_H
+#define LPF_CONFIG_MCU_H
 
-#include "pconfig_common.h"
+#include "lpf_config_common.h"
 
 /*===========================================================================
  * MCU 配置类型定义
@@ -22,36 +22,36 @@
  * @brief MCU通信接口类型
  */
 typedef enum {
-	PCONFIG_MCU_INTERFACE_CAN = 0x00, /* CAN总线 */
-	PCONFIG_MCU_INTERFACE_SERIAL = 0x01, /* 串口 */
-	PCONFIG_MCU_INTERFACE_I2C = 0x02, /* I2C（预留） */
-	PCONFIG_MCU_INTERFACE_SPI = 0x03 /* SPI（预留） */
-} pconfig_mcu_interface_t;
+	LPF_CONFIG_MCU_INTERFACE_CAN = 0x00, /* CAN总线 */
+	LPF_CONFIG_MCU_INTERFACE_SERIAL = 0x01, /* 串口 */
+	LPF_CONFIG_MCU_INTERFACE_I2C = 0x02, /* I2C（预留） */
+	LPF_CONFIG_MCU_INTERFACE_SPI = 0x03 /* SPI（预留） */
+} lpf_config_mcu_interface_t;
 
 /**
  * @brief 串口校验位类型
  */
 typedef enum {
-	PCONFIG_MCU_PARITY_NONE = 0, /* 无校验 */
-	PCONFIG_MCU_PARITY_ODD, /* 奇校验 */
-	PCONFIG_MCU_PARITY_EVEN /* 偶校验 */
-} pconfig_mcu_parity_t;
+	LPF_CONFIG_MCU_PARITY_NONE = 0, /* 无校验 */
+	LPF_CONFIG_MCU_PARITY_ODD, /* 奇校验 */
+	LPF_CONFIG_MCU_PARITY_EVEN /* 偶校验 */
+} lpf_config_mcu_parity_t;
 
 /**
  * @brief 串口流控类型
  */
 typedef enum {
-	PCONFIG_MCU_FLOW_NONE = 0, /* 无流控 */
-	PCONFIG_MCU_FLOW_HW, /* 硬件流控（RTS/CTS） */
-	PCONFIG_MCU_FLOW_SW /* 软件流控（XON/XOFF） */
-} pconfig_mcu_flow_control_t;
+	LPF_CONFIG_MCU_FLOW_NONE = 0, /* 无流控 */
+	LPF_CONFIG_MCU_FLOW_HW, /* 硬件流控（RTS/CTS） */
+	LPF_CONFIG_MCU_FLOW_SW /* 软件流控（XON/XOFF） */
+} lpf_config_mcu_flow_control_t;
 
 /**
  * @brief MCU配置（完整定义）
  */
 typedef struct {
 	char name[64]; /* MCU名称 */
-	pconfig_mcu_interface_t interface; /* 通信接口类型 */
+	lpf_config_mcu_interface_t interface; /* 通信接口类型 */
 
 	/* 硬件接口配置（Tagged Union） */
 	union {
@@ -71,15 +71,15 @@ typedef struct {
 			uint32_t baudrate; /* 波特率 */
 			uint8_t data_bits; /* 数据位（5-8） */
 			uint8_t stop_bits; /* 停止位（1-2） */
-			pconfig_mcu_parity_t parity; /* 校验位 */
-			pconfig_mcu_flow_control_t flow_control; /* 流控 */
+			lpf_config_mcu_parity_t parity; /* 校验位 */
+			lpf_config_mcu_flow_control_t flow_control; /* 流控 */
 		} serial;
 	} hw;
 
 	/* 通用配置 */
 	uint32_t cmd_timeout_ms; /* 命令超时（ms） */
 	uint32_t retry_count; /* 重试次数 */
-} pconfig_mcu_config_t;
+} lpf_config_mcu_config_t;
 
 /**
  * @brief MCU外设配置条目
@@ -87,11 +87,11 @@ typedef struct {
 typedef struct {
 	const char *description; /* 描述信息 */
 	bool enabled; /* 是否启用 */
-	pconfig_mcu_config_t config; /* MCU配置 */
+	lpf_config_mcu_config_t config; /* MCU配置 */
 
 	/* GPIO控制（可选） */
-	const pconfig_gpio_config_t *reset_gpio; /* 复位GPIO */
-	const pconfig_gpio_config_t *irq_gpio; /* 中断GPIO */
-} pconfig_mcu_entry_t;
+	const lpf_config_gpio_config_t *reset_gpio; /* 复位GPIO */
+	const lpf_config_gpio_config_t *irq_gpio; /* 中断GPIO */
+} lpf_config_mcu_entry_t;
 
-#endif /* PCONFIG_MCU_H */
+#endif /* LPF_CONFIG_MCU_H */

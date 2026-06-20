@@ -93,12 +93,12 @@ static lpf_mcu_handle_t lpf_mcu_proc_get_handle(uint32_t index)
 	return lpf_mcu_get(index);
 }
 
-static const char *lpf_mcu_interface_name(pconfig_mcu_interface_t interface)
+static const char *lpf_mcu_interface_name(lpf_config_mcu_interface_t interface)
 {
 	switch (interface) {
-	case PCONFIG_MCU_INTERFACE_CAN:
+	case LPF_CONFIG_MCU_INTERFACE_CAN:
 		return "can";
-	case PCONFIG_MCU_INTERFACE_SERIAL:
+	case LPF_CONFIG_MCU_INTERFACE_SERIAL:
 		return "serial";
 	default:
 		return "unknown";

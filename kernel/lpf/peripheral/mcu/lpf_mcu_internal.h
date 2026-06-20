@@ -11,7 +11,7 @@
 
 #include "osal.h"
 #include "lpf/lpf_core.h"
-#include "pconfig.h"
+#include "lpf_config.h"
 #include "lpf/lpf_mcu_service.h"
 #include "lpf/lpf_mcu_transport.h"
 
@@ -24,7 +24,7 @@
 typedef struct {
 	bool present;
 	char name[64];
-	pconfig_mcu_interface_t interface;
+	lpf_config_mcu_interface_t interface;
 	uint32_t cmd_timeout_ms;
 } lpf_mcu_debug_info_t;
 

@@ -11,7 +11,7 @@ kernel/
   Makefile
   include/
     osal/          # kernel-side cross-module OSAL headers
-    pconfig/       # transitional runtime config type headers
+    lpf_config/       # transitional runtime config type headers
     lpf/           # kernel-side cross-module LPF headers
   osal/
     src/           # builds osal.ko
@@ -43,9 +43,9 @@ uapi/
 - `kernel/lpf/hw` provides LPF-owned hardware access APIs used by LPF
   peripheral services. The objects are linked into
   `lpf_peripheral_runtime.ko`.
-- `kernel/pconfig` currently provides transitional runtime config source files
-  and type headers. The objects are linked into `lpf_peripheral_runtime.ko`
-  rather than a standalone module.
+- `kernel/lpf/config` provides LPF runtime config source files and type headers.
+  The objects are linked into `lpf_peripheral_runtime.ko` rather than a
+  standalone module.
 - `user/pdi` provides the application-facing C API and wraps open/ioctl.
 - `uapi/lpf` is the stable ABI shared by LPF kernel nodes and `user/pdi`.
 
@@ -53,8 +53,8 @@ uapi/
 
 - Kernel code may include `kernel/include/<module>/` and generated headers.
 - Userspace code may include `user/<module>/include/` and `uapi/` headers.
-- Userspace code must not include kernel-internal LPF HW, PCONFIG, LPF Core, or
-  LPF peripheral headers.
+- Userspace code must not include kernel-internal LPF HW, LPF runtime config,
+  LPF Core, or LPF peripheral headers.
 - UAPI headers must not depend on kernel-only types or private framework
   structures.
 - PDI should marshal data and call ioctl; it should not duplicate LPF

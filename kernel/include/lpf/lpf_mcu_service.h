@@ -9,7 +9,7 @@
  * 设计理念：
  * - 对外只暴露业务接口（版本查询、状态读取、命令执行等）
  * - 内部封装通信细节（CAN/串口协议、帧封装、CRC校验等）
- * - 配置类型由 PCONFIG 定义，LPF MCU service 使用
+ * - 配置类型由 LPF_CONFIG 定义，LPF MCU service 使用
  ************************************************************************/
 
 #ifndef LPF_MCU_SERVICE_H
@@ -86,17 +86,17 @@ typedef struct {
 /**
  * @brief 初始化MCU驱动
  *
- * @param[in] index MCU设备索引（从 PCONFIG 获取配置）
+ * @param[in] index MCU设备索引（从 LPF_CONFIG 获取配置）
  * @param[out] handle 返回MCU句柄
  *
  * @return OSAL_SUCCESS 成功
  * @return OSAL_ERR_GENERIC 失败
  *
  * @note 函数内部会：
- *       1. 调用 pconfig_get_board() 获取平台配置
- *       2. 调用 pconfig_hw_get_mcu(platform, index) 获取 MCU 配置
+ *       1. 调用 lpf_config_get_board() 获取平台配置
+ *       2. 调用 lpf_config_hw_get_mcu(platform, index) 获取 MCU 配置
  *       3. 检查配置是否启用
- *       4. 将 PCONFIG 配置转换为 LPF HW 配置并初始化硬件
+ *       4. 将 LPF_CONFIG 配置转换为 LPF HW 配置并初始化硬件
  */
 int32_t lpf_mcu_service_register(void);
 void lpf_mcu_service_unregister(void);

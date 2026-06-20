@@ -1,8 +1,9 @@
 # LPF Runtime Config
 
-This directory currently contains the transitional `pconfig_*` source and type
-names for the LPF runtime configuration layer. The code is no longer built as a
-standalone `pconfig.ko`; it is linked into `lpf_peripheral_runtime.ko`.
+This directory currently contains the transitional `lpf_config_*` source and type
+names for the LPF runtime configuration layer. The code is linked into
+`lpf_peripheral_runtime.ko` instead of being built as a standalone config
+module.
 
 The runtime configuration layer selects a configuration backend, validates the
 active platform, and exposes one typed device list to the LPF peripheral
@@ -37,20 +38,20 @@ compiled static table.
 ## Public API
 
 ```c
-const pconfig_platform_config_t *pconfig_get_board(void);
-const pconfig_device_config_t *pconfig_get(void);
-const pconfig_platform_config_t *pconfig_find(const char *product,
+const lpf_config_platform_config_t *lpf_config_get_board(void);
+const lpf_config_device_config_t *lpf_config_get(void);
+const lpf_config_platform_config_t *lpf_config_find(const char *product,
                                              const char *project,
                                              const char *version);
-int32_t pconfig_list(const pconfig_platform_config_t **configs, uint32_t *count);
-int32_t pconfig_validate(const pconfig_platform_config_t *config);
-void pconfig_print(const pconfig_platform_config_t *config);
+int32_t lpf_config_list(const lpf_config_platform_config_t **configs, uint32_t *count);
+int32_t lpf_config_validate(const lpf_config_platform_config_t *config);
+void lpf_config_print(const lpf_config_platform_config_t *config);
 ```
 
-The static backend uses the table symbol from `configs/pconfig_configs.c`:
+The static backend uses the table symbol from `configs/lpf_config_configs.c`:
 
 ```c
-extern const pconfig_platform_table_t g_pconfig_platform_table;
+extern const lpf_config_platform_table_t g_lpf_config_platform_table;
 ```
 
 Concrete configs live under:
@@ -107,17 +108,17 @@ MCU supports `interface = "can"` and `interface = "serial"`. LED supports
 The current header provides inline index-based peripheral accessors:
 
 ```c
-pconfig_hw_get_mcu(platform, index);
-pconfig_hw_get_led(platform, index);
+lpf_config_hw_get_mcu(platform, index);
+lpf_config_hw_get_led(platform, index);
 ```
 
 ## Layering Rules
 
 - Runtime config owns backend selection, validation, and normalized device
   enumeration.
-- `kernel/pconfig/configs` owns concrete static platform tables.
-- LPF peripheral configuration consumes `pconfig_get()` and typed entries; it
+- `kernel/lpf/config/configs` owns concrete static platform tables.
+- LPF peripheral configuration consumes `lpf_config_get()` and typed entries; it
   must not know concrete product table symbols or backend implementations.
 - New configuration sources should be added as runtime config backends. They must
-  produce the same `pconfig_platform_config_t` and `pconfig_device_config_t`
+  produce the same `lpf_config_platform_config_t` and `lpf_config_device_config_t`
   model before LPF peripheral configuration sees them.

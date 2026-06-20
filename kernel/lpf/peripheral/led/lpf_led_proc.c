@@ -43,12 +43,12 @@ static lpf_led_handle_t lpf_led_proc_get_handle(uint32_t index)
 	return lpf_led_get(index);
 }
 
-static const char *lpf_led_control_name(pconfig_led_control_t control)
+static const char *lpf_led_control_name(lpf_config_led_control_t control)
 {
 	switch (control) {
-	case PCONFIG_LED_CONTROL_GPIO:
+	case LPF_CONFIG_LED_CONTROL_GPIO:
 		return "gpio";
-	case PCONFIG_LED_CONTROL_PWM:
+	case LPF_CONFIG_LED_CONTROL_PWM:
 		return "pwm";
 	default:
 		return "unknown";

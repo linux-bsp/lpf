@@ -25,13 +25,13 @@ endif
 ifeq ($(CONFIG_LPF_PERIPHERAL_RUNTIME),y)
 obj-m += lpf_peripheral_runtime.o
 lpf_peripheral_runtime-y := lpf/peripheral/lpf_peripheral_module.o
-lpf_peripheral_runtime-y += pconfig/src/pconfig_api.o
-lpf_peripheral_runtime-y += pconfig/src/pconfig_backend.o
-lpf_peripheral_runtime-y += pconfig/src/pconfig_dt_backend.o
-lpf_peripheral_runtime-y += pconfig/src/pconfig_static_backend.o
-lpf_peripheral_runtime-y += pconfig/src/pconfig_validator.o
-lpf_peripheral_runtime-y += pconfig/configs/pconfig_configs.o
-lpf_peripheral_runtime-y += pconfig/configs/kernel/x86_modules/1.0.0/pconfig_kernel_x86_modules.o
+lpf_peripheral_runtime-y += lpf/config/src/lpf_config_api.o
+lpf_peripheral_runtime-y += lpf/config/src/lpf_config_backend.o
+lpf_peripheral_runtime-y += lpf/config/src/lpf_config_dt_backend.o
+lpf_peripheral_runtime-y += lpf/config/src/lpf_config_static_backend.o
+lpf_peripheral_runtime-y += lpf/config/src/lpf_config_validator.o
+lpf_peripheral_runtime-y += lpf/config/configs/lpf_config_configs.o
+lpf_peripheral_runtime-y += lpf/config/configs/kernel/x86_modules/1.0.0/lpf_config_kernel_x86_modules.o
 lpf_peripheral_runtime-y += lpf/hw/lpf_hw.o
 lpf_peripheral_runtime-y += lpf/hw/lpf_hw_builtin_start.o
 lpf_peripheral_runtime-$(CONFIG_LPF_HW_CAN) += lpf/hw/lpf_hw_transport_can.o

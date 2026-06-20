@@ -1,16 +1,16 @@
 /************************************************************************
- * PCONFIG 通用类型定义
+ * LPF_CONFIG 通用类型定义
  *
  * 功能：
- * - GPIO配置（PCONFIG 层扩展功能）
+ * - GPIO配置（LPF_CONFIG 层扩展功能）
  *
  * 说明：
- * - 本文件包含 PCONFIG 层特有的扩展配置类型
- * - 硬件接口类型由 PCONFIG 层定义，外设服务按需消费
+ * - 本文件包含 LPF_CONFIG 层特有的扩展配置类型
+ * - 硬件接口类型由 LPF_CONFIG 层定义，外设服务按需消费
  ************************************************************************/
 
-#ifndef PCONFIG_COMMON_H
-#define PCONFIG_COMMON_H
+#ifndef LPF_CONFIG_COMMON_H
+#define LPF_CONFIG_COMMON_H
 
 #include "osal.h"
 
@@ -19,26 +19,26 @@
  *===========================================================================*/
 
 typedef enum {
-	PCONFIG_DEVICE_TYPE_INVALID = 0x00,
-	PCONFIG_DEVICE_TYPE_MCU = 0x01,
-	PCONFIG_DEVICE_TYPE_LED = 0x02,
-} pconfig_device_type_t;
+	LPF_CONFIG_DEVICE_TYPE_INVALID = 0x00,
+	LPF_CONFIG_DEVICE_TYPE_MCU = 0x01,
+	LPF_CONFIG_DEVICE_TYPE_LED = 0x02,
+} lpf_config_device_type_t;
 
 typedef struct {
-	pconfig_device_type_t device_type;
+	lpf_config_device_type_t device_type;
 	uint32_t index;
 	const void *entry;
-} pconfig_device_config_t;
+} lpf_config_device_config_t;
 
 /*===========================================================================
- * GPIO配置（PCONFIG 层扩展）
+ * GPIO配置（LPF_CONFIG 层扩展）
  *===========================================================================*/
 
 /**
  * @brief GPIO配置
  *
  * 说明：
- * - 用于 PCONFIG 层的设备扩展（复位 GPIO、中断 GPIO 等）
+ * - 用于 LPF_CONFIG 层的设备扩展（复位 GPIO、中断 GPIO 等）
  * - 实际 GPIO 操作通过 LPF HW 层实现
  */
 typedef struct {
@@ -47,6 +47,6 @@ typedef struct {
 	bool active_low; /* 低电平有效 */
 	bool pull_up; /* 上拉使能 */
 	bool pull_down; /* 下拉使能 */
-} pconfig_gpio_config_t;
+} lpf_config_gpio_config_t;
 
-#endif /* PCONFIG_COMMON_H */
+#endif /* LPF_CONFIG_COMMON_H */

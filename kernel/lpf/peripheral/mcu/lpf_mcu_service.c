@@ -8,7 +8,7 @@
  ************************************************************************/
 
 #include "osal.h"
-#include "pconfig.h"
+#include "lpf_config.h"
 #include "lpf/lpf_protocol.h"
 #include "lpf_mcu_internal.h"
 
@@ -17,7 +17,7 @@
  *===========================================================================*/
 
 typedef struct {
-	const pconfig_mcu_config_t *config;
+	const lpf_config_mcu_config_t *config;
 	const lpf_mcu_transport_ops_t *transport;
 	lpf_mcu_transport_handle_t transport_handle;
 	osal_mutex_t mutex;
@@ -163,7 +163,7 @@ int32_t lpf_mcu_send_data(lpf_mcu_handle_t handle, lpf_mcu_data_t *data)
  * @brief 初始化 MCU 驱动
  */
 static int32_t lpf_mcu_init_from_entry(uint32_t mcu_index,
-				       const pconfig_mcu_entry_t *entry,
+				       const lpf_config_mcu_entry_t *entry,
 				       lpf_mcu_handle_t *handle)
 {
 	lpf_mcu_context_t *ctx;
@@ -240,27 +240,27 @@ static int32_t lpf_mcu_init_from_entry(uint32_t mcu_index,
 
 int32_t lpf_mcu_init(uint32_t mcu_index, lpf_mcu_handle_t *handle)
 {
-	const pconfig_platform_config_t *platform;
-	const pconfig_mcu_entry_t *entry;
+	const lpf_config_platform_config_t *platform;
+	const lpf_config_mcu_entry_t *entry;
 
-	platform = pconfig_get_board();
+	platform = lpf_config_get_board();
 	if (!platform)
 		return OSAL_ERR_GENERIC;
 
-	entry = pconfig_hw_get_mcu(platform, mcu_index);
+	entry = lpf_config_hw_get_mcu(platform, mcu_index);
 	return lpf_mcu_init_from_entry(mcu_index, entry, handle);
 }
 
 int32_t lpf_mcu_probe(const lpf_device_t *device)
 {
-	const pconfig_mcu_entry_t *entry;
+	const lpf_config_mcu_entry_t *entry;
 	lpf_mcu_handle_t handle = NULL;
 	int32_t ret;
 
 	if (!device || device->config.type != LPF_DEVICE_TYPE_MCU)
 		return OSAL_ERR_INVALID_PARAM;
 
-	entry = (const pconfig_mcu_entry_t *)device->config.entry;
+	entry = (const lpf_config_mcu_entry_t *)device->config.entry;
 	ret = lpf_mcu_init_from_entry(device->config.index, entry, &handle);
 	if (ret != OSAL_SUCCESS)
 		return ret;

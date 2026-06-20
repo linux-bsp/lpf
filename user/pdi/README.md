@@ -39,5 +39,5 @@ device nodes.
 UAPI and ABI rules for new peripherals are documented in
 `docs/LPF_UAPI_ABI.md`.
 
-PDI must not reimplement kernel LPF HW, PConfig, or LPF peripheral service
+PDI must not reimplement kernel LPF HW, LPF runtime config, or LPF peripheral service
 logic.

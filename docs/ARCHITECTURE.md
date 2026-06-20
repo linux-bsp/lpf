@@ -77,7 +77,7 @@ subsystem or vendor BSP APIs directly.
 LPF Core owns the framework-level device model. Peripheral services register as
 LPF drivers, and configured device instances are registered as LPF devices. LPF
 Core handles bind, probe, remove ordering, stable device names, and capability
-metadata. It does not depend on PCONFIG; callers map configuration backends into
+metadata. It does not depend on LPF_CONFIG; callers map configuration backends into
 LPF device configs before registration. LPF Core also initializes the default
 SoC adapter path used by hardware access paths. Device discovery callers should
 use the snapshot APIs (`lpf_device_list()`, `lpf_device_get_info_by_name()`,
@@ -124,8 +124,8 @@ enabled device entries in one normalized list. Backend selection is controlled
 by the `backend` module parameter on `lpf_peripheral_runtime.ko`: `auto` tries
 Device Tree first and falls back to the built-in static table, while `dt` and
 `static` require a specific backend. The source still uses transitional
-`pconfig_*` names, but the code is linked into the LPF peripheral runtime rather
-than a standalone `pconfig.ko`. Future board-profile or product-selection
+`lpf_config_*` names, but the code is linked into the LPF peripheral runtime
+instead of a standalone config module. Future board-profile or product-selection
 backends should produce the same runtime config model before LPF peripheral
 configuration sees the data.
 
@@ -145,7 +145,7 @@ entry used by the integration module.
 
 LPF transport implementations own reusable communication backends used by
 peripheral services. The current MCU CAN and UART transports live under
-`kernel/lpf/transport/mcu/` and are selected by normalized PCONFIG interface
+`kernel/lpf/transport/mcu/` and are selected by normalized LPF_CONFIG interface
 type. MCU service code uses the transport registry instead of depending on
 CAN/UART implementation symbols directly.
 
@@ -162,7 +162,7 @@ lives under `kernel/lpf/protocol/`, exports encode/decode entry points from
 `lpf_peripheral_runtime.ko` owns the current integration module load/unload
 entry points. It calls the LPF peripheral runtime entry, which owns LPF Core
 initialization order, per-service registration, configured-device probing, and
-PCONFIG-to-LPF mapping orchestration.
+runtime config-to-LPF mapping orchestration.
 Business operations stay on LPF instance nodes such as `/dev/lpf/mcu0` and
 `/dev/lpf/led0`; LPF service status snapshots live under `/proc/lpf/`.
 
@@ -182,7 +182,7 @@ LPF device snapshots and look up devices by stable name or capability.
 ### ACONFIG
 
 ACONFIG provides application-facing configuration mapping. It is separate from
-PCONFIG so application function metadata does not leak into hardware tables.
+LPF_CONFIG so application function metadata does not leak into hardware tables.
 
 ## Current Peripheral Scope
 
@@ -274,4 +274,4 @@ coverage together so the ABI and build configuration remain consistent.
   capabilities.
 - Kernel-version conditionals belong in `kernel/lpf/compat/`.
 - Userspace code must use PDI/UAPI rather than including kernel-internal LPF HW,
-  PCONFIG, LPF Core, or LPF peripheral headers.
+  LPF_CONFIG, LPF Core, or LPF peripheral headers.

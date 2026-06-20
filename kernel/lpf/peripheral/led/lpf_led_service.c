@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-2.0
 
 #include "osal.h"
-#include "pconfig.h"
+#include "lpf_config.h"
 #include "lpf/lpf_driver.h"
 #include "lpf/lpf_hw.h"
 #include "lpf_led_internal.h"
 
 typedef struct {
-	const pconfig_led_config_t *config;
+	const lpf_config_led_config_t *config;
 	lpf_hw_pwm_handle_t pwm;
 	osal_mutex_t lock;
 	uint32_t brightness;
@@ -30,7 +30,7 @@ static uint32_t lpf_led_clamp_brightness(const lpf_led_context_t *ctx,
 	return brightness;
 }
 
-static lpf_gpio_level_t lpf_led_gpio_level(const pconfig_led_config_t *config,
+static lpf_gpio_level_t lpf_led_gpio_level(const lpf_config_led_config_t *config,
 					   bool enabled)
 {
 	bool active = enabled;
@@ -70,9 +70,9 @@ static int32_t lpf_led_apply_pwm(lpf_led_context_t *ctx)
 static int32_t lpf_led_apply(lpf_led_context_t *ctx)
 {
 	switch (ctx->config->control) {
-	case PCONFIG_LED_CONTROL_GPIO:
+	case LPF_CONFIG_LED_CONTROL_GPIO:
 		return lpf_led_apply_gpio(ctx);
-	case PCONFIG_LED_CONTROL_PWM:
+	case LPF_CONFIG_LED_CONTROL_PWM:
 		return lpf_led_apply_pwm(ctx);
 	default:
 		return OSAL_ERR_INVALID_PARAM;
@@ -128,10 +128,10 @@ static void lpf_led_deinit_hw(lpf_led_context_t *ctx)
 		return;
 
 	switch (ctx->config->control) {
-	case PCONFIG_LED_CONTROL_GPIO:
+	case LPF_CONFIG_LED_CONTROL_GPIO:
 		lpf_hw_gpio_deinit(ctx->config->hw.gpio.gpio_num);
 		break;
-	case PCONFIG_LED_CONTROL_PWM:
+	case LPF_CONFIG_LED_CONTROL_PWM:
 		if (ctx->pwm)
 			lpf_hw_pwm_deinit(ctx->pwm);
 		ctx->pwm = NULL;
@@ -142,7 +142,7 @@ static void lpf_led_deinit_hw(lpf_led_context_t *ctx)
 }
 
 static int32_t lpf_led_init_from_entry(uint32_t index,
-				       const pconfig_led_entry_t *entry,
+				       const lpf_config_led_entry_t *entry,
 				       lpf_led_handle_t *handle)
 {
 	lpf_led_context_t *ctx;
@@ -184,10 +184,10 @@ static int32_t lpf_led_init_from_entry(uint32_t index,
 	ctx->lock_ready = true;
 
 	switch (entry->config.control) {
-	case PCONFIG_LED_CONTROL_GPIO:
+	case LPF_CONFIG_LED_CONTROL_GPIO:
 		ret = lpf_led_init_gpio(ctx);
 		break;
-	case PCONFIG_LED_CONTROL_PWM:
+	case LPF_CONFIG_LED_CONTROL_PWM:
 		ret = lpf_led_init_pwm(ctx);
 		break;
 	default:
@@ -230,14 +230,14 @@ out_free_success:
 
 int32_t lpf_led_probe(const lpf_device_t *device)
 {
-	const pconfig_led_entry_t *entry;
+	const lpf_config_led_entry_t *entry;
 	lpf_led_handle_t handle = NULL;
 	int32_t ret;
 
 	if (!device || device->config.type != LPF_DEVICE_TYPE_LED)
 		return OSAL_ERR_INVALID_PARAM;
 
-	entry = (const pconfig_led_entry_t *)device->config.entry;
+	entry = (const lpf_config_led_entry_t *)device->config.entry;
 	ret = lpf_led_init_from_entry(device->config.index, entry, &handle);
 	if (ret != OSAL_SUCCESS)
 		return ret;

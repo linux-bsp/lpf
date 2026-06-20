@@ -115,7 +115,7 @@ Current status:
 - Started. `lpf_core.ko` now owns the LPF driver and device registry.
 - `kernel/include/lpf/lpf_device.h` and `lpf_driver.h` define the first device,
   driver, and capability model.
-- LPF peripheral configuration maps PCONFIG entries into
+- LPF peripheral configuration maps LPF_CONFIG entries into
   `lpf_device_config_t`; MCU/LED services register through LPF Core.
 - Started device discovery. LPF Core now exposes snapshot APIs for listing
   devices and querying by type/index, name, or capability without exposing
@@ -258,7 +258,7 @@ Current status:
 
 ## Phase 6: Runtime Configuration Layer
 
-Goal: move PCONFIG responsibilities into the LPF peripheral runtime as its
+Goal: move runtime configuration responsibilities into the LPF peripheral runtime as its
 configuration input layer, while keeping backend-based configuration loading.
 
 Work items:
@@ -272,10 +272,10 @@ Work items:
 - Add a board profile backend for product-line selection.
 - Make all backends produce the same `lpf_device_config` model.
 - Move per-device validation into per-device validators.
-- Delete standalone `CONFIG_PCONFIG` and `pconfig.ko`.
-- Move source layout toward `kernel/lpf/config/`.
-- Rename public-internal APIs from `pconfig_*` to `lpf_config_*` after the
-  module boundary is removed.
+- Delete the standalone configuration Kconfig/module boundary.
+- Move source layout to `kernel/lpf/config/`.
+- Rename public-internal APIs and types to `lpf_config_*` after the module
+  boundary is removed.
 
 Deliverables:
 
@@ -289,28 +289,29 @@ Acceptance criteria:
 
 - The same MCU or LED device can be created from static table or Device Tree.
 - LPF Core and peripheral services do not care where configuration came from.
-- Module builds no longer produce `pconfig.ko`.
+- Module builds no longer produce a standalone configuration module.
 - Runtime config unloads when `lpf_peripheral_runtime.ko` unloads.
 
 Current status:
 
-- Started. PCONFIG now has a backend abstraction, a static table backend, and
+- Done. LPF runtime config has a backend abstraction, a static table backend, and
   a separate per-device validator/descriptor file.
-- `pconfig_load()`, `pconfig_get_board()`, `pconfig_find()`, and
-  `pconfig_list()` now route through the selected backend instead of directly
-  reading `g_pconfig_platform_table`.
+- `lpf_config_load()`, `lpf_config_get_board()`, `lpf_config_find()`, and
+  `lpf_config_list()` now route through the selected backend instead of directly
+  reading `g_lpf_config_platform_table`.
 - Backend selection now supports `backend=auto`, `backend=dt`, and
   `backend=static`. `auto` tries Device Tree first and falls back to the static
   table.
 - Started the Device Tree backend. It parses LPF root identity, MCU CAN/Serial,
-  and LED GPIO/PWM entries into the same normalized PCONFIG model.
-- Done. PCONFIG backend objects are linked into
-  `lpf_peripheral_runtime.ko`, and standalone `pconfig.ko` has been removed
-  from the module build.
-- Remaining work: rename `pconfig_*` APIs/types to `lpf_config_*`, move files
-  under `kernel/lpf/config/`, add a documented DTS binding/schema,
-  board-profile backend, product-selection policy, and broader peripheral
-  coverage.
+  and LED GPIO/PWM entries into the same normalized LPF config model.
+- Done. LPF runtime config backend objects are linked into
+  `lpf_peripheral_runtime.ko`, and the standalone configuration module boundary
+  has been removed from the build.
+- Done. Runtime config source files now live under `kernel/lpf/config/`, public
+  kernel-internal headers live under `kernel/include/lpf/`, and APIs/types use
+  the `lpf_config_*` namespace.
+- Remaining work: add a documented DTS binding/schema, board-profile backend,
+  product-selection policy, and broader peripheral coverage.
 
 ## Phase 7: Peripheral Service Layer
 
@@ -359,7 +360,7 @@ Current status:
   `kernel/lpf/peripheral/lpf_peripheral.c`; the LPF peripheral runtime entry
   calls that service entry instead of registering MCU/LED services directly in
   the module shell.
-- Done. PCONFIG-to-LPF device mapping lives in
+- Done. Runtime config-to-LPF device mapping lives in
   `kernel/lpf/peripheral/lpf_peripheral_config.c`; the LPF peripheral runtime
   calls the LPF peripheral probe entry instead of owning per-device capability
   mapping in the module shell.
@@ -567,7 +568,7 @@ Current status:
 3. Add the kernel compat layer.
 4. Add the SoC adapter layer.
 5. Maintain the LPF HW API layer above the SoC adapter.
-6. Finish merging PCONFIG naming and headers into the LPF runtime
+6. Finish merging LPF_CONFIG naming and headers into the LPF runtime
    configuration layer.
 7. Migrate LED first as the simplest complete peripheral service.
 8. Migrate MCU and split transport handling inside the LPF framework layers.

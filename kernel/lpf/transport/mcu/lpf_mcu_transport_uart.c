@@ -8,25 +8,25 @@
  ************************************************************************/
 
 #include "osal.h"
-#include "pconfig.h"
+#include "lpf_config.h"
 #include "lpf/lpf_hw_transport_uart.h"
 #include "lpf/lpf_mcu_transport.h"
 
 /*===========================================================================
- * PCONFIG to LPF HW type conversion.
+ * LPF_CONFIG to LPF HW type conversion.
  *===========================================================================*/
 
 /**
- * @brief 转换 PCONFIG 校验位类型到 LPF HW 校验位类型
+ * @brief 转换 LPF_CONFIG 校验位类型到 LPF HW 校验位类型
  */
-static uint8_t _lpf_mcu_to_lpf_hw_parity(pconfig_mcu_parity_t parity)
+static uint8_t _lpf_mcu_to_lpf_hw_parity(lpf_config_mcu_parity_t parity)
 {
 	switch (parity) {
-	case PCONFIG_MCU_PARITY_NONE:
+	case LPF_CONFIG_MCU_PARITY_NONE:
 		return LPF_SERIAL_PARITY_NONE;
-	case PCONFIG_MCU_PARITY_ODD:
+	case LPF_CONFIG_MCU_PARITY_ODD:
 		return LPF_SERIAL_PARITY_ODD;
-	case PCONFIG_MCU_PARITY_EVEN:
+	case LPF_CONFIG_MCU_PARITY_EVEN:
 		return LPF_SERIAL_PARITY_EVEN;
 	default:
 		return LPF_SERIAL_PARITY_NONE;
@@ -34,16 +34,16 @@ static uint8_t _lpf_mcu_to_lpf_hw_parity(pconfig_mcu_parity_t parity)
 }
 
 /**
- * @brief 转换 PCONFIG 流控类型到 LPF HW 流控类型
+ * @brief 转换 LPF_CONFIG 流控类型到 LPF HW 流控类型
  */
-static uint8_t _lpf_mcu_to_lpf_hw_flow_control(pconfig_mcu_flow_control_t flow)
+static uint8_t _lpf_mcu_to_lpf_hw_flow_control(lpf_config_mcu_flow_control_t flow)
 {
 	switch (flow) {
-	case PCONFIG_MCU_FLOW_NONE:
+	case LPF_CONFIG_MCU_FLOW_NONE:
 		return LPF_SERIAL_FLOW_NONE;
-	case PCONFIG_MCU_FLOW_HW:
+	case LPF_CONFIG_MCU_FLOW_HW:
 		return LPF_SERIAL_FLOW_HW;
-	case PCONFIG_MCU_FLOW_SW:
+	case LPF_CONFIG_MCU_FLOW_SW:
 		return LPF_SERIAL_FLOW_SW;
 	default:
 		return LPF_SERIAL_FLOW_NONE;
@@ -66,7 +66,7 @@ typedef struct {
  * @brief 初始化串口通信
  */
 static int32_t lpf_mcu_transport_uart_open(
-	const pconfig_mcu_config_t *mcu_cfg,
+	const lpf_config_mcu_config_t *mcu_cfg,
 	lpf_mcu_transport_handle_t *handle)
 {
 	lpf_mcu_serial_context_t *ctx;
@@ -191,7 +191,7 @@ static int32_t lpf_mcu_transport_uart_transfer(
  * @brief Serial接口的ops结构定义（导出供lpf_mcu.c使用）
  */
 const lpf_mcu_transport_ops_t lpf_mcu_transport_uart_ops = {
-	.interface = PCONFIG_MCU_INTERFACE_SERIAL,
+	.interface = LPF_CONFIG_MCU_INTERFACE_SERIAL,
 	.name = "uart",
 	.open = lpf_mcu_transport_uart_open,
 	.close = lpf_mcu_transport_uart_close,

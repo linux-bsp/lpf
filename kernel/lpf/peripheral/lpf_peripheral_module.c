@@ -32,4 +32,4 @@ module_exit(lpf_peripheral_module_exit);
 MODULE_AUTHOR("LPF");
 MODULE_DESCRIPTION("LPF peripheral integration module");
 MODULE_LICENSE("GPL");
-MODULE_SOFTDEP("pre: osal lpf_core pconfig hal can can_raw");
+MODULE_SOFTDEP("pre: osal lpf_core can can_raw");

@@ -6,7 +6,7 @@ ACONFIG is the application configuration query layer. It reads the product-provi
 
 - ACONFIG owns the generic read-only query API for application-level mappings and opaque function metadata.
 - Product modules own the concrete `g_aconfig_table` definition.
-- PCONFIG owns hardware tables.
+- LPF_CONFIG owns hardware tables.
 - Product-specific interpretation belongs in product modules outside the core framework.
 - Core ACONFIG APIs must not depend on a concrete product business layer.
 - Runtime code must not register, unregister, reload, or mutate ACONFIG tables through core APIs.

@@ -1,32 +1,32 @@
 /************************************************************************
- * PCONFIG 对外 API
+ * LPF_CONFIG 对外 API
  *
  * 功能：
  * - 硬件配置后端选择和只读查询（以外设为单位）
  * - 配置验证和调试打印
  *
  * 命名规范：
- * - PCONFIG_*      - 通用接口
- * - PCONFIG_HW_*   - 硬件配置相关接口
+ * - LPF_CONFIG_*      - 通用接口
+ * - LPF_CONFIG_HW_*   - 硬件配置相关接口
  *
  * 设计原则：
- * - PCONFIG 负责屏蔽静态表、Device Tree、产品配置等来源差异
+ * - LPF_CONFIG 负责屏蔽静态表、Device Tree、产品配置等来源差异
  * - LPF peripheral configuration consumes the unified device list and typed
  *   configuration entries
  ************************************************************************/
 
-#ifndef PCONFIG_H
-#define PCONFIG_H
+#ifndef LPF_CONFIG_H
+#define LPF_CONFIG_H
 
-#define PCONFIG_VERSION_MAJOR 0x1
-#define PCONFIG_VERSION_MINOR 0x0
-#define PCONFIG_VERSION_PATCH 0x0
+#define LPF_CONFIG_VERSION_MAJOR 0x1
+#define LPF_CONFIG_VERSION_MINOR 0x0
+#define LPF_CONFIG_VERSION_PATCH 0x0
 
 /* 类型定义 - 按模块组织 */
-#include "pconfig_common.h" /* 通用基础类型 */
-#include "pconfig_mcu.h" /* MCU 配置类型 */
-#include "pconfig_led.h" /* LED 配置类型 */
-#include "pconfig_platform.h" /* 板级配置类型 */
+#include "lpf_config_common.h" /* 通用基础类型 */
+#include "lpf_config_mcu.h" /* MCU 配置类型 */
+#include "lpf_config_led.h" /* LED 配置类型 */
+#include "lpf_config_platform.h" /* 板级配置类型 */
 
 /*===========================================================================
  * 产品配置入口
@@ -35,11 +35,11 @@
 /**
  * @brief 内置静态配置后端使用的平台配置表
  *
- * 产品或测试目标通过 PCONFIG_EXTRA_SRCS 编译进该符号。该符号只属于
- * PCONFIG static backend；其他配置来源应实现独立 backend，不应让 LPF
+ * 产品或测试目标通过 LPF_CONFIG_EXTRA_SRCS 编译进该符号。该符号只属于
+ * LPF_CONFIG static backend；其他配置来源应实现独立 backend，不应让 LPF
  * peripheral configuration 直接依赖具体表符号。
  */
-extern const pconfig_platform_table_t g_pconfig_platform_table;
+extern const lpf_config_platform_table_t g_lpf_config_platform_table;
 
 /*===========================================================================
  * 板级配置查询
@@ -50,10 +50,10 @@ extern const pconfig_platform_table_t g_pconfig_platform_table;
  *
  * @return 平台配置指针，失败返回NULL
  */
-const pconfig_platform_config_t *pconfig_get_board(void);
-const pconfig_device_config_t *pconfig_get(void);
-int32_t pconfig_load(void);
-void pconfig_unload(void);
+const lpf_config_platform_config_t *lpf_config_get_board(void);
+const lpf_config_device_config_t *lpf_config_get(void);
+int32_t lpf_config_load(void);
+void lpf_config_unload(void);
 
 /**
  * @brief 根据产品、项目和版本查找配置
@@ -64,8 +64,8 @@ void pconfig_unload(void);
  *
  * @return 平台配置指针，失败返回NULL
  */
-const pconfig_platform_config_t *
-pconfig_find(const char *product, const char *project, const char *version);
+const lpf_config_platform_config_t *
+lpf_config_find(const char *product, const char *project, const char *version);
 
 /**
  * @brief 列出所有配置
@@ -75,11 +75,11 @@ pconfig_find(const char *product, const char *project, const char *version);
  *
  * @return OSAL_SUCCESS 成功
  */
-int32_t pconfig_list(const pconfig_platform_config_t **configs,
+int32_t lpf_config_list(const lpf_config_platform_config_t **configs,
 					 uint32_t *count);
 
 /*===========================================================================
- * 硬件外设配置查询接口（PCONFIG_HW_*）
+ * 硬件外设配置查询接口（LPF_CONFIG_HW_*）
  *===========================================================================*/
 
 /**
@@ -90,8 +90,8 @@ int32_t pconfig_list(const pconfig_platform_config_t **configs,
  *
  * @return MCU配置条目指针，失败返回NULL
  */
-static inline const pconfig_mcu_entry_t *
-pconfig_hw_get_mcu(const pconfig_platform_config_t *platform, uint32_t index)
+static inline const lpf_config_mcu_entry_t *
+lpf_config_hw_get_mcu(const lpf_config_platform_config_t *platform, uint32_t index)
 {
 	if (!platform || !platform->mcu_array || index >= platform->mcu_count) {
 		return NULL;
@@ -99,8 +99,8 @@ pconfig_hw_get_mcu(const pconfig_platform_config_t *platform, uint32_t index)
 	return &platform->mcu_array[index];
 }
 
-static inline const pconfig_led_entry_t *
-pconfig_hw_get_led(const pconfig_platform_config_t *platform, uint32_t index)
+static inline const lpf_config_led_entry_t *
+lpf_config_hw_get_led(const lpf_config_platform_config_t *platform, uint32_t index)
 {
 	if (!platform || !platform->led_array || index >= platform->led_count) {
 		return NULL;
@@ -120,14 +120,14 @@ pconfig_hw_get_led(const pconfig_platform_config_t *platform, uint32_t index)
  * @return OSAL_SUCCESS 验证通过
  * @return OSAL_ERR_GENERIC 验证失败
  */
-int32_t pconfig_validate(const pconfig_platform_config_t *config);
+int32_t lpf_config_validate(const lpf_config_platform_config_t *config);
 
 /**
  * @brief 打印平台配置信息（用于调试）
  *
  * @param[in] config 平台配置
  */
-void pconfig_print(const pconfig_platform_config_t *config);
-void pconfig_print_version(void);
+void lpf_config_print(const lpf_config_platform_config_t *config);
+void lpf_config_print_version(void);
 
-#endif /* PCONFIG_H */
+#endif /* LPF_CONFIG_H */

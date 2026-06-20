@@ -4,14 +4,14 @@
 #define LPF_MCU_TRANSPORT_H
 
 #include "osal.h"
-#include "pconfig.h"
+#include "lpf_config.h"
 
 typedef void *lpf_mcu_transport_handle_t;
 
 typedef struct {
-	pconfig_mcu_interface_t interface;
+	lpf_config_mcu_interface_t interface;
 	const char *name;
-	int32_t (*open)(const pconfig_mcu_config_t *config,
+	int32_t (*open)(const lpf_config_mcu_config_t *config,
 			lpf_mcu_transport_handle_t *handle);
 	int32_t (*close)(lpf_mcu_transport_handle_t handle);
 	int32_t (*transfer)(lpf_mcu_transport_handle_t handle,
@@ -21,6 +21,6 @@ typedef struct {
 } lpf_mcu_transport_ops_t;
 
 const lpf_mcu_transport_ops_t *
-lpf_mcu_transport_get(pconfig_mcu_interface_t interface);
+lpf_mcu_transport_get(lpf_config_mcu_interface_t interface);
 
 #endif /* LPF_MCU_TRANSPORT_H */
