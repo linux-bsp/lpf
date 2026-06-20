@@ -178,26 +178,31 @@ static int test_default_paths(void)
 	mock_reset();
 	pdi_syscall_set_ops(&g_mock_ops);
 
-	if (pdi_ctl_open(&ctl, NULL) != 0)
+	if (strcmp(LPF_CTL_DEVICE_NAME, "lpf_ctl") != 0)
+		return 300;
+	if (strcmp(PDI_CTL_DEFAULT_DEVICE, "/dev/lpf_ctl") != 0)
 		return 301;
-	if (strcmp(g_mock.last_path, PDI_CTL_DEFAULT_DEVICE) != 0)
+
+	if (pdi_ctl_open(&ctl, NULL) != 0)
 		return 302;
-	if (pdi_ctl_close(&ctl) != 0 || ctl.fd != -1)
+	if (strcmp(g_mock.last_path, PDI_CTL_DEFAULT_DEVICE) != 0)
 		return 303;
+	if (pdi_ctl_close(&ctl) != 0 || ctl.fd != -1)
+		return 304;
 
 	if (pdi_mcu_open(&mcu, NULL) != 0)
-		return 304;
-	if (strcmp(g_mock.last_path, PDI_MCU_DEFAULT_DEVICE) != 0)
 		return 305;
-	if (pdi_mcu_close(&mcu) != 0 || mcu.fd != -1)
+	if (strcmp(g_mock.last_path, PDI_MCU_DEFAULT_DEVICE) != 0)
 		return 306;
+	if (pdi_mcu_close(&mcu) != 0 || mcu.fd != -1)
+		return 307;
 
 	if (pdi_led_open(&led, NULL) != 0)
-		return 307;
-	if (strcmp(g_mock.last_path, PDI_LED_DEFAULT_DEVICE) != 0)
 		return 308;
-	if (pdi_led_close(&led) != 0 || led.fd != -1)
+	if (strcmp(g_mock.last_path, PDI_LED_DEFAULT_DEVICE) != 0)
 		return 309;
+	if (pdi_led_close(&led) != 0 || led.fd != -1)
+		return 310;
 
 	pdi_syscall_reset_ops();
 	return 0;

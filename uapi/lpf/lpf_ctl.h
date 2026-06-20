@@ -1,7 +1,7 @@
 /*
  * LPF control UAPI
  *
- * This header defines the ioctl ABI shared by /dev/pdm_ctl and userspace
+ * This header defines the ioctl ABI shared by /dev/lpf_ctl and userspace
  * device-discovery clients. LPF ABI v1 is snapshot-based and does not expose
  * asynchronous userspace device events.
  */
@@ -13,7 +13,7 @@
 #include <linux/types.h>
 
 #define LPF_CTL_ABI_VERSION 0x00010000U
-#define LPF_CTL_DEVICE_NAME "pdm_ctl"
+#define LPF_CTL_DEVICE_NAME "lpf_ctl"
 #define LPF_CTL_NAME_LEN 64U
 
 enum lpf_ctl_device_type {

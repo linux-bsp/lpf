@@ -73,8 +73,8 @@ peripheral service.
 
 ## Runtime Access Model
 
-- `/dev/pdm_ctl` is the Core-owned control and discovery node.
-- `/dev/pdm_ctl` exposes synchronous device snapshots; LPF v1 keeps device
+- `/dev/lpf_ctl` is the Core-owned control and discovery node.
+- `/dev/lpf_ctl` exposes synchronous device snapshots; LPF v1 keeps device
   event notification kernel-only.
 - `/dev/lpf/<type><index>` is the per-instance business ABI.
 - Sysfs attributes are read-only runtime inspection data.

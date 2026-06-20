@@ -28,7 +28,7 @@ Runtime character-device, sysfs-attribute, and debugfs-file lifecycle helpers
 are provided by `lpf_core.ko`; LPF peripheral services own the concrete
 operation handlers. LPF protocol encode/decode helpers are also provided by
 `lpf_core.ko` for services that need framed communication.
-LPF device discovery is provided by the LPF Core control node `/dev/pdm_ctl`.
+LPF device discovery is provided by the LPF Core control node `/dev/lpf_ctl`.
 
 ## Configuration
 
@@ -143,7 +143,7 @@ MCU and LED service implementations live under `kernel/lpf/peripheral/`.
 They are registered through the LPF peripheral runtime while the framework
 module boundary is being cleaned up.
 
-`/dev/pdm_ctl` is the management node for discovery. It is implemented by LPF
+`/dev/lpf_ctl` is the management node for discovery. It is implemented by LPF
 Core and exposes LPF Core device snapshots through `uapi/lpf/lpf_ctl.h`,
 including stable name, type, state, driver name, capability flags,
 `last_error`, and `error_count`. It does not perform peripheral business

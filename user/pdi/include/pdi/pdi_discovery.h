@@ -13,7 +13,7 @@
 extern "C" {
 #endif
 
-#define PDI_CTL_DEFAULT_DEVICE "/dev/pdm_ctl"
+#define PDI_CTL_DEFAULT_DEVICE "/dev/lpf_ctl"
 
 typedef struct {
 	int fd;

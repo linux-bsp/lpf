@@ -87,12 +87,12 @@ operations should use `lpf_device_get()` or the name/capability variants and
 release the returned handle with `lpf_device_put()`. LPF Core emits kernel
 device events for registration, bind, state changes, errors, remove start, and
 remove completion. These events are kernel-only in LPF v1; userspace observes
-lifecycle and health through synchronous `/dev/pdm_ctl`, sysfs, and procfs
+lifecycle and health through synchronous `/dev/lpf_ctl`, sysfs, and procfs
 snapshots.
 It also provides reusable kernel infrastructure helpers for LPF instance
 character devices, instance sysfs attributes, and debugfs command files so
 peripheral services do not duplicate node lifecycle code.
-The LPF control/discovery node `/dev/pdm_ctl` is implemented in LPF Core and
+The LPF control/discovery node `/dev/lpf_ctl` is implemented in LPF Core and
 exposes read-only snapshots of the LPF device model through
 `uapi/lpf/lpf_ctl.h`.
 
@@ -178,7 +178,7 @@ should avoid kernel-internal types.
 
 PDI is the userspace C API layer. It opens the matching `/dev/lpf/*` node,
 marshals requests through UAPI ioctls, and hides ioctl details from
-applications. Discovery APIs use the LPF control node `/dev/pdm_ctl` to list
+applications. Discovery APIs use the LPF control node `/dev/lpf_ctl` to list
 LPF device snapshots and look up devices by stable name or capability.
 
 ### ACONFIG
@@ -254,8 +254,8 @@ coverage together so the ABI and build configuration remain consistent.
 
 ## Runtime Interfaces
 
-- `/dev/pdm_ctl` is the LPF Core-owned management/discovery node.
-- `/dev/pdm_ctl` is a synchronous snapshot and lookup ABI; LPF v1 does not
+- `/dev/lpf_ctl` is the LPF Core-owned management/discovery node.
+- `/dev/lpf_ctl` is a synchronous snapshot and lookup ABI; LPF v1 does not
   expose asynchronous userspace device events.
 - `/dev/lpf/<peripheral><index>` nodes are the stable per-instance business ABI.
 - `/sys/class/misc/<device>/` attributes are read-only per-instance sysfs

@@ -446,13 +446,13 @@ Acceptance criteria:
 
 Current status:
 
-- Started. The LPF Core-owned `/dev/pdm_ctl` node and `uapi/lpf/lpf_ctl.h`
+- Started. The LPF Core-owned `/dev/lpf_ctl` node and `uapi/lpf/lpf_ctl.h`
   expose LPF device discovery snapshots to userspace.
 - Started. PDI now provides `pdi_list_devices`,
   `pdi_get_device_by_name`, and `pdi_get_device_by_capability`.
 - Started `pdi_open_by_name` through type-specific helpers
   `pdi_mcu_open_by_name` and `pdi_led_open_by_name`; these validate stable LPF
-  names through `/dev/pdm_ctl` before opening the current aggregated peripheral
+  names through `/dev/lpf_ctl` before opening the current aggregated peripheral
   nodes.
 - Done. UAPI headers now live under the final `uapi/lpf/` namespace with
   `LPF_*` ABI types and ioctl constants. MCU and LED UAPI headers are ABI-only,
@@ -466,7 +466,7 @@ Current status:
   `/dev/lpf/ledN`, and PDI name-based open helpers resolve stable LPF names to
   those nodes through discovery.
 - Done. LPF v1 does not expose asynchronous userspace device events. PDI keeps
-  discovery as synchronous snapshot and lookup APIs over `/dev/pdm_ctl`; the
+  discovery as synchronous snapshot and lookup APIs over `/dev/lpf_ctl`; the
   kernel LPF event notifier remains an in-kernel service mechanism.
 
 ## Phase 9: Device Nodes And Observability
@@ -508,7 +508,7 @@ Acceptance criteria:
 
 Current status:
 
-- Started. `/dev/pdm_ctl` remains the management/discovery node, is now
+- Started. `/dev/lpf_ctl` is the management/discovery node, is now
   implemented by LPF Core, and configured peripheral instances expose
   `/dev/lpf/mcuN` and `/dev/lpf/ledN` nodes.
 - Started. Instance character devices now expose read-only sysfs attributes:
@@ -530,7 +530,7 @@ Current status:
   `lpf_sysfs`, and `lpf_debugfs`.
 - Done. The control/discovery character device implementation has moved from
   the old module shell into LPF Core as `kernel/lpf/core/lpf_ctl.c`; LPF
-  peripheral runtime no longer owns `/dev/pdm_ctl` registration.
+  peripheral runtime no longer owns `/dev/lpf_ctl` registration.
 - Done. Procfs and OSAL-status-to-errno helpers have been extracted into LPF
   helpers, and migrated peripheral services no longer depend on legacy
   proc/status wrappers.
