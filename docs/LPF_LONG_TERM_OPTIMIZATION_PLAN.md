@@ -218,6 +218,9 @@ Current status:
 - Started. `kernel/lpf/soc/mock/` provides a Kconfig-selectable mock SoC
   backend for GPIO, PWM, I2C, SPI, CAN, and serial paths, with
   `kernel_x86_mock_modules_defconfig` as a no-hardware module build preset.
+- Done. The mock SoC backend allocates mock GPIO, PWM, I2C, SPI, CAN, and
+  serial resources dynamically instead of using fixed per-capability global
+  tables.
 - Remaining work: extend the interface to pinctrl, clocks, resets, and SoC
   identity, then add target SoC adapters.
 
@@ -273,14 +276,19 @@ Current status:
   been removed.
 - Done. `lpf_hw_mock_selftest.ko` exercises LPF HW GPIO, PWM, CAN, UART, I2C,
   and SPI operation paths over the mock SoC backend when the module is loaded.
+- Done. `lpf_hw_mock_selftest.ko` also covers mock SoC dynamic resource
+  allocation beyond the old fixed GPIO, PWM, I2C, SPI, CAN, and serial table
+  sizes.
 - Done. `lpf_dummy_service_selftest.ko` exercises LPF Core dummy service
   lifecycle, discovery, capability lookup, error/recovery state transitions,
   event delivery, and removal cleanup when loaded in the mock module preset.
 - Started. LPF HW GPIO no longer uses a fixed global GPIO table; requested GPIO
   contexts are tracked dynamically by GPIO number.
-- Remaining work: continue removing hard-coded global limits where they are not
-  ABI or protocol constraints, and broaden LPF HW/SoC adapter self-test
-  coverage.
+- Done. The mock SoC backend no longer has fixed mock resource tables for GPIO,
+  PWM, I2C, SPI, CAN, or serial handles.
+- Remaining work: continue removing hard-coded global limits outside the mock
+  backend where they are not ABI or protocol constraints, and broaden LPF
+  HW/SoC adapter self-test coverage.
 
 ## Phase 6: Runtime Configuration Layer
 
@@ -610,6 +618,8 @@ Current status:
   HW and peripheral-service integration paths without live hardware.
 - Done. `LPF_HW_MOCK_SELFTEST` builds a load-time kernel self-test module for
   LPF HW operation paths over the mock SoC backend.
+- Done. The LPF HW mock self-test covers dynamic mock SoC resource allocation
+  beyond the old fixed per-capability table sizes.
 - Started. `make mock-modules-smoke` now automates the mock module load/unload
   sequence and runs `lpf_hw_mock_selftest.ko` plus
   `lpf_dummy_service_selftest.ko`.

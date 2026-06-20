@@ -11,12 +11,23 @@
 #include "lpf/hw/lpf_hw_bus_spi.h"
 
 #define LPF_HW_MOCK_SELFTEST_GPIO 7U
+#define LPF_HW_MOCK_SELFTEST_HIGH_GPIO 300U
+#define LPF_HW_MOCK_SELFTEST_PWM_HANDLES 40U
+#define LPF_HW_MOCK_SELFTEST_BUS_HANDLES 20U
 
 typedef struct {
 	uint32_t count;
 	uint32_t gpio_num;
 	lpf_gpio_level_t level;
 } lpf_hw_mock_gpio_irq_state_t;
+
+typedef struct {
+	lpf_hw_pwm_handle_t pwm_handles[LPF_HW_MOCK_SELFTEST_PWM_HANDLES];
+	lpf_hw_bus_i2c_handle_t i2c_handles[LPF_HW_MOCK_SELFTEST_BUS_HANDLES];
+	lpf_hw_bus_spi_handle_t spi_handles[LPF_HW_MOCK_SELFTEST_BUS_HANDLES];
+	lpf_hw_transport_can_handle_t can_handles[LPF_HW_MOCK_SELFTEST_BUS_HANDLES];
+	lpf_hw_transport_uart_handle_t serial_handles[LPF_HW_MOCK_SELFTEST_BUS_HANDLES];
+} lpf_hw_mock_dynamic_resource_handles_t;
 
 static int lpf_hw_mock_status_to_errno(int32_t status)
 {
@@ -368,6 +379,107 @@ out_close:
 	return lpf_hw_mock_expect_success("spi path", ret);
 }
 
+static int32_t lpf_hw_mock_selftest_dynamic_resources(void)
+{
+	lpf_gpio_config_t gpio_config = {
+		.direction = LPF_GPIO_DIR_OUTPUT,
+		.initial_level = LPF_GPIO_LEVEL_LOW,
+		.edge = LPF_GPIO_EDGE_NONE,
+	};
+	lpf_pwm_config_t pwm_config = {
+		.consumer = "lpf-mock-pwm-scale",
+		.period_ns = 1000000U,
+		.duty_ns = 100000U,
+	};
+	lpf_i2c_config_t i2c_config = {
+		.device = "i2c-mock-scale",
+		.timeout = 10U,
+	};
+	lpf_spi_config_t spi_config = {
+		.device = "mock-spi-scale",
+		.mode = LPF_SPI_MODE_0,
+		.bits_per_word = 8U,
+		.max_speed_hz = 1000000U,
+		.timeout = 10U,
+	};
+	lpf_can_config_t can_config = {
+		.interface = "mock-can-scale",
+		.baudrate = 500000U,
+		.rx_timeout = 10U,
+		.tx_timeout = 10U,
+	};
+	lpf_serial_config_t serial_config = {
+		.baud_rate = 115200U,
+		.data_bits = 8U,
+		.stop_bits = 1U,
+		.parity = LPF_SERIAL_PARITY_NONE,
+		.flow_control = LPF_SERIAL_FLOW_NONE,
+	};
+	lpf_hw_mock_dynamic_resource_handles_t *handles;
+	bool gpio_initialized = false;
+	uint32_t i;
+	int32_t ret = OSAL_SUCCESS;
+
+	handles = osal_zalloc(sizeof(*handles));
+	if (!handles)
+		return lpf_hw_mock_expect_success("dynamic resource paths",
+						  OSAL_ERR_NO_MEMORY);
+
+	ret = lpf_hw_gpio_init(LPF_HW_MOCK_SELFTEST_HIGH_GPIO, &gpio_config);
+	if (ret != OSAL_SUCCESS)
+		goto out;
+	gpio_initialized = true;
+
+	for (i = 0; i < LPF_HW_MOCK_SELFTEST_PWM_HANDLES; i++) {
+		ret = lpf_hw_pwm_init(&pwm_config, &handles->pwm_handles[i]);
+		if (ret != OSAL_SUCCESS)
+			goto out;
+	}
+
+	for (i = 0; i < LPF_HW_MOCK_SELFTEST_BUS_HANDLES; i++) {
+		ret = lpf_hw_bus_i2c_open(&i2c_config,
+					   &handles->i2c_handles[i]);
+		if (ret != OSAL_SUCCESS)
+			goto out;
+		ret = lpf_hw_bus_spi_open(&spi_config,
+					   &handles->spi_handles[i]);
+		if (ret != OSAL_SUCCESS)
+			goto out;
+		ret = lpf_hw_transport_can_init(&can_config,
+						 &handles->can_handles[i]);
+		if (ret != OSAL_SUCCESS)
+			goto out;
+		ret = lpf_hw_transport_uart_open("mock-tty-scale",
+						 &serial_config,
+						 &handles->serial_handles[i]);
+		if (ret != OSAL_SUCCESS)
+			goto out;
+	}
+
+out:
+	for (i = 0; i < LPF_HW_MOCK_SELFTEST_BUS_HANDLES; i++) {
+		if (handles->serial_handles[i])
+			(void)lpf_hw_transport_uart_close(
+				handles->serial_handles[i]);
+		if (handles->can_handles[i])
+			(void)lpf_hw_transport_can_deinit(
+				handles->can_handles[i]);
+		if (handles->spi_handles[i])
+			(void)lpf_hw_bus_spi_close(handles->spi_handles[i]);
+		if (handles->i2c_handles[i])
+			(void)lpf_hw_bus_i2c_close(handles->i2c_handles[i]);
+	}
+	for (i = 0; i < LPF_HW_MOCK_SELFTEST_PWM_HANDLES; i++) {
+		if (handles->pwm_handles[i])
+			(void)lpf_hw_pwm_deinit(handles->pwm_handles[i]);
+	}
+	if (gpio_initialized)
+		(void)lpf_hw_gpio_deinit(LPF_HW_MOCK_SELFTEST_HIGH_GPIO);
+	osal_free(handles);
+
+	return lpf_hw_mock_expect_success("dynamic resource paths", ret);
+}
+
 static int32_t lpf_hw_mock_selftest_run(void)
 {
 	int32_t ret;
@@ -387,7 +499,10 @@ static int32_t lpf_hw_mock_selftest_run(void)
 	ret = lpf_hw_mock_selftest_i2c();
 	if (ret != OSAL_SUCCESS)
 		return ret;
-	return lpf_hw_mock_selftest_spi();
+	ret = lpf_hw_mock_selftest_spi();
+	if (ret != OSAL_SUCCESS)
+		return ret;
+	return lpf_hw_mock_selftest_dynamic_resources();
 }
 
 static int __init lpf_hw_mock_selftest_init(void)

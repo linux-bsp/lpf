@@ -1,23 +1,12 @@
 // SPDX-License-Identifier: GPL-2.0
 
+#include <linux/list.h>
 #include <linux/module.h>
 
+#include "osal.h"
 #include "lpf/soc/lpf_soc_adapter.h"
 
-#define LPF_SOC_MOCK_MAX_GPIO 256U
-#define LPF_SOC_MOCK_MAX_PWM 32U
-#define LPF_SOC_MOCK_MAX_I2C 16U
-#define LPF_SOC_MOCK_MAX_SPI 16U
-#define LPF_SOC_MOCK_MAX_CAN 16U
-#define LPF_SOC_MOCK_MAX_SERIAL 16U
 #define LPF_SOC_MOCK_SERIAL_BUFFER_SIZE 256U
-
-typedef struct {
-	uint32_t gpio_num;
-	lpf_gpio_direction_t direction;
-	lpf_gpio_level_t level;
-	bool requested;
-} lpf_soc_mock_gpio_t;
 
 typedef struct {
 	uint32_t gpio_num;
@@ -29,23 +18,36 @@ typedef struct {
 } lpf_soc_mock_gpio_irq_t;
 
 typedef struct {
+	uint32_t gpio_num;
+	lpf_gpio_direction_t direction;
+	lpf_gpio_level_t level;
+	bool requested;
+	lpf_soc_mock_gpio_irq_t irq;
+	struct list_head node;
+} lpf_soc_mock_gpio_t;
+
+typedef struct {
+	struct list_head node;
 	lpf_pwm_state_t state;
 	char consumer[32];
 	bool allocated;
 } lpf_soc_mock_pwm_t;
 
 typedef struct {
+	struct list_head node;
 	char device[32];
 	bool allocated;
 } lpf_soc_mock_i2c_t;
 
 typedef struct {
+	struct list_head node;
 	lpf_spi_config_t config;
 	char device[32];
 	bool allocated;
 } lpf_soc_mock_spi_t;
 
 typedef struct {
+	struct list_head node;
 	lpf_can_config_t config;
 	char interface[32];
 	lpf_can_frame_t last_tx;
@@ -54,6 +56,7 @@ typedef struct {
 } lpf_soc_mock_can_t;
 
 typedef struct {
+	struct list_head node;
 	lpf_serial_config_t config;
 	char device[32];
 	uint8_t buffer[LPF_SOC_MOCK_SERIAL_BUFFER_SIZE];
@@ -62,13 +65,12 @@ typedef struct {
 } lpf_soc_mock_serial_t;
 
 static DEFINE_MUTEX(g_lpf_soc_mock_lock);
-static lpf_soc_mock_gpio_t g_lpf_soc_mock_gpios[LPF_SOC_MOCK_MAX_GPIO];
-static lpf_soc_mock_gpio_irq_t g_lpf_soc_mock_irqs[LPF_SOC_MOCK_MAX_GPIO];
-static lpf_soc_mock_pwm_t g_lpf_soc_mock_pwms[LPF_SOC_MOCK_MAX_PWM];
-static lpf_soc_mock_i2c_t g_lpf_soc_mock_i2c[LPF_SOC_MOCK_MAX_I2C];
-static lpf_soc_mock_spi_t g_lpf_soc_mock_spi[LPF_SOC_MOCK_MAX_SPI];
-static lpf_soc_mock_can_t g_lpf_soc_mock_can[LPF_SOC_MOCK_MAX_CAN];
-static lpf_soc_mock_serial_t g_lpf_soc_mock_serial[LPF_SOC_MOCK_MAX_SERIAL];
+static LIST_HEAD(g_lpf_soc_mock_gpios);
+static LIST_HEAD(g_lpf_soc_mock_pwms);
+static LIST_HEAD(g_lpf_soc_mock_i2c);
+static LIST_HEAD(g_lpf_soc_mock_spi);
+static LIST_HEAD(g_lpf_soc_mock_can);
+static LIST_HEAD(g_lpf_soc_mock_serial);
 
 static bool lpf_soc_mock_valid_gpio_level(lpf_gpio_level_t level)
 {
@@ -96,19 +98,129 @@ static int32_t lpf_soc_mock_copy_name(char *dst, size_t dst_size,
 	return OSAL_SUCCESS;
 }
 
+static lpf_soc_mock_gpio_t *lpf_soc_mock_find_gpio_locked(uint32_t gpio_num)
+{
+	lpf_soc_mock_gpio_t *gpio;
+
+	list_for_each_entry(gpio, &g_lpf_soc_mock_gpios, node) {
+		if (gpio->gpio_num == gpio_num)
+			return gpio;
+	}
+
+	return NULL;
+}
+
+static lpf_soc_mock_gpio_irq_t *
+lpf_soc_mock_find_gpio_irq_locked(void *irq_handle)
+{
+	lpf_soc_mock_gpio_t *gpio;
+
+	if (!irq_handle)
+		return NULL;
+
+	list_for_each_entry(gpio, &g_lpf_soc_mock_gpios, node) {
+		if (&gpio->irq == irq_handle && gpio->irq.allocated)
+			return &gpio->irq;
+	}
+
+	return NULL;
+}
+
+static lpf_soc_mock_pwm_t *
+lpf_soc_mock_find_pwm_locked(lpf_pwm_handle_t handle)
+{
+	lpf_soc_mock_pwm_t *pwm;
+
+	if (!handle)
+		return NULL;
+
+	list_for_each_entry(pwm, &g_lpf_soc_mock_pwms, node) {
+		if ((lpf_pwm_handle_t)pwm == handle && pwm->allocated)
+			return pwm;
+	}
+
+	return NULL;
+}
+
+static lpf_soc_mock_i2c_t *
+lpf_soc_mock_find_i2c_locked(lpf_i2c_handle_t handle)
+{
+	lpf_soc_mock_i2c_t *i2c;
+
+	if (!handle)
+		return NULL;
+
+	list_for_each_entry(i2c, &g_lpf_soc_mock_i2c, node) {
+		if ((lpf_i2c_handle_t)i2c == handle && i2c->allocated)
+			return i2c;
+	}
+
+	return NULL;
+}
+
+static lpf_soc_mock_spi_t *
+lpf_soc_mock_find_spi_locked(lpf_spi_handle_t handle)
+{
+	lpf_soc_mock_spi_t *spi;
+
+	if (!handle)
+		return NULL;
+
+	list_for_each_entry(spi, &g_lpf_soc_mock_spi, node) {
+		if ((lpf_spi_handle_t)spi == handle && spi->allocated)
+			return spi;
+	}
+
+	return NULL;
+}
+
+static lpf_soc_mock_can_t *
+lpf_soc_mock_find_can_locked(lpf_can_handle_t handle)
+{
+	lpf_soc_mock_can_t *can;
+
+	if (!handle)
+		return NULL;
+
+	list_for_each_entry(can, &g_lpf_soc_mock_can, node) {
+		if ((lpf_can_handle_t)can == handle && can->allocated)
+			return can;
+	}
+
+	return NULL;
+}
+
+static lpf_soc_mock_serial_t *
+lpf_soc_mock_find_serial_locked(lpf_serial_handle_t handle)
+{
+	lpf_soc_mock_serial_t *serial;
+
+	if (!handle)
+		return NULL;
+
+	list_for_each_entry(serial, &g_lpf_soc_mock_serial, node) {
+		if ((lpf_serial_handle_t)serial == handle &&
+		    serial->allocated)
+			return serial;
+	}
+
+	return NULL;
+}
+
 static int32_t lpf_soc_mock_gpio_request(uint32_t gpio_num, const char *label)
 {
 	lpf_soc_mock_gpio_t *gpio;
 
 	(void)label;
 
-	if (gpio_num >= LPF_SOC_MOCK_MAX_GPIO)
-		return OSAL_ERR_INVALID_PARAM;
+	gpio = osal_zalloc(sizeof(*gpio));
+	if (!gpio)
+		return OSAL_ERR_NO_MEMORY;
 
 	mutex_lock(&g_lpf_soc_mock_lock);
-	gpio = &g_lpf_soc_mock_gpios[gpio_num];
-	if (gpio->requested) {
+	if (lpf_soc_mock_find_gpio_locked(gpio_num)) {
 		mutex_unlock(&g_lpf_soc_mock_lock);
+		osal_free(gpio);
 		return OSAL_ERR_ALREADY_EXISTS;
 	}
 
@@ -116,6 +228,8 @@ static int32_t lpf_soc_mock_gpio_request(uint32_t gpio_num, const char *label)
 	gpio->direction = LPF_GPIO_DIR_INPUT;
 	gpio->level = LPF_GPIO_LEVEL_LOW;
 	gpio->requested = true;
+	INIT_LIST_HEAD(&gpio->node);
+	list_add(&gpio->node, &g_lpf_soc_mock_gpios);
 	mutex_unlock(&g_lpf_soc_mock_lock);
 
 	return OSAL_SUCCESS;
@@ -123,15 +237,15 @@ static int32_t lpf_soc_mock_gpio_request(uint32_t gpio_num, const char *label)
 
 static void lpf_soc_mock_gpio_free(uint32_t gpio_num)
 {
-	if (gpio_num >= LPF_SOC_MOCK_MAX_GPIO)
-		return;
+	lpf_soc_mock_gpio_t *gpio;
 
 	mutex_lock(&g_lpf_soc_mock_lock);
-	osal_memset(&g_lpf_soc_mock_gpios[gpio_num], 0,
-		    sizeof(g_lpf_soc_mock_gpios[gpio_num]));
-	osal_memset(&g_lpf_soc_mock_irqs[gpio_num], 0,
-		    sizeof(g_lpf_soc_mock_irqs[gpio_num]));
+	gpio = lpf_soc_mock_find_gpio_locked(gpio_num);
+	if (gpio)
+		list_del_init(&gpio->node);
 	mutex_unlock(&g_lpf_soc_mock_lock);
+
+	osal_free(gpio);
 }
 
 static int32_t lpf_soc_mock_gpio_set_direction(
@@ -140,14 +254,13 @@ static int32_t lpf_soc_mock_gpio_set_direction(
 {
 	lpf_soc_mock_gpio_t *gpio;
 
-	if (gpio_num >= LPF_SOC_MOCK_MAX_GPIO ||
-	    !lpf_soc_mock_valid_gpio_direction(direction) ||
+	if (!lpf_soc_mock_valid_gpio_direction(direction) ||
 	    !lpf_soc_mock_valid_gpio_level(initial_level))
 		return OSAL_ERR_INVALID_PARAM;
 
 	mutex_lock(&g_lpf_soc_mock_lock);
-	gpio = &g_lpf_soc_mock_gpios[gpio_num];
-	if (!gpio->requested) {
+	gpio = lpf_soc_mock_find_gpio_locked(gpio_num);
+	if (!gpio || !gpio->requested) {
 		mutex_unlock(&g_lpf_soc_mock_lock);
 		return OSAL_ERR_INVALID_ID;
 	}
@@ -169,19 +282,18 @@ static int32_t lpf_soc_mock_gpio_set_level(uint32_t gpio_num,
 	void *user_data = NULL;
 	bool should_notify = false;
 
-	if (gpio_num >= LPF_SOC_MOCK_MAX_GPIO ||
-	    !lpf_soc_mock_valid_gpio_level(level))
+	if (!lpf_soc_mock_valid_gpio_level(level))
 		return OSAL_ERR_INVALID_PARAM;
 
 	mutex_lock(&g_lpf_soc_mock_lock);
-	gpio = &g_lpf_soc_mock_gpios[gpio_num];
-	if (!gpio->requested) {
+	gpio = lpf_soc_mock_find_gpio_locked(gpio_num);
+	if (!gpio || !gpio->requested) {
 		mutex_unlock(&g_lpf_soc_mock_lock);
 		return OSAL_ERR_INVALID_ID;
 	}
 
 	if (gpio->level != level) {
-		irq = &g_lpf_soc_mock_irqs[gpio_num];
+		irq = &gpio->irq;
 		should_notify = irq->allocated && irq->enabled &&
 				((level == LPF_GPIO_LEVEL_HIGH &&
 				  (irq->edge == LPF_GPIO_EDGE_RISING ||
@@ -207,16 +319,19 @@ static int32_t lpf_soc_mock_gpio_set_level(uint32_t gpio_num,
 static int32_t lpf_soc_mock_gpio_get_level(uint32_t gpio_num,
 					   lpf_gpio_level_t *level)
 {
-	if (gpio_num >= LPF_SOC_MOCK_MAX_GPIO || !level)
+	lpf_soc_mock_gpio_t *gpio;
+
+	if (!level)
 		return OSAL_ERR_INVALID_PARAM;
 
 	mutex_lock(&g_lpf_soc_mock_lock);
-	if (!g_lpf_soc_mock_gpios[gpio_num].requested) {
+	gpio = lpf_soc_mock_find_gpio_locked(gpio_num);
+	if (!gpio || !gpio->requested) {
 		mutex_unlock(&g_lpf_soc_mock_lock);
 		return OSAL_ERR_INVALID_ID;
 	}
 
-	*level = g_lpf_soc_mock_gpios[gpio_num].level;
+	*level = gpio->level;
 	mutex_unlock(&g_lpf_soc_mock_lock);
 
 	return OSAL_SUCCESS;
@@ -227,18 +342,21 @@ static int32_t lpf_soc_mock_gpio_request_interrupt(
 	lpf_gpio_irq_callback_t callback, void *user_data, void **irq_handle)
 {
 	lpf_soc_mock_gpio_irq_t *irq;
+	lpf_soc_mock_gpio_t *gpio;
 
-	if (gpio_num >= LPF_SOC_MOCK_MAX_GPIO || !callback || !irq_handle ||
-	    edge == LPF_GPIO_EDGE_NONE)
+	if (!callback || !irq_handle || edge == LPF_GPIO_EDGE_NONE)
 		return OSAL_ERR_INVALID_PARAM;
 
+	*irq_handle = NULL;
+
 	mutex_lock(&g_lpf_soc_mock_lock);
-	if (!g_lpf_soc_mock_gpios[gpio_num].requested) {
+	gpio = lpf_soc_mock_find_gpio_locked(gpio_num);
+	if (!gpio || !gpio->requested) {
 		mutex_unlock(&g_lpf_soc_mock_lock);
 		return OSAL_ERR_INVALID_ID;
 	}
 
-	irq = &g_lpf_soc_mock_irqs[gpio_num];
+	irq = &gpio->irq;
 	if (irq->allocated) {
 		mutex_unlock(&g_lpf_soc_mock_lock);
 		return OSAL_ERR_ALREADY_EXISTS;
@@ -258,24 +376,26 @@ static int32_t lpf_soc_mock_gpio_request_interrupt(
 
 static void lpf_soc_mock_gpio_free_interrupt(void *irq_handle)
 {
-	lpf_soc_mock_gpio_irq_t *irq = irq_handle;
-
-	if (!irq)
-		return;
+	lpf_soc_mock_gpio_irq_t *irq;
 
 	mutex_lock(&g_lpf_soc_mock_lock);
-	osal_memset(irq, 0, sizeof(*irq));
+	irq = lpf_soc_mock_find_gpio_irq_locked(irq_handle);
+	if (irq)
+		osal_memset(irq, 0, sizeof(*irq));
 	mutex_unlock(&g_lpf_soc_mock_lock);
 }
 
 static int32_t lpf_soc_mock_gpio_enable_interrupt(void *irq_handle)
 {
-	lpf_soc_mock_gpio_irq_t *irq = irq_handle;
-
-	if (!irq || !irq->allocated)
-		return OSAL_ERR_INVALID_PARAM;
+	lpf_soc_mock_gpio_irq_t *irq;
 
 	mutex_lock(&g_lpf_soc_mock_lock);
+	irq = lpf_soc_mock_find_gpio_irq_locked(irq_handle);
+	if (!irq) {
+		mutex_unlock(&g_lpf_soc_mock_lock);
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
 	irq->enabled = true;
 	mutex_unlock(&g_lpf_soc_mock_lock);
 
@@ -284,12 +404,15 @@ static int32_t lpf_soc_mock_gpio_enable_interrupt(void *irq_handle)
 
 static int32_t lpf_soc_mock_gpio_disable_interrupt(void *irq_handle)
 {
-	lpf_soc_mock_gpio_irq_t *irq = irq_handle;
-
-	if (!irq || !irq->allocated)
-		return OSAL_ERR_INVALID_PARAM;
+	lpf_soc_mock_gpio_irq_t *irq;
 
 	mutex_lock(&g_lpf_soc_mock_lock);
+	irq = lpf_soc_mock_find_gpio_irq_locked(irq_handle);
+	if (!irq) {
+		mutex_unlock(&g_lpf_soc_mock_lock);
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
 	irq->enabled = false;
 	mutex_unlock(&g_lpf_soc_mock_lock);
 
@@ -299,59 +422,63 @@ static int32_t lpf_soc_mock_gpio_disable_interrupt(void *irq_handle)
 static int32_t lpf_soc_mock_pwm_get(const char *consumer,
 				    lpf_pwm_handle_t *handle)
 {
-	uint32_t i;
+	lpf_soc_mock_pwm_t *pwm;
 	int32_t ret;
 
 	if (!consumer || !handle)
 		return OSAL_ERR_INVALID_PARAM;
 
 	*handle = NULL;
+	pwm = osal_zalloc(sizeof(*pwm));
+	if (!pwm)
+		return OSAL_ERR_NO_MEMORY;
 
-	mutex_lock(&g_lpf_soc_mock_lock);
-	for (i = 0; i < LPF_SOC_MOCK_MAX_PWM; i++) {
-		if (g_lpf_soc_mock_pwms[i].allocated)
-			continue;
-
-		ret = lpf_soc_mock_copy_name(g_lpf_soc_mock_pwms[i].consumer,
-					     sizeof(g_lpf_soc_mock_pwms[i].consumer),
-					     consumer);
-		if (ret != OSAL_SUCCESS) {
-			mutex_unlock(&g_lpf_soc_mock_lock);
-			return ret;
-		}
-
-		g_lpf_soc_mock_pwms[i].allocated = true;
-		*handle = &g_lpf_soc_mock_pwms[i];
-		mutex_unlock(&g_lpf_soc_mock_lock);
-		return OSAL_SUCCESS;
+	ret = lpf_soc_mock_copy_name(pwm->consumer, sizeof(pwm->consumer),
+				     consumer);
+	if (ret != OSAL_SUCCESS) {
+		osal_free(pwm);
+		return ret;
 	}
-	mutex_unlock(&g_lpf_soc_mock_lock);
 
-	return OSAL_ERR_RESOURCE_LIMIT;
+	pwm->allocated = true;
+	INIT_LIST_HEAD(&pwm->node);
+	mutex_lock(&g_lpf_soc_mock_lock);
+	list_add(&pwm->node, &g_lpf_soc_mock_pwms);
+	mutex_unlock(&g_lpf_soc_mock_lock);
+	*handle = pwm;
+
+	return OSAL_SUCCESS;
 }
 
 static void lpf_soc_mock_pwm_put(lpf_pwm_handle_t handle)
 {
-	lpf_soc_mock_pwm_t *pwm = handle;
-
-	if (!pwm)
-		return;
+	lpf_soc_mock_pwm_t *pwm;
 
 	mutex_lock(&g_lpf_soc_mock_lock);
-	osal_memset(pwm, 0, sizeof(*pwm));
+	pwm = lpf_soc_mock_find_pwm_locked(handle);
+	if (pwm)
+		list_del_init(&pwm->node);
 	mutex_unlock(&g_lpf_soc_mock_lock);
+
+	osal_free(pwm);
 }
 
 static int32_t lpf_soc_mock_pwm_apply(lpf_pwm_handle_t handle,
 				      const lpf_pwm_state_t *state)
 {
-	lpf_soc_mock_pwm_t *pwm = handle;
+	lpf_soc_mock_pwm_t *pwm;
 
-	if (!pwm || !state || !pwm->allocated || state->period_ns == 0 ||
+	if (!state || state->period_ns == 0 ||
 	    state->duty_ns > state->period_ns)
 		return OSAL_ERR_INVALID_PARAM;
 
 	mutex_lock(&g_lpf_soc_mock_lock);
+	pwm = lpf_soc_mock_find_pwm_locked(handle);
+	if (!pwm) {
+		mutex_unlock(&g_lpf_soc_mock_lock);
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
 	pwm->state = *state;
 	mutex_unlock(&g_lpf_soc_mock_lock);
 
@@ -361,12 +488,18 @@ static int32_t lpf_soc_mock_pwm_apply(lpf_pwm_handle_t handle,
 static int32_t lpf_soc_mock_pwm_get_state(lpf_pwm_handle_t handle,
 					  lpf_pwm_state_t *state)
 {
-	lpf_soc_mock_pwm_t *pwm = handle;
+	lpf_soc_mock_pwm_t *pwm;
 
-	if (!pwm || !state || !pwm->allocated)
+	if (!state)
 		return OSAL_ERR_INVALID_PARAM;
 
 	mutex_lock(&g_lpf_soc_mock_lock);
+	pwm = lpf_soc_mock_find_pwm_locked(handle);
+	if (!pwm) {
+		mutex_unlock(&g_lpf_soc_mock_lock);
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
 	*state = pwm->state;
 	mutex_unlock(&g_lpf_soc_mock_lock);
 
@@ -375,12 +508,15 @@ static int32_t lpf_soc_mock_pwm_get_state(lpf_pwm_handle_t handle,
 
 static int32_t lpf_soc_mock_pwm_enable(lpf_pwm_handle_t handle)
 {
-	lpf_soc_mock_pwm_t *pwm = handle;
-
-	if (!pwm || !pwm->allocated)
-		return OSAL_ERR_INVALID_PARAM;
+	lpf_soc_mock_pwm_t *pwm;
 
 	mutex_lock(&g_lpf_soc_mock_lock);
+	pwm = lpf_soc_mock_find_pwm_locked(handle);
+	if (!pwm) {
+		mutex_unlock(&g_lpf_soc_mock_lock);
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
 	pwm->state.enabled = true;
 	mutex_unlock(&g_lpf_soc_mock_lock);
 
@@ -389,12 +525,15 @@ static int32_t lpf_soc_mock_pwm_enable(lpf_pwm_handle_t handle)
 
 static int32_t lpf_soc_mock_pwm_disable(lpf_pwm_handle_t handle)
 {
-	lpf_soc_mock_pwm_t *pwm = handle;
-
-	if (!pwm || !pwm->allocated)
-		return OSAL_ERR_INVALID_PARAM;
+	lpf_soc_mock_pwm_t *pwm;
 
 	mutex_lock(&g_lpf_soc_mock_lock);
+	pwm = lpf_soc_mock_find_pwm_locked(handle);
+	if (!pwm) {
+		mutex_unlock(&g_lpf_soc_mock_lock);
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
 	pwm->state.enabled = false;
 	mutex_unlock(&g_lpf_soc_mock_lock);
 
@@ -404,58 +543,62 @@ static int32_t lpf_soc_mock_pwm_disable(lpf_pwm_handle_t handle)
 static int32_t lpf_soc_mock_i2c_open(const char *device,
 				     lpf_i2c_handle_t *handle)
 {
-	uint32_t i;
+	lpf_soc_mock_i2c_t *i2c;
 	int32_t ret;
 
 	if (!device || !handle)
 		return OSAL_ERR_INVALID_PARAM;
 
 	*handle = NULL;
+	i2c = osal_zalloc(sizeof(*i2c));
+	if (!i2c)
+		return OSAL_ERR_NO_MEMORY;
 
-	mutex_lock(&g_lpf_soc_mock_lock);
-	for (i = 0; i < LPF_SOC_MOCK_MAX_I2C; i++) {
-		if (g_lpf_soc_mock_i2c[i].allocated)
-			continue;
-
-		ret = lpf_soc_mock_copy_name(g_lpf_soc_mock_i2c[i].device,
-					     sizeof(g_lpf_soc_mock_i2c[i].device),
-					     device);
-		if (ret != OSAL_SUCCESS) {
-			mutex_unlock(&g_lpf_soc_mock_lock);
-			return ret;
-		}
-
-		g_lpf_soc_mock_i2c[i].allocated = true;
-		*handle = &g_lpf_soc_mock_i2c[i];
-		mutex_unlock(&g_lpf_soc_mock_lock);
-		return OSAL_SUCCESS;
+	ret = lpf_soc_mock_copy_name(i2c->device, sizeof(i2c->device),
+				     device);
+	if (ret != OSAL_SUCCESS) {
+		osal_free(i2c);
+		return ret;
 	}
-	mutex_unlock(&g_lpf_soc_mock_lock);
 
-	return OSAL_ERR_RESOURCE_LIMIT;
+	i2c->allocated = true;
+	INIT_LIST_HEAD(&i2c->node);
+	mutex_lock(&g_lpf_soc_mock_lock);
+	list_add(&i2c->node, &g_lpf_soc_mock_i2c);
+	mutex_unlock(&g_lpf_soc_mock_lock);
+	*handle = i2c;
+
+	return OSAL_SUCCESS;
 }
 
 static void lpf_soc_mock_i2c_close(lpf_i2c_handle_t handle)
 {
-	lpf_soc_mock_i2c_t *i2c = handle;
-
-	if (!i2c)
-		return;
+	lpf_soc_mock_i2c_t *i2c;
 
 	mutex_lock(&g_lpf_soc_mock_lock);
-	osal_memset(i2c, 0, sizeof(*i2c));
+	i2c = lpf_soc_mock_find_i2c_locked(handle);
+	if (i2c)
+		list_del_init(&i2c->node);
 	mutex_unlock(&g_lpf_soc_mock_lock);
+
+	osal_free(i2c);
 }
 
 static int32_t lpf_soc_mock_i2c_transfer(lpf_i2c_handle_t handle,
 					 lpf_i2c_msg_t *msgs, uint32_t num)
 {
-	lpf_soc_mock_i2c_t *i2c = handle;
 	uint32_t i;
 	uint16_t j;
 
-	if (!i2c || !i2c->allocated || !msgs || num == 0 || num > 64)
+	if (!msgs || num == 0 || num > 64)
 		return OSAL_ERR_INVALID_PARAM;
+
+	mutex_lock(&g_lpf_soc_mock_lock);
+	if (!lpf_soc_mock_find_i2c_locked(handle)) {
+		mutex_unlock(&g_lpf_soc_mock_lock);
+		return OSAL_ERR_INVALID_PARAM;
+	}
+	mutex_unlock(&g_lpf_soc_mock_lock);
 
 	for (i = 0; i < num; i++) {
 		if (!msgs[i].buf || msgs[i].len == 0)
@@ -474,66 +617,70 @@ static int32_t lpf_soc_mock_i2c_transfer(lpf_i2c_handle_t handle,
 static int32_t lpf_soc_mock_spi_open(const lpf_spi_config_t *config,
 				     lpf_spi_handle_t *handle)
 {
-	uint32_t i;
+	lpf_soc_mock_spi_t *spi;
 	int32_t ret;
 
 	if (!config || !config->device || !handle)
 		return OSAL_ERR_INVALID_PARAM;
 
 	*handle = NULL;
+	spi = osal_zalloc(sizeof(*spi));
+	if (!spi)
+		return OSAL_ERR_NO_MEMORY;
 
-	mutex_lock(&g_lpf_soc_mock_lock);
-	for (i = 0; i < LPF_SOC_MOCK_MAX_SPI; i++) {
-		if (g_lpf_soc_mock_spi[i].allocated)
-			continue;
-
-		ret = lpf_soc_mock_copy_name(g_lpf_soc_mock_spi[i].device,
-					     sizeof(g_lpf_soc_mock_spi[i].device),
-					     config->device);
-		if (ret != OSAL_SUCCESS) {
-			mutex_unlock(&g_lpf_soc_mock_lock);
-			return ret;
-		}
-
-		g_lpf_soc_mock_spi[i].config = *config;
-		g_lpf_soc_mock_spi[i].config.device =
-			g_lpf_soc_mock_spi[i].device;
-		g_lpf_soc_mock_spi[i].allocated = true;
-		*handle = &g_lpf_soc_mock_spi[i];
-		mutex_unlock(&g_lpf_soc_mock_lock);
-		return OSAL_SUCCESS;
+	ret = lpf_soc_mock_copy_name(spi->device, sizeof(spi->device),
+				     config->device);
+	if (ret != OSAL_SUCCESS) {
+		osal_free(spi);
+		return ret;
 	}
-	mutex_unlock(&g_lpf_soc_mock_lock);
 
-	return OSAL_ERR_RESOURCE_LIMIT;
+	spi->config = *config;
+	spi->config.device = spi->device;
+	spi->allocated = true;
+	INIT_LIST_HEAD(&spi->node);
+	mutex_lock(&g_lpf_soc_mock_lock);
+	list_add(&spi->node, &g_lpf_soc_mock_spi);
+	mutex_unlock(&g_lpf_soc_mock_lock);
+	*handle = spi;
+
+	return OSAL_SUCCESS;
 }
 
 static void lpf_soc_mock_spi_close(lpf_spi_handle_t handle)
 {
-	lpf_soc_mock_spi_t *spi = handle;
-
-	if (!spi)
-		return;
+	lpf_soc_mock_spi_t *spi;
 
 	mutex_lock(&g_lpf_soc_mock_lock);
-	osal_memset(spi, 0, sizeof(*spi));
+	spi = lpf_soc_mock_find_spi_locked(handle);
+	if (spi)
+		list_del_init(&spi->node);
 	mutex_unlock(&g_lpf_soc_mock_lock);
+
+	osal_free(spi);
 }
 
 static int32_t lpf_soc_mock_spi_transfer(
 	lpf_spi_handle_t handle, const lpf_spi_transfer_t *transfers,
 	uint32_t num)
 {
-	lpf_soc_mock_spi_t *spi = handle;
 	uint32_t i;
 
-	if (!spi || !spi->allocated || !transfers || num == 0)
+	if (!transfers || num == 0)
 		return OSAL_ERR_INVALID_PARAM;
+
+	mutex_lock(&g_lpf_soc_mock_lock);
+	if (!lpf_soc_mock_find_spi_locked(handle)) {
+		mutex_unlock(&g_lpf_soc_mock_lock);
+		return OSAL_ERR_INVALID_PARAM;
+	}
 
 	for (i = 0; i < num; i++) {
 		if ((!transfers[i].tx_buf && !transfers[i].rx_buf) ||
-		    transfers[i].len == 0)
+		    transfers[i].len == 0) {
+			mutex_unlock(&g_lpf_soc_mock_lock);
 			return OSAL_ERR_INVALID_PARAM;
+		}
 
 		if (transfers[i].rx_buf && transfers[i].tx_buf)
 			osal_memcpy(transfers[i].rx_buf, transfers[i].tx_buf,
@@ -542,6 +689,7 @@ static int32_t lpf_soc_mock_spi_transfer(
 			osal_memset(transfers[i].rx_buf, 0,
 				    transfers[i].len);
 	}
+	mutex_unlock(&g_lpf_soc_mock_lock);
 
 	return OSAL_SUCCESS;
 }
@@ -549,12 +697,18 @@ static int32_t lpf_soc_mock_spi_transfer(
 static int32_t lpf_soc_mock_spi_set_config(lpf_spi_handle_t handle,
 					   const lpf_spi_config_t *config)
 {
-	lpf_soc_mock_spi_t *spi = handle;
+	lpf_soc_mock_spi_t *spi;
 
-	if (!spi || !spi->allocated || !config || !config->device)
+	if (!config || !config->device)
 		return OSAL_ERR_INVALID_PARAM;
 
 	mutex_lock(&g_lpf_soc_mock_lock);
+	spi = lpf_soc_mock_find_spi_locked(handle);
+	if (!spi) {
+		mutex_unlock(&g_lpf_soc_mock_lock);
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
 	spi->config = *config;
 	spi->config.device = spi->device;
 	mutex_unlock(&g_lpf_soc_mock_lock);
@@ -565,50 +719,50 @@ static int32_t lpf_soc_mock_spi_set_config(lpf_spi_handle_t handle,
 static int32_t lpf_soc_mock_can_init(const lpf_can_config_t *config,
 				     lpf_can_handle_t *handle)
 {
-	uint32_t i;
+	lpf_soc_mock_can_t *can;
 	int32_t ret;
 
 	if (!config || !config->interface || !handle)
 		return OSAL_ERR_INVALID_PARAM;
 
 	*handle = NULL;
+	can = osal_zalloc(sizeof(*can));
+	if (!can)
+		return OSAL_ERR_NO_MEMORY;
 
-	mutex_lock(&g_lpf_soc_mock_lock);
-	for (i = 0; i < LPF_SOC_MOCK_MAX_CAN; i++) {
-		if (g_lpf_soc_mock_can[i].allocated)
-			continue;
-
-		ret = lpf_soc_mock_copy_name(g_lpf_soc_mock_can[i].interface,
-					     sizeof(g_lpf_soc_mock_can[i].interface),
-					     config->interface);
-		if (ret != OSAL_SUCCESS) {
-			mutex_unlock(&g_lpf_soc_mock_lock);
-			return ret;
-		}
-
-		g_lpf_soc_mock_can[i].config = *config;
-		g_lpf_soc_mock_can[i].config.interface =
-			g_lpf_soc_mock_can[i].interface;
-		g_lpf_soc_mock_can[i].allocated = true;
-		*handle = &g_lpf_soc_mock_can[i];
-		mutex_unlock(&g_lpf_soc_mock_lock);
-		return OSAL_SUCCESS;
+	ret = lpf_soc_mock_copy_name(can->interface, sizeof(can->interface),
+				     config->interface);
+	if (ret != OSAL_SUCCESS) {
+		osal_free(can);
+		return ret;
 	}
-	mutex_unlock(&g_lpf_soc_mock_lock);
 
-	return OSAL_ERR_RESOURCE_LIMIT;
+	can->config = *config;
+	can->config.interface = can->interface;
+	can->allocated = true;
+	INIT_LIST_HEAD(&can->node);
+	mutex_lock(&g_lpf_soc_mock_lock);
+	list_add(&can->node, &g_lpf_soc_mock_can);
+	mutex_unlock(&g_lpf_soc_mock_lock);
+	*handle = can;
+
+	return OSAL_SUCCESS;
 }
 
 static int32_t lpf_soc_mock_can_deinit(lpf_can_handle_t handle)
 {
-	lpf_soc_mock_can_t *can = handle;
-
-	if (!can)
-		return OSAL_ERR_INVALID_PARAM;
+	lpf_soc_mock_can_t *can;
 
 	mutex_lock(&g_lpf_soc_mock_lock);
-	osal_memset(can, 0, sizeof(*can));
+	can = lpf_soc_mock_find_can_locked(handle);
+	if (!can) {
+		mutex_unlock(&g_lpf_soc_mock_lock);
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
+	list_del_init(&can->node);
 	mutex_unlock(&g_lpf_soc_mock_lock);
+	osal_free(can);
 
 	return OSAL_SUCCESS;
 }
@@ -616,13 +770,18 @@ static int32_t lpf_soc_mock_can_deinit(lpf_can_handle_t handle)
 static int32_t lpf_soc_mock_can_send(lpf_can_handle_t handle,
 				     const lpf_can_frame_t *frame)
 {
-	lpf_soc_mock_can_t *can = handle;
+	lpf_soc_mock_can_t *can;
 
-	if (!can || !can->allocated || !frame ||
-	    frame->dlc > LPF_CAN_MAX_DATA_LEN)
+	if (!frame || frame->dlc > LPF_CAN_MAX_DATA_LEN)
 		return OSAL_ERR_INVALID_PARAM;
 
 	mutex_lock(&g_lpf_soc_mock_lock);
+	can = lpf_soc_mock_find_can_locked(handle);
+	if (!can) {
+		mutex_unlock(&g_lpf_soc_mock_lock);
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
 	can->last_tx = *frame;
 	can->has_last_tx = true;
 	mutex_unlock(&g_lpf_soc_mock_lock);
@@ -634,14 +793,20 @@ static int32_t lpf_soc_mock_can_recv(lpf_can_handle_t handle,
 				     lpf_can_frame_t *frame,
 				     int32_t timeout)
 {
-	lpf_soc_mock_can_t *can = handle;
+	lpf_soc_mock_can_t *can;
 
 	(void)timeout;
 
-	if (!can || !can->allocated || !frame)
+	if (!frame)
 		return OSAL_ERR_INVALID_PARAM;
 
 	mutex_lock(&g_lpf_soc_mock_lock);
+	can = lpf_soc_mock_find_can_locked(handle);
+	if (!can) {
+		mutex_unlock(&g_lpf_soc_mock_lock);
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
 	if (!can->has_last_tx) {
 		mutex_unlock(&g_lpf_soc_mock_lock);
 		return OSAL_ERR_TIMEOUT;
@@ -657,13 +822,15 @@ static int32_t lpf_soc_mock_can_set_filter(lpf_can_handle_t handle,
 					   uint32_t filter_id,
 					   uint32_t filter_mask)
 {
-	lpf_soc_mock_can_t *can = handle;
-
 	(void)filter_id;
 	(void)filter_mask;
 
-	if (!can || !can->allocated)
+	mutex_lock(&g_lpf_soc_mock_lock);
+	if (!lpf_soc_mock_find_can_locked(handle)) {
+		mutex_unlock(&g_lpf_soc_mock_lock);
 		return OSAL_ERR_INVALID_PARAM;
+	}
+	mutex_unlock(&g_lpf_soc_mock_lock);
 
 	return OSAL_SUCCESS;
 }
@@ -672,48 +839,49 @@ static int32_t lpf_soc_mock_serial_open(
 	const char *device, const lpf_serial_config_t *config,
 	lpf_serial_handle_t *handle)
 {
-	uint32_t i;
+	lpf_soc_mock_serial_t *serial;
 	int32_t ret;
 
 	if (!device || !config || !handle || config->baud_rate == 0)
 		return OSAL_ERR_INVALID_PARAM;
 
 	*handle = NULL;
+	serial = osal_zalloc(sizeof(*serial));
+	if (!serial)
+		return OSAL_ERR_NO_MEMORY;
 
-	mutex_lock(&g_lpf_soc_mock_lock);
-	for (i = 0; i < LPF_SOC_MOCK_MAX_SERIAL; i++) {
-		if (g_lpf_soc_mock_serial[i].allocated)
-			continue;
-
-		ret = lpf_soc_mock_copy_name(g_lpf_soc_mock_serial[i].device,
-					     sizeof(g_lpf_soc_mock_serial[i].device),
-					     device);
-		if (ret != OSAL_SUCCESS) {
-			mutex_unlock(&g_lpf_soc_mock_lock);
-			return ret;
-		}
-
-		g_lpf_soc_mock_serial[i].config = *config;
-		g_lpf_soc_mock_serial[i].allocated = true;
-		*handle = &g_lpf_soc_mock_serial[i];
-		mutex_unlock(&g_lpf_soc_mock_lock);
-		return OSAL_SUCCESS;
+	ret = lpf_soc_mock_copy_name(serial->device, sizeof(serial->device),
+				     device);
+	if (ret != OSAL_SUCCESS) {
+		osal_free(serial);
+		return ret;
 	}
-	mutex_unlock(&g_lpf_soc_mock_lock);
 
-	return OSAL_ERR_RESOURCE_LIMIT;
+	serial->config = *config;
+	serial->allocated = true;
+	INIT_LIST_HEAD(&serial->node);
+	mutex_lock(&g_lpf_soc_mock_lock);
+	list_add(&serial->node, &g_lpf_soc_mock_serial);
+	mutex_unlock(&g_lpf_soc_mock_lock);
+	*handle = serial;
+
+	return OSAL_SUCCESS;
 }
 
 static int32_t lpf_soc_mock_serial_close(lpf_serial_handle_t handle)
 {
-	lpf_soc_mock_serial_t *serial = handle;
-
-	if (!serial)
-		return OSAL_ERR_INVALID_PARAM;
+	lpf_soc_mock_serial_t *serial;
 
 	mutex_lock(&g_lpf_soc_mock_lock);
-	osal_memset(serial, 0, sizeof(*serial));
+	serial = lpf_soc_mock_find_serial_locked(handle);
+	if (!serial) {
+		mutex_unlock(&g_lpf_soc_mock_lock);
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
+	list_del_init(&serial->node);
 	mutex_unlock(&g_lpf_soc_mock_lock);
+	osal_free(serial);
 
 	return OSAL_SUCCESS;
 }
@@ -722,17 +890,22 @@ static int32_t lpf_soc_mock_serial_write(lpf_serial_handle_t handle,
 					 const void *buffer, uint32_t size,
 					 int32_t timeout)
 {
-	lpf_soc_mock_serial_t *serial = handle;
+	lpf_soc_mock_serial_t *serial;
 	uint32_t copy_len;
 
 	(void)timeout;
 
-	if (!serial || !serial->allocated || !buffer || size == 0)
+	if (!buffer || size == 0)
 		return OSAL_ERR_INVALID_PARAM;
 
-	copy_len = min_t(uint32_t, size, sizeof(serial->buffer));
-
 	mutex_lock(&g_lpf_soc_mock_lock);
+	serial = lpf_soc_mock_find_serial_locked(handle);
+	if (!serial) {
+		mutex_unlock(&g_lpf_soc_mock_lock);
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
+	copy_len = min_t(uint32_t, size, sizeof(serial->buffer));
 	osal_memcpy(serial->buffer, buffer, copy_len);
 	serial->buffer_len = copy_len;
 	mutex_unlock(&g_lpf_soc_mock_lock);
@@ -744,15 +917,21 @@ static int32_t lpf_soc_mock_serial_read(lpf_serial_handle_t handle,
 					void *buffer, uint32_t size,
 					int32_t timeout)
 {
-	lpf_soc_mock_serial_t *serial = handle;
+	lpf_soc_mock_serial_t *serial;
 	uint32_t copy_len;
 
 	(void)timeout;
 
-	if (!serial || !serial->allocated || !buffer || size == 0)
+	if (!buffer || size == 0)
 		return OSAL_ERR_INVALID_PARAM;
 
 	mutex_lock(&g_lpf_soc_mock_lock);
+	serial = lpf_soc_mock_find_serial_locked(handle);
+	if (!serial) {
+		mutex_unlock(&g_lpf_soc_mock_lock);
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
 	copy_len = min_t(uint32_t, size, serial->buffer_len);
 	if (copy_len > 0)
 		osal_memcpy(buffer, serial->buffer, copy_len);
@@ -763,12 +942,15 @@ static int32_t lpf_soc_mock_serial_read(lpf_serial_handle_t handle,
 
 static int32_t lpf_soc_mock_serial_flush(lpf_serial_handle_t handle)
 {
-	lpf_soc_mock_serial_t *serial = handle;
-
-	if (!serial || !serial->allocated)
-		return OSAL_ERR_INVALID_PARAM;
+	lpf_soc_mock_serial_t *serial;
 
 	mutex_lock(&g_lpf_soc_mock_lock);
+	serial = lpf_soc_mock_find_serial_locked(handle);
+	if (!serial) {
+		mutex_unlock(&g_lpf_soc_mock_lock);
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
 	serial->buffer_len = 0;
 	mutex_unlock(&g_lpf_soc_mock_lock);
 
@@ -778,13 +960,18 @@ static int32_t lpf_soc_mock_serial_flush(lpf_serial_handle_t handle)
 static int32_t lpf_soc_mock_serial_set_config(
 	lpf_serial_handle_t handle, const lpf_serial_config_t *config)
 {
-	lpf_soc_mock_serial_t *serial = handle;
+	lpf_soc_mock_serial_t *serial;
 
-	if (!serial || !serial->allocated || !config ||
-	    config->baud_rate == 0)
+	if (!config || config->baud_rate == 0)
 		return OSAL_ERR_INVALID_PARAM;
 
 	mutex_lock(&g_lpf_soc_mock_lock);
+	serial = lpf_soc_mock_find_serial_locked(handle);
+	if (!serial) {
+		mutex_unlock(&g_lpf_soc_mock_lock);
+		return OSAL_ERR_INVALID_PARAM;
+	}
+
 	serial->config = *config;
 	mutex_unlock(&g_lpf_soc_mock_lock);
 
