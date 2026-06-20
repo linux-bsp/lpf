@@ -584,6 +584,9 @@ Current status:
   validate stable-name discovery, generated instance-node paths, MCU ioctl
   payloads, LED ioctl payloads, and close handling without requiring live LPF
   device nodes.
+- Done. MCU transport registry tests now use mock CAN/UART transport ops to
+  validate transport selection, invalid-interface rejection, and basic
+  open/transfer/close operation paths without live hardware.
 - Started. Added a Kconfig-selectable mock SoC backend and
   `kernel_x86_mock_modules_defconfig` so kernel module builds can validate LPF
   HW and peripheral-service integration paths without live hardware.
