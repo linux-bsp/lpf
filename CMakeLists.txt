@@ -35,7 +35,7 @@ kconfig_load()
 # Project Declaration
 # ==============================================================================
 
-project(lpf_sdk C CXX ASM)
+project(lpf_sdk C ASM)
 
 option(LPF_BUILD_TESTS "Build LPF test targets" OFF)
 

@@ -8,6 +8,8 @@
  ************************************************************************/
 
 #include "osal.h"
+#include <linux/math64.h>
+
 #include "lpf/config/lpf_config.h"
 #include "lpf/hw/lpf_hw_can.h"
 #include "lpf_mcu_transport.h"
@@ -105,6 +107,7 @@ static int32_t lpf_mcu_transport_can_transfer(
 	int32_t ret;
 	uint64_t start_time_us;
 	uint64_t elapsed_us;
+	uint32_t elapsed_ms;
 	uint32_t remaining_timeout_ms;
 	uint32_t sent_bytes = 0;
 	uint32_t recv_bytes = 0;
@@ -136,17 +139,19 @@ static int32_t lpf_mcu_transport_can_transfer(
 
 		/* 检查超时 */
 		elapsed_us = osal_get_monotonic_time() - start_time_us;
-		if (elapsed_us / 1000 >= timeout_ms) {
+		elapsed_ms = (uint32_t)div_u64(elapsed_us, 1000);
+		if (elapsed_ms >= timeout_ms) {
 			return OSAL_ERR_TIMEOUT;
 		}
 	}
 
 	/* 计算剩余超时时间 */
 	elapsed_us = osal_get_monotonic_time() - start_time_us;
-	if (elapsed_us / 1000 >= timeout_ms) {
+	elapsed_ms = (uint32_t)div_u64(elapsed_us, 1000);
+	if (elapsed_ms >= timeout_ms) {
 		return OSAL_ERR_TIMEOUT;
 	}
-	remaining_timeout_ms = timeout_ms - (uint32_t)(elapsed_us / 1000);
+	remaining_timeout_ms = timeout_ms - elapsed_ms;
 
 	/* 接收响应报文（可能多帧） */
 	osal_mutex_lock(&ctx->rx_mutex);
@@ -180,11 +185,12 @@ static int32_t lpf_mcu_transport_can_transfer(
 
 		/* 更新剩余超时 */
 		elapsed_us = osal_get_monotonic_time() - start_time_us;
-		if (elapsed_us / 1000 >= timeout_ms) {
+		elapsed_ms = (uint32_t)div_u64(elapsed_us, 1000);
+		if (elapsed_ms >= timeout_ms) {
 			osal_mutex_unlock(&ctx->rx_mutex);
 			return OSAL_ERR_TIMEOUT;
 		}
-		remaining_timeout_ms = timeout_ms - (uint32_t)(elapsed_us / 1000);
+		remaining_timeout_ms = timeout_ms - elapsed_ms;
 	}
 
 	osal_mutex_unlock(&ctx->rx_mutex);

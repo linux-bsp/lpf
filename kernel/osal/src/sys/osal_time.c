@@ -3,6 +3,7 @@
 #include "osal/osal.h"
 
 #include <linux/delay.h>
+#include <linux/math64.h>
 #include <linux/ktime.h>
 #include <linux/timekeeping.h>
 
@@ -53,13 +54,13 @@ EXPORT_SYMBOL_GPL(osal_nanosleep);
 
 int64_t osal_get_monotonic_time(void)
 {
-	return (int64_t)(ktime_get_ns() / OSAL_NSEC_PER_USEC);
+	return (int64_t)div_u64(ktime_get_ns(), OSAL_NSEC_PER_USEC);
 }
 EXPORT_SYMBOL_GPL(osal_get_monotonic_time);
 
 int64_t osal_get_boot_time(void)
 {
-	return (int64_t)(ktime_get_boottime_ns() / OSAL_NSEC_PER_USEC);
+	return (int64_t)div_u64(ktime_get_boottime_ns(), OSAL_NSEC_PER_USEC);
 }
 EXPORT_SYMBOL_GPL(osal_get_boot_time);
 

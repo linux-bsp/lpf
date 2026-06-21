@@ -508,14 +508,6 @@ config COMPILER_CUSTOM_C_FLAGS
 
 	  Example: -fno-strict-aliasing -Wno-unused-parameter
 
-config COMPILER_CUSTOM_CXX_FLAGS
-	string "Custom C++ flags"
-	default ""
-	help
-	  Additional custom C++ compiler flags.
-
-	  These flags are appended to the default flags.
-
 config COMPILER_CUSTOM_LINK_FLAGS
 	string "Custom linker flags"
 	default ""

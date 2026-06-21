@@ -8,6 +8,8 @@
  ************************************************************************/
 
 #include "osal.h"
+#include <linux/math64.h>
+
 #include "lpf/config/lpf_config.h"
 #include "lpf/hw/lpf_hw_uart.h"
 #include "lpf_mcu_transport.h"
@@ -142,6 +144,7 @@ static int32_t lpf_mcu_transport_uart_transfer(
 	int32_t rx_len;
 	uint64_t start_time_us;
 	uint64_t elapsed_us;
+	uint32_t elapsed_ms;
 	uint32_t remaining_timeout_ms;
 
 	if (!handle || !packet) {
@@ -161,10 +164,11 @@ static int32_t lpf_mcu_transport_uart_transfer(
 
 	/* 计算剩余超时时间 */
 	elapsed_us = osal_get_monotonic_time() - start_time_us;
-	if (elapsed_us / 1000 >= timeout_ms) {
+	elapsed_ms = (uint32_t)div_u64(elapsed_us, 1000);
+	if (elapsed_ms >= timeout_ms) {
 		return OSAL_ERR_TIMEOUT;
 	}
-	remaining_timeout_ms = timeout_ms - (uint32_t)(elapsed_us / 1000);
+	remaining_timeout_ms = timeout_ms - elapsed_ms;
 
 	/* 接收响应报文 */
 	osal_mutex_lock(&ctx->rx_mutex);

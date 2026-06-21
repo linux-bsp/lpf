@@ -12,6 +12,7 @@ LPF_SITE = ssh://gitea@192.168.18.254:4022/CSPD/LPF.git
 LPF_SITE_METHOD = git
 LPF_LICENSE = Proprietary
 LPF_INSTALL_TARGET = YES
+LPF_ADD_TOOLCHAIN_DEPENDENCY = NO
 
 # Dependencies - Kconfig + CMake/Kbuild build system
 LPF_DEPENDENCIES = host-pkgconf host-cmake host-flex host-bison linux
@@ -34,8 +35,10 @@ LPF_MAKE_OPTS = \
 	KERNEL_SRC="$(LINUX_DIR)" \
 	ARCH="$(KERNEL_ARCH)" \
 	CROSS_COMPILE="$(TARGET_CROSS)" \
+	CC="$(TARGET_CC)" \
 	CMAKE_BUILD_TYPE="$(LPF_BUILD_TYPE)" \
 	CMAKE_TOOLCHAIN_FILE="$(HOST_DIR)/share/buildroot/toolchainfile.cmake" \
+	CMAKE_EXTRA_FLAGS='-DCMAKE_C_COMPILER="$(TARGET_CC)" -DCMAKE_C_FLAGS="$(TARGET_CFLAGS)" -DCMAKE_EXE_LINKER_FLAGS="$(TARGET_LDFLAGS)"' \
 	CMAKE_INSTALL_PREFIX="/usr"
 
 # Configure using make (kernel-style interface)
@@ -53,6 +56,7 @@ endef
 # Build userspace libraries and kernel modules.
 define LPF_BUILD_CMDS
 	@echo "LPF: Building with configuration $(LPF_KCONFIG_DEFCONFIG)"
+	rm -f "$(LPF_BUILD_OUTPUT)/CMakeCache.txt"
 	$(TARGET_MAKE_ENV) $(MAKE) -C $(@D) $(LPF_MAKE_OPTS) all
 endef
 

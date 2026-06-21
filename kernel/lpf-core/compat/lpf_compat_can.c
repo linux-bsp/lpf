@@ -4,6 +4,7 @@
 #include <linux/can/raw.h>
 #include <linux/if.h>
 #include <linux/jiffies.h>
+#include <linux/math64.h>
 #include <linux/module.h>
 #include <linux/net.h>
 #include <linux/netdevice.h>
@@ -286,7 +287,7 @@ int32_t lpf_compat_can_recv(lpf_can_handle_t handle,
 				     can_frame.can_dlc;
 		osal_memcpy(frame->data, can_frame.data, frame->dlc);
 		frame->timestamp =
-			(uint32_t)(osal_get_monotonic_time() / 1000);
+			(uint32_t)div_u64(osal_get_monotonic_time(), 1000);
 		return OSAL_SUCCESS;
 	}
 

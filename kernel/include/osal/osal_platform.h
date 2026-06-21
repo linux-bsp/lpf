@@ -8,12 +8,12 @@
 #define OSAL_PLATFORM_LINUX
 #define OSAL_PLATFORM_KERNEL
 
-#if defined(CONFIG_ARCH_X86_64) || defined(__x86_64__) || defined(__amd64__) || \
-	defined(CONFIG_ARCH_ARM64) || defined(__aarch64__) ||                 \
+#if defined(CONFIG_64BIT) || defined(CONFIG_ARCH_X86_64) || defined(__x86_64__) || \
+	defined(__amd64__) || defined(CONFIG_ARCH_ARM64) || defined(__aarch64__) || \
 	defined(CONFIG_ARCH_RISCV64)
 #define OSAL_ARCH_BITS 0x40
 #else
-#define OSAL_ARCH_BITS (sizeof(void *) * 8)
+#define OSAL_ARCH_BITS 0x20
 #endif
 
 #define OSAL_LITTLE_ENDIAN 0x1

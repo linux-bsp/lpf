@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 
+#include <linux/math64.h>
+
 #include "lpf/hw/lpf_hw_pwm.h"
 #include "lpf_led_internal.h"
 
@@ -36,7 +38,7 @@ static int32_t lpf_led_pwm_apply(lpf_led_context_t *ctx)
 		return OSAL_ERR_INVALID_PARAM;
 
 	duty = (uint64_t)ctx->config->hw.pwm.period_ns * ctx->brightness;
-	duty /= ctx->config->max_brightness;
+	duty = div_u64(duty, ctx->config->max_brightness);
 
 	state.period_ns = ctx->config->hw.pwm.period_ns;
 	state.duty_ns = (uint32_t)duty;

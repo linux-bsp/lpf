@@ -473,6 +473,15 @@ modules: _check_config include/generated/gen_autoconf.h include/generated/gen_ve
 		M=$(abspath $(MODULES_SRC_DIR)) \
 		MO=$(abspath $(MODULES_OUTPUT_DIR)) \
 		modules
+	$(Q)if [ "$(abspath $(MODULES_OUTPUT_DIR))" != "$(abspath $(MODULES_SRC_DIR))" ]; then \
+		for module in $(MODULES_LIST); do \
+			src="$(abspath $(MODULES_SRC_DIR))/$$module.ko"; \
+			dst="$(abspath $(MODULES_OUTPUT_DIR))/$$module.ko"; \
+			if [ ! -f "$$dst" ] && [ -f "$$src" ]; then \
+				cp -f "$$src" "$$dst"; \
+			fi; \
+		done; \
+	fi
 	@echo ""
 	@echo "==================================================================="
 	@echo "Kernel module build completed successfully!"

@@ -3,7 +3,6 @@ config BR2_PACKAGE_LPF
 	depends on BR2_LINUX_KERNEL
 	depends on BR2_TOOLCHAIN_HAS_THREADS
 	depends on BR2_USE_MMU
-	depends on BR2_INSTALL_LIBSTDCPP
 	help
 	  LPF is a generic Linux peripheral framework
 	  with a Kconfig+CMake/Kbuild build system. It provides OSAL,
@@ -50,6 +49,6 @@ config BR2_PACKAGE_LPF_INSTALL_HEADERS
 
 endif # BR2_PACKAGE_LPF
 
-comment "LPF needs Linux kernel and a toolchain w/ threads, C++, MMU"
+comment "LPF needs Linux kernel and a toolchain w/ threads, MMU"
 	depends on !BR2_LINUX_KERNEL || !BR2_TOOLCHAIN_HAS_THREADS || \
-		!BR2_USE_MMU || !BR2_INSTALL_LIBSTDCPP
+		!BR2_USE_MMU
