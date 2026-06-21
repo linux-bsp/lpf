@@ -1,21 +1,42 @@
-# LPF Static Config Module Configuration
+# LPF Configuration Module Configuration
 
 config LPF_CONFIGS
-	tristate "Build selected LPF static config module"
+	tristate "LPF configuration engine and data providers"
 	default m
-	depends on LPF_CORE
+	depends on OSAL
 	depends on m
 	help
-	  Build lpf_configs.ko from the static platform configuration selected
-	  below. This is the C-config equivalent of providing a product DTS:
-	  only the selected product configuration is compiled into the module.
+	  Build lpf_configs.ko. This module owns LPF configuration loading,
+	  backend selection, validation, normalization, and the unified
+	  configured-device node table consumed by lpf_core.ko.
+
+	  Static platform configuration tables and Device Tree parsing are both
+	  implemented inside this module.
+
+if LPF_CONFIGS
+
+config LPF_CONFIG_SOURCE_STATIC
+	bool "Enable static platform config provider"
+	default y
+	help
+	  Enable the compiled static platform configuration provider.
+
+config LPF_CONFIG_SOURCE_DT
+	bool "Enable Device Tree config provider"
+	default y if OF
+	depends on OF
+	help
+	  Enable the Device Tree configuration provider.
+
+menu "LPF Static Platform Config Selection"
+
+depends on LPF_CONFIG_SOURCE_STATIC
 
 choice
 	prompt "Selected LPF static config"
 	default LPF_CONFIG_UBUNTU_X86_MOCK_MODULES if LPF_SOC_ADAPTER_MOCK
 	default LPF_CONFIG_IMX6ULL_MODULES if ARCH_ARM32
 	default LPF_CONFIG_UBUNTU_X86_MODULES
-	depends on LPF_CONFIGS
 	help
 	  Select the single static platform configuration compiled into
 	  lpf_configs.ko.
@@ -30,3 +51,17 @@ config LPF_CONFIG_UBUNTU_X86_MOCK_MODULES
 	bool "ubuntu/x86_mock_modules v1"
 
 endchoice
+
+endmenu
+
+config LPF_CONFIG_OF_SELFTEST
+	bool "Build LPF Device Tree config self-test"
+	default n
+	depends on LPF_CONFIG_SOURCE_DT
+	depends on LPF_SOC_ADAPTER_MOCK
+	help
+	  Build the LPF Device Tree configuration self-test into
+	  lpf_configs.ko. This validates the LPF Device Tree parser through
+	  Linux OF accessors on kernels with CONFIG_OF enabled.
+
+endif # LPF_CONFIGS

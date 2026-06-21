@@ -10,8 +10,12 @@ module_param_named(backend, lpf_config_backend_name, charp, 0444);
 MODULE_PARM_DESC(backend, "LPF_CONFIG backend: auto, static, or dt");
 
 static const lpf_config_backend_ops_t *const g_lpf_config_backends[] = {
+#if IS_ENABLED(CONFIG_LPF_CONFIG_SOURCE_STATIC)
 	&g_lpf_config_static_backend,
+#endif
+#if IS_ENABLED(CONFIG_LPF_CONFIG_SOURCE_DT)
 	&g_lpf_config_dt_backend,
+#endif
 };
 
 static const lpf_config_backend_ops_t *

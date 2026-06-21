@@ -4,6 +4,7 @@ menuconfig LPF_CORE
 	tristate "LPF core device model"
 	default m
 	depends on OSAL
+	depends on LPF_CONFIGS
 	depends on m
 	help
 	  LPF Core owns the framework device and driver registry used by
@@ -146,23 +147,6 @@ menuconfig LPF_LED_SERVICE
 	  /dev/lpf/ledN, sysfs attributes, and debugfs commands.
 
 source "kernel/lpf-core/peripheral/led/Config.in"
-
-menu "LPF Runtime Test Configuration"
-
-config LPF_CONFIG_OF_SELFTEST
-	bool "Build LPF Device Tree config runtime self-test"
-	default n
-	depends on LPF_SOC_ADAPTER_MOCK
-	help
-	  Link the LPF Device Tree config self-test into
-	  lpf_core.ko. The test contributes an entry to the LPF
-	  runtime entry section and validates the LPF Device Tree
-	  parser through Linux OF accessors on kernels with CONFIG_OF and
-	  CONFIG_OF_DYNAMIC enabled. Kernels without live OF support skip the
-	  runtime overlay check, so the same mock defconfig can be used in a
-	  broader kernel matrix.
-
-endmenu
 
 endif # LPF_RUNTIME
 

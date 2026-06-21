@@ -37,6 +37,6 @@ module_init(lpf_configs_module_init);
 module_exit(lpf_configs_module_exit);
 
 MODULE_AUTHOR("LPF");
-MODULE_DESCRIPTION("LPF selected static platform configuration");
+MODULE_DESCRIPTION("LPF configuration engine and built-in data providers");
 MODULE_LICENSE("GPL");
 MODULE_SOFTDEP("pre: osal");

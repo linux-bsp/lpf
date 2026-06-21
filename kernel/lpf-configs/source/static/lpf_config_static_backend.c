@@ -68,18 +68,13 @@ static bool lpf_config_static_has_effective_identity_selector(
 static const lpf_config_static_table_t *lpf_config_static_get_table(void)
 {
 	if (!g_lpf_config_static_table)
-		g_lpf_config_static_table =
-			symbol_get(g_lpf_config_platform_table);
+		g_lpf_config_static_table = &g_lpf_config_platform_table;
 
 	return g_lpf_config_static_table;
 }
 
 static void lpf_config_static_put_table(void)
 {
-	if (!g_lpf_config_static_table)
-		return;
-
-	symbol_put(g_lpf_config_platform_table);
 	g_lpf_config_static_table = NULL;
 }
 
