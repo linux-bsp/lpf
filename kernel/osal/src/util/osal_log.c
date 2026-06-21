@@ -4,6 +4,7 @@
 
 #include <linux/atomic.h>
 #include <linux/printk.h>
+#include <linux/string.h>
 
 static atomic64_t g_log_total = ATOMIC64_INIT(0);
 static atomic64_t g_log_dropped = ATOMIC64_INIT(0);
@@ -45,6 +46,17 @@ static const char *osal_log_level_prefix(int32_t level)
 	default:
 		return KERN_INFO;
 	}
+}
+
+static const char *osal_log_basename(const char *path)
+{
+	const char *name;
+
+	if (!path)
+		return "";
+
+	name = strrchr(path, '/');
+	return name ? name + 1 : path;
 }
 
 int32_t osal_log_init(const char *log_file_path, int32_t level)
@@ -183,6 +195,7 @@ void osal_log_emit(int32_t level, const char *module, const char *file,
 {
 	va_list args;
 	char message[OSAL_LOG_MESSAGE_SIZE];
+	const char *filename = osal_log_basename(file);
 
 	if (level < g_log_level) {
 		atomic64_inc(&g_log_dropped);
@@ -196,7 +209,7 @@ void osal_log_emit(int32_t level, const char *module, const char *file,
 	atomic64_inc(&g_log_total);
 	printk("%sLPF:%s:%s:%s:%d:%s: %s\n",
 	       osal_log_level_prefix(level), module ? module : "APP",
-	       osal_log_level_name(level), file ? file : "", line,
+	       osal_log_level_name(level), filename, line,
 	       func ? func : "", message);
 }
 EXPORT_SYMBOL_GPL(osal_log_emit);
