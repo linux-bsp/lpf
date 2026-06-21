@@ -329,13 +329,28 @@ EXPORT_SYMBOL_GPL(lpf_config_print);
 void lpf_config_print_version(void)
 {
 	osal_log(OS_LOG_LEVEL_INFO, "LPF_CONFIG",
-		 "module_version=%u.%u.%u lpf_version=%s git=%s build_time=%s build_by=%s@%s compiler=%s arch=%s kernel=%s",
+		 "========================================");
+	osal_log(OS_LOG_LEVEL_INFO, "LPF_CONFIG",
+		 "module_version : %u.%u.%u",
 		 LPF_CONFIG_VERSION_MAJOR, LPF_CONFIG_VERSION_MINOR,
-		 LPF_CONFIG_VERSION_PATCH, LPF_VERSION,
-		 LPF_GIT_COMMIT, LPF_COMPILE_TIME,
-		 LPF_COMPILE_BY, LPF_COMPILE_HOST,
-		 LPF_COMPILER, LPF_BUILD_ARCH,
-		 LPF_BUILD_KERNEL);
+		 LPF_CONFIG_VERSION_PATCH);
+	osal_log(OS_LOG_LEVEL_INFO, "LPF_CONFIG",
+		 "lpf_version    : %s", LPF_VERSION);
+	osal_log(OS_LOG_LEVEL_INFO, "LPF_CONFIG",
+		 "git_commit     : %s", LPF_GIT_COMMIT);
+	osal_log(OS_LOG_LEVEL_INFO, "LPF_CONFIG",
+		 "build_time     : %s", LPF_COMPILE_TIME);
+	osal_log(OS_LOG_LEVEL_INFO, "LPF_CONFIG",
+		 "build_by       : %s@%s",
+		 LPF_COMPILE_BY, LPF_COMPILE_HOST);
+	osal_log(OS_LOG_LEVEL_INFO, "LPF_CONFIG",
+		 "compiler       : %s", LPF_COMPILER);
+	osal_log(OS_LOG_LEVEL_INFO, "LPF_CONFIG",
+		 "arch           : %s", LPF_BUILD_ARCH);
+	osal_log(OS_LOG_LEVEL_INFO, "LPF_CONFIG",
+		 "kernel         : %s", LPF_BUILD_KERNEL);
+	osal_log(OS_LOG_LEVEL_INFO, "LPF_CONFIG",
+		 "========================================");
 }
 EXPORT_SYMBOL_GPL(lpf_config_print_version);
 
@@ -346,8 +361,6 @@ int32_t lpf_config_load(void)
 
 	if (g_lpf_config_initialized)
 		return OSAL_SUCCESS;
-
-	lpf_config_print_version();
 
 	if (lpf_config_backend_is_auto()) {
 		ret = lpf_config_load_auto();

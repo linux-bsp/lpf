@@ -15,14 +15,29 @@ static bool g_lpf_runtime_devices_ready;
 void lpf_runtime_print_version(void)
 {
 	osal_log(OS_LOG_LEVEL_INFO, "LPF-RUNTIME",
-		 "module_version=%u.%u.%u lpf_version=%s git=%s build_time=%s build_by=%s@%s compiler=%s arch=%s kernel=%s",
+		 "========================================");
+	osal_log(OS_LOG_LEVEL_INFO, "LPF-RUNTIME",
+		 "module_version : %u.%u.%u",
 		 LPF_RUNTIME_VERSION_MAJOR,
 		 LPF_RUNTIME_VERSION_MINOR,
-		 LPF_RUNTIME_VERSION_PATCH,
-		 LPF_VERSION, LPF_GIT_COMMIT,
-		 LPF_COMPILE_TIME, LPF_COMPILE_BY,
-		 LPF_COMPILE_HOST, LPF_COMPILER,
-		 LPF_BUILD_ARCH, LPF_BUILD_KERNEL);
+		 LPF_RUNTIME_VERSION_PATCH);
+	osal_log(OS_LOG_LEVEL_INFO, "LPF-RUNTIME",
+		 "lpf_version    : %s", LPF_VERSION);
+	osal_log(OS_LOG_LEVEL_INFO, "LPF-RUNTIME",
+		 "git_commit     : %s", LPF_GIT_COMMIT);
+	osal_log(OS_LOG_LEVEL_INFO, "LPF-RUNTIME",
+		 "build_time     : %s", LPF_COMPILE_TIME);
+	osal_log(OS_LOG_LEVEL_INFO, "LPF-RUNTIME",
+		 "build_by       : %s@%s",
+		 LPF_COMPILE_BY, LPF_COMPILE_HOST);
+	osal_log(OS_LOG_LEVEL_INFO, "LPF-RUNTIME",
+		 "compiler       : %s", LPF_COMPILER);
+	osal_log(OS_LOG_LEVEL_INFO, "LPF-RUNTIME",
+		 "arch           : %s", LPF_BUILD_ARCH);
+	osal_log(OS_LOG_LEVEL_INFO, "LPF-RUNTIME",
+		 "kernel         : %s", LPF_BUILD_KERNEL);
+	osal_log(OS_LOG_LEVEL_INFO, "LPF-RUNTIME",
+		 "========================================");
 }
 
 static const lpf_runtime_entry_t *lpf_runtime_entry_first(void)

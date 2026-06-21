@@ -3,6 +3,7 @@
 #include <linux/module.h>
 
 #include "osal.h"
+#include "lpf/config/lpf_config.h"
 #include "lpf/config/lpf_config_static.h"
 
 extern const lpf_config_platform_config_t *const lpf_config_static_start;
@@ -23,6 +24,7 @@ static uint32_t lpf_configs_count_static_configs(void)
 static int __init lpf_configs_module_init(void)
 {
 	g_lpf_config_platform_table.count = lpf_configs_count_static_configs();
+	lpf_config_print_version();
 	LOG_INFO("LPF_CONFIGS", "loaded %u static config(s)",
 		 g_lpf_config_platform_table.count);
 	return 0;
