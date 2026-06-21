@@ -4,9 +4,6 @@
 #include "lpf_config_normalizer.h"
 #include "test_lpf_config_compare.h"
 
-extern const lpf_config_platform_config_t
-	g_lpf_config_kernel_x86_mock_modules_v1;
-
 static const lpf_config_mcu_entry_t g_dt_equivalent_mcus[] = {
 	{
 		.description = "mcu0",
@@ -82,13 +79,17 @@ static int test_static_and_dt_equivalent_normalize_same(void)
 	lpf_config_device_config_t
 		static_devices[TEST_LPF_CONFIG_DEVICE_CAPACITY];
 	lpf_config_device_config_t dt_devices[TEST_LPF_CONFIG_DEVICE_CAPACITY];
+	const lpf_config_platform_config_t *static_config;
 	uint32_t static_count;
 	uint32_t dt_count;
 	uint32_t i;
 
-	if (test_lpf_config_normalize_platform(
-		    &g_lpf_config_kernel_x86_mock_modules_v1, static_devices,
-		    &static_count) != OSAL_SUCCESS)
+	static_config = test_lpf_config_mock_static_config();
+	if (!static_config)
+		return 30;
+
+	if (test_lpf_config_normalize_platform(static_config, static_devices,
+					       &static_count) != OSAL_SUCCESS)
 		return 1;
 	if (test_lpf_config_normalize_platform(&g_dt_equivalent_platform,
 					       dt_devices,
@@ -197,11 +198,15 @@ static int test_disabled_entries_keep_source_index(void)
 
 static int test_count_only_reports_enabled_devices(void)
 {
+	const lpf_config_platform_config_t *static_config;
 	uint32_t count = 0;
 
-	if (lpf_config_normalize_devices(
-		    &g_lpf_config_kernel_x86_mock_modules_v1, NULL,
-		    &count) != OSAL_SUCCESS)
+	static_config = test_lpf_config_mock_static_config();
+	if (!static_config)
+		return 203;
+
+	if (lpf_config_normalize_devices(static_config, NULL,
+					 &count) != OSAL_SUCCESS)
 		return 201;
 
 	return count == 3U ? 0 : 202;
@@ -212,13 +217,15 @@ static int test_node_table_supports_compat_accessors(void)
 	const lpf_config_mcu_entry_t *mcu;
 	const lpf_config_led_entry_t *status;
 	const lpf_config_led_entry_t *activity;
+	const lpf_config_platform_config_t *static_config;
 
-	mcu = lpf_config_hw_get_mcu(&g_lpf_config_kernel_x86_mock_modules_v1,
-				    0);
-	status = lpf_config_hw_get_led(
-		&g_lpf_config_kernel_x86_mock_modules_v1, 0);
-	activity = lpf_config_hw_get_led(
-		&g_lpf_config_kernel_x86_mock_modules_v1, 1);
+	static_config = test_lpf_config_mock_static_config();
+	if (!static_config)
+		return 403;
+
+	mcu = lpf_config_hw_get_mcu(static_config, 0);
+	status = lpf_config_hw_get_led(static_config, 0);
+	activity = lpf_config_hw_get_led(static_config, 1);
 
 	if (!mcu || !status || !activity)
 		return 401;
@@ -233,11 +240,15 @@ static int test_node_table_supports_compat_accessors(void)
 static int test_exact_capacity_requires_sentinel_slot(void)
 {
 	lpf_config_device_config_t devices[3];
+	const lpf_config_platform_config_t *static_config;
 	uint32_t count = OSAL_ARRAY_SIZE(devices);
 
-	if (lpf_config_normalize_devices(
-		    &g_lpf_config_kernel_x86_mock_modules_v1, devices,
-		    &count) != OSAL_ERR_RESOURCE_LIMIT)
+	static_config = test_lpf_config_mock_static_config();
+	if (!static_config)
+		return 303;
+
+	if (lpf_config_normalize_devices(static_config, devices,
+					 &count) != OSAL_ERR_RESOURCE_LIMIT)
 		return 301;
 	if (count != 3U)
 		return 302;

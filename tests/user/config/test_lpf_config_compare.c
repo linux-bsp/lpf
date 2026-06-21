@@ -1,9 +1,27 @@
 // SPDX-License-Identifier: MIT
 
 #include "test_lpf_config_compare.h"
+#include "lpf_config_static.h"
 #include "lpf_config_normalizer.h"
 
 #include <string.h>
+
+extern const lpf_config_platform_config_t *const lpf_config_static_start;
+extern const lpf_config_platform_config_t *const lpf_config_static_end;
+
+const lpf_config_platform_config_t *test_lpf_config_mock_static_config(void)
+{
+	const lpf_config_platform_config_t *const *config;
+
+	for (config = &lpf_config_static_start + 1;
+	     config < &lpf_config_static_end; config++) {
+		if (*config && (*config)->project_name &&
+		    strcmp((*config)->project_name, "x86_mock_modules") == 0)
+			return *config;
+	}
+
+	return NULL;
+}
 
 int test_lpf_config_string_equal(const char *left, const char *right)
 {

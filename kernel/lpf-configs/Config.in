@@ -1,0 +1,28 @@
+# LPF Static Config Module Configuration
+
+config LPF_CONFIGS
+	tristate "Build selected LPF static config module"
+	default m
+	depends on LPF_CORE
+	depends on m
+	help
+	  Build lpf_configs.ko from the static platform configuration selected
+	  below. This is the C-config equivalent of providing a product DTS:
+	  only the selected product configuration is compiled into the module.
+
+choice
+	prompt "Selected LPF static config"
+	default LPF_CONFIG_KERNEL_X86_MOCK_MODULES if LPF_SOC_ADAPTER_MOCK
+	default LPF_CONFIG_KERNEL_X86_MODULES
+	depends on LPF_CONFIGS
+	help
+	  Select the single static platform configuration compiled into
+	  lpf_configs.ko.
+
+config LPF_CONFIG_KERNEL_X86_MODULES
+	bool "kernel/x86_modules v1"
+
+config LPF_CONFIG_KERNEL_X86_MOCK_MODULES
+	bool "kernel/x86_mock_modules v1"
+
+endchoice

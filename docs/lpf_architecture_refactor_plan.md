@@ -35,12 +35,13 @@ In this model:
 - `lpf_core.ko` is the LPF device model / pseudo bus. It owns driver
   registration, device registration, matching, probe/remove, discovery, state,
   events, and shared userspace observability.
-- `lpf_runtime/peripheral/` owns peripheral drivers such as MCU and LED. These
+- `kernel/lpf-core/peripheral/` owns peripheral drivers such as MCU and LED. These
   drivers register with LPF Core and own their service-specific parsing,
   transport, char device, and debug behavior.
-- `lpf_runtime/config/` owns board-description loading and validation. Static C
-  tables, product configuration, or a future Device Tree backend are different
-  backends behind the same board-description model.
+- `kernel/lpf-core/config/` owns board-description loading and validation.
+  Static C tables from `kernel/lpf-configs/`, product configuration, or a
+  future Device Tree backend are different backends behind the same
+  board-description model.
 - `backend=auto` tries custom static configuration first, then falls back to
   Device Tree. Explicit backend selection is strict and does not fall back.
 - `configs` are treated as DTS-like board descriptions, not as runtime driver
@@ -57,7 +58,7 @@ parser, or driver-core internals.
 - Kernel module boundaries are clear: `osal.ko`, `lpf_configs.ko`, and
   `lpf_core.ko`.
 - Source layout now follows module ownership with `kernel/lpf-core/` and
-  `kernel/lpf-runtime/`.
+  `kernel/lpf-configs/`.
 - Kbuild object selection is used for trim-friendly services, service-owned
   transport backends, HW paths, and runtime self-tests.
 - LPF Core provides one device/driver lifecycle, discovery snapshots,
@@ -78,7 +79,7 @@ parser, or driver-core internals.
      include LPF HW headers or depend on a single unrelated type bucket.
 
 2. **Centralized runtime device mapping**
-   - `kernel/lpf-runtime/runtime/lpf_runtime_config.c` hard-codes MCU and LED
+   - `kernel/lpf-core/runtime/lpf_runtime_config.c` hard-codes MCU and LED
      config-to-device mapping.
    - Adding a peripheral should not require editing runtime core code.
 
@@ -144,7 +145,7 @@ Acceptance:
 
 Acceptance:
 - Adding a new peripheral does not require editing
-  `kernel/lpf-runtime/runtime/lpf_runtime_config.c`.
+  `kernel/lpf-core/runtime/lpf_runtime_config.c`.
 
 ### Phase 3: Add Runtime Entry Classes
 
@@ -224,6 +225,9 @@ Acceptance:
 - [x] Move static config authoring from per-peripheral arrays toward
       first-class node tables for local code cleanup; target smoke validation
       remains tracked in Phases 5 and 6.
+- [x] Make static C board descriptions self-register through a section so
+      common `lpf_configs.ko` code does not depend on concrete platform
+      symbols or product-selection macros.
 - [x] Add compatible-string dispatch when multiple drivers need to bind the
       same LPF config device type.
 

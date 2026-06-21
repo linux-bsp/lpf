@@ -8,9 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-extern const lpf_config_platform_config_t
-	g_lpf_config_kernel_x86_mock_modules_v1;
-
 typedef enum {
 	FAKE_DT_PROP_STRING,
 	FAKE_DT_PROP_U32,
@@ -229,6 +226,7 @@ static int test_fake_dt_parser_matches_mock_static_config(void)
 	lpf_config_device_config_t
 		static_devices[TEST_LPF_CONFIG_DEVICE_CAPACITY];
 	lpf_config_device_config_t dt_devices[TEST_LPF_CONFIG_DEVICE_CAPACITY];
+	const lpf_config_platform_config_t *static_config;
 	uint32_t static_count;
 	uint32_t dt_count;
 	uint32_t i;
@@ -256,9 +254,14 @@ static int test_fake_dt_parser_matches_mock_static_config(void)
 		goto out_clear;
 	}
 
-	if (test_lpf_config_normalize_platform(
-		    &g_lpf_config_kernel_x86_mock_modules_v1, static_devices,
-		    &static_count) != OSAL_SUCCESS) {
+	static_config = test_lpf_config_mock_static_config();
+	if (!static_config) {
+		ret = 7;
+		goto out_clear;
+	}
+
+	if (test_lpf_config_normalize_platform(static_config, static_devices,
+					       &static_count) != OSAL_SUCCESS) {
 		ret = 4;
 		goto out_clear;
 	}

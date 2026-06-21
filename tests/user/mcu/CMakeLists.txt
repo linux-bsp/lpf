@@ -1,6 +1,6 @@
 set(LPF_MCU_TRANSPORT_REGISTRY_SOURCES
     test_lpf_mcu_transport_registry.c
-    "${SDK_PATH}/kernel/lpf-runtime/peripheral/mcu/lpf_mcu_transport.c"
+    "${SDK_PATH}/kernel/lpf-core/peripheral/mcu/lpf_mcu_transport.c"
 )
 
 add_executable(lpf_mcu_transport_registry_all_test
@@ -17,7 +17,7 @@ target_compile_definitions(lpf_mcu_transport_registry_all_test PRIVATE
 target_include_directories(lpf_mcu_transport_registry_all_test PRIVATE
     "${SDK_PATH}/kernel/include"
     "${SDK_PATH}/kernel/include/lpf"
-    "${SDK_PATH}/kernel/lpf-runtime/peripheral/mcu"
+    "${SDK_PATH}/kernel/lpf-core/peripheral/mcu"
     "${SDK_PATH}/user/osal/include/osal"
 )
 

@@ -14,5 +14,6 @@ int test_lpf_config_compare_devices(
 int test_lpf_config_normalize_platform(
 	const lpf_config_platform_config_t *platform,
 	lpf_config_device_config_t *devices, uint32_t *count);
+const lpf_config_platform_config_t *test_lpf_config_mock_static_config(void);
 
 #endif /* TEST_LPF_CONFIG_COMPARE_H */

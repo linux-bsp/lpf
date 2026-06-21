@@ -75,7 +75,7 @@ by LPF peripheral services and their service-owned transport backends. Current
 support includes CAN, UART, GPIO, PWM, I2C, and SPI. LPF HW calls the LPF SoC
 Adapter instead of Linux subsystem or vendor BSP APIs directly. Public
 kernel-internal LPF HW headers live under `kernel/include/lpf/hw/`, while HW
-implementations are grouped by capability under `kernel/lpf-runtime/hw/`.
+implementations are grouped by capability under `kernel/lpf-core/hw/`.
 
 ### LPF Core
 
@@ -137,8 +137,10 @@ falls back to Device Tree, while `static` and `dt` require a specific backend
 and do not fall back. Runtime config backend code is linked into
 `lpf_core.ko`; selected static C configs are built as `lpf_configs.ko`, which
 exports board-description data and does not register devices. Static C configs
-should author the board description as first-class configured-device node
-tables, with legacy
+register themselves through a linker section in `lpf_configs.ko`, so product
+selection stays at Kbuild/Kconfig object boundaries instead of central platform
+extern tables. Static C configs should author the board description as
+first-class configured-device node tables, with legacy
 per-peripheral arrays kept only as compatibility payload storage where needed.
 Future board-profile or product-selection backends should produce the same
 runtime config model before LPF peripheral configuration sees the data. Public
@@ -150,11 +152,11 @@ LPF peripheral services own kernel-side peripheral business behavior, ioctl
 dispatch, state, error handling, debug command handlers, and service-specific
 transport backends. Services register with LPF Core for device lifecycle
 handling and use LPF chrdev/sysfs/debugfs helpers for runtime nodes. MCU and
-LED services now live under `kernel/lpf-runtime/peripheral/` and expose
+LED services now live under `kernel/lpf-core/peripheral/` and expose
 instance nodes such as `/dev/lpf/mcu0` and `/dev/lpf/led0`; they remain
 integrated through `lpf_core.ko` rather than being split into one KO per
 peripheral.
-`kernel/lpf-runtime/runtime/lpf_runtime.c` owns the unified runtime entry that
+`kernel/lpf-core/runtime/lpf_runtime.c` owns the unified runtime entry that
 is called by `lpf_core.ko` module initialization. Public kernel-internal
 peripheral headers live under `kernel/include/lpf/peripheral/`.
 

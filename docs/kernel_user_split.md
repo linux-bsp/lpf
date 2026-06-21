@@ -26,12 +26,13 @@ kernel/
     protocol/      # LPF protocol helpers linked into lpf_core.ko
     compat/        # Linux kernel compatibility wrappers
     soc/           # SoC adapter backends
-  lpf-runtime/
-    config/        # runtime configuration backends and tables
+    config/        # runtime configuration backends and parsers
     hw/            # capability-grouped LPF HW implementations
     include/       # runtime-private helper headers
     runtime/       # integrated runtime entry and orchestration
     peripheral/    # framework-owned runtime services and service backends
+  lpf-configs/
+    configs/       # selected static board descriptions for lpf_configs.ko
 
 user/
   osal/            # userspace OSAL library
@@ -48,17 +49,18 @@ uapi/
 - `kernel/lpf-core/core` owns the LPF device model, control/discovery node, and
   shared chrdev/sysfs/debugfs helpers. It also calls the integrated runtime
   entry linked into `lpf_core.ko`.
-- `kernel/lpf-runtime/peripheral` owns framework runtime service
+- `kernel/lpf-core/peripheral` owns framework runtime service
   implementations; current service paths are linked into `lpf_core.ko`.
 - `kernel/lpf-core/protocol` provides kernel-side LPF protocol helpers through
   `lpf_core.ko` for services that need framed communication.
-- `kernel/lpf-runtime/hw` provides capability-grouped LPF-owned hardware access
+- `kernel/lpf-core/hw` provides capability-grouped LPF-owned hardware access
   implementations used by LPF peripheral services. The objects are linked into
   `lpf_core.ko`; runtime-private helper headers live under
-  `kernel/lpf-runtime/include`.
-- `kernel/lpf-runtime/config` provides LPF runtime config source files and type
-  headers. Backend/parser objects are linked into `lpf_core.ko`; selected
-  static board descriptions are linked into `lpf_configs.ko`.
+  `kernel/lpf-core/include`.
+- `kernel/lpf-core/config` provides LPF runtime config backend/parser objects
+  linked into `lpf_core.ko`.
+- `kernel/lpf-configs/configs` provides selected static board descriptions
+  linked into `lpf_configs.ko`.
 - `user/pdi` provides the application-facing C API and wraps open/ioctl.
 - `uapi/lpf` is the stable ABI shared by LPF kernel nodes and `user/pdi`.
 
