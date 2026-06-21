@@ -15,7 +15,7 @@ It is responsible for:
 ```text
 kernel/lpf-configs/
 ├── core/          # provider-independent config engine
-├── source/
+├── parser/
 │   ├── static/    # built-in static table provider
 │   └── dt/        # Device Tree provider
 ├── products/      # product-specific static platform data
