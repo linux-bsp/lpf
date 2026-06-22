@@ -4,7 +4,6 @@
 
 #include "../bus/pdm_bus_controller.h"
 #include "pdm_ctl.h"
-#include "../peripheral/pdm_peripheral.h"
 #include "../mock/pdm_mock_devices.h"
 #include "pdm/core/pdm_client.h"
 #include "pdm/core/pdm_bus.h"
@@ -19,7 +18,6 @@ static int __init pdm_core_module_init(void)
 
 	LOG_INFO("PDM_CORE", "Initializing PDM Core with Linux bus_type");
 
-	/* 初始化 Linux bus_type */
 	ret = pdm_bus_init();
 	if (ret) {
 		LOG_ERROR("PDM_CORE", "Failed to initialize PDM bus: %d", ret);
@@ -29,63 +27,47 @@ static int __init pdm_core_module_init(void)
 	ret = pdm_ctl_init();
 	if (ret) {
 		LOG_ERROR("PDM_CORE", "Failed to initialize PDM control node: %d", ret);
-		pdm_bus_exit();
-		return ret;
+		goto err_bus;
 	}
 
 	ret = pdm_client_init();
 	if (ret) {
 		LOG_ERROR("PDM_CORE", "Failed to initialize PDM client nodes: %d", ret);
-		pdm_ctl_exit();
-		pdm_bus_exit();
-		return ret;
+		goto err_ctl;
 	}
 
-	ret = pdm_mcu_driver_init();
+	ret = pdm_driver_entries_init();
 	if (ret) {
-		LOG_ERROR("PDM_CORE", "Failed to register MCU driver: %d", ret);
-		pdm_client_exit();
-		pdm_ctl_exit();
-		pdm_bus_exit();
-		return ret;
-	}
-
-	ret = pdm_led_driver_init();
-	if (ret) {
-		LOG_ERROR("PDM_CORE", "Failed to register LED driver: %d", ret);
-		pdm_mcu_driver_exit();
-		pdm_client_exit();
-		pdm_ctl_exit();
-		pdm_bus_exit();
-		return ret;
+		LOG_ERROR("PDM_CORE", "Failed to register PDM drivers: %d", ret);
+		goto err_client;
 	}
 
 	ret = pdm_mock_devices_init();
 	if (ret) {
 		LOG_ERROR("PDM_CORE", "Failed to register mock PDM devices: %d", ret);
-		pdm_led_driver_exit();
-		pdm_mcu_driver_exit();
-		pdm_client_exit();
-		pdm_ctl_exit();
-		pdm_bus_exit();
-		return ret;
+		goto err_drivers;
 	}
 
-	/* 注册 PDM bus controller platform driver */
 	ret = pdm_bus_controller_init();
 	if (ret) {
 		LOG_ERROR("PDM_CORE", "Failed to register bus controller: %d", ret);
-		pdm_mock_devices_exit();
-		pdm_led_driver_exit();
-		pdm_mcu_driver_exit();
-		pdm_client_exit();
-		pdm_ctl_exit();
-		pdm_bus_exit();
-		return ret;
+		goto err_mock_devices;
 	}
 
 	LOG_INFO("PDM_CORE", "PDM Core initialized successfully");
 	return 0;
+
+err_mock_devices:
+	pdm_mock_devices_exit();
+err_drivers:
+	pdm_driver_entries_exit();
+err_client:
+	pdm_client_exit();
+err_ctl:
+	pdm_ctl_exit();
+err_bus:
+	pdm_bus_exit();
+	return ret;
 }
 
 /**
@@ -95,8 +77,7 @@ static void __exit pdm_core_module_exit(void)
 {
 	pdm_bus_controller_exit();
 	pdm_mock_devices_exit();
-	pdm_led_driver_exit();
-	pdm_mcu_driver_exit();
+	pdm_driver_entries_exit();
 	pdm_client_exit();
 	pdm_ctl_exit();
 	pdm_bus_exit();

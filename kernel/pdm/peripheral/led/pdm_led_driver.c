@@ -366,5 +366,7 @@ void pdm_led_driver_exit(void)
 	pdm_bus_unregister_driver(&pdm_led_driver);
 }
 
+pdm_driver_register(led, pdm_led_driver_init, pdm_led_driver_exit);
+
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("PDM LED bus driver");

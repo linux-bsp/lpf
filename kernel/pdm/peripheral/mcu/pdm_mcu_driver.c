@@ -539,5 +539,7 @@ void pdm_mcu_driver_exit(void)
 	pdm_bus_unregister_driver(&pdm_mcu_driver);
 }
 
+pdm_driver_register(mcu, pdm_mcu_driver_init, pdm_mcu_driver_exit);
+
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("PDM MCU bus driver");

@@ -7,6 +7,7 @@
 #ifndef PDM_BUS_H
 #define PDM_BUS_H
 
+#include <linux/compiler.h>
 #include <linux/device.h>
 #include <linux/mod_devicetable.h>
 #include <linux/module.h>
@@ -49,8 +50,23 @@ int pdm_bus_for_each_dev(void *data, int (*fn)(struct device *dev, void *data));
 int pdm_bus_register_driver(struct module *owner, struct pdm_driver *driver);
 void pdm_bus_unregister_driver(struct pdm_driver *driver);
 
-#define pdm_driver_register(driver) \
-	pdm_bus_register_driver(THIS_MODULE, driver)
+struct pdm_driver_entry {
+	const char *name;
+	int (*init)(void);
+	void (*exit)(void);
+};
+
+#define pdm_driver_register(_name, _init, _exit) \
+	static const struct pdm_driver_entry \
+	__pdm_driver_entry_##_name __used \
+	__section("pdm_driver_entries") __aligned(sizeof(void *)) = { \
+		.name = #_name, \
+		.init = _init, \
+		.exit = _exit, \
+	}
+
+int pdm_driver_entries_init(void);
+void pdm_driver_entries_exit(void);
 
 int pdm_bus_init(void);
 void pdm_bus_exit(void);
