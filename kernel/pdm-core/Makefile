@@ -12,6 +12,6 @@ include $(src)/pdm-core/compat/Makefile
 # include $(src)/pdm-core/hw/Makefile  # 已删除：无使用者
 # include $(src)/pdm-core/hw/selftest/Makefile  # 已删除：无使用者
 # include $(src)/pdm-core/runtime/Makefile  # 已删除：无实际作用
-include $(src)/pdm-core/peripheral/mcu/Makefile
-include $(src)/pdm-core/peripheral/led/Makefile
+# include $(src)/pdm-core/peripheral/mcu/Makefile  # 已删除：service 已删除
+# include $(src)/pdm-core/peripheral/led/Makefile  # 已删除：service 已删除
 include $(src)/pdm-core/peripheral/selftest/Makefile
