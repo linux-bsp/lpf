@@ -17,12 +17,20 @@ config PDM_INSTANCE_DEVNODE_MODE
 	string "PDM instance device node mode"
 	default "0660"
 	help
-	  Octal permission mode applied to per-instance PDM misc device nodes
+	  Octal permission mode applied to per-instance PDM character device nodes
 	  under /dev/pdm/, such as /dev/pdm/mcu0 and /dev/pdm/led0.
 
 	  Product builds should keep this conservative and assign device group
 	  ownership with udev, devtmpfs policy, or the product init system.
 	  Development-only builds that intentionally need broad local access can
 	  override this to "0666".
+
+config PDM_MOCK_DEVICES
+	bool "Synthetic PDM devices for module smoke tests"
+	default n
+	help
+	  Create in-kernel mock PDM MCU and LED devices when pdm_core loads.
+	  This is intended for x86 smoke tests that do not have Device Tree
+	  PDM child nodes. Product builds should leave this disabled.
 
 endif # PDM_CORE

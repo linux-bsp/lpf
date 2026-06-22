@@ -1,68 +1,89 @@
 // SPDX-License-Identifier: GPL-2.0
+/**
+ * @file pdm_device.h
+ * @brief PDM device structure for Linux bus_type integration
+ */
 
 #ifndef PDM_DEVICE_H
 #define PDM_DEVICE_H
 
-#include "osal.h"
+#include <linux/device.h>
+#include <linux/types.h>
 
-#define PDM_DEVICE_NAME_LEN 64U
+#include "pdm/pdm_ctl.h"
 
-#define PDM_DEVICE_CAP_NONE          0ULL
-#define PDM_DEVICE_CAP_TRANSPORT_CAN (1ULL << 0)
-#define PDM_DEVICE_CAP_TRANSPORT_UART (1ULL << 1)
-#define PDM_DEVICE_CAP_CONTROL_GPIO  (1ULL << 8)
-#define PDM_DEVICE_CAP_CONTROL_PWM   (1ULL << 9)
-#define PDM_DEVICE_CAP_USER_IOCTL    (1ULL << 16)
-#define PDM_DEVICE_CAP_DEBUGFS       (1ULL << 17)
+/**
+ * struct pdm_device - device registered on the PDM bus
+ * @dev: Embedded Linux device.
+ * @compatible: Primary Device Tree compatible string.
+ * @config_data: Optional driver/controller-owned configuration payload.
+ * @type: PDM_CTL_DEVICE_TYPE_* value exposed through /dev/pdm_ctl.
+ * @capabilities: PDM capability flags exposed by the concrete driver.
+ * @state: Discovery state exported through /dev/pdm_ctl.
+ * @last_error: Last probe/runtime error exported through /dev/pdm_ctl.
+ * @error_count: Number of recorded errors exported through /dev/pdm_ctl.
+ * @id: Stable instance id, normally sourced from the DT reg property.
+ */
+struct pdm_device {
+	struct device dev;
+	const char *compatible;
+	void *config_data;
+	u32 type;
+	u64 capabilities;
+	u32 state;
+	s32 last_error;
+	u32 error_count;
+	int id;
+};
 
-typedef enum {
-	PDM_DEVICE_TYPE_INVALID = 0x00,
-	PDM_DEVICE_TYPE_MCU = 0x01,
-	PDM_DEVICE_TYPE_LED = 0x02,
-	PDM_DEVICE_TYPE_DUMMY = 0x7F,
-} pdm_device_type_t;
+#define dev_to_pdm_device(__dev) \
+	container_of(__dev, struct pdm_device, dev)
 
-typedef enum {
-	PDM_DEVICE_STATE_REGISTERED = 0,
-	PDM_DEVICE_STATE_BOUND,
-	PDM_DEVICE_STATE_ERROR,
-} pdm_device_state_t;
+#define pdm_device_to_dev(__pdm_dev) \
+	(&(__pdm_dev)->dev)
 
-typedef uint64_t pdm_capability_t;
+static inline void *pdm_device_get_drvdata(struct pdm_device *pdm_dev)
+{
+	return dev_get_drvdata(&pdm_dev->dev);
+}
 
-typedef struct {
-	/* Match key used to find the registered PDM driver. */
-	pdm_device_type_t type;
-	/* Stable instance index within one PDM device type. */
-	uint32_t index;
-	/* Typed configuration payload owned by the runtime config driver. */
-	const void *entry;
-	/* Optional configured name; Core falls back to driver name + index. */
-	const char *name;
-	pdm_capability_t capabilities;
-} pdm_device_config_t;
+static inline void pdm_device_set_drvdata(struct pdm_device *pdm_dev, void *data)
+{
+	dev_set_drvdata(&pdm_dev->dev, data);
+}
 
-struct pdm_driver;
 
-typedef struct pdm_device {
-	pdm_device_config_t config;
-	const struct pdm_driver *driver;
-	pdm_device_state_t state;
-	int32_t last_error;
-	uint32_t error_count;
-	pdm_capability_t capabilities;
-	char name[PDM_DEVICE_NAME_LEN];
-} pdm_device_t;
+static inline void pdm_device_set_state(struct pdm_device *pdm_dev, u32 state)
+{
+	pdm_dev->state = state;
+}
 
-typedef struct {
-	pdm_device_type_t type;
-	uint32_t index;
-	pdm_device_state_t state;
-	int32_t last_error;
-	uint32_t error_count;
-	pdm_capability_t capabilities;
-	char name[PDM_DEVICE_NAME_LEN];
-	char driver_name[PDM_DEVICE_NAME_LEN];
-} pdm_device_info_t;
+static inline void pdm_device_record_error(struct pdm_device *pdm_dev, int error)
+{
+	if (!pdm_dev || !error)
+		return;
+
+	pdm_dev->last_error = error;
+	pdm_dev->error_count++;
+	pdm_dev->state = PDM_CTL_DEVICE_STATE_ERROR;
+}
+
+static inline struct pdm_device *pdm_device_get(struct pdm_device *pdm_dev)
+{
+	if (!pdm_dev || !get_device(&pdm_dev->dev))
+		return NULL;
+
+	return pdm_dev;
+}
+
+static inline void pdm_device_put(struct pdm_device *pdm_dev)
+{
+	if (pdm_dev)
+		put_device(&pdm_dev->dev);
+}
+
+struct pdm_device *pdm_device_alloc(unsigned int size);
+int pdm_device_register(struct pdm_device *pdm_dev, const char *name);
+void pdm_device_unregister(struct pdm_device *pdm_dev);
 
 #endif /* PDM_DEVICE_H */

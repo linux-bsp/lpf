@@ -5,25 +5,22 @@
  */
 
 #include <linux/module.h>
+#include <linux/of.h>
 #include <linux/slab.h>
+
 #include "pdm/core/pdm_bus.h"
-#include "pdm/core/pdm_device_new.h"
+#include "pdm/core/pdm_device.h"
 #include "osal.h"
 
-/**
- * @brief Release callback for PDM device
- */
 static void pdm_device_release(struct device *dev)
 {
 	struct pdm_device *pdm_dev = dev_to_pdm_device(dev);
 
 	LOG_DEBUG("PDM-DEVICE", "Releasing device [%s]", dev_name(dev));
+	of_node_put(dev->of_node);
 	kfree(pdm_dev);
 }
 
-/**
- * @brief Allocates a new PDM device
- */
 struct pdm_device *pdm_device_alloc(unsigned int size)
 {
 	struct pdm_device *pdm_dev;
@@ -40,9 +37,6 @@ struct pdm_device *pdm_device_alloc(unsigned int size)
 }
 EXPORT_SYMBOL_GPL(pdm_device_alloc);
 
-/**
- * @brief Registers a PDM device on the bus
- */
 int pdm_device_register(struct pdm_device *pdm_dev, const char *name)
 {
 	int ret;
@@ -50,7 +44,13 @@ int pdm_device_register(struct pdm_device *pdm_dev, const char *name)
 	if (!pdm_dev || !name)
 		return -EINVAL;
 
-	dev_set_name(&pdm_dev->dev, "%s", name);
+	ret = dev_set_name(&pdm_dev->dev, "%s", name);
+	if (ret) {
+		LOG_ERROR("PDM-DEVICE", "Failed to name device [%s], error %d",
+			  name, ret);
+		put_device(&pdm_dev->dev);
+		return ret;
+	}
 
 	ret = device_register(&pdm_dev->dev);
 	if (ret) {
@@ -65,9 +65,6 @@ int pdm_device_register(struct pdm_device *pdm_dev, const char *name)
 }
 EXPORT_SYMBOL_GPL(pdm_device_register);
 
-/**
- * @brief Unregisters a PDM device
- */
 void pdm_device_unregister(struct pdm_device *pdm_dev)
 {
 	if (!pdm_dev)

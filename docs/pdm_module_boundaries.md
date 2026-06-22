@@ -86,8 +86,10 @@ explicitly documented as a transitional compatibility path.
 
 ## Forbidden Patterns
 
-- Peripheral service code calling `pdm_soc_*`, `pdm_compat_*`, `gpio_*`,
-  `pwm_*`, `i2c_*`, `spi_*`, CAN socket helpers, TTY helpers, or vendor BSP APIs.
+- Peripheral service/ioctl code calling `pdm_soc_*`, `pdm_compat_*`, `gpio_*`,
+  `pwm_*`, `i2c_*`, `spi_*`, CAN socket helpers, TTY helpers, or vendor BSP APIs
+  directly. Concrete kernel APIs belong in narrowly scoped backend files such as
+  `pdm_led_gpio.c`, `pdm_led_pwm.c`, `pdm_mcu_can.c`, or `pdm_mcu_uart.c`.
 - Userspace code including `kernel/include/pdm/` headers other than installed
   UAPI copies.
 - Product-specific business logic under shared framework service directories.

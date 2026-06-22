@@ -1,32 +1,25 @@
 // SPDX-License-Identifier: GPL-2.0
 /**
  * @file pdm_bus_controller.c
- * @brief PDM Bus Controller - Creates PDM devices from Device Tree
- *
- * This platform driver reads Device Tree nodes under "vendor,pdm-bus"
- * and creates PDM devices on the PDM bus for each child node.
- *
- * Similar to platform_drv_probe_with_id() for platform devices.
+ * @brief PDM Bus Controller - creates PDM devices from Device Tree
  */
 
 #include <linux/module.h>
-#include <linux/platform_device.h>
-#include <linux/of_platform.h>
 #include <linux/of.h>
+#include <linux/of_platform.h>
+#include <linux/platform_device.h>
 #include <linux/slab.h>
 
 #include "pdm/core/pdm_bus.h"
-#include "pdm/core/pdm_device_new.h"
+#include "pdm/core/pdm_device.h"
+#include "pdm_bus_controller.h"
 #include "osal.h"
 
-/**
- * @brief PDM bus controller data
- *
- * Tracks all PDM devices created by this controller
- */
+#define PDM_BUS_DEVICE_NAME_LEN 96
+
 struct pdm_bus_controller {
 	struct platform_device *pdev;
-	struct list_head devices;	/* List of created pdm_device pointers */
+	struct list_head devices;
 	int device_count;
 };
 
@@ -35,19 +28,36 @@ struct pdm_device_list_entry {
 	struct pdm_device *pdm_dev;
 };
 
-/**
- * @brief Probe function - called when DT node matches
- *
- * This function is called when a Device Tree node with compatible
- * "vendor,pdm-bus" is found. It iterates through child nodes and
- * creates a PDM device for each one.
- */
+static void pdm_bus_controller_unregister_devices(struct pdm_bus_controller *ctrl)
+{
+	struct pdm_device_list_entry *entry, *tmp;
+
+	list_for_each_entry_safe(entry, tmp, &ctrl->devices, node) {
+		LOG_DEBUG("PDM-BUS-CTRL", "Unregistering device: %s",
+			  dev_name(&entry->pdm_dev->dev));
+		pdm_device_unregister(entry->pdm_dev);
+		list_del(&entry->node);
+		ctrl->device_count--;
+	}
+}
+
+static int pdm_bus_controller_child_id(struct device_node *child,
+				       int fallback_id)
+{
+	u32 reg;
+
+	if (of_property_read_u32(child, "reg", &reg) == 0)
+		return (int)reg;
+
+	return fallback_id;
+}
+
 static int pdm_bus_controller_probe(struct platform_device *pdev)
 {
 	struct pdm_bus_controller *ctrl;
 	struct device_node *child;
+	int fallback_id = 0;
 	int ret = 0;
-	int id = 0;
 
 	LOG_INFO("PDM-BUS-CTRL", "Probing PDM bus controller");
 
@@ -59,14 +69,13 @@ static int pdm_bus_controller_probe(struct platform_device *pdev)
 	INIT_LIST_HEAD(&ctrl->devices);
 	platform_set_drvdata(pdev, ctrl);
 
-	/* Iterate through all child nodes in Device Tree */
 	for_each_available_child_of_node(pdev->dev.of_node, child) {
-		struct pdm_device *pdm_dev;
 		struct pdm_device_list_entry *entry;
+		struct pdm_device *pdm_dev;
 		const char *compatible;
-		char name[32];
+		char name[PDM_BUS_DEVICE_NAME_LEN];
+		int device_id;
 
-		/* Get compatible string */
 		ret = of_property_read_string(child, "compatible", &compatible);
 		if (ret) {
 			LOG_WARN("PDM-BUS-CTRL",
@@ -75,102 +84,73 @@ static int pdm_bus_controller_probe(struct platform_device *pdev)
 			continue;
 		}
 
-		/* Allocate PDM device */
 		pdm_dev = pdm_device_alloc(0);
 		if (!pdm_dev) {
-			LOG_ERROR("PDM-BUS-CTRL",
-				  "Failed to allocate PDM device for %s",
-				  child->name);
 			ret = -ENOMEM;
 			goto err_cleanup;
 		}
 
-		/* Set device properties */
+		entry = devm_kzalloc(&pdev->dev, sizeof(*entry), GFP_KERNEL);
+		if (!entry) {
+			put_device(&pdm_dev->dev);
+			ret = -ENOMEM;
+			goto err_cleanup;
+		}
+
+		device_id = pdm_bus_controller_child_id(child, fallback_id++);
 		pdm_dev->dev.parent = &pdev->dev;
-		pdm_dev->dev.of_node = child;
+		pdm_dev->dev.of_node = of_node_get(child);
 		pdm_dev->compatible = compatible;
-		pdm_dev->id = id++;
+		pdm_dev->id = device_id;
 
-		/* Generate device name */
-		snprintf(name, sizeof(name), "%s", child->name);
+		snprintf(name, sizeof(name), "%s.%s.%d",
+			 dev_name(&pdev->dev), child->name, device_id);
 
-		/* Register the device on PDM bus */
 		ret = pdm_device_register(pdm_dev, name);
 		if (ret) {
 			LOG_ERROR("PDM-BUS-CTRL",
 				  "Failed to register device %s, error %d",
 				  name, ret);
-			put_device(&pdm_dev->dev);
 			goto err_cleanup;
 		}
 
-		/* Track this device for cleanup */
-		entry = devm_kzalloc(&pdev->dev, sizeof(*entry), GFP_KERNEL);
-		if (entry) {
-			entry->pdm_dev = pdm_dev;
-			list_add_tail(&entry->node, &ctrl->devices);
-			ctrl->device_count++;
-		}
+		entry->pdm_dev = pdm_dev;
+		list_add_tail(&entry->node, &ctrl->devices);
+		ctrl->device_count++;
 
-		LOG_INFO("PDM-BUS-CTRL",
-			 "Created device: %s (compatible: %s)",
+		LOG_INFO("PDM-BUS-CTRL", "Created device: %s (compatible: %s)",
 			 name, compatible);
 	}
 
 	LOG_INFO("PDM-BUS-CTRL",
 		 "PDM bus controller probe complete, %d devices created",
 		 ctrl->device_count);
-
 	return 0;
 
 err_cleanup:
-	/* Cleanup any devices we created before the error */
-	{
-		struct pdm_device_list_entry *entry, *tmp;
-		list_for_each_entry_safe(entry, tmp, &ctrl->devices, node) {
-			pdm_device_unregister(entry->pdm_dev);
-			list_del(&entry->node);
-		}
-	}
+	pdm_bus_controller_unregister_devices(ctrl);
 	of_node_put(child);
 	return ret;
 }
 
-/**
- * @brief Remove function - cleanup when module unloads
- */
 static void pdm_bus_controller_remove(struct platform_device *pdev)
 {
 	struct pdm_bus_controller *ctrl = platform_get_drvdata(pdev);
-	struct pdm_device_list_entry *entry, *tmp;
+
+	if (!ctrl)
+		return;
 
 	LOG_INFO("PDM-BUS-CTRL", "Removing PDM bus controller");
-
-	/* Unregister all PDM devices */
-	list_for_each_entry_safe(entry, tmp, &ctrl->devices, node) {
-		LOG_DEBUG("PDM-BUS-CTRL", "Unregistering device: %s",
-			  dev_name(&entry->pdm_dev->dev));
-		pdm_device_unregister(entry->pdm_dev);
-		list_del(&entry->node);
-	}
-
+	pdm_bus_controller_unregister_devices(ctrl);
 	LOG_INFO("PDM-BUS-CTRL", "PDM bus controller removed");
 }
 
-/**
- * @brief Device Tree match table
- *
- * This driver matches Device Tree nodes with compatible = "vendor,pdm-bus"
- */
 static const struct of_device_id pdm_bus_controller_of_match[] = {
 	{ .compatible = "vendor,pdm-bus" },
 	{ }
 };
 MODULE_DEVICE_TABLE(of, pdm_bus_controller_of_match);
 
-/**
- * @brief Platform driver structure
- */
 static struct platform_driver pdm_bus_controller_driver = {
 	.probe = pdm_bus_controller_probe,
 	.remove = pdm_bus_controller_remove,
@@ -180,10 +160,7 @@ static struct platform_driver pdm_bus_controller_driver = {
 	},
 };
 
-/**
- * @brief Module init - register platform driver
- */
-int __init pdm_bus_controller_init(void)
+int pdm_bus_controller_init(void)
 {
 	int ret;
 
@@ -198,17 +175,12 @@ int __init pdm_bus_controller_init(void)
 	return 0;
 }
 
-/**
- * @brief Module exit - unregister platform driver
- */
-void __exit pdm_bus_controller_exit(void)
+void pdm_bus_controller_exit(void)
 {
 	platform_driver_unregister(&pdm_bus_controller_driver);
 	LOG_INFO("PDM-BUS-CTRL", "PDM bus controller driver unregistered");
 }
 
-
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("PDM Team");
 MODULE_DESCRIPTION("PDM Bus Controller - Creates devices from Device Tree");
-MODULE_SOFTDEP("pre: pdm_core");

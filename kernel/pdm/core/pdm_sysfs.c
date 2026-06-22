@@ -2,176 +2,86 @@
 
 #include "pdm_sysfs.h"
 
-#include "pdm/core/pdm_chrdev.h"
+#include <linux/device.h>
+
 #include "pdm/compat/pdm_compat_sysfs.h"
+#include "pdm/core/pdm_device.h"
 
-static bool pdm_sysfs_get_info(struct device *dev, pdm_device_info_t *info)
+static ssize_t pdm_name_show(struct device *dev,
+				     struct device_attribute *attr, char *buf)
 {
-	pdm_chrdev_t *chrdev = dev_get_drvdata(dev);
-
-	if (!chrdev || !info)
-		return false;
-
-	return pdm_chrdev_get_info(chrdev, info) == 0;
+	(void)attr;
+	return pdm_compat_sysfs_emit(buf, "%s\n", dev_name(dev));
 }
 
-static ssize_t name_show(struct device *dev,
-			 struct device_attribute *attr, char *buf)
+static ssize_t compatible_show(struct device *dev,
+			       struct device_attribute *attr, char *buf)
 {
-	pdm_device_info_t info;
+	struct pdm_device *pdm_dev = dev_to_pdm_device(dev);
 
 	(void)attr;
-	if (!pdm_sysfs_get_info(dev, &info))
-		return pdm_compat_sysfs_emit(buf, "\n");
-
-	return pdm_compat_sysfs_emit(buf, "%s\n", info.name);
+	return pdm_compat_sysfs_emit(buf, "%s\n",
+				      pdm_dev->compatible ? pdm_dev->compatible : "");
 }
 
-static ssize_t type_show(struct device *dev,
-			 struct device_attribute *attr, char *buf)
+static ssize_t pdm_id_show(struct device *dev,
+			   struct device_attribute *attr, char *buf)
 {
-	pdm_device_info_t info;
+	struct pdm_device *pdm_dev = dev_to_pdm_device(dev);
 
 	(void)attr;
-	if (!pdm_sysfs_get_info(dev, &info))
-		return pdm_compat_sysfs_emit(buf, "0\n");
-
-	return pdm_compat_sysfs_emit(buf, "%u\n", info.type);
+	return pdm_compat_sysfs_emit(buf, "%d\n", pdm_dev->id);
 }
 
-static ssize_t index_show(struct device *dev,
-			  struct device_attribute *attr, char *buf)
+static ssize_t pdm_type_show(struct device *dev,
+				  struct device_attribute *attr, char *buf)
 {
-	pdm_device_info_t info;
+	struct pdm_device *pdm_dev = dev_to_pdm_device(dev);
 
 	(void)attr;
-	if (!pdm_sysfs_get_info(dev, &info))
-		return pdm_compat_sysfs_emit(buf, "0\n");
-
-	return pdm_compat_sysfs_emit(buf, "%u\n", info.index);
-}
-
-static ssize_t state_show(struct device *dev,
-			  struct device_attribute *attr, char *buf)
-{
-	pdm_device_info_t info;
-
-	(void)attr;
-	if (!pdm_sysfs_get_info(dev, &info))
-		return pdm_compat_sysfs_emit(buf, "0\n");
-
-	return pdm_compat_sysfs_emit(buf, "%u\n", info.state);
+	return pdm_compat_sysfs_emit(buf, "%u\n", pdm_dev->type);
 }
 
 static ssize_t capabilities_show(struct device *dev,
 				 struct device_attribute *attr, char *buf)
 {
-	pdm_device_info_t info;
+	struct pdm_device *pdm_dev = dev_to_pdm_device(dev);
 
 	(void)attr;
-	if (!pdm_sysfs_get_info(dev, &info))
-		return pdm_compat_sysfs_emit(buf, "0x0\n");
-
-	return pdm_compat_sysfs_emit(
-		buf, "0x%llx\n", (unsigned long long)info.capabilities);
+	return pdm_compat_sysfs_emit(buf, "0x%llx\n",
+				      (unsigned long long)pdm_dev->capabilities);
 }
 
-static ssize_t driver_show(struct device *dev,
-			   struct device_attribute *attr, char *buf)
-{
-	pdm_device_info_t info;
-
-	(void)attr;
-	if (!pdm_sysfs_get_info(dev, &info))
-		return pdm_compat_sysfs_emit(buf, "\n");
-
-	return pdm_compat_sysfs_emit(buf, "%s\n", info.driver_name);
-}
-
-static ssize_t soc_show(struct device *dev,
-			struct device_attribute *attr, char *buf)
-{
-	pdm_chrdev_t *chrdev = dev_get_drvdata(dev);
-
-	(void)attr;
-	if (!chrdev)
-		return pdm_compat_sysfs_emit(buf, "\n");
-
-	return pdm_compat_sysfs_emit(buf, "%s\n", chrdev->soc_name);
-}
-
-static ssize_t last_error_show(struct device *dev,
+static ssize_t pdm_driver_show(struct device *dev,
 			       struct device_attribute *attr, char *buf)
 {
-	pdm_device_info_t info;
-
 	(void)attr;
-	if (!pdm_sysfs_get_info(dev, &info))
-		return pdm_compat_sysfs_emit(buf, "0\n");
-
-	return pdm_compat_sysfs_emit(buf, "%d\n", info.last_error);
+	return pdm_compat_sysfs_emit(buf, "%s\n",
+				      dev->driver ? dev->driver->name : "");
 }
 
-static ssize_t error_count_show(struct device *dev,
-				struct device_attribute *attr, char *buf)
-{
-	pdm_device_info_t info;
-
-	(void)attr;
-	if (!pdm_sysfs_get_info(dev, &info))
-		return pdm_compat_sysfs_emit(buf, "0\n");
-
-	return pdm_compat_sysfs_emit(buf, "%u\n", info.error_count);
-}
-
-static ssize_t open_count_show(struct device *dev,
-			       struct device_attribute *attr, char *buf)
-{
-	pdm_chrdev_t *chrdev = dev_get_drvdata(dev);
-
-	(void)attr;
-	if (!chrdev)
-		return pdm_compat_sysfs_emit(buf, "0\n");
-
-	return pdm_compat_sysfs_emit(buf, "%u\n",
-				     pdm_chrdev_open_count(chrdev));
-}
-
-static DEVICE_ATTR_RO(name);
-static DEVICE_ATTR_RO(type);
-static DEVICE_ATTR_RO(index);
-static DEVICE_ATTR_RO(state);
+static DEVICE_ATTR_RO(pdm_name);
+static DEVICE_ATTR_RO(compatible);
+static DEVICE_ATTR_RO(pdm_id);
+static DEVICE_ATTR_RO(pdm_type);
 static DEVICE_ATTR_RO(capabilities);
-static DEVICE_ATTR_RO(driver);
-static DEVICE_ATTR_RO(soc);
-static DEVICE_ATTR_RO(last_error);
-static DEVICE_ATTR_RO(error_count);
-static DEVICE_ATTR_RO(open_count);
+static DEVICE_ATTR_RO(pdm_driver);
 
-static struct attribute *g_lpf_chrdev_attrs[] = {
-	&dev_attr_name.attr,
-	&dev_attr_type.attr,
-	&dev_attr_index.attr,
-	&dev_attr_state.attr,
+static struct attribute *pdm_device_attrs[] = {
+	&dev_attr_pdm_name.attr,
+	&dev_attr_compatible.attr,
+	&dev_attr_pdm_id.attr,
+	&dev_attr_pdm_type.attr,
 	&dev_attr_capabilities.attr,
-	&dev_attr_driver.attr,
-	&dev_attr_soc.attr,
-	&dev_attr_last_error.attr,
-	&dev_attr_error_count.attr,
-	&dev_attr_open_count.attr,
+	&dev_attr_pdm_driver.attr,
 	NULL,
 };
 
-static const struct attribute_group g_lpf_chrdev_attr_group = {
-	.attrs = g_lpf_chrdev_attrs,
+static const struct attribute_group pdm_device_attr_group = {
+	.attrs = pdm_device_attrs,
 };
 
-static const struct attribute_group *g_lpf_chrdev_attr_groups[] = {
-	&g_lpf_chrdev_attr_group,
+const struct attribute_group *pdm_device_attr_groups[] = {
+	&pdm_device_attr_group,
 	NULL,
 };
-
-const struct attribute_group **pdm_chrdev_sysfs_groups(void)
-{
-	return g_lpf_chrdev_attr_groups;
-}

@@ -67,16 +67,14 @@ DESTDIR ?=
 
 # Kernel module build configuration
 KERNEL_SRC ?= /lib/modules/$(shell uname -r)/build
+ARCH ?= $(CONFIG_ARCH)
 MODULES_BUILD_DIR ?= _build/modules
 override MODULES_BUILD_DIR := $(patsubst %/,%,$(MODULES_BUILD_DIR))
 MODULES_SRC_DIR ?= $(srctree)/kernel
 MODULES_OUTPUT_DIR ?= $(MODULES_BUILD_DIR)
 MODULES_LIST ?= $(strip \
 	$(if $(filter y m,$(CONFIG_OSAL)),osal) \
-	$(if $(filter y m,$(CONFIG_PDM_CORE)),pdm_core) \
-	$(if $(filter y m,$(CONFIG_PDM_HW_MOCK_SELFTEST)),pdm_hw_mock_selftest) \
-	$(if $(filter y m,$(CONFIG_PDM_DUMMY_SERVICE_SELFTEST)),pdm_dummy_service_selftest))
-# 已删除：pdm_configs - 使用 Device Tree 替代静态配置
+	$(if $(filter y m,$(CONFIG_PDM_CORE)),pdm_core))
 MODULES_ARTIFACTS = $(addprefix $(MODULES_OUTPUT_DIR)/,$(addsuffix .ko,$(MODULES_LIST)))
 
 # Parallel build auto-detection
@@ -443,7 +441,7 @@ tests: _check_config _validate_config include/generated/gen_autoconf.h include/g
 		-DCMAKE_INSTALL_PREFIX=$(CMAKE_INSTALL_PREFIX) \
 		-DCONFIG_FILE=$(abspath $(CURDIR)/.config) \
 		-DAUTOCONF_H=$(abspath $(CURDIR)/include/generated/gen_autoconf.h) \
-		-DLPF_BUILD_TESTS=ON \
+		-DPDM_BUILD_TESTS=ON \
 		$(if $(CMAKE_TOOLCHAIN_FILE),-DCMAKE_TOOLCHAIN_FILE=$(CMAKE_TOOLCHAIN_FILE)) \
 		$(CMAKE_EXTRA_FLAGS) \
 		$(CURDIR)
@@ -543,7 +541,7 @@ _modules_check_environment:
 		echo "ERROR: No kernel modules are enabled in the current configuration."; \
 		echo "==================================================================="; \
 		echo ""; \
-		echo "Enable CONFIG_OSAL, CONFIG_PDM_CORE, and/or CONFIG_PDM_CONFIGS before invoking make modules."; \
+		echo "Enable CONFIG_OSAL and/or CONFIG_PDM_CORE before invoking make modules."; \
 		echo "For example, run make menuconfig or load a defconfig that enables"; \
 		echo "the kernel modules you want to build."; \
 		echo "==================================================================="; \

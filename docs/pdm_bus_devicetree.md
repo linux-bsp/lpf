@@ -1,0 +1,66 @@
+# PDM Bus Device Tree Notes
+
+PDM Core creates devices from children of a `vendor,pdm-bus` controller node.
+Each child becomes one `struct pdm_device` on `/sys/bus/pdm` and, after driver
+binding, one userspace node under `/dev/pdm/`.
+
+Supported MCU compatibles:
+
+- `pdm,mcu` or `vendor,pdm-mcu`: generic bring-up device; status/reset only.
+- `pdm,mcu-can` or `vendor,pdm-mcu-can`: classic CAN RAW single-frame transport.
+- `pdm,mcu-uart` or `vendor,pdm-mcu-uart`: file-backed UART/TTY byte transport.
+
+Supported LED compatibles:
+
+- `pdm,led` or `vendor,pdm-led`: generic bring-up device; in-memory state.
+- `pdm,led-gpio` or `vendor,pdm-led-gpio`: GPIO descriptor output.
+- `pdm,led-pwm` or `vendor,pdm-led-pwm`: PWM duty-cycle output.
+
+Example:
+
+```dts
+pdm_bus: pdm-bus {
+    compatible = "vendor,pdm-bus";
+
+    mcu0: mcu@0 {
+        compatible = "pdm,mcu-can";
+        reg = <0>;
+        can-interface = "can0";
+        rx-timeout-ms = <100>;
+        /* Optional: use extended CAN IDs even for values <= 0x7ff. */
+        /* can-extended-id; */
+    };
+
+    mcu1: mcu@1 {
+        compatible = "pdm,mcu-uart";
+        reg = <1>;
+        tty-path = "/dev/ttyS1";
+        baudrate = <115200>;
+        rx-timeout-ms = <100>;
+    };
+
+    status_led: led@0 {
+        compatible = "pdm,led-gpio";
+        reg = <0>;
+        led-gpios = <&gpio1 3 GPIO_ACTIVE_HIGH>;
+        max-brightness = <1>;
+        default-state = "off";
+    };
+
+    panel_led: led@1 {
+        compatible = "pdm,led-pwm";
+        reg = <1>;
+        pwms = <&pwm1 0 1000000>;
+        max-brightness = <255>;
+        default-brightness = <32>;
+    };
+};
+```
+
+MCU-CAN maps `PDM_MCU_IOC_COMMAND.command` and `pdm_mcu_data.address` to the CAN
+ID. The current implementation intentionally supports one classic CAN frame per
+ioctl, so payloads larger than 8 bytes return `-EMSGSIZE`.
+
+MCU-UART uses `tty-path` with `filp_open()` and synchronous `kernel_read()` /
+`kernel_write()`. The `baudrate` property is recorded for integration clarity,
+but termios programming is left to the platform serial configuration.

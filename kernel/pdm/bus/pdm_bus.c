@@ -2,35 +2,26 @@
 /**
  * @file pdm_bus.c
  * @brief PDM Bus implementation using standard Linux bus_type
- *
- * This implements PDM as a proper Linux bus, replacing the pseudo-bus.
- * Based on the reference implementation from /home/wanguo/Github/pdm
  */
 
-#include <linux/module.h>
 #include <linux/device.h>
+#include <linux/module.h>
 #include <linux/of_device.h>
+#include <linux/string.h>
 #include <linux/version.h>
 
+#include "../core/pdm_sysfs.h"
 #include "pdm/core/pdm_bus.h"
-#include "pdm/core/pdm_device_new.h"
+#include "pdm/core/pdm_device.h"
 #include "osal.h"
 
-/* 使用新总线的设备结构，不再包含旧的 pdm_device.h */
-
-/**
- * @brief Matches a device based on its parent device
- */
 static int pdm_bus_device_match_parent(struct device *dev, const void *data)
 {
-	struct pdm_device *pdm_dev = dev_to_pdm_device(dev);
 	struct device *parent = (struct device *)data;
-	return (pdm_dev->dev.parent == parent) ? 1 : 0;
+
+	return dev->parent == parent ? 1 : 0;
 }
 
-/**
- * @brief Finds a device on the pdm_bus_type that matches the parent
- */
 struct pdm_device *pdm_bus_find_device_by_parent(struct device *parent)
 {
 	struct device *dev;
@@ -44,24 +35,21 @@ struct pdm_device *pdm_bus_find_device_by_parent(struct device *parent)
 }
 EXPORT_SYMBOL_GPL(pdm_bus_find_device_by_parent);
 
-/**
- * @brief Iterates over all devices on the PDM bus
- */
 int pdm_bus_for_each_dev(void *data, int (*fn)(struct device *dev, void *data))
 {
 	return bus_for_each_dev(&pdm_bus_type, NULL, data, fn);
 }
 EXPORT_SYMBOL_GPL(pdm_bus_for_each_dev);
 
-/**
- * @brief Registers a PDM driver with the kernel
- */
 int pdm_bus_register_driver(struct module *owner, struct pdm_driver *driver)
 {
 	int ret;
 
-	if (!driver)
+	if (!driver || !driver->driver.name)
 		return -EINVAL;
+
+	if (driver->of_match_table && !driver->driver.of_match_table)
+		driver->driver.of_match_table = driver->of_match_table;
 
 	driver->driver.owner = owner;
 	driver->driver.bus = &pdm_bus_type;
@@ -78,9 +66,6 @@ int pdm_bus_register_driver(struct module *owner, struct pdm_driver *driver)
 }
 EXPORT_SYMBOL_GPL(pdm_bus_register_driver);
 
-/**
- * @brief Unregisters a PDM driver
- */
 void pdm_bus_unregister_driver(struct pdm_driver *driver)
 {
 	if (!driver)
@@ -91,71 +76,90 @@ void pdm_bus_unregister_driver(struct pdm_driver *driver)
 }
 EXPORT_SYMBOL_GPL(pdm_bus_unregister_driver);
 
-/**
- * @brief Probes a PDM device
- */
 static int pdm_bus_device_probe(struct device *dev)
 {
 	struct pdm_device *pdm_dev;
 	struct pdm_driver *pdm_drv;
+	int ret;
 
-	if (!dev)
+	if (!dev || !dev->driver)
 		return -EINVAL;
 
 	pdm_dev = dev_to_pdm_device(dev);
 	pdm_drv = drv_to_pdm_driver(dev->driver);
 
-	if (pdm_dev && pdm_drv && pdm_drv->probe) {
-		LOG_DEBUG("PDM-BUS", "Probing device [%s] with driver [%s]",
-			  dev_name(dev), pdm_drv->driver.name);
-		return pdm_drv->probe(pdm_dev);
+	if (!pdm_drv->probe)
+		return -ENODEV;
+
+	LOG_DEBUG("PDM-BUS", "Probing device [%s] with driver [%s]",
+		  dev_name(dev), pdm_drv->driver.name);
+	pdm_dev->type = pdm_drv->device_type;
+	pdm_dev->capabilities |= pdm_drv->capabilities;
+	ret = pdm_drv->probe(pdm_dev);
+	if (ret) {
+		pdm_device_record_error(pdm_dev, ret);
+		return ret;
 	}
 
-	LOG_WARN("PDM-BUS", "Driver or device not found or probe missing");
-	return -ENODEV;
+	pdm_device_set_state(pdm_dev, PDM_CTL_DEVICE_STATE_BOUND);
+	pdm_dev->last_error = 0;
+	return 0;
 }
 
-/**
- * @brief Removes a PDM device
- */
 static void pdm_bus_device_remove(struct device *dev)
 {
 	struct pdm_device *pdm_dev;
 	struct pdm_driver *pdm_drv;
 
-	if (!dev)
+	if (!dev || !dev->driver)
 		return;
 
 	pdm_dev = dev_to_pdm_device(dev);
 	pdm_drv = drv_to_pdm_driver(dev->driver);
 
-	if (pdm_dev && pdm_drv && pdm_drv->remove) {
-		LOG_DEBUG("PDM-BUS", "Removing device [%s]", dev_name(dev));
+	LOG_DEBUG("PDM-BUS", "Removing device [%s]", dev_name(dev));
+	if (pdm_drv->remove)
 		pdm_drv->remove(pdm_dev);
-	}
+	pdm_dev->type = PDM_CTL_DEVICE_TYPE_INVALID;
+	pdm_dev->capabilities = PDM_CTL_DEVICE_CAP_NONE;
+	pdm_device_set_state(pdm_dev, PDM_CTL_DEVICE_STATE_REGISTERED);
 }
 
-/**
- * @brief Matches a PDM device with a driver
- *
- * Uses Device Tree of_driver_match_device() for matching.
- * This is the standard Linux way of matching devices to drivers.
- */
-static int pdm_bus_device_match_impl(struct device *dev,
-				     const struct device_driver *drv)
+static int pdm_bus_match_compatible(const struct pdm_device *pdm_dev,
+				    const struct device_driver *drv)
 {
-	/* Use OF style match with parent device */
-	if (of_driver_match_device(dev->parent, drv))
-		return 1;
+	const struct of_device_id *match;
+
+	if (!pdm_dev->compatible || !drv->of_match_table)
+		return 0;
+
+	for (match = drv->of_match_table; match->compatible[0]; match++) {
+		if (strcmp(match->compatible, pdm_dev->compatible) == 0)
+			return 1;
+	}
 
 	return 0;
 }
 
-/* Kernel version compatibility wrapper */
+static int pdm_bus_device_match_impl(struct device *dev,
+				     const struct device_driver *drv)
+{
+	struct pdm_device *pdm_dev;
+
+	if (!dev || !drv)
+		return 0;
+
+	if (dev->of_node && of_driver_match_device(dev, drv))
+		return 1;
+
+	pdm_dev = dev_to_pdm_device(dev);
+	return pdm_bus_match_compatible(pdm_dev, drv);
+}
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(6, 10, 0)
 static int pdm_bus_device_match(struct device *dev, struct device_driver *drv)
 {
-	return pdm_bus_device_match_impl(dev, (const struct device_driver *)drv);
+	return pdm_bus_device_match_impl(dev, drv);
 }
 #else
 static int pdm_bus_device_match(struct device *dev,
@@ -165,27 +169,19 @@ static int pdm_bus_device_match(struct device *dev,
 }
 #endif
 
-/**
- * @brief PDM bus type definition
- *
- * This is the standard Linux bus_type structure that integrates
- * PDM into the kernel's driver model.
- */
 #if LINUX_VERSION_CODE < KERNEL_VERSION(6, 2, 0)
 struct bus_type pdm_bus_type = {
 #else
 const struct bus_type pdm_bus_type = {
 #endif
-	.name   = "pdm",
-	.probe  = pdm_bus_device_probe,
-	.remove = pdm_bus_device_remove,
-	.match  = pdm_bus_device_match,
+	.name       = "pdm",
+	.probe      = pdm_bus_device_probe,
+	.remove     = pdm_bus_device_remove,
+	.match      = pdm_bus_device_match,
+	.dev_groups = pdm_device_attr_groups,
 };
 EXPORT_SYMBOL_GPL(pdm_bus_type);
 
-/**
- * @brief Initializes the PDM bus
- */
 int pdm_bus_init(void)
 {
 	int ret;
@@ -200,9 +196,6 @@ int pdm_bus_init(void)
 	return 0;
 }
 
-/**
- * @brief Exits the PDM bus
- */
 void pdm_bus_exit(void)
 {
 	bus_unregister(&pdm_bus_type);

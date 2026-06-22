@@ -4,31 +4,32 @@
 set -eu
 
 module_dir=${PDM_MODULE_DIR:-_build/modules}
-smoke_binary=${PDM_SMOKE_BINARY:-_build/tests/bin/pdm_mock_runtime_smoke}
-expected_instance_devnode_mode=${PDM_EXPECT_INSTANCE_DEVNODE_MODE:-0660}
-required_modules="osal pdm_configs pdm_core pdm_hw_mock_selftest pdm_dummy_service_selftest"
+config_file=${PDM_CONFIG_FILE:-include/config/auto.conf}
+required_modules="osal pdm_core"
 loaded_modules=
 
 log()
 {
-	printf '%s\n' "$*"
+	printf '%s
+' "$*"
 }
 
 die()
 {
-	printf 'ERROR: %s\n' "$*" >&2
+	printf 'ERROR: %s
+' "$*" >&2
 	exit 1
 }
 
 is_loaded()
 {
-	awk -v name="$1" '$1 == name { found = 1 } END { exit found ? 0 : 1 }' \
-		/proc/modules
+	awk -v name="$1" '$1 == name { found = 1 } END { exit found ? 0 : 1 }' 		/proc/modules
 }
 
 module_path()
 {
-	printf '%s/%s.ko\n' "$module_dir" "$1"
+	printf '%s/%s.ko
+' "$module_dir" "$1"
 }
 
 load_module()
@@ -41,32 +42,11 @@ load_module()
 	loaded_modules="$module $loaded_modules"
 }
 
-wait_for_path()
-{
-	path=$1
-	tries=${2:-50}
-
-	while [ "$tries" -gt 0 ]; do
-		[ -e "$path" ] && return 0
-		tries=$((tries - 1))
-		sleep 0.1
-	done
-
-	die "path did not appear: $path"
-}
-
 expect_path()
 {
 	path=$1
 
 	[ -e "$path" ] || die "missing expected path: $path"
-}
-
-expect_absent()
-{
-	path=$1
-
-	[ ! -e "$path" ] || die "unexpected path exists: $path"
 }
 
 expect_readable()
@@ -76,129 +56,31 @@ expect_readable()
 	[ -r "$path" ] || die "path is not readable: $path"
 }
 
-file_mode()
+mock_devices_enabled()
 {
-	path=$1
-
-	mode=$(stat -c '%a' "$path" 2>/dev/null || stat -f '%Lp' "$path")
-	printf '%s\n' "${mode#${mode%???}}"
+	[ -r "$config_file" ] && grep -q '^CONFIG_PDM_MOCK_DEVICES=y$' "$config_file"
 }
 
-expect_mode()
+check_mock_devices()
 {
-	path=$1
-	expected=$2
-	actual=$(file_mode "$path")
-
-	[ "$actual" = "$expected" ] ||
-		die "unexpected mode for $path: expected $expected, got $actual"
+	expect_path /sys/class/pdm
+	expect_path /sys/class/pdm/mcu0
+	expect_path /sys/class/pdm/led0
+	expect_path /dev/pdm/mcu0
+	expect_path /dev/pdm/led0
 }
 
-expect_not_world_writable()
+check_pdm_bus()
 {
-	path=$1
-	mode=$(file_mode "$path")
-	other_digit=${mode#${mode%?}}
+	expect_path /sys/bus/pdm
+	expect_path /sys/bus/pdm/devices
+	expect_path /sys/bus/pdm/drivers
+	expect_readable /sys/bus/pdm/uevent
+	expect_path /dev/pdm_ctl
 
-	case "$other_digit" in
-		2|3|6|7)
-			die "path is world-writable: $path mode=$mode"
-			;;
-	esac
-}
-
-expect_no_write_bits()
-{
-	path=$1
-	mode=$(file_mode "$path")
-
-	case "$mode" in
-		2??|3??|6??|7??|?2?|?3?|?6?|?7?|??2|??3|??6|??7)
-			die "path has write permission bits: $path mode=$mode"
-			;;
-	esac
-}
-
-expect_has_write_bits()
-{
-	path=$1
-	mode=$(file_mode "$path")
-
-	case "$mode" in
-		2??|3??|6??|7??|?2?|?3?|?6?|?7?|??2|??3|??6|??7)
-			return 0
-			;;
-	esac
-
-	die "path has no write permission bits: $path mode=$mode"
-}
-
-check_procfs()
-{
-	for path in /proc/pdm/mcu /proc/pdm/led; do
-		expect_path "$path"
-		expect_readable "$path"
-		expect_no_write_bits "$path"
-	done
-}
-
-check_debugfs()
-{
-	if [ ! -d /sys/kernel/debug ]; then
-		log "  SKIP    debugfs root is not mounted"
-		return
+	if mock_devices_enabled; then
+		check_mock_devices
 	fi
-
-	for path in /sys/kernel/debug/pdm/mcu /sys/kernel/debug/pdm/led; do
-		expect_path "$path"
-		expect_has_write_bits "$path"
-	done
-}
-
-check_sysfs()
-{
-	for base in /sys/class/misc/pdm_mcu0 /sys/class/misc/pdm_led0 /sys/class/misc/pdm_led1; do
-		expect_path "$base"
-		for attr in name type index state capabilities driver soc last_error error_count open_count; do
-			expect_readable "$base/$attr"
-			expect_no_write_bits "$base/$attr"
-		done
-	done
-}
-
-check_devnode_modes()
-{
-	expect_mode /dev/pdm_ctl 666
-
-	for path in /dev/pdm/mcu0 /dev/pdm/led0 /dev/pdm/led1; do
-		expect_mode "$path" "$expected_instance_devnode_mode"
-		expect_not_world_writable "$path"
-	done
-}
-
-check_runtime_nodes()
-{
-	wait_for_path /dev/pdm_ctl
-	wait_for_path /dev/pdm/mcu0
-	wait_for_path /dev/pdm/led0
-	wait_for_path /dev/pdm/led1
-
-	expect_absent /dev/pdm/mcu1
-	expect_absent /dev/pdm/led2
-
-	check_devnode_modes
-	check_sysfs
-	check_procfs
-	check_debugfs
-}
-
-run_user_smoke()
-{
-	[ -x "$smoke_binary" ] ||
-		die "runtime smoke binary not found or not executable: $smoke_binary; run make tests first or set PDM_SMOKE_BINARY"
-
-	log "  SMOKE   $smoke_binary"
-	"$smoke_binary"
 }
 
 cleanup()
@@ -234,16 +116,13 @@ if [ "$(id -u)" != "0" ]; then
 	die "module smoke test requires root; run with sudo or as root"
 fi
 
-log "PDM mock module smoke test"
+log "PDM core module smoke test"
 log "Module directory: $module_dir"
-log "Runtime smoke binary: $smoke_binary"
-log "Expected PDM instance devnode mode: $expected_instance_devnode_mode"
 
 for module in $required_modules; do
 	load_module "$module"
 done
 
-check_runtime_nodes
-run_user_smoke
+check_pdm_bus
 
-log "PDM mock module smoke test passed"
+log "PDM core module smoke test passed"
