@@ -10,6 +10,10 @@
 #include "pdm/soc/pdm_soc_adapter.h"
 #include "pdm_ctl_internal.h"
 
+#ifdef CONFIG_PDM_NEW_BUS
+#include "pdm/core/pdm_bus.h"
+#endif
+
 typedef struct {
 	struct list_head node;
 	const pdm_driver_t *driver;
@@ -1032,15 +1036,30 @@ static int __init pdm_core_module_init(void)
 {
 	int32_t ret;
 
+#ifdef CONFIG_PDM_NEW_BUS
+	/* Initialize new Linux bus_type */
+	ret = pdm_bus_init();
+	if (ret != 0) {
+		LOG_ERROR("PDM", "Failed to initialize PDM bus");
+		return ret;
+	}
+	LOG_INFO("PDM", "Using new Linux bus_type implementation");
+#else
+	/* Initialize old pseudo-bus */
 	ret = pdm_core_init();
 	if (ret != OSAL_SUCCESS)
 		return pdm_status_to_errno(ret);
+#endif
 
 #ifdef CONFIG_PDM_RUNTIME
 	pdm_runtime_print_version();
 	ret = pdm_runtime_init();
 	if (ret != OSAL_SUCCESS) {
+#ifdef CONFIG_PDM_NEW_BUS
+		pdm_bus_exit();
+#else
 		pdm_core_deinit();
+#endif
 		return pdm_status_to_errno(ret);
 	}
 #endif
@@ -1054,7 +1073,13 @@ static void __exit pdm_core_module_exit(void)
 #ifdef CONFIG_PDM_RUNTIME
 	pdm_runtime_exit();
 #endif
+
+#ifdef CONFIG_PDM_NEW_BUS
+	pdm_bus_exit();
+#else
 	pdm_core_deinit();
+#endif
+
 	LOG_INFO("PDM", "core unloaded");
 }
 
