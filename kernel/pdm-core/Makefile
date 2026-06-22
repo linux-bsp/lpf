@@ -2,6 +2,9 @@
 
 obj-$(CONFIG_PDM_CORE) += pdm_core.o
 
+# New Linux bus_type implementation (experimental)
+include $(src)/pdm-core/bus/Makefile
+
 include $(src)/pdm-core/core/Makefile
 include $(src)/pdm-core/protocol/Makefile
 include $(src)/pdm-core/compat/Makefile

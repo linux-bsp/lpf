@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: GPL-2.0
+# PDM Bus - Standard Linux bus_type implementation
 
-pdm_bus-objs := pdm_bus.o pdm_device.o
-
-obj-y += pdm_bus.o
+# Only compile if new bus is enabled
+pdm_core-$(CONFIG_PDM_NEW_BUS) += pdm-core/bus/pdm_bus.o
+pdm_core-$(CONFIG_PDM_NEW_BUS) += pdm-core/bus/pdm_device.o
