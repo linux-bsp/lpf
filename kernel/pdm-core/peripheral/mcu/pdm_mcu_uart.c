@@ -3,52 +3,52 @@
  *
  * 职责：
  * - 封装串口收发
- * - 直接转发 LPF protocol 协议报文（透传模式）
+ * - 直接转发 PDM protocol 协议报文（透传模式）
  * - 超时控制
  ************************************************************************/
 
 #include "osal.h"
 #include <linux/math64.h>
 
-#include "lpf/config/lpf_config.h"
-#include "lpf/hw/lpf_hw_uart.h"
-#include "lpf_mcu_transport.h"
+#include "pdm/config/pdm_config.h"
+#include "pdm/hw/pdm_hw_uart.h"
+#include "pdm_mcu_transport.h"
 
 /*===========================================================================
- * LPF_CONFIG to LPF HW type conversion.
+ * PDM_CONFIG to PDM HW type conversion.
  *===========================================================================*/
 
 /**
- * @brief 转换 LPF_CONFIG 校验位类型到 LPF HW 校验位类型
+ * @brief 转换 PDM_CONFIG 校验位类型到 PDM HW 校验位类型
  */
-static uint8_t _lpf_mcu_to_lpf_hw_parity(lpf_config_mcu_parity_t parity)
+static uint8_t _lpf_mcu_to_lpf_hw_parity(pdm_config_mcu_parity_t parity)
 {
 	switch (parity) {
-	case LPF_CONFIG_MCU_PARITY_NONE:
-		return LPF_SERIAL_PARITY_NONE;
-	case LPF_CONFIG_MCU_PARITY_ODD:
-		return LPF_SERIAL_PARITY_ODD;
-	case LPF_CONFIG_MCU_PARITY_EVEN:
-		return LPF_SERIAL_PARITY_EVEN;
+	case PDM_CONFIG_MCU_PARITY_NONE:
+		return PDM_SERIAL_PARITY_NONE;
+	case PDM_CONFIG_MCU_PARITY_ODD:
+		return PDM_SERIAL_PARITY_ODD;
+	case PDM_CONFIG_MCU_PARITY_EVEN:
+		return PDM_SERIAL_PARITY_EVEN;
 	default:
-		return LPF_SERIAL_PARITY_NONE;
+		return PDM_SERIAL_PARITY_NONE;
 	}
 }
 
 /**
- * @brief 转换 LPF_CONFIG 流控类型到 LPF HW 流控类型
+ * @brief 转换 PDM_CONFIG 流控类型到 PDM HW 流控类型
  */
-static uint8_t _lpf_mcu_to_lpf_hw_flow_control(lpf_config_mcu_flow_control_t flow)
+static uint8_t _lpf_mcu_to_lpf_hw_flow_control(pdm_config_mcu_flow_control_t flow)
 {
 	switch (flow) {
-	case LPF_CONFIG_MCU_FLOW_NONE:
-		return LPF_SERIAL_FLOW_NONE;
-	case LPF_CONFIG_MCU_FLOW_HW:
-		return LPF_SERIAL_FLOW_HW;
-	case LPF_CONFIG_MCU_FLOW_SW:
-		return LPF_SERIAL_FLOW_SW;
+	case PDM_CONFIG_MCU_FLOW_NONE:
+		return PDM_SERIAL_FLOW_NONE;
+	case PDM_CONFIG_MCU_FLOW_HW:
+		return PDM_SERIAL_FLOW_HW;
+	case PDM_CONFIG_MCU_FLOW_SW:
+		return PDM_SERIAL_FLOW_SW;
 	default:
-		return LPF_SERIAL_FLOW_NONE;
+		return PDM_SERIAL_FLOW_NONE;
 	}
 }
 
@@ -60,30 +60,30 @@ static uint8_t _lpf_mcu_to_lpf_hw_flow_control(lpf_config_mcu_flow_control_t flo
  * @brief 串口通信上下文
  */
 typedef struct {
-	lpf_hw_transport_uart_handle_t serial_handle;
+	pdm_hw_transport_uart_handle_t serial_handle;
 	osal_mutex_t rx_mutex;
-} lpf_mcu_serial_context_t;
+} pdm_mcu_serial_context_t;
 
 /**
  * @brief 初始化串口通信
  */
-static int32_t lpf_mcu_transport_uart_open(
-	const lpf_config_mcu_config_t *mcu_cfg,
-	lpf_mcu_transport_handle_t *handle)
+static int32_t pdm_mcu_transport_uart_open(
+	const pdm_config_mcu_config_t *mcu_cfg,
+	pdm_mcu_transport_handle_t *handle)
 {
-	lpf_mcu_serial_context_t *ctx;
-	lpf_serial_config_t serial_config;
+	pdm_mcu_serial_context_t *ctx;
+	pdm_serial_config_t serial_config;
 
 	if (!mcu_cfg || !handle) {
 		return OSAL_ERR_INVALID_PARAM;
 	}
 
-	ctx = (lpf_mcu_serial_context_t *)osal_malloc(sizeof(lpf_mcu_serial_context_t));
+	ctx = (pdm_mcu_serial_context_t *)osal_malloc(sizeof(pdm_mcu_serial_context_t));
 	if (!ctx) {
 		return OSAL_ERR_NO_MEMORY;
 	}
 
-	osal_memset(ctx, 0, sizeof(lpf_mcu_serial_context_t));
+	osal_memset(ctx, 0, sizeof(pdm_mcu_serial_context_t));
 
 	/* 配置串口参数 */
 	serial_config.baud_rate = mcu_cfg->hw.serial.baudrate;
@@ -94,7 +94,7 @@ static int32_t lpf_mcu_transport_uart_open(
 	serial_config.flow_control =
 		_lpf_mcu_to_lpf_hw_flow_control(mcu_cfg->hw.serial.flow_control);
 
-	if (OSAL_SUCCESS != lpf_hw_transport_uart_open(mcu_cfg->hw.serial.device,
+	if (OSAL_SUCCESS != pdm_hw_transport_uart_open(mcu_cfg->hw.serial.device,
 										&serial_config, &ctx->serial_handle)) {
 		osal_free(ctx);
 		return OSAL_ERR_GENERIC;
@@ -102,7 +102,7 @@ static int32_t lpf_mcu_transport_uart_open(
 
 	/* 创建接收互斥锁 */
 	if (OSAL_SUCCESS != osal_mutex_init(&ctx->rx_mutex, NULL)) {
-		lpf_hw_transport_uart_close(ctx->serial_handle);
+		pdm_hw_transport_uart_close(ctx->serial_handle);
 		osal_free(ctx);
 		return OSAL_ERR_GENERIC;
 	}
@@ -114,17 +114,17 @@ static int32_t lpf_mcu_transport_uart_open(
 /**
  * @brief 反初始化串口通信
  */
-static int32_t lpf_mcu_transport_uart_close(lpf_mcu_transport_handle_t handle)
+static int32_t pdm_mcu_transport_uart_close(pdm_mcu_transport_handle_t handle)
 {
-	lpf_mcu_serial_context_t *ctx;
+	pdm_mcu_serial_context_t *ctx;
 
 	if (!handle) {
 		return OSAL_ERR_INVALID_PARAM;
 	}
 
-	ctx = (lpf_mcu_serial_context_t *)handle;
+	ctx = (pdm_mcu_serial_context_t *)handle;
 
-	lpf_hw_transport_uart_close(ctx->serial_handle);
+	pdm_hw_transport_uart_close(ctx->serial_handle);
 	osal_mutex_destroy(&ctx->rx_mutex);
 	osal_free(ctx);
 
@@ -132,14 +132,14 @@ static int32_t lpf_mcu_transport_uart_close(lpf_mcu_transport_handle_t handle)
 }
 
 /**
- * @brief 发送 LPF protocol 报文并接收响应（透传模式）
+ * @brief 发送 PDM protocol 报文并接收响应（透传模式）
  */
-static int32_t lpf_mcu_transport_uart_transfer(
-	lpf_mcu_transport_handle_t handle, const uint8_t *packet,
+static int32_t pdm_mcu_transport_uart_transfer(
+	pdm_mcu_transport_handle_t handle, const uint8_t *packet,
 	uint32_t packet_len, uint8_t *response, uint32_t resp_size,
 	uint32_t *actual_size, uint32_t timeout_ms)
 {
-	lpf_mcu_serial_context_t *ctx;
+	pdm_mcu_serial_context_t *ctx;
 	int32_t ret;
 	int32_t rx_len;
 	uint64_t start_time_us;
@@ -151,13 +151,13 @@ static int32_t lpf_mcu_transport_uart_transfer(
 		return OSAL_ERR_INVALID_PARAM;
 	}
 
-	ctx = (lpf_mcu_serial_context_t *)handle;
+	ctx = (pdm_mcu_serial_context_t *)handle;
 
 	/* 记录起始时间 */
 	start_time_us = osal_get_monotonic_time();
 
-	/* 发送 LPF protocol 报文（完整报文，包含协议头和 CRC） */
-	ret = lpf_hw_transport_uart_write(ctx->serial_handle, packet, packet_len, timeout_ms);
+	/* 发送 PDM protocol 报文（完整报文，包含协议头和 CRC） */
+	ret = pdm_hw_transport_uart_write(ctx->serial_handle, packet, packet_len, timeout_ms);
 	if (ret != (int32_t)packet_len) {
 		return OSAL_ERR_GENERIC;
 	}
@@ -173,7 +173,7 @@ static int32_t lpf_mcu_transport_uart_transfer(
 	/* 接收响应报文 */
 	osal_mutex_lock(&ctx->rx_mutex);
 
-	rx_len = lpf_hw_transport_uart_read(ctx->serial_handle, response, resp_size,
+	rx_len = pdm_hw_transport_uart_read(ctx->serial_handle, response, resp_size,
 							 remaining_timeout_ms);
 
 	osal_mutex_unlock(&ctx->rx_mutex);
@@ -194,10 +194,10 @@ static int32_t lpf_mcu_transport_uart_transfer(
 /**
  * @brief Serial接口的ops结构定义（导出供lpf_mcu.c使用）
  */
-const lpf_mcu_transport_ops_t lpf_mcu_transport_uart_ops = {
-	.interface = LPF_CONFIG_MCU_INTERFACE_SERIAL,
+const pdm_mcu_transport_ops_t pdm_mcu_transport_uart_ops = {
+	.interface = PDM_CONFIG_MCU_INTERFACE_SERIAL,
 	.name = "uart",
-	.open = lpf_mcu_transport_uart_open,
-	.close = lpf_mcu_transport_uart_close,
-	.transfer = lpf_mcu_transport_uart_transfer,
+	.open = pdm_mcu_transport_uart_open,
+	.close = pdm_mcu_transport_uart_close,
+	.transfer = pdm_mcu_transport_uart_transfer,
 };

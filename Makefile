@@ -1,5 +1,5 @@
 # ==============================================================================
-# LPF Makefile
+# PDM Makefile
 # ==============================================================================
 # This Makefile provides a clean wrapper layer between user commands and the
 # CMake build system, inspired by Linux kernel and Buildroot architecture.
@@ -22,7 +22,7 @@ VERSION = 1
 PATCHLEVEL = 0
 SUBLEVEL = 0
 EXTRAVERSION =
-NAME = LPF
+NAME = PDM
 
 # Version string
 export VERSION PATCHLEVEL SUBLEVEL EXTRAVERSION
@@ -44,7 +44,7 @@ ifndef KBUILD_VERBOSE
 endif
 
 # kbuild supports saving output files in a separate directory.
-# For LPF, we use BUILD_DIR variable for CMake output directory.
+# For PDM, we use BUILD_DIR variable for CMake output directory.
 # This is simpler than full out-of-tree build support.
 
 # Build directory (for CMake build artifacts)
@@ -73,10 +73,10 @@ MODULES_SRC_DIR ?= $(srctree)/kernel
 MODULES_OUTPUT_DIR ?= $(MODULES_BUILD_DIR)
 MODULES_LIST ?= $(strip \
 	$(if $(filter y m,$(CONFIG_OSAL)),osal) \
-	$(if $(filter y m,$(CONFIG_LPF_CONFIGS)),lpf_configs) \
-	$(if $(filter y m,$(CONFIG_LPF_CORE)),lpf_core) \
-	$(if $(filter y m,$(CONFIG_LPF_HW_MOCK_SELFTEST)),lpf_hw_mock_selftest) \
-	$(if $(filter y m,$(CONFIG_LPF_DUMMY_SERVICE_SELFTEST)),lpf_dummy_service_selftest))
+	$(if $(filter y m,$(CONFIG_PDM_CONFIGS)),pdm_configs) \
+	$(if $(filter y m,$(CONFIG_PDM_CORE)),pdm_core) \
+	$(if $(filter y m,$(CONFIG_PDM_HW_MOCK_SELFTEST)),pdm_hw_mock_selftest) \
+	$(if $(filter y m,$(CONFIG_PDM_DUMMY_SERVICE_SELFTEST)),pdm_dummy_service_selftest))
 MODULES_ARTIFACTS = $(addprefix $(MODULES_OUTPUT_DIR)/,$(addsuffix .ko,$(MODULES_LIST)))
 
 # Parallel build auto-detection
@@ -390,7 +390,7 @@ PHONY += all
 all:
 	@echo ""
 	@echo "==================================================================="
-	@echo "LPF Full Build"
+	@echo "PDM Full Build"
 	@echo "==================================================================="
 	$(Q)$(MAKE) libs
 	$(Q)$(MAKE) modules
@@ -406,13 +406,13 @@ PHONY += libs
 libs: _check_config _validate_config include/generated/gen_autoconf.h include/generated/gen_version.h _cmake_configure
 	@echo ""
 	@echo "==================================================================="
-	@echo "LPF Library Build"
+	@echo "PDM Library Build"
 	@echo "==================================================================="
 	@echo ""
 	@echo "Configuration: $(CURDIR)/.config"
 	@echo "Building with CMake..."
 	@echo ""
-	@echo "  BUILD    LPF libraries"
+	@echo "  BUILD    PDM libraries"
 	$(Q)$(MAKE) -C $(BUILD_DIR) $(PARALLEL_BUILD)
 	@echo ""
 	@echo "==================================================================="
@@ -430,7 +430,7 @@ PHONY += tests
 tests: _check_config _validate_config include/generated/gen_autoconf.h include/generated/gen_version.h
 	@echo ""
 	@echo "==================================================================="
-	@echo "LPF Test Build"
+	@echo "PDM Test Build"
 	@echo "==================================================================="
 	@echo ""
 	@echo "Configuration: $(CURDIR)/.config"
@@ -447,9 +447,9 @@ tests: _check_config _validate_config include/generated/gen_autoconf.h include/g
 		$(if $(CMAKE_TOOLCHAIN_FILE),-DCMAKE_TOOLCHAIN_FILE=$(CMAKE_TOOLCHAIN_FILE)) \
 		$(CMAKE_EXTRA_FLAGS) \
 		$(CURDIR)
-	@echo "  BUILD    LPF tests"
+	@echo "  BUILD    PDM tests"
 	$(Q)$(MAKE) -C $(TEST_BUILD_DIR) $(PARALLEL_BUILD)
-	@echo "  CTEST    LPF tests"
+	@echo "  CTEST    PDM tests"
 	$(Q)cd $(TEST_BUILD_DIR) && ctest --output-on-failure
 	@echo ""
 	@echo "==================================================================="
@@ -461,7 +461,7 @@ PHONY += modules
 modules: _check_config include/generated/gen_autoconf.h include/generated/gen_version.h _modules_check_environment _modules_prepare
 	@echo ""
 	@echo "==================================================================="
-	@echo "LPF Kernel Module Build"
+	@echo "PDM Kernel Module Build"
 	@echo "==================================================================="
 	@echo ""
 	@echo "Kernel source: $(KERNEL_SRC)"
@@ -505,12 +505,12 @@ PHONY += mock-modules-smoke
 mock-modules-smoke:
 	@echo ""
 	@echo "==================================================================="
-	@echo "LPF Mock Kernel Module Smoke Test"
+	@echo "PDM Mock Kernel Module Smoke Test"
 	@echo "==================================================================="
 	@echo ""
-	$(Q)LPF_MODULE_DIR="$(abspath $(MODULES_OUTPUT_DIR))" \
-		LPF_EXPECT_INSTANCE_DEVNODE_MODE=$(CONFIG_LPF_INSTANCE_DEVNODE_MODE) \
-		$(CONFIG_SHELL) $(srctree)/scripts/lpf_mock_module_smoke.sh
+	$(Q)PDM_MODULE_DIR="$(abspath $(MODULES_OUTPUT_DIR))" \
+		PDM_EXPECT_INSTANCE_DEVNODE_MODE=$(CONFIG_PDM_INSTANCE_DEVNODE_MODE) \
+		$(CONFIG_SHELL) $(srctree)/scripts/pdm_mock_module_smoke.sh
 	@echo ""
 	@echo "==================================================================="
 	@echo "Mock kernel module smoke test completed successfully!"
@@ -521,14 +521,14 @@ PHONY += kernel-matrix
 kernel-matrix:
 	@echo ""
 	@echo "==================================================================="
-	@echo "LPF Kernel Module Matrix Build"
+	@echo "PDM Kernel Module Matrix Build"
 	@echo "==================================================================="
 	@echo ""
 	$(Q)KERNEL_SRC="$(KERNEL_SRC)" \
 		KERNEL_SRC_LIST="$(KERNEL_SRC_LIST)" \
-		LPF_KERNEL_MATRIX_DEFCONFIG="$(LPF_KERNEL_MATRIX_DEFCONFIG)" \
-		LPF_KERNEL_MATRIX_BUILD_ROOT="$(LPF_KERNEL_MATRIX_BUILD_ROOT)" \
-		$(CONFIG_SHELL) $(srctree)/scripts/lpf_kernel_matrix_build.sh
+		PDM_KERNEL_MATRIX_DEFCONFIG="$(PDM_KERNEL_MATRIX_DEFCONFIG)" \
+		PDM_KERNEL_MATRIX_BUILD_ROOT="$(PDM_KERNEL_MATRIX_BUILD_ROOT)" \
+		$(CONFIG_SHELL) $(srctree)/scripts/pdm_kernel_matrix_build.sh
 	@echo ""
 	@echo "==================================================================="
 	@echo "Kernel module matrix build completed successfully!"
@@ -543,7 +543,7 @@ _modules_check_environment:
 		echo "ERROR: No kernel modules are enabled in the current configuration."; \
 		echo "==================================================================="; \
 		echo ""; \
-		echo "Enable CONFIG_OSAL, CONFIG_LPF_CORE, and/or CONFIG_LPF_CONFIGS before invoking make modules."; \
+		echo "Enable CONFIG_OSAL, CONFIG_PDM_CORE, and/or CONFIG_PDM_CONFIGS before invoking make modules."; \
 		echo "For example, run make menuconfig or load a defconfig that enables"; \
 		echo "the kernel modules you want to build."; \
 		echo "==================================================================="; \
@@ -748,7 +748,7 @@ install_headers:
 PHONY += help list
 
 help:
-	@echo 'LPF Build System'
+	@echo 'PDM Build System'
 	@echo '===================================='
 	@echo ''
 	@echo 'Configuration targets:'
@@ -768,9 +768,9 @@ help:
 	@echo '  libs            - Build userspace libraries via CMake'
 	@echo '  modules         - Build kernel modules via kbuild'
 	@echo '  mock-modules-smoke'
-	@echo '                  - Load/unload mock kernel modules and LPF selftests'
+	@echo '                  - Load/unload mock kernel modules and PDM selftests'
 	@echo '  kernel-matrix   - Build kernel modules against KERNEL_SRC_LIST'
-	@echo '  tests           - Build and run LPF test targets'
+	@echo '  tests           - Build and run PDM test targets'
 	@echo '  install         - Install binaries and libraries'
 	@echo '  install_headers - Install development headers only'
 	@echo '  clean           - Remove build artifacts'
@@ -790,8 +790,8 @@ help:
 	@echo '  KERNEL_SRC_LIST="<dirs>" - Space-separated kernel build trees for kernel-matrix'
 	@echo '  MODULES_BUILD_DIR=<dir> - Output directory for module artifacts'
 	@echo '  MODULES_SRC_DIR=<dir> - Kernel module source directory'
-	@echo '  LPF_KERNEL_MATRIX_DEFCONFIG=<name> - Defconfig for kernel-matrix'
-	@echo '  LPF_KERNEL_MATRIX_BUILD_ROOT=<dir> - Output root for kernel-matrix'
+	@echo '  PDM_KERNEL_MATRIX_DEFCONFIG=<name> - Defconfig for kernel-matrix'
+	@echo '  PDM_KERNEL_MATRIX_BUILD_ROOT=<dir> - Output root for kernel-matrix'
 	@echo '  MODULES_LIST="<list>" - Expected modules derived from enabled kernel module options'
 	@echo '  CMAKE_BUILD_TYPE=<type>'
 	@echo '                  - Set build type: Debug, Release, RelWithDebInfo, MinSizeRel'
@@ -845,7 +845,7 @@ list:
 
 PHONY += version
 version:
-	@echo "LPF - Linux Peripheral Framework"
+	@echo "PDM - Linux Peripheral Framework"
 	@echo "Version: $(VERSION_STRING)"
 	@if [ -d .git ]; then \
 		echo "Git commit: $$(git rev-parse --short HEAD 2>/dev/null || echo 'unknown')"; \

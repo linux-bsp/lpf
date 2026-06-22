@@ -1,39 +1,39 @@
 // SPDX-License-Identifier: GPL-2.0
 
 #include "osal.h"
-#include "lpf_config_backend.h"
-#include "lpf_config_dt_parser.h"
+#include "pdm_config_backend.h"
+#include "pdm_config_dt_parser.h"
 
 #include <linux/of.h>
 
-#define LPF_CONFIG_DT_ROOT_PATH "/lpf"
-#define LPF_CONFIG_DT_COMPATIBLE "lpf,linux-peripheral-framework"
-#define LPF_CONFIG_DT_LEGACY_COMPATIBLE "linux-peripheral-framework"
-#define LPF_CONFIG_DT_OLD_COMPATIBLE "lpf,platform-config"
+#define PDM_CONFIG_DT_ROOT_PATH "/lpf"
+#define PDM_CONFIG_DT_COMPATIBLE "lpf,linux-peripheral-framework"
+#define PDM_CONFIG_DT_LEGACY_COMPATIBLE "linux-peripheral-framework"
+#define PDM_CONFIG_DT_OLD_COMPATIBLE "lpf,platform-config"
 
-static lpf_config_dt_parse_result_t g_lpf_config_dt;
+static pdm_config_dt_parse_result_t g_lpf_config_dt;
 static bool g_lpf_config_dt_loaded;
 
-static const char *lpf_config_dt_of_name(const void *node)
+static const char *pdm_config_dt_of_name(const void *node)
 {
 	const struct device_node *of_node = node;
 
 	return of_node ? of_node->name : NULL;
 }
 
-static const void *lpf_config_dt_of_next_available_child(
+static const void *pdm_config_dt_of_next_available_child(
 	const void *node, const void *previous)
 {
 	return of_get_next_available_child((const struct device_node *)node,
 					   (struct device_node *)previous);
 }
 
-static void lpf_config_dt_of_put_node(const void *node)
+static void pdm_config_dt_of_put_node(const void *node)
 {
 	of_node_put((struct device_node *)node);
 }
 
-static int32_t lpf_config_dt_of_read_string(
+static int32_t pdm_config_dt_of_read_string(
 	const void *node, const char *property, const char **value)
 {
 	if (of_property_read_string(node, property, value) != 0)
@@ -42,12 +42,12 @@ static int32_t lpf_config_dt_of_read_string(
 	return OSAL_SUCCESS;
 }
 
-static bool lpf_config_dt_of_read_bool(const void *node, const char *property)
+static bool pdm_config_dt_of_read_bool(const void *node, const char *property)
 {
 	return of_property_read_bool(node, property);
 }
 
-static int32_t lpf_config_dt_of_read_u32(const void *node, const char *property,
+static int32_t pdm_config_dt_of_read_u32(const void *node, const char *property,
 					 uint32_t *value)
 {
 	if (of_property_read_u32(node, property, value) != 0)
@@ -56,48 +56,48 @@ static int32_t lpf_config_dt_of_read_u32(const void *node, const char *property,
 	return OSAL_SUCCESS;
 }
 
-static const lpf_config_dt_node_ops_t g_lpf_config_dt_of_ops = {
-	.name = lpf_config_dt_of_name,
-	.next_available_child = lpf_config_dt_of_next_available_child,
-	.put_node = lpf_config_dt_of_put_node,
-	.read_string = lpf_config_dt_of_read_string,
-	.read_bool = lpf_config_dt_of_read_bool,
-	.read_u32 = lpf_config_dt_of_read_u32,
+static const pdm_config_dt_node_ops_t g_lpf_config_dt_of_ops = {
+	.name = pdm_config_dt_of_name,
+	.next_available_child = pdm_config_dt_of_next_available_child,
+	.put_node = pdm_config_dt_of_put_node,
+	.read_string = pdm_config_dt_of_read_string,
+	.read_bool = pdm_config_dt_of_read_bool,
+	.read_u32 = pdm_config_dt_of_read_u32,
 	.alloc = osal_zalloc,
 	.free = osal_free,
 };
 
-static struct device_node *lpf_config_dt_find_root(void)
+static struct device_node *pdm_config_dt_find_root(void)
 {
 	struct device_node *root;
 
-	root = of_find_node_by_path(LPF_CONFIG_DT_ROOT_PATH);
+	root = of_find_node_by_path(PDM_CONFIG_DT_ROOT_PATH);
 	if (root)
 		return root;
 
-	root = of_find_compatible_node(NULL, NULL, LPF_CONFIG_DT_COMPATIBLE);
+	root = of_find_compatible_node(NULL, NULL, PDM_CONFIG_DT_COMPATIBLE);
 	if (root)
 		return root;
 
 	root = of_find_compatible_node(NULL, NULL,
-				       LPF_CONFIG_DT_LEGACY_COMPATIBLE);
+				       PDM_CONFIG_DT_LEGACY_COMPATIBLE);
 	if (root)
 		return root;
 
-	return of_find_compatible_node(NULL, NULL, LPF_CONFIG_DT_OLD_COMPATIBLE);
+	return of_find_compatible_node(NULL, NULL, PDM_CONFIG_DT_OLD_COMPATIBLE);
 }
 
-static void lpf_config_dt_free_entries(void)
+static void pdm_config_dt_free_entries(void)
 {
-	lpf_config_dt_parse_result_clear(&g_lpf_config_dt_of_ops,
+	pdm_config_dt_parse_result_clear(&g_lpf_config_dt_of_ops,
 					 &g_lpf_config_dt);
 }
 
-static bool lpf_config_dt_available(void)
+static bool pdm_config_dt_available(void)
 {
 	struct device_node *root;
 
-	root = lpf_config_dt_find_root();
+	root = pdm_config_dt_find_root();
 	if (!root)
 		return false;
 
@@ -105,7 +105,7 @@ static bool lpf_config_dt_available(void)
 	return true;
 }
 
-static int32_t lpf_config_dt_load(void)
+static int32_t pdm_config_dt_load(void)
 {
 	struct device_node *root;
 	int32_t ret;
@@ -113,11 +113,11 @@ static int32_t lpf_config_dt_load(void)
 	if (g_lpf_config_dt_loaded)
 		return OSAL_SUCCESS;
 
-	root = lpf_config_dt_find_root();
+	root = pdm_config_dt_find_root();
 	if (!root)
 		return OSAL_ERR_NOT_SUPPORTED;
 
-	ret = lpf_config_dt_parse_platform(&g_lpf_config_dt_of_ops, root,
+	ret = pdm_config_dt_parse_platform(&g_lpf_config_dt_of_ops, root,
 					   &g_lpf_config_dt);
 	of_node_put(root);
 	if (ret != OSAL_SUCCESS)
@@ -127,23 +127,23 @@ static int32_t lpf_config_dt_load(void)
 	return OSAL_SUCCESS;
 }
 
-static void lpf_config_dt_unload(void)
+static void pdm_config_dt_unload(void)
 {
-	lpf_config_dt_free_entries();
+	pdm_config_dt_free_entries();
 	g_lpf_config_dt_loaded = false;
 }
 
-static const lpf_config_platform_config_t *lpf_config_dt_active(void)
+static const pdm_config_platform_config_t *pdm_config_dt_active(void)
 {
 	return g_lpf_config_dt_loaded ? &g_lpf_config_dt.platform : NULL;
 }
 
-static const lpf_config_platform_config_t *
-lpf_config_dt_find(const char *product, const char *project, const char *version)
+static const pdm_config_platform_config_t *
+pdm_config_dt_find(const char *product, const char *project, const char *version)
 {
-	const lpf_config_platform_config_t *config;
+	const pdm_config_platform_config_t *config;
 
-	config = lpf_config_dt_active();
+	config = pdm_config_dt_active();
 	if (!config || !product || !project)
 		return NULL;
 
@@ -159,7 +159,7 @@ lpf_config_dt_find(const char *product, const char *project, const char *version
 	return config;
 }
 
-static int32_t lpf_config_dt_list(const lpf_config_platform_config_t **configs,
+static int32_t pdm_config_dt_list(const pdm_config_platform_config_t **configs,
 				  uint32_t *count)
 {
 	if (!configs || !count)
@@ -180,12 +180,12 @@ static int32_t lpf_config_dt_list(const lpf_config_platform_config_t **configs,
 	return OSAL_SUCCESS;
 }
 
-const lpf_config_backend_ops_t g_lpf_config_dt_backend = {
+const pdm_config_backend_ops_t g_lpf_config_dt_backend = {
 	.name = "dt",
-	.available = lpf_config_dt_available,
-	.load = lpf_config_dt_load,
-	.unload = lpf_config_dt_unload,
-	.active = lpf_config_dt_active,
-	.find = lpf_config_dt_find,
-	.list = lpf_config_dt_list,
+	.available = pdm_config_dt_available,
+	.load = pdm_config_dt_load,
+	.unload = pdm_config_dt_unload,
+	.active = pdm_config_dt_active,
+	.find = pdm_config_dt_find,
+	.list = pdm_config_dt_list,
 };

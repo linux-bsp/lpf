@@ -3,11 +3,11 @@
 #include <linux/module.h>
 
 #include "osal.h"
-#include "lpf/hw/lpf_hw_uart.h"
-#include "lpf/soc/lpf_soc_adapter.h"
+#include "pdm/hw/pdm_hw_uart.h"
+#include "pdm/soc/pdm_soc_adapter.h"
 
-static void lpf_hw_transport_uart_fill_lpf_config(const lpf_serial_config_t *src,
-				       lpf_serial_config_t *dst)
+static void pdm_hw_transport_uart_fill_lpf_config(const pdm_serial_config_t *src,
+				       pdm_serial_config_t *dst)
 {
 	dst->baud_rate = src->baud_rate;
 	dst->data_bits = src->data_bits;
@@ -16,58 +16,58 @@ static void lpf_hw_transport_uart_fill_lpf_config(const lpf_serial_config_t *src
 	dst->flow_control = src->flow_control;
 }
 
-int32_t lpf_hw_transport_uart_open(const char *device, const lpf_serial_config_t *config,
-			lpf_hw_transport_uart_handle_t *handle)
+int32_t pdm_hw_transport_uart_open(const char *device, const pdm_serial_config_t *config,
+			pdm_hw_transport_uart_handle_t *handle)
 {
-	lpf_serial_config_t lpf_config;
+	pdm_serial_config_t pdm_config;
 
 	if (!device || !config || !handle)
 		return OSAL_ERR_INVALID_PARAM;
 
-	lpf_hw_transport_uart_fill_lpf_config(config, &lpf_config);
-	return lpf_soc_serial_open(device, &lpf_config,
-				   (lpf_serial_handle_t *)handle);
+	pdm_hw_transport_uart_fill_lpf_config(config, &pdm_config);
+	return pdm_soc_serial_open(device, &pdm_config,
+				   (pdm_serial_handle_t *)handle);
 }
-EXPORT_SYMBOL_GPL(lpf_hw_transport_uart_open);
+EXPORT_SYMBOL_GPL(pdm_hw_transport_uart_open);
 
-int32_t lpf_hw_transport_uart_close(lpf_hw_transport_uart_handle_t handle)
+int32_t pdm_hw_transport_uart_close(pdm_hw_transport_uart_handle_t handle)
 {
-	return lpf_soc_serial_close((lpf_serial_handle_t)handle);
+	return pdm_soc_serial_close((pdm_serial_handle_t)handle);
 }
-EXPORT_SYMBOL_GPL(lpf_hw_transport_uart_close);
+EXPORT_SYMBOL_GPL(pdm_hw_transport_uart_close);
 
-int32_t lpf_hw_transport_uart_write(lpf_hw_transport_uart_handle_t handle, const void *buffer,
+int32_t pdm_hw_transport_uart_write(pdm_hw_transport_uart_handle_t handle, const void *buffer,
 			 uint32_t size, int32_t timeout)
 {
-	return lpf_soc_serial_write((lpf_serial_handle_t)handle, buffer, size,
+	return pdm_soc_serial_write((pdm_serial_handle_t)handle, buffer, size,
 				    timeout);
 }
-EXPORT_SYMBOL_GPL(lpf_hw_transport_uart_write);
+EXPORT_SYMBOL_GPL(pdm_hw_transport_uart_write);
 
-int32_t lpf_hw_transport_uart_read(lpf_hw_transport_uart_handle_t handle, void *buffer,
+int32_t pdm_hw_transport_uart_read(pdm_hw_transport_uart_handle_t handle, void *buffer,
 			uint32_t size, int32_t timeout)
 {
-	return lpf_soc_serial_read((lpf_serial_handle_t)handle, buffer, size,
+	return pdm_soc_serial_read((pdm_serial_handle_t)handle, buffer, size,
 				   timeout);
 }
-EXPORT_SYMBOL_GPL(lpf_hw_transport_uart_read);
+EXPORT_SYMBOL_GPL(pdm_hw_transport_uart_read);
 
-int32_t lpf_hw_transport_uart_flush(lpf_hw_transport_uart_handle_t handle)
+int32_t pdm_hw_transport_uart_flush(pdm_hw_transport_uart_handle_t handle)
 {
-	return lpf_soc_serial_flush((lpf_serial_handle_t)handle);
+	return pdm_soc_serial_flush((pdm_serial_handle_t)handle);
 }
-EXPORT_SYMBOL_GPL(lpf_hw_transport_uart_flush);
+EXPORT_SYMBOL_GPL(pdm_hw_transport_uart_flush);
 
-int32_t lpf_hw_transport_uart_set_config(lpf_hw_transport_uart_handle_t handle,
-			      const lpf_serial_config_t *config)
+int32_t pdm_hw_transport_uart_set_config(pdm_hw_transport_uart_handle_t handle,
+			      const pdm_serial_config_t *config)
 {
-	lpf_serial_config_t lpf_config;
+	pdm_serial_config_t pdm_config;
 
 	if (!config)
 		return OSAL_ERR_INVALID_PARAM;
 
-	lpf_hw_transport_uart_fill_lpf_config(config, &lpf_config);
-	return lpf_soc_serial_set_config((lpf_serial_handle_t)handle,
-					 &lpf_config);
+	pdm_hw_transport_uart_fill_lpf_config(config, &pdm_config);
+	return pdm_soc_serial_set_config((pdm_serial_handle_t)handle,
+					 &pdm_config);
 }
-EXPORT_SYMBOL_GPL(lpf_hw_transport_uart_set_config);
+EXPORT_SYMBOL_GPL(pdm_hw_transport_uart_set_config);

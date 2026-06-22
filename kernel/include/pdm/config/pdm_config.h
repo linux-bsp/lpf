@@ -1,32 +1,32 @@
 /************************************************************************
- * LPF_CONFIG 对外 API
+ * PDM_CONFIG 对外 API
  *
  * 功能：
  * - 硬件配置后端选择和只读查询（以外设为单位）
  * - 配置验证和调试打印
  *
  * 命名规范：
- * - LPF_CONFIG_*      - 通用接口
- * - LPF_CONFIG_HW_*   - 硬件配置相关接口
+ * - PDM_CONFIG_*      - 通用接口
+ * - PDM_CONFIG_HW_*   - 硬件配置相关接口
  *
  * 设计原则：
- * - LPF_CONFIG 负责屏蔽静态表、Device Tree、产品配置等来源差异
- * - LPF peripheral configuration consumes the unified device list and typed
+ * - PDM_CONFIG 负责屏蔽静态表、Device Tree、产品配置等来源差异
+ * - PDM peripheral configuration consumes the unified device list and typed
  *   configuration entries
  ************************************************************************/
 
-#ifndef LPF_CONFIG_H
-#define LPF_CONFIG_H
+#ifndef PDM_CONFIG_H
+#define PDM_CONFIG_H
 
-#define LPF_CONFIG_VERSION_MAJOR 0x1
-#define LPF_CONFIG_VERSION_MINOR 0x0
-#define LPF_CONFIG_VERSION_PATCH 0x0
+#define PDM_CONFIG_VERSION_MAJOR 0x1
+#define PDM_CONFIG_VERSION_MINOR 0x0
+#define PDM_CONFIG_VERSION_PATCH 0x0
 
 /* 类型定义 - 按模块组织 */
-#include "lpf/config/lpf_config_common.h" /* 通用基础类型 */
-#include "lpf/config/lpf_config_mcu.h" /* MCU 配置类型 */
-#include "lpf/config/lpf_config_led.h" /* LED 配置类型 */
-#include "lpf/config/lpf_config_platform.h" /* 板级配置类型 */
+#include "pdm/config/pdm_config_common.h" /* 通用基础类型 */
+#include "pdm/config/pdm_config_mcu.h" /* MCU 配置类型 */
+#include "pdm/config/pdm_config_led.h" /* LED 配置类型 */
+#include "pdm/config/pdm_config_platform.h" /* 板级配置类型 */
 
 /*===========================================================================
  * 板级配置查询
@@ -37,11 +37,11 @@
  *
  * @return 平台配置指针，失败返回NULL
  */
-const lpf_config_platform_config_t *lpf_config_get_board(void);
-int32_t lpf_config_load(void);
-void lpf_config_unload(void);
+const pdm_config_platform_config_t *pdm_config_get_board(void);
+int32_t pdm_config_load(void);
+void pdm_config_unload(void);
 
-const lpf_config_device_node_t *lpf_config_get_device_nodes(uint32_t *count);
+const pdm_config_device_node_t *pdm_config_get_device_nodes(uint32_t *count);
 
 /**
  * @brief 根据产品、项目和版本查找配置
@@ -52,8 +52,8 @@ const lpf_config_device_node_t *lpf_config_get_device_nodes(uint32_t *count);
  *
  * @return 平台配置指针，失败返回NULL
  */
-const lpf_config_platform_config_t *
-lpf_config_find(const char *product, const char *project, const char *version);
+const pdm_config_platform_config_t *
+pdm_config_find(const char *product, const char *project, const char *version);
 
 /**
  * @brief 列出所有配置
@@ -63,11 +63,11 @@ lpf_config_find(const char *product, const char *project, const char *version);
  *
  * @return OSAL_SUCCESS 成功
  */
-int32_t lpf_config_list(const lpf_config_platform_config_t **configs,
+int32_t pdm_config_list(const pdm_config_platform_config_t **configs,
 					 uint32_t *count);
 
 /*===========================================================================
- * 硬件外设配置查询接口（LPF_CONFIG_HW_*）
+ * 硬件外设配置查询接口（PDM_CONFIG_HW_*）
  *===========================================================================*/
 
 /**
@@ -78,8 +78,8 @@ int32_t lpf_config_list(const lpf_config_platform_config_t **configs,
  *
  * @return MCU配置条目指针，失败返回NULL
  */
-static inline const lpf_config_mcu_entry_t *
-lpf_config_hw_get_mcu(const lpf_config_platform_config_t *platform, uint32_t index)
+static inline const pdm_config_mcu_entry_t *
+pdm_config_hw_get_mcu(const pdm_config_platform_config_t *platform, uint32_t index)
 {
 	uint32_t i;
 
@@ -92,19 +92,19 @@ lpf_config_hw_get_mcu(const lpf_config_platform_config_t *platform, uint32_t ind
 
 	for (i = 0; platform->device_nodes &&
 	     i < platform->device_node_count; i++) {
-		const lpf_config_device_node_t *node = &platform->device_nodes[i];
+		const pdm_config_device_node_t *node = &platform->device_nodes[i];
 
-		if (node->device_type == LPF_CONFIG_DEVICE_TYPE_MCU &&
+		if (node->device_type == PDM_CONFIG_DEVICE_TYPE_MCU &&
 		    node->index == index &&
-		    node->payload_size == sizeof(lpf_config_mcu_entry_t))
-			return (const lpf_config_mcu_entry_t *)node->payload;
+		    node->payload_size == sizeof(pdm_config_mcu_entry_t))
+			return (const pdm_config_mcu_entry_t *)node->payload;
 	}
 
 	return NULL;
 }
 
-static inline const lpf_config_led_entry_t *
-lpf_config_hw_get_led(const lpf_config_platform_config_t *platform, uint32_t index)
+static inline const pdm_config_led_entry_t *
+pdm_config_hw_get_led(const pdm_config_platform_config_t *platform, uint32_t index)
 {
 	uint32_t i;
 
@@ -117,12 +117,12 @@ lpf_config_hw_get_led(const lpf_config_platform_config_t *platform, uint32_t ind
 
 	for (i = 0; platform->device_nodes &&
 	     i < platform->device_node_count; i++) {
-		const lpf_config_device_node_t *node = &platform->device_nodes[i];
+		const pdm_config_device_node_t *node = &platform->device_nodes[i];
 
-		if (node->device_type == LPF_CONFIG_DEVICE_TYPE_LED &&
+		if (node->device_type == PDM_CONFIG_DEVICE_TYPE_LED &&
 		    node->index == index &&
-		    node->payload_size == sizeof(lpf_config_led_entry_t))
-			return (const lpf_config_led_entry_t *)node->payload;
+		    node->payload_size == sizeof(pdm_config_led_entry_t))
+			return (const pdm_config_led_entry_t *)node->payload;
 	}
 
 	return NULL;
@@ -140,14 +140,14 @@ lpf_config_hw_get_led(const lpf_config_platform_config_t *platform, uint32_t ind
  * @return OSAL_SUCCESS 验证通过
  * @return OSAL_ERR_GENERIC 验证失败
  */
-int32_t lpf_config_validate(const lpf_config_platform_config_t *config);
+int32_t pdm_config_validate(const pdm_config_platform_config_t *config);
 
 /**
  * @brief 打印平台配置信息（用于调试）
  *
  * @param[in] config 平台配置
  */
-void lpf_config_print(const lpf_config_platform_config_t *config);
-void lpf_config_print_version(void);
+void pdm_config_print(const pdm_config_platform_config_t *config);
+void pdm_config_print_version(void);
 
-#endif /* LPF_CONFIG_H */
+#endif /* PDM_CONFIG_H */

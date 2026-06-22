@@ -4,10 +4,10 @@
 #include <linux/module.h>
 #include <linux/spi/spi.h>
 
-#include "lpf/compat/lpf_compat_errno.h"
-#include "lpf/compat/lpf_compat_spi.h"
+#include "pdm/compat/pdm_compat_errno.h"
+#include "pdm/compat/pdm_compat_spi.h"
 
-static struct spi_device *lpf_compat_spi_find_device(const char *name)
+static struct spi_device *pdm_compat_spi_find_device(const char *name)
 {
 	struct device *dev;
 
@@ -18,8 +18,8 @@ static struct spi_device *lpf_compat_spi_find_device(const char *name)
 	return to_spi_device(dev);
 }
 
-static int32_t lpf_compat_spi_apply_config(struct spi_device *spi,
-					   const lpf_spi_config_t *config)
+static int32_t pdm_compat_spi_apply_config(struct spi_device *spi,
+					   const pdm_spi_config_t *config)
 {
 	int ret;
 
@@ -31,11 +31,11 @@ static int32_t lpf_compat_spi_apply_config(struct spi_device *spi,
 	spi->max_speed_hz = config->max_speed_hz;
 
 	ret = spi_setup(spi);
-	return lpf_compat_errno_to_status(ret);
+	return pdm_compat_errno_to_status(ret);
 }
 
-int32_t lpf_compat_spi_open(const lpf_spi_config_t *config,
-			    lpf_spi_handle_t *handle)
+int32_t pdm_compat_spi_open(const pdm_spi_config_t *config,
+			    pdm_spi_handle_t *handle)
 {
 	struct spi_device *spi;
 	const char *name;
@@ -51,11 +51,11 @@ int32_t lpf_compat_spi_open(const lpf_spi_config_t *config,
 	if (slash)
 		name = slash + 1;
 
-	spi = lpf_compat_spi_find_device(name);
+	spi = pdm_compat_spi_find_device(name);
 	if (!spi)
 		return OSAL_ENOENT;
 
-	ret = lpf_compat_spi_apply_config(spi, config);
+	ret = pdm_compat_spi_apply_config(spi, config);
 	if (ret != OSAL_SUCCESS) {
 		spi_dev_put(spi);
 		return ret;
@@ -65,14 +65,14 @@ int32_t lpf_compat_spi_open(const lpf_spi_config_t *config,
 	return OSAL_SUCCESS;
 }
 
-void lpf_compat_spi_close(lpf_spi_handle_t handle)
+void pdm_compat_spi_close(pdm_spi_handle_t handle)
 {
 	if (handle)
 		spi_dev_put((struct spi_device *)handle);
 }
 
-int32_t lpf_compat_spi_transfer(lpf_spi_handle_t handle,
-				const lpf_spi_transfer_t *transfers,
+int32_t pdm_compat_spi_transfer(pdm_spi_handle_t handle,
+				const pdm_spi_transfer_t *transfers,
 				uint32_t num)
 {
 	struct spi_device *spi = handle;
@@ -110,11 +110,11 @@ int32_t lpf_compat_spi_transfer(lpf_spi_handle_t handle,
 	ret = spi_sync(spi, &message);
 	osal_free(xfers);
 
-	return lpf_compat_errno_to_status(ret);
+	return pdm_compat_errno_to_status(ret);
 }
 
-int32_t lpf_compat_spi_set_config(lpf_spi_handle_t handle,
-				  const lpf_spi_config_t *config)
+int32_t pdm_compat_spi_set_config(pdm_spi_handle_t handle,
+				  const pdm_spi_config_t *config)
 {
-	return lpf_compat_spi_apply_config((struct spi_device *)handle, config);
+	return pdm_compat_spi_apply_config((struct spi_device *)handle, config);
 }

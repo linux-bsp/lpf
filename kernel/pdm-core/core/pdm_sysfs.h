@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-2.0
 
-#ifndef LPF_SYSFS_H
-#define LPF_SYSFS_H
+#ifndef PDM_SYSFS_H
+#define PDM_SYSFS_H
 
 #include <linux/device.h>
 
-const struct attribute_group **lpf_chrdev_sysfs_groups(void);
+const struct attribute_group **pdm_chrdev_sysfs_groups(void);
 
-#endif /* LPF_SYSFS_H */
+#endif /* PDM_SYSFS_H */

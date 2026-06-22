@@ -1,70 +1,70 @@
 // SPDX-License-Identifier: GPL-2.0
 
-#ifndef LPF_CORE_H
-#define LPF_CORE_H
+#ifndef PDM_CORE_H
+#define PDM_CORE_H
 
-#include "lpf/core/lpf_device.h"
-#include "lpf/core/lpf_driver.h"
+#include "pdm/core/pdm_device.h"
+#include "pdm/core/pdm_driver.h"
 
 /*
- * LPF Core is the LPF-owned device model. Runtime/peripheral code registers
- * LPF drivers and configured LPF devices here.
- * Core matches devices to drivers by LPF device type and calls probe/remove.
+ * PDM Core is the PDM-owned device model. Runtime/peripheral code registers
+ * PDM drivers and configured PDM devices here.
+ * Core matches devices to drivers by PDM device type and calls probe/remove.
  */
 
-typedef struct lpf_device_handle lpf_device_handle_t;
+typedef struct pdm_device_handle pdm_device_handle_t;
 
 typedef enum {
-	LPF_DEVICE_EVENT_REGISTERED = 0,
-	LPF_DEVICE_EVENT_BOUND,
-	LPF_DEVICE_EVENT_STATE_CHANGED,
-	LPF_DEVICE_EVENT_ERROR,
-	LPF_DEVICE_EVENT_REMOVING,
-	LPF_DEVICE_EVENT_REMOVED,
-} lpf_device_event_type_t;
+	PDM_DEVICE_EVENT_REGISTERED = 0,
+	PDM_DEVICE_EVENT_BOUND,
+	PDM_DEVICE_EVENT_STATE_CHANGED,
+	PDM_DEVICE_EVENT_ERROR,
+	PDM_DEVICE_EVENT_REMOVING,
+	PDM_DEVICE_EVENT_REMOVED,
+} pdm_device_event_type_t;
 
 typedef struct {
-	lpf_device_event_type_t type;
-	lpf_device_info_t device;
+	pdm_device_event_type_t type;
+	pdm_device_info_t device;
 	int32_t status;
-} lpf_device_event_t;
+} pdm_device_event_t;
 
-typedef void (*lpf_device_event_callback_t)(
-	const lpf_device_event_t *event, void *user_data);
+typedef void (*pdm_device_event_callback_t)(
+	const pdm_device_event_t *event, void *user_data);
 
-int32_t lpf_driver_register(const lpf_driver_t *driver);
-void lpf_driver_unregister(const lpf_driver_t *driver);
-void lpf_driver_unregister_all(void);
+int32_t pdm_driver_register(const pdm_driver_t *driver);
+void pdm_driver_unregister(const pdm_driver_t *driver);
+void pdm_driver_unregister_all(void);
 
-/* Registers one configured LPF device and binds it to the matching driver. */
-int32_t lpf_device_register(const lpf_device_config_t *config);
-void lpf_device_unregister_all(void);
-const lpf_device_t *lpf_device_find(lpf_device_type_t type, uint32_t index);
-lpf_device_handle_t *lpf_device_get(lpf_device_type_t type, uint32_t index);
-lpf_device_handle_t *lpf_device_get_by_name(const char *name);
-lpf_device_handle_t *
-lpf_device_get_by_capability(lpf_capability_t required, uint32_t match_index);
-const lpf_device_t *lpf_device_from_handle(
-	const lpf_device_handle_t *handle);
-int32_t lpf_device_handle_get_info(const lpf_device_handle_t *handle,
-				   lpf_device_info_t *info);
-void lpf_device_put(lpf_device_handle_t *handle);
-int32_t lpf_device_get_info(lpf_device_type_t type, uint32_t index,
-			    lpf_device_info_t *info);
-int32_t lpf_device_get_info_by_name(const char *name,
-				    lpf_device_info_t *info);
-int32_t lpf_device_get_info_by_capability(lpf_capability_t required,
+/* Registers one configured PDM device and binds it to the matching driver. */
+int32_t pdm_device_register(const pdm_device_config_t *config);
+void pdm_device_unregister_all(void);
+const pdm_device_t *pdm_device_find(pdm_device_type_t type, uint32_t index);
+pdm_device_handle_t *pdm_device_get(pdm_device_type_t type, uint32_t index);
+pdm_device_handle_t *pdm_device_get_by_name(const char *name);
+pdm_device_handle_t *
+pdm_device_get_by_capability(pdm_capability_t required, uint32_t match_index);
+const pdm_device_t *pdm_device_from_handle(
+	const pdm_device_handle_t *handle);
+int32_t pdm_device_handle_get_info(const pdm_device_handle_t *handle,
+				   pdm_device_info_t *info);
+void pdm_device_put(pdm_device_handle_t *handle);
+int32_t pdm_device_get_info(pdm_device_type_t type, uint32_t index,
+			    pdm_device_info_t *info);
+int32_t pdm_device_get_info_by_name(const char *name,
+				    pdm_device_info_t *info);
+int32_t pdm_device_get_info_by_capability(pdm_capability_t required,
 					  uint32_t match_index,
-					  lpf_device_info_t *info);
-int32_t lpf_device_list(lpf_device_info_t *infos, uint32_t *count);
-int32_t lpf_device_set_state(lpf_device_type_t type, uint32_t index,
-			     lpf_device_state_t state, int32_t status);
-void lpf_device_record_error(lpf_device_type_t type, uint32_t index,
+					  pdm_device_info_t *info);
+int32_t pdm_device_list(pdm_device_info_t *infos, uint32_t *count);
+int32_t pdm_device_set_state(pdm_device_type_t type, uint32_t index,
+			     pdm_device_state_t state, int32_t status);
+void pdm_device_record_error(pdm_device_type_t type, uint32_t index,
 			     int32_t error);
-int32_t lpf_device_record_recovery(lpf_device_type_t type, uint32_t index);
-int32_t lpf_device_event_subscribe(lpf_device_event_callback_t callback,
+int32_t pdm_device_record_recovery(pdm_device_type_t type, uint32_t index);
+int32_t pdm_device_event_subscribe(pdm_device_event_callback_t callback,
 				   void *user_data);
-void lpf_device_event_unsubscribe(lpf_device_event_callback_t callback,
+void pdm_device_event_unsubscribe(pdm_device_event_callback_t callback,
 				  void *user_data);
 
-#endif /* LPF_CORE_H */
+#endif /* PDM_CORE_H */

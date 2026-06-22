@@ -1,27 +1,27 @@
 // SPDX-License-Identifier: GPL-2.0
 
-#include "lpf/core/lpf_chrdev.h"
+#include "pdm/core/pdm_chrdev.h"
 
 #include <linux/container_of.h>
 #include <linux/device.h>
 #include <linux/errno.h>
 
-#include "lpf/soc/lpf_soc_adapter.h"
-#include "lpf_sysfs.h"
+#include "pdm/soc/pdm_soc_adapter.h"
+#include "pdm_sysfs.h"
 
-#ifndef CONFIG_LPF_INSTANCE_DEVNODE_MODE
-#define CONFIG_LPF_INSTANCE_DEVNODE_MODE "0660"
+#ifndef CONFIG_PDM_INSTANCE_DEVNODE_MODE
+#define CONFIG_PDM_INSTANCE_DEVNODE_MODE "0660"
 #endif
 
-#define LPF_CTL_DEVNODE_MODE 0666
-#define LPF_INSTANCE_DEVNODE_MODE_FALLBACK 0660
+#define PDM_CTL_DEVNODE_MODE 0666
+#define PDM_INSTANCE_DEVNODE_MODE_FALLBACK 0660
 
 typedef struct {
-	lpf_chrdev_t *chrdev;
-	lpf_device_handle_t *device_handle;
-} lpf_chrdev_file_ctx_t;
+	pdm_chrdev_t *chrdev;
+	pdm_device_handle_t *device_handle;
+} pdm_chrdev_file_ctx_t;
 
-static bool lpf_chrdev_parse_mode(const char *text, umode_t *mode)
+static bool pdm_chrdev_parse_mode(const char *text, umode_t *mode)
 {
 	const char *cursor;
 	umode_t value = 0;
@@ -42,19 +42,19 @@ static bool lpf_chrdev_parse_mode(const char *text, umode_t *mode)
 	return true;
 }
 
-static umode_t lpf_chrdev_instance_mode(void)
+static umode_t pdm_chrdev_instance_mode(void)
 {
 	umode_t mode;
 
-	if (lpf_chrdev_parse_mode(CONFIG_LPF_INSTANCE_DEVNODE_MODE, &mode))
+	if (pdm_chrdev_parse_mode(CONFIG_PDM_INSTANCE_DEVNODE_MODE, &mode))
 		return mode;
 
-	LOG_WARN_ONCE("LPF", "invalid instance devnode mode %s; using 0660",
-		      CONFIG_LPF_INSTANCE_DEVNODE_MODE);
-	return LPF_INSTANCE_DEVNODE_MODE_FALLBACK;
+	LOG_WARN_ONCE("PDM", "invalid instance devnode mode %s; using 0660",
+		      CONFIG_PDM_INSTANCE_DEVNODE_MODE);
+	return PDM_INSTANCE_DEVNODE_MODE_FALLBACK;
 }
 
-static lpf_chrdev_t *lpf_chrdev_from_private_data(void *private_data)
+static pdm_chrdev_t *pdm_chrdev_from_private_data(void *private_data)
 {
 	struct miscdevice *miscdev;
 
@@ -62,11 +62,11 @@ static lpf_chrdev_t *lpf_chrdev_from_private_data(void *private_data)
 		return NULL;
 
 	miscdev = private_data;
-	return container_of(miscdev, lpf_chrdev_t, miscdev);
+	return container_of(miscdev, pdm_chrdev_t, miscdev);
 }
 
-static void lpf_chrdev_fill_info(lpf_chrdev_t *chrdev,
-				 const lpf_device_t *device, uint32_t index)
+static void pdm_chrdev_fill_info(pdm_chrdev_t *chrdev,
+				 const pdm_device_t *device, uint32_t index)
 {
 	const char *soc_name;
 
@@ -92,23 +92,23 @@ static void lpf_chrdev_fill_info(lpf_chrdev_t *chrdev,
 		}
 	}
 
-	soc_name = lpf_soc_adapter_name();
+	soc_name = pdm_soc_adapter_name();
 	osal_strncpy(chrdev->soc_name, soc_name ? soc_name : "unknown",
 		     sizeof(chrdev->soc_name) - 1U);
 	chrdev->soc_name[sizeof(chrdev->soc_name) - 1U] = '\0';
 }
 
-static int lpf_chrdev_refresh_info_locked(lpf_chrdev_t *chrdev)
+static int pdm_chrdev_refresh_info_locked(pdm_chrdev_t *chrdev)
 {
-	lpf_device_info_t info;
+	pdm_device_info_t info;
 	int32_t ret;
 
 	if (!chrdev)
 		return -EINVAL;
-	if (chrdev->info.type == LPF_DEVICE_TYPE_INVALID)
+	if (chrdev->info.type == PDM_DEVICE_TYPE_INVALID)
 		return -ENODEV;
 
-	ret = lpf_device_get_info(chrdev->info.type, chrdev->info.index, &info);
+	ret = pdm_device_get_info(chrdev->info.type, chrdev->info.index, &info);
 	if (ret != OSAL_SUCCESS)
 		return -ENODEV;
 
@@ -117,17 +117,17 @@ static int lpf_chrdev_refresh_info_locked(lpf_chrdev_t *chrdev)
 	return 0;
 }
 
-int lpf_chrdev_open(struct file *file)
+int pdm_chrdev_open(struct file *file)
 {
-	lpf_chrdev_file_ctx_t *ctx;
-	lpf_device_handle_t *handle = NULL;
-	lpf_chrdev_t *chrdev;
+	pdm_chrdev_file_ctx_t *ctx;
+	pdm_device_handle_t *handle = NULL;
+	pdm_chrdev_t *chrdev;
 	int open_count;
 
 	if (!file)
 		return -EINVAL;
 
-	chrdev = lpf_chrdev_from_private_data(file->private_data);
+	chrdev = pdm_chrdev_from_private_data(file->private_data);
 	if (!chrdev)
 		return -EINVAL;
 
@@ -136,8 +136,8 @@ int lpf_chrdev_open(struct file *file)
 		return -ENOMEM;
 
 	osal_mutex_lock(&chrdev->lock);
-	if (chrdev->info.type != LPF_DEVICE_TYPE_INVALID) {
-		handle = lpf_device_get(chrdev->info.type, chrdev->info.index);
+	if (chrdev->info.type != PDM_DEVICE_TYPE_INVALID) {
+		handle = pdm_device_get(chrdev->info.type, chrdev->info.index);
 		if (!handle) {
 			osal_mutex_unlock(&chrdev->lock);
 			osal_free(ctx);
@@ -153,13 +153,13 @@ int lpf_chrdev_open(struct file *file)
 	LOG_INFO(chrdev->name, "open count=%d", open_count);
 	return 0;
 }
-EXPORT_SYMBOL_GPL(lpf_chrdev_open);
+EXPORT_SYMBOL_GPL(pdm_chrdev_open);
 
-int lpf_chrdev_release(struct file *file)
+int pdm_chrdev_release(struct file *file)
 {
-	lpf_chrdev_file_ctx_t *ctx;
-	lpf_device_handle_t *handle = NULL;
-	lpf_chrdev_t *chrdev;
+	pdm_chrdev_file_ctx_t *ctx;
+	pdm_device_handle_t *handle = NULL;
+	pdm_chrdev_t *chrdev;
 	int open_count;
 
 	if (!file || !file->private_data)
@@ -171,7 +171,7 @@ int lpf_chrdev_release(struct file *file)
 	file->private_data = NULL;
 
 	if (!chrdev) {
-		lpf_device_put(handle);
+		pdm_device_put(handle);
 		osal_free(ctx);
 		return -EINVAL;
 	}
@@ -182,25 +182,25 @@ int lpf_chrdev_release(struct file *file)
 	open_count = (int)osal_atomic_load(&chrdev->open_count);
 	osal_mutex_unlock(&chrdev->lock);
 
-	lpf_device_put(handle);
+	pdm_device_put(handle);
 	osal_free(ctx);
 	LOG_INFO(chrdev->name, "release count=%d", open_count);
 	return 0;
 }
-EXPORT_SYMBOL_GPL(lpf_chrdev_release);
+EXPORT_SYMBOL_GPL(pdm_chrdev_release);
 
-int lpf_chrdev_register(lpf_chrdev_t *chrdev, const char *name,
+int pdm_chrdev_register(pdm_chrdev_t *chrdev, const char *name,
 			const struct file_operations *fops)
 {
-	return lpf_chrdev_register_instance(chrdev, name, NULL, 0, fops);
+	return pdm_chrdev_register_instance(chrdev, name, NULL, 0, fops);
 }
-EXPORT_SYMBOL_GPL(lpf_chrdev_register);
+EXPORT_SYMBOL_GPL(pdm_chrdev_register);
 
-int lpf_chrdev_register_instance(lpf_chrdev_t *chrdev, const char *name,
+int pdm_chrdev_register_instance(pdm_chrdev_t *chrdev, const char *name,
 				 const char *nodename, uint32_t index,
 				 const struct file_operations *fops)
 {
-	lpf_device_t device;
+	pdm_device_t device;
 
 	osal_memset(&device, 0, sizeof(device));
 	device.config.index = index;
@@ -208,14 +208,14 @@ int lpf_chrdev_register_instance(lpf_chrdev_t *chrdev, const char *name,
 	osal_strncpy(device.name, name, sizeof(device.name) - 1U);
 	device.name[sizeof(device.name) - 1U] = '\0';
 
-	return lpf_chrdev_register_lpf_device(chrdev, name, nodename, &device,
+	return pdm_chrdev_register_lpf_device(chrdev, name, nodename, &device,
 					      fops);
 }
-EXPORT_SYMBOL_GPL(lpf_chrdev_register_instance);
+EXPORT_SYMBOL_GPL(pdm_chrdev_register_instance);
 
-int lpf_chrdev_register_lpf_device(lpf_chrdev_t *chrdev, const char *name,
+int pdm_chrdev_register_lpf_device(pdm_chrdev_t *chrdev, const char *name,
 				   const char *nodename,
-				   const lpf_device_t *device,
+				   const pdm_device_t *device,
 				   const struct file_operations *fops)
 {
 	int ret;
@@ -241,7 +241,7 @@ int lpf_chrdev_register_lpf_device(lpf_chrdev_t *chrdev, const char *name,
 	}
 	chrdev->fops = fops;
 	chrdev->index = index;
-	lpf_chrdev_fill_info(chrdev, device, index);
+	pdm_chrdev_fill_info(chrdev, device, index);
 	osal_atomic_init(&chrdev->open_count, 0);
 	osal_atomic_init(&chrdev->error_count, 0);
 
@@ -249,9 +249,9 @@ int lpf_chrdev_register_lpf_device(lpf_chrdev_t *chrdev, const char *name,
 	chrdev->miscdev.name = chrdev->name;
 	chrdev->miscdev.fops = fops;
 	chrdev->miscdev.nodename = nodename ? chrdev->nodename : NULL;
-	chrdev->miscdev.groups = lpf_chrdev_sysfs_groups();
-	chrdev->miscdev.mode = nodename ? lpf_chrdev_instance_mode() :
-					   LPF_CTL_DEVNODE_MODE;
+	chrdev->miscdev.groups = pdm_chrdev_sysfs_groups();
+	chrdev->miscdev.mode = nodename ? pdm_chrdev_instance_mode() :
+					   PDM_CTL_DEVNODE_MODE;
 
 	ret = misc_register(&chrdev->miscdev);
 	if (ret) {
@@ -268,9 +268,9 @@ int lpf_chrdev_register_lpf_device(lpf_chrdev_t *chrdev, const char *name,
 					    chrdev->name);
 	return 0;
 }
-EXPORT_SYMBOL_GPL(lpf_chrdev_register_lpf_device);
+EXPORT_SYMBOL_GPL(pdm_chrdev_register_lpf_device);
 
-void lpf_chrdev_unregister(lpf_chrdev_t *chrdev)
+void pdm_chrdev_unregister(pdm_chrdev_t *chrdev)
 {
 	if (!chrdev)
 		return;
@@ -281,12 +281,12 @@ void lpf_chrdev_unregister(lpf_chrdev_t *chrdev)
 	osal_mutex_destroy(&chrdev->lock);
 	osal_memset(chrdev, 0, sizeof(*chrdev));
 }
-EXPORT_SYMBOL_GPL(lpf_chrdev_unregister);
+EXPORT_SYMBOL_GPL(pdm_chrdev_unregister);
 
-lpf_chrdev_t *lpf_chrdev_from_file(struct file *file)
+pdm_chrdev_t *pdm_chrdev_from_file(struct file *file)
 {
-	lpf_chrdev_file_ctx_t *ctx;
-	lpf_chrdev_t *chrdev;
+	pdm_chrdev_file_ctx_t *ctx;
+	pdm_chrdev_t *chrdev;
 
 	if (!file || !file->private_data)
 		return NULL;
@@ -295,9 +295,9 @@ lpf_chrdev_t *lpf_chrdev_from_file(struct file *file)
 	chrdev = ctx->chrdev;
 	return chrdev && chrdev->registered ? chrdev : NULL;
 }
-EXPORT_SYMBOL_GPL(lpf_chrdev_from_file);
+EXPORT_SYMBOL_GPL(pdm_chrdev_from_file);
 
-int lpf_chrdev_get_info(lpf_chrdev_t *chrdev, lpf_device_info_t *info)
+int pdm_chrdev_get_info(pdm_chrdev_t *chrdev, pdm_device_info_t *info)
 {
 	int ret;
 
@@ -308,36 +308,36 @@ int lpf_chrdev_get_info(lpf_chrdev_t *chrdev, lpf_device_info_t *info)
 
 	osal_mutex_lock(&chrdev->lock);
 	if (chrdev->registered)
-		(void)lpf_chrdev_refresh_info_locked(chrdev);
+		(void)pdm_chrdev_refresh_info_locked(chrdev);
 	*info = chrdev->info;
 	ret = chrdev->registered ? 0 : -ENODEV;
 	osal_mutex_unlock(&chrdev->lock);
 
 	return ret;
 }
-EXPORT_SYMBOL_GPL(lpf_chrdev_get_info);
+EXPORT_SYMBOL_GPL(pdm_chrdev_get_info);
 
-uint32_t lpf_chrdev_open_count(const lpf_chrdev_t *chrdev)
+uint32_t pdm_chrdev_open_count(const pdm_chrdev_t *chrdev)
 {
 	if (!chrdev)
 		return 0;
 
 	return osal_atomic_load(&chrdev->open_count);
 }
-EXPORT_SYMBOL_GPL(lpf_chrdev_open_count);
+EXPORT_SYMBOL_GPL(pdm_chrdev_open_count);
 
-uint32_t lpf_chrdev_error_count(const lpf_chrdev_t *chrdev)
+uint32_t pdm_chrdev_error_count(const pdm_chrdev_t *chrdev)
 {
 	if (!chrdev)
 		return 0;
 
 	return osal_atomic_load(&chrdev->error_count);
 }
-EXPORT_SYMBOL_GPL(lpf_chrdev_error_count);
+EXPORT_SYMBOL_GPL(pdm_chrdev_error_count);
 
-void lpf_chrdev_record_error(lpf_chrdev_t *chrdev, int error)
+void pdm_chrdev_record_error(pdm_chrdev_t *chrdev, int error)
 {
-	lpf_device_type_t type;
+	pdm_device_type_t type;
 	uint32_t index;
 
 	if (!chrdev || error == 0)
@@ -348,25 +348,25 @@ void lpf_chrdev_record_error(lpf_chrdev_t *chrdev, int error)
 	osal_mutex_lock(&chrdev->lock);
 	type = chrdev->info.type;
 	index = chrdev->info.index;
-	if (type == LPF_DEVICE_TYPE_INVALID) {
-		chrdev->info.state = LPF_DEVICE_STATE_ERROR;
+	if (type == PDM_DEVICE_TYPE_INVALID) {
+		chrdev->info.state = PDM_DEVICE_STATE_ERROR;
 		chrdev->info.last_error = error;
 		chrdev->info.error_count = osal_atomic_inc(&chrdev->error_count);
 	}
 	osal_mutex_unlock(&chrdev->lock);
 
-	if (type != LPF_DEVICE_TYPE_INVALID) {
-		lpf_device_record_error(type, index, error);
+	if (type != PDM_DEVICE_TYPE_INVALID) {
+		pdm_device_record_error(type, index, error);
 		osal_mutex_lock(&chrdev->lock);
-		(void)lpf_chrdev_refresh_info_locked(chrdev);
+		(void)pdm_chrdev_refresh_info_locked(chrdev);
 		osal_mutex_unlock(&chrdev->lock);
 	}
 }
-EXPORT_SYMBOL_GPL(lpf_chrdev_record_error);
+EXPORT_SYMBOL_GPL(pdm_chrdev_record_error);
 
-void lpf_chrdev_record_recovery(lpf_chrdev_t *chrdev)
+void pdm_chrdev_record_recovery(pdm_chrdev_t *chrdev)
 {
-	lpf_device_type_t type;
+	pdm_device_type_t type;
 	uint32_t index;
 
 	if (!chrdev)
@@ -379,22 +379,22 @@ void lpf_chrdev_record_recovery(lpf_chrdev_t *chrdev)
 	index = chrdev->info.index;
 	osal_mutex_unlock(&chrdev->lock);
 
-	if (type == LPF_DEVICE_TYPE_INVALID)
+	if (type == PDM_DEVICE_TYPE_INVALID)
 		return;
 
-	if (lpf_device_record_recovery(type, index) == OSAL_SUCCESS) {
+	if (pdm_device_record_recovery(type, index) == OSAL_SUCCESS) {
 		osal_mutex_lock(&chrdev->lock);
-		(void)lpf_chrdev_refresh_info_locked(chrdev);
+		(void)pdm_chrdev_refresh_info_locked(chrdev);
 		osal_mutex_unlock(&chrdev->lock);
 	}
 }
-EXPORT_SYMBOL_GPL(lpf_chrdev_record_recovery);
+EXPORT_SYMBOL_GPL(pdm_chrdev_record_recovery);
 
-uint32_t lpf_chrdev_index(const lpf_chrdev_t *chrdev)
+uint32_t pdm_chrdev_index(const pdm_chrdev_t *chrdev)
 {
 	if (!chrdev)
 		return 0;
 
 	return chrdev->index;
 }
-EXPORT_SYMBOL_GPL(lpf_chrdev_index);
+EXPORT_SYMBOL_GPL(pdm_chrdev_index);

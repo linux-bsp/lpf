@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: GPL-2.0
 
-#include "lpf/config/lpf_config_static.h"
+#include "pdm/config/pdm_config_static.h"
 
-static const lpf_config_mcu_entry_t
+static const pdm_config_mcu_entry_t
 	g_lpf_config_ubuntu_x86_mock_modules_mcu0 = {
 		.description = "Mock CAN MCU",
 		.enabled = true,
 		.config = {
 			.name = "mcu0",
-			.interface = LPF_CONFIG_MCU_INTERFACE_CAN,
+			.interface = PDM_CONFIG_MCU_INTERFACE_CAN,
 			.hw.can = {
 				.device = "mock-can0",
 				.bitrate = 500000U,
@@ -24,13 +24,13 @@ static const lpf_config_mcu_entry_t
 		.irq_gpio = NULL,
 	};
 
-static const lpf_config_led_entry_t
+static const pdm_config_led_entry_t
 	g_lpf_config_ubuntu_x86_mock_modules_status_led = {
 		.description = "Mock GPIO status LED",
 		.enabled = true,
 		.config = {
 			.name = "status",
-			.control = LPF_CONFIG_LED_CONTROL_GPIO,
+			.control = PDM_CONFIG_LED_CONTROL_GPIO,
 			.max_brightness = 1U,
 			.default_brightness = 0U,
 			.hw.gpio = {
@@ -43,13 +43,13 @@ static const lpf_config_led_entry_t
 		},
 	};
 
-static const lpf_config_led_entry_t
+static const pdm_config_led_entry_t
 	g_lpf_config_ubuntu_x86_mock_modules_activity_led = {
 		.description = "Mock PWM activity LED",
 		.enabled = true,
 		.config = {
 			.name = "activity",
-			.control = LPF_CONFIG_LED_CONTROL_PWM,
+			.control = PDM_CONFIG_LED_CONTROL_PWM,
 			.max_brightness = 255U,
 			.default_brightness = 0U,
 			.hw.pwm = {
@@ -60,45 +60,45 @@ static const lpf_config_led_entry_t
 		},
 	};
 
-static const lpf_config_device_node_t
+static const pdm_config_device_node_t
 	g_lpf_config_ubuntu_x86_mock_modules_nodes[] = {
 		{
-			.device_type = LPF_CONFIG_DEVICE_TYPE_MCU,
+			.device_type = PDM_CONFIG_DEVICE_TYPE_MCU,
 			.index = 0,
 			.name = "mcu0",
 			.compatible = "lpf,mcu",
-			.status = LPF_CONFIG_NODE_STATUS_OKAY,
+			.status = PDM_CONFIG_NODE_STATUS_OKAY,
 			.payload = &g_lpf_config_ubuntu_x86_mock_modules_mcu0,
 			.entry = &g_lpf_config_ubuntu_x86_mock_modules_mcu0,
-			.payload_size = sizeof(lpf_config_mcu_entry_t),
+			.payload_size = sizeof(pdm_config_mcu_entry_t),
 		},
 		{
-			.device_type = LPF_CONFIG_DEVICE_TYPE_LED,
+			.device_type = PDM_CONFIG_DEVICE_TYPE_LED,
 			.index = 0,
 			.name = "status",
 			.compatible = "lpf,led",
-			.status = LPF_CONFIG_NODE_STATUS_OKAY,
+			.status = PDM_CONFIG_NODE_STATUS_OKAY,
 			.payload =
 				&g_lpf_config_ubuntu_x86_mock_modules_status_led,
 			.entry =
 				&g_lpf_config_ubuntu_x86_mock_modules_status_led,
-			.payload_size = sizeof(lpf_config_led_entry_t),
+			.payload_size = sizeof(pdm_config_led_entry_t),
 		},
 		{
-			.device_type = LPF_CONFIG_DEVICE_TYPE_LED,
+			.device_type = PDM_CONFIG_DEVICE_TYPE_LED,
 			.index = 1,
 			.name = "activity",
 			.compatible = "lpf,led",
-			.status = LPF_CONFIG_NODE_STATUS_OKAY,
+			.status = PDM_CONFIG_NODE_STATUS_OKAY,
 			.payload =
 				&g_lpf_config_ubuntu_x86_mock_modules_activity_led,
 			.entry =
 				&g_lpf_config_ubuntu_x86_mock_modules_activity_led,
-			.payload_size = sizeof(lpf_config_led_entry_t),
+			.payload_size = sizeof(pdm_config_led_entry_t),
 		},
 	};
 
-static const lpf_config_platform_config_t
+static const pdm_config_platform_config_t
 	g_lpf_config_ubuntu_x86_mock_modules_v1 = {
 		.platform_name = "linux",
 		.chip_name = "x86_64",
@@ -114,5 +114,5 @@ static const lpf_config_platform_config_t
 		.led_array = NULL,
 };
 
-lpf_config_static_register(ubuntu_x86_mock_modules_v1,
+pdm_config_static_register(ubuntu_x86_mock_modules_v1,
 			   &g_lpf_config_ubuntu_x86_mock_modules_v1);

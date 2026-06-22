@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0
 
-#include "lpf/config/lpf_config_static.h"
+#include "pdm/config/pdm_config_static.h"
 
-static const lpf_config_platform_config_t
+static const pdm_config_platform_config_t
 	g_lpf_config_ubuntu_x86_modules_v1 = {
 	.platform_name = "linux",
 	.chip_name = "x86_64",
@@ -17,5 +17,5 @@ static const lpf_config_platform_config_t
 	.led_array = NULL,
 };
 
-lpf_config_static_register(ubuntu_x86_modules_v1,
+pdm_config_static_register(ubuntu_x86_modules_v1,
 			   &g_lpf_config_ubuntu_x86_modules_v1);

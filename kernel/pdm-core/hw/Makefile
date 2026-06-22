@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: GPL-2.0
 
-lpf_core-$(CONFIG_LPF_RUNTIME) += lpf-core/hw/core/lpf_hw.o
-lpf_core-$(CONFIG_LPF_RUNTIME) += lpf-core/hw/core/lpf_hw_builtin_start.o
-lpf_core-$(CONFIG_LPF_HW_CAN) += lpf-core/hw/can/lpf_hw_can.o
-lpf_core-$(CONFIG_LPF_HW_UART) += lpf-core/hw/uart/lpf_hw_uart.o
-lpf_core-$(CONFIG_LPF_HW_GPIO) += lpf-core/hw/gpio/lpf_hw_gpio.o
-lpf_core-$(CONFIG_LPF_HW_PWM) += lpf-core/hw/pwm/lpf_hw_pwm.o
-lpf_core-$(CONFIG_LPF_HW_I2C) += lpf-core/hw/i2c/lpf_hw_i2c.o
-lpf_core-$(CONFIG_LPF_HW_SPI) += lpf-core/hw/spi/lpf_hw_spi.o
-lpf_core-$(CONFIG_LPF_RUNTIME) += lpf-core/hw/core/lpf_hw_builtin_end.o
+pdm_core-$(CONFIG_PDM_RUNTIME) += pdm-core/hw/core/pdm_hw.o
+pdm_core-$(CONFIG_PDM_RUNTIME) += pdm-core/hw/core/pdm_hw_builtin_start.o
+pdm_core-$(CONFIG_PDM_HW_CAN) += pdm-core/hw/can/pdm_hw_can.o
+pdm_core-$(CONFIG_PDM_HW_UART) += pdm-core/hw/uart/pdm_hw_uart.o
+pdm_core-$(CONFIG_PDM_HW_GPIO) += pdm-core/hw/gpio/pdm_hw_gpio.o
+pdm_core-$(CONFIG_PDM_HW_PWM) += pdm-core/hw/pwm/pdm_hw_pwm.o
+pdm_core-$(CONFIG_PDM_HW_I2C) += pdm-core/hw/i2c/pdm_hw_i2c.o
+pdm_core-$(CONFIG_PDM_HW_SPI) += pdm-core/hw/spi/pdm_hw_spi.o
+pdm_core-$(CONFIG_PDM_RUNTIME) += pdm-core/hw/core/pdm_hw_builtin_end.o

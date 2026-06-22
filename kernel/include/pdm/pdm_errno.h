@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-2.0
 
-#ifndef LPF_ERRNO_H
-#define LPF_ERRNO_H
+#ifndef PDM_ERRNO_H
+#define PDM_ERRNO_H
 
 #include <linux/errno.h>
 
 #include "osal.h"
 
-static inline long lpf_status_to_errno(int32_t status)
+static inline long pdm_status_to_errno(int32_t status)
 {
 	if (status <= 0)
 		return status;
@@ -46,7 +46,7 @@ static inline long lpf_status_to_errno(int32_t status)
 	return -EIO;
 }
 
-static inline bool lpf_errno_is_runtime_error(long error)
+static inline bool pdm_errno_is_runtime_error(long error)
 {
 	switch (error) {
 	case -ENODEV:
@@ -61,4 +61,4 @@ static inline bool lpf_errno_is_runtime_error(long error)
 	}
 }
 
-#endif /* LPF_ERRNO_H */
+#endif /* PDM_ERRNO_H */

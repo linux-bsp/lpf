@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: GPL-2.0
 
-lpf_core-y := lpf-core/core/lpf_core.o
-lpf_core-y += lpf-core/core/lpf_chrdev.o
-lpf_core-y += lpf-core/core/lpf_ctl.o
-lpf_core-y += lpf-core/core/lpf_debugfs.o
-lpf_core-y += lpf-core/core/lpf_proc.o
-lpf_core-y += lpf-core/core/lpf_sysfs.o
+pdm_core-y := pdm-core/core/pdm_core.o
+pdm_core-y += pdm-core/core/pdm_chrdev.o
+pdm_core-y += pdm-core/core/pdm_ctl.o
+pdm_core-y += pdm-core/core/pdm_debugfs.o
+pdm_core-y += pdm-core/core/pdm_proc.o
+pdm_core-y += pdm-core/core/pdm_sysfs.o

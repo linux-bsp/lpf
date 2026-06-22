@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0
 
-lpf_core-y += lpf-core/soc/lpf_soc_adapter.o
-lpf_core-$(CONFIG_LPF_SOC_ADAPTER_MOCK) += lpf-core/soc/mock/lpf_soc_mock.o
-ifneq ($(CONFIG_LPF_SOC_ADAPTER_MOCK),y)
-lpf_core-y += lpf-core/soc/generic_linux/lpf_soc_generic_linux.o
+pdm_core-y += pdm-core/soc/pdm_soc_adapter.o
+pdm_core-$(CONFIG_PDM_SOC_ADAPTER_MOCK) += pdm-core/soc/mock/pdm_soc_mock.o
+ifneq ($(CONFIG_PDM_SOC_ADAPTER_MOCK),y)
+pdm_core-y += pdm-core/soc/generic_linux/pdm_soc_generic_linux.o
 endif

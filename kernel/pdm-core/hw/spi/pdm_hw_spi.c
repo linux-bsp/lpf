@@ -3,18 +3,18 @@
 #include <linux/module.h>
 
 #include "osal.h"
-#include "lpf/hw/lpf_hw_spi.h"
-#include "lpf/soc/lpf_soc_adapter.h"
+#include "pdm/hw/pdm_hw_spi.h"
+#include "pdm/soc/pdm_soc_adapter.h"
 
 typedef struct {
-	lpf_spi_handle_t spi;
+	pdm_spi_handle_t spi;
 	osal_mutex_t lock;
-	lpf_spi_config_t config;
+	pdm_spi_config_t config;
 	bool initialized;
-} lpf_hw_bus_spi_context_t;
+} pdm_hw_bus_spi_context_t;
 
-static void lpf_hw_bus_spi_fill_lpf_config(const lpf_spi_config_t *src,
-				    lpf_spi_config_t *dst)
+static void pdm_hw_bus_spi_fill_lpf_config(const pdm_spi_config_t *src,
+				    pdm_spi_config_t *dst)
 {
 	dst->device = src->device;
 	dst->mode = src->mode;
@@ -23,17 +23,17 @@ static void lpf_hw_bus_spi_fill_lpf_config(const lpf_spi_config_t *src,
 	dst->timeout = src->timeout;
 }
 
-static int32_t lpf_hw_bus_spi_apply_config(lpf_hw_bus_spi_context_t *ctx,
-				    const lpf_spi_config_t *config)
+static int32_t pdm_hw_bus_spi_apply_config(pdm_hw_bus_spi_context_t *ctx,
+				    const pdm_spi_config_t *config)
 {
-	lpf_spi_config_t lpf_config;
+	pdm_spi_config_t pdm_config;
 	int32_t ret;
 
 	if (!ctx || !ctx->spi || !config)
 		return OSAL_ERR_INVALID_PARAM;
 
-	lpf_hw_bus_spi_fill_lpf_config(config, &lpf_config);
-	ret = lpf_soc_spi_set_config(ctx->spi, &lpf_config);
+	pdm_hw_bus_spi_fill_lpf_config(config, &pdm_config);
+	ret = pdm_soc_spi_set_config(ctx->spi, &pdm_config);
 	if (ret != OSAL_SUCCESS)
 		return ret;
 
@@ -41,10 +41,10 @@ static int32_t lpf_hw_bus_spi_apply_config(lpf_hw_bus_spi_context_t *ctx,
 	return OSAL_SUCCESS;
 }
 
-int32_t lpf_hw_bus_spi_open(const lpf_spi_config_t *config, lpf_hw_bus_spi_handle_t *handle)
+int32_t pdm_hw_bus_spi_open(const pdm_spi_config_t *config, pdm_hw_bus_spi_handle_t *handle)
 {
-	lpf_hw_bus_spi_context_t *ctx;
-	lpf_spi_config_t lpf_config;
+	pdm_hw_bus_spi_context_t *ctx;
+	pdm_spi_config_t pdm_config;
 	int32_t ret;
 
 	if (!config || !handle || !config->device)
@@ -60,8 +60,8 @@ int32_t lpf_hw_bus_spi_open(const lpf_spi_config_t *config, lpf_hw_bus_spi_handl
 	if (ret != OSAL_SUCCESS)
 		goto err_free;
 
-	lpf_hw_bus_spi_fill_lpf_config(config, &lpf_config);
-	ret = lpf_soc_spi_open(&lpf_config, &ctx->spi);
+	pdm_hw_bus_spi_fill_lpf_config(config, &pdm_config);
+	ret = pdm_soc_spi_open(&pdm_config, &ctx->spi);
 	if (ret != OSAL_SUCCESS)
 		goto err_mutex;
 
@@ -69,7 +69,7 @@ int32_t lpf_hw_bus_spi_open(const lpf_spi_config_t *config, lpf_hw_bus_spi_handl
 	ctx->initialized = true;
 	*handle = ctx;
 
-	LOG_INFO("LPF_HW_BUS_SPI", "opened %s", config->device);
+	LOG_INFO("PDM_HW_BUS_SPI", "opened %s", config->device);
 	return OSAL_SUCCESS;
 
 err_mutex:
@@ -78,12 +78,12 @@ err_free:
 	osal_free(ctx);
 	return ret;
 }
-EXPORT_SYMBOL_GPL(lpf_hw_bus_spi_open);
+EXPORT_SYMBOL_GPL(pdm_hw_bus_spi_open);
 
-int32_t lpf_hw_bus_spi_close(lpf_hw_bus_spi_handle_t handle)
+int32_t pdm_hw_bus_spi_close(pdm_hw_bus_spi_handle_t handle)
 {
-	lpf_hw_bus_spi_context_t *ctx = handle;
-	lpf_spi_handle_t spi;
+	pdm_hw_bus_spi_context_t *ctx = handle;
+	pdm_spi_handle_t spi;
 
 	if (!handle)
 		return OSAL_ERR_INVALID_PARAM;
@@ -95,37 +95,37 @@ int32_t lpf_hw_bus_spi_close(lpf_hw_bus_spi_handle_t handle)
 	osal_mutex_unlock(&ctx->lock);
 
 	if (spi)
-		lpf_soc_spi_close(spi);
+		pdm_soc_spi_close(spi);
 
 	osal_mutex_destroy(&ctx->lock);
 	osal_free(ctx);
 	return OSAL_SUCCESS;
 }
-EXPORT_SYMBOL_GPL(lpf_hw_bus_spi_close);
+EXPORT_SYMBOL_GPL(pdm_hw_bus_spi_close);
 
-int32_t lpf_hw_bus_spi_write(lpf_hw_bus_spi_handle_t handle, const uint8_t *buffer,
+int32_t pdm_hw_bus_spi_write(pdm_hw_bus_spi_handle_t handle, const uint8_t *buffer,
 		      uint32_t size)
 {
 	if (!handle || !buffer)
 		return OSAL_ERR_INVALID_PARAM;
 
-	return lpf_hw_bus_spi_transfer(handle, buffer, NULL, size);
+	return pdm_hw_bus_spi_transfer(handle, buffer, NULL, size);
 }
-EXPORT_SYMBOL_GPL(lpf_hw_bus_spi_write);
+EXPORT_SYMBOL_GPL(pdm_hw_bus_spi_write);
 
-int32_t lpf_hw_bus_spi_read(lpf_hw_bus_spi_handle_t handle, uint8_t *buffer, uint32_t size)
+int32_t pdm_hw_bus_spi_read(pdm_hw_bus_spi_handle_t handle, uint8_t *buffer, uint32_t size)
 {
 	if (!handle || !buffer)
 		return OSAL_ERR_INVALID_PARAM;
 
-	return lpf_hw_bus_spi_transfer(handle, NULL, buffer, size);
+	return pdm_hw_bus_spi_transfer(handle, NULL, buffer, size);
 }
-EXPORT_SYMBOL_GPL(lpf_hw_bus_spi_read);
+EXPORT_SYMBOL_GPL(pdm_hw_bus_spi_read);
 
-int32_t lpf_hw_bus_spi_transfer(lpf_hw_bus_spi_handle_t handle, const uint8_t *tx_buffer,
+int32_t pdm_hw_bus_spi_transfer(pdm_hw_bus_spi_handle_t handle, const uint8_t *tx_buffer,
 			 uint8_t *rx_buffer, uint32_t size)
 {
-	lpf_spi_transfer_t transfer = {
+	pdm_spi_transfer_t transfer = {
 		.tx_buf = tx_buffer,
 		.rx_buf = rx_buffer,
 		.len = size,
@@ -134,15 +134,15 @@ int32_t lpf_hw_bus_spi_transfer(lpf_hw_bus_spi_handle_t handle, const uint8_t *t
 	if (!handle || (!tx_buffer && !rx_buffer) || size == 0)
 		return OSAL_ERR_INVALID_PARAM;
 
-	return lpf_hw_bus_spi_transfer_multi(handle, &transfer, 1);
+	return pdm_hw_bus_spi_transfer_multi(handle, &transfer, 1);
 }
-EXPORT_SYMBOL_GPL(lpf_hw_bus_spi_transfer);
+EXPORT_SYMBOL_GPL(pdm_hw_bus_spi_transfer);
 
-int32_t lpf_hw_bus_spi_transfer_multi(lpf_hw_bus_spi_handle_t handle,
-			       lpf_spi_transfer_t *transfers, uint32_t num)
+int32_t pdm_hw_bus_spi_transfer_multi(pdm_hw_bus_spi_handle_t handle,
+			       pdm_spi_transfer_t *transfers, uint32_t num)
 {
-	lpf_hw_bus_spi_context_t *ctx = handle;
-	lpf_spi_transfer_t *xfers;
+	pdm_hw_bus_spi_context_t *ctx = handle;
+	pdm_spi_transfer_t *xfers;
 	uint32_t i;
 	int32_t ret;
 
@@ -180,23 +180,23 @@ int32_t lpf_hw_bus_spi_transfer_multi(lpf_hw_bus_spi_handle_t handle,
 		return OSAL_ERR_INVALID_ID;
 	}
 
-	ret = lpf_soc_spi_transfer(ctx->spi, xfers, num);
+	ret = pdm_soc_spi_transfer(ctx->spi, xfers, num);
 	osal_mutex_unlock(&ctx->lock);
 	osal_free(xfers);
 
 	if (ret != OSAL_SUCCESS) {
-		LOG_ERROR("LPF_HW_BUS_SPI", "transfer failed: %d", ret);
+		LOG_ERROR("PDM_HW_BUS_SPI", "transfer failed: %d", ret);
 		return ret;
 	}
 
 	return OSAL_SUCCESS;
 }
-EXPORT_SYMBOL_GPL(lpf_hw_bus_spi_transfer_multi);
+EXPORT_SYMBOL_GPL(pdm_hw_bus_spi_transfer_multi);
 
-int32_t lpf_hw_bus_spi_set_config(lpf_hw_bus_spi_handle_t handle,
-			   const lpf_spi_config_t *config)
+int32_t pdm_hw_bus_spi_set_config(pdm_hw_bus_spi_handle_t handle,
+			   const pdm_spi_config_t *config)
 {
-	lpf_hw_bus_spi_context_t *ctx = handle;
+	pdm_hw_bus_spi_context_t *ctx = handle;
 	int ret;
 
 	if (!handle || !config)
@@ -208,8 +208,8 @@ int32_t lpf_hw_bus_spi_set_config(lpf_hw_bus_spi_handle_t handle,
 		return OSAL_ERR_INVALID_ID;
 	}
 
-	ret = lpf_hw_bus_spi_apply_config(ctx, config);
+	ret = pdm_hw_bus_spi_apply_config(ctx, config);
 	osal_mutex_unlock(&ctx->lock);
 	return ret;
 }
-EXPORT_SYMBOL_GPL(lpf_hw_bus_spi_set_config);
+EXPORT_SYMBOL_GPL(pdm_hw_bus_spi_set_config);

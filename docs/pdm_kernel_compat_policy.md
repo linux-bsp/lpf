@@ -1,8 +1,8 @@
-# LPF Kernel Compatibility Policy
+# PDM Kernel Compatibility Policy
 
 ## Supported Baseline
 
-LPF kernel modules target Linux kernel `5.10` and newer.
+PDM kernel modules target Linux kernel `5.10` and newer.
 
 When changing kernel-facing code, validate at least:
 
@@ -13,15 +13,15 @@ When changing kernel-facing code, validate at least:
 
 Broader CI should cover one kernel from each actively supported product family.
 If a product needs a kernel older than `5.10`, the required fallback must be
-implemented in LPF compat wrappers before the product enables that target.
+implemented in PDM compat wrappers before the product enables that target.
 
 ## Rules
 
-- Linux version and feature checks belong in `kernel/include/lpf/compat/lpf_compat_*`
-  headers or `kernel/lpf-core/compat/` source files.
-- Peripheral services, service-owned transport backends, LPF HW, runtime config,
-  and LPF Core business logic must not add direct `LINUX_VERSION_CODE` checks.
-- Use feature-style helpers such as `LPF_KERNEL_HAS_SYSFS_EMIT` instead of
+- Linux version and feature checks belong in `kernel/include/pdm/compat/pdm_compat_*`
+  headers or `kernel/pdm-core/compat/` source files.
+- Peripheral services, service-owned transport backends, PDM HW, runtime config,
+  and PDM Core business logic must not add direct `LINUX_VERSION_CODE` checks.
+- Use feature-style helpers such as `PDM_KERNEL_HAS_SYSFS_EMIT` instead of
   scattering raw version comparisons.
 - Prefer small compat wrappers around API shape differences instead of
   duplicating service logic.
@@ -30,14 +30,14 @@ implemented in LPF compat wrappers before the product enables that target.
 
 ## Current Feature Gates
 
-`kernel/include/lpf/compat/lpf_compat_features.h` defines the supported kernel baseline
+`kernel/include/pdm/compat/pdm_compat_features.h` defines the supported kernel baseline
 and currently detected feature gates:
 
-- `LPF_KERNEL_HAS_PROC_OPS`
-- `LPF_KERNEL_HAS_SYSFS_EMIT`
+- `PDM_KERNEL_HAS_PROC_OPS`
+- `PDM_KERNEL_HAS_SYSFS_EMIT`
 
-`kernel/include/lpf/compat/lpf_compat_sysfs.h` wraps sysfs text emission through
-`lpf_compat_sysfs_emit()`. New sysfs attributes should use this wrapper rather
+`kernel/include/pdm/compat/pdm_compat_sysfs.h` wraps sysfs text emission through
+`pdm_compat_sysfs_emit()`. New sysfs attributes should use this wrapper rather
 than calling `sysfs_emit()` directly.
 
 Procfs currently requires `struct proc_ops`, which is available within the
@@ -50,7 +50,7 @@ points within the supported baseline.
 
 ## Matrix Policy
 
-`make kernel-matrix` is the local and CI entry point for compiling LPF kernel
+`make kernel-matrix` is the local and CI entry point for compiling PDM kernel
 modules against selected kernel build trees. By default it builds the mock
 module preset against `KERNEL_SRC`. To cover multiple kernels, pass a
 space-separated list:
@@ -62,7 +62,7 @@ make kernel-matrix KERNEL_SRC_LIST="/path/to/linux-5.10/build /path/to/linux-6.6
 The target writes each kernel's artifacts under `_build/kernel-matrix/` so
 results from different kernels do not overwrite each other. The default
 defconfig is `ubuntu_x86_mock_modules_defconfig`; override it with
-`LPF_KERNEL_MATRIX_DEFCONFIG=<name>` when validating another module preset.
+`PDM_KERNEL_MATRIX_DEFCONFIG=<name>` when validating another module preset.
 
 The target CI matrix should include:
 

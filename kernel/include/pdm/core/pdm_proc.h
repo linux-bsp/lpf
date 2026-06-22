@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 
-#ifndef LPF_PROC_H
-#define LPF_PROC_H
+#ifndef PDM_PROC_H
+#define PDM_PROC_H
 
 #include <linux/proc_fs.h>
 #include <linux/seq_file.h>
@@ -9,22 +9,22 @@
 
 #include "osal.h"
 
-#define LPF_PROC_WRITE_MAX_SIZE 256U
+#define PDM_PROC_WRITE_MAX_SIZE 256U
 
-typedef int (*lpf_proc_show_t)(struct seq_file *seq, void *data);
-typedef int (*lpf_proc_write_t)(char *command, size_t count, void *data);
+typedef int (*pdm_proc_show_t)(struct seq_file *seq, void *data);
+typedef int (*pdm_proc_write_t)(char *command, size_t count, void *data);
 
 typedef struct {
 	const char *name;
-	lpf_proc_show_t show;
-	lpf_proc_write_t write;
+	pdm_proc_show_t show;
+	pdm_proc_write_t write;
 	void *data;
 	struct proc_dir_entry *entry;
-} lpf_proc_entry_t;
+} pdm_proc_entry_t;
 
-int lpf_proc_register(lpf_proc_entry_t *entry, const char *name,
-		      lpf_proc_show_t show, lpf_proc_write_t write,
+int pdm_proc_register(pdm_proc_entry_t *entry, const char *name,
+		      pdm_proc_show_t show, pdm_proc_write_t write,
 		      void *data);
-void lpf_proc_unregister(lpf_proc_entry_t *entry);
+void pdm_proc_unregister(pdm_proc_entry_t *entry);
 
-#endif /* LPF_PROC_H */
+#endif /* PDM_PROC_H */

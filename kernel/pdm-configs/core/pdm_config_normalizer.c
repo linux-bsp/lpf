@@ -1,29 +1,29 @@
 // SPDX-License-Identifier: GPL-2.0
 
 #include "osal.h"
-#include "lpf_config_normalizer.h"
-#include "lpf_config_validator.h"
+#include "pdm_config_normalizer.h"
+#include "pdm_config_validator.h"
 
-static void lpf_config_normalizer_clear_devices(
-	lpf_config_device_node_t *nodes, uint32_t count)
+static void pdm_config_normalizer_clear_devices(
+	pdm_config_device_node_t *nodes, uint32_t count)
 {
 	uint32_t i;
 
 	for (i = 0; i < count; i++) {
-		nodes[i].device_type = LPF_CONFIG_DEVICE_TYPE_INVALID;
+		nodes[i].device_type = PDM_CONFIG_DEVICE_TYPE_INVALID;
 		nodes[i].index = 0;
 		nodes[i].name = NULL;
 		nodes[i].compatible = NULL;
-		nodes[i].status = LPF_CONFIG_NODE_STATUS_DISABLED;
+		nodes[i].status = PDM_CONFIG_NODE_STATUS_DISABLED;
 		nodes[i].payload = NULL;
 		nodes[i].entry = NULL;
 		nodes[i].payload_size = 0;
 	}
 }
 
-static int32_t lpf_config_copy_platform_nodes(
-	const lpf_config_platform_config_t *platform,
-	lpf_config_device_node_t *nodes, uint32_t *count)
+static int32_t pdm_config_copy_platform_nodes(
+	const pdm_config_platform_config_t *platform,
+	pdm_config_device_node_t *nodes, uint32_t *count)
 {
 	uint32_t capacity;
 	uint32_t i;
@@ -36,7 +36,7 @@ static int32_t lpf_config_copy_platform_nodes(
 
 	capacity = nodes ? *count : 0;
 	if (nodes && capacity > 0)
-		lpf_config_normalizer_clear_devices(nodes, capacity);
+		pdm_config_normalizer_clear_devices(nodes, capacity);
 
 	if (!nodes) {
 		*count = platform->device_node_count;
@@ -51,15 +51,15 @@ static int32_t lpf_config_copy_platform_nodes(
 		return OSAL_ERR_RESOURCE_LIMIT;
 
 	nodes[platform->device_node_count].device_type =
-		LPF_CONFIG_DEVICE_TYPE_INVALID;
+		PDM_CONFIG_DEVICE_TYPE_INVALID;
 	return OSAL_SUCCESS;
 }
 
-int32_t lpf_config_build_device_nodes(
-	const lpf_config_platform_config_t *platform,
-	lpf_config_device_node_t *nodes, uint32_t *count)
+int32_t pdm_config_build_device_nodes(
+	const pdm_config_platform_config_t *platform,
+	pdm_config_device_node_t *nodes, uint32_t *count)
 {
-	const lpf_config_device_descriptor_t *descriptors;
+	const pdm_config_device_descriptor_t *descriptors;
 	uint32_t descriptor_count;
 	uint32_t capacity;
 	uint32_t out_index = 0;
@@ -69,15 +69,15 @@ int32_t lpf_config_build_device_nodes(
 		return OSAL_ERR_INVALID_PARAM;
 
 	if (platform->device_nodes && platform->device_node_count > 0)
-		return lpf_config_copy_platform_nodes(platform, nodes, count);
+		return pdm_config_copy_platform_nodes(platform, nodes, count);
 
 	capacity = nodes ? *count : 0;
 	if (nodes && capacity > 0)
-		lpf_config_normalizer_clear_devices(nodes, capacity);
+		pdm_config_normalizer_clear_devices(nodes, capacity);
 
-	descriptors = lpf_config_device_descriptors(&descriptor_count);
+	descriptors = pdm_config_device_descriptors(&descriptor_count);
 	for (desc_index = 0; desc_index < descriptor_count; desc_index++) {
-		const lpf_config_device_descriptor_t *desc;
+		const pdm_config_device_descriptor_t *desc;
 		uint32_t device_count;
 		uint32_t i;
 
@@ -98,7 +98,7 @@ int32_t lpf_config_build_device_nodes(
 								NULL;
 				nodes[out_index].compatible = desc->compatible;
 				nodes[out_index].status =
-					LPF_CONFIG_NODE_STATUS_OKAY;
+					PDM_CONFIG_NODE_STATUS_OKAY;
 				nodes[out_index].payload = entry;
 				nodes[out_index].entry = entry;
 				nodes[out_index].payload_size = desc->payload_size;
@@ -114,13 +114,13 @@ int32_t lpf_config_build_device_nodes(
 	if (out_index >= capacity)
 		return OSAL_ERR_RESOURCE_LIMIT;
 
-	nodes[out_index].device_type = LPF_CONFIG_DEVICE_TYPE_INVALID;
+	nodes[out_index].device_type = PDM_CONFIG_DEVICE_TYPE_INVALID;
 	return OSAL_SUCCESS;
 }
 
-int32_t lpf_config_normalize_devices(
-	const lpf_config_platform_config_t *platform,
-	lpf_config_device_config_t *devices, uint32_t *count)
+int32_t pdm_config_normalize_devices(
+	const pdm_config_platform_config_t *platform,
+	pdm_config_device_config_t *devices, uint32_t *count)
 {
-	return lpf_config_build_device_nodes(platform, devices, count);
+	return pdm_config_build_device_nodes(platform, devices, count);
 }

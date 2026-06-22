@@ -1,12 +1,12 @@
 config BR2_PACKAGE_LPF
-	bool "lpf"
+	bool "pdm"
 	depends on BR2_LINUX_KERNEL
 	depends on BR2_TOOLCHAIN_HAS_THREADS
 	depends on BR2_USE_MMU
 	help
-	  LPF is a generic Linux peripheral framework
+	  PDM is a generic Linux peripheral framework
 	  with a Kconfig+CMake/Kbuild build system. It provides OSAL,
-	  LPF HW, LPF Core, LPF runtime, PDI, ACONFIG, and
+	  PDM HW, PDM Core, PDM runtime, PDI, ACONFIG, and
 	  runtime configuration layers for Linux systems.
 
 if BR2_PACKAGE_LPF
@@ -15,9 +15,9 @@ config BR2_PACKAGE_LPF_DEFCONFIG
 	string "Kconfig defconfig to use"
 	default ""
 	help
-	  Specify which LPF defconfig to load before building.
+	  Specify which PDM defconfig to load before building.
 	  Product external trees should set this to a product-specific
-	  LPF defconfig, for example imx6ull_modules_defconfig.
+	  PDM defconfig, for example imx6ull_modules_defconfig.
 
 choice
 	prompt "Build type"
@@ -45,10 +45,10 @@ config BR2_PACKAGE_LPF_INSTALL_HEADERS
 	default n
 	help
 	  Install development headers to $(STAGING_DIR)/usr/include/.
-	  Only needed for packages that depend on LPF.
+	  Only needed for packages that depend on PDM.
 
 endif # BR2_PACKAGE_LPF
 
-comment "LPF needs Linux kernel and a toolchain w/ threads, MMU"
+comment "PDM needs Linux kernel and a toolchain w/ threads, MMU"
 	depends on !BR2_LINUX_KERNEL || !BR2_TOOLCHAIN_HAS_THREADS || \
 		!BR2_USE_MMU

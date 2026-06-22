@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0
 
-#include "lpf/config/lpf_config_static.h"
+#include "pdm/config/pdm_config_static.h"
 
-static const lpf_config_gpio_config_t
+static const pdm_config_gpio_config_t
 	g_lpf_config_imx6ull_modules_mcu0_reset_gpio = {
 		.gpio_num = 0U,
 		.pin_mux = 0U,
@@ -11,7 +11,7 @@ static const lpf_config_gpio_config_t
 		.pull_down = false,
 	};
 
-static const lpf_config_gpio_config_t
+static const pdm_config_gpio_config_t
 	g_lpf_config_imx6ull_modules_mcu0_irq_gpio = {
 		.gpio_num = 0U,
 		.pin_mux = 0U,
@@ -20,14 +20,14 @@ static const lpf_config_gpio_config_t
 		.pull_down = false,
 	};
 
-static const lpf_config_mcu_entry_t
+static const pdm_config_mcu_entry_t
 	g_lpf_config_imx6ull_modules_mcus[] = {
 		{
 			.description = "i.MX6ULL placeholder CAN MCU",
 			.enabled = false,
 			.config = {
 				.name = "mcu0",
-				.interface = LPF_CONFIG_MCU_INTERFACE_CAN,
+				.interface = PDM_CONFIG_MCU_INTERFACE_CAN,
 				.hw.can = {
 					.device = "can0",
 					.bitrate = 500000U,
@@ -46,14 +46,14 @@ static const lpf_config_mcu_entry_t
 		},
 	};
 
-static const lpf_config_led_entry_t
+static const pdm_config_led_entry_t
 	g_lpf_config_imx6ull_modules_leds[] = {
 		{
 			.description = "i.MX6ULL placeholder GPIO status LED",
 			.enabled = false,
 			.config = {
 				.name = "status",
-				.control = LPF_CONFIG_LED_CONTROL_GPIO,
+				.control = PDM_CONFIG_LED_CONTROL_GPIO,
 				.max_brightness = 1U,
 				.default_brightness = 0U,
 				.hw.gpio = {
@@ -70,7 +70,7 @@ static const lpf_config_led_entry_t
 			.enabled = false,
 			.config = {
 				.name = "activity",
-				.control = LPF_CONFIG_LED_CONTROL_PWM,
+				.control = PDM_CONFIG_LED_CONTROL_PWM,
 				.max_brightness = 255U,
 				.default_brightness = 0U,
 				.hw.pwm = {
@@ -82,41 +82,41 @@ static const lpf_config_led_entry_t
 		},
 	};
 
-static const lpf_config_device_node_t
+static const pdm_config_device_node_t
 	g_lpf_config_imx6ull_modules_nodes[] = {
 		{
-			.device_type = LPF_CONFIG_DEVICE_TYPE_MCU,
+			.device_type = PDM_CONFIG_DEVICE_TYPE_MCU,
 			.index = 0,
 			.name = "mcu0",
 			.compatible = "lpf,mcu",
-			.status = LPF_CONFIG_NODE_STATUS_DISABLED,
+			.status = PDM_CONFIG_NODE_STATUS_DISABLED,
 			.payload = &g_lpf_config_imx6ull_modules_mcus[0],
 			.entry = &g_lpf_config_imx6ull_modules_mcus[0],
-			.payload_size = sizeof(lpf_config_mcu_entry_t),
+			.payload_size = sizeof(pdm_config_mcu_entry_t),
 		},
 		{
-			.device_type = LPF_CONFIG_DEVICE_TYPE_LED,
+			.device_type = PDM_CONFIG_DEVICE_TYPE_LED,
 			.index = 0,
 			.name = "status",
 			.compatible = "lpf,led",
-			.status = LPF_CONFIG_NODE_STATUS_DISABLED,
+			.status = PDM_CONFIG_NODE_STATUS_DISABLED,
 			.payload = &g_lpf_config_imx6ull_modules_leds[0],
 			.entry = &g_lpf_config_imx6ull_modules_leds[0],
-			.payload_size = sizeof(lpf_config_led_entry_t),
+			.payload_size = sizeof(pdm_config_led_entry_t),
 		},
 		{
-			.device_type = LPF_CONFIG_DEVICE_TYPE_LED,
+			.device_type = PDM_CONFIG_DEVICE_TYPE_LED,
 			.index = 1,
 			.name = "activity",
 			.compatible = "lpf,led",
-			.status = LPF_CONFIG_NODE_STATUS_DISABLED,
+			.status = PDM_CONFIG_NODE_STATUS_DISABLED,
 			.payload = &g_lpf_config_imx6ull_modules_leds[1],
 			.entry = &g_lpf_config_imx6ull_modules_leds[1],
-			.payload_size = sizeof(lpf_config_led_entry_t),
+			.payload_size = sizeof(pdm_config_led_entry_t),
 		},
 	};
 
-static const lpf_config_platform_config_t
+static const pdm_config_platform_config_t
 	g_lpf_config_imx6ull_modules_v1 = {
 		.platform_name = "nxp",
 		.chip_name = "imx6ull",
@@ -132,5 +132,5 @@ static const lpf_config_platform_config_t
 		.led_array = g_lpf_config_imx6ull_modules_leds,
 	};
 
-lpf_config_static_register(imx6ull_modules_v1,
+pdm_config_static_register(imx6ull_modules_v1,
 			   &g_lpf_config_imx6ull_modules_v1);

@@ -1,52 +1,52 @@
-# LPF Architecture Refactor Plan
+# PDM Architecture Refactor Plan
 
 ## Purpose
 
-This is the active refactor plan for LPF. It replaces the older overlapping
+This is the active refactor plan for PDM. It replaces the older overlapping
 kernel refactor, long-term optimization, and roadmap trackers with one
 architecture-driven checklist.
 
-LPF's current direction is sound: `lpf_core.ko` owns the LPF device model and
-the integrated runtime, including runtime configuration backends, LPF HW,
+PDM's current direction is sound: `pdm_core.ko` owns the PDM device model and
+the integrated runtime, including runtime configuration backends, PDM HW,
 peripheral services, service-owned transport backends, and configured-device
-probing. `lpf_configs.ko` is a DTS-like static board-description provider
-loaded before Core. The remaining work is to keep this model explicit: LPF
-Core should behave like a small LPF-owned pseudo bus and device model, runtime
+probing. `pdm_configs.ko` is a DTS-like static board-description provider
+loaded before Core. The remaining work is to keep this model explicit: PDM
+Core should behave like a small PDM-owned pseudo bus and device model, runtime
 peripherals should behave like drivers registered on that model, and configs
 should behave like DTS-style board descriptions even when the current backend
 is a static C table.
 
 ## Target Architecture Model
 
-LPF should follow a simplified Linux driver-model flow without inheriting
+PDM should follow a simplified Linux driver-model flow without inheriting
 unneeded Linux bus complexity:
 
-1. `lpf_core.ko` initializes the LPF device model.
-2. Runtime peripheral services register `lpf_driver_t` instances with LPF Core.
+1. `pdm_core.ko` initializes the PDM device model.
+2. Runtime peripheral services register `pdm_driver_t` instances with PDM Core.
 3. The selected config backend loads the active board description.
 4. Runtime walks the board's configured device nodes.
 5. A registered runtime config driver parses each matching node.
-6. The config driver creates an `lpf_device_config_t` and calls
-   `lpf_device_register()`.
-7. LPF Core matches the device with a registered driver and calls `probe()`.
+6. The config driver creates an `pdm_device_config_t` and calls
+   `pdm_device_register()`.
+7. PDM Core matches the device with a registered driver and calls `probe()`.
 
 In this model:
 
-- `lpf_core.ko` is the LPF device model / pseudo bus. It owns driver
+- `pdm_core.ko` is the PDM device model / pseudo bus. It owns driver
   registration, device registration, matching, probe/remove, discovery, state,
   events, and shared userspace observability.
-- `kernel/lpf-core/peripheral/` owns peripheral drivers such as MCU and LED. These
-  drivers register with LPF Core and own their service-specific parsing,
+- `kernel/pdm-core/peripheral/` owns peripheral drivers such as MCU and LED. These
+  drivers register with PDM Core and own their service-specific parsing,
   transport, char device, and debug behavior.
-- `kernel/lpf-core/config/` owns board-description loading and validation.
-  Static C tables from `kernel/lpf-configs/`, product configuration, or a
+- `kernel/pdm-core/config/` owns board-description loading and validation.
+  Static C tables from `kernel/pdm-configs/`, product configuration, or a
   future Device Tree backend are different backends behind the same
   board-description model.
 - `backend=auto` tries custom static configuration first, then falls back to
   Device Tree. Explicit backend selection is strict and does not fall back.
 - `configs` are treated as DTS-like board descriptions, not as runtime driver
   logic. They should describe what devices exist and carry typed payloads, while
-  peripheral config drivers decide how to translate those payloads into LPF
+  peripheral config drivers decide how to translate those payloads into PDM
   devices.
 
 The goal is conceptual alignment with Linux driver registration and device
@@ -55,31 +55,31 @@ parser, or driver-core internals.
 
 ## Current Architecture Strengths
 
-- Kernel module boundaries are clear: `osal.ko`, `lpf_configs.ko`, and
-  `lpf_core.ko`.
-- Source layout now follows module ownership with `kernel/lpf-core/` and
-  `kernel/lpf-configs/`.
+- Kernel module boundaries are clear: `osal.ko`, `pdm_configs.ko`, and
+  `pdm_core.ko`.
+- Source layout now follows module ownership with `kernel/pdm-core/` and
+  `kernel/pdm-configs/`.
 - Kbuild object selection is used for trim-friendly services, service-owned
   transport backends, HW paths, and runtime self-tests.
-- LPF Core provides one device/driver lifecycle, discovery snapshots,
+- PDM Core provides one device/driver lifecycle, discovery snapshots,
   reference-counted device handles, state/error tracking, and shared node
   helpers.
-- LPF Core already follows the critical driver-model path where device
+- PDM Core already follows the critical driver-model path where device
   registration matches a registered driver and calls `probe()`.
 - Runtime peripheral services already register drivers, and runtime config
   drivers already own MCU/LED config-to-device creation.
-- UAPI and PDI are separated, with ABI-only headers under `uapi/lpf/`.
+- UAPI and PDI are separated, with ABI-only headers under `uapi/pdm/`.
 
 ## Architecture Defects To Fix
 
 1. **Layer dependency inversion**
    - Fixed in the first cleanup pass by moving shared GPIO/PWM/I2C/SPI/CAN/UART
-     types into per-capability headers under `kernel/include/lpf/types/`.
-   - The rule is now explicit: SoC Adapter is below LPF HW, so it must not
-     include LPF HW headers or depend on a single unrelated type bucket.
+     types into per-capability headers under `kernel/include/pdm/types/`.
+   - The rule is now explicit: SoC Adapter is below PDM HW, so it must not
+     include PDM HW headers or depend on a single unrelated type bucket.
 
 2. **Centralized runtime device mapping**
-   - `kernel/lpf-core/runtime/lpf_runtime_config.c` hard-codes MCU and LED
+   - `kernel/pdm-core/runtime/pdm_runtime_config.c` hard-codes MCU and LED
      config-to-device mapping.
    - Adding a peripheral should not require editing runtime core code.
 
@@ -90,14 +90,14 @@ parser, or driver-core internals.
      class order and reverse declaration order within each class.
 
 4. **Core lifecycle ownership is blurred**
-   - Fixed by making Core init/deinit private to `lpf_core.ko` module
+   - Fixed by making Core init/deinit private to `pdm_core.ko` module
      init/exit.
    - Public Core APIs now require initialized Core state and return invalid
      state instead of implicitly creating Core global state.
 
 5. **Product security policy is not explicit**
    - Fixed for instance misc devices by adding a configurable
-     `CONFIG_LPF_INSTANCE_DEVNODE_MODE` policy with a conservative `0660`
+     `CONFIG_PDM_INSTANCE_DEVNODE_MODE` policy with a conservative `0660`
      default.
    - Target-level verification still needs to confirm devtmpfs/udev ownership
      and read-only observability surfaces on product-like kernels.
@@ -116,20 +116,20 @@ parser, or driver-core internals.
 
 - [x] Move shared hardware capability types out of `lpf/hw/`.
 - [x] Introduce neutral, per-capability type headers under
-      `kernel/include/lpf/types/`.
-  - `lpf_gpio_types.h`
-  - `lpf_pwm_types.h`
-  - `lpf_i2c_types.h`
-  - `lpf_spi_types.h`
-  - `lpf_can_types.h`
-  - `lpf_serial_types.h`
-- [x] Make both LPF HW and SoC Adapter depend on the neutral capability type
+      `kernel/include/pdm/types/`.
+  - `pdm_gpio_types.h`
+  - `pdm_pwm_types.h`
+  - `pdm_i2c_types.h`
+  - `pdm_spi_types.h`
+  - `pdm_can_types.h`
+  - `pdm_serial_types.h`
+- [x] Make both PDM HW and SoC Adapter depend on the neutral capability type
       headers.
 - [x] Add or update architecture-boundary tests to catch SoC -> HW include
       regressions.
 
 Acceptance:
-- SoC Adapter headers do not include LPF HW headers.
+- SoC Adapter headers do not include PDM HW headers.
 - `make modules` and `make tests` pass.
 
 ### Phase 2: Decentralize Runtime Device Mapping
@@ -140,20 +140,20 @@ Acceptance:
       service/config object.
 - [x] Move LED config parsing and device registration into the LED
       service/config object.
-- [x] Make `lpf_runtime_probe_devices()` use registered config drivers instead
+- [x] Make `pdm_runtime_probe_devices()` use registered config drivers instead
       of a switch or a central normalized-device list.
 
 Acceptance:
 - Adding a new peripheral does not require editing
-  `kernel/lpf-core/runtime/lpf_runtime_config.c`.
+  `kernel/pdm-core/runtime/pdm_runtime_config.c`.
 
 ### Phase 3: Add Runtime Entry Classes
 
 - [x] Replace single unordered runtime entry traversal with explicit entry
       classes or priorities.
 - [x] Keep function-style registration APIs, for example
-      `lpf_runtime_core_register()`, `lpf_runtime_service_register()`, and
-      `lpf_runtime_selftest_register()`.
+      `pdm_runtime_core_register()`, `pdm_runtime_service_register()`, and
+      `pdm_runtime_selftest_register()`.
 - [x] Preserve reverse-order exit within each class.
 
 Acceptance:
@@ -162,7 +162,7 @@ Acceptance:
 
 ### Phase 4: Harden Core Lifecycle And Runtime Ownership
 
-- [x] Make LPF Core public registration APIs require initialized Core state.
+- [x] Make PDM Core public registration APIs require initialized Core state.
 - [x] Keep module init/exit as the only owner of Core init/deinit.
 - [x] Audit runtime failure paths for symmetric cleanup.
 - [x] Document module load order and failure behavior.
@@ -173,12 +173,12 @@ Acceptance:
 
 ### Phase 5: Productization And Security
 
-- [x] Make LPF instance device node permissions configurable.
+- [x] Make PDM instance device node permissions configurable.
 - [x] Default product builds to a conservative mode such as `0660`.
 - [x] Document udev or product policy integration.
-- [x] Add target-smoke checks for `/dev/lpf/*` mode policy, read-only
+- [x] Add target-smoke checks for `/dev/pdm/*` mode policy, read-only
       sysfs/procfs inspection nodes, and writable debugfs command nodes.
-- [ ] Verify `/dev/lpf/*`, sysfs, procfs, and debugfs behavior on a real or
+- [ ] Verify `/dev/pdm/*`, sysfs, procfs, and debugfs behavior on a real or
       target-like kernel.
 
 Acceptance:
@@ -192,7 +192,7 @@ Acceptance:
       This includes instance devnode mode validation against the active
       Kconfig policy and rejects world-writable instance nodes.
 - [ ] Run `make mock-modules-smoke` on a compatible kernel.
-- [ ] Verify `/dev/lpf/mcuN` and `/dev/lpf/ledN` creation.
+- [ ] Verify `/dev/pdm/mcuN` and `/dev/pdm/ledN` creation.
 - [ ] Verify configured and unconfigured PDI ioctl behavior.
 - [ ] Keep kernel matrix builds active for supported kernel versions.
 - [x] Add ABI/PDI coverage for current MCU and LED peripheral discovery,
@@ -208,14 +208,14 @@ Acceptance:
       stable fields such as type, name, index, enabled/status, compatible
       string, typed payload pointer, and payload size.
 - [x] Build or expose the active platform config as an ordered device-node
-      table during `lpf_config_load()`.
+      table during `pdm_config_load()`.
 - [x] Keep existing static C configs as the first backend, but make their data
       consumable through the generic node table.
 - [x] Make auto backend selection try static config first and fall back to
       Device Tree without exposing the source to runtime config drivers.
 - [x] Change runtime config drivers to parse one matching node at a time rather
       than receiving and scanning the whole platform config.
-- [x] Make `lpf_runtime_probe_devices()` walk configured nodes generically and
+- [x] Make `pdm_runtime_probe_devices()` walk configured nodes generically and
       dispatch each node to a registered runtime config driver by type or
       compatible.
 - [x] Keep MCU and LED payload structs module-owned or config-owned as needed,
@@ -226,10 +226,10 @@ Acceptance:
       first-class node tables for local code cleanup; target smoke validation
       remains tracked in Phases 5 and 6.
 - [x] Make static C board descriptions self-register through a section so
-      common `lpf_configs.ko` code does not depend on concrete platform
+      common `pdm_configs.ko` code does not depend on concrete platform
       symbols or product-selection macros.
 - [x] Add compatible-string dispatch when multiple drivers need to bind the
-      same LPF config device type.
+      same PDM config device type.
 
 Acceptance:
 - Adding a new peripheral requires adding its config type/payload, config
@@ -238,14 +238,14 @@ Acceptance:
   hard-coded runtime mapping tables.
 - `make tests` and `make modules` pass.
 
-### Phase 8: Document And Harden The LPF Driver Model
+### Phase 8: Document And Harden The PDM Driver Model
 
-- [x] Document LPF Core as the LPF device model / pseudo bus in the runtime and
+- [x] Document PDM Core as the PDM device model / pseudo bus in the runtime and
       peripheral README files.
 - [x] Document the expected ordering: core init, peripheral driver
       registration, config load, device-node traversal, device registration,
       Core match, and driver probe.
-- [x] Define match rules explicitly: initially by LPF device type, with a path
+- [x] Define match rules explicitly: initially by PDM device type, with a path
       to add compatible-string matching only when needed.
 - [x] Audit exported Core APIs so names and comments reflect device-model
       ownership rather than ad hoc registries.
@@ -253,7 +253,7 @@ Acceptance:
       concrete future requirement needs it.
 
 Acceptance:
-- The code and docs consistently describe one LPF device model.
+- The code and docs consistently describe one PDM device model.
 - Peripheral ownership remains module-local, and no new generic abstraction is
   introduced without a real shared behavior.
 
@@ -263,7 +263,7 @@ Acceptance:
   API.
 - Keep feature selection at Kbuild object and section-registration boundaries.
 - Do not add product-specific behavior under shared framework directories.
-- Treat LPF Core as a pseudo bus/device model concept, but do not create extra
+- Treat PDM Core as a pseudo bus/device model concept, but do not create extra
   bus-layer directories or KOs unless there is a concrete need.
 - Treat configs as DTS-like board descriptions, but do not require a Device
   Tree parser for static configuration.

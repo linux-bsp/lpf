@@ -1,23 +1,23 @@
 // SPDX-License-Identifier: GPL-2.0
 
-#ifndef LPF_HW_UART_H
-#define LPF_HW_UART_H
+#ifndef PDM_HW_UART_H
+#define PDM_HW_UART_H
 
-#include "lpf/types/lpf_serial_types.h"
+#include "pdm/types/pdm_serial_types.h"
 
-int32_t lpf_hw_transport_uart_open(
-	const char *device, const lpf_serial_config_t *config,
-	lpf_hw_transport_uart_handle_t *handle);
-int32_t lpf_hw_transport_uart_close(lpf_hw_transport_uart_handle_t handle);
-int32_t lpf_hw_transport_uart_write(lpf_hw_transport_uart_handle_t handle,
+int32_t pdm_hw_transport_uart_open(
+	const char *device, const pdm_serial_config_t *config,
+	pdm_hw_transport_uart_handle_t *handle);
+int32_t pdm_hw_transport_uart_close(pdm_hw_transport_uart_handle_t handle);
+int32_t pdm_hw_transport_uart_write(pdm_hw_transport_uart_handle_t handle,
 				    const void *buffer, uint32_t size,
 				    int32_t timeout);
-int32_t lpf_hw_transport_uart_read(lpf_hw_transport_uart_handle_t handle,
+int32_t pdm_hw_transport_uart_read(pdm_hw_transport_uart_handle_t handle,
 				   void *buffer, uint32_t size,
 				   int32_t timeout);
-int32_t lpf_hw_transport_uart_flush(lpf_hw_transport_uart_handle_t handle);
-int32_t lpf_hw_transport_uart_set_config(
-	lpf_hw_transport_uart_handle_t handle,
-	const lpf_serial_config_t *config);
+int32_t pdm_hw_transport_uart_flush(pdm_hw_transport_uart_handle_t handle);
+int32_t pdm_hw_transport_uart_set_config(
+	pdm_hw_transport_uart_handle_t handle,
+	const pdm_serial_config_t *config);
 
-#endif /* LPF_HW_UART_H */
+#endif /* PDM_HW_UART_H */

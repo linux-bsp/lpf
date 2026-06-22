@@ -1,26 +1,26 @@
 // SPDX-License-Identifier: GPL-2.0
 
-#include "lpf/core/lpf_proc.h"
+#include "pdm/core/pdm_proc.h"
 
 #include <linux/errno.h>
 #include <linux/fs.h>
 
-#include "lpf/compat/lpf_compat_features.h"
+#include "pdm/compat/pdm_compat_features.h"
 
-#if !LPF_KERNEL_HAS_PROC_OPS
-#error "LPF procfs requires proc_ops; add a compat fallback before lowering the kernel baseline"
+#if !PDM_KERNEL_HAS_PROC_OPS
+#error "PDM procfs requires proc_ops; add a compat fallback before lowering the kernel baseline"
 #endif
 
-#define LPF_PROC_ROOT_NAME "lpf"
+#define PDM_PROC_ROOT_NAME "pdm"
 
 static struct proc_dir_entry *g_lpf_proc_root;
 static osal_mutex_t g_lpf_proc_lock;
 static bool g_lpf_proc_lock_ready;
 static uint32_t g_lpf_proc_users;
 
-static int lpf_proc_open(struct inode *inode, struct file *file)
+static int pdm_proc_open(struct inode *inode, struct file *file)
 {
-	lpf_proc_entry_t *entry = pde_data(inode);
+	pdm_proc_entry_t *entry = pde_data(inode);
 
 	if (!entry || !entry->show)
 		return -EINVAL;
@@ -28,10 +28,10 @@ static int lpf_proc_open(struct inode *inode, struct file *file)
 	return single_open(file, entry->show, entry->data);
 }
 
-static ssize_t lpf_proc_write(struct file *file, const char __user *buffer,
+static ssize_t pdm_proc_write(struct file *file, const char __user *buffer,
 			      size_t count, loff_t *ppos)
 {
-	lpf_proc_entry_t *entry = pde_data(file_inode(file));
+	pdm_proc_entry_t *entry = pde_data(file_inode(file));
 	char *command;
 	int32_t status;
 	int ret;
@@ -42,7 +42,7 @@ static ssize_t lpf_proc_write(struct file *file, const char __user *buffer,
 	if (count == 0)
 		return 0;
 
-	if (count > LPF_PROC_WRITE_MAX_SIZE)
+	if (count > PDM_PROC_WRITE_MAX_SIZE)
 		return -E2BIG;
 
 	command = osal_malloc(count + 1);
@@ -67,15 +67,15 @@ static ssize_t lpf_proc_write(struct file *file, const char __user *buffer,
 	return count;
 }
 
-static const struct proc_ops lpf_proc_ops = {
-	.proc_open = lpf_proc_open,
+static const struct proc_ops pdm_proc_ops = {
+	.proc_open = pdm_proc_open,
 	.proc_read = seq_read,
-	.proc_write = lpf_proc_write,
+	.proc_write = pdm_proc_write,
 	.proc_lseek = seq_lseek,
 	.proc_release = single_release,
 };
 
-static int lpf_proc_root_init(void)
+static int pdm_proc_root_init(void)
 {
 	int ret;
 
@@ -88,7 +88,7 @@ static int lpf_proc_root_init(void)
 
 	osal_mutex_lock(&g_lpf_proc_lock);
 	if (!g_lpf_proc_root) {
-		g_lpf_proc_root = proc_mkdir(LPF_PROC_ROOT_NAME, NULL);
+		g_lpf_proc_root = proc_mkdir(PDM_PROC_ROOT_NAME, NULL);
 		if (!g_lpf_proc_root) {
 			osal_mutex_unlock(&g_lpf_proc_lock);
 			return -ENOMEM;
@@ -100,7 +100,7 @@ static int lpf_proc_root_init(void)
 	return 0;
 }
 
-static void lpf_proc_root_deinit(void)
+static void pdm_proc_root_deinit(void)
 {
 	if (!g_lpf_proc_lock_ready)
 		return;
@@ -115,8 +115,8 @@ static void lpf_proc_root_deinit(void)
 	osal_mutex_unlock(&g_lpf_proc_lock);
 }
 
-int lpf_proc_register(lpf_proc_entry_t *entry, const char *name,
-		      lpf_proc_show_t show, lpf_proc_write_t write,
+int pdm_proc_register(pdm_proc_entry_t *entry, const char *name,
+		      pdm_proc_show_t show, pdm_proc_write_t write,
 		      void *data)
 {
 	umode_t mode;
@@ -125,7 +125,7 @@ int lpf_proc_register(lpf_proc_entry_t *entry, const char *name,
 	if (!entry || !name || !show)
 		return -EINVAL;
 
-	ret = lpf_proc_root_init();
+	ret = pdm_proc_root_init();
 	if (ret)
 		return ret;
 
@@ -136,25 +136,25 @@ int lpf_proc_register(lpf_proc_entry_t *entry, const char *name,
 	entry->data = data;
 	mode = write ? 0644 : 0444;
 	entry->entry = proc_create_data(name, mode, g_lpf_proc_root,
-					&lpf_proc_ops, entry);
+					&pdm_proc_ops, entry);
 	if (!entry->entry) {
-		lpf_proc_root_deinit();
+		pdm_proc_root_deinit();
 		osal_memset(entry, 0, sizeof(*entry));
 		return -ENOMEM;
 	}
 
-	LOG_INFO(name, "/proc/%s/%s ready", LPF_PROC_ROOT_NAME, name);
+	LOG_INFO(name, "/proc/%s/%s ready", PDM_PROC_ROOT_NAME, name);
 	return 0;
 }
-EXPORT_SYMBOL_GPL(lpf_proc_register);
+EXPORT_SYMBOL_GPL(pdm_proc_register);
 
-void lpf_proc_unregister(lpf_proc_entry_t *entry)
+void pdm_proc_unregister(pdm_proc_entry_t *entry)
 {
 	if (!entry || !entry->entry)
 		return;
 
 	proc_remove(entry->entry);
 	osal_memset(entry, 0, sizeof(*entry));
-	lpf_proc_root_deinit();
+	pdm_proc_root_deinit();
 }
-EXPORT_SYMBOL_GPL(lpf_proc_unregister);
+EXPORT_SYMBOL_GPL(pdm_proc_unregister);

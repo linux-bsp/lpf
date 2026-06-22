@@ -1,67 +1,67 @@
-# LPF Configuration Module Configuration
+# PDM Configuration Module Configuration
 
-config LPF_CONFIGS
-	tristate "LPF configuration engine and data providers"
+config PDM_CONFIGS
+	tristate "PDM configuration engine and data providers"
 	default m
 	depends on OSAL
 	depends on m
 	help
-	  Build lpf_configs.ko. This module owns LPF configuration loading,
+	  Build pdm_configs.ko. This module owns PDM configuration loading,
 	  backend selection, validation, normalization, and the unified
-	  configured-device node table consumed by lpf_core.ko.
+	  configured-device node table consumed by pdm_core.ko.
 
 	  Static platform configuration tables and Device Tree parsing are both
 	  implemented inside this module.
 
-if LPF_CONFIGS
+if PDM_CONFIGS
 
-config LPF_CONFIG_SOURCE_STATIC
+config PDM_CONFIG_SOURCE_STATIC
 	bool "Enable static platform config provider"
 	default y
 	help
 	  Enable the compiled static platform configuration provider.
 
-config LPF_CONFIG_SOURCE_DT
+config PDM_CONFIG_SOURCE_DT
 	bool "Enable Device Tree config provider"
 	default y if OF
 	depends on OF
 	help
 	  Enable the Device Tree configuration provider.
 
-menu "LPF Static Platform Config Selection"
+menu "PDM Static Platform Config Selection"
 
-depends on LPF_CONFIG_SOURCE_STATIC
+depends on PDM_CONFIG_SOURCE_STATIC
 
 choice
-	prompt "Selected LPF static config"
-	default LPF_CONFIG_UBUNTU_X86_MOCK_MODULES if LPF_SOC_ADAPTER_MOCK
-	default LPF_CONFIG_IMX6ULL_MODULES if ARCH_ARM32
-	default LPF_CONFIG_UBUNTU_X86_MODULES
+	prompt "Selected PDM static config"
+	default PDM_CONFIG_UBUNTU_X86_MOCK_MODULES if PDM_SOC_ADAPTER_MOCK
+	default PDM_CONFIG_IMX6ULL_MODULES if ARCH_ARM32
+	default PDM_CONFIG_UBUNTU_X86_MODULES
 	help
 	  Select the single static platform configuration compiled into
-	  lpf_configs.ko.
+	  pdm_configs.ko.
 
-config LPF_CONFIG_IMX6ULL_MODULES
+config PDM_CONFIG_IMX6ULL_MODULES
 	bool "imx6ull/modules v1"
 
-config LPF_CONFIG_UBUNTU_X86_MODULES
+config PDM_CONFIG_UBUNTU_X86_MODULES
 	bool "ubuntu/x86_modules v1"
 
-config LPF_CONFIG_UBUNTU_X86_MOCK_MODULES
+config PDM_CONFIG_UBUNTU_X86_MOCK_MODULES
 	bool "ubuntu/x86_mock_modules v1"
 
 endchoice
 
 endmenu
 
-config LPF_CONFIG_OF_SELFTEST
-	bool "Build LPF Device Tree config self-test"
+config PDM_CONFIG_OF_SELFTEST
+	bool "Build PDM Device Tree config self-test"
 	default n
-	depends on LPF_CONFIG_SOURCE_DT
-	depends on LPF_SOC_ADAPTER_MOCK
+	depends on PDM_CONFIG_SOURCE_DT
+	depends on PDM_SOC_ADAPTER_MOCK
 	help
-	  Build the LPF Device Tree configuration self-test into
-	  lpf_configs.ko. This validates the LPF Device Tree parser through
+	  Build the PDM Device Tree configuration self-test into
+	  pdm_configs.ko. This validates the PDM Device Tree parser through
 	  Linux OF accessors on kernels with CONFIG_OF enabled.
 
-endif # LPF_CONFIGS
+endif # PDM_CONFIGS

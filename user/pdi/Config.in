@@ -4,11 +4,11 @@ menuconfig PDI
 	bool "PDI (Peripheral Driver Interface)"
 	default n
 	help
-	  Userspace API library for LPF kernel peripheral devices.
+	  Userspace API library for PDM kernel peripheral devices.
 
 	  PDI owns the userspace API surface, including device discovery
-	  through the LPF control node /dev/lpf_ctl and peripheral APIs such
-	  as /dev/lpf/mcuN and /dev/lpf/ledN.
+	  through the PDM control node /dev/pdm_ctl and peripheral APIs such
+	  as /dev/pdm/mcuN and /dev/pdm/ledN.
 
 if PDI
 

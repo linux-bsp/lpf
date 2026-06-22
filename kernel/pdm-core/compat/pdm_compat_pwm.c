@@ -3,11 +3,11 @@
 #include <linux/module.h>
 #include <linux/pwm.h>
 
-#include "lpf/compat/lpf_compat_errno.h"
-#include "lpf/compat/lpf_compat_pwm.h"
+#include "pdm/compat/pdm_compat_errno.h"
+#include "pdm/compat/pdm_compat_pwm.h"
 
-static void lpf_compat_pwm_fill_state(const struct pwm_state *src,
-				      lpf_pwm_state_t *dst)
+static void pdm_compat_pwm_fill_state(const struct pwm_state *src,
+				      pdm_pwm_state_t *dst)
 {
 	dst->period_ns = (uint32_t)src->period;
 	dst->duty_ns = (uint32_t)src->duty_cycle;
@@ -15,7 +15,7 @@ static void lpf_compat_pwm_fill_state(const struct pwm_state *src,
 	dst->polarity_inversed = src->polarity == PWM_POLARITY_INVERSED;
 }
 
-static void lpf_compat_pwm_fill_kernel_state(const lpf_pwm_state_t *src,
+static void pdm_compat_pwm_fill_kernel_state(const pdm_pwm_state_t *src,
 					     struct pwm_state *dst)
 {
 	dst->period = src->period_ns;
@@ -25,7 +25,7 @@ static void lpf_compat_pwm_fill_kernel_state(const lpf_pwm_state_t *src,
 						 PWM_POLARITY_NORMAL;
 }
 
-int32_t lpf_compat_pwm_get(const char *consumer, lpf_pwm_handle_t *handle)
+int32_t pdm_compat_pwm_get(const char *consumer, pdm_pwm_handle_t *handle)
 {
 	struct pwm_device *pwm;
 	int ret;
@@ -36,14 +36,14 @@ int32_t lpf_compat_pwm_get(const char *consumer, lpf_pwm_handle_t *handle)
 	pwm = pwm_get(NULL, consumer);
 	if (IS_ERR(pwm)) {
 		ret = PTR_ERR(pwm);
-		return lpf_compat_errno_to_status(ret);
+		return pdm_compat_errno_to_status(ret);
 	}
 
 	*handle = pwm;
 	return OSAL_SUCCESS;
 }
 
-void lpf_compat_pwm_put(lpf_pwm_handle_t handle)
+void pdm_compat_pwm_put(pdm_pwm_handle_t handle)
 {
 	if (!handle)
 		return;
@@ -51,8 +51,8 @@ void lpf_compat_pwm_put(lpf_pwm_handle_t handle)
 	pwm_put((struct pwm_device *)handle);
 }
 
-int32_t lpf_compat_pwm_apply(lpf_pwm_handle_t handle,
-			     const lpf_pwm_state_t *state)
+int32_t pdm_compat_pwm_apply(pdm_pwm_handle_t handle,
+			     const pdm_pwm_state_t *state)
 {
 	struct pwm_state pwm_state;
 	struct pwm_device *pwm = handle;
@@ -63,13 +63,13 @@ int32_t lpf_compat_pwm_apply(lpf_pwm_handle_t handle,
 		return OSAL_ERR_INVALID_PARAM;
 
 	pwm_get_state(pwm, &pwm_state);
-	lpf_compat_pwm_fill_kernel_state(state, &pwm_state);
+	pdm_compat_pwm_fill_kernel_state(state, &pwm_state);
 	ret = pwm_apply_might_sleep(pwm, &pwm_state);
-	return lpf_compat_errno_to_status(ret);
+	return pdm_compat_errno_to_status(ret);
 }
 
-int32_t lpf_compat_pwm_get_state(lpf_pwm_handle_t handle,
-				 lpf_pwm_state_t *state)
+int32_t pdm_compat_pwm_get_state(pdm_pwm_handle_t handle,
+				 pdm_pwm_state_t *state)
 {
 	struct pwm_state pwm_state;
 	struct pwm_device *pwm = handle;
@@ -78,11 +78,11 @@ int32_t lpf_compat_pwm_get_state(lpf_pwm_handle_t handle,
 		return OSAL_ERR_INVALID_PARAM;
 
 	pwm_get_state(pwm, &pwm_state);
-	lpf_compat_pwm_fill_state(&pwm_state, state);
+	pdm_compat_pwm_fill_state(&pwm_state, state);
 	return OSAL_SUCCESS;
 }
 
-int32_t lpf_compat_pwm_enable(lpf_pwm_handle_t handle)
+int32_t pdm_compat_pwm_enable(pdm_pwm_handle_t handle)
 {
 	struct pwm_device *pwm = handle;
 	int ret;
@@ -91,10 +91,10 @@ int32_t lpf_compat_pwm_enable(lpf_pwm_handle_t handle)
 		return OSAL_ERR_INVALID_PARAM;
 
 	ret = pwm_enable(pwm);
-	return lpf_compat_errno_to_status(ret);
+	return pdm_compat_errno_to_status(ret);
 }
 
-int32_t lpf_compat_pwm_disable(lpf_pwm_handle_t handle)
+int32_t pdm_compat_pwm_disable(pdm_pwm_handle_t handle)
 {
 	struct pwm_device *pwm = handle;
 

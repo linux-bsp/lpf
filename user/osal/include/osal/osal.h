@@ -1,5 +1,5 @@
 /************************************************************************
- * LPF - Linux Peripheral Framework
+ * PDM - Linux Peripheral Framework
  *
  * 轻量化操作系统抽象层
  *

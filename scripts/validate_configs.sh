@@ -11,7 +11,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR/.."
 
 echo "========================================================================"
-echo "LPF Configuration System Validation"
+echo "PDM Configuration System Validation"
 echo "========================================================================"
 echo ""
 

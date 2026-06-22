@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: GPL-2.0
 
-#include "lpf_mcu_internal.h"
-#include "lpf/core/lpf_debugfs.h"
-#include "lpf/lpf_errno.h"
-#include "lpf/core/lpf_proc.h"
+#include "pdm_mcu_internal.h"
+#include "pdm/core/pdm_debugfs.h"
+#include "pdm/pdm_errno.h"
+#include "pdm/core/pdm_proc.h"
 
 #include <linux/errno.h>
 #include <linux/kernel.h>
 #include <linux/kstrtox.h>
 #include <linux/string.h>
 
-static lpf_proc_entry_t g_lpf_mcu_proc;
-static lpf_debugfs_entry_t g_lpf_mcu_debugfs;
+static pdm_proc_entry_t g_lpf_mcu_proc;
+static pdm_debugfs_entry_t g_lpf_mcu_debugfs;
 
-static void lpf_mcu_proc_format_bytes(const uint8_t *data, uint32_t size,
+static void pdm_mcu_proc_format_bytes(const uint8_t *data, uint32_t size,
 				      char *buffer, uint32_t buffer_size)
 {
 	uint32_t i;
@@ -38,7 +38,7 @@ static void lpf_mcu_proc_format_bytes(const uint8_t *data, uint32_t size,
 	buffer[buffer_size - 1] = '\0';
 }
 
-static char *lpf_mcu_proc_next_token(char **cursor)
+static char *pdm_mcu_proc_next_token(char **cursor)
 {
 	char *token;
 
@@ -50,9 +50,9 @@ static char *lpf_mcu_proc_next_token(char **cursor)
 	return NULL;
 }
 
-static int lpf_mcu_proc_parse_u32(char **cursor, uint32_t *value)
+static int pdm_mcu_proc_parse_u32(char **cursor, uint32_t *value)
 {
-	char *token = lpf_mcu_proc_next_token(cursor);
+	char *token = pdm_mcu_proc_next_token(cursor);
 
 	if (!token)
 		return -EINVAL;
@@ -60,7 +60,7 @@ static int lpf_mcu_proc_parse_u32(char **cursor, uint32_t *value)
 	return kstrtou32(token, 0, value);
 }
 
-static int lpf_mcu_proc_parse_bytes(char **cursor, uint8_t *buffer,
+static int pdm_mcu_proc_parse_bytes(char **cursor, uint8_t *buffer,
 				    uint32_t max_size, uint32_t *actual_size)
 {
 	char *token;
@@ -68,7 +68,7 @@ static int lpf_mcu_proc_parse_bytes(char **cursor, uint8_t *buffer,
 	uint32_t count = 0;
 	int ret;
 
-	while ((token = lpf_mcu_proc_next_token(cursor)) != NULL) {
+	while ((token = pdm_mcu_proc_next_token(cursor)) != NULL) {
 		if (count >= max_size)
 			return -E2BIG;
 
@@ -85,40 +85,40 @@ static int lpf_mcu_proc_parse_bytes(char **cursor, uint8_t *buffer,
 	return 0;
 }
 
-static lpf_mcu_handle_t lpf_mcu_proc_get_handle(uint32_t index)
+static pdm_mcu_handle_t pdm_mcu_proc_get_handle(uint32_t index)
 {
-	if (index >= LPF_MCU_MAX_DEVICES)
+	if (index >= PDM_MCU_MAX_DEVICES)
 		return NULL;
 
-	return lpf_mcu_get(index);
+	return pdm_mcu_get(index);
 }
 
-static const char *lpf_mcu_interface_name(lpf_config_mcu_interface_t interface)
+static const char *pdm_mcu_interface_name(pdm_config_mcu_interface_t interface)
 {
 	switch (interface) {
-	case LPF_CONFIG_MCU_INTERFACE_CAN:
+	case PDM_CONFIG_MCU_INTERFACE_CAN:
 		return "can";
-	case LPF_CONFIG_MCU_INTERFACE_SERIAL:
+	case PDM_CONFIG_MCU_INTERFACE_SERIAL:
 		return "serial";
 	default:
 		return "unknown";
 	}
 }
 
-static int lpf_mcu_proc_show(struct seq_file *seq, void *data)
+static int pdm_mcu_proc_show(struct seq_file *seq, void *data)
 {
-	lpf_mcu_debug_info_t info;
+	pdm_mcu_debug_info_t info;
 	uint32_t i;
 	int32_t ret;
 
 	(void)data;
 
-	seq_puts(seq, "LPF MCU\n");
-	seq_printf(seq, "max_devices=%u\n", LPF_MCU_MAX_DEVICES);
+	seq_puts(seq, "PDM MCU\n");
+	seq_printf(seq, "max_devices=%u\n", PDM_MCU_MAX_DEVICES);
 	seq_puts(seq, "devices:\n");
 
-	for (i = 0; i < LPF_MCU_MAX_DEVICES; i++) {
-		ret = lpf_mcu_debug_get(i, &info);
+	for (i = 0; i < PDM_MCU_MAX_DEVICES; i++) {
+		ret = pdm_mcu_debug_get(i, &info);
 		if (ret == OSAL_ERR_INVALID_STATE) {
 			seq_puts(seq, "  registry=uninitialized\n");
 			return 0;
@@ -134,62 +134,62 @@ static int lpf_mcu_proc_show(struct seq_file *seq, void *data)
 		seq_printf(seq,
 			   "  [%u] present=1 name=%s interface=%s timeout_ms=%u\n",
 			   i, info.name,
-			   lpf_mcu_interface_name(info.interface),
+			   pdm_mcu_interface_name(info.interface),
 			   info.cmd_timeout_ms);
 	}
 
 	return 0;
 }
 
-static int lpf_mcu_proc_do_version(lpf_mcu_handle_t handle, uint32_t index)
+static int pdm_mcu_proc_do_version(pdm_mcu_handle_t handle, uint32_t index)
 {
-	lpf_mcu_version_t version;
+	pdm_mcu_version_t version;
 	int32_t ret;
 
 	osal_memset(&version, 0, sizeof(version));
-	ret = lpf_mcu_get_version(handle, &version);
+	ret = pdm_mcu_get_version(handle, &version);
 	if (ret != OSAL_SUCCESS)
-		return lpf_status_to_errno(ret);
+		return pdm_status_to_errno(ret);
 
-	LOG_INFO("LPF_MCU",
+	LOG_INFO("PDM_MCU",
 		 "debugfs version index=%u version=%u.%u.%u.%u string=%s",
 		 index, version.major, version.minor, version.patch,
 		 version.build, version.version_string);
 	return 0;
 }
 
-static int lpf_mcu_proc_do_status(lpf_mcu_handle_t handle, uint32_t index)
+static int pdm_mcu_proc_do_status(pdm_mcu_handle_t handle, uint32_t index)
 {
-	lpf_mcu_status_t status;
+	pdm_mcu_status_t status;
 	int32_t ret;
 
 	osal_memset(&status, 0, sizeof(status));
-	ret = lpf_mcu_get_status(handle, &status);
+	ret = pdm_mcu_get_status(handle, &status);
 	if (ret != OSAL_SUCCESS)
-		return lpf_status_to_errno(ret);
+		return pdm_status_to_errno(ret);
 
-	LOG_INFO("LPF_MCU",
+	LOG_INFO("PDM_MCU",
 		 "debugfs status index=%u online=%u state=%u uptime=%u error=%u temp_mc=%d voltage_mv=%u timestamp_us=%llu",
 		 index, status.online ? 1U : 0U, status.state,
 		 status.uptime_sec, status.error_code,
 		 status.temperature_milli_celsius, status.voltage_mv,
 		 (unsigned long long)status.timestamp_us);
-	lpf_mcu_chrdev_record_status(index, &status);
+	pdm_mcu_chrdev_record_status(index, &status);
 	return 0;
 }
 
-static int lpf_mcu_proc_do_reset(lpf_mcu_handle_t handle, uint32_t index)
+static int pdm_mcu_proc_do_reset(pdm_mcu_handle_t handle, uint32_t index)
 {
-	int32_t ret = lpf_mcu_reset(handle);
+	int32_t ret = pdm_mcu_reset(handle);
 
 	if (ret != OSAL_SUCCESS)
-		return lpf_status_to_errno(ret);
+		return pdm_status_to_errno(ret);
 
-	LOG_INFO("LPF_MCU", "debugfs reset index=%u success", index);
+	LOG_INFO("PDM_MCU", "debugfs reset index=%u success", index);
 	return 0;
 }
 
-static int lpf_mcu_proc_do_cmd(lpf_mcu_handle_t handle, uint32_t index,
+static int pdm_mcu_proc_do_cmd(pdm_mcu_handle_t handle, uint32_t index,
 			       uint32_t command, char **cursor)
 {
 	uint8_t request[64];
@@ -203,26 +203,26 @@ static int lpf_mcu_proc_do_cmd(lpf_mcu_handle_t handle, uint32_t index,
 	if (command > 0xFFU)
 		return -ERANGE;
 
-	parse_ret = lpf_mcu_proc_parse_bytes(cursor, request,
+	parse_ret = pdm_mcu_proc_parse_bytes(cursor, request,
 					     sizeof(request), &request_len);
 	if (parse_ret)
 		return parse_ret;
 
-	ret = lpf_mcu_send_command(handle, (uint8_t)command, request,
+	ret = pdm_mcu_send_command(handle, (uint8_t)command, request,
 				   request_len, response, sizeof(response),
 				   &response_len);
 	if (ret != OSAL_SUCCESS)
-		return lpf_status_to_errno(ret);
+		return pdm_status_to_errno(ret);
 
-	lpf_mcu_proc_format_bytes(response, response_len, response_hex,
+	pdm_mcu_proc_format_bytes(response, response_len, response_hex,
 				  sizeof(response_hex));
-	LOG_INFO("LPF_MCU",
+	LOG_INFO("PDM_MCU",
 		 "debugfs cmd index=%u cmd=0x%02x tx_len=%u rx_len=%u rx=[%s]",
 		 index, command, request_len, response_len, response_hex);
 	return 0;
 }
 
-static int lpf_mcu_proc_do_read(lpf_mcu_handle_t handle, uint32_t index,
+static int pdm_mcu_proc_do_read(pdm_mcu_handle_t handle, uint32_t index,
 				uint32_t address, uint32_t size)
 {
 	uint8_t data[64];
@@ -232,18 +232,18 @@ static int lpf_mcu_proc_do_read(lpf_mcu_handle_t handle, uint32_t index,
 	if (size == 0 || size > sizeof(data))
 		return -EINVAL;
 
-	ret = lpf_mcu_read_data(handle, address, data, size);
+	ret = pdm_mcu_read_data(handle, address, data, size);
 	if (ret != OSAL_SUCCESS)
-		return lpf_status_to_errno(ret);
+		return pdm_status_to_errno(ret);
 
-	lpf_mcu_proc_format_bytes(data, size, data_hex, sizeof(data_hex));
-	LOG_INFO("LPF_MCU",
+	pdm_mcu_proc_format_bytes(data, size, data_hex, sizeof(data_hex));
+	LOG_INFO("PDM_MCU",
 		 "debugfs read index=%u addr=0x%08x len=%u data=[%s]",
 		 index, address, size, data_hex);
 	return 0;
 }
 
-static int lpf_mcu_proc_do_write(lpf_mcu_handle_t handle, uint32_t index,
+static int pdm_mcu_proc_do_write(pdm_mcu_handle_t handle, uint32_t index,
 				 uint32_t address, char **cursor)
 {
 	uint8_t data[64];
@@ -251,24 +251,24 @@ static int lpf_mcu_proc_do_write(lpf_mcu_handle_t handle, uint32_t index,
 	int32_t ret;
 	int parse_ret;
 
-	parse_ret = lpf_mcu_proc_parse_bytes(cursor, data, sizeof(data), &size);
+	parse_ret = pdm_mcu_proc_parse_bytes(cursor, data, sizeof(data), &size);
 	if (parse_ret)
 		return parse_ret;
 	if (size == 0)
 		return -EINVAL;
 
-	ret = lpf_mcu_write_data(handle, address, data, size);
+	ret = pdm_mcu_write_data(handle, address, data, size);
 	if (ret != OSAL_SUCCESS)
-		return lpf_status_to_errno(ret);
+		return pdm_status_to_errno(ret);
 
-	LOG_INFO("LPF_MCU", "debugfs write index=%u addr=0x%08x len=%u",
+	LOG_INFO("PDM_MCU", "debugfs write index=%u addr=0x%08x len=%u",
 		 index, address, size);
 	return 0;
 }
 
-static int lpf_mcu_proc_write(char *command, size_t count, void *data)
+static int pdm_mcu_proc_write(char *command, size_t count, void *data)
 {
-	lpf_mcu_handle_t handle;
+	pdm_mcu_handle_t handle;
 	char *cursor = command;
 	char *op;
 	uint32_t index;
@@ -280,64 +280,64 @@ static int lpf_mcu_proc_write(char *command, size_t count, void *data)
 	(void)count;
 	(void)data;
 
-	op = lpf_mcu_proc_next_token(&cursor);
+	op = pdm_mcu_proc_next_token(&cursor);
 	if (!op)
 		return -EINVAL;
 
-	ret = lpf_mcu_proc_parse_u32(&cursor, &index);
+	ret = pdm_mcu_proc_parse_u32(&cursor, &index);
 	if (ret)
 		return ret;
 
-	handle = lpf_mcu_proc_get_handle(index);
+	handle = pdm_mcu_proc_get_handle(index);
 	if (!handle) {
-		lpf_mcu_chrdev_record_error(index, -ENODEV);
+		pdm_mcu_chrdev_record_error(index, -ENODEV);
 		return -ENODEV;
 	}
 
 	if (!strcmp(op, "version")) {
 		recover_on_success = true;
-		ret = lpf_mcu_proc_do_version(handle, index);
+		ret = pdm_mcu_proc_do_version(handle, index);
 		goto out;
 	}
 
 	if (!strcmp(op, "status")) {
-		ret = lpf_mcu_proc_do_status(handle, index);
+		ret = pdm_mcu_proc_do_status(handle, index);
 		goto out;
 	}
 
 	if (!strcmp(op, "reset")) {
 		recover_on_success = true;
-		ret = lpf_mcu_proc_do_reset(handle, index);
+		ret = pdm_mcu_proc_do_reset(handle, index);
 		goto out;
 	}
 
 	if (!strcmp(op, "cmd")) {
-		ret = lpf_mcu_proc_parse_u32(&cursor, &value);
+		ret = pdm_mcu_proc_parse_u32(&cursor, &value);
 		if (ret)
 			goto out;
 		recover_on_success = true;
-		ret = lpf_mcu_proc_do_cmd(handle, index, value, &cursor);
+		ret = pdm_mcu_proc_do_cmd(handle, index, value, &cursor);
 		goto out;
 	}
 
 	if (!strcmp(op, "read")) {
-		ret = lpf_mcu_proc_parse_u32(&cursor, &value);
+		ret = pdm_mcu_proc_parse_u32(&cursor, &value);
 		if (ret)
 			goto out;
-		ret = lpf_mcu_proc_parse_u32(&cursor, &size);
+		ret = pdm_mcu_proc_parse_u32(&cursor, &size);
 		if (ret)
 			goto out;
 		recover_on_success = true;
-		ret = lpf_mcu_proc_do_read(handle, index, value, size);
+		ret = pdm_mcu_proc_do_read(handle, index, value, size);
 		goto out;
 	}
 
 	if (!strcmp(op, "write")) {
-		ret = lpf_mcu_proc_parse_u32(&cursor, &value);
+		ret = pdm_mcu_proc_parse_u32(&cursor, &value);
 		if (ret)
 			goto out;
 		recover_on_success = true;
-		ret = lpf_mcu_proc_do_write(handle, index, value, &cursor);
+		ret = pdm_mcu_proc_do_write(handle, index, value, &cursor);
 		goto out;
 	}
 
@@ -345,30 +345,30 @@ static int lpf_mcu_proc_write(char *command, size_t count, void *data)
 
 out:
 	if (ret == 0 && recover_on_success)
-		lpf_mcu_chrdev_record_recovery(index);
-	else if (lpf_errno_is_runtime_error(ret))
-		lpf_mcu_chrdev_record_error(index, ret);
+		pdm_mcu_chrdev_record_recovery(index);
+	else if (pdm_errno_is_runtime_error(ret))
+		pdm_mcu_chrdev_record_error(index, ret);
 	return ret;
 }
 
-int lpf_mcu_proc_register(void)
+int pdm_mcu_proc_register(void)
 {
-	return lpf_proc_register(&g_lpf_mcu_proc, "mcu",
-				 lpf_mcu_proc_show, NULL, NULL);
+	return pdm_proc_register(&g_lpf_mcu_proc, "mcu",
+				 pdm_mcu_proc_show, NULL, NULL);
 }
 
-void lpf_mcu_proc_unregister(void)
+void pdm_mcu_proc_unregister(void)
 {
-	lpf_proc_unregister(&g_lpf_mcu_proc);
+	pdm_proc_unregister(&g_lpf_mcu_proc);
 }
 
-int lpf_mcu_debugfs_register(void)
+int pdm_mcu_debugfs_register(void)
 {
-	return lpf_debugfs_register(&g_lpf_mcu_debugfs, "lpf", "mcu",
-				    lpf_mcu_proc_write, NULL);
+	return pdm_debugfs_register(&g_lpf_mcu_debugfs, "pdm", "mcu",
+				    pdm_mcu_proc_write, NULL);
 }
 
-void lpf_mcu_debugfs_unregister(void)
+void pdm_mcu_debugfs_unregister(void)
 {
-	lpf_debugfs_unregister(&g_lpf_mcu_debugfs);
+	pdm_debugfs_unregister(&g_lpf_mcu_debugfs);
 }

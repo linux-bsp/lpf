@@ -1,26 +1,26 @@
 // SPDX-License-Identifier: GPL-2.0
 
-#ifndef LPF_MCU_TRANSPORT_H
-#define LPF_MCU_TRANSPORT_H
+#ifndef PDM_MCU_TRANSPORT_H
+#define PDM_MCU_TRANSPORT_H
 
 #include "osal.h"
-#include "lpf/config/lpf_config.h"
+#include "pdm/config/pdm_config.h"
 
-typedef void *lpf_mcu_transport_handle_t;
+typedef void *pdm_mcu_transport_handle_t;
 
 typedef struct {
-	lpf_config_mcu_interface_t interface;
+	pdm_config_mcu_interface_t interface;
 	const char *name;
-	int32_t (*open)(const lpf_config_mcu_config_t *config,
-			lpf_mcu_transport_handle_t *handle);
-	int32_t (*close)(lpf_mcu_transport_handle_t handle);
-	int32_t (*transfer)(lpf_mcu_transport_handle_t handle,
+	int32_t (*open)(const pdm_config_mcu_config_t *config,
+			pdm_mcu_transport_handle_t *handle);
+	int32_t (*close)(pdm_mcu_transport_handle_t handle);
+	int32_t (*transfer)(pdm_mcu_transport_handle_t handle,
 			    const uint8_t *packet, uint32_t packet_len,
 			    uint8_t *response, uint32_t response_size,
 			    uint32_t *actual_size, uint32_t timeout_ms);
-} lpf_mcu_transport_ops_t;
+} pdm_mcu_transport_ops_t;
 
-const lpf_mcu_transport_ops_t *
-lpf_mcu_transport_get(lpf_config_mcu_interface_t interface);
+const pdm_mcu_transport_ops_t *
+pdm_mcu_transport_get(pdm_config_mcu_interface_t interface);
 
-#endif /* LPF_MCU_TRANSPORT_H */
+#endif /* PDM_MCU_TRANSPORT_H */

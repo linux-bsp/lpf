@@ -3,16 +3,16 @@
  *
  * 职责：
  * - 封装CAN收发
- * - 直接转发 LPF protocol 协议报文（透传模式）
+ * - 直接转发 PDM protocol 协议报文（透传模式）
  * - 处理 CAN 分片传输（每帧最多 8 字节）
  ************************************************************************/
 
 #include "osal.h"
 #include <linux/math64.h>
 
-#include "lpf/config/lpf_config.h"
-#include "lpf/hw/lpf_hw_can.h"
-#include "lpf_mcu_transport.h"
+#include "pdm/config/pdm_config.h"
+#include "pdm/hw/pdm_hw_can.h"
+#include "pdm_mcu_transport.h"
 
 /*===========================================================================
  * CAN通信实现
@@ -22,31 +22,31 @@
  * @brief CAN通信上下文
  */
 typedef struct {
-	lpf_hw_transport_can_handle_t can_handle;
+	pdm_hw_transport_can_handle_t can_handle;
 	uint32_t tx_id;
 	uint32_t rx_id;
 	osal_mutex_t rx_mutex;
-} lpf_mcu_can_context_t;
+} pdm_mcu_can_context_t;
 
 /**
  * @brief 初始化CAN通信
  */
-static int32_t lpf_mcu_transport_can_open(const lpf_config_mcu_config_t *mcu_cfg,
-					  lpf_mcu_transport_handle_t *handle)
+static int32_t pdm_mcu_transport_can_open(const pdm_config_mcu_config_t *mcu_cfg,
+					  pdm_mcu_transport_handle_t *handle)
 {
-	lpf_mcu_can_context_t *ctx;
-	lpf_can_config_t can_config;
+	pdm_mcu_can_context_t *ctx;
+	pdm_can_config_t can_config;
 
 	if (!mcu_cfg || !handle) {
 		return OSAL_ERR_INVALID_PARAM;
 	}
 
-	ctx = (lpf_mcu_can_context_t *)osal_malloc(sizeof(lpf_mcu_can_context_t));
+	ctx = (pdm_mcu_can_context_t *)osal_malloc(sizeof(pdm_mcu_can_context_t));
 	if (!ctx) {
 		return OSAL_ERR_NO_MEMORY;
 	}
 
-	osal_memset(ctx, 0, sizeof(lpf_mcu_can_context_t));
+	osal_memset(ctx, 0, sizeof(pdm_mcu_can_context_t));
 
 	/* 配置CAN参数 */
 	can_config.interface = mcu_cfg->hw.can.device;
@@ -54,7 +54,7 @@ static int32_t lpf_mcu_transport_can_open(const lpf_config_mcu_config_t *mcu_cfg
 	can_config.rx_timeout = mcu_cfg->hw.can.rx_timeout;
 	can_config.tx_timeout = mcu_cfg->hw.can.tx_timeout;
 
-	if (OSAL_SUCCESS != lpf_hw_transport_can_init(&can_config, &ctx->can_handle)) {
+	if (OSAL_SUCCESS != pdm_hw_transport_can_init(&can_config, &ctx->can_handle)) {
 		osal_free(ctx);
 		return OSAL_ERR_GENERIC;
 	}
@@ -64,7 +64,7 @@ static int32_t lpf_mcu_transport_can_open(const lpf_config_mcu_config_t *mcu_cfg
 
 	/* 创建接收互斥锁 */
 	if (OSAL_SUCCESS != osal_mutex_init(&ctx->rx_mutex, NULL)) {
-		lpf_hw_transport_can_deinit(ctx->can_handle);
+		pdm_hw_transport_can_deinit(ctx->can_handle);
 		osal_free(ctx);
 		return OSAL_ERR_GENERIC;
 	}
@@ -76,17 +76,17 @@ static int32_t lpf_mcu_transport_can_open(const lpf_config_mcu_config_t *mcu_cfg
 /**
  * @brief 反初始化CAN通信
  */
-static int32_t lpf_mcu_transport_can_close(lpf_mcu_transport_handle_t handle)
+static int32_t pdm_mcu_transport_can_close(pdm_mcu_transport_handle_t handle)
 {
-	lpf_mcu_can_context_t *ctx;
+	pdm_mcu_can_context_t *ctx;
 
 	if (!handle) {
 		return OSAL_ERR_INVALID_PARAM;
 	}
 
-	ctx = (lpf_mcu_can_context_t *)handle;
+	ctx = (pdm_mcu_can_context_t *)handle;
 
-	lpf_hw_transport_can_deinit(ctx->can_handle);
+	pdm_hw_transport_can_deinit(ctx->can_handle);
 	osal_mutex_destroy(&ctx->rx_mutex);
 	osal_free(ctx);
 
@@ -94,16 +94,16 @@ static int32_t lpf_mcu_transport_can_close(lpf_mcu_transport_handle_t handle)
 }
 
 /**
- * @brief 发送 LPF protocol 报文并接收响应
+ * @brief 发送 PDM protocol 报文并接收响应
  */
-static int32_t lpf_mcu_transport_can_transfer(
-	lpf_mcu_transport_handle_t handle, const uint8_t *packet,
+static int32_t pdm_mcu_transport_can_transfer(
+	pdm_mcu_transport_handle_t handle, const uint8_t *packet,
 	uint32_t packet_len, uint8_t *response, uint32_t resp_size,
 	uint32_t *actual_size, uint32_t timeout_ms)
 {
-	lpf_mcu_can_context_t *ctx;
-	lpf_can_frame_t can_frame;
-	lpf_can_frame_t rx_frame;
+	pdm_mcu_can_context_t *ctx;
+	pdm_can_frame_t can_frame;
+	pdm_can_frame_t rx_frame;
 	int32_t ret;
 	uint64_t start_time_us;
 	uint64_t elapsed_us;
@@ -116,12 +116,12 @@ static int32_t lpf_mcu_transport_can_transfer(
 		return OSAL_ERR_INVALID_PARAM;
 	}
 
-	ctx = (lpf_mcu_can_context_t *)handle;
+	ctx = (pdm_mcu_can_context_t *)handle;
 
 	/* 记录起始时间 */
 	start_time_us = osal_get_monotonic_time();
 
-	/* 分片发送 LPF protocol 报文（CAN 每帧最多 8 字节） */
+	/* 分片发送 PDM protocol 报文（CAN 每帧最多 8 字节） */
 	while (sent_bytes < packet_len) {
 		uint32_t chunk_size =
 			(packet_len - sent_bytes > 8) ? 8 : (packet_len - sent_bytes);
@@ -130,7 +130,7 @@ static int32_t lpf_mcu_transport_can_transfer(
 		can_frame.dlc = chunk_size;
 		osal_memcpy(can_frame.data, &packet[sent_bytes], chunk_size);
 
-		ret = lpf_hw_transport_can_send(ctx->can_handle, &can_frame);
+		ret = pdm_hw_transport_can_send(ctx->can_handle, &can_frame);
 		if (ret != OSAL_SUCCESS) {
 			return ret;
 		}
@@ -157,7 +157,7 @@ static int32_t lpf_mcu_transport_can_transfer(
 	osal_mutex_lock(&ctx->rx_mutex);
 
 	while (recv_bytes < resp_size) {
-		ret = lpf_hw_transport_can_recv(ctx->can_handle, &rx_frame, remaining_timeout_ms);
+		ret = pdm_hw_transport_can_recv(ctx->can_handle, &rx_frame, remaining_timeout_ms);
 		if (ret != OSAL_SUCCESS) {
 			osal_mutex_unlock(&ctx->rx_mutex);
 			return ret;
@@ -205,10 +205,10 @@ static int32_t lpf_mcu_transport_can_transfer(
 /**
  * @brief CAN接口的ops结构定义（导出供lpf_mcu.c使用）
  */
-const lpf_mcu_transport_ops_t lpf_mcu_transport_can_ops = {
-	.interface = LPF_CONFIG_MCU_INTERFACE_CAN,
+const pdm_mcu_transport_ops_t pdm_mcu_transport_can_ops = {
+	.interface = PDM_CONFIG_MCU_INTERFACE_CAN,
 	.name = "can",
-	.open = lpf_mcu_transport_can_open,
-	.close = lpf_mcu_transport_can_close,
-	.transfer = lpf_mcu_transport_can_transfer,
+	.open = pdm_mcu_transport_can_open,
+	.close = pdm_mcu_transport_can_close,
+	.transfer = pdm_mcu_transport_can_transfer,
 };

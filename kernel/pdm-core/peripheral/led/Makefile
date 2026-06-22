@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: GPL-2.0
 
-lpf_core-$(CONFIG_LPF_LED_SERVICE) += lpf-core/peripheral/led/lpf_led_config_driver.o
-lpf_core-$(CONFIG_LPF_LED_SERVICE) += lpf-core/peripheral/led/lpf_led_service.o
-lpf_core-$(CONFIG_LPF_LED_SERVICE) += lpf-core/peripheral/led/lpf_led_gpio.o
-lpf_core-$(CONFIG_LPF_LED_SERVICE) += lpf-core/peripheral/led/lpf_led_pwm.o
-lpf_core-$(CONFIG_LPF_LED_SERVICE) += lpf-core/peripheral/led/lpf_led_chrdev.o
-lpf_core-$(CONFIG_LPF_LED_SERVICE) += lpf-core/peripheral/led/lpf_led_proc.o
+pdm_core-$(CONFIG_PDM_LED_SERVICE) += pdm-core/peripheral/led/pdm_led_config_driver.o
+pdm_core-$(CONFIG_PDM_LED_SERVICE) += pdm-core/peripheral/led/pdm_led_service.o
+pdm_core-$(CONFIG_PDM_LED_SERVICE) += pdm-core/peripheral/led/pdm_led_gpio.o
+pdm_core-$(CONFIG_PDM_LED_SERVICE) += pdm-core/peripheral/led/pdm_led_pwm.o
+pdm_core-$(CONFIG_PDM_LED_SERVICE) += pdm-core/peripheral/led/pdm_led_chrdev.o
+pdm_core-$(CONFIG_PDM_LED_SERVICE) += pdm-core/peripheral/led/pdm_led_proc.o

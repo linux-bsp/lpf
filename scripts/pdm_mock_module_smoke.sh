@@ -3,10 +3,10 @@
 
 set -eu
 
-module_dir=${LPF_MODULE_DIR:-_build/modules}
-smoke_binary=${LPF_SMOKE_BINARY:-_build/tests/bin/lpf_mock_runtime_smoke}
-expected_instance_devnode_mode=${LPF_EXPECT_INSTANCE_DEVNODE_MODE:-0660}
-required_modules="osal lpf_configs lpf_core lpf_hw_mock_selftest lpf_dummy_service_selftest"
+module_dir=${PDM_MODULE_DIR:-_build/modules}
+smoke_binary=${PDM_SMOKE_BINARY:-_build/tests/bin/pdm_mock_runtime_smoke}
+expected_instance_devnode_mode=${PDM_EXPECT_INSTANCE_DEVNODE_MODE:-0660}
+required_modules="osal pdm_configs pdm_core pdm_hw_mock_selftest pdm_dummy_service_selftest"
 loaded_modules=
 
 log()
@@ -135,7 +135,7 @@ expect_has_write_bits()
 
 check_procfs()
 {
-	for path in /proc/lpf/mcu /proc/lpf/led; do
+	for path in /proc/pdm/mcu /proc/pdm/led; do
 		expect_path "$path"
 		expect_readable "$path"
 		expect_no_write_bits "$path"
@@ -149,7 +149,7 @@ check_debugfs()
 		return
 	fi
 
-	for path in /sys/kernel/debug/lpf/mcu /sys/kernel/debug/lpf/led; do
+	for path in /sys/kernel/debug/pdm/mcu /sys/kernel/debug/pdm/led; do
 		expect_path "$path"
 		expect_has_write_bits "$path"
 	done
@@ -157,7 +157,7 @@ check_debugfs()
 
 check_sysfs()
 {
-	for base in /sys/class/misc/lpf_mcu0 /sys/class/misc/lpf_led0 /sys/class/misc/lpf_led1; do
+	for base in /sys/class/misc/pdm_mcu0 /sys/class/misc/pdm_led0 /sys/class/misc/pdm_led1; do
 		expect_path "$base"
 		for attr in name type index state capabilities driver soc last_error error_count open_count; do
 			expect_readable "$base/$attr"
@@ -168,9 +168,9 @@ check_sysfs()
 
 check_devnode_modes()
 {
-	expect_mode /dev/lpf_ctl 666
+	expect_mode /dev/pdm_ctl 666
 
-	for path in /dev/lpf/mcu0 /dev/lpf/led0 /dev/lpf/led1; do
+	for path in /dev/pdm/mcu0 /dev/pdm/led0 /dev/pdm/led1; do
 		expect_mode "$path" "$expected_instance_devnode_mode"
 		expect_not_world_writable "$path"
 	done
@@ -178,13 +178,13 @@ check_devnode_modes()
 
 check_runtime_nodes()
 {
-	wait_for_path /dev/lpf_ctl
-	wait_for_path /dev/lpf/mcu0
-	wait_for_path /dev/lpf/led0
-	wait_for_path /dev/lpf/led1
+	wait_for_path /dev/pdm_ctl
+	wait_for_path /dev/pdm/mcu0
+	wait_for_path /dev/pdm/led0
+	wait_for_path /dev/pdm/led1
 
-	expect_absent /dev/lpf/mcu1
-	expect_absent /dev/lpf/led2
+	expect_absent /dev/pdm/mcu1
+	expect_absent /dev/pdm/led2
 
 	check_devnode_modes
 	check_sysfs
@@ -195,7 +195,7 @@ check_runtime_nodes()
 run_user_smoke()
 {
 	[ -x "$smoke_binary" ] ||
-		die "runtime smoke binary not found or not executable: $smoke_binary; run make tests first or set LPF_SMOKE_BINARY"
+		die "runtime smoke binary not found or not executable: $smoke_binary; run make tests first or set PDM_SMOKE_BINARY"
 
 	log "  SMOKE   $smoke_binary"
 	"$smoke_binary"
@@ -234,10 +234,10 @@ if [ "$(id -u)" != "0" ]; then
 	die "module smoke test requires root; run with sudo or as root"
 fi
 
-log "LPF mock module smoke test"
+log "PDM mock module smoke test"
 log "Module directory: $module_dir"
 log "Runtime smoke binary: $smoke_binary"
-log "Expected LPF instance devnode mode: $expected_instance_devnode_mode"
+log "Expected PDM instance devnode mode: $expected_instance_devnode_mode"
 
 for module in $required_modules; do
 	load_module "$module"
@@ -246,4 +246,4 @@ done
 check_runtime_nodes
 run_user_smoke
 
-log "LPF mock module smoke test passed"
+log "PDM mock module smoke test passed"

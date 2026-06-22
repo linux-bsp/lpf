@@ -4,8 +4,8 @@
 set -eu
 
 make_cmd=${MAKE:-make}
-defconfig=${LPF_KERNEL_MATRIX_DEFCONFIG:-ubuntu_x86_mock_modules_defconfig}
-build_root=${LPF_KERNEL_MATRIX_BUILD_ROOT:-_build/kernel-matrix}
+defconfig=${PDM_KERNEL_MATRIX_DEFCONFIG:-ubuntu_x86_mock_modules_defconfig}
+build_root=${PDM_KERNEL_MATRIX_BUILD_ROOT:-_build/kernel-matrix}
 kernel_src_list=${KERNEL_SRC_LIST:-${KERNEL_SRC:-/lib/modules/$(uname -r)/build}}
 
 log()
@@ -38,7 +38,7 @@ kernel_tag()
 
 [ -n "$kernel_src_list" ] || die "KERNEL_SRC_LIST is empty"
 
-log "LPF kernel module matrix build"
+log "PDM kernel module matrix build"
 log "Defconfig: $defconfig"
 log "Output root: $build_root"
 
@@ -62,4 +62,4 @@ for kernel_src in $kernel_src_list; do
 done
 
 log ""
-log "LPF kernel module matrix build passed"
+log "PDM kernel module matrix build passed"

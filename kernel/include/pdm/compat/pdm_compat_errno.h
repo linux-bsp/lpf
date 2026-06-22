@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-2.0
 
-#ifndef LPF_COMPAT_ERRNO_H
-#define LPF_COMPAT_ERRNO_H
+#ifndef PDM_COMPAT_ERRNO_H
+#define PDM_COMPAT_ERRNO_H
 
 #include <linux/errno.h>
 
 #include "osal.h"
 
-static inline int32_t lpf_compat_errno_to_status(int ret)
+static inline int32_t pdm_compat_errno_to_status(int ret)
 {
 	int err;
 
@@ -25,4 +25,4 @@ static inline int32_t lpf_compat_errno_to_status(int ret)
 	return err;
 }
 
-#endif /* LPF_COMPAT_ERRNO_H */
+#endif /* PDM_COMPAT_ERRNO_H */

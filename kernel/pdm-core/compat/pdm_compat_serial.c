@@ -11,7 +11,7 @@
 #include <linux/tty_ldisc.h>
 #include <linux/wait.h>
 
-#include "lpf/compat/lpf_compat_serial.h"
+#include "pdm/compat/pdm_compat_serial.h"
 
 typedef struct {
 	struct file *file;
@@ -21,14 +21,14 @@ typedef struct {
 	osal_mutex_t config_lock;
 	osal_mutex_t state_lock;
 	wait_queue_head_t idle_wait;
-	lpf_serial_config_t config;
+	pdm_serial_config_t config;
 	uint32_t active_ops;
 	char path[128];
 	bool initialized;
 	bool closing;
-} lpf_compat_serial_context_t;
+} pdm_compat_serial_context_t;
 
-static int32_t lpf_compat_serial_errno_to_status(int ret)
+static int32_t pdm_compat_serial_errno_to_status(int ret)
 {
 	int err;
 
@@ -46,8 +46,8 @@ static int32_t lpf_compat_serial_errno_to_status(int ret)
 	return err;
 }
 
-static bool lpf_compat_serial_valid_config(
-	const lpf_serial_config_t *config)
+static bool pdm_compat_serial_valid_config(
+	const pdm_serial_config_t *config)
 {
 	if (!config)
 		return false;
@@ -61,20 +61,20 @@ static bool lpf_compat_serial_valid_config(
 	if (config->stop_bits != 1 && config->stop_bits != 2)
 		return false;
 
-	if (config->parity != LPF_SERIAL_PARITY_NONE &&
-	    config->parity != LPF_SERIAL_PARITY_ODD &&
-	    config->parity != LPF_SERIAL_PARITY_EVEN)
+	if (config->parity != PDM_SERIAL_PARITY_NONE &&
+	    config->parity != PDM_SERIAL_PARITY_ODD &&
+	    config->parity != PDM_SERIAL_PARITY_EVEN)
 		return false;
 
-	if (config->flow_control != LPF_SERIAL_FLOW_NONE &&
-	    config->flow_control != LPF_SERIAL_FLOW_HW &&
-	    config->flow_control != LPF_SERIAL_FLOW_SW)
+	if (config->flow_control != PDM_SERIAL_FLOW_NONE &&
+	    config->flow_control != PDM_SERIAL_FLOW_HW &&
+	    config->flow_control != PDM_SERIAL_FLOW_SW)
 		return false;
 
 	return true;
 }
 
-static int32_t lpf_compat_serial_build_path(const char *device, char *path,
+static int32_t pdm_compat_serial_build_path(const char *device, char *path,
 					    size_t path_size)
 {
 	int len;
@@ -93,7 +93,7 @@ static int32_t lpf_compat_serial_build_path(const char *device, char *path,
 	return OSAL_SUCCESS;
 }
 
-static const char *lpf_compat_serial_tty_name_from_path(const char *path)
+static const char *pdm_compat_serial_tty_name_from_path(const char *path)
 {
 	const char *name;
 
@@ -104,7 +104,7 @@ static const char *lpf_compat_serial_tty_name_from_path(const char *path)
 	return name ? name + 1 : path;
 }
 
-static int32_t lpf_compat_serial_open_tty(const char *path,
+static int32_t pdm_compat_serial_open_tty(const char *path,
 					  struct tty_struct **tty)
 {
 	const char *name;
@@ -115,25 +115,25 @@ static int32_t lpf_compat_serial_open_tty(const char *path,
 		return OSAL_ERR_INVALID_PARAM;
 
 	*tty = NULL;
-	name = lpf_compat_serial_tty_name_from_path(path);
+	name = pdm_compat_serial_tty_name_from_path(path);
 	if (!name || name[0] == '\0')
 		return OSAL_ERR_INVALID_PARAM;
 
 	ret = tty_dev_name_to_number(name, &devt);
 	if (ret < 0)
-		return lpf_compat_serial_errno_to_status(ret);
+		return pdm_compat_serial_errno_to_status(ret);
 
 	*tty = tty_kopen_shared(devt);
 	if (IS_ERR(*tty)) {
 		ret = PTR_ERR(*tty);
 		*tty = NULL;
-		return lpf_compat_serial_errno_to_status(ret);
+		return pdm_compat_serial_errno_to_status(ret);
 	}
 
 	return OSAL_SUCCESS;
 }
 
-static void lpf_compat_serial_make_raw(struct ktermios *termios)
+static void pdm_compat_serial_make_raw(struct ktermios *termios)
 {
 	termios->c_iflag &=
 		~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR |
@@ -147,17 +147,17 @@ static void lpf_compat_serial_make_raw(struct ktermios *termios)
 }
 
 static int32_t
-lpf_compat_serial_apply_config(lpf_compat_serial_context_t *ctx,
-			       const lpf_serial_config_t *config)
+pdm_compat_serial_apply_config(pdm_compat_serial_context_t *ctx,
+			       const pdm_serial_config_t *config)
 {
 	struct ktermios termios;
 	int ret;
 
-	if (!ctx || !ctx->tty || !lpf_compat_serial_valid_config(config))
+	if (!ctx || !ctx->tty || !pdm_compat_serial_valid_config(config))
 		return OSAL_ERR_INVALID_PARAM;
 
 	termios = ctx->tty->termios;
-	lpf_compat_serial_make_raw(&termios);
+	pdm_compat_serial_make_raw(&termios);
 
 	switch (config->data_bits) {
 	case 5:
@@ -178,14 +178,14 @@ lpf_compat_serial_apply_config(lpf_compat_serial_context_t *ctx,
 	if (config->stop_bits == 2)
 		termios.c_cflag |= CSTOPB;
 
-	if (config->parity == LPF_SERIAL_PARITY_ODD)
+	if (config->parity == PDM_SERIAL_PARITY_ODD)
 		termios.c_cflag |= PARENB | PARODD;
-	else if (config->parity == LPF_SERIAL_PARITY_EVEN)
+	else if (config->parity == PDM_SERIAL_PARITY_EVEN)
 		termios.c_cflag |= PARENB;
 
-	if (config->flow_control == LPF_SERIAL_FLOW_HW)
+	if (config->flow_control == PDM_SERIAL_FLOW_HW)
 		termios.c_cflag |= CRTSCTS;
-	else if (config->flow_control == LPF_SERIAL_FLOW_SW)
+	else if (config->flow_control == PDM_SERIAL_FLOW_SW)
 		termios.c_iflag |= IXON | IXOFF | IXANY;
 
 	tty_termios_encode_baud_rate(&termios, config->baud_rate,
@@ -193,22 +193,22 @@ lpf_compat_serial_apply_config(lpf_compat_serial_context_t *ctx,
 
 	ret = tty_set_termios(ctx->tty, &termios);
 	if (ret < 0)
-		return lpf_compat_serial_errno_to_status(ret);
+		return pdm_compat_serial_errno_to_status(ret);
 
 	ctx->config = *config;
 	return OSAL_SUCCESS;
 }
 
-static int32_t lpf_compat_serial_wait_result(ssize_t ret)
+static int32_t pdm_compat_serial_wait_result(ssize_t ret)
 {
 	if (ret >= 0)
 		return (int32_t)ret;
 
-	return lpf_compat_serial_errno_to_status((int)ret);
+	return pdm_compat_serial_errno_to_status((int)ret);
 }
 
 static int32_t
-lpf_compat_serial_begin_op(lpf_compat_serial_context_t *ctx)
+pdm_compat_serial_begin_op(pdm_compat_serial_context_t *ctx)
 {
 	int32_t ret = OSAL_SUCCESS;
 
@@ -225,7 +225,7 @@ lpf_compat_serial_begin_op(lpf_compat_serial_context_t *ctx)
 	return ret;
 }
 
-static void lpf_compat_serial_end_op(lpf_compat_serial_context_t *ctx)
+static void pdm_compat_serial_end_op(pdm_compat_serial_context_t *ctx)
 {
 	bool idle;
 
@@ -242,7 +242,7 @@ static void lpf_compat_serial_end_op(lpf_compat_serial_context_t *ctx)
 		wake_up(&ctx->idle_wait);
 }
 
-static bool lpf_compat_serial_is_closing(lpf_compat_serial_context_t *ctx)
+static bool pdm_compat_serial_is_closing(pdm_compat_serial_context_t *ctx)
 {
 	bool closing;
 
@@ -253,12 +253,12 @@ static bool lpf_compat_serial_is_closing(lpf_compat_serial_context_t *ctx)
 	return closing;
 }
 
-static bool lpf_compat_serial_timeout_expired(unsigned long deadline)
+static bool pdm_compat_serial_timeout_expired(unsigned long deadline)
 {
 	return deadline != MAX_JIFFY_OFFSET && time_after_eq(jiffies, deadline);
 }
 
-static unsigned int lpf_compat_serial_sleep_ms(unsigned long deadline)
+static unsigned int pdm_compat_serial_sleep_ms(unsigned long deadline)
 {
 	unsigned long remaining;
 
@@ -272,8 +272,8 @@ static unsigned int lpf_compat_serial_sleep_ms(unsigned long deadline)
 	return min_t(unsigned int, remaining, 20);
 }
 
-static int32_t lpf_compat_serial_rw_loop(
-	lpf_compat_serial_context_t *ctx, void *buffer, uint32_t size,
+static int32_t pdm_compat_serial_rw_loop(
+	pdm_compat_serial_context_t *ctx, void *buffer, uint32_t size,
 	int32_t timeout, bool write)
 {
 	unsigned long deadline;
@@ -291,7 +291,7 @@ static int32_t lpf_compat_serial_rw_loop(
 		deadline = jiffies + msecs_to_jiffies(timeout);
 
 	for (;;) {
-		if (lpf_compat_serial_is_closing(ctx))
+		if (pdm_compat_serial_is_closing(ctx))
 			return OSAL_ERR_INVALID_ID;
 
 		if (write)
@@ -307,21 +307,21 @@ static int32_t lpf_compat_serial_rw_loop(
 				return 0;
 		} else if (ret != -EAGAIN && ret != -EWOULDBLOCK &&
 			   ret != -ERESTARTSYS)
-			return lpf_compat_serial_wait_result(ret);
+			return pdm_compat_serial_wait_result(ret);
 
 		if (timeout == 0 ||
-		    lpf_compat_serial_timeout_expired(deadline))
+		    pdm_compat_serial_timeout_expired(deadline))
 			return OSAL_ERR_TIMEOUT;
 
-		msleep(lpf_compat_serial_sleep_ms(deadline));
+		msleep(pdm_compat_serial_sleep_ms(deadline));
 	}
 }
 
-int32_t lpf_compat_serial_open(const char *device,
-			       const lpf_serial_config_t *config,
-			       lpf_serial_handle_t *handle)
+int32_t pdm_compat_serial_open(const char *device,
+			       const pdm_serial_config_t *config,
+			       pdm_serial_handle_t *handle)
 {
-	lpf_compat_serial_context_t *ctx;
+	pdm_compat_serial_context_t *ctx;
 	int ret;
 
 	if (!device || !config || !handle)
@@ -329,14 +329,14 @@ int32_t lpf_compat_serial_open(const char *device,
 
 	*handle = NULL;
 
-	if (!lpf_compat_serial_valid_config(config))
+	if (!pdm_compat_serial_valid_config(config))
 		return OSAL_ERR_INVALID_PARAM;
 
 	ctx = osal_zalloc(sizeof(*ctx));
 	if (!ctx)
 		return OSAL_ERR_NO_MEMORY;
 
-	ret = lpf_compat_serial_build_path(device, ctx->path,
+	ret = pdm_compat_serial_build_path(device, ctx->path,
 					   sizeof(ctx->path));
 	if (ret != OSAL_SUCCESS)
 		goto err_free;
@@ -361,16 +361,16 @@ int32_t lpf_compat_serial_open(const char *device,
 
 	ctx->file = filp_open(ctx->path, O_RDWR | O_NOCTTY | O_NONBLOCK, 0);
 	if (IS_ERR(ctx->file)) {
-		ret = lpf_compat_serial_errno_to_status(PTR_ERR(ctx->file));
+		ret = pdm_compat_serial_errno_to_status(PTR_ERR(ctx->file));
 		ctx->file = NULL;
 		goto err_state_mutex;
 	}
 
-	ret = lpf_compat_serial_open_tty(ctx->path, &ctx->tty);
+	ret = pdm_compat_serial_open_tty(ctx->path, &ctx->tty);
 	if (ret != OSAL_SUCCESS)
 		goto err_file;
 
-	ret = lpf_compat_serial_apply_config(ctx, config);
+	ret = pdm_compat_serial_apply_config(ctx, config);
 	if (ret != OSAL_SUCCESS)
 		goto err_tty;
 
@@ -380,7 +380,7 @@ int32_t lpf_compat_serial_open(const char *device,
 	ctx->initialized = true;
 	*handle = ctx;
 
-	LOG_INFO("LPF_SERIAL", "opened %s @ %u bps", ctx->path,
+	LOG_INFO("PDM_SERIAL", "opened %s @ %u bps", ctx->path,
 		 config->baud_rate);
 	return OSAL_SUCCESS;
 
@@ -403,9 +403,9 @@ err_free:
 	return ret;
 }
 
-int32_t lpf_compat_serial_close(lpf_serial_handle_t handle)
+int32_t pdm_compat_serial_close(pdm_serial_handle_t handle)
 {
-	lpf_compat_serial_context_t *ctx = handle;
+	pdm_compat_serial_context_t *ctx = handle;
 	struct tty_struct *tty;
 	struct file *file;
 
@@ -443,109 +443,109 @@ int32_t lpf_compat_serial_close(lpf_serial_handle_t handle)
 	return OSAL_SUCCESS;
 }
 
-int32_t lpf_compat_serial_write(lpf_serial_handle_t handle,
+int32_t pdm_compat_serial_write(pdm_serial_handle_t handle,
 				const void *buffer, uint32_t size,
 				int32_t timeout)
 {
-	lpf_compat_serial_context_t *ctx = handle;
+	pdm_compat_serial_context_t *ctx = handle;
 	int32_t ret;
 
 	if (!ctx || !buffer || size == 0)
 		return OSAL_ERR_INVALID_PARAM;
 
-	ret = lpf_compat_serial_begin_op(ctx);
+	ret = pdm_compat_serial_begin_op(ctx);
 	if (ret != OSAL_SUCCESS)
 		return ret;
 
 	osal_mutex_lock(&ctx->tx_lock);
 	if (!READ_ONCE(ctx->initialized) || !ctx->file) {
 		osal_mutex_unlock(&ctx->tx_lock);
-		lpf_compat_serial_end_op(ctx);
+		pdm_compat_serial_end_op(ctx);
 		return OSAL_ERR_INVALID_ID;
 	}
 
-	ret = lpf_compat_serial_rw_loop(ctx, (void *)buffer, size, timeout,
+	ret = pdm_compat_serial_rw_loop(ctx, (void *)buffer, size, timeout,
 					true);
 	osal_mutex_unlock(&ctx->tx_lock);
-	lpf_compat_serial_end_op(ctx);
+	pdm_compat_serial_end_op(ctx);
 	return ret;
 }
 
-int32_t lpf_compat_serial_read(lpf_serial_handle_t handle, void *buffer,
+int32_t pdm_compat_serial_read(pdm_serial_handle_t handle, void *buffer,
 			       uint32_t size, int32_t timeout)
 {
-	lpf_compat_serial_context_t *ctx = handle;
+	pdm_compat_serial_context_t *ctx = handle;
 	int32_t ret;
 
 	if (!ctx || !buffer || size == 0)
 		return OSAL_ERR_INVALID_PARAM;
 
-	ret = lpf_compat_serial_begin_op(ctx);
+	ret = pdm_compat_serial_begin_op(ctx);
 	if (ret != OSAL_SUCCESS)
 		return ret;
 
 	osal_mutex_lock(&ctx->rx_lock);
 	if (!READ_ONCE(ctx->initialized) || !ctx->file) {
 		osal_mutex_unlock(&ctx->rx_lock);
-		lpf_compat_serial_end_op(ctx);
+		pdm_compat_serial_end_op(ctx);
 		return OSAL_ERR_INVALID_ID;
 	}
 
-	ret = lpf_compat_serial_rw_loop(ctx, buffer, size, timeout, false);
+	ret = pdm_compat_serial_rw_loop(ctx, buffer, size, timeout, false);
 	osal_mutex_unlock(&ctx->rx_lock);
-	lpf_compat_serial_end_op(ctx);
+	pdm_compat_serial_end_op(ctx);
 	return ret;
 }
 
-int32_t lpf_compat_serial_flush(lpf_serial_handle_t handle)
+int32_t pdm_compat_serial_flush(pdm_serial_handle_t handle)
 {
-	lpf_compat_serial_context_t *ctx = handle;
+	pdm_compat_serial_context_t *ctx = handle;
 	int32_t ret;
 
 	if (!ctx)
 		return OSAL_ERR_INVALID_PARAM;
 
-	ret = lpf_compat_serial_begin_op(ctx);
+	ret = pdm_compat_serial_begin_op(ctx);
 	if (ret != OSAL_SUCCESS)
 		return ret;
 
 	osal_mutex_lock(&ctx->config_lock);
 	if (!READ_ONCE(ctx->initialized) || !ctx->tty) {
 		osal_mutex_unlock(&ctx->config_lock);
-		lpf_compat_serial_end_op(ctx);
+		pdm_compat_serial_end_op(ctx);
 		return OSAL_ERR_INVALID_ID;
 	}
 
 	tty_ldisc_flush(ctx->tty);
 	tty_driver_flush_buffer(ctx->tty);
 	osal_mutex_unlock(&ctx->config_lock);
-	lpf_compat_serial_end_op(ctx);
+	pdm_compat_serial_end_op(ctx);
 
 	return OSAL_SUCCESS;
 }
 
-int32_t lpf_compat_serial_set_config(lpf_serial_handle_t handle,
-				     const lpf_serial_config_t *config)
+int32_t pdm_compat_serial_set_config(pdm_serial_handle_t handle,
+				     const pdm_serial_config_t *config)
 {
-	lpf_compat_serial_context_t *ctx = handle;
+	pdm_compat_serial_context_t *ctx = handle;
 	int32_t ret;
 
 	if (!ctx || !config)
 		return OSAL_ERR_INVALID_PARAM;
 
-	ret = lpf_compat_serial_begin_op(ctx);
+	ret = pdm_compat_serial_begin_op(ctx);
 	if (ret != OSAL_SUCCESS)
 		return ret;
 
 	osal_mutex_lock(&ctx->config_lock);
 	if (!READ_ONCE(ctx->initialized) || !ctx->tty) {
 		osal_mutex_unlock(&ctx->config_lock);
-		lpf_compat_serial_end_op(ctx);
+		pdm_compat_serial_end_op(ctx);
 		return OSAL_ERR_INVALID_ID;
 	}
 
-	ret = lpf_compat_serial_apply_config(ctx, config);
+	ret = pdm_compat_serial_apply_config(ctx, config);
 	osal_mutex_unlock(&ctx->config_lock);
-	lpf_compat_serial_end_op(ctx);
+	pdm_compat_serial_end_op(ctx);
 	return ret;
 }

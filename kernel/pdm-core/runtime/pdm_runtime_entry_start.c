@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-2.0
 
-#include "lpf_runtime_internal.h"
+#include "pdm_runtime_internal.h"
 
-const lpf_runtime_entry_t lpf_runtime_entry_start
+const pdm_runtime_entry_t pdm_runtime_entry_start
 	__attribute__((used, aligned(sizeof(void *)),
-		       section(LPF_RUNTIME_ENTRY_SECTION))) = {};
+		       section(PDM_RUNTIME_ENTRY_SECTION))) = {};
 
-const lpf_runtime_config_driver_t lpf_runtime_config_driver_start
+const pdm_runtime_config_driver_t pdm_runtime_config_driver_start
 	__attribute__((used, aligned(sizeof(void *)),
-		       section(LPF_RUNTIME_CONFIG_DRIVER_SECTION))) = {};
+		       section(PDM_RUNTIME_CONFIG_DRIVER_SECTION))) = {};

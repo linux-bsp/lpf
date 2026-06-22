@@ -1,5 +1,5 @@
 /************************************************************************
- * LPF_CONFIG 平台配置类型定义
+ * PDM_CONFIG 平台配置类型定义
  *
  * 功能：
  * - 板级配置（顶层）
@@ -8,11 +8,11 @@
  * - 汇总所有外设配置，形成完整的板级配置
  ************************************************************************/
 
-#ifndef LPF_CONFIG_PLATFORM_H
-#define LPF_CONFIG_PLATFORM_H
+#ifndef PDM_CONFIG_PLATFORM_H
+#define PDM_CONFIG_PLATFORM_H
 
-#include "lpf/config/lpf_config_mcu.h"
-#include "lpf/config/lpf_config_led.h"
+#include "pdm/config/pdm_config_mcu.h"
+#include "pdm/config/pdm_config_led.h"
 
 /*===========================================================================
  * 板级配置（顶层）
@@ -40,13 +40,13 @@ typedef struct {
 
 	/* 首选 DTS-like configured-device node 表 */
 	uint32_t device_node_count; /* configured-device node 数量 */
-	const lpf_config_device_node_t *device_nodes; /* 有序 node 表 */
+	const pdm_config_device_node_t *device_nodes; /* 有序 node 表 */
 
 	/* 兼容硬件外设配置数组（直接数组指针） */
 	uint32_t mcu_count; /* MCU外设数量 */
-	const lpf_config_mcu_entry_t *mcu_array; /* MCU外设数组（直接指向数组首元素） */
+	const pdm_config_mcu_entry_t *mcu_array; /* MCU外设数组（直接指向数组首元素） */
 	uint32_t led_count; /* LED外设数量 */
-	const lpf_config_led_entry_t *led_array; /* LED外设数组 */
-} lpf_config_platform_config_t;
+	const pdm_config_led_entry_t *led_array; /* LED外设数组 */
+} pdm_config_platform_config_t;
 
-#endif /* LPF_CONFIG_PLATFORM_H */
+#endif /* PDM_CONFIG_PLATFORM_H */

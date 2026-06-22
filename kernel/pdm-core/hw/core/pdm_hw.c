@@ -3,25 +3,25 @@
 #include <linux/module.h>
 
 #include "osal.h"
-#include "lpf/hw/lpf_hw.h"
-#include "lpf_hw_internal.h"
+#include "pdm/hw/pdm_hw.h"
+#include "pdm_hw_internal.h"
 static bool g_lpf_hw_builtin_drivers_ready;
 
-static const lpf_hw_builtin_driver_t *lpf_hw_builtin_driver_first(void)
+static const pdm_hw_builtin_driver_t *pdm_hw_builtin_driver_first(void)
 {
-	return &lpf_hw_builtin_driver_start + 1;
+	return &pdm_hw_builtin_driver_start + 1;
 }
 
-static const lpf_hw_builtin_driver_t *lpf_hw_builtin_driver_last(void)
+static const pdm_hw_builtin_driver_t *pdm_hw_builtin_driver_last(void)
 {
-	return &lpf_hw_builtin_driver_end;
+	return &pdm_hw_builtin_driver_end;
 }
 
 static void
-lpf_hw_builtin_drivers_exit_range(const lpf_hw_builtin_driver_t *end)
+pdm_hw_builtin_drivers_exit_range(const pdm_hw_builtin_driver_t *end)
 {
-	const lpf_hw_builtin_driver_t *first = lpf_hw_builtin_driver_first();
-	const lpf_hw_builtin_driver_t *driver = end;
+	const pdm_hw_builtin_driver_t *first = pdm_hw_builtin_driver_first();
+	const pdm_hw_builtin_driver_t *driver = end;
 
 	while (driver > first) {
 		driver--;
@@ -30,25 +30,25 @@ lpf_hw_builtin_drivers_exit_range(const lpf_hw_builtin_driver_t *end)
 	}
 }
 
-static int lpf_hw_builtin_drivers_init(void)
+static int pdm_hw_builtin_drivers_init(void)
 {
-	const lpf_hw_builtin_driver_t *driver;
+	const pdm_hw_builtin_driver_t *driver;
 	int ret;
 
-	for (driver = lpf_hw_builtin_driver_first();
-	     driver < lpf_hw_builtin_driver_last(); driver++) {
+	for (driver = pdm_hw_builtin_driver_first();
+	     driver < pdm_hw_builtin_driver_last(); driver++) {
 		if (!driver->init)
 			continue;
 
 		ret = driver->init();
 		if (ret) {
-			LOG_ERROR("LPF_HW", "Builtin driver %s init failed: %d",
+			LOG_ERROR("PDM_HW", "Builtin driver %s init failed: %d",
 				  driver->name ? driver->name : "unknown", ret);
-			lpf_hw_builtin_drivers_exit_range(driver);
+			pdm_hw_builtin_drivers_exit_range(driver);
 			return ret;
 		}
 
-		LOG_INFO("LPF_HW", "Builtin driver %s initialized",
+		LOG_INFO("PDM_HW", "Builtin driver %s initialized",
 			 driver->name ? driver->name : "unknown");
 	}
 
@@ -56,29 +56,29 @@ static int lpf_hw_builtin_drivers_init(void)
 	return 0;
 }
 
-static void lpf_hw_builtin_drivers_exit(void)
+static void pdm_hw_builtin_drivers_exit(void)
 {
 	if (!g_lpf_hw_builtin_drivers_ready)
 		return;
 
-	lpf_hw_builtin_drivers_exit_range(lpf_hw_builtin_driver_last());
+	pdm_hw_builtin_drivers_exit_range(pdm_hw_builtin_driver_last());
 	g_lpf_hw_builtin_drivers_ready = false;
 }
 
-int32_t lpf_hw_runtime_init(void)
+int32_t pdm_hw_runtime_init(void)
 {
 	int ret;
 
-	ret = lpf_hw_builtin_drivers_init();
+	ret = pdm_hw_builtin_drivers_init();
 	if (ret)
 		return ret;
 
-	LOG_INFO("LPF_HW", "runtime initialized");
+	LOG_INFO("PDM_HW", "runtime initialized");
 	return OSAL_SUCCESS;
 }
 
-void lpf_hw_runtime_exit(void)
+void pdm_hw_runtime_exit(void)
 {
-	lpf_hw_builtin_drivers_exit();
-	LOG_INFO("LPF_HW", "runtime exited");
+	pdm_hw_builtin_drivers_exit();
+	LOG_INFO("PDM_HW", "runtime exited");
 }

@@ -2,13 +2,13 @@
 
 #include <linux/math64.h>
 
-#include "lpf/hw/lpf_hw_pwm.h"
-#include "lpf_led_internal.h"
+#include "pdm/hw/pdm_hw_pwm.h"
+#include "pdm_led_internal.h"
 
-static int32_t lpf_led_pwm_init(lpf_led_context_t *ctx)
+static int32_t pdm_led_pwm_init(pdm_led_context_t *ctx)
 {
-	lpf_pwm_config_t pwm_config;
-	lpf_hw_pwm_handle_t pwm;
+	pdm_pwm_config_t pwm_config;
+	pdm_hw_pwm_handle_t pwm;
 	int32_t ret;
 
 	if (!ctx->config->hw.pwm.consumer ||
@@ -21,7 +21,7 @@ static int32_t lpf_led_pwm_init(lpf_led_context_t *ctx)
 	pwm_config.enabled = false;
 	pwm_config.polarity_inversed = ctx->config->hw.pwm.polarity_inversed;
 
-	ret = lpf_hw_pwm_init(&pwm_config, &pwm);
+	ret = pdm_hw_pwm_init(&pwm_config, &pwm);
 	if (ret != OSAL_SUCCESS)
 		return ret;
 
@@ -29,9 +29,9 @@ static int32_t lpf_led_pwm_init(lpf_led_context_t *ctx)
 	return OSAL_SUCCESS;
 }
 
-static int32_t lpf_led_pwm_apply(lpf_led_context_t *ctx)
+static int32_t pdm_led_pwm_apply(pdm_led_context_t *ctx)
 {
-	lpf_pwm_state_t state;
+	pdm_pwm_state_t state;
 	uint64_t duty;
 
 	if (!ctx->hw_handle || ctx->config->max_brightness == 0)
@@ -45,19 +45,19 @@ static int32_t lpf_led_pwm_apply(lpf_led_context_t *ctx)
 	state.enabled = ctx->enabled && ctx->brightness > 0;
 	state.polarity_inversed = ctx->config->hw.pwm.polarity_inversed;
 
-	return lpf_hw_pwm_apply(ctx->hw_handle, &state);
+	return pdm_hw_pwm_apply(ctx->hw_handle, &state);
 }
 
-static void lpf_led_pwm_deinit(lpf_led_context_t *ctx)
+static void pdm_led_pwm_deinit(pdm_led_context_t *ctx)
 {
 	if (ctx->hw_handle)
-		lpf_hw_pwm_deinit(ctx->hw_handle);
+		pdm_hw_pwm_deinit(ctx->hw_handle);
 	ctx->hw_handle = NULL;
 }
 
-const lpf_led_control_ops_t lpf_led_pwm_ops = {
-	.control = LPF_CONFIG_LED_CONTROL_PWM,
-	.init = lpf_led_pwm_init,
-	.apply = lpf_led_pwm_apply,
-	.deinit = lpf_led_pwm_deinit,
+const pdm_led_control_ops_t pdm_led_pwm_ops = {
+	.control = PDM_CONFIG_LED_CONTROL_PWM,
+	.init = pdm_led_pwm_init,
+	.apply = pdm_led_pwm_apply,
+	.deinit = pdm_led_pwm_deinit,
 };

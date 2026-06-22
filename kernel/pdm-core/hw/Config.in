@@ -1,4 +1,4 @@
-# LPF HW configuration
+# PDM HW configuration
 
 menu "Platform Configuration"
 
@@ -17,62 +17,62 @@ config PLATFORM_LINUX
 
 endmenu
 
-menu "LPF HW Configuration"
+menu "PDM HW Configuration"
 
-config LPF_HW_CAN
-	bool "LPF HW CAN transport support"
+config PDM_HW_CAN
+	bool "PDM HW CAN transport support"
 	default n
-	depends on LPF_RUNTIME
+	depends on PDM_RUNTIME
 	help
-	  Enable the LPF HW CAN transport path used by peripheral services.
+	  Enable the PDM HW CAN transport path used by peripheral services.
 
-config LPF_HW_UART
-	bool "LPF HW UART transport support"
+config PDM_HW_UART
+	bool "PDM HW UART transport support"
 	default n
-	depends on LPF_RUNTIME
+	depends on PDM_RUNTIME
 	help
-	  Enable the LPF HW UART transport path used by peripheral services.
+	  Enable the PDM HW UART transport path used by peripheral services.
 
-config LPF_HW_I2C
-	bool "LPF HW I2C bus support"
+config PDM_HW_I2C
+	bool "PDM HW I2C bus support"
 	default n
-	depends on LPF_RUNTIME
+	depends on PDM_RUNTIME
 	help
-	  Enable the LPF HW I2C bus path used by peripheral services.
+	  Enable the PDM HW I2C bus path used by peripheral services.
 
-config LPF_HW_SPI
-	bool "LPF HW SPI bus support"
+config PDM_HW_SPI
+	bool "PDM HW SPI bus support"
 	default n
-	depends on LPF_RUNTIME
+	depends on PDM_RUNTIME
 	help
-	  Enable the LPF HW SPI bus path used by peripheral services.
+	  Enable the PDM HW SPI bus path used by peripheral services.
 
-config LPF_HW_GPIO
-	bool "LPF HW GPIO control support"
+config PDM_HW_GPIO
+	bool "PDM HW GPIO control support"
 	default n
-	depends on LPF_RUNTIME
+	depends on PDM_RUNTIME
 	help
-	  Enable the LPF HW GPIO control path used by peripheral services.
+	  Enable the PDM HW GPIO control path used by peripheral services.
 
-config LPF_HW_PWM
-	bool "LPF HW PWM control support"
+config PDM_HW_PWM
+	bool "PDM HW PWM control support"
 	default n
-	depends on LPF_RUNTIME
+	depends on PDM_RUNTIME
 	help
-	  Enable the LPF HW PWM control path used by peripheral services.
+	  Enable the PDM HW PWM control path used by peripheral services.
 
-config LPF_HW_MOCK_SELFTEST
-	tristate "Build LPF HW mock backend self-test module"
-	depends on LPF_SOC_ADAPTER_MOCK && LPF_RUNTIME
+config PDM_HW_MOCK_SELFTEST
+	tristate "Build PDM HW mock backend self-test module"
+	depends on PDM_SOC_ADAPTER_MOCK && PDM_RUNTIME
 	depends on m
-	select LPF_HW_CAN
-	select LPF_HW_UART
-	select LPF_HW_I2C
-	select LPF_HW_SPI
-	select LPF_HW_GPIO
-	select LPF_HW_PWM
+	select PDM_HW_CAN
+	select PDM_HW_UART
+	select PDM_HW_I2C
+	select PDM_HW_SPI
+	select PDM_HW_GPIO
+	select PDM_HW_PWM
 	help
-	  Build lpf_hw_mock_selftest.ko. Loading this module runs LPF HW
+	  Build pdm_hw_mock_selftest.ko. Loading this module runs PDM HW
 	  GPIO, PWM, CAN, UART, I2C, and SPI operation checks through the
 	  mock SoC adapter.
 

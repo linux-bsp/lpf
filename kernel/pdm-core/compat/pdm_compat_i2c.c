@@ -3,10 +3,10 @@
 #include <linux/i2c.h>
 #include <linux/module.h>
 
-#include "lpf/compat/lpf_compat_errno.h"
-#include "lpf/compat/lpf_compat_i2c.h"
+#include "pdm/compat/pdm_compat_errno.h"
+#include "pdm/compat/pdm_compat_i2c.h"
 
-static bool lpf_compat_i2c_parse_adapter_id(const char *device,
+static bool pdm_compat_i2c_parse_adapter_id(const char *device,
 					    int *adapter_id)
 {
 	const char *name;
@@ -26,7 +26,7 @@ static bool lpf_compat_i2c_parse_adapter_id(const char *device,
 	return false;
 }
 
-int32_t lpf_compat_i2c_open(const char *device, lpf_i2c_handle_t *handle)
+int32_t pdm_compat_i2c_open(const char *device, pdm_i2c_handle_t *handle)
 {
 	struct i2c_adapter *adapter;
 	int adapter_id;
@@ -35,7 +35,7 @@ int32_t lpf_compat_i2c_open(const char *device, lpf_i2c_handle_t *handle)
 		return OSAL_ERR_INVALID_PARAM;
 
 	*handle = NULL;
-	if (!lpf_compat_i2c_parse_adapter_id(device, &adapter_id))
+	if (!pdm_compat_i2c_parse_adapter_id(device, &adapter_id))
 		return OSAL_ERR_INVALID_PARAM;
 
 	adapter = i2c_get_adapter(adapter_id);
@@ -46,14 +46,14 @@ int32_t lpf_compat_i2c_open(const char *device, lpf_i2c_handle_t *handle)
 	return OSAL_SUCCESS;
 }
 
-void lpf_compat_i2c_close(lpf_i2c_handle_t handle)
+void pdm_compat_i2c_close(pdm_i2c_handle_t handle)
 {
 	if (handle)
 		i2c_put_adapter((struct i2c_adapter *)handle);
 }
 
-int32_t lpf_compat_i2c_transfer(lpf_i2c_handle_t handle,
-				lpf_i2c_msg_t *msgs, uint32_t num)
+int32_t pdm_compat_i2c_transfer(pdm_i2c_handle_t handle,
+				pdm_i2c_msg_t *msgs, uint32_t num)
 {
 	struct i2c_adapter *adapter = handle;
 	struct i2c_msg *kernel_msgs;
@@ -87,5 +87,5 @@ int32_t lpf_compat_i2c_transfer(lpf_i2c_handle_t handle,
 	if (ret >= 0)
 		return OSAL_ERR_GENERIC;
 
-	return lpf_compat_errno_to_status(ret);
+	return pdm_compat_errno_to_status(ret);
 }

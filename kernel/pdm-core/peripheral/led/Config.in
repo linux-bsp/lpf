@@ -1,11 +1,11 @@
-if LPF_LED_SERVICE
+if PDM_LED_SERVICE
 
-config LPF_LED_MAX_DEVICES
+config PDM_LED_MAX_DEVICES
 	int "Maximum LED devices"
 	default 8
 	range 1 256
 	help
-	  Maximum number of configured LED devices managed by the LPF LED
+	  Maximum number of configured LED devices managed by the PDM LED
 	  peripheral service.
 
-endif # LPF_LED_SERVICE
+endif # PDM_LED_SERVICE

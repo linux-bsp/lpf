@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-2.0
 
-#ifndef LPF_HW_TYPES_H
-#define LPF_HW_TYPES_H
+#ifndef PDM_HW_TYPES_H
+#define PDM_HW_TYPES_H
 
-#include "lpf/types/lpf_can_types.h"
-#include "lpf/types/lpf_gpio_types.h"
-#include "lpf/types/lpf_i2c_types.h"
-#include "lpf/types/lpf_pwm_types.h"
-#include "lpf/types/lpf_serial_types.h"
-#include "lpf/types/lpf_spi_types.h"
+#include "pdm/types/pdm_can_types.h"
+#include "pdm/types/pdm_gpio_types.h"
+#include "pdm/types/pdm_i2c_types.h"
+#include "pdm/types/pdm_pwm_types.h"
+#include "pdm/types/pdm_serial_types.h"
+#include "pdm/types/pdm_spi_types.h"
 
-#endif /* LPF_HW_TYPES_H */
+#endif /* PDM_HW_TYPES_H */

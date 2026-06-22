@@ -42,7 +42,7 @@ int32_t pdi_led_open(pdi_led_context_t *ctx, const char *device_path)
 int32_t pdi_led_open_by_name(pdi_led_context_t *ctx, const char *name)
 {
 	pdi_ctl_context_t ctl;
-	struct lpf_ctl_device_info info;
+	struct pdm_ctl_device_info info;
 	char path[PDI_DEVICE_PATH_LEN];
 	int32_t ret;
 
@@ -61,7 +61,7 @@ int32_t pdi_led_open_by_name(pdi_led_context_t *ctx, const char *name)
 	if (ret < 0)
 		return ret;
 
-	if (info.type != LPF_CTL_DEVICE_TYPE_LED)
+	if (info.type != PDM_CTL_DEVICE_TYPE_LED)
 		return pdi_fail_no_device();
 
 	ret = snprintf(path, sizeof(path), PDI_LED_DEVICE_PATH_FORMAT,
@@ -86,41 +86,41 @@ int32_t pdi_led_close(pdi_led_context_t *ctx)
 	return pdi_result_from_syscall(ret);
 }
 
-int32_t pdi_led_get_info(pdi_led_context_t *ctx, struct lpf_led_info *info)
+int32_t pdi_led_get_info(pdi_led_context_t *ctx, struct pdm_led_info *info)
 {
 	if (pdi_check_ptr(info) < 0)
 		return PDI_FAILURE;
 
-	return pdi_led_ioctl_checked(ctx, LPF_LED_IOC_GET_INFO, info);
+	return pdi_led_ioctl_checked(ctx, PDM_LED_IOC_GET_INFO, info);
 }
 
 int32_t pdi_led_get_state(pdi_led_context_t *ctx,
-			  struct lpf_led_state *state)
+			  struct pdm_led_state *state)
 {
 	if (pdi_check_ptr(state) < 0)
 		return PDI_FAILURE;
 
-	return pdi_led_ioctl_checked(ctx, LPF_LED_IOC_GET_STATE, state);
+	return pdi_led_ioctl_checked(ctx, PDM_LED_IOC_GET_STATE, state);
 }
 
 int32_t pdi_led_set_brightness(pdi_led_context_t *ctx, uint32_t index,
 			       uint32_t brightness)
 {
-	struct lpf_led_brightness request = {
+	struct pdm_led_brightness request = {
 		.index = index,
 		.brightness = brightness,
 	};
 
-	return pdi_led_ioctl_checked(ctx, LPF_LED_IOC_SET_BRIGHTNESS,
+	return pdi_led_ioctl_checked(ctx, PDM_LED_IOC_SET_BRIGHTNESS,
 				     &request);
 }
 
 int32_t pdi_led_enable(pdi_led_context_t *ctx, uint32_t index)
 {
-	return pdi_led_ioctl_checked(ctx, LPF_LED_IOC_ENABLE, &index);
+	return pdi_led_ioctl_checked(ctx, PDM_LED_IOC_ENABLE, &index);
 }
 
 int32_t pdi_led_disable(pdi_led_context_t *ctx, uint32_t index)
 {
-	return pdi_led_ioctl_checked(ctx, LPF_LED_IOC_DISABLE, &index);
+	return pdi_led_ioctl_checked(ctx, PDM_LED_IOC_DISABLE, &index);
 }

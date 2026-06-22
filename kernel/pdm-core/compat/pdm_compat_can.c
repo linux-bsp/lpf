@@ -15,13 +15,13 @@
 #include <net/net_namespace.h>
 #include <net/sock.h>
 
-#include "lpf/compat/lpf_compat_can.h"
-#include "lpf/compat/lpf_compat_features.h"
+#include "pdm/compat/pdm_compat_can.h"
+#include "pdm/compat/pdm_compat_features.h"
 
-#if LPF_KERNEL_HAS_SOCKADDR_UNSIZED
-#define LPF_COMPAT_SOCKADDR_PTR(addr) ((struct sockaddr_unsized *)(addr))
+#if PDM_KERNEL_HAS_SOCKADDR_UNSIZED
+#define PDM_COMPAT_SOCKADDR_PTR(addr) ((struct sockaddr_unsized *)(addr))
 #else
-#define LPF_COMPAT_SOCKADDR_PTR(addr) ((struct sockaddr *)(addr))
+#define PDM_COMPAT_SOCKADDR_PTR(addr) ((struct sockaddr *)(addr))
 #endif
 
 typedef struct {
@@ -33,9 +33,9 @@ typedef struct {
 	uint32_t rx_timeout;
 	uint32_t tx_timeout;
 	bool initialized;
-} lpf_compat_can_context_t;
+} pdm_compat_can_context_t;
 
-static int32_t lpf_compat_can_errno_to_status(int ret)
+static int32_t pdm_compat_can_errno_to_status(int ret)
 {
 	int err;
 
@@ -49,7 +49,7 @@ static int32_t lpf_compat_can_errno_to_status(int ret)
 	return err;
 }
 
-static long lpf_compat_can_timeout_to_jiffies(uint32_t timeout_ms)
+static long pdm_compat_can_timeout_to_jiffies(uint32_t timeout_ms)
 {
 	if (timeout_ms == OS_PEND)
 		return MAX_SCHEDULE_TIMEOUT;
@@ -58,7 +58,7 @@ static long lpf_compat_can_timeout_to_jiffies(uint32_t timeout_ms)
 }
 
 static int32_t
-lpf_compat_can_set_socket_timeouts(lpf_compat_can_context_t *ctx)
+pdm_compat_can_set_socket_timeouts(pdm_compat_can_context_t *ctx)
 {
 	struct sock *sk;
 
@@ -67,15 +67,15 @@ lpf_compat_can_set_socket_timeouts(lpf_compat_can_context_t *ctx)
 
 	sk = ctx->sock->sk;
 	WRITE_ONCE(sk->sk_rcvtimeo,
-		   lpf_compat_can_timeout_to_jiffies(ctx->rx_timeout));
+		   pdm_compat_can_timeout_to_jiffies(ctx->rx_timeout));
 	WRITE_ONCE(sk->sk_sndtimeo,
-		   lpf_compat_can_timeout_to_jiffies(ctx->tx_timeout));
+		   pdm_compat_can_timeout_to_jiffies(ctx->tx_timeout));
 
 	return OSAL_SUCCESS;
 }
 
 static int32_t
-lpf_compat_can_bind_interface(lpf_compat_can_context_t *ctx)
+pdm_compat_can_bind_interface(pdm_compat_can_context_t *ctx)
 {
 	struct net_device *dev;
 	struct sockaddr_can addr = { 0 };
@@ -84,7 +84,7 @@ lpf_compat_can_bind_interface(lpf_compat_can_context_t *ctx)
 
 	dev = dev_get_by_name(&init_net, ctx->interface);
 	if (!dev) {
-		LOG_ERROR("LPF_CAN", "interface %s not found", ctx->interface);
+		LOG_ERROR("PDM_CAN", "interface %s not found", ctx->interface);
 		return OSAL_ENOENT;
 	}
 
@@ -94,20 +94,20 @@ lpf_compat_can_bind_interface(lpf_compat_can_context_t *ctx)
 	addr.can_family = AF_CAN;
 	addr.can_ifindex = ifindex;
 
-	ret = kernel_bind(ctx->sock, LPF_COMPAT_SOCKADDR_PTR(&addr), sizeof(addr));
+	ret = kernel_bind(ctx->sock, PDM_COMPAT_SOCKADDR_PTR(&addr), sizeof(addr));
 	if (ret < 0) {
-		LOG_ERROR("LPF_CAN", "bind %s failed: %d", ctx->interface,
+		LOG_ERROR("PDM_CAN", "bind %s failed: %d", ctx->interface,
 			  ret);
-		return lpf_compat_can_errno_to_status(ret);
+		return pdm_compat_can_errno_to_status(ret);
 	}
 
 	return OSAL_SUCCESS;
 }
 
-int32_t lpf_compat_can_init(const lpf_can_config_t *config,
-			    lpf_can_handle_t *handle)
+int32_t pdm_compat_can_init(const pdm_can_config_t *config,
+			    pdm_can_handle_t *handle)
 {
-	lpf_compat_can_context_t *ctx;
+	pdm_compat_can_context_t *ctx;
 	int ret;
 
 	if (!config || !handle)
@@ -142,23 +142,23 @@ int32_t lpf_compat_can_init(const lpf_can_config_t *config,
 	ret = sock_create_kern(&init_net, PF_CAN, SOCK_RAW, CAN_RAW,
 			       &ctx->sock);
 	if (ret < 0) {
-		LOG_ERROR("LPF_CAN", "create raw CAN socket failed: %d", ret);
-		ret = lpf_compat_can_errno_to_status(ret);
+		LOG_ERROR("PDM_CAN", "create raw CAN socket failed: %d", ret);
+		ret = pdm_compat_can_errno_to_status(ret);
 		goto err_mutex;
 	}
 
-	ret = lpf_compat_can_bind_interface(ctx);
+	ret = pdm_compat_can_bind_interface(ctx);
 	if (ret != OSAL_SUCCESS)
 		goto err_socket;
 
-	ret = lpf_compat_can_set_socket_timeouts(ctx);
+	ret = pdm_compat_can_set_socket_timeouts(ctx);
 	if (ret != OSAL_SUCCESS)
 		goto err_socket;
 
 	ctx->initialized = true;
 	*handle = ctx;
 
-	LOG_INFO("LPF_CAN", "initialized %s @ %u bps", ctx->interface,
+	LOG_INFO("PDM_CAN", "initialized %s @ %u bps", ctx->interface,
 		 ctx->baudrate);
 	return OSAL_SUCCESS;
 
@@ -174,9 +174,9 @@ err_free:
 	return ret;
 }
 
-int32_t lpf_compat_can_deinit(lpf_can_handle_t handle)
+int32_t pdm_compat_can_deinit(pdm_can_handle_t handle)
 {
-	lpf_compat_can_context_t *ctx = handle;
+	pdm_compat_can_context_t *ctx = handle;
 	struct socket *sock;
 
 	if (!ctx)
@@ -200,10 +200,10 @@ int32_t lpf_compat_can_deinit(lpf_can_handle_t handle)
 	return OSAL_SUCCESS;
 }
 
-int32_t lpf_compat_can_send(lpf_can_handle_t handle,
-			    const lpf_can_frame_t *frame)
+int32_t pdm_compat_can_send(pdm_can_handle_t handle,
+			    const pdm_can_frame_t *frame)
 {
-	lpf_compat_can_context_t *ctx = handle;
+	pdm_compat_can_context_t *ctx = handle;
 	struct can_frame can_frame = { 0 };
 	struct msghdr msg = { 0 };
 	struct kvec iov;
@@ -212,7 +212,7 @@ int32_t lpf_compat_can_send(lpf_can_handle_t handle,
 	if (!ctx || !frame)
 		return OSAL_ERR_INVALID_PARAM;
 
-	if (frame->dlc > LPF_CAN_MAX_DATA_LEN)
+	if (frame->dlc > PDM_CAN_MAX_DATA_LEN)
 		return OSAL_ERR_INVALID_SIZE;
 
 	osal_mutex_lock(&ctx->tx_lock);
@@ -235,19 +235,19 @@ int32_t lpf_compat_can_send(lpf_can_handle_t handle,
 		return OSAL_SUCCESS;
 
 	if (ret >= 0) {
-		LOG_ERROR("LPF_CAN", "short send: %d/%zu", ret,
+		LOG_ERROR("PDM_CAN", "short send: %d/%zu", ret,
 			  sizeof(can_frame));
 		return OSAL_ERR_GENERIC;
 	}
 
-	LOG_ERROR("LPF_CAN", "send failed: %d", ret);
-	return lpf_compat_can_errno_to_status(ret);
+	LOG_ERROR("PDM_CAN", "send failed: %d", ret);
+	return pdm_compat_can_errno_to_status(ret);
 }
 
-int32_t lpf_compat_can_recv(lpf_can_handle_t handle,
-			    lpf_can_frame_t *frame, int32_t timeout)
+int32_t pdm_compat_can_recv(pdm_can_handle_t handle,
+			    pdm_can_frame_t *frame, int32_t timeout)
 {
-	lpf_compat_can_context_t *ctx = handle;
+	pdm_compat_can_context_t *ctx = handle;
 	struct can_frame can_frame;
 	struct msghdr msg = { 0 };
 	struct kvec iov;
@@ -289,8 +289,8 @@ int32_t lpf_compat_can_recv(lpf_can_handle_t handle,
 	if (ret == sizeof(can_frame)) {
 		osal_memset(frame, 0, sizeof(*frame));
 		frame->can_id = can_frame.can_id;
-		frame->dlc = (can_frame.can_dlc > LPF_CAN_MAX_DATA_LEN) ?
-				     LPF_CAN_MAX_DATA_LEN :
+		frame->dlc = (can_frame.can_dlc > PDM_CAN_MAX_DATA_LEN) ?
+				     PDM_CAN_MAX_DATA_LEN :
 				     can_frame.can_dlc;
 		osal_memcpy(frame->data, can_frame.data, frame->dlc);
 		frame->timestamp =
@@ -299,18 +299,18 @@ int32_t lpf_compat_can_recv(lpf_can_handle_t handle,
 	}
 
 	if (ret >= 0) {
-		LOG_ERROR("LPF_CAN", "short receive: %d/%zu", ret,
+		LOG_ERROR("PDM_CAN", "short receive: %d/%zu", ret,
 			  sizeof(can_frame));
 		return OSAL_ERR_GENERIC;
 	}
 
-	return lpf_compat_can_errno_to_status(ret);
+	return pdm_compat_can_errno_to_status(ret);
 }
 
-int32_t lpf_compat_can_set_filter(lpf_can_handle_t handle,
+int32_t pdm_compat_can_set_filter(pdm_can_handle_t handle,
 				  uint32_t filter_id, uint32_t filter_mask)
 {
-	lpf_compat_can_context_t *ctx = handle;
+	pdm_compat_can_context_t *ctx = handle;
 	struct can_filter filter;
 	int ret;
 
@@ -334,8 +334,8 @@ int32_t lpf_compat_can_set_filter(lpf_can_handle_t handle,
 	osal_mutex_unlock(&ctx->rx_lock);
 
 	if (ret < 0) {
-		LOG_ERROR("LPF_CAN", "set filter failed: %d", ret);
-		return lpf_compat_can_errno_to_status(ret);
+		LOG_ERROR("PDM_CAN", "set filter failed: %d", ret);
+		return pdm_compat_can_errno_to_status(ret);
 	}
 
 	return OSAL_SUCCESS;

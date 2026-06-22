@@ -1,29 +1,29 @@
 // SPDX-License-Identifier: GPL-2.0
 
-#ifndef LPF_DEBUGFS_H
-#define LPF_DEBUGFS_H
+#ifndef PDM_DEBUGFS_H
+#define PDM_DEBUGFS_H
 
 #include <linux/dcache.h>
 #include <linux/types.h>
 
 #include "osal.h"
 
-#define LPF_DEBUGFS_ROOT_NAME_LEN 64U
-#define LPF_DEBUGFS_WRITE_MAX_SIZE 256U
+#define PDM_DEBUGFS_ROOT_NAME_LEN 64U
+#define PDM_DEBUGFS_WRITE_MAX_SIZE 256U
 
-typedef int (*lpf_debugfs_write_t)(char *command, size_t count, void *data);
+typedef int (*pdm_debugfs_write_t)(char *command, size_t count, void *data);
 
 typedef struct {
-	char root_name[LPF_DEBUGFS_ROOT_NAME_LEN];
+	char root_name[PDM_DEBUGFS_ROOT_NAME_LEN];
 	const char *name;
-	lpf_debugfs_write_t write;
+	pdm_debugfs_write_t write;
 	void *data;
 	struct dentry *entry;
-} lpf_debugfs_entry_t;
+} pdm_debugfs_entry_t;
 
-int lpf_debugfs_register(lpf_debugfs_entry_t *entry, const char *root_name,
-			 const char *name, lpf_debugfs_write_t write,
+int pdm_debugfs_register(pdm_debugfs_entry_t *entry, const char *root_name,
+			 const char *name, pdm_debugfs_write_t write,
 			 void *data);
-void lpf_debugfs_unregister(lpf_debugfs_entry_t *entry);
+void pdm_debugfs_unregister(pdm_debugfs_entry_t *entry);
 
-#endif /* LPF_DEBUGFS_H */
+#endif /* PDM_DEBUGFS_H */
