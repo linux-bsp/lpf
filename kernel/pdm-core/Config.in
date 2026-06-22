@@ -60,67 +60,12 @@ config PDM_SOC_ADAPTER_MOCK
 
 endchoice
 
-menu "PDM Protocol Configuration"
-
-config PDM_PROTOCOL
-	bool "PDM peripheral protocol support"
-	default n
-	help
-	  Enable the PDM-owned protocol encoder/decoder used by peripheral
-	  services that need framed communication.
-
-	  The protocol layer is part of PDM infrastructure and is linked into
-	  pdm_core.ko so services hosted by the integrated PDM peripheral
-	  runtime can share the same packet framing implementation.
-
-config PDM_PROTOCOL_MCU
-	bool "MCU protocol messages"
-	default n
-	depends on PDM_PROTOCOL
-	help
-	  Enable MCU message definitions for the PDM peripheral protocol.
-
-config PDM_PROTOCOL_CRC_CHECK
-	bool "Enable CRC16 checksum"
-	default y
-	depends on PDM_PROTOCOL
-	help
-	  Enable CRC16-CCITT checksum support for protocol packets.
-
-config PDM_PROTOCOL_SEQUENCE_CHECK
-	bool "Enable sequence number check"
-	default y
-	depends on PDM_PROTOCOL
-	help
-	  Enable sequence number helpers for packet ordering.
-
-config PDM_PROTOCOL_MAX_PAYLOAD_SIZE
-	int "Maximum protocol payload size (bytes)"
-	default 4096
-	range 256 65536
-	depends on PDM_PROTOCOL
-	help
-	  Maximum payload size for PDM protocol packets.
-
-endmenu
+# menu "PDM Protocol Configuration" - 已删除：protocol 模块已删除
 
 # menuconfig PDM_RUNTIME - 已删除：无实际作用
 # menuconfig PDM_MCU_SERVICE - 已删除：依赖 pdm_configs
 # menuconfig PDM_LED_SERVICE - 已删除：依赖 pdm_configs
 
-menu "PDM Core Test Configuration"
-
-config PDM_DUMMY_SERVICE_SELFTEST
-	tristate "Build PDM dummy service self-test module"
-	default n
-	depends on PDM_CORE && PDM_SOC_ADAPTER_MOCK
-	depends on m
-	help
-	  Build pdm_dummy_service_selftest.ko. Loading this module registers
-	  a temporary dummy PDM driver and device to validate PDM Core
-	  lifecycle, discovery, capability lookup, state/error transitions,
-	  event delivery, and removal cleanup without requiring live hardware.
-
-endmenu
+# menu "PDM Core Test Configuration" - 已删除：selftest 已删除
 
 endif # PDM_CORE
