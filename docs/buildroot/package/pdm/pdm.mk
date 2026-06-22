@@ -1,6 +1,6 @@
 ################################################################################
 #
-# lpf
+# pdm
 #
 ################################################################################
 
@@ -18,15 +18,15 @@ PDM_ADD_TOOLCHAIN_DEPENDENCY = NO
 PDM_DEPENDENCIES = host-pkgconf host-cmake host-flex host-bison linux
 
 # Kconfig configuration to use (from Buildroot config)
-PDM_KCONFIG_DEFCONFIG = $(call qstrip,$(BR2_PACKAGE_LPF_DEFCONFIG))
+PDM_KCONFIG_DEFCONFIG = $(call qstrip,$(BR2_PACKAGE_PDM_DEFCONFIG))
 
 # Build type from Buildroot configuration
-PDM_BUILD_TYPE = $(call qstrip,$(BR2_PACKAGE_LPF_BUILD_TYPE))
+PDM_BUILD_TYPE = $(call qstrip,$(BR2_PACKAGE_PDM_BUILD_TYPE))
 
 # Build in-tree for Buildroot (output/build/pdm/_build)
 PDM_BUILD_OUTPUT = $(@D)/_build
 PDM_MODULES_OUTPUT = $(@D)/_build/modules
-PDM_MODULE_EXTRA_DIR = extra/lpf
+PDM_MODULE_EXTRA_DIR = extra/pdm
 
 PDM_MAKE_OPTS = \
 	BUILD_DIR="$(PDM_BUILD_OUTPUT)" \
@@ -44,7 +44,7 @@ PDM_MAKE_OPTS = \
 # This loads the defconfig and generates .config + autoconf.h
 define PDM_CONFIGURE_CMDS
 	@test -n "$(PDM_KCONFIG_DEFCONFIG)" || { \
-		echo "PDM: BR2_PACKAGE_LPF_DEFCONFIG must be set"; \
+		echo "PDM: BR2_PACKAGE_PDM_DEFCONFIG must be set"; \
 		exit 1; \
 	}
 	@echo "PDM: Loading defconfig $(PDM_KCONFIG_DEFCONFIG)"
@@ -101,7 +101,7 @@ define PDM_INSTALL_TARGET_CMDS
 endef
 
 # Optional: Install development headers and userspace libraries to staging.
-ifeq ($(BR2_PACKAGE_LPF_INSTALL_HEADERS),y)
+ifeq ($(BR2_PACKAGE_PDM_INSTALL_HEADERS),y)
 PDM_INSTALL_STAGING = YES
 define PDM_INSTALL_STAGING_CMDS
 	@echo "PDM: Installing libraries to staging"

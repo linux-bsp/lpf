@@ -1,17 +1,17 @@
-config BR2_PACKAGE_LPF
+config BR2_PACKAGE_PDM
 	bool "pdm"
 	depends on BR2_LINUX_KERNEL
 	depends on BR2_TOOLCHAIN_HAS_THREADS
 	depends on BR2_USE_MMU
 	help
-	  PDM is a generic Linux peripheral framework
-	  with a Kconfig+CMake/Kbuild build system. It provides OSAL,
-	  PDM HW, PDM Core, PDM runtime, PDI, ACONFIG, and
-	  runtime configuration layers for Linux systems.
+	  PDM is a Linux peripheral access framework with a
+	  Kconfig+CMake/Kbuild build system. It provides OSAL,
+	  PDM Core, UAPI headers, PDI, and ACONFIG layers for
+	  Linux systems.
 
-if BR2_PACKAGE_LPF
+if BR2_PACKAGE_PDM
 
-config BR2_PACKAGE_LPF_DEFCONFIG
+config BR2_PACKAGE_PDM_DEFCONFIG
 	string "Kconfig defconfig to use"
 	default ""
 	help
@@ -21,33 +21,33 @@ config BR2_PACKAGE_LPF_DEFCONFIG
 
 choice
 	prompt "Build type"
-	default BR2_PACKAGE_LPF_BUILD_TYPE_RELEASE
+	default BR2_PACKAGE_PDM_BUILD_TYPE_RELEASE
 
-config BR2_PACKAGE_LPF_BUILD_TYPE_RELEASE
+config BR2_PACKAGE_PDM_BUILD_TYPE_RELEASE
 	bool "Release"
 
-config BR2_PACKAGE_LPF_BUILD_TYPE_DEBUG
+config BR2_PACKAGE_PDM_BUILD_TYPE_DEBUG
 	bool "Debug"
 
-config BR2_PACKAGE_LPF_BUILD_TYPE_RELWITHDEBINFO
+config BR2_PACKAGE_PDM_BUILD_TYPE_RELWITHDEBINFO
 	bool "RelWithDebInfo"
 
 endchoice
 
-config BR2_PACKAGE_LPF_BUILD_TYPE
+config BR2_PACKAGE_PDM_BUILD_TYPE
 	string
-	default "Release" if BR2_PACKAGE_LPF_BUILD_TYPE_RELEASE
-	default "Debug" if BR2_PACKAGE_LPF_BUILD_TYPE_DEBUG
-	default "RelWithDebInfo" if BR2_PACKAGE_LPF_BUILD_TYPE_RELWITHDEBINFO
+	default "Release" if BR2_PACKAGE_PDM_BUILD_TYPE_RELEASE
+	default "Debug" if BR2_PACKAGE_PDM_BUILD_TYPE_DEBUG
+	default "RelWithDebInfo" if BR2_PACKAGE_PDM_BUILD_TYPE_RELWITHDEBINFO
 
-config BR2_PACKAGE_LPF_INSTALL_HEADERS
+config BR2_PACKAGE_PDM_INSTALL_HEADERS
 	bool "Install development headers"
 	default n
 	help
 	  Install development headers to $(STAGING_DIR)/usr/include/.
 	  Only needed for packages that depend on PDM.
 
-endif # BR2_PACKAGE_LPF
+endif # BR2_PACKAGE_PDM
 
 comment "PDM needs Linux kernel and a toolchain w/ threads, MMU"
 	depends on !BR2_LINUX_KERNEL || !BR2_TOOLCHAIN_HAS_THREADS || \

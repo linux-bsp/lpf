@@ -15,9 +15,8 @@ and Linux external-module Kbuild support.
 ## Current Scope
 
 The repository currently contains the framework core modules. Product-specific
-satellite/PMC business code, the old static configuration provider, runtime
-configuration layer, PDM HW abstraction layer, and the previous test product
-have been removed.
+satellite/PMC business code, legacy configuration/runtime layers, and the
+previous test product have been removed.
 
 Current kernel modules:
 
@@ -25,11 +24,9 @@ Current kernel modules:
 - PDM Core (`pdm_core.ko`), implemented as a Linux `bus_type` named `pdm`
 
 PDM Core currently provides the standard Linux bus integration, Device Tree
-backed PDM device creation through the PDM bus controller, `/dev/pdm_ctl`
-discovery snapshots, lightweight proc/debugfs/sysfs helpers, and minimal
-MCU/LED `struct pdm_driver` implementations that create `/dev/pdm/mcuN` and
-`/dev/pdm/ledN` instance nodes. The current MCU/LED drivers provide ABI bring-up
-behavior; hardware-backed transport/control backends still need to be added.
+backed PDM device creation through the PDM bus controller, native UART/I2C/SPI
+MCU device creation, `/dev/pdm_ctl` discovery snapshots, lightweight
+proc/debugfs/sysfs helpers, MCU transport backends, and LED GPIO/PWM backends.
 
 PDM currently targets Linux only. OSAL still separates operating-system-facing
 APIs from higher layers, but non-Linux ports are outside the current direction.
@@ -117,13 +114,9 @@ PDM/
 ## Documentation
 
 - `docs/architecture.md`: current module architecture and extension flow.
-- `docs/pdm_target_architecture.md`: target layered architecture.
 - `docs/pdm_module_boundaries.md`: allowed dependencies and forbidden shortcuts.
-- `docs/pdm_refactor_roadmap.md`: staged cleanup roadmap.
 - `docs/pdm_kernel_compat_policy.md`: supported kernel baseline and compat
   feature-gate rules.
 - `docs/kernel_user_split.md`: kernel/userspace boundary and include rules.
-- `docs/pdm_long_term_optimization_plan.md`: long-term optimization plan for
-  multi-kernel and multi-SoC deployments.
 - `docs/pdm_uapi_abi.md`: UAPI ABI and PDI wrapper rules for new peripherals.
 - `docs/pdm_bus_devicetree.md`: current PDM bus child-node compatibles and backend properties.

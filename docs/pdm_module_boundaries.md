@@ -2,107 +2,76 @@
 
 ## Dependency Direction
 
-Dependencies should point downward through the PDM stack:
+Dependencies should point downward through the current PDM stack:
 
 ```text
-Product → ACONFIG/PDI → UAPI → Peripheral Service → Core
-        → PDM HW → SoC Adapter → Kernel Compat → Linux Kernel
+Application -> PDI -> UAPI/ioctl -> PDM peripheral driver
+            -> PDM bus/core helpers -> Linux subsystem or controller driver
 ```
 
-Cross-layer shortcuts should be treated as architecture debt unless they are
-explicitly documented as a transitional compatibility path.
+Cross-layer shortcuts are architecture debt unless they are documented as a
+temporary compatibility path.
 
 ## Allowed Dependencies
 
 ### PDI
 
-- May include UAPI headers from `uapi/pdm/`.
+- May include public PDI headers and UAPI headers from `uapi/pdm/`.
 - May use libc/POSIX and userspace OSAL helpers.
-- Must not include kernel-internal PDM headers.
+- Must not include `kernel/include/pdm/` headers.
 
 ### UAPI
 
-- May use Linux UAPI scalar types such as `__u32`.
+- May use Linux fixed-width UAPI scalar types such as `__u32` and `__s32`.
 - Must contain only fixed-layout structures, ABI constants, ioctl constants, and
-  enum values that are part of the ABI.
-- Must not expose SDK context types, helper functions, default-open paths, or
-  kernel-private framework structures.
-
-### PDM Peripheral Services
-
-- May use PDM Core device/driver APIs.
-- May use PDM HW APIs.
-- May use PDM runtime config typed entries as configuration input.
-- May use shared PDM chrdev, sysfs, procfs, and debugfs helpers.
-- May own service-specific transport backends under the peripheral directory
-  when the backend is not shared by multiple peripheral families.
-- Must not call SoC adapter, compat, vendor BSP, or Linux hardware subsystem APIs
-  directly.
+  enum values that are part of the stable ABI.
+- Must not expose kernel-private PDM structs, backend ops, OSAL objects, or PDI
+  context types.
 
 ### PDM Core
 
-- May own PDM device/driver lifecycle, discovery, events, and shared runtime node
-  helpers.
-- Acts as the PDM-owned device model / pseudo bus. Matching is by
-  `pdm_device_type_t`; `pdm_device_register()` binds a configured device to the
-  already registered driver with the same type and calls `probe()`.
-- May own reusable infrastructure wrappers for chrdev, sysfs, procfs, and
-  debugfs.
-- Owns its global lifecycle in `pdm_core.ko` module init/exit; public Core APIs
-  must require initialized state instead of calling Core init implicitly.
-- Owns shared PDM character-device node policy. Instance nodes under
-  `/dev/pdm/` use `CONFIG_PDM_INSTANCE_DEVNODE_MODE`, while product-specific
-  ownership such as group assignment belongs in udev/devtmpfs/init policy.
-- Must not depend on concrete runtime config backends or product tables.
+- Owns Linux `bus_type` registration, PDM device lifecycle, driver matching,
+  `/dev/pdm_ctl`, shared client node policy, sysfs, procfs, debugfs, and module
+  init/exit ordering.
+- May own generic registries such as the section-based driver and backend entry
+  walkers.
+- Must not contain product-specific business logic.
+- Must not require every peripheral or backend to be called manually from core
+  init code.
 
-### PDM HW
+### PDM Peripheral Drivers
 
-- May call PDM SoC Adapter APIs.
-- May hold hardware capability state that is meaningful above a concrete SoC
-  backend.
-- Must not call Linux subsystem or vendor BSP APIs directly.
+- May use PDM bus, device, client-node, procfs, sysfs, debugfs, and backend
+  registry helpers.
+- May own service-specific operation tables and match logic.
+- May call `pdm_backend_find()` to select a backend for a matching compatible
+  string.
+- Should keep transport or control details in backend files such as
+  `pdm_mcu_uart.c`, `pdm_mcu_i2c.c`, `pdm_mcu_spi.c`, `pdm_mcu_can.c`,
+  `pdm_led_gpio.c`, and `pdm_led_pwm.c`.
 
-### PDM SoC Adapter
+### PDM Backends
 
-- May call PDM Kernel Compat APIs or vendor BSP APIs.
-- Must keep SoC-specific code under `kernel/pdm-core/soc/`.
-- Must not contain peripheral business behavior.
+- May call the Linux subsystem API for the backend they own, for example serdev,
+  I2C, SPI, CAN, GPIO, or PWM.
+- Must register through `pdm_backend_register()` instead of adding direct core
+  init calls.
+- Must keep optional feature guards local and compile to a no-op when the
+  required Linux subsystem is unavailable.
 
-### PDM Kernel Compat
+### Kernel Compatibility
 
-- May include Linux kernel headers and wrap kernel API differences.
-- Should be the default location for `LINUX_VERSION_CODE` and equivalent
-  version/feature handling. Use `pdm_compat_features.h` feature gates rather
-  than raw version checks outside the compat layer.
-- Must not contain peripheral business behavior.
-
-### Runtime Config
-
-- Owns backend selection, validation, and configured-device node generation.
-- Backends may read static tables, Device Tree, module parameters, or future
-  board-profile sources.
-- Runtime config drivers must consume configured-device nodes, not concrete
-  backend symbols. PDM Core consumes only `pdm_device_config_t`.
+- Linux version and feature checks belong in `kernel/include/pdm/compat/` or
+  small local compatibility wrappers.
+- Shared driver, backend, and userspace-facing logic should use feature helpers
+  rather than raw `LINUX_VERSION_CODE` checks.
 
 ## Forbidden Patterns
 
-- Peripheral service/ioctl code calling `pdm_soc_*`, `pdm_compat_*`, `gpio_*`,
-  `pwm_*`, `i2c_*`, `spi_*`, CAN socket helpers, TTY helpers, or vendor BSP APIs
-  directly. Concrete kernel APIs belong in narrowly scoped backend files such as
-  `pdm_led_gpio.c`, `pdm_led_pwm.c`, `pdm_mcu_can.c`, or `pdm_mcu_uart.c`.
-- Userspace code including `kernel/include/pdm/` headers other than installed
-  UAPI copies.
-- Product-specific business logic under shared framework service directories.
-- New per-peripheral kernel modules when the integrated runtime boundary can
-  host the reusable service.
-- New global fixed-size registries when PDM Core device lifecycle or dynamic
-  service-owned registries are sufficient.
-
-## Transitional Allowances
-
-- Instance character device arrays may retain configured maxima while UAPI info
-  still reports `max_devices`.
-- ABI or protocol constants may remain fixed-size when changing them would break
-  userspace or wire compatibility.
-- Procfs/debugfs/sysfs helpers may live in PDM Core while compat wrappers for
-  their API-version differences are still being defined.
+- Userspace code including kernel-internal PDM headers.
+- Product-specific business logic under shared PDM driver directories.
+- New fixed global registries when the section-based driver or backend registry
+  is sufficient.
+- PDM Core manually calling each MCU, LED, or future peripheral backend init.
+- UAPI structs carrying kernel pointers, private structs, or backend-specific
+  implementation details.
