@@ -21,21 +21,6 @@ menuconfig PDM_CORE
 
 if PDM_CORE
 
-config PDM_NEW_BUS
-	bool "Use new Linux bus_type implementation (EXPERIMENTAL)"
-	default n
-	help
-	  Enable the new standard Linux bus_type implementation for PDM.
-
-	  This replaces the custom pseudo-bus with a proper Linux bus that
-	  integrates with the standard driver model. Devices will be visible
-	  in /sys/bus/pdm/ and work with standard tools like udevadm.
-
-	  This is EXPERIMENTAL. Leave disabled for stable operation.
-	  Enable only for testing the new architecture.
-
-	  If unsure, say N.
-
 config PDM_INSTANCE_DEVNODE_MODE
 	string "PDM instance device node mode"
 	default "0660"

@@ -30,8 +30,6 @@ static pdm_mcu_context_t *g_mcu_context_list;
 static osal_mutex_t g_registry_mutex;
 static bool g_registry_initialized = false;
 
-static const pdm_driver_t g_lpf_mcu_driver;
-
 static void pdm_mcu_remove_index(uint32_t index);
 
 /*===========================================================================
@@ -318,29 +316,6 @@ int32_t pdm_mcu_init(uint32_t mcu_index, pdm_mcu_handle_t *handle)
 	return pdm_mcu_init_from_entry(mcu_index, entry, handle);
 }
 
-int32_t pdm_mcu_probe(const pdm_device_t *device)
-{
-	const pdm_config_mcu_entry_t *entry;
-	pdm_mcu_handle_t handle = NULL;
-	int32_t ret;
-
-	if (!device || device->config.type != PDM_DEVICE_TYPE_MCU)
-		return OSAL_ERR_INVALID_PARAM;
-
-	entry = (const pdm_config_mcu_entry_t *)device->config.entry;
-	ret = pdm_mcu_init_from_entry(device->config.index, entry, &handle);
-	if (ret != OSAL_SUCCESS)
-		return ret;
-
-	ret = pdm_mcu_chrdev_register_device(device);
-	if (ret) {
-		pdm_mcu_remove_index(device->config.index);
-		return OSAL_ERR_GENERIC;
-	}
-
-	return OSAL_SUCCESS;
-}
-
 pdm_mcu_handle_t pdm_mcu_get(uint32_t index)
 {
 	pdm_mcu_handle_t handle = NULL;
@@ -394,15 +369,6 @@ static void pdm_mcu_remove_index(uint32_t index)
 	osal_mutex_unlock(&g_registry_mutex);
 
 	pdm_mcu_free_context(ctx);
-}
-
-void pdm_mcu_remove(const pdm_device_t *device)
-{
-	if (!device || device->config.type != PDM_DEVICE_TYPE_MCU)
-		return;
-
-	pdm_mcu_chrdev_unregister_device(device);
-	pdm_mcu_remove_index(device->config.index);
 }
 
 static void pdm_mcu_registry_deinit(void)
@@ -704,43 +670,19 @@ static void pdm_mcu_driver_exit(void)
 	LOG_INFO("PDM_MCU", "unregistered");
 }
 
-static const pdm_driver_t g_lpf_mcu_driver = {
-	.name = "mcu",
-	.type = PDM_DEVICE_TYPE_MCU,
-	.capabilities = PDM_DEVICE_CAP_USER_IOCTL | PDM_DEVICE_CAP_DEBUGFS,
-	.init = pdm_mcu_driver_init,
-	.exit = pdm_mcu_driver_exit,
-	.probe = pdm_mcu_probe,
-	.remove = pdm_mcu_remove,
-};
-
-static int32_t pdm_mcu_service_register(void)
-{
-	return pdm_driver_register(&g_lpf_mcu_driver);
-}
-
-static void pdm_mcu_service_unregister(void)
-{
-	pdm_driver_unregister(&g_lpf_mcu_driver);
-}
-
-pdm_runtime_service_register(mcu_service, pdm_mcu_service_register,
-			     pdm_mcu_service_unregister);
-
-#ifdef CONFIG_PDM_NEW_BUS
 /*===========================================================================
- * 新总线驱动注册（Linux bus_type）
+ * PDM 总线驱动（Linux bus_type）
  *===========================================================================*/
 
 #include "pdm/core/pdm_bus.h"
 #include "pdm/core/pdm_device_new.h"
 
 /**
- * @brief 新总线的 probe 函数
+ * @brief PDM 总线的 probe 函数
  *
  * 从 Device Tree 读取配置并初始化 MCU 外设
  */
-static int pdm_mcu_probe_new(struct pdm_device *pdm_dev)
+static int pdm_mcu_probe(struct pdm_device *pdm_dev)
 {
 	struct device_node *np = pdm_dev->dev.of_node;
 	pdm_config_mcu_entry_t *entry;
@@ -880,9 +822,9 @@ static int pdm_mcu_probe_new(struct pdm_device *pdm_dev)
 }
 
 /**
- * @brief 新总线的 remove 函数
+ * @brief PDM 总线的 remove 函数
  */
-static void pdm_mcu_remove_new(struct pdm_device *pdm_dev)
+static void pdm_mcu_remove(struct pdm_device *pdm_dev)
 {
 	pdm_device_t temp_device = {
 		.config = {
@@ -913,27 +855,27 @@ static const struct of_device_id pdm_mcu_of_match[] = {
 MODULE_DEVICE_TABLE(of, pdm_mcu_of_match);
 
 /**
- * @brief PDM MCU 驱动结构（新总线）
+ * @brief PDM MCU 驱动结构
  */
-static struct pdm_driver pdm_mcu_driver_new = {
+static struct pdm_driver pdm_mcu_driver = {
 	.driver = {
 		.name = "pdm-mcu",
 		.of_match_table = pdm_mcu_of_match,
 	},
-	.probe = pdm_mcu_probe_new,
-	.remove = pdm_mcu_remove_new,
+	.probe = pdm_mcu_probe,
+	.remove = pdm_mcu_remove,
 };
 
 /**
- * @brief 模块初始化（新总线）
+ * @brief 模块初始化
  */
-static int __init pdm_mcu_driver_init_new(void)
+static int __init pdm_mcu_driver_init(void)
 {
 	int ret;
 
-	LOG_INFO("PDM_MCU", "Registering MCU driver on new PDM bus");
+	LOG_INFO("PDM_MCU", "Registering MCU driver on PDM bus");
 
-	ret = pdm_driver_register(&pdm_mcu_driver_new);
+	ret = pdm_driver_register(&pdm_mcu_driver);
 	if (ret) {
 		LOG_ERROR("PDM_MCU", "Failed to register driver, error %d", ret);
 		return ret;
@@ -943,15 +885,15 @@ static int __init pdm_mcu_driver_init_new(void)
 }
 
 /**
- * @brief 模块退出（新总线）
+ * @brief 模块退出
  */
-static void __exit pdm_mcu_driver_exit_new(void)
+static void __exit pdm_mcu_driver_exit(void)
 {
-	pdm_bus_unregister_driver(&pdm_mcu_driver_new);
-	LOG_INFO("PDM_MCU", "MCU driver unregistered from PDM bus");
+	LOG_INFO("PDM_MCU", "Unregistering MCU driver from PDM bus");
+
+	pdm_driver_unregister(&pdm_mcu_driver);
 }
 
-module_init(pdm_mcu_driver_init_new);
-module_exit(pdm_mcu_driver_exit_new);
+module_init(pdm_mcu_driver_init);
+module_exit(pdm_mcu_driver_exit);
 
-#endif /* CONFIG_PDM_NEW_BUS */

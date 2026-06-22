@@ -2,7 +2,6 @@
 
 #include "osal.h"
 #include "pdm/config/pdm_config.h"
-#include "pdm/core/pdm_driver.h"
 #include "pdm_runtime_internal.h"
 #include "pdm_led_internal.h"
 
@@ -200,29 +199,6 @@ pdm_led_control_get(pdm_config_led_control_t control)
 	}
 }
 
-int32_t pdm_led_probe(const pdm_device_t *device)
-{
-	const pdm_config_led_entry_t *entry;
-	pdm_led_handle_t handle = NULL;
-	int32_t ret;
-
-	if (!device || device->config.type != PDM_DEVICE_TYPE_LED)
-		return OSAL_ERR_INVALID_PARAM;
-
-	entry = (const pdm_config_led_entry_t *)device->config.entry;
-	ret = pdm_led_init_from_entry(device->config.index, entry, &handle);
-	if (ret != OSAL_SUCCESS)
-		return ret;
-
-	ret = pdm_led_chrdev_register_device(device);
-	if (ret) {
-		pdm_led_remove_index(device->config.index);
-		return OSAL_ERR_GENERIC;
-	}
-
-	return OSAL_SUCCESS;
-}
-
 pdm_led_handle_t pdm_led_get(uint32_t index)
 {
 	pdm_led_handle_t handle = NULL;
@@ -280,15 +256,6 @@ static void pdm_led_remove_index(uint32_t index)
 	osal_mutex_unlock(&g_led_registry_lock);
 
 	pdm_led_free_context(ctx);
-}
-
-void pdm_led_remove(const pdm_device_t *device)
-{
-	if (!device || device->config.type != PDM_DEVICE_TYPE_LED)
-		return;
-
-	pdm_led_chrdev_unregister_device(device);
-	pdm_led_remove_index(device->config.index);
 }
 
 static void pdm_led_registry_deinit(void)
@@ -422,41 +389,17 @@ static void pdm_led_driver_exit(void)
 	LOG_INFO("PDM_LED", "unregistered");
 }
 
-static const pdm_driver_t g_lpf_led_driver = {
-	.name = "led",
-	.type = PDM_DEVICE_TYPE_LED,
-	.capabilities = PDM_DEVICE_CAP_USER_IOCTL | PDM_DEVICE_CAP_DEBUGFS,
-	.init = pdm_led_driver_init,
-	.exit = pdm_led_driver_exit,
-	.probe = pdm_led_probe,
-	.remove = pdm_led_remove,
-};
-
-static int32_t pdm_led_service_register(void)
-{
-	return pdm_driver_register(&g_lpf_led_driver);
-}
-
-static void pdm_led_service_unregister(void)
-{
-	pdm_driver_unregister(&g_lpf_led_driver);
-}
-
-pdm_runtime_service_register(led_service, pdm_led_service_register,
-			     pdm_led_service_unregister);
-
-#ifdef CONFIG_PDM_NEW_BUS
 /*===========================================================================
- * 新总线驱动注册（Linux bus_type）
+ * PDM 总线驱动（Linux bus_type）
  *===========================================================================*/
 
 #include "pdm/core/pdm_bus.h"
 #include "pdm/core/pdm_device_new.h"
 
 /**
- * @brief 新总线的 probe 函数
+ * @brief PDM 总线的 probe 函数
  */
-static int pdm_led_probe_new(struct pdm_device *pdm_dev)
+static int pdm_led_probe(struct pdm_device *pdm_dev)
 {
 	struct device_node *np = pdm_dev->dev.of_node;
 	pdm_config_led_entry_t *entry;
@@ -573,9 +516,9 @@ static int pdm_led_probe_new(struct pdm_device *pdm_dev)
 }
 
 /**
- * @brief 新总线的 remove 函数
+ * @brief PDM 总线的 remove 函数
  */
-static void pdm_led_remove_new(struct pdm_device *pdm_dev)
+static void pdm_led_remove(struct pdm_device *pdm_dev)
 {
 	pdm_device_t temp_device = {
 		.config = {
@@ -604,27 +547,27 @@ static const struct of_device_id pdm_led_of_match[] = {
 MODULE_DEVICE_TABLE(of, pdm_led_of_match);
 
 /**
- * @brief PDM LED 驱动结构（新总线）
+ * @brief PDM LED 驱动结构
  */
-static struct pdm_driver pdm_led_driver_new = {
+static struct pdm_driver pdm_led_driver = {
 	.driver = {
 		.name = "pdm-led",
 		.of_match_table = pdm_led_of_match,
 	},
-	.probe = pdm_led_probe_new,
-	.remove = pdm_led_remove_new,
+	.probe = pdm_led_probe,
+	.remove = pdm_led_remove,
 };
 
 /**
- * @brief 模块初始化（新总线）
+ * @brief 模块初始化
  */
-static int __init pdm_led_driver_init_new(void)
+static int __init pdm_led_driver_init(void)
 {
 	int ret;
 
-	LOG_INFO("PDM_LED", "Registering LED driver on new PDM bus");
+	LOG_INFO("PDM_LED", "Registering LED driver on PDM bus");
 
-	ret = pdm_driver_register(&pdm_led_driver_new);
+	ret = pdm_driver_register(&pdm_led_driver);
 	if (ret) {
 		LOG_ERROR("PDM_LED", "Failed to register driver, error %d", ret);
 		return ret;
@@ -634,15 +577,15 @@ static int __init pdm_led_driver_init_new(void)
 }
 
 /**
- * @brief 模块退出（新总线）
+ * @brief 模块退出
  */
-static void __exit pdm_led_driver_exit_new(void)
+static void __exit pdm_led_driver_exit(void)
 {
-	pdm_bus_unregister_driver(&pdm_led_driver_new);
-	LOG_INFO("PDM_LED", "LED driver unregistered from PDM bus");
+	LOG_INFO("PDM_LED", "Unregistering LED driver from PDM bus");
+
+	pdm_driver_unregister(&pdm_led_driver);
 }
 
-module_init(pdm_led_driver_init_new);
-module_exit(pdm_led_driver_exit_new);
+module_init(pdm_led_driver_init);
+module_exit(pdm_led_driver_exit);
 
-#endif /* CONFIG_PDM_NEW_BUS */
