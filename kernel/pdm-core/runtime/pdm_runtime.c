@@ -165,7 +165,8 @@ void pdm_runtime_config_detach(void)
 	if (!g_lpf_runtime_devices_ready)
 		return;
 
-	pdm_device_unregister_all();
+	/* 注意: 在新总线架构中，设备由 Device Tree 创建和管理 */
+	/* pdm_device_unregister_all(); - 旧伪总线 API 已删除 */
 	pdm_config_unload();
 	g_lpf_runtime_devices_ready = false;
 }

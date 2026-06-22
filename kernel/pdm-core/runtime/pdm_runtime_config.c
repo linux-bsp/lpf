@@ -90,6 +90,7 @@ int32_t pdm_runtime_probe_devices(void)
 	return OSAL_SUCCESS;
 
 out_error:
-	pdm_device_unregister_all();
+	/* 注意: 在新总线架构中，设备由 Device Tree 创建和管理 */
+	/* pdm_device_unregister_all(); - 旧伪总线 API 已删除 */
 	return ret;
 }

@@ -13,8 +13,10 @@
 #include <linux/version.h>
 
 #include "pdm/core/pdm_bus.h"
-#include "pdm/core/pdm_device.h"
-#include "osal/osal_log.h"
+#include "pdm/core/pdm_device_new.h"
+#include "osal.h"
+
+/* 使用新总线的设备结构，不再包含旧的 pdm_device.h */
 
 /**
  * @brief Matches a device based on its parent device

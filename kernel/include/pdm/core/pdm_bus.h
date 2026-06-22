@@ -13,7 +13,7 @@
 #include <linux/mod_devicetable.h>
 #include <linux/version.h>
 
-#include "pdm_device.h"
+#include "pdm_device_new.h"  /* 使用新总线设备定义 */
 
 /**
  * @struct pdm_device_id

@@ -17,7 +17,7 @@
 
 #include "pdm/core/pdm_bus.h"
 #include "pdm/core/pdm_device_new.h"
-#include "osal/osal_log.h"
+#include "osal.h"
 
 /**
  * @brief PDM bus controller data
@@ -139,7 +139,7 @@ err_cleanup:
 /**
  * @brief Remove function - cleanup when module unloads
  */
-static int pdm_bus_controller_remove(struct platform_device *pdev)
+static void pdm_bus_controller_remove(struct platform_device *pdev)
 {
 	struct pdm_bus_controller *ctrl = platform_get_drvdata(pdev);
 	struct pdm_device_list_entry *entry, *tmp;
@@ -155,7 +155,6 @@ static int pdm_bus_controller_remove(struct platform_device *pdev)
 	}
 
 	LOG_INFO("PDM-BUS-CTRL", "PDM bus controller removed");
-	return 0;
 }
 
 /**
@@ -184,7 +183,7 @@ static struct platform_driver pdm_bus_controller_driver = {
 /**
  * @brief Module init - register platform driver
  */
-static int __init pdm_bus_controller_init(void)
+int __init pdm_bus_controller_init(void)
 {
 	int ret;
 
@@ -202,14 +201,12 @@ static int __init pdm_bus_controller_init(void)
 /**
  * @brief Module exit - unregister platform driver
  */
-static void __exit pdm_bus_controller_exit(void)
+void __exit pdm_bus_controller_exit(void)
 {
 	platform_driver_unregister(&pdm_bus_controller_driver);
 	LOG_INFO("PDM-BUS-CTRL", "PDM bus controller driver unregistered");
 }
 
-module_init(pdm_bus_controller_init);
-module_exit(pdm_bus_controller_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("PDM Team");

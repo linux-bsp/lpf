@@ -6,6 +6,10 @@
 #include "pdm/pdm_errno.h"
 #include "pdm/runtime/pdm_runtime.h"
 
+/* Forward declarations for bus controller */
+extern int __init pdm_bus_controller_init(void);
+extern void __exit pdm_bus_controller_exit(void);
+
 /**
  * @brief PDM Core 模块初始化
  */
@@ -22,12 +26,21 @@ static int __init pdm_core_module_init(void)
 		return ret;
 	}
 
+	/* 注册 PDM bus controller platform driver */
+	ret = pdm_bus_controller_init();
+	if (ret) {
+		LOG_ERROR("PDM_CORE", "Failed to register bus controller: %d", ret);
+		pdm_bus_exit();
+		return ret;
+	}
+
 #ifdef CONFIG_PDM_RUNTIME
 	/* 初始化运行时系统 */
 	pdm_runtime_print_version();
 	ret = pdm_runtime_init();
 	if (ret != OSAL_SUCCESS) {
 		LOG_ERROR("PDM_CORE", "Failed to initialize runtime: %d", ret);
+		pdm_bus_controller_exit();
 		pdm_bus_exit();
 		return pdm_status_to_errno(ret);
 	}
@@ -46,6 +59,7 @@ static void __exit pdm_core_module_exit(void)
 	pdm_runtime_exit();
 #endif
 
+	pdm_bus_controller_exit();
 	pdm_bus_exit();
 
 	LOG_INFO("PDM_CORE", "PDM Core exited");

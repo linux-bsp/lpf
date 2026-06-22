@@ -8,7 +8,7 @@
 #include <linux/slab.h>
 #include "pdm/core/pdm_bus.h"
 #include "pdm/core/pdm_device_new.h"
-#include "osal/osal_log.h"
+#include "osal.h"
 
 /**
  * @brief Release callback for PDM device
