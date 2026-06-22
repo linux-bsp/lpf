@@ -1,5 +1,5 @@
 # ==============================================================================
-# LPF SDK Root CMakeLists.txt
+# PDM SDK Root CMakeLists.txt
 # ==============================================================================
 # Clean separation of concerns:
 #   - Makefile:        Configuration management (Kconfig)
@@ -35,9 +35,9 @@ kconfig_load()
 # Project Declaration
 # ==============================================================================
 
-project(lpf_sdk C ASM)
+project(pdm_sdk C ASM)
 
-option(LPF_BUILD_TESTS "Build LPF test targets" OFF)
+option(PDM_BUILD_TESTS "Build PDM test targets" OFF)
 
 # ==============================================================================
 # Configure Installation Paths (after project())
@@ -116,12 +116,12 @@ if(CONFIG_LINUX_ONLY)
     message(STATUS "Building Linux-only modules")
 
     _lpf_add_core_component(CONFIG_OSAL osal user/osal)
-    _lpf_add_core_component(CONFIG_LPF_CORE lpf_core kernel/lpf-core)
+    _lpf_add_core_component(CONFIG_PDM_CORE pdm_core kernel/pdm)
     _lpf_add_core_component(CONFIG_PDI pdi user/pdi)
     _lpf_add_core_component(CONFIG_ACONFIG aconfig user/aconfig)
 endif()
 
-if(LPF_BUILD_TESTS)
+if(PDM_BUILD_TESTS)
     enable_testing()
     add_subdirectory(${SDK_PATH}/tests ${CMAKE_BINARY_DIR}/tests)
 endif()
@@ -132,7 +132,7 @@ endif()
 
 message(STATUS "")
 message(STATUS "========================================================================")
-message(STATUS "LPF Configuration Summary")
+message(STATUS "PDM Configuration Summary")
 message(STATUS "========================================================================")
 message(STATUS "SDK Version:    ${SDK_VERSION}")
 message(STATUS "Git Commit:     ${GIT_COMMIT_HASH}")
@@ -142,10 +142,8 @@ message(STATUS "")
 message(STATUS "Core Modules:")
 message(STATUS "  Linux-only:    ${CONFIG_LINUX_ONLY}")
 message(STATUS "  OSAL:         ${CONFIG_OSAL}")
-message(STATUS "  LPF Core:     ${CONFIG_LPF_CORE}")
-message(STATUS "  LPF Runtime:  ${CONFIG_LPF_RUNTIME}")
+message(STATUS "  PDM Core:     ${CONFIG_PDM_CORE}")
 message(STATUS "  PDI:          ${CONFIG_PDI}")
-message(STATUS "  LPF Protocol: ${CONFIG_LPF_PROTOCOL}")
 message(STATUS "  ACONFIG:      ${CONFIG_ACONFIG}")
 message(STATUS "========================================================================")
 message(STATUS "")

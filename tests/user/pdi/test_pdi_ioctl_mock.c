@@ -47,14 +47,14 @@ static int mock_close(int fd)
 	return 0;
 }
 
-static void fill_mock_device(struct lpf_ctl_device_info *info, uint32_t type,
+static void fill_mock_device(struct pdm_ctl_device_info *info, uint32_t type,
 			     uint32_t index, const char *name,
 			     uint64_t capabilities)
 {
 	memset(info, 0, sizeof(*info));
 	info->type = type;
 	info->index = index;
-	info->state = LPF_CTL_DEVICE_STATE_BOUND;
+	info->state = PDM_CTL_DEVICE_STATE_BOUND;
 	info->capabilities = capabilities;
 	strncpy(info->name, name, sizeof(info->name) - 1U);
 	strncpy(info->driver_name, "mock-driver",
@@ -62,20 +62,20 @@ static void fill_mock_device(struct lpf_ctl_device_info *info, uint32_t type,
 }
 
 static int fill_mock_device_by_index(uint32_t index,
-				     struct lpf_ctl_device_info *info)
+				     struct pdm_ctl_device_info *info)
 {
 	switch (index) {
 	case 0:
-		fill_mock_device(info, LPF_CTL_DEVICE_TYPE_MCU, 3, "mcu-main",
-				 LPF_CTL_DEVICE_CAP_USER_IOCTL |
-					 LPF_CTL_DEVICE_CAP_DEBUGFS |
-					 LPF_CTL_DEVICE_CAP_TRANSPORT_CAN);
+		fill_mock_device(info, PDM_CTL_DEVICE_TYPE_MCU, 3, "mcu-main",
+				 PDM_CTL_DEVICE_CAP_USER_IOCTL |
+					 PDM_CTL_DEVICE_CAP_DEBUGFS |
+					 PDM_CTL_DEVICE_CAP_TRANSPORT_CAN);
 		return 0;
 	case 1:
-		fill_mock_device(info, LPF_CTL_DEVICE_TYPE_LED, 2, "led-front",
-				 LPF_CTL_DEVICE_CAP_USER_IOCTL |
-					 LPF_CTL_DEVICE_CAP_DEBUGFS |
-					 LPF_CTL_DEVICE_CAP_CONTROL_PWM);
+		fill_mock_device(info, PDM_CTL_DEVICE_TYPE_LED, 2, "led-front",
+				 PDM_CTL_DEVICE_CAP_USER_IOCTL |
+					 PDM_CTL_DEVICE_CAP_DEBUGFS |
+					 PDM_CTL_DEVICE_CAP_CONTROL_PWM);
 		return 0;
 	default:
 		errno = ENODEV;
@@ -90,40 +90,40 @@ static int mock_ioctl(int fd, unsigned long request, void *arg)
 	g_mock.last_request = request;
 
 	switch (request) {
-	case LPF_CTL_IOC_GET_INFO: {
-		struct lpf_ctl_info *info = arg;
+	case PDM_CTL_IOC_GET_INFO: {
+		struct pdm_ctl_info *info = arg;
 
 		memset(info, 0, sizeof(*info));
-		info->abi_version = LPF_CTL_ABI_VERSION;
+		info->abi_version = PDM_CTL_ABI_VERSION;
 		info->device_count = 2;
 		return 0;
 	}
-	case LPF_CTL_IOC_GET_DEVICE: {
-		struct lpf_ctl_device_query *query = arg;
+	case PDM_CTL_IOC_GET_DEVICE: {
+		struct pdm_ctl_device_query *query = arg;
 
 		return fill_mock_device_by_index(query->match_index,
 						 &query->info);
 	}
-	case LPF_CTL_IOC_GET_DEVICE_BY_NAME: {
-		struct lpf_ctl_device_name_query *query = arg;
+	case PDM_CTL_IOC_GET_DEVICE_BY_NAME: {
+		struct pdm_ctl_device_name_query *query = arg;
 
 		if (strcmp(query->name, "mcu-main") == 0)
 			return fill_mock_device_by_index(0, &query->info);
 		if (strcmp(query->name, "led-front") == 0)
 			return fill_mock_device_by_index(1, &query->info);
 		if (strcmp(query->name, "wrong-type") == 0) {
-			fill_mock_device(&query->info, LPF_CTL_DEVICE_TYPE_LED,
+			fill_mock_device(&query->info, PDM_CTL_DEVICE_TYPE_LED,
 					 4, "wrong-type",
-					 LPF_CTL_DEVICE_CAP_USER_IOCTL);
+					 PDM_CTL_DEVICE_CAP_USER_IOCTL);
 			return 0;
 		}
 
 		errno = ENODEV;
 		return -1;
 	}
-	case LPF_CTL_IOC_GET_DEVICE_BY_CAPABILITY: {
-		struct lpf_ctl_device_query *query = arg;
-		struct lpf_ctl_device_info info;
+	case PDM_CTL_IOC_GET_DEVICE_BY_CAPABILITY: {
+		struct pdm_ctl_device_query *query = arg;
+		struct pdm_ctl_device_info info;
 		uint32_t match = 0;
 		uint32_t i;
 
@@ -141,16 +141,16 @@ static int mock_ioctl(int fd, unsigned long request, void *arg)
 		errno = ENODEV;
 		return -1;
 	}
-	case LPF_MCU_IOC_GET_INFO: {
-		struct lpf_mcu_info *info = arg;
+	case PDM_MCU_IOC_GET_INFO: {
+		struct pdm_mcu_info *info = arg;
 
 		memset(info, 0, sizeof(*info));
-		info->abi_version = LPF_MCU_ABI_VERSION;
+		info->abi_version = PDM_MCU_ABI_VERSION;
 		info->max_devices = 4;
 		return 0;
 	}
-	case LPF_MCU_IOC_GET_VERSION: {
-		struct lpf_mcu_version *version = arg;
+	case PDM_MCU_IOC_GET_VERSION: {
+		struct pdm_mcu_version *version = arg;
 
 		if (version->index != 0)
 			return -1;
@@ -162,13 +162,13 @@ static int mock_ioctl(int fd, unsigned long request, void *arg)
 			sizeof(version->version_string) - 1U);
 		return 0;
 	}
-	case LPF_MCU_IOC_GET_STATUS: {
-		struct lpf_mcu_status *status = arg;
+	case PDM_MCU_IOC_GET_STATUS: {
+		struct pdm_mcu_status *status = arg;
 
 		if (status->index != 0)
 			return -1;
 		status->online = 1;
-		status->state = LPF_MCU_STATE_READY;
+		status->state = PDM_MCU_STATE_READY;
 		status->uptime_sec = 10;
 		status->error_code = 0;
 		status->temperature_milli_celsius = 42000;
@@ -176,13 +176,13 @@ static int mock_ioctl(int fd, unsigned long request, void *arg)
 		status->timestamp_us = 123456U;
 		return 0;
 	}
-	case LPF_MCU_IOC_RESET: {
+	case PDM_MCU_IOC_RESET: {
 		const uint32_t *index = arg;
 
 		return index && *index == 9 ? 0 : -1;
 	}
-	case LPF_MCU_IOC_COMMAND: {
-		struct lpf_mcu_command *command = arg;
+	case PDM_MCU_IOC_COMMAND: {
+		struct pdm_mcu_command *command = arg;
 
 		if (command->index != 0 || command->command != 0x22 ||
 		    command->tx_len != 2 || command->tx_data[0] != 0xAA ||
@@ -193,8 +193,8 @@ static int mock_ioctl(int fd, unsigned long request, void *arg)
 		command->rx_data[1] = 0x34;
 		return 0;
 	}
-	case LPF_MCU_IOC_READ_DATA: {
-		struct lpf_mcu_data *data = arg;
+	case PDM_MCU_IOC_READ_DATA: {
+		struct pdm_mcu_data *data = arg;
 
 		if (data->index != 0 || data->address != 0x1000 ||
 		    data->len != 3)
@@ -204,8 +204,8 @@ static int mock_ioctl(int fd, unsigned long request, void *arg)
 		data->data[2] = 0x03;
 		return 0;
 	}
-	case LPF_MCU_IOC_WRITE_DATA: {
-		const struct lpf_mcu_data *data = arg;
+	case PDM_MCU_IOC_WRITE_DATA: {
+		const struct pdm_mcu_data *data = arg;
 
 		return data->index == 0 && data->address == 0x2000 &&
 			       data->len == 2 && data->data[0] == 0xFE &&
@@ -213,8 +213,8 @@ static int mock_ioctl(int fd, unsigned long request, void *arg)
 			       0 :
 			       -1;
 	}
-	case LPF_LED_IOC_GET_STATE: {
-		struct lpf_led_state *state = arg;
+	case PDM_LED_IOC_GET_STATE: {
+		struct pdm_led_state *state = arg;
 
 		if (state->index != 0)
 			return -1;
@@ -223,23 +223,23 @@ static int mock_ioctl(int fd, unsigned long request, void *arg)
 		state->enabled = 1;
 		return 0;
 	}
-	case LPF_LED_IOC_GET_INFO: {
-		struct lpf_led_info *info = arg;
+	case PDM_LED_IOC_GET_INFO: {
+		struct pdm_led_info *info = arg;
 
 		memset(info, 0, sizeof(*info));
-		info->abi_version = LPF_LED_ABI_VERSION;
+		info->abi_version = PDM_LED_ABI_VERSION;
 		info->max_devices = 8;
 		return 0;
 	}
-	case LPF_LED_IOC_SET_BRIGHTNESS: {
-		const struct lpf_led_brightness *brightness = arg;
+	case PDM_LED_IOC_SET_BRIGHTNESS: {
+		const struct pdm_led_brightness *brightness = arg;
 
 		return brightness->index == 5 && brightness->brightness == 8 ?
 			       0 :
 			       -1;
 	}
-	case LPF_LED_IOC_ENABLE:
-	case LPF_LED_IOC_DISABLE: {
+	case PDM_LED_IOC_ENABLE:
+	case PDM_LED_IOC_DISABLE: {
 		const uint32_t *index = arg;
 
 		return index && *index == 6 ? 0 : -1;
@@ -265,9 +265,9 @@ static int test_default_paths(void)
 	mock_reset();
 	pdi_syscall_set_ops(&g_mock_ops);
 
-	if (strcmp(LPF_CTL_DEVICE_NAME, "lpf_ctl") != 0)
+	if (strcmp(PDM_CTL_DEVICE_NAME, "pdm_ctl") != 0)
 		return 300;
-	if (strcmp(PDI_CTL_DEFAULT_DEVICE, "/dev/lpf_ctl") != 0)
+	if (strcmp(PDI_CTL_DEFAULT_DEVICE, "/dev/pdm_ctl") != 0)
 		return 301;
 
 	if (pdi_ctl_open(&ctl, NULL) != 0)
@@ -298,9 +298,9 @@ static int test_default_paths(void)
 static int test_control_discovery(void)
 {
 	pdi_ctl_context_t ctl = { .fd = MOCK_FD };
-	struct lpf_ctl_info info;
-	struct lpf_ctl_device_info devices[2];
-	struct lpf_ctl_device_info device;
+	struct pdm_ctl_info info;
+	struct pdm_ctl_device_info devices[2];
+	struct pdm_ctl_device_info device;
 	uint32_t count;
 
 	mock_reset();
@@ -309,27 +309,27 @@ static int test_control_discovery(void)
 	memset(&info, 0, sizeof(info));
 	if (pdi_ctl_get_info(&ctl, &info) != 0)
 		return 401;
-	if (g_mock.last_request != LPF_CTL_IOC_GET_INFO ||
-	    info.abi_version != LPF_CTL_ABI_VERSION || info.device_count != 2)
+	if (g_mock.last_request != PDM_CTL_IOC_GET_INFO ||
+	    info.abi_version != PDM_CTL_ABI_VERSION || info.device_count != 2)
 		return 402;
 
 	memset(devices, 0, sizeof(devices));
 	count = ARRAY_SIZE(devices);
 	if (pdi_list_devices(&ctl, devices, &count) != 0)
 		return 403;
-	if (count != 2 || devices[0].type != LPF_CTL_DEVICE_TYPE_MCU ||
+	if (count != 2 || devices[0].type != PDM_CTL_DEVICE_TYPE_MCU ||
 	    devices[0].index != 3 || strcmp(devices[0].name, "mcu-main") ||
-	    devices[1].type != LPF_CTL_DEVICE_TYPE_LED ||
+	    devices[1].type != PDM_CTL_DEVICE_TYPE_LED ||
 	    devices[1].index != 2 || strcmp(devices[1].name, "led-front"))
 		return 404;
 
 	memset(&device, 0, sizeof(device));
 	if (pdi_get_device_by_capability(&ctl,
-					 LPF_CTL_DEVICE_CAP_CONTROL_PWM, 0,
+					 PDM_CTL_DEVICE_CAP_CONTROL_PWM, 0,
 					 &device) != 0)
 		return 405;
-	if (g_mock.last_request != LPF_CTL_IOC_GET_DEVICE_BY_CAPABILITY ||
-	    device.type != LPF_CTL_DEVICE_TYPE_LED || device.index != 2)
+	if (g_mock.last_request != PDM_CTL_IOC_GET_DEVICE_BY_CAPABILITY ||
+	    device.type != PDM_CTL_DEVICE_TYPE_LED || device.index != 2)
 		return 406;
 
 	errno = 0;
@@ -340,7 +340,7 @@ static int test_control_discovery(void)
 
 	errno = 0;
 	if (pdi_get_device_by_capability(&ctl,
-					 LPF_CTL_DEVICE_CAP_CONTROL_GPIO, 0,
+					 PDM_CTL_DEVICE_CAP_CONTROL_GPIO, 0,
 					 &device) != -1)
 		return 409;
 	if (errno != ENODEV)
@@ -362,7 +362,7 @@ static int test_open_by_name(void)
 		return 1;
 	if (mcu.fd != MOCK_FD)
 		return 2;
-	if (strcmp(g_mock.last_path, "/dev/lpf/mcu3") != 0)
+	if (strcmp(g_mock.last_path, "/dev/pdm/mcu3") != 0)
 		return 3;
 	if ((g_mock.last_flags & O_CLOEXEC) == 0)
 		return 4;
@@ -371,7 +371,7 @@ static int test_open_by_name(void)
 		return 5;
 	if (led.fd != MOCK_FD)
 		return 6;
-	if (strcmp(g_mock.last_path, "/dev/lpf/led2") != 0)
+	if (strcmp(g_mock.last_path, "/dev/pdm/led2") != 0)
 		return 7;
 
 	if (pdi_mcu_close(&mcu) != 0 || mcu.fd != -1)
@@ -398,11 +398,11 @@ static int test_open_by_name(void)
 static int test_mcu_operations(void)
 {
 	pdi_mcu_context_t ctx = { .fd = MOCK_FD };
-	struct lpf_mcu_info info;
-	struct lpf_mcu_version version;
-	struct lpf_mcu_status status;
-	struct lpf_mcu_command command;
-	struct lpf_mcu_data data;
+	struct pdm_mcu_info info;
+	struct pdm_mcu_version version;
+	struct pdm_mcu_status status;
+	struct pdm_mcu_command command;
+	struct pdm_mcu_data data;
 
 	mock_reset();
 	pdi_syscall_set_ops(&g_mock_ops);
@@ -410,14 +410,14 @@ static int test_mcu_operations(void)
 	memset(&info, 0, sizeof(info));
 	if (pdi_mcu_get_info(&ctx, &info) != 0)
 		return 112;
-	if (g_mock.last_request != LPF_MCU_IOC_GET_INFO ||
-	    info.abi_version != LPF_MCU_ABI_VERSION || info.max_devices != 4)
+	if (g_mock.last_request != PDM_MCU_IOC_GET_INFO ||
+	    info.abi_version != PDM_MCU_ABI_VERSION || info.max_devices != 4)
 		return 113;
 
 	memset(&version, 0, sizeof(version));
 	if (pdi_mcu_get_version(&ctx, &version) != 0)
 		return 101;
-	if (g_mock.last_request != LPF_MCU_IOC_GET_VERSION ||
+	if (g_mock.last_request != PDM_MCU_IOC_GET_VERSION ||
 	    version.major != 1 || version.minor != 2 || version.patch != 3 ||
 	    version.build != 4 || strcmp(version.version_string, "1.2.3.4"))
 		return 102;
@@ -425,13 +425,13 @@ static int test_mcu_operations(void)
 	memset(&status, 0, sizeof(status));
 	if (pdi_mcu_get_status(&ctx, &status) != 0)
 		return 103;
-	if (g_mock.last_request != LPF_MCU_IOC_GET_STATUS ||
-	    status.online != 1 || status.state != LPF_MCU_STATE_READY ||
+	if (g_mock.last_request != PDM_MCU_IOC_GET_STATUS ||
+	    status.online != 1 || status.state != PDM_MCU_STATE_READY ||
 	    status.temperature_milli_celsius != 42000)
 		return 104;
 
 	if (pdi_mcu_reset(&ctx, 9) != 0 ||
-	    g_mock.last_request != LPF_MCU_IOC_RESET)
+	    g_mock.last_request != PDM_MCU_IOC_RESET)
 		return 105;
 
 	memset(&command, 0, sizeof(command));
@@ -442,7 +442,7 @@ static int test_mcu_operations(void)
 	command.tx_data[1] = 0x55;
 	if (pdi_mcu_command(&ctx, &command) != 0)
 		return 106;
-	if (g_mock.last_request != LPF_MCU_IOC_COMMAND ||
+	if (g_mock.last_request != PDM_MCU_IOC_COMMAND ||
 	    command.rx_len != 2 || command.rx_data[0] != 0x12 ||
 	    command.rx_data[1] != 0x34)
 		return 107;
@@ -452,7 +452,7 @@ static int test_mcu_operations(void)
 	data.len = 3;
 	if (pdi_mcu_read_data(&ctx, &data) != 0)
 		return 108;
-	if (g_mock.last_request != LPF_MCU_IOC_READ_DATA ||
+	if (g_mock.last_request != PDM_MCU_IOC_READ_DATA ||
 	    data.data[0] != 0x01 || data.data[1] != 0x02 ||
 	    data.data[2] != 0x03)
 		return 109;
@@ -464,7 +464,7 @@ static int test_mcu_operations(void)
 	data.data[1] = 0xED;
 	if (pdi_mcu_write_data(&ctx, &data) != 0)
 		return 110;
-	if (g_mock.last_request != LPF_MCU_IOC_WRITE_DATA)
+	if (g_mock.last_request != PDM_MCU_IOC_WRITE_DATA)
 		return 111;
 
 	pdi_syscall_reset_ops();
@@ -474,8 +474,8 @@ static int test_mcu_operations(void)
 static int test_led_operations(void)
 {
 	pdi_led_context_t ctx = { .fd = MOCK_FD };
-	struct lpf_led_info info;
-	struct lpf_led_state state;
+	struct pdm_led_info info;
+	struct pdm_led_state state;
 
 	mock_reset();
 	pdi_syscall_set_ops(&g_mock_ops);
@@ -483,28 +483,28 @@ static int test_led_operations(void)
 	memset(&info, 0, sizeof(info));
 	if (pdi_led_get_info(&ctx, &info) != 0)
 		return 206;
-	if (g_mock.last_request != LPF_LED_IOC_GET_INFO ||
-	    info.abi_version != LPF_LED_ABI_VERSION || info.max_devices != 8)
+	if (g_mock.last_request != PDM_LED_IOC_GET_INFO ||
+	    info.abi_version != PDM_LED_ABI_VERSION || info.max_devices != 8)
 		return 207;
 
 	memset(&state, 0, sizeof(state));
 	if (pdi_led_get_state(&ctx, &state) != 0)
 		return 201;
-	if (g_mock.last_request != LPF_LED_IOC_GET_STATE ||
+	if (g_mock.last_request != PDM_LED_IOC_GET_STATE ||
 	    state.brightness != 7 || state.max_brightness != 10 ||
 	    state.enabled != 1)
 		return 202;
 
 	if (pdi_led_set_brightness(&ctx, 5, 8) != 0 ||
-	    g_mock.last_request != LPF_LED_IOC_SET_BRIGHTNESS)
+	    g_mock.last_request != PDM_LED_IOC_SET_BRIGHTNESS)
 		return 203;
 
 	if (pdi_led_enable(&ctx, 6) != 0 ||
-	    g_mock.last_request != LPF_LED_IOC_ENABLE)
+	    g_mock.last_request != PDM_LED_IOC_ENABLE)
 		return 204;
 
 	if (pdi_led_disable(&ctx, 6) != 0 ||
-	    g_mock.last_request != LPF_LED_IOC_DISABLE)
+	    g_mock.last_request != PDM_LED_IOC_DISABLE)
 		return 205;
 
 	pdi_syscall_reset_ops();

@@ -14,7 +14,7 @@ mkdir -p include/generated
 
 # Extract version from .config or use default
 if [ -f .config ]; then
-    VERSION=$(grep '^CONFIG_LPF_VERSION=' .config | cut -d'"' -f2)
+    VERSION=$(grep '^CONFIG_PDM_VERSION=' .config | cut -d'"' -f2)
 else
     VERSION="unknown"
 fi
@@ -51,7 +51,7 @@ fi
 cat > "$TEMP_FILE" << EOF
 /*
  * Automatically generated file - do not edit
- * LPF version: ${VERSION}
+ * PDM version: ${VERSION}
  * Generated on: ${BUILD_TIME}
  */
 
@@ -61,48 +61,48 @@ cat > "$TEMP_FILE" << EOF
 /*
  * Version Information
  */
-#define LPF_VERSION           "${VERSION}"
-#define LPF_VERSION_CODE      ${BUILD_TIMESTAMP}
+#define PDM_VERSION           "${VERSION}"
+#define PDM_VERSION_CODE      ${BUILD_TIMESTAMP}
 
 /*
  * Build Information
  */
-#define LPF_COMPILE_BY        "${BUILD_USER}"
-#define LPF_COMPILE_HOST      "${BUILD_HOST}"
-#define LPF_COMPILER          "${GCC_VERSION}"
+#define PDM_COMPILE_BY        "${BUILD_USER}"
+#define PDM_COMPILE_HOST      "${BUILD_HOST}"
+#define PDM_COMPILER          "${GCC_VERSION}"
 
 /*
  * Timestamps
  */
-#define LPF_COMPILE_TIME      "${BUILD_TIME}"
-#define LPF_COMPILE_TIMESTAMP ${BUILD_TIMESTAMP}
+#define PDM_COMPILE_TIME      "${BUILD_TIME}"
+#define PDM_COMPILE_TIMESTAMP ${BUILD_TIMESTAMP}
 
 /*
  * Platform Information
  */
-#define LPF_BUILD_ARCH        "${ARCH}"
-#define LPF_BUILD_KERNEL      "${KERNEL_VERSION}"
+#define PDM_BUILD_ARCH        "${ARCH}"
+#define PDM_BUILD_KERNEL      "${KERNEL_VERSION}"
 
 /*
  * Git Information
  */
-#define LPF_GIT_COMMIT        "${GIT_COMMIT}${GIT_DIRTY}"
+#define PDM_GIT_COMMIT        "${GIT_COMMIT}${GIT_DIRTY}"
 
 /*
  * Version Banner (similar to Linux kernel banner)
- * Format: LPF version <version> (<user>@<host>) (<compiler>) <timestamp>
+ * Format: PDM version <version> (<user>@<host>) (<compiler>) <timestamp>
  */
-#define LPF_BANNER \
-    "LPF version " LPF_VERSION \
-    " (" LPF_COMPILE_BY "@" LPF_COMPILE_HOST ")" \
-    " (" LPF_COMPILER ")" \
-    " " LPF_COMPILE_TIME
+#define PDM_BANNER \
+    "PDM version " PDM_VERSION \
+    " (" PDM_COMPILE_BY "@" PDM_COMPILE_HOST ")" \
+    " (" PDM_COMPILER ")" \
+    " " PDM_COMPILE_TIME
 
 /*
  * Short version string (version + git commit)
  */
-#define LPF_VERSION_STRING \
-    LPF_VERSION "-" LPF_GIT_COMMIT
+#define PDM_VERSION_STRING \
+    PDM_VERSION "-" PDM_GIT_COMMIT
 
 #endif /* __LPF_VERSION_H__ */
 EOF

@@ -1,13 +1,13 @@
 # ============================================================================
-# LPF SDK Root Configuration
+# PDM SDK Root Configuration
 # ============================================================================
-# This is the root Config.in file for the LPF kernel-centric SDK.
+# This is the root Config.in file for the PDM kernel-centric SDK.
 # It provides a unified configuration interface for core components.
 # ============================================================================
 
-mainmenu "LPF (Linux Peripheral Framework) Configuration"
+mainmenu "PDM (Linux Peripheral Framework) Configuration"
 
-config LPF_VERSION
+config PDM_VERSION
 	string
 	default "1.0.0"
 
@@ -28,7 +28,7 @@ config PROJECT_NAME
 
 config PROJECT_VERSION
 	string "Project version"
-	default LPF_VERSION
+	default PDM_VERSION
 	help
 	  Project version string.
 
@@ -56,7 +56,7 @@ config MODULES
 	default y
 	modules
 	help
-	  Enable Kconfig tristate module values. LPF kernel products are built
+	  Enable Kconfig tristate module values. PDM kernel products are built
 	  as external loadable modules, so top-level kernel module targets use
 	  =m while features linked into those modules remain bool options.
 
@@ -70,7 +70,7 @@ choice
 	help
 	  Select the target operating system type.
 
-	  LPF currently supports Linux only.
+	  PDM currently supports Linux only.
 
 config OS_LINUX
 	bool "Linux"
@@ -527,8 +527,7 @@ endmenu
 menu "Modules"
 
 source "user/osal/Config.in"
-source "kernel/lpf-core/Config.in"
-source "kernel/lpf-configs/Config.in"
+source "kernel/pdm/Config.in"
 source "user/aconfig/Config.in"
 source "user/pdi/Config.in"
 
@@ -555,49 +554,12 @@ menu "Configuration Validation"
 # Dependency Checks
 # ============================================================================
 
-config SANITY_ERROR_LPF_RUNTIME_NO_DEPS
-	def_bool y
-	depends on LPF_RUNTIME && (!OSAL || !LPF_CORE)
-	prompt "ERROR: LPF runtime requires OSAL and LPF Core to be enabled"
 
 config SANITY_ERROR_ACONFIG_NO_OSAL
 	def_bool y
 	depends on ACONFIG && !OSAL
 	prompt "ERROR: ACONFIG requires OSAL to be enabled"
 
-# ============================================================================
-# LPF HW Dependency Checks
-# ============================================================================
-
-config SANITY_ERROR_LPF_HW_CAN_NO_PLATFORM
-	def_bool y
-	depends on LPF_HW_CAN && !PLATFORM_LINUX
-	prompt "ERROR: LPF_HW_CAN requires Linux platform support (PLATFORM_LINUX)"
-
-config SANITY_ERROR_LPF_HW_UART_NO_PLATFORM
-	def_bool y
-	depends on LPF_HW_UART && !PLATFORM_LINUX
-	prompt "ERROR: LPF_HW_UART requires Linux platform support (PLATFORM_LINUX)"
-
-config SANITY_ERROR_LPF_HW_GPIO_NO_PLATFORM
-	def_bool y
-	depends on LPF_HW_GPIO && !PLATFORM_LINUX
-	prompt "ERROR: LPF_HW_GPIO requires Linux platform support (PLATFORM_LINUX)"
-
-config SANITY_ERROR_LPF_HW_PWM_NO_PLATFORM
-	def_bool y
-	depends on LPF_HW_PWM && !PLATFORM_LINUX
-	prompt "ERROR: LPF_HW_PWM requires Linux platform support (PLATFORM_LINUX)"
-
-config SANITY_ERROR_LPF_HW_I2C_NO_PLATFORM
-	def_bool y
-	depends on LPF_HW_I2C && !PLATFORM_LINUX
-	prompt "ERROR: LPF_HW_I2C requires Linux platform support (PLATFORM_LINUX)"
-
-config SANITY_ERROR_LPF_HW_SPI_NO_PLATFORM
-	def_bool y
-	depends on LPF_HW_SPI && !PLATFORM_LINUX
-	prompt "ERROR: LPF_HW_SPI requires Linux platform support (PLATFORM_LINUX)"
 
 # ============================================================================
 # Compatibility Checks
@@ -618,15 +580,7 @@ config SANITY_ERROR_SANITIZER_CONFLICT
 
 config SANITY_CHECK_PASSED
 	def_bool y
-	depends on !SANITY_ERROR_LPF_RUNTIME_NO_DEPS && \
-	           !SANITY_ERROR_ACONFIG_NO_OSAL && \
-	           !SANITY_ERROR_LPF_HW_CAN_NO_PLATFORM && \
-	           !SANITY_ERROR_LPF_HW_UART_NO_PLATFORM && \
-	           !SANITY_ERROR_LPF_HW_GPIO_NO_PLATFORM && \
-	           !SANITY_ERROR_LPF_HW_PWM_NO_PLATFORM && \
-	           !SANITY_ERROR_LPF_HW_I2C_NO_PLATFORM && \
-	           !SANITY_ERROR_LPF_HW_SPI_NO_PLATFORM && \
-	           !SANITY_ERROR_SANITIZER_CONFLICT
+	depends on !SANITY_ERROR_ACONFIG_NO_OSAL && 	           !SANITY_ERROR_SANITIZER_CONFLICT
 	help
 	  This symbol is set when all sanity checks pass.
 	  If this is not set, review error messages above.

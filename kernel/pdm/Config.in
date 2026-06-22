@@ -1,0 +1,60 @@
+# PDM Core Configuration
+
+menuconfig PDM_CORE
+	tristate "PDM core device model"
+	default m
+	depends on OSAL
+	depends on m
+	help
+	  PDM Core provides a Linux bus_type implementation for PDM devices.
+	  Device configuration uses Device Tree exclusively.
+
+	  If unsure, say Y when enabling PDM peripheral services.
+
+if PDM_CORE
+
+config PDM_INSTANCE_DEVNODE_MODE
+	string "PDM instance device node mode"
+	default "0660"
+	help
+	  Octal permission mode applied to per-instance PDM character device nodes
+	  under /dev/pdm/, such as /dev/pdm/mcu0 and /dev/pdm/led0.
+
+	  Product builds should keep this conservative and assign device group
+	  ownership with udev, devtmpfs policy, or the product init system.
+	  Development-only builds that intentionally need broad local access can
+	  override this to "0666".
+
+config PDM_MOCK_DEVICES
+	bool "Synthetic PDM devices for module smoke tests"
+	default n
+	help
+	  Create in-kernel mock PDM MCU and LED devices when pdm_core loads.
+	  This is intended for x86 smoke tests that do not have Device Tree
+	  PDM child nodes. Product builds should leave this disabled.
+
+config PDM_MCU_UART_SERDEV
+	bool "PDM MCU UART serdev transport"
+	default y
+	help
+	  Register a serdev client driver for MCU devices described below a UART
+	  controller node. If the target kernel lacks CONFIG_SERIAL_DEV_BUS, this
+	  backend compiles to a no-op and legacy tty-path UART remains available.
+
+config PDM_MCU_I2C
+	bool "PDM MCU I2C transport"
+	default y
+	help
+	  Register an I2C client driver for MCU devices described below an I2C
+	  controller node. If the target kernel lacks CONFIG_I2C, this backend
+	  compiles to a no-op.
+
+config PDM_MCU_SPI
+	bool "PDM MCU SPI transport"
+	default y
+	help
+	  Register an SPI client driver for MCU devices described below an SPI
+	  controller node. If the target kernel lacks CONFIG_SPI, this backend
+	  compiles to a no-op.
+
+endif # PDM_CORE
