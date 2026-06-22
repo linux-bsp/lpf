@@ -104,53 +104,9 @@ config PDM_PROTOCOL_MAX_PAYLOAD_SIZE
 
 endmenu
 
-menuconfig PDM_RUNTIME
-	bool "PDM integrated peripheral runtime"
-	default y
-	depends on PDM_CORE
-	help
-	  Link the integrated PDM runtime into pdm_core.ko. This runtime hosts
-	  the reusable PDM peripheral services selected below and the runtime
-	  configuration backend used to create PDM devices. It keeps framework
-	  services in one core/driver module instead of splitting one kernel
-	  module per peripheral. Static platform configuration can be provided
-	  by the separate pdm_configs.ko module or by Device Tree.
-
-	  If unsure, say Y when enabling PDM peripheral services.
-
-if PDM_RUNTIME
-
-source "kernel/pdm-core/hw/Config.in"
-
-menuconfig PDM_MCU_SERVICE
-	bool "PDM MCU peripheral service"
-	default n
-	depends on PDM_RUNTIME
-	select PDM_PROTOCOL
-	select PDM_PROTOCOL_MCU
-	select PDM_HW_CAN
-	select PDM_HW_UART
-	help
-	  Enable the PDM MCU peripheral service. MCU instances are created from
-	  normalized PDM_CONFIG entries and exposed through PDM device lifecycle,
-	  /dev/pdm/mcuN, sysfs attributes, and debugfs commands.
-
-source "kernel/pdm-core/peripheral/mcu/Config.in"
-
-menuconfig PDM_LED_SERVICE
-	bool "PDM LED peripheral service"
-	default n
-	depends on PDM_RUNTIME
-	select PDM_HW_GPIO
-	select PDM_HW_PWM
-	help
-	  Enable the PDM LED peripheral service. LED instances are created from
-	  normalized PDM_CONFIG entries and exposed through PDM device lifecycle,
-	  /dev/pdm/ledN, sysfs attributes, and debugfs commands.
-
-source "kernel/pdm-core/peripheral/led/Config.in"
-
-endif # PDM_RUNTIME
+# menuconfig PDM_RUNTIME - 已删除：无实际作用
+# menuconfig PDM_MCU_SERVICE - 已删除：依赖 pdm_configs
+# menuconfig PDM_LED_SERVICE - 已删除：依赖 pdm_configs
 
 menu "PDM Core Test Configuration"
 
