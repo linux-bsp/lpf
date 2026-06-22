@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: MIT
 
 #include "test_lpf_config_compare.h"
-#include "lpf_config_static.h"
-#include "lpf_config_normalizer.h"
+#include "pdm_config_static.h"
+#include "pdm_config_normalizer.h"
 
 #include <string.h>
 
-extern const lpf_config_platform_config_t *const lpf_config_static_start;
-extern const lpf_config_platform_config_t *const lpf_config_static_end;
+extern const pdm_config_platform_config_t *const pdm_config_static_start;
+extern const pdm_config_platform_config_t *const pdm_config_static_end;
 
-const lpf_config_platform_config_t *test_lpf_config_mock_static_config(void)
+const pdm_config_platform_config_t *test_lpf_config_mock_static_config(void)
 {
-	const lpf_config_platform_config_t *const *config;
+	const pdm_config_platform_config_t *const *config;
 
-	for (config = &lpf_config_static_start + 1;
-	     config < &lpf_config_static_end; config++) {
+	for (config = &pdm_config_static_start + 1;
+	     config < &pdm_config_static_end; config++) {
 		if (*config && (*config)->project_name &&
 		    strcmp((*config)->project_name, "x86_mock_modules") == 0)
 			return *config;
@@ -32,11 +32,11 @@ int test_lpf_config_string_equal(const char *left, const char *right)
 }
 
 static int test_lpf_config_compare_mcu_entries(
-	const lpf_config_mcu_entry_t *left,
-	const lpf_config_mcu_entry_t *right)
+	const pdm_config_mcu_entry_t *left,
+	const pdm_config_mcu_entry_t *right)
 {
-	const lpf_config_mcu_config_t *a = &left->config;
-	const lpf_config_mcu_config_t *b = &right->config;
+	const pdm_config_mcu_config_t *a = &left->config;
+	const pdm_config_mcu_config_t *b = &right->config;
 
 	if (left->enabled != right->enabled)
 		return -1;
@@ -49,7 +49,7 @@ static int test_lpf_config_compare_mcu_entries(
 		return -1;
 
 	switch (a->interface) {
-	case LPF_CONFIG_MCU_INTERFACE_CAN:
+	case PDM_CONFIG_MCU_INTERFACE_CAN:
 		if (test_lpf_config_string_equal(a->hw.can.device,
 						 b->hw.can.device))
 			return -1;
@@ -60,7 +60,7 @@ static int test_lpf_config_compare_mcu_entries(
 			       a->hw.can.rx_id == b->hw.can.rx_id ?
 			       0 :
 			       -1;
-	case LPF_CONFIG_MCU_INTERFACE_SERIAL:
+	case PDM_CONFIG_MCU_INTERFACE_SERIAL:
 		if (test_lpf_config_string_equal(a->hw.serial.device,
 						 b->hw.serial.device))
 			return -1;
@@ -78,11 +78,11 @@ static int test_lpf_config_compare_mcu_entries(
 }
 
 static int test_lpf_config_compare_led_entries(
-	const lpf_config_led_entry_t *left,
-	const lpf_config_led_entry_t *right)
+	const pdm_config_led_entry_t *left,
+	const pdm_config_led_entry_t *right)
 {
-	const lpf_config_led_config_t *a = &left->config;
-	const lpf_config_led_config_t *b = &right->config;
+	const pdm_config_led_config_t *a = &left->config;
+	const pdm_config_led_config_t *b = &right->config;
 
 	if (left->enabled != right->enabled)
 		return -1;
@@ -94,7 +94,7 @@ static int test_lpf_config_compare_led_entries(
 		return -1;
 
 	switch (a->control) {
-	case LPF_CONFIG_LED_CONTROL_GPIO:
+	case PDM_CONFIG_LED_CONTROL_GPIO:
 		return a->hw.gpio.gpio_num == b->hw.gpio.gpio_num &&
 			       a->hw.gpio.pin_mux == b->hw.gpio.pin_mux &&
 			       a->hw.gpio.active_low == b->hw.gpio.active_low &&
@@ -102,7 +102,7 @@ static int test_lpf_config_compare_led_entries(
 			       a->hw.gpio.pull_down == b->hw.gpio.pull_down ?
 			       0 :
 			       -1;
-	case LPF_CONFIG_LED_CONTROL_PWM:
+	case PDM_CONFIG_LED_CONTROL_PWM:
 		if (test_lpf_config_string_equal(a->hw.pwm.consumer,
 						 b->hw.pwm.consumer))
 			return -1;
@@ -117,17 +117,17 @@ static int test_lpf_config_compare_led_entries(
 }
 
 int test_lpf_config_compare_devices(
-	const lpf_config_device_config_t *left,
-	const lpf_config_device_config_t *right)
+	const pdm_config_device_config_t *left,
+	const pdm_config_device_config_t *right)
 {
 	if (left->device_type != right->device_type || left->index != right->index)
 		return -1;
 
 	switch (left->device_type) {
-	case LPF_CONFIG_DEVICE_TYPE_MCU:
+	case PDM_CONFIG_DEVICE_TYPE_MCU:
 		return test_lpf_config_compare_mcu_entries(left->entry,
 							   right->entry);
-	case LPF_CONFIG_DEVICE_TYPE_LED:
+	case PDM_CONFIG_DEVICE_TYPE_LED:
 		return test_lpf_config_compare_led_entries(left->entry,
 							   right->entry);
 	default:
@@ -136,9 +136,9 @@ int test_lpf_config_compare_devices(
 }
 
 int test_lpf_config_normalize_platform(
-	const lpf_config_platform_config_t *platform,
-	lpf_config_device_config_t *devices, uint32_t *count)
+	const pdm_config_platform_config_t *platform,
+	pdm_config_device_config_t *devices, uint32_t *count)
 {
 	*count = TEST_LPF_CONFIG_DEVICE_CAPACITY;
-	return lpf_config_normalize_devices(platform, devices, count);
+	return pdm_config_normalize_devices(platform, devices, count);
 }

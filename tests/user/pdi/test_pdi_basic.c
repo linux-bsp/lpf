@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#define MISSING_DEVICE_PATH "/tmp/lpf_missing_device_for_pdi_test"
+#define MISSING_DEVICE_PATH "/tmp/pdm_missing_device_for_pdi_test"
 
 static int expect_failure_errno(int32_t ret, int expected_errno)
 {
@@ -16,8 +16,8 @@ static int expect_failure_errno(int32_t ret, int expected_errno)
 static int test_ctl_validation(void)
 {
 	pdi_ctl_context_t ctx = { .fd = -1 };
-	struct lpf_ctl_info info;
-	struct lpf_ctl_device_info device;
+	struct pdm_ctl_info info;
+	struct pdm_ctl_device_info device;
 	uint32_t count = 0;
 
 	errno = 0;
@@ -77,7 +77,7 @@ static int test_ctl_validation(void)
 
 	errno = 0;
 	if (expect_failure_errno(
-		    pdi_get_device_by_capability(&ctx, LPF_CTL_DEVICE_CAP_NONE,
+		    pdi_get_device_by_capability(&ctx, PDM_CTL_DEVICE_CAP_NONE,
 						 0, &device),
 		    EINVAL))
 		return 14;
@@ -85,7 +85,7 @@ static int test_ctl_validation(void)
 	errno = 0;
 	if (expect_failure_errno(
 		    pdi_get_device_by_capability(&ctx,
-						 LPF_CTL_DEVICE_CAP_USER_IOCTL,
+						 PDM_CTL_DEVICE_CAP_USER_IOCTL,
 						 0, NULL),
 		    EINVAL))
 		return 15;
@@ -96,11 +96,11 @@ static int test_ctl_validation(void)
 static int test_mcu_validation(void)
 {
 	pdi_mcu_context_t ctx = { .fd = -1 };
-	struct lpf_mcu_info info;
-	struct lpf_mcu_version version;
-	struct lpf_mcu_status status;
-	struct lpf_mcu_command command;
-	struct lpf_mcu_data data;
+	struct pdm_mcu_info info;
+	struct pdm_mcu_version version;
+	struct pdm_mcu_status status;
+	struct pdm_mcu_command command;
+	struct pdm_mcu_data data;
 
 	memset(&command, 0, sizeof(command));
 	memset(&data, 0, sizeof(data));
@@ -197,8 +197,8 @@ static int test_mcu_validation(void)
 static int test_led_validation(void)
 {
 	pdi_led_context_t ctx = { .fd = -1 };
-	struct lpf_led_info info;
-	struct lpf_led_state state;
+	struct pdm_led_info info;
+	struct pdm_led_state state;
 
 	errno = 0;
 	if (expect_failure_errno(pdi_led_open(NULL, NULL), EINVAL))

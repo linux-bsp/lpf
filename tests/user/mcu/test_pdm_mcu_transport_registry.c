@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-#include "lpf_mcu_transport.h"
+#include "pdm_mcu_transport.h"
 
 #include <string.h>
 
@@ -16,18 +16,18 @@ static int g_open_count;
 static int g_close_count;
 static int g_transfer_count;
 
-static int32_t mock_open(const lpf_config_mcu_config_t *config,
-			 lpf_mcu_transport_handle_t *handle)
+static int32_t mock_open(const pdm_config_mcu_config_t *config,
+			 pdm_mcu_transport_handle_t *handle)
 {
 	if (!config || !handle)
 		return OSAL_ERR_INVALID_PARAM;
 
 	g_open_count++;
-	*handle = (lpf_mcu_transport_handle_t)config;
+	*handle = (pdm_mcu_transport_handle_t)config;
 	return OSAL_SUCCESS;
 }
 
-static int32_t mock_close(lpf_mcu_transport_handle_t handle)
+static int32_t mock_close(pdm_mcu_transport_handle_t handle)
 {
 	if (!handle)
 		return OSAL_ERR_INVALID_PARAM;
@@ -36,7 +36,7 @@ static int32_t mock_close(lpf_mcu_transport_handle_t handle)
 	return OSAL_SUCCESS;
 }
 
-static int32_t mock_transfer(lpf_mcu_transport_handle_t handle,
+static int32_t mock_transfer(pdm_mcu_transport_handle_t handle,
 			     const uint8_t *packet, uint32_t packet_len,
 			     uint8_t *response, uint32_t response_size,
 			     uint32_t *actual_size, uint32_t timeout_ms)
@@ -57,28 +57,28 @@ static int32_t mock_transfer(lpf_mcu_transport_handle_t handle,
 	return OSAL_SUCCESS;
 }
 
-const lpf_mcu_transport_ops_t lpf_mcu_transport_can_ops = {
-	.interface = LPF_CONFIG_MCU_INTERFACE_CAN,
+const pdm_mcu_transport_ops_t pdm_mcu_transport_can_ops = {
+	.interface = PDM_CONFIG_MCU_INTERFACE_CAN,
 	.name = "mock-can",
 	.open = mock_open,
 	.close = mock_close,
 	.transfer = mock_transfer,
 };
 
-const lpf_mcu_transport_ops_t lpf_mcu_transport_uart_ops = {
-	.interface = LPF_CONFIG_MCU_INTERFACE_SERIAL,
+const pdm_mcu_transport_ops_t pdm_mcu_transport_uart_ops = {
+	.interface = PDM_CONFIG_MCU_INTERFACE_SERIAL,
 	.name = "mock-uart",
 	.open = mock_open,
 	.close = mock_close,
 	.transfer = mock_transfer,
 };
 
-static int test_transport_ops(const lpf_mcu_transport_ops_t *ops)
+static int test_transport_ops(const pdm_mcu_transport_ops_t *ops)
 {
 	const uint8_t packet[] = { 0x10U, 0x20U, 0x30U, 0x40U };
 	uint8_t response[sizeof(packet)];
-	lpf_config_mcu_config_t config;
-	lpf_mcu_transport_handle_t handle = NULL;
+	pdm_config_mcu_config_t config;
+	pdm_mcu_transport_handle_t handle = NULL;
 	uint32_t actual_size = 0;
 
 	if (!ops || !ops->open || !ops->close || !ops->transfer)
@@ -109,14 +109,14 @@ static int test_transport_ops(const lpf_mcu_transport_ops_t *ops)
 	return 0;
 }
 
-static int expect_transport(lpf_config_mcu_interface_t interface,
-			    const lpf_mcu_transport_ops_t *expected,
+static int expect_transport(pdm_config_mcu_interface_t interface,
+			    const pdm_mcu_transport_ops_t *expected,
 			    int should_exist)
 {
-	const lpf_mcu_transport_ops_t *ops;
+	const pdm_mcu_transport_ops_t *ops;
 	int ret;
 
-	ops = lpf_mcu_transport_get(interface);
+	ops = pdm_mcu_transport_get(interface);
 	if (!should_exist)
 		return ops == NULL ? 0 : 1;
 
@@ -135,23 +135,23 @@ int main(void)
 {
 	int ret;
 
-	ret = expect_transport(LPF_CONFIG_MCU_INTERFACE_CAN,
-			       &lpf_mcu_transport_can_ops,
+	ret = expect_transport(PDM_CONFIG_MCU_INTERFACE_CAN,
+			       &pdm_mcu_transport_can_ops,
 			       EXPECT_CAN_TRANSPORT);
 	if (ret != 0)
 		return 100 + ret;
 
-	ret = expect_transport(LPF_CONFIG_MCU_INTERFACE_SERIAL,
-			       &lpf_mcu_transport_uart_ops,
+	ret = expect_transport(PDM_CONFIG_MCU_INTERFACE_SERIAL,
+			       &pdm_mcu_transport_uart_ops,
 			       EXPECT_UART_TRANSPORT);
 	if (ret != 0)
 		return 200 + ret;
 
-	if (lpf_mcu_transport_get(LPF_CONFIG_MCU_INTERFACE_I2C) != NULL)
+	if (pdm_mcu_transport_get(PDM_CONFIG_MCU_INTERFACE_I2C) != NULL)
 		return 300;
-	if (lpf_mcu_transport_get(LPF_CONFIG_MCU_INTERFACE_SPI) != NULL)
+	if (pdm_mcu_transport_get(PDM_CONFIG_MCU_INTERFACE_SPI) != NULL)
 		return 301;
-	if (lpf_mcu_transport_get((lpf_config_mcu_interface_t)0xFF) != NULL)
+	if (pdm_mcu_transport_get((pdm_config_mcu_interface_t)0xFF) != NULL)
 		return 302;
 
 	if (g_open_count != g_close_count)

@@ -186,17 +186,17 @@ static int test_service_context_registries(void)
 	int failures = 0;
 
 	mcu_service = read_source_file(
-		"kernel/lpf-core/peripheral/mcu/lpf_mcu_service.c");
+		"kernel/pdm-core/peripheral/mcu/pdm_mcu_service.c");
 	led_service = read_source_file(
-		"kernel/lpf-core/peripheral/led/lpf_led_service.c");
+		"kernel/pdm-core/peripheral/led/pdm_led_service.c");
 	led_internal = read_source_file(
-		"kernel/lpf-core/peripheral/led/lpf_led_internal.h");
+		"kernel/pdm-core/peripheral/led/pdm_led_internal.h");
 	led_makefile = read_source_file(
-		"kernel/lpf-core/peripheral/led/Makefile");
+		"kernel/pdm-core/peripheral/led/Makefile");
 	mcu_chrdev = read_source_file(
-		"kernel/lpf-core/peripheral/mcu/lpf_mcu_chrdev.c");
+		"kernel/pdm-core/peripheral/mcu/pdm_mcu_chrdev.c");
 	led_chrdev = read_source_file(
-		"kernel/lpf-core/peripheral/led/lpf_led_chrdev.c");
+		"kernel/pdm-core/peripheral/led/pdm_led_chrdev.c");
 
 	if (!mcu_service || !led_service || !led_internal || !led_makefile ||
 	    !mcu_chrdev || !led_chrdev) {
@@ -206,49 +206,49 @@ static int test_service_context_registries(void)
 	}
 
 	failures += expect_contains(
-		"lpf_mcu_service.c", mcu_service,
-		"struct lpf_mcu_context *next;");
+		"pdm_mcu_service.c", mcu_service,
+		"struct pdm_mcu_context *next;");
 	failures += expect_contains(
-		"lpf_mcu_service.c", mcu_service,
-		"static lpf_mcu_context_t *g_mcu_context_list;");
-	failures += expect_contains("lpf_mcu_service.c", mcu_service,
-				    "lpf_mcu_add_context_locked");
-	failures += expect_contains("lpf_mcu_service.c", mcu_service,
-				    "lpf_mcu_remove_context_locked");
-	failures += expect_not_contains("lpf_mcu_service.c", mcu_service,
-					"[LPF_MCU_MAX_DEVICES]");
-	failures += expect_not_contains("lpf_mcu_service.c", mcu_service,
-					"LPF_MCU_MAX_DEVICES");
+		"pdm_mcu_service.c", mcu_service,
+		"static pdm_mcu_context_t *g_mcu_context_list;");
+	failures += expect_contains("pdm_mcu_service.c", mcu_service,
+				    "pdm_mcu_add_context_locked");
+	failures += expect_contains("pdm_mcu_service.c", mcu_service,
+				    "pdm_mcu_remove_context_locked");
+	failures += expect_not_contains("pdm_mcu_service.c", mcu_service,
+					"[PDM_MCU_MAX_DEVICES]");
+	failures += expect_not_contains("pdm_mcu_service.c", mcu_service,
+					"PDM_MCU_MAX_DEVICES");
 
 	failures += expect_contains(
-		"lpf_led_internal.h", led_internal,
-		"struct lpf_led_context *next;");
+		"pdm_led_internal.h", led_internal,
+		"struct pdm_led_context *next;");
 	failures += expect_contains(
-		"lpf_led_service.c", led_service,
-		"static lpf_led_context_t *g_led_context_list;");
-	failures += expect_contains("lpf_led_service.c", led_service,
-				    "lpf_led_add_context_locked");
-	failures += expect_contains("lpf_led_service.c", led_service,
-				    "lpf_led_remove_context_locked");
-	failures += expect_not_contains("lpf_led_service.c", led_service,
-					"[LPF_LED_MAX_DEVICES]");
-	failures += expect_not_contains("lpf_led_service.c", led_service,
-					"LPF_LED_MAX_DEVICES");
-	failures += expect_not_contains("lpf_led_service.c", led_service,
-					"lpf_hw_gpio_");
-	failures += expect_not_contains("lpf_led_service.c", led_service,
-					"lpf_hw_pwm_");
+		"pdm_led_service.c", led_service,
+		"static pdm_led_context_t *g_led_context_list;");
+	failures += expect_contains("pdm_led_service.c", led_service,
+				    "pdm_led_add_context_locked");
+	failures += expect_contains("pdm_led_service.c", led_service,
+				    "pdm_led_remove_context_locked");
+	failures += expect_not_contains("pdm_led_service.c", led_service,
+					"[PDM_LED_MAX_DEVICES]");
+	failures += expect_not_contains("pdm_led_service.c", led_service,
+					"PDM_LED_MAX_DEVICES");
+	failures += expect_not_contains("pdm_led_service.c", led_service,
+					"pdm_hw_gpio_");
+	failures += expect_not_contains("pdm_led_service.c", led_service,
+					"pdm_hw_pwm_");
 	failures += expect_contains("led/Makefile", led_makefile,
-				    "lpf-core/peripheral/led/lpf_led_gpio.o");
+				    "pdm-core/peripheral/led/pdm_led_gpio.o");
 	failures += expect_contains("led/Makefile", led_makefile,
-				    "lpf-core/peripheral/led/lpf_led_pwm.o");
+				    "pdm-core/peripheral/led/pdm_led_pwm.o");
 
 	failures += expect_contains(
-		"lpf_mcu_chrdev.c", mcu_chrdev,
-		"static lpf_chrdev_t g_lpf_mcu_chrdevs[LPF_MCU_MAX_DEVICES];");
+		"pdm_mcu_chrdev.c", mcu_chrdev,
+		"static pdm_chrdev_t g_lpf_mcu_chrdevs[PDM_MCU_MAX_DEVICES];");
 	failures += expect_contains(
-		"lpf_led_chrdev.c", led_chrdev,
-		"static lpf_chrdev_t g_lpf_led_chrdevs[LPF_LED_MAX_DEVICES];");
+		"pdm_led_chrdev.c", led_chrdev,
+		"static pdm_chrdev_t g_lpf_led_chrdevs[PDM_LED_MAX_DEVICES];");
 
 out:
 	free(led_chrdev);
@@ -267,9 +267,9 @@ static int test_mcu_transport_is_service_owned(void)
 	int failures = 0;
 
 	mcu_internal = read_source_file(
-		"kernel/lpf-core/peripheral/mcu/lpf_mcu_internal.h");
+		"kernel/pdm-core/peripheral/mcu/pdm_mcu_internal.h");
 	mcu_makefile = read_source_file(
-		"kernel/lpf-core/peripheral/mcu/Makefile");
+		"kernel/pdm-core/peripheral/mcu/Makefile");
 
 	if (!mcu_internal || !mcu_makefile) {
 		fprintf(stderr, "failed to read MCU transport ownership sources\n");
@@ -277,21 +277,21 @@ static int test_mcu_transport_is_service_owned(void)
 		goto out;
 	}
 
-	failures += expect_path_absent("kernel/lpf-runtime/transport/mcu");
-	failures += expect_path_absent("kernel/lpf-runtime");
-	failures += expect_path_absent("kernel/include/lpf/transport/mcu");
-	failures += expect_contains("lpf_mcu_internal.h", mcu_internal,
-				    "#include \"lpf_mcu_transport.h\"");
-	failures += expect_not_contains("lpf_mcu_internal.h", mcu_internal,
-					"lpf/transport/mcu");
+	failures += expect_path_absent("kernel/pdm-runtime/transport/mcu");
+	failures += expect_path_absent("kernel/pdm-runtime");
+	failures += expect_path_absent("kernel/include/pdm/transport/mcu");
+	failures += expect_contains("pdm_mcu_internal.h", mcu_internal,
+				    "#include \"pdm_mcu_transport.h\"");
+	failures += expect_not_contains("pdm_mcu_internal.h", mcu_internal,
+					"pdm/transport/mcu");
 	failures += expect_contains("mcu/Makefile", mcu_makefile,
-				    "lpf-core/peripheral/mcu/lpf_mcu_transport.o");
+				    "pdm-core/peripheral/mcu/pdm_mcu_transport.o");
 	failures += expect_contains(
 		"mcu/Makefile", mcu_makefile,
-		"lpf-core/peripheral/mcu/lpf_mcu_can.o");
+		"pdm-core/peripheral/mcu/pdm_mcu_can.o");
 	failures += expect_contains(
 		"mcu/Makefile", mcu_makefile,
-		"lpf-core/peripheral/mcu/lpf_mcu_uart.o");
+		"pdm-core/peripheral/mcu/pdm_mcu_uart.o");
 
 out:
 	free(mcu_makefile);
@@ -306,9 +306,9 @@ static int test_hw_sources_are_capability_grouped(void)
 	char *hw_gpio;
 	int failures = 0;
 
-	hw_makefile = read_source_file("kernel/lpf-core/hw/Makefile");
-	hw_core = read_source_file("kernel/lpf-core/hw/core/lpf_hw.c");
-	hw_gpio = read_source_file("kernel/lpf-core/hw/gpio/lpf_hw_gpio.c");
+	hw_makefile = read_source_file("kernel/pdm-core/hw/Makefile");
+	hw_core = read_source_file("kernel/pdm-core/hw/core/pdm_hw.c");
+	hw_gpio = read_source_file("kernel/pdm-core/hw/gpio/pdm_hw_gpio.c");
 
 	if (!hw_makefile || !hw_core || !hw_gpio) {
 		fprintf(stderr, "failed to read HW grouping sources\n");
@@ -316,49 +316,49 @@ static int test_hw_sources_are_capability_grouped(void)
 		goto out;
 	}
 
-	failures += expect_path_present("kernel/lpf-core/include/lpf_hw_internal.h");
-	failures += expect_path_absent("kernel/lpf-core/hw/lpf_hw_internal.h");
-	failures += expect_path_absent("kernel/lpf-core/hw/lpf_hw.c");
-	failures += expect_path_absent("kernel/lpf-core/hw/lpf_hw_gpio.c");
-	failures += expect_path_absent("kernel/lpf-core/hw/lpf_hw_pwm.c");
-	failures += expect_path_absent("kernel/lpf-core/hw/lpf_hw_bus_i2c.c");
-	failures += expect_path_absent("kernel/lpf-core/hw/lpf_hw_bus_spi.c");
-	failures += expect_path_absent("kernel/lpf-core/hw/i2c/lpf_hw_bus_i2c.c");
-	failures += expect_path_absent("kernel/lpf-core/hw/spi/lpf_hw_bus_spi.c");
+	failures += expect_path_present("kernel/pdm-core/include/pdm_hw_internal.h");
+	failures += expect_path_absent("kernel/pdm-core/hw/pdm_hw_internal.h");
+	failures += expect_path_absent("kernel/pdm-core/hw/pdm_hw.c");
+	failures += expect_path_absent("kernel/pdm-core/hw/pdm_hw_gpio.c");
+	failures += expect_path_absent("kernel/pdm-core/hw/pdm_hw_pwm.c");
+	failures += expect_path_absent("kernel/pdm-core/hw/pdm_hw_bus_i2c.c");
+	failures += expect_path_absent("kernel/pdm-core/hw/pdm_hw_bus_spi.c");
+	failures += expect_path_absent("kernel/pdm-core/hw/i2c/pdm_hw_bus_i2c.c");
+	failures += expect_path_absent("kernel/pdm-core/hw/spi/pdm_hw_bus_spi.c");
 	failures += expect_path_absent(
-		"kernel/lpf-core/hw/lpf_hw_transport_can.c");
+		"kernel/pdm-core/hw/pdm_hw_transport_can.c");
 	failures += expect_path_absent(
-		"kernel/lpf-core/hw/lpf_hw_transport_uart.c");
+		"kernel/pdm-core/hw/pdm_hw_transport_uart.c");
 	failures += expect_path_absent(
-		"kernel/lpf-core/hw/can/lpf_hw_transport_can.c");
+		"kernel/pdm-core/hw/can/pdm_hw_transport_can.c");
 	failures += expect_path_absent(
-		"kernel/lpf-core/hw/uart/lpf_hw_transport_uart.c");
-	failures += expect_path_absent("kernel/lpf-core/hw/bus/i2c");
-	failures += expect_path_absent("kernel/lpf-core/hw/bus/spi");
-	failures += expect_path_absent("kernel/lpf-core/hw/transport/can");
-	failures += expect_path_absent("kernel/lpf-core/hw/transport/uart");
+		"kernel/pdm-core/hw/uart/pdm_hw_transport_uart.c");
+	failures += expect_path_absent("kernel/pdm-core/hw/bus/i2c");
+	failures += expect_path_absent("kernel/pdm-core/hw/bus/spi");
+	failures += expect_path_absent("kernel/pdm-core/hw/transport/can");
+	failures += expect_path_absent("kernel/pdm-core/hw/transport/uart");
 
 	failures += expect_contains("hw/Makefile", hw_makefile,
-				    "lpf-core/hw/core/lpf_hw.o");
+				    "pdm-core/hw/core/pdm_hw.o");
 	failures += expect_contains("hw/Makefile", hw_makefile,
-				    "lpf-core/hw/gpio/lpf_hw_gpio.o");
+				    "pdm-core/hw/gpio/pdm_hw_gpio.o");
 	failures += expect_contains("hw/Makefile", hw_makefile,
-				    "lpf-core/hw/pwm/lpf_hw_pwm.o");
+				    "pdm-core/hw/pwm/pdm_hw_pwm.o");
 	failures += expect_contains("hw/Makefile", hw_makefile,
-				    "lpf-core/hw/i2c/lpf_hw_i2c.o");
+				    "pdm-core/hw/i2c/pdm_hw_i2c.o");
 	failures += expect_contains("hw/Makefile", hw_makefile,
-				    "lpf-core/hw/spi/lpf_hw_spi.o");
+				    "pdm-core/hw/spi/pdm_hw_spi.o");
 	failures += expect_contains(
 		"hw/Makefile", hw_makefile,
-		"lpf-core/hw/can/lpf_hw_can.o");
+		"pdm-core/hw/can/pdm_hw_can.o");
 	failures += expect_contains(
 		"hw/Makefile", hw_makefile,
-		"lpf-core/hw/uart/lpf_hw_uart.o");
+		"pdm-core/hw/uart/pdm_hw_uart.o");
 
-	failures += expect_contains("lpf_hw.c", hw_core,
-				    "#include \"lpf_hw_internal.h\"");
-	failures += expect_contains("lpf_hw_gpio.c", hw_gpio,
-				    "#include \"lpf_hw_internal.h\"");
+	failures += expect_contains("pdm_hw.c", hw_core,
+				    "#include \"pdm_hw_internal.h\"");
+	failures += expect_contains("pdm_hw_gpio.c", hw_gpio,
+				    "#include \"pdm_hw_internal.h\"");
 
 out:
 	free(hw_gpio);
@@ -381,19 +381,19 @@ static int test_static_config_sources_are_version_named(void)
 	char *mock_defconfig;
 	int failures = 0;
 
-	config_makefile = read_source_file("kernel/lpf-configs/Makefile");
-	config_header = read_source_file("kernel/include/lpf/config/lpf_config.h");
+	config_makefile = read_source_file("kernel/pdm-configs/Makefile");
+	config_header = read_source_file("kernel/include/pdm/config/pdm_config.h");
 	config_backend = read_source_file(
-		"kernel/lpf-core/config/src/lpf_config_backend.c");
+		"kernel/pdm-core/config/src/pdm_config_backend.c");
 	config_static_header = read_source_file(
-		"kernel/lpf-core/config/src/lpf_config_static.h");
+		"kernel/pdm-core/config/src/pdm_config_static.h");
 	static_backend = read_source_file(
-		"kernel/lpf-core/config/src/lpf_config_static_backend.c");
-	static_table = read_source_file("kernel/lpf-configs/lpf_config_configs.c");
+		"kernel/pdm-core/config/src/pdm_config_static_backend.c");
+	static_table = read_source_file("kernel/pdm-configs/pdm_config_configs.c");
 	x86_config = read_source_file(
-		"kernel/lpf-configs/configs/ubuntu/x86_modules/lpf_config_ubuntu_x86_modules_v1.c");
+		"kernel/pdm-configs/configs/ubuntu/x86_modules/pdm_config_ubuntu_x86_modules_v1.c");
 	mock_config = read_source_file(
-		"kernel/lpf-configs/configs/ubuntu/x86_mock_modules/lpf_config_ubuntu_x86_mock_modules_v1.c");
+		"kernel/pdm-configs/configs/ubuntu/x86_mock_modules/pdm_config_ubuntu_x86_mock_modules_v1.c");
 	x86_defconfig =
 		read_source_file("configs/ubuntu/ubuntu_x86_modules_defconfig");
 	mock_defconfig = read_source_file(
@@ -407,32 +407,32 @@ static int test_static_config_sources_are_version_named(void)
 	}
 
 	failures += expect_path_absent(
-		"kernel/lpf-configs/configs/kernel/x86_modules/1.0.0");
+		"kernel/pdm-configs/configs/kernel/x86_modules/1.0.0");
 	failures += expect_path_absent(
-		"kernel/lpf-configs/configs/kernel/x86_mock_modules/1.0.0");
+		"kernel/pdm-configs/configs/kernel/x86_mock_modules/1.0.0");
 	failures += expect_path_absent(
-		"kernel/lpf-configs/configs/kernel/x86_modules/lpf_config_kernel_x86_modules_v1.c");
+		"kernel/pdm-configs/configs/kernel/x86_modules/pdm_config_kernel_x86_modules_v1.c");
 	failures += expect_path_absent(
-		"kernel/lpf-configs/configs/kernel/x86_mock_modules/lpf_config_kernel_x86_mock_modules_v1.c");
+		"kernel/pdm-configs/configs/kernel/x86_mock_modules/pdm_config_kernel_x86_mock_modules_v1.c");
 	failures += expect_path_absent(
 		"configs/kernel/kernel_x86_modules_defconfig");
 	failures += expect_path_absent(
 		"configs/kernel/kernel_x86_mock_modules_defconfig");
 	failures += expect_path_absent(
-		"kernel/lpf-configs/configs/lpf_config_configs.c");
+		"kernel/pdm-configs/configs/pdm_config_configs.c");
 	failures += expect_path_absent(
-		"kernel/lpf-configs/configs/lpf_config_static_start.c");
+		"kernel/pdm-configs/configs/pdm_config_static_start.c");
 	failures += expect_path_absent(
-		"kernel/lpf-configs/configs/lpf_config_static_end.c");
-	failures += expect_path_present("kernel/lpf-configs/lpf_config_configs.c");
+		"kernel/pdm-configs/configs/pdm_config_static_end.c");
+	failures += expect_path_present("kernel/pdm-configs/pdm_config_configs.c");
 	failures += expect_path_present(
-		"kernel/lpf-configs/lpf_config_static_start.c");
+		"kernel/pdm-configs/pdm_config_static_start.c");
 	failures += expect_path_present(
-		"kernel/lpf-configs/lpf_config_static_end.c");
+		"kernel/pdm-configs/pdm_config_static_end.c");
 	failures += expect_path_present(
-		"kernel/lpf-configs/configs/ubuntu/x86_modules/lpf_config_ubuntu_x86_modules_v1.c");
+		"kernel/pdm-configs/configs/ubuntu/x86_modules/pdm_config_ubuntu_x86_modules_v1.c");
 	failures += expect_path_present(
-		"kernel/lpf-configs/configs/ubuntu/x86_mock_modules/lpf_config_ubuntu_x86_mock_modules_v1.c");
+		"kernel/pdm-configs/configs/ubuntu/x86_mock_modules/pdm_config_ubuntu_x86_mock_modules_v1.c");
 	failures += expect_path_present(
 		"configs/ubuntu/ubuntu_x86_modules_defconfig");
 	failures += expect_path_present(
@@ -451,92 +451,92 @@ static int test_static_config_sources_are_version_named(void)
 					"CONFIG_LPF_CONFIG_KERNEL_X86");
 	failures += expect_contains(
 		"config/Makefile", config_makefile,
-		"lpf-configs/configs/ubuntu/x86_modules/lpf_config_ubuntu_x86_modules_v1.o");
+		"pdm-configs/configs/ubuntu/x86_modules/pdm_config_ubuntu_x86_modules_v1.o");
 	failures += expect_contains(
 		"config/Makefile", config_makefile,
-		"lpf-configs/configs/ubuntu/x86_mock_modules/lpf_config_ubuntu_x86_mock_modules_v1.o");
+		"pdm-configs/configs/ubuntu/x86_mock_modules/pdm_config_ubuntu_x86_mock_modules_v1.o");
 	failures += expect_contains(
 		"config/Makefile", config_makefile,
-		"lpf-configs/lpf_config_configs.o");
+		"pdm-configs/pdm_config_configs.o");
 	failures += expect_contains(
 		"config/Makefile", config_makefile,
-		"lpf-configs/lpf_config_static_start.o");
+		"pdm-configs/pdm_config_static_start.o");
 	failures += expect_contains(
 		"config/Makefile", config_makefile,
-		"lpf-configs/lpf_config_static_end.o");
+		"pdm-configs/pdm_config_static_end.o");
 	failures += expect_contains(
 		"config/Makefile", config_makefile,
-		"lpf_configs-y += lpf-configs/lpf_config_configs.o");
+		"pdm_configs-y += pdm-configs/pdm_config_configs.o");
 	failures += expect_contains(
 		"config/Makefile", config_makefile,
-		"lpf_configs-$(CONFIG_LPF_CONFIG_UBUNTU_X86_MODULES)");
+		"pdm_configs-$(CONFIG_LPF_CONFIG_UBUNTU_X86_MODULES)");
 	failures += expect_not_contains("config/Makefile", config_makefile,
 					"CONFIG_LPF_CONFIG_KERNEL_X86");
-	failures += expect_ordered_contains("lpf_config_backend.c",
+	failures += expect_ordered_contains("pdm_config_backend.c",
 					    config_backend,
 					    "&g_lpf_config_static_backend",
 					    "&g_lpf_config_dt_backend");
 	failures += expect_not_contains("config/Makefile", config_makefile,
 					"/1.0.0/");
-	failures += expect_not_contains("lpf_config.h", config_header,
+	failures += expect_not_contains("pdm_config.h", config_header,
 					"g_lpf_config_platform_table");
-	failures += expect_contains("lpf_config_static.h", config_static_header,
-				    "lpf_config_static_table_t");
-	failures += expect_contains("lpf_config_static.h", config_static_header,
-				    "lpf_config_static_register");
-	failures += expect_contains("lpf_config_configs.c", static_table,
+	failures += expect_contains("pdm_config_static.h", config_static_header,
+				    "pdm_config_static_table_t");
+	failures += expect_contains("pdm_config_static.h", config_static_header,
+				    "pdm_config_static_register");
+	failures += expect_contains("pdm_config_configs.c", static_table,
 				    "EXPORT_SYMBOL_GPL(g_lpf_config_platform_table)");
-	failures += expect_contains("lpf_config_configs.c", static_table,
-				    "lpf_config_static_start");
-	failures += expect_contains("lpf_config_configs.c", static_table,
-				    "lpf_config_static_end");
-	failures += expect_not_contains("lpf_config_configs.c", static_table,
+	failures += expect_contains("pdm_config_configs.c", static_table,
+				    "pdm_config_static_start");
+	failures += expect_contains("pdm_config_configs.c", static_table,
+				    "pdm_config_static_end");
+	failures += expect_not_contains("pdm_config_configs.c", static_table,
 					"CONFIG_LPF_CONFIG_KERNEL_X86");
-	failures += expect_not_contains("lpf_config_configs.c", static_table,
+	failures += expect_not_contains("pdm_config_configs.c", static_table,
 					"g_lpf_config_kernel_x86");
-	failures += expect_contains("lpf_config_static_backend.c", static_backend,
+	failures += expect_contains("pdm_config_static_backend.c", static_backend,
 				    "symbol_get(g_lpf_config_platform_table)");
-	failures += expect_contains("lpf_config_static_backend.c", static_backend,
+	failures += expect_contains("pdm_config_static_backend.c", static_backend,
 				    "symbol_put(g_lpf_config_platform_table)");
-	failures += expect_not_contains("lpf_config_static_backend.c",
+	failures += expect_not_contains("pdm_config_static_backend.c",
 					static_backend,
-					"lpf_config_static_register_table");
-	failures += expect_not_contains("lpf_config_ubuntu_x86_modules_v1.c",
+					"pdm_config_static_register_table");
+	failures += expect_not_contains("pdm_config_ubuntu_x86_modules_v1.c",
 					x86_config,
 					"g_lpf_config_platform_table");
-	failures += expect_contains("lpf_config_ubuntu_x86_modules_v1.c",
+	failures += expect_contains("pdm_config_ubuntu_x86_modules_v1.c",
 				    x86_config,
-				    "lpf_config_static_register");
-	failures += expect_contains("lpf_config_ubuntu_x86_modules_v1.c",
+				    "pdm_config_static_register");
+	failures += expect_contains("pdm_config_ubuntu_x86_modules_v1.c",
 				    x86_config, ".product_name = \"ubuntu\"");
-	failures += expect_not_contains("lpf_config_ubuntu_x86_mock_modules_v1.c",
+	failures += expect_not_contains("pdm_config_ubuntu_x86_mock_modules_v1.c",
 					mock_config,
 					"g_lpf_config_platform_table");
-	failures += expect_contains("lpf_config_ubuntu_x86_mock_modules_v1.c",
+	failures += expect_contains("pdm_config_ubuntu_x86_mock_modules_v1.c",
 				    mock_config,
-				    "lpf_config_static_register");
-	failures += expect_contains("lpf_config_ubuntu_x86_mock_modules_v1.c",
+				    "pdm_config_static_register");
+	failures += expect_contains("pdm_config_ubuntu_x86_mock_modules_v1.c",
 				    mock_config,
 				    "g_lpf_config_ubuntu_x86_mock_modules_nodes");
-	failures += expect_contains("lpf_config_ubuntu_x86_mock_modules_v1.c",
+	failures += expect_contains("pdm_config_ubuntu_x86_mock_modules_v1.c",
 				    mock_config,
 				    ".device_node_count = OSAL_ARRAY_SIZE");
-	failures += expect_contains("lpf_config_ubuntu_x86_mock_modules_v1.c",
+	failures += expect_contains("pdm_config_ubuntu_x86_mock_modules_v1.c",
 				    mock_config,
 				    ".device_nodes = g_lpf_config_ubuntu_x86_mock_modules_nodes");
-	failures += expect_contains("lpf_config_ubuntu_x86_mock_modules_v1.c",
+	failures += expect_contains("pdm_config_ubuntu_x86_mock_modules_v1.c",
 				    mock_config,
-				    ".compatible = \"lpf,mcu\"");
-	failures += expect_contains("lpf_config_ubuntu_x86_mock_modules_v1.c",
+				    ".compatible = \"pdm,mcu\"");
+	failures += expect_contains("pdm_config_ubuntu_x86_mock_modules_v1.c",
 				    mock_config,
-				    ".compatible = \"lpf,led\"");
-	failures += expect_contains("lpf_config_ubuntu_x86_mock_modules_v1.c",
+				    ".compatible = \"pdm,led\"");
+	failures += expect_contains("pdm_config_ubuntu_x86_mock_modules_v1.c",
 				    mock_config,
 				    ".mcu_count = 0");
-	failures += expect_contains("lpf_config_ubuntu_x86_mock_modules_v1.c",
+	failures += expect_contains("pdm_config_ubuntu_x86_mock_modules_v1.c",
 				    mock_config,
 				    ".led_count = 0");
-	failures += expect_contains("lpf_config_ubuntu_x86_mock_modules_v1.c",
+	failures += expect_contains("pdm_config_ubuntu_x86_mock_modules_v1.c",
 				    mock_config, ".product_name = \"ubuntu\"");
 
 out:
@@ -556,38 +556,38 @@ out:
 static int test_peripheral_layer_dependencies(void)
 {
 	static const source_file_t files[] = {
-		{ "lpf_runtime.c",
-		  "kernel/lpf-core/runtime/lpf_runtime.c" },
-		{ "lpf_runtime_config.c",
-		  "kernel/lpf-core/runtime/lpf_runtime_config.c" },
-		{ "lpf_mcu_service.c",
-		  "kernel/lpf-core/peripheral/mcu/lpf_mcu_service.c" },
-		{ "lpf_mcu_chrdev.c",
-		  "kernel/lpf-core/peripheral/mcu/lpf_mcu_chrdev.c" },
-		{ "lpf_mcu_proc.c",
-		  "kernel/lpf-core/peripheral/mcu/lpf_mcu_proc.c" },
-		{ "lpf_led_service.c",
-		  "kernel/lpf-core/peripheral/led/lpf_led_service.c" },
-		{ "lpf_led_gpio.c",
-		  "kernel/lpf-core/peripheral/led/lpf_led_gpio.c" },
-		{ "lpf_led_pwm.c",
-		  "kernel/lpf-core/peripheral/led/lpf_led_pwm.c" },
-		{ "lpf_led_chrdev.c",
-		  "kernel/lpf-core/peripheral/led/lpf_led_chrdev.c" },
-		{ "lpf_led_proc.c",
-		  "kernel/lpf-core/peripheral/led/lpf_led_proc.c" },
-		{ "lpf_mcu_transport.c",
-		  "kernel/lpf-core/peripheral/mcu/lpf_mcu_transport.c" },
-		{ "lpf_mcu_can.c",
-		  "kernel/lpf-core/peripheral/mcu/lpf_mcu_can.c" },
-		{ "lpf_mcu_uart.c",
-		  "kernel/lpf-core/peripheral/mcu/lpf_mcu_uart.c" },
+		{ "pdm_runtime.c",
+		  "kernel/pdm-core/runtime/pdm_runtime.c" },
+		{ "pdm_runtime_config.c",
+		  "kernel/pdm-core/runtime/pdm_runtime_config.c" },
+		{ "pdm_mcu_service.c",
+		  "kernel/pdm-core/peripheral/mcu/pdm_mcu_service.c" },
+		{ "pdm_mcu_chrdev.c",
+		  "kernel/pdm-core/peripheral/mcu/pdm_mcu_chrdev.c" },
+		{ "pdm_mcu_proc.c",
+		  "kernel/pdm-core/peripheral/mcu/pdm_mcu_proc.c" },
+		{ "pdm_led_service.c",
+		  "kernel/pdm-core/peripheral/led/pdm_led_service.c" },
+		{ "pdm_led_gpio.c",
+		  "kernel/pdm-core/peripheral/led/pdm_led_gpio.c" },
+		{ "pdm_led_pwm.c",
+		  "kernel/pdm-core/peripheral/led/pdm_led_pwm.c" },
+		{ "pdm_led_chrdev.c",
+		  "kernel/pdm-core/peripheral/led/pdm_led_chrdev.c" },
+		{ "pdm_led_proc.c",
+		  "kernel/pdm-core/peripheral/led/pdm_led_proc.c" },
+		{ "pdm_mcu_transport.c",
+		  "kernel/pdm-core/peripheral/mcu/pdm_mcu_transport.c" },
+		{ "pdm_mcu_can.c",
+		  "kernel/pdm-core/peripheral/mcu/pdm_mcu_can.c" },
+		{ "pdm_mcu_uart.c",
+		  "kernel/pdm-core/peripheral/mcu/pdm_mcu_uart.c" },
 	};
 	static const char *forbidden_tokens[] = {
-		"lpf/soc/",
-		"lpf/compat/",
-		"lpf_soc_",
-		"lpf_compat_",
+		"pdm/soc/",
+		"pdm/compat/",
+		"pdm_soc_",
+		"pdm_compat_",
 	};
 	size_t i;
 	size_t j;
@@ -616,9 +616,9 @@ static int test_peripheral_layer_dependencies(void)
 static int test_uapi_headers_are_abi_only(void)
 {
 	static const source_file_t headers[] = {
-		{ "lpf_ctl.h", "uapi/lpf/lpf_ctl.h" },
-		{ "lpf_mcu.h", "uapi/lpf/lpf_mcu.h" },
-		{ "lpf_led.h", "uapi/lpf/lpf_led.h" },
+		{ "pdm_ctl.h", "uapi/pdm/pdm_ctl.h" },
+		{ "pdm_mcu.h", "uapi/pdm/pdm_mcu.h" },
+		{ "pdm_led.h", "uapi/pdm/pdm_led.h" },
 	};
 	static const char *forbidden_tokens[] = {
 		"pdi_",
@@ -659,26 +659,26 @@ static int test_soc_adapter_header_dependencies(void)
 	char *content;
 	int failures = 0;
 
-	content = read_source_file("kernel/include/lpf/soc/lpf_soc_adapter.h");
+	content = read_source_file("kernel/include/pdm/soc/pdm_soc_adapter.h");
 	if (!content) {
-		fprintf(stderr, "lpf_soc_adapter.h: failed to read header\n");
+		fprintf(stderr, "pdm_soc_adapter.h: failed to read header\n");
 		return 1;
 	}
 
-	failures += expect_not_contains("lpf_soc_adapter.h", content,
-					"lpf/hw/");
-	failures += expect_contains("lpf_soc_adapter.h", content,
-				    "lpf/types/lpf_gpio_types.h");
-	failures += expect_contains("lpf_soc_adapter.h", content,
-				    "lpf/types/lpf_pwm_types.h");
-	failures += expect_contains("lpf_soc_adapter.h", content,
-				    "lpf/types/lpf_i2c_types.h");
-	failures += expect_contains("lpf_soc_adapter.h", content,
-				    "lpf/types/lpf_spi_types.h");
-	failures += expect_contains("lpf_soc_adapter.h", content,
-				    "lpf/types/lpf_can_types.h");
-	failures += expect_contains("lpf_soc_adapter.h", content,
-				    "lpf/types/lpf_serial_types.h");
+	failures += expect_not_contains("pdm_soc_adapter.h", content,
+					"pdm/hw/");
+	failures += expect_contains("pdm_soc_adapter.h", content,
+				    "pdm/types/pdm_gpio_types.h");
+	failures += expect_contains("pdm_soc_adapter.h", content,
+				    "pdm/types/pdm_pwm_types.h");
+	failures += expect_contains("pdm_soc_adapter.h", content,
+				    "pdm/types/pdm_i2c_types.h");
+	failures += expect_contains("pdm_soc_adapter.h", content,
+				    "pdm/types/pdm_spi_types.h");
+	failures += expect_contains("pdm_soc_adapter.h", content,
+				    "pdm/types/pdm_can_types.h");
+	failures += expect_contains("pdm_soc_adapter.h", content,
+				    "pdm/types/pdm_serial_types.h");
 
 	free(content);
 	return failures ? 1 : 0;
@@ -693,13 +693,13 @@ static int test_runtime_config_mapping_is_registered(void)
 	int failures = 0;
 
 	runtime_config = read_source_file(
-		"kernel/lpf-core/runtime/lpf_runtime_config.c");
+		"kernel/pdm-core/runtime/pdm_runtime_config.c");
 	runtime_header = read_source_file(
-		"kernel/lpf-core/include/lpf_runtime_internal.h");
+		"kernel/pdm-core/include/pdm_runtime_internal.h");
 	mcu_driver = read_source_file(
-		"kernel/lpf-core/peripheral/mcu/lpf_mcu_config_driver.c");
+		"kernel/pdm-core/peripheral/mcu/pdm_mcu_config_driver.c");
 	led_driver = read_source_file(
-		"kernel/lpf-core/peripheral/led/lpf_led_config_driver.c");
+		"kernel/pdm-core/peripheral/led/pdm_led_config_driver.c");
 
 	if (!runtime_config || !runtime_header || !mcu_driver || !led_driver) {
 		fprintf(stderr, "failed to read runtime config driver sources\n");
@@ -707,45 +707,45 @@ static int test_runtime_config_mapping_is_registered(void)
 		goto out;
 	}
 
-	failures += expect_contains("lpf_runtime_config.c", runtime_config,
-				    "lpf_runtime_config_driver_first");
-	failures += expect_contains("lpf_runtime_config.c", runtime_config,
-				    "lpf_config_get_device_nodes");
-	failures += expect_contains("lpf_runtime_config.c", runtime_config,
+	failures += expect_contains("pdm_runtime_config.c", runtime_config,
+				    "pdm_runtime_config_driver_first");
+	failures += expect_contains("pdm_runtime_config.c", runtime_config,
+				    "pdm_config_get_device_nodes");
+	failures += expect_contains("pdm_runtime_config.c", runtime_config,
 				    "driver->compatible");
-	failures += expect_contains("lpf_runtime_config.c", runtime_config,
+	failures += expect_contains("pdm_runtime_config.c", runtime_config,
 				    "node->compatible");
-	failures += expect_contains("lpf_runtime_internal.h", runtime_header,
-				    "lpf_runtime_config_compatible_driver_register");
-	failures += expect_not_contains("lpf_runtime_config.c", runtime_config,
-					"LPF_CONFIG_DEVICE_TYPE_MCU");
-	failures += expect_not_contains("lpf_runtime_config.c", runtime_config,
-					"LPF_CONFIG_DEVICE_TYPE_LED");
-	failures += expect_not_contains("lpf_runtime_config.c", runtime_config,
-					"lpf_config_get()");
-	failures += expect_not_contains("lpf_runtime_config.c", runtime_config,
+	failures += expect_contains("pdm_runtime_internal.h", runtime_header,
+				    "pdm_runtime_config_compatible_driver_register");
+	failures += expect_not_contains("pdm_runtime_config.c", runtime_config,
+					"PDM_CONFIG_DEVICE_TYPE_MCU");
+	failures += expect_not_contains("pdm_runtime_config.c", runtime_config,
+					"PDM_CONFIG_DEVICE_TYPE_LED");
+	failures += expect_not_contains("pdm_runtime_config.c", runtime_config,
+					"pdm_config_get()");
+	failures += expect_not_contains("pdm_runtime_config.c", runtime_config,
 					"mcu_count");
-	failures += expect_not_contains("lpf_runtime_config.c", runtime_config,
+	failures += expect_not_contains("pdm_runtime_config.c", runtime_config,
 					"led_count");
-	failures += expect_contains("lpf_mcu_config_driver.c", mcu_driver,
-				    "lpf_runtime_config_driver_register");
-	failures += expect_contains("lpf_led_config_driver.c", led_driver,
-				    "lpf_runtime_config_driver_register");
-	failures += expect_contains("lpf_mcu_config_driver.c", mcu_driver,
-				    "lpf_device_register");
-	failures += expect_contains("lpf_led_config_driver.c", led_driver,
-				    "lpf_device_register");
-	failures += expect_contains("lpf_mcu_config_driver.c", mcu_driver,
-				    "lpf_config_device_node_t");
-	failures += expect_contains("lpf_led_config_driver.c", led_driver,
-				    "lpf_config_device_node_t");
-	failures += expect_not_contains("lpf_mcu_config_driver.c", mcu_driver,
-					"lpf_config_hw_get_mcu");
-	failures += expect_not_contains("lpf_led_config_driver.c", led_driver,
-					"lpf_config_hw_get_led");
-	failures += expect_not_contains("lpf_mcu_config_driver.c", mcu_driver,
+	failures += expect_contains("pdm_mcu_config_driver.c", mcu_driver,
+				    "pdm_runtime_config_driver_register");
+	failures += expect_contains("pdm_led_config_driver.c", led_driver,
+				    "pdm_runtime_config_driver_register");
+	failures += expect_contains("pdm_mcu_config_driver.c", mcu_driver,
+				    "pdm_device_register");
+	failures += expect_contains("pdm_led_config_driver.c", led_driver,
+				    "pdm_device_register");
+	failures += expect_contains("pdm_mcu_config_driver.c", mcu_driver,
+				    "pdm_config_device_node_t");
+	failures += expect_contains("pdm_led_config_driver.c", led_driver,
+				    "pdm_config_device_node_t");
+	failures += expect_not_contains("pdm_mcu_config_driver.c", mcu_driver,
+					"pdm_config_hw_get_mcu");
+	failures += expect_not_contains("pdm_led_config_driver.c", led_driver,
+					"pdm_config_hw_get_led");
+	failures += expect_not_contains("pdm_mcu_config_driver.c", mcu_driver,
 					"mcu_count");
-	failures += expect_not_contains("lpf_led_config_driver.c", led_driver,
+	failures += expect_not_contains("pdm_led_config_driver.c", led_driver,
 					"led_count");
 
 out:
@@ -765,13 +765,13 @@ static int test_runtime_entries_are_classed(void)
 	int failures = 0;
 
 	runtime_header = read_source_file(
-		"kernel/lpf-core/include/lpf_runtime_internal.h");
+		"kernel/pdm-core/include/pdm_runtime_internal.h");
 	mcu_service = read_source_file(
-		"kernel/lpf-core/peripheral/mcu/lpf_mcu_service.c");
+		"kernel/pdm-core/peripheral/mcu/pdm_mcu_service.c");
 	led_service = read_source_file(
-		"kernel/lpf-core/peripheral/led/lpf_led_service.c");
+		"kernel/pdm-core/peripheral/led/pdm_led_service.c");
 	config_selftest = read_source_file(
-		"kernel/lpf-core/config/selftest/lpf_config_of_selftest.c");
+		"kernel/pdm-core/config/selftest/pdm_config_of_selftest.c");
 
 	if (!runtime_header || !mcu_service || !led_service || !config_selftest) {
 		fprintf(stderr, "failed to read runtime entry sources\n");
@@ -779,18 +779,18 @@ static int test_runtime_entries_are_classed(void)
 		goto out;
 	}
 
-	failures += expect_contains("lpf_runtime_internal.h", runtime_header,
-				    "lpf_runtime_service_register");
-	failures += expect_contains("lpf_runtime_internal.h", runtime_header,
-				    "lpf_runtime_selftest_register");
-	failures += expect_not_contains("lpf_runtime_internal.h", runtime_header,
-					"#define lpf_runtime_register");
-	failures += expect_contains("lpf_mcu_service.c", mcu_service,
-				    "lpf_runtime_service_register");
-	failures += expect_contains("lpf_led_service.c", led_service,
-				    "lpf_runtime_service_register");
-	failures += expect_contains("lpf_config_of_selftest.c", config_selftest,
-				    "lpf_runtime_selftest_register");
+	failures += expect_contains("pdm_runtime_internal.h", runtime_header,
+				    "pdm_runtime_service_register");
+	failures += expect_contains("pdm_runtime_internal.h", runtime_header,
+				    "pdm_runtime_selftest_register");
+	failures += expect_not_contains("pdm_runtime_internal.h", runtime_header,
+					"#define pdm_runtime_register");
+	failures += expect_contains("pdm_mcu_service.c", mcu_service,
+				    "pdm_runtime_service_register");
+	failures += expect_contains("pdm_led_service.c", led_service,
+				    "pdm_runtime_service_register");
+	failures += expect_contains("pdm_config_of_selftest.c", config_selftest,
+				    "pdm_runtime_selftest_register");
 
 out:
 	free(config_selftest);
@@ -809,12 +809,12 @@ static int test_core_lifecycle_is_module_owned(void)
 	char *runtime_source;
 	int failures = 0;
 
-	core_header = read_source_file("kernel/include/lpf/core/lpf_core.h");
-	driver_header = read_source_file("kernel/include/lpf/core/lpf_driver.h");
-	device_header = read_source_file("kernel/include/lpf/core/lpf_device.h");
-	core_source = read_source_file("kernel/lpf-core/core/lpf_core.c");
+	core_header = read_source_file("kernel/include/pdm/core/pdm_core.h");
+	driver_header = read_source_file("kernel/include/pdm/core/pdm_driver.h");
+	device_header = read_source_file("kernel/include/pdm/core/pdm_device.h");
+	core_source = read_source_file("kernel/pdm-core/core/pdm_core.c");
 	runtime_source = read_source_file(
-		"kernel/lpf-core/runtime/lpf_runtime.c");
+		"kernel/pdm-core/runtime/pdm_runtime.c");
 
 	if (!core_header || !driver_header || !device_header || !core_source ||
 	    !runtime_source) {
@@ -823,51 +823,51 @@ static int test_core_lifecycle_is_module_owned(void)
 		goto out;
 	}
 
-	failures += expect_not_contains("lpf_core.h", core_header,
-					"lpf_core_init");
-	failures += expect_not_contains("lpf_core.h", core_header,
-					"lpf_core_deinit");
-	failures += expect_contains("lpf_core.c", core_source,
-				    "static int32_t lpf_core_init(void)");
-	failures += expect_contains("lpf_core.c", core_source,
-				    "static void lpf_core_deinit(void)");
+	failures += expect_not_contains("pdm_core.h", core_header,
+					"pdm_core_init");
+	failures += expect_not_contains("pdm_core.h", core_header,
+					"pdm_core_deinit");
+	failures += expect_contains("pdm_core.c", core_source,
+				    "static int32_t pdm_core_init(void)");
+	failures += expect_contains("pdm_core.c", core_source,
+				    "static void pdm_core_deinit(void)");
 	failures += expect_path_absent(
-		"kernel/lpf-core/runtime/lpf_runtime_module.c");
-	failures += expect_contains("lpf_core.c", core_source,
-				    "lpf_runtime_init()");
-	failures += expect_contains("lpf_core.c", core_source,
-				    "lpf_runtime_exit()");
-	failures += expect_not_contains("lpf_core.c", core_source,
-					"EXPORT_SYMBOL_GPL(lpf_core_init)");
-	failures += expect_not_contains("lpf_core.c", core_source,
-					"EXPORT_SYMBOL_GPL(lpf_core_deinit)");
+		"kernel/pdm-core/runtime/pdm_runtime_module.c");
+	failures += expect_contains("pdm_core.c", core_source,
+				    "pdm_runtime_init()");
+	failures += expect_contains("pdm_core.c", core_source,
+				    "pdm_runtime_exit()");
+	failures += expect_not_contains("pdm_core.c", core_source,
+					"EXPORT_SYMBOL_GPL(pdm_core_init)");
+	failures += expect_not_contains("pdm_core.c", core_source,
+					"EXPORT_SYMBOL_GPL(pdm_core_deinit)");
 	failures += expect_range_not_contains(
-		"lpf_core.c", core_source,
-		"int32_t lpf_driver_register(const lpf_driver_t *driver)",
-		"EXPORT_SYMBOL_GPL(lpf_driver_register);",
-		"lpf_core_init");
+		"pdm_core.c", core_source,
+		"int32_t pdm_driver_register(const pdm_driver_t *driver)",
+		"EXPORT_SYMBOL_GPL(pdm_driver_register);",
+		"pdm_core_init");
 	failures += expect_range_not_contains(
-		"lpf_core.c", core_source,
-		"int32_t lpf_device_register(const lpf_device_config_t *config)",
-		"EXPORT_SYMBOL_GPL(lpf_device_register);",
-		"lpf_core_init");
+		"pdm_core.c", core_source,
+		"int32_t pdm_device_register(const pdm_device_config_t *config)",
+		"EXPORT_SYMBOL_GPL(pdm_device_register);",
+		"pdm_core_init");
 	failures += expect_range_not_contains(
-		"lpf_core.c", core_source,
-		"int32_t lpf_device_event_subscribe",
-		"EXPORT_SYMBOL_GPL(lpf_device_event_subscribe);",
-		"lpf_core_init");
-	failures += expect_not_contains("lpf_runtime.c", runtime_source,
-					"lpf_core_init");
-	failures += expect_contains("lpf_core.h", core_header,
+		"pdm_core.c", core_source,
+		"int32_t pdm_device_event_subscribe",
+		"EXPORT_SYMBOL_GPL(pdm_device_event_subscribe);",
+		"pdm_core_init");
+	failures += expect_not_contains("pdm_runtime.c", runtime_source,
+					"pdm_core_init");
+	failures += expect_contains("pdm_core.h", core_header,
 				    "LPF-owned device model");
-	failures += expect_contains("lpf_core.h", core_header,
+	failures += expect_contains("pdm_core.h", core_header,
 				    "matches devices to drivers by LPF device type");
-	failures += expect_contains("lpf_driver.h", driver_header,
+	failures += expect_contains("pdm_driver.h", driver_header,
 				    "Match key used by LPF Core");
-	failures += expect_contains("lpf_device.h", device_header,
+	failures += expect_contains("pdm_device.h", device_header,
 				    "Match key used to find the registered LPF driver");
-	failures += expect_contains("lpf_core.c", core_source,
-				    "lpf_match_driver_by_type_locked");
+	failures += expect_contains("pdm_core.c", core_source,
+				    "pdm_match_driver_by_type_locked");
 
 out:
 	free(runtime_source);
@@ -884,8 +884,8 @@ static int test_instance_devnode_mode_policy(void)
 	char *chrdev_source;
 	int failures = 0;
 
-	core_config = read_source_file("kernel/lpf-core/Config.in");
-	chrdev_source = read_source_file("kernel/lpf-core/core/lpf_chrdev.c");
+	core_config = read_source_file("kernel/pdm-core/Config.in");
+	chrdev_source = read_source_file("kernel/pdm-core/core/pdm_chrdev.c");
 
 	if (!core_config || !chrdev_source) {
 		fprintf(stderr, "failed to read instance devnode policy sources\n");
@@ -894,20 +894,20 @@ static int test_instance_devnode_mode_policy(void)
 	}
 
 	failures += expect_contains("Config.in", core_config,
-				    "config LPF_INSTANCE_DEVNODE_MODE");
+				    "config PDM_INSTANCE_DEVNODE_MODE");
 	failures += expect_contains("Config.in", core_config,
 				    "default \"0660\"");
-	failures += expect_contains("lpf_chrdev.c", chrdev_source,
+	failures += expect_contains("pdm_chrdev.c", chrdev_source,
 				    "CONFIG_LPF_INSTANCE_DEVNODE_MODE");
-	failures += expect_contains("lpf_chrdev.c", chrdev_source,
-				    "LPF_INSTANCE_DEVNODE_MODE_FALLBACK 0660");
-	failures += expect_contains("lpf_chrdev.c", chrdev_source,
-				    "lpf_chrdev_parse_mode");
-	failures += expect_contains("lpf_chrdev.c", chrdev_source,
-				    "lpf_chrdev_instance_mode()");
-	failures += expect_contains("lpf_chrdev.c", chrdev_source,
-				    "LPF_CTL_DEVNODE_MODE");
-	failures += expect_not_contains("lpf_chrdev.c", chrdev_source,
+	failures += expect_contains("pdm_chrdev.c", chrdev_source,
+				    "PDM_INSTANCE_DEVNODE_MODE_FALLBACK 0660");
+	failures += expect_contains("pdm_chrdev.c", chrdev_source,
+				    "pdm_chrdev_parse_mode");
+	failures += expect_contains("pdm_chrdev.c", chrdev_source,
+				    "pdm_chrdev_instance_mode()");
+	failures += expect_contains("pdm_chrdev.c", chrdev_source,
+				    "PDM_CTL_DEVNODE_MODE");
+	failures += expect_not_contains("pdm_chrdev.c", chrdev_source,
 					"chrdev->miscdev.mode = 0666;");
 
 out:
@@ -922,18 +922,18 @@ static int test_no_separate_bus_layer(void)
 	char *peripheral_readme;
 	int failures = 0;
 
-	plan = read_source_file("docs/lpf_architecture_refactor_plan.md");
+	plan = read_source_file("docs/pdm_architecture_refactor_plan.md");
 	peripheral_readme = read_source_file(
-		"kernel/lpf-core/peripheral/README.md");
+		"kernel/pdm-core/peripheral/README.md");
 	if (!plan || !peripheral_readme) {
 		fprintf(stderr, "failed to read bus-layer policy docs\n");
 		failures = 1;
 		goto out;
 	}
 
-	failures += expect_path_absent("kernel/lpf-core/bus");
-	failures += expect_path_absent("kernel/lpf-runtime/bus");
-	failures += expect_contains("lpf_architecture_refactor_plan.md", plan,
+	failures += expect_path_absent("kernel/pdm-core/bus");
+	failures += expect_path_absent("kernel/pdm-runtime/bus");
+	failures += expect_contains("pdm_architecture_refactor_plan.md", plan,
 				    "do not create extra");
 	failures += expect_contains("peripheral/README.md", peripheral_readme,
 				    "does not expose a separate physical bus layer");
@@ -953,7 +953,7 @@ static int test_mock_smoke_covers_runtime_surfaces(void)
 	char *smoke_source;
 	int failures = 0;
 
-	script = read_source_file("scripts/lpf_mock_module_smoke.sh");
+	script = read_source_file("scripts/pdm_mock_module_smoke.sh");
 	makefile = read_source_file("Makefile");
 	tests_cmake = read_source_file("tests/user/CMakeLists.txt");
 	smoke_cmake = read_source_file("tests/user/smoke/CMakeLists.txt");
@@ -966,34 +966,34 @@ static int test_mock_smoke_covers_runtime_surfaces(void)
 		goto out;
 	}
 
-	failures += expect_contains("lpf_mock_module_smoke.sh", script,
-				    "lpf_mock_runtime_smoke");
-	failures += expect_contains("lpf_mock_module_smoke.sh", script,
-				    "/dev/lpf_ctl");
-	failures += expect_contains("lpf_mock_module_smoke.sh", script,
-				    "/dev/lpf/mcu0");
-	failures += expect_contains("lpf_mock_module_smoke.sh", script,
-				    "/dev/lpf/led1");
-	failures += expect_contains("lpf_mock_module_smoke.sh", script,
-				    "LPF_EXPECT_INSTANCE_DEVNODE_MODE");
-	failures += expect_contains("lpf_mock_module_smoke.sh", script,
+	failures += expect_contains("pdm_mock_module_smoke.sh", script,
+				    "pdm_mock_runtime_smoke");
+	failures += expect_contains("pdm_mock_module_smoke.sh", script,
+				    "/dev/pdm_ctl");
+	failures += expect_contains("pdm_mock_module_smoke.sh", script,
+				    "/dev/pdm/mcu0");
+	failures += expect_contains("pdm_mock_module_smoke.sh", script,
+				    "/dev/pdm/led1");
+	failures += expect_contains("pdm_mock_module_smoke.sh", script,
+				    "PDM_EXPECT_INSTANCE_DEVNODE_MODE");
+	failures += expect_contains("pdm_mock_module_smoke.sh", script,
 				    "check_devnode_modes");
-	failures += expect_contains("lpf_mock_module_smoke.sh", script,
+	failures += expect_contains("pdm_mock_module_smoke.sh", script,
 				    "expect_not_world_writable");
-	failures += expect_contains("lpf_mock_module_smoke.sh", script,
+	failures += expect_contains("pdm_mock_module_smoke.sh", script,
 				    "expect_no_write_bits");
-	failures += expect_contains("lpf_mock_module_smoke.sh", script,
+	failures += expect_contains("pdm_mock_module_smoke.sh", script,
 				    "expect_has_write_bits");
 	failures += expect_contains("Makefile", makefile,
-				    "LPF_EXPECT_INSTANCE_DEVNODE_MODE=$(CONFIG_LPF_INSTANCE_DEVNODE_MODE)");
-	failures += expect_contains("lpf_mock_module_smoke.sh", script,
-				    "/proc/lpf/mcu");
-	failures += expect_contains("lpf_mock_module_smoke.sh", script,
-				    "/sys/kernel/debug/lpf/led");
+				    "PDM_EXPECT_INSTANCE_DEVNODE_MODE=$(CONFIG_LPF_INSTANCE_DEVNODE_MODE)");
+	failures += expect_contains("pdm_mock_module_smoke.sh", script,
+				    "/proc/pdm/mcu");
+	failures += expect_contains("pdm_mock_module_smoke.sh", script,
+				    "/sys/kernel/debug/pdm/led");
 	failures += expect_contains("tests/user/CMakeLists.txt", tests_cmake,
 				    "add_subdirectory(smoke)");
 	failures += expect_contains("smoke/CMakeLists.txt", smoke_cmake,
-				    "add_executable(lpf_mock_runtime_smoke");
+				    "add_executable(pdm_mock_runtime_smoke");
 	failures += expect_not_contains("smoke/CMakeLists.txt", smoke_cmake,
 					"add_test(");
 	failures += expect_contains("test_lpf_mock_runtime_smoke.c",
@@ -1022,7 +1022,7 @@ static int test_pdi_coverage_tracks_discovery_paths(void)
 	int failures = 0;
 
 	pdi_mock = read_source_file("tests/user/pdi/test_pdi_ioctl_mock.c");
-	plan = read_source_file("docs/lpf_architecture_refactor_plan.md");
+	plan = read_source_file("docs/pdm_architecture_refactor_plan.md");
 	if (!pdi_mock || !plan) {
 		fprintf(stderr, "failed to read PDI coverage sources\n");
 		failures = 1;
@@ -1032,7 +1032,7 @@ static int test_pdi_coverage_tracks_discovery_paths(void)
 	failures += expect_contains("test_pdi_ioctl_mock.c", pdi_mock,
 				    "test_control_discovery");
 	failures += expect_contains("test_pdi_ioctl_mock.c", pdi_mock,
-				    "LPF_CTL_IOC_GET_DEVICE_BY_CAPABILITY");
+				    "PDM_CTL_IOC_GET_DEVICE_BY_CAPABILITY");
 	failures += expect_contains("test_pdi_ioctl_mock.c", pdi_mock,
 				    "pdi_get_device_by_capability");
 	failures += expect_contains("test_pdi_ioctl_mock.c", pdi_mock,
@@ -1043,7 +1043,7 @@ static int test_pdi_coverage_tracks_discovery_paths(void)
 				    "pdi_mcu_get_info");
 	failures += expect_contains("test_pdi_ioctl_mock.c", pdi_mock,
 				    "pdi_led_get_info");
-	failures += expect_contains("lpf_architecture_refactor_plan.md",
+	failures += expect_contains("pdm_architecture_refactor_plan.md",
 				    plan, "Add ABI/PDI coverage for current");
 
 out:

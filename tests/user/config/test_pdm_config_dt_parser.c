@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-#include "lpf/config/lpf_config.h"
-#include "lpf_config_dt_parser.h"
-#include "lpf_config_normalizer.h"
+#include "pdm/config/pdm_config.h"
+#include "pdm_config_dt_parser.h"
+#include "pdm_config_normalizer.h"
 #include "test_lpf_config_compare.h"
 
 #include <stdlib.h>
@@ -122,7 +122,7 @@ static int32_t fake_dt_read_u32(const void *node, const char *property,
 	return OSAL_SUCCESS;
 }
 
-static const lpf_config_dt_node_ops_t g_fake_dt_ops = {
+static const pdm_config_dt_node_ops_t g_fake_dt_ops = {
 	.name = fake_dt_name,
 	.next_available_child = fake_dt_next_available_child,
 	.put_node = NULL,
@@ -160,7 +160,7 @@ static const fake_dt_property_t g_fake_led_activity_props[] = {
 	{ "control", FAKE_DT_PROP_STRING, "pwm", 0U },
 	{ "max-brightness", FAKE_DT_PROP_U32, NULL, 255U },
 	{ "default-brightness", FAKE_DT_PROP_U32, NULL, 0U },
-	{ "consumer", FAKE_DT_PROP_STRING, "lpf-mock-led-pwm0", 0U },
+	{ "consumer", FAKE_DT_PROP_STRING, "pdm-mock-led-pwm0", 0U },
 	{ "period-ns", FAKE_DT_PROP_U32, NULL, 1000000U },
 };
 
@@ -212,7 +212,7 @@ static const fake_dt_property_t g_fake_root_props[] = {
 };
 
 static const fake_dt_node_t g_fake_root = {
-	.name = "lpf",
+	.name = "pdm",
 	.available = true,
 	.properties = g_fake_root_props,
 	.property_count = OSAL_ARRAY_SIZE(g_fake_root_props),
@@ -222,17 +222,17 @@ static const fake_dt_node_t g_fake_root = {
 
 static int test_fake_dt_parser_matches_mock_static_config(void)
 {
-	lpf_config_dt_parse_result_t parsed;
-	lpf_config_device_config_t
+	pdm_config_dt_parse_result_t parsed;
+	pdm_config_device_config_t
 		static_devices[TEST_LPF_CONFIG_DEVICE_CAPACITY];
-	lpf_config_device_config_t dt_devices[TEST_LPF_CONFIG_DEVICE_CAPACITY];
-	const lpf_config_platform_config_t *static_config;
+	pdm_config_device_config_t dt_devices[TEST_LPF_CONFIG_DEVICE_CAPACITY];
+	const pdm_config_platform_config_t *static_config;
 	uint32_t static_count;
 	uint32_t dt_count;
 	uint32_t i;
 	int ret = 0;
 
-	if (lpf_config_dt_parse_platform(&g_fake_dt_ops, &g_fake_root,
+	if (pdm_config_dt_parse_platform(&g_fake_dt_ops, &g_fake_root,
 					 &parsed) != OSAL_SUCCESS)
 		return 1;
 
@@ -286,7 +286,7 @@ static int test_fake_dt_parser_matches_mock_static_config(void)
 	}
 
 out_clear:
-	lpf_config_dt_parse_result_clear(&g_fake_dt_ops, &parsed);
+	pdm_config_dt_parse_result_clear(&g_fake_dt_ops, &parsed);
 	return ret;
 }
 
@@ -313,15 +313,15 @@ static int test_missing_required_device_fails(void)
 		},
 	};
 	static const fake_dt_node_t root = {
-		.name = "lpf",
+		.name = "pdm",
 		.available = true,
 		.children = root_children,
 		.child_count = OSAL_ARRAY_SIZE(root_children),
 	};
-	lpf_config_dt_parse_result_t parsed;
+	pdm_config_dt_parse_result_t parsed;
 	int32_t ret;
 
-	ret = lpf_config_dt_parse_platform(&g_fake_dt_ops, &root, &parsed);
+	ret = pdm_config_dt_parse_platform(&g_fake_dt_ops, &root, &parsed);
 	if (ret != OSAL_ERR_INVALID_PARAM)
 		return 101;
 

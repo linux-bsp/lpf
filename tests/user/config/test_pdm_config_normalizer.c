@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
 
-#include "lpf/config/lpf_config.h"
-#include "lpf_config_normalizer.h"
+#include "pdm/config/pdm_config.h"
+#include "pdm_config_normalizer.h"
 #include "test_lpf_config_compare.h"
 
-static const lpf_config_mcu_entry_t g_dt_equivalent_mcus[] = {
+static const pdm_config_mcu_entry_t g_dt_equivalent_mcus[] = {
 	{
 		.description = "mcu0",
 		.enabled = true,
 		.config = {
 			.name = "mcu0",
-			.interface = LPF_CONFIG_MCU_INTERFACE_CAN,
+			.interface = PDM_CONFIG_MCU_INTERFACE_CAN,
 			.hw.can = {
 				.device = "mock-can0",
 				.bitrate = 500000U,
@@ -27,13 +27,13 @@ static const lpf_config_mcu_entry_t g_dt_equivalent_mcus[] = {
 	},
 };
 
-static const lpf_config_led_entry_t g_dt_equivalent_leds[] = {
+static const pdm_config_led_entry_t g_dt_equivalent_leds[] = {
 	{
 		.description = "status",
 		.enabled = true,
 		.config = {
 			.name = "status",
-			.control = LPF_CONFIG_LED_CONTROL_GPIO,
+			.control = PDM_CONFIG_LED_CONTROL_GPIO,
 			.max_brightness = 1U,
 			.default_brightness = 0U,
 			.hw.gpio = {
@@ -50,11 +50,11 @@ static const lpf_config_led_entry_t g_dt_equivalent_leds[] = {
 		.enabled = true,
 		.config = {
 			.name = "activity",
-			.control = LPF_CONFIG_LED_CONTROL_PWM,
+			.control = PDM_CONFIG_LED_CONTROL_PWM,
 			.max_brightness = 255U,
 			.default_brightness = 0U,
 			.hw.pwm = {
-				.consumer = "lpf-mock-led-pwm0",
+				.consumer = "pdm-mock-led-pwm0",
 				.period_ns = 1000000U,
 				.polarity_inversed = false,
 			},
@@ -62,7 +62,7 @@ static const lpf_config_led_entry_t g_dt_equivalent_leds[] = {
 	},
 };
 
-static const lpf_config_platform_config_t g_dt_equivalent_platform = {
+static const pdm_config_platform_config_t g_dt_equivalent_platform = {
 	.platform_name = "linux",
 	.chip_name = "x86_64",
 	.project_name = "x86_mock_modules",
@@ -76,10 +76,10 @@ static const lpf_config_platform_config_t g_dt_equivalent_platform = {
 
 static int test_static_and_dt_equivalent_normalize_same(void)
 {
-	lpf_config_device_config_t
+	pdm_config_device_config_t
 		static_devices[TEST_LPF_CONFIG_DEVICE_CAPACITY];
-	lpf_config_device_config_t dt_devices[TEST_LPF_CONFIG_DEVICE_CAPACITY];
-	const lpf_config_platform_config_t *static_config;
+	pdm_config_device_config_t dt_devices[TEST_LPF_CONFIG_DEVICE_CAPACITY];
+	const pdm_config_platform_config_t *static_config;
 	uint32_t static_count;
 	uint32_t dt_count;
 	uint32_t i;
@@ -106,23 +106,23 @@ static int test_static_and_dt_equivalent_normalize_same(void)
 	}
 
 	if (static_devices[static_count].device_type !=
-	    LPF_CONFIG_DEVICE_TYPE_INVALID)
+	    PDM_CONFIG_DEVICE_TYPE_INVALID)
 		return 20;
-	if (dt_devices[dt_count].device_type != LPF_CONFIG_DEVICE_TYPE_INVALID)
+	if (dt_devices[dt_count].device_type != PDM_CONFIG_DEVICE_TYPE_INVALID)
 		return 21;
-	if (static_devices[0].status != LPF_CONFIG_NODE_STATUS_OKAY ||
+	if (static_devices[0].status != PDM_CONFIG_NODE_STATUS_OKAY ||
 	    test_lpf_config_string_equal(static_devices[0].name, "mcu0") ||
 	    test_lpf_config_string_equal(static_devices[0].compatible,
-					 "lpf,mcu") ||
+					 "pdm,mcu") ||
 	    static_devices[0].payload != static_devices[0].entry ||
-	    static_devices[0].payload_size != sizeof(lpf_config_mcu_entry_t))
+	    static_devices[0].payload_size != sizeof(pdm_config_mcu_entry_t))
 		return 22;
-	if (static_devices[1].status != LPF_CONFIG_NODE_STATUS_OKAY ||
+	if (static_devices[1].status != PDM_CONFIG_NODE_STATUS_OKAY ||
 	    test_lpf_config_string_equal(static_devices[1].name, "status") ||
 	    test_lpf_config_string_equal(static_devices[1].compatible,
-					 "lpf,led") ||
+					 "pdm,led") ||
 	    static_devices[1].payload != static_devices[1].entry ||
-	    static_devices[1].payload_size != sizeof(lpf_config_led_entry_t))
+	    static_devices[1].payload_size != sizeof(pdm_config_led_entry_t))
 		return 23;
 
 	return 0;
@@ -130,13 +130,13 @@ static int test_static_and_dt_equivalent_normalize_same(void)
 
 static int test_disabled_entries_keep_source_index(void)
 {
-	static const lpf_config_mcu_entry_t mcu_entries[] = {
+	static const pdm_config_mcu_entry_t mcu_entries[] = {
 		{
 			.description = "disabled",
 			.enabled = false,
 			.config = {
 				.name = "disabled",
-				.interface = LPF_CONFIG_MCU_INTERFACE_CAN,
+				.interface = PDM_CONFIG_MCU_INTERFACE_CAN,
 				.hw.can = {
 					.device = "mock-can-disabled",
 					.bitrate = 500000U,
@@ -154,7 +154,7 @@ static int test_disabled_entries_keep_source_index(void)
 			.enabled = true,
 			.config = {
 				.name = "enabled",
-				.interface = LPF_CONFIG_MCU_INTERFACE_CAN,
+				.interface = PDM_CONFIG_MCU_INTERFACE_CAN,
 				.hw.can = {
 					.device = "mock-can-enabled",
 					.bitrate = 500000U,
@@ -168,7 +168,7 @@ static int test_disabled_entries_keep_source_index(void)
 			},
 		},
 	};
-	static const lpf_config_platform_config_t platform = {
+	static const pdm_config_platform_config_t platform = {
 		.platform_name = "linux",
 		.chip_name = "x86_64",
 		.project_name = "test",
@@ -179,7 +179,7 @@ static int test_disabled_entries_keep_source_index(void)
 		.led_count = 0,
 		.led_array = NULL,
 	};
-	lpf_config_device_config_t devices[TEST_LPF_CONFIG_DEVICE_CAPACITY];
+	pdm_config_device_config_t devices[TEST_LPF_CONFIG_DEVICE_CAPACITY];
 	uint32_t count;
 
 	if (test_lpf_config_normalize_platform(&platform, devices,
@@ -187,10 +187,10 @@ static int test_disabled_entries_keep_source_index(void)
 		return 101;
 	if (count != 1U)
 		return 102;
-	if (devices[0].device_type != LPF_CONFIG_DEVICE_TYPE_MCU ||
+	if (devices[0].device_type != PDM_CONFIG_DEVICE_TYPE_MCU ||
 	    devices[0].index != 1U || devices[0].entry != &mcu_entries[1])
 		return 103;
-	if (devices[1].device_type != LPF_CONFIG_DEVICE_TYPE_INVALID)
+	if (devices[1].device_type != PDM_CONFIG_DEVICE_TYPE_INVALID)
 		return 104;
 
 	return 0;
@@ -198,14 +198,14 @@ static int test_disabled_entries_keep_source_index(void)
 
 static int test_count_only_reports_enabled_devices(void)
 {
-	const lpf_config_platform_config_t *static_config;
+	const pdm_config_platform_config_t *static_config;
 	uint32_t count = 0;
 
 	static_config = test_lpf_config_mock_static_config();
 	if (!static_config)
 		return 203;
 
-	if (lpf_config_normalize_devices(static_config, NULL,
+	if (pdm_config_normalize_devices(static_config, NULL,
 					 &count) != OSAL_SUCCESS)
 		return 201;
 
@@ -214,18 +214,18 @@ static int test_count_only_reports_enabled_devices(void)
 
 static int test_node_table_supports_compat_accessors(void)
 {
-	const lpf_config_mcu_entry_t *mcu;
-	const lpf_config_led_entry_t *status;
-	const lpf_config_led_entry_t *activity;
-	const lpf_config_platform_config_t *static_config;
+	const pdm_config_mcu_entry_t *mcu;
+	const pdm_config_led_entry_t *status;
+	const pdm_config_led_entry_t *activity;
+	const pdm_config_platform_config_t *static_config;
 
 	static_config = test_lpf_config_mock_static_config();
 	if (!static_config)
 		return 403;
 
-	mcu = lpf_config_hw_get_mcu(static_config, 0);
-	status = lpf_config_hw_get_led(static_config, 0);
-	activity = lpf_config_hw_get_led(static_config, 1);
+	mcu = pdm_config_hw_get_mcu(static_config, 0);
+	status = pdm_config_hw_get_led(static_config, 0);
+	activity = pdm_config_hw_get_led(static_config, 1);
 
 	if (!mcu || !status || !activity)
 		return 401;
@@ -239,15 +239,15 @@ static int test_node_table_supports_compat_accessors(void)
 
 static int test_exact_capacity_requires_sentinel_slot(void)
 {
-	lpf_config_device_config_t devices[3];
-	const lpf_config_platform_config_t *static_config;
+	pdm_config_device_config_t devices[3];
+	const pdm_config_platform_config_t *static_config;
 	uint32_t count = OSAL_ARRAY_SIZE(devices);
 
 	static_config = test_lpf_config_mock_static_config();
 	if (!static_config)
 		return 303;
 
-	if (lpf_config_normalize_devices(static_config, devices,
+	if (pdm_config_normalize_devices(static_config, devices,
 					 &count) != OSAL_ERR_RESOURCE_LIMIT)
 		return 301;
 	if (count != 3U)
