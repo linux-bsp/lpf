@@ -125,6 +125,10 @@ if(CONFIG_DEBUG_STUDY)
     add_subdirectory(${SDK_PATH}/apps/debug_study ${CMAKE_BINARY_DIR}/apps/debug_study)
 endif()
 
+if(CONFIG_SMART_MONITOR)
+    add_subdirectory(${SDK_PATH}/apps/smart_monitor ${CMAKE_BINARY_DIR}/apps/smart_monitor)
+endif()
+
 if(PDM_BUILD_TESTS)
     enable_testing()
     add_subdirectory(${SDK_PATH}/tests ${CMAKE_BINARY_DIR}/tests)

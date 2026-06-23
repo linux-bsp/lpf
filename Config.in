@@ -545,6 +545,13 @@ config DEBUG_STUDY
 	help
 	  Build the debug_study userspace executable.
 
+config SMART_MONITOR
+	bool "Build smart_monitor app"
+	depends on LINUX_ONLY
+	help
+	  Build the smart_monitor userspace executable for reading eMMC
+	  SMART data through the Linux MMC ioctl interface.
+
 endmenu
 
 # ============================================================================
