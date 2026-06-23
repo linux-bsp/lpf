@@ -534,13 +534,13 @@ source "user/pdi/Config.in"
 endmenu
 
 # ============================================================================
-# Product-Specific Configuration
+# Application Configuration
 # ============================================================================
 
-menu "Examples"
+menu "Apps"
 
 config DEBUG_STUDY
-	bool "Build debug_study example"
+	bool "Build debug_study app"
 	depends on LINUX_ONLY
 	help
 	  Build the debug_study userspace executable.

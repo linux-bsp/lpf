@@ -122,7 +122,7 @@ if(CONFIG_LINUX_ONLY)
 endif()
 
 if(CONFIG_DEBUG_STUDY)
-    add_subdirectory(${SDK_PATH}/examples/debug_study ${CMAKE_BINARY_DIR}/examples/debug_study)
+    add_subdirectory(${SDK_PATH}/apps/debug_study ${CMAKE_BINARY_DIR}/apps/debug_study)
 endif()
 
 if(PDM_BUILD_TESTS)

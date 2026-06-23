@@ -104,6 +104,7 @@ Use `make menuconfig` for interactive configuration.
 PDM/
 ├── kernel/        # Kernel modules and kernel-side headers
 ├── user/          # Userspace libraries
+├── apps/          # Common userspace applications
 ├── uapi/          # Shared userspace/kernel ABI headers
 ├── configs/       # Development defconfigs
 ├── docs/          # Architecture and integration documentation
