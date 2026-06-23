@@ -15,4 +15,10 @@ config SMART_MONITOR
 	  Build the smart_monitor userspace executable for reading eMMC
 	  SMART data through the Linux MMC ioctl interface.
 
+config MEMORY_MONITOR
+	bool "Build memory_monitor app"
+	help
+	  Build the memory_monitor userspace executable for collecting
+	  system, kernel, reserved, process, and thread memory statistics.
+
 endmenu
