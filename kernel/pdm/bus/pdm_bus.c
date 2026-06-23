@@ -152,8 +152,8 @@ static int pdm_bus_device_match_impl(struct device *dev,
 
 	pdm_dev = dev_to_pdm_device(dev);
 	pdm_drv = drv_to_pdm_driver(drv);
-	if (pdm_drv->match && pdm_drv->match(pdm_dev))
-		return 1;
+	if (pdm_drv->match)
+		return pdm_drv->match(pdm_dev) ? 1 : 0;
 
 	if (dev->of_node && of_driver_match_device(dev, drv))
 		return 1;

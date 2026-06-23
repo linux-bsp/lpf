@@ -446,7 +446,7 @@ static int pdm_mcu_uart_write_data(struct pdm_mcu_instance *inst,
 	return ret == data->len ? 0 : -EIO;
 }
 
-const struct pdm_mcu_transport_ops pdm_mcu_uart_ops = {
+static const struct pdm_mcu_transport_ops pdm_mcu_uart_ops = {
 	.type = PDM_MCU_BACKEND_UART,
 	.name = "uart",
 	.capability = PDM_CTL_DEVICE_CAP_TRANSPORT_UART,
@@ -458,10 +458,20 @@ const struct pdm_mcu_transport_ops pdm_mcu_uart_ops = {
 	.write_data = pdm_mcu_uart_write_data,
 };
 
+#if IS_ENABLED(CONFIG_PDM_MCU_UART_SERDEV) && IS_ENABLED(CONFIG_SERIAL_DEV_BUS)
+static int pdm_mcu_serdev_driver_register(void);
+static void pdm_mcu_serdev_driver_unregister(void);
+#define PDM_MCU_UART_BACKEND_INIT pdm_mcu_serdev_driver_register
+#define PDM_MCU_UART_BACKEND_EXIT pdm_mcu_serdev_driver_unregister
+#else
+#define PDM_MCU_UART_BACKEND_INIT NULL
+#define PDM_MCU_UART_BACKEND_EXIT NULL
+#endif
+
 pdm_backend_register(mcu_uart, PDM_CTL_DEVICE_TYPE_MCU,
 		     PDM_BACKEND_CLASS_TRANSPORT, pdm_mcu_uart_of_match,
-		     &pdm_mcu_uart_ops, pdm_mcu_serdev_driver_register,
-		     pdm_mcu_serdev_driver_unregister);
+		     &pdm_mcu_uart_ops, PDM_MCU_UART_BACKEND_INIT,
+		     PDM_MCU_UART_BACKEND_EXIT);
 
 #if IS_ENABLED(CONFIG_PDM_MCU_UART_SERDEV) && IS_ENABLED(CONFIG_SERIAL_DEV_BUS)
 static int pdm_mcu_serdev_probe(struct serdev_device *serdev)
@@ -495,12 +505,12 @@ static struct serdev_device_driver pdm_mcu_serdev_driver = {
 	},
 };
 
-int pdm_mcu_serdev_driver_register(void)
+static int pdm_mcu_serdev_driver_register(void)
 {
 	return serdev_device_driver_register(&pdm_mcu_serdev_driver);
 }
 
-void pdm_mcu_serdev_driver_unregister(void)
+static void pdm_mcu_serdev_driver_unregister(void)
 {
 	serdev_device_driver_unregister(&pdm_mcu_serdev_driver);
 }

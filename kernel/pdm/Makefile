@@ -24,12 +24,12 @@ pdm-y += pdm/peripheral/mcu/pdm_mcu_driver.o
 # Automatic PDM backend entries must be linked between these markers.
 pdm-y += pdm/core/pdm_backend_start.o
 pdm-y += pdm/peripheral/mcu/pdm_mcu_uart.o
-pdm-y += pdm/peripheral/mcu/pdm_mcu_can.o
+pdm-$(CONFIG_PDM_MCU_CAN) += pdm/peripheral/mcu/pdm_mcu_can.o
 pdm-$(CONFIG_PDM_MCU_I2C) += pdm/peripheral/mcu/pdm_mcu_i2c.o
 pdm-$(CONFIG_PDM_MCU_SPI) += pdm/peripheral/mcu/pdm_mcu_spi.o
 pdm-y += pdm/peripheral/led/pdm_led_driver.o
-pdm-y += pdm/peripheral/led/pdm_led_gpio.o
-pdm-y += pdm/peripheral/led/pdm_led_pwm.o
+pdm-$(CONFIG_PDM_LED_GPIO) += pdm/peripheral/led/pdm_led_gpio.o
+pdm-$(CONFIG_PDM_LED_PWM) += pdm/peripheral/led/pdm_led_pwm.o
 pdm-y += pdm/core/pdm_backend_stop.o
 pdm-y += pdm/bus/pdm_driver_registry_stop.o
 pdm-$(CONFIG_PDM_MOCK_DEVICES) += pdm/mock/pdm_mock_devices.o

@@ -184,7 +184,7 @@ static int pdm_mcu_i2c_write_data(struct pdm_mcu_instance *inst,
 	return pdm_mcu_i2c_xfer(inst, tx, prefix + data->len, NULL, 0);
 }
 
-const struct pdm_mcu_transport_ops pdm_mcu_i2c_ops = {
+static const struct pdm_mcu_transport_ops pdm_mcu_i2c_ops = {
 	.type = PDM_MCU_BACKEND_I2C,
 	.name = "i2c",
 	.capability = PDM_CTL_DEVICE_CAP_TRANSPORT_I2C,
@@ -233,6 +233,7 @@ static const struct of_device_id pdm_mcu_i2c_of_match[] = {
 MODULE_DEVICE_TABLE(of, pdm_mcu_i2c_of_match);
 
 static const struct i2c_device_id pdm_mcu_i2c_id[] = {
+	{ "mcu-i2c", 0 },
 	{ "pdm-mcu-i2c", 0 },
 	{ }
 };
@@ -252,12 +253,12 @@ static struct i2c_driver pdm_mcu_i2c_driver = {
 	.id_table = pdm_mcu_i2c_id,
 };
 
-int pdm_mcu_i2c_driver_register(void)
+static int pdm_mcu_i2c_driver_register(void)
 {
 	return i2c_register_driver(THIS_MODULE, &pdm_mcu_i2c_driver);
 }
 
-void pdm_mcu_i2c_driver_unregister(void)
+static void pdm_mcu_i2c_driver_unregister(void)
 {
 	i2c_del_driver(&pdm_mcu_i2c_driver);
 }

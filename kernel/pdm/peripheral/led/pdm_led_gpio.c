@@ -12,6 +12,8 @@
 #include "pdm_led_internal.h"
 #include "osal.h"
 
+#if IS_ENABLED(CONFIG_GPIOLIB)
+
 static const struct of_device_id pdm_led_gpio_of_match[] = {
 	{ .compatible = "pdm,led-gpio" },
 	{ .compatible = "vendor,pdm-led-gpio" },
@@ -59,7 +61,7 @@ static int pdm_led_gpio_apply(struct pdm_led_instance *inst)
 	return 0;
 }
 
-const struct pdm_led_backend_ops pdm_led_gpio_ops = {
+static const struct pdm_led_backend_ops pdm_led_gpio_ops = {
 	.type = PDM_LED_BACKEND_GPIO,
 	.name = "gpio",
 	.capability = PDM_CTL_DEVICE_CAP_CONTROL_GPIO,
@@ -71,3 +73,4 @@ const struct pdm_led_backend_ops pdm_led_gpio_ops = {
 pdm_backend_register(led_gpio, PDM_CTL_DEVICE_TYPE_LED,
 		     PDM_BACKEND_CLASS_CONTROL, pdm_led_gpio_of_match,
 		     &pdm_led_gpio_ops, NULL, NULL);
+#endif

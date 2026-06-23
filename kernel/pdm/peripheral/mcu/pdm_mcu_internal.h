@@ -112,48 +112,4 @@ int pdm_mcu_register_native_device(struct device *parent,
 				   struct pdm_mcu_native_device *native);
 void pdm_mcu_unregister_native_device(struct pdm_mcu_native_device *native);
 
-extern const struct pdm_mcu_transport_ops pdm_mcu_uart_ops;
-extern const struct pdm_mcu_transport_ops pdm_mcu_can_ops;
-
-#if IS_ENABLED(CONFIG_PDM_MCU_I2C) && IS_ENABLED(CONFIG_I2C)
-extern const struct pdm_mcu_transport_ops pdm_mcu_i2c_ops;
-int pdm_mcu_i2c_driver_register(void);
-void pdm_mcu_i2c_driver_unregister(void);
-#else
-static inline int pdm_mcu_i2c_driver_register(void)
-{
-	return 0;
-}
-static inline void pdm_mcu_i2c_driver_unregister(void)
-{
-}
-#endif
-
-#if IS_ENABLED(CONFIG_PDM_MCU_SPI) && IS_ENABLED(CONFIG_SPI)
-extern const struct pdm_mcu_transport_ops pdm_mcu_spi_ops;
-int pdm_mcu_spi_driver_register(void);
-void pdm_mcu_spi_driver_unregister(void);
-#else
-static inline int pdm_mcu_spi_driver_register(void)
-{
-	return 0;
-}
-static inline void pdm_mcu_spi_driver_unregister(void)
-{
-}
-#endif
-
-#if IS_ENABLED(CONFIG_PDM_MCU_UART_SERDEV) && IS_ENABLED(CONFIG_SERIAL_DEV_BUS)
-int pdm_mcu_serdev_driver_register(void);
-void pdm_mcu_serdev_driver_unregister(void);
-#else
-static inline int pdm_mcu_serdev_driver_register(void)
-{
-	return 0;
-}
-static inline void pdm_mcu_serdev_driver_unregister(void)
-{
-}
-#endif
-
 #endif /* PDM_MCU_INTERNAL_H */

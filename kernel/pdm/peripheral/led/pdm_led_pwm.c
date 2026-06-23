@@ -12,6 +12,8 @@
 #include "pdm_led_internal.h"
 #include "osal.h"
 
+#if IS_ENABLED(CONFIG_PWM)
+
 static const struct of_device_id pdm_led_pwm_of_match[] = {
 	{ .compatible = "pdm,led-pwm" },
 	{ .compatible = "vendor,pdm-led-pwm" },
@@ -77,7 +79,7 @@ static int pdm_led_pwm_apply(struct pdm_led_instance *inst)
 	return pwm_apply_might_sleep(inst->hw.pwmdev, &state);
 }
 
-const struct pdm_led_backend_ops pdm_led_pwm_ops = {
+static const struct pdm_led_backend_ops pdm_led_pwm_ops = {
 	.type = PDM_LED_BACKEND_PWM,
 	.name = "pwm",
 	.capability = PDM_CTL_DEVICE_CAP_CONTROL_PWM,
@@ -89,3 +91,4 @@ const struct pdm_led_backend_ops pdm_led_pwm_ops = {
 pdm_backend_register(led_pwm, PDM_CTL_DEVICE_TYPE_LED,
 		     PDM_BACKEND_CLASS_CONTROL, pdm_led_pwm_of_match,
 		     &pdm_led_pwm_ops, NULL, NULL);
+#endif

@@ -21,7 +21,7 @@
  * @of_match_table: Optional compatibility alias for driver.of_match_table.
  * @device_type: PDM_CTL_DEVICE_TYPE_* value for devices handled by this driver.
  * @capabilities: Capability flags added to devices handled by this driver.
- * @match: Optional service-owned match callback for dynamic backend matches.
+ * @match: Optional service-owned authoritative match callback.
  * @probe: Called after the PDM bus matches a device to this driver.
  * @remove: Called before a bound PDM device is detached.
  */

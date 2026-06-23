@@ -510,40 +510,11 @@ static struct pdm_driver pdm_mcu_driver = {
 
 int pdm_mcu_driver_init(void)
 {
-	int ret;
-
-	ret = pdm_bus_register_driver(THIS_MODULE, &pdm_mcu_driver);
-	if (ret)
-		return ret;
-
-	ret = pdm_mcu_serdev_driver_register();
-	if (ret)
-		goto err_unregister_pdm;
-
-	ret = pdm_mcu_i2c_driver_register();
-	if (ret)
-		goto err_unregister_serdev;
-
-	ret = pdm_mcu_spi_driver_register();
-	if (ret)
-		goto err_unregister_i2c;
-
-	return 0;
-
-err_unregister_i2c:
-	pdm_mcu_i2c_driver_unregister();
-err_unregister_serdev:
-	pdm_mcu_serdev_driver_unregister();
-err_unregister_pdm:
-	pdm_bus_unregister_driver(&pdm_mcu_driver);
-	return ret;
+	return pdm_bus_register_driver(THIS_MODULE, &pdm_mcu_driver);
 }
 
 void pdm_mcu_driver_exit(void)
 {
-	pdm_mcu_spi_driver_unregister();
-	pdm_mcu_i2c_driver_unregister();
-	pdm_mcu_serdev_driver_unregister();
 	pdm_bus_unregister_driver(&pdm_mcu_driver);
 }
 

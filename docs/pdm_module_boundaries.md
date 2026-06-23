@@ -12,6 +12,37 @@ Application -> PDI -> UAPI/ioctl -> PDM peripheral driver
 Cross-layer shortcuts are architecture debt unless they are documented as a
 temporary compatibility path.
 
+## Driver Architecture
+
+The PDM kernel stack uses four explicit layers:
+
+```text
+Linux native bus or vendor,pdm-bus DT node
+    -> PDM device
+    -> PDM peripheral driver
+    -> PDM backend
+    -> Linux subsystem resource or native transport driver
+```
+
+- The PDM bus owns `struct bus_type`, PDM device registration, driver matching,
+  probe/remove dispatch, and common device state.
+- A PDM device is the stable service instance exposed under `/sys/bus/pdm` and,
+  after binding, under `/dev/pdm/`. It may be created by the `vendor,pdm-bus`
+  controller or by a backend-owned native bus driver such as serdev, I2C, or SPI.
+- A PDM peripheral driver owns service semantics: UAPI/ioctl handling, client
+  node policy, generic device state, and selection of a backend through
+  `pdm_backend_find()`. It must not directly register backend-owned Linux
+  subsystem drivers.
+- A PDM backend owns implementation details for one compatible class. Backends
+  provide service operation tables and, when the hardware is enumerated by a
+  native Linux bus, own registration and unregistration of that native driver.
+
+Backends that do not need native enumeration, such as CAN socket transport or
+LED GPIO/PWM control, should register backend ops without an init/exit hook.
+Backends that create PDM devices from native Linux children, such as serdev,
+I2C, and SPI MCU transports, should put the native driver lifecycle in the
+backend init/exit hooks.
+
 ## Allowed Dependencies
 
 ### PDI

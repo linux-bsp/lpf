@@ -176,7 +176,7 @@ static int pdm_mcu_spi_write_data(struct pdm_mcu_instance *inst,
 	return pdm_mcu_spi_xfer(inst, tx, prefix + data->len, NULL, 0);
 }
 
-const struct pdm_mcu_transport_ops pdm_mcu_spi_ops = {
+static const struct pdm_mcu_transport_ops pdm_mcu_spi_ops = {
 	.type = PDM_MCU_BACKEND_SPI,
 	.name = "spi",
 	.capability = PDM_CTL_DEVICE_CAP_TRANSPORT_SPI,
@@ -225,6 +225,7 @@ static const struct of_device_id pdm_mcu_spi_of_match[] = {
 MODULE_DEVICE_TABLE(of, pdm_mcu_spi_of_match);
 
 static const struct spi_device_id pdm_mcu_spi_id[] = {
+	{ "mcu-spi", 0 },
 	{ "pdm-mcu-spi", 0 },
 	{ }
 };
@@ -240,12 +241,12 @@ static struct spi_driver pdm_mcu_spi_driver = {
 	.id_table = pdm_mcu_spi_id,
 };
 
-int pdm_mcu_spi_driver_register(void)
+static int pdm_mcu_spi_driver_register(void)
 {
 	return spi_register_driver(&pdm_mcu_spi_driver);
 }
 
-void pdm_mcu_spi_driver_unregister(void)
+static void pdm_mcu_spi_driver_unregister(void)
 {
 	spi_unregister_driver(&pdm_mcu_spi_driver);
 }

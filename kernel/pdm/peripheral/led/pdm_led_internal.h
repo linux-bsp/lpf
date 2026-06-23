@@ -46,7 +46,5 @@ struct pdm_led_instance {
 };
 
 const struct pdm_led_backend_ops *pdm_led_backend_select(const char *compatible);
-extern const struct pdm_led_backend_ops pdm_led_gpio_ops;
-extern const struct pdm_led_backend_ops pdm_led_pwm_ops;
 
 #endif /* PDM_LED_INTERNAL_H */

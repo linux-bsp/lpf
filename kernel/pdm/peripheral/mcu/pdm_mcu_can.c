@@ -21,6 +21,8 @@
 #include "pdm_mcu_internal.h"
 #include "osal.h"
 
+#if IS_ENABLED(CONFIG_CAN_RAW)
+
 static const struct of_device_id pdm_mcu_can_of_match[] = {
 	{ .compatible = "pdm,mcu-can" },
 	{ .compatible = "vendor,pdm-mcu-can" },
@@ -232,7 +234,7 @@ static int pdm_mcu_can_write_data(struct pdm_mcu_instance *inst,
 	return pdm_mcu_can_send_frame(inst, data->address, data->data, data->len);
 }
 
-const struct pdm_mcu_transport_ops pdm_mcu_can_ops = {
+static const struct pdm_mcu_transport_ops pdm_mcu_can_ops = {
 	.type = PDM_MCU_BACKEND_CAN,
 	.name = "can",
 	.capability = PDM_CTL_DEVICE_CAP_TRANSPORT_CAN,
@@ -247,3 +249,4 @@ const struct pdm_mcu_transport_ops pdm_mcu_can_ops = {
 pdm_backend_register(mcu_can, PDM_CTL_DEVICE_TYPE_MCU,
 		     PDM_BACKEND_CLASS_TRANSPORT, pdm_mcu_can_of_match,
 		     &pdm_mcu_can_ops, NULL, NULL);
+#endif

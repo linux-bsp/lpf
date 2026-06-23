@@ -33,6 +33,14 @@ config PDM_MOCK_DEVICES
 	  This is intended for x86 smoke tests that do not have Device Tree
 	  PDM child nodes. Product builds should leave this disabled.
 
+config PDM_MCU_CAN
+	bool "PDM MCU CAN RAW transport"
+	default y
+	help
+	  Enable the CAN RAW transport backend for MCU devices described under
+	  the PDM bus controller with compatible "pdm,mcu-can".
+	  The target kernel still needs CAN RAW support for runtime use.
+
 config PDM_MCU_UART_SERDEV
 	bool "PDM MCU UART serdev transport"
 	default y
@@ -56,5 +64,21 @@ config PDM_MCU_SPI
 	  Register an SPI client driver for MCU devices described below an SPI
 	  controller node. If the target kernel lacks CONFIG_SPI, this backend
 	  compiles to a no-op.
+
+config PDM_LED_GPIO
+	bool "PDM LED GPIO backend"
+	default y
+	help
+	  Enable the GPIO control backend for LED devices described under the
+	  PDM bus controller with compatible "pdm,led-gpio".
+	  The target kernel still needs GPIOLIB support for runtime use.
+
+config PDM_LED_PWM
+	bool "PDM LED PWM backend"
+	default y
+	help
+	  Enable the PWM control backend for LED devices described under the
+	  PDM bus controller with compatible "pdm,led-pwm".
+	  The target kernel still needs PWM support for runtime use.
 
 endif # PDM
