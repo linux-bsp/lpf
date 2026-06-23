@@ -537,6 +537,16 @@ endmenu
 # Product-Specific Configuration
 # ============================================================================
 
+menu "Examples"
+
+config DEBUG_STUDY
+	bool "Build debug_study example"
+	depends on LINUX_ONLY
+	help
+	  Build the debug_study userspace executable.
+
+endmenu
+
 # ============================================================================
 # Configuration Validation
 # ============================================================================

@@ -105,15 +105,14 @@ endif
 
 %_defconfig: $(obj)/conf
 	@defconfig_file=""; \
-	product_name=$$(echo "$@" | cut -d'_' -f1); \
 	project_name=$$(echo "$@" | sed 's/^[^_]*_//; s/_defconfig$$//'); \
-	if [ -f "$(srctree)/configs/$$product_name/$@" ]; then \
-		defconfig_file="$(srctree)/configs/$$product_name/$@"; \
+	if [ -f "$(srctree)/configs/$@" ]; then \
+		defconfig_file="$(srctree)/configs/$@"; \
 	elif [ -f "$(srctree)/arch/$(SRCARCH)/configs/$@" ]; then \
 		defconfig_file="arch/$(SRCARCH)/configs/$@"; \
 	else \
 		echo "Error: defconfig file '$@' not found"; \
-		echo "  Expected: $(srctree)/configs/$$product_name/$@"; \
+		echo "  Expected: $(srctree)/configs/$@"; \
 		exit 1; \
 	fi; \
 	tmpfile=$$(mktemp); \

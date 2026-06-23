@@ -10,7 +10,7 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$PROJECT_ROOT"
 
 # Find all defconfig files
-DEFCONFIGS=$(find configs -name "*_defconfig" -type f | sort)
+DEFCONFIGS=$(find configs -maxdepth 1 -name "*_defconfig" -type f | sort)
 
 TOTAL=$(echo "$DEFCONFIGS" | wc -l)
 echo "Found $TOTAL defconfig files to update"
@@ -70,7 +70,7 @@ if [ $FAILED -gt 0 ]; then
     echo "You may need to update them manually with:"
     echo "  make distclean"
     echo "  yes \"\" | make <config>_defconfig"
-    echo "  cp .config configs/<subdir>/<config>_defconfig"
+    echo "  cp .config configs/<config>_defconfig"
     exit 1
 else
     echo "✓ All defconfigs updated successfully!"

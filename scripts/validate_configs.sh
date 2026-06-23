@@ -77,7 +77,7 @@ echo "Testing Configurations:"
 echo "----------------------------------------"
 while IFS= read -r config; do
     test_defconfig "$config"
-done < <(find configs -name "*_defconfig" -type f | sort)
+done < <(find configs -maxdepth 1 -name "*_defconfig" -type f | sort)
 echo ""
 
 # Summary

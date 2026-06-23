@@ -121,6 +121,10 @@ if(CONFIG_LINUX_ONLY)
     _lpf_add_core_component(CONFIG_ACONFIG aconfig user/aconfig)
 endif()
 
+if(CONFIG_DEBUG_STUDY)
+    add_subdirectory(${SDK_PATH}/examples/debug_study ${CMAKE_BINARY_DIR}/examples/debug_study)
+endif()
+
 if(PDM_BUILD_TESTS)
     enable_testing()
     add_subdirectory(${SDK_PATH}/tests ${CMAKE_BINARY_DIR}/tests)

@@ -800,12 +800,8 @@ help:
 	@echo '                  - Specify CMake toolchain for cross-compilation'
 	@echo ''
 	@echo 'Available defconfigs:'
-	@for subdir in $(sort $(notdir $(wildcard $(srctree)/configs/*/))); do \
-		echo ""; \
-		echo "  $$subdir configurations:"; \
-		for config in $(sort $(notdir $(wildcard $(srctree)/configs/$$subdir/*_defconfig))); do \
-			printf "    %-30s\n" $$config; \
-		done; \
+	@for config in $(sort $(notdir $(wildcard $(srctree)/configs/*_defconfig))); do \
+		printf "  %-35s\n" $$config; \
 	done
 	@echo ''
 	@echo 'Examples:'
@@ -831,14 +827,8 @@ help:
 list:
 	@echo 'Available defconfigs:'
 	@echo ''
-	@cd $(srctree)/configs && for subdir in */; do \
-		subdir=$${subdir%/}; \
-		echo "$$subdir configurations:"; \
-		for config in $$subdir/*_defconfig; do \
-			config=$$(basename $$config); \
-			printf "  %-35s\n" $$config; \
-		done; \
-		echo ""; \
+	@for config in $(sort $(notdir $(wildcard $(srctree)/configs/*_defconfig))); do \
+		printf "  %-35s\n" $$config; \
 	done
 
 PHONY += version
