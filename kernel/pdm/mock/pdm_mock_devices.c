@@ -88,8 +88,9 @@ static int pdm_mock_register_one(struct pdm_mock_device_entry *entry,
 	entry->desc = desc;
 
 	ret = pdm_mock_register_parent(entry);
-	if (ret)
+	if (ret) {
 		return ret;
+	}
 
 	pdm_dev = pdm_device_alloc(0);
 	if (!pdm_dev) {
@@ -128,16 +129,18 @@ int pdm_mock_devices_init(void)
 	for (i = 0; i < ARRAY_SIZE(pdm_mock_device_descs); i++) {
 		ret = pdm_mock_register_one(&pdm_mock_devices[i],
 					    &pdm_mock_device_descs[i]);
-		if (ret)
+		if (ret) {
 			goto err_unregister;
+		}
 	}
 
 	LOG_INFO("PDM mock devices initialized");
 	return 0;
 
 err_unregister:
-	while (--i >= 0)
+	while (--i >= 0) {
 		pdm_mock_unregister_one(&pdm_mock_devices[i]);
+	}
 	return ret;
 }
 
@@ -145,8 +148,9 @@ void pdm_mock_devices_exit(void)
 {
 	int i;
 
-	for (i = ARRAY_SIZE(pdm_mock_devices) - 1; i >= 0; i--)
+	for (i = ARRAY_SIZE(pdm_mock_devices) - 1; i >= 0; i--) {
 		pdm_mock_unregister_one(&pdm_mock_devices[i]);
+	}
 
 	LOG_INFO("PDM mock devices exited");
 }

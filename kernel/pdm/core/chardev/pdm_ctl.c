@@ -65,8 +65,9 @@ static struct miscdevice pdm_ctl_miscdev = {
 static bool pdm_ctl_device_visible(const struct pdm_device *pdm_dev)
 {
 	if (!pdm_dev || !pdm_dev->id_allocated ||
-	    pdm_dev->type == PDM_CTL_DEVICE_TYPE_INVALID)
+	    pdm_dev->type == PDM_CTL_DEVICE_TYPE_INVALID) {
 		return false;
+	}
 
 	return pdm_dev->state == PDM_CTL_DEVICE_STATE_BOUND ||
 	       pdm_dev->state == PDM_CTL_DEVICE_STATE_ERROR;
@@ -85,9 +86,10 @@ static void pdm_ctl_fill_device_info(struct device *dev,
 	info->error_count = pdm_dev->error_count;
 	info->capabilities = pdm_dev->capabilities;
 	strscpy(info->name, dev_name(dev), sizeof(info->name));
-	if (dev->driver)
+	if (dev->driver) {
 		strscpy(info->driver_name, dev->driver->name,
 			sizeof(info->driver_name));
+	}
 }
 
 static int pdm_ctl_count_cb(struct device *dev, void *data)
@@ -95,8 +97,9 @@ static int pdm_ctl_count_cb(struct device *dev, void *data)
 	u32 *count = data;
 	struct pdm_device *pdm_dev = dev_to_pdm_device(dev);
 
-	if (!pdm_ctl_device_visible(pdm_dev))
+	if (!pdm_ctl_device_visible(pdm_dev)) {
 		return 0;
+	}
 
 	(*count)++;
 	return 0;
@@ -107,11 +110,13 @@ static int pdm_ctl_match_index_cb(struct device *dev, void *data)
 	struct pdm_ctl_match_ctx *ctx = data;
 	struct pdm_device *pdm_dev = dev_to_pdm_device(dev);
 
-	if (!pdm_ctl_device_visible(pdm_dev))
+	if (!pdm_ctl_device_visible(pdm_dev)) {
 		return 0;
+	}
 
-	if (ctx->seen++ != ctx->match_index)
+	if (ctx->seen++ != ctx->match_index) {
 		return 0;
+	}
 
 	pdm_ctl_fill_device_info(dev, ctx->info);
 	ctx->found = true;
@@ -123,11 +128,13 @@ static int pdm_ctl_match_name_cb(struct device *dev, void *data)
 	struct pdm_ctl_match_ctx *ctx = data;
 	struct pdm_device *pdm_dev = dev_to_pdm_device(dev);
 
-	if (!pdm_ctl_device_visible(pdm_dev))
+	if (!pdm_ctl_device_visible(pdm_dev)) {
 		return 0;
+	}
 
-	if (strncmp(dev_name(dev), ctx->name, PDM_CTL_NAME_LEN) != 0)
+	if (strncmp(dev_name(dev), ctx->name, PDM_CTL_NAME_LEN) != 0) {
 		return 0;
+	}
 
 	pdm_ctl_fill_device_info(dev, ctx->info);
 	ctx->found = true;
@@ -139,15 +146,18 @@ static int pdm_ctl_match_capability_cb(struct device *dev, void *data)
 	struct pdm_ctl_match_ctx *ctx = data;
 	struct pdm_device *pdm_dev = dev_to_pdm_device(dev);
 
-	if (!pdm_ctl_device_visible(pdm_dev))
+	if (!pdm_ctl_device_visible(pdm_dev)) {
 		return 0;
+	}
 
 	if ((pdm_dev->capabilities & ctx->required_capabilities) !=
-	    ctx->required_capabilities)
+	    ctx->required_capabilities) {
 		return 0;
+	}
 
-	if (ctx->seen++ != ctx->match_index)
+	if (ctx->seen++ != ctx->match_index) {
 		return 0;
+	}
 
 	pdm_ctl_fill_device_info(dev, ctx->info);
 	ctx->found = true;
@@ -168,12 +178,14 @@ static long pdm_ctl_get_info(unsigned long arg)
 	info.open_count = (u32)atomic_read(&pdm_ctl_open_count);
 
 	ret = pdm_bus_for_each_dev(&device_count, pdm_ctl_count_cb);
-	if (ret < 0)
+	if (ret < 0) {
 		return ret;
+	}
 	info.device_count = device_count;
 
-	if (copy_to_user((void __user *)arg, &info, sizeof(info)))
+	if (copy_to_user((void __user *)arg, &info, sizeof(info))) {
 		return -EFAULT;
+	}
 
 	return 0;
 }
@@ -184,21 +196,25 @@ static long pdm_ctl_get_device(unsigned long arg)
 	struct pdm_ctl_match_ctx ctx;
 	int ret;
 
-	if (copy_from_user(&query, (void __user *)arg, sizeof(query)))
+	if (copy_from_user(&query, (void __user *)arg, sizeof(query))) {
 		return -EFAULT;
+	}
 
 	memset(&ctx, 0, sizeof(ctx));
 	ctx.info = &query.info;
 	ctx.match_index = query.match_index;
 
 	ret = pdm_bus_for_each_dev(&ctx, pdm_ctl_match_index_cb);
-	if (ret < 0)
+	if (ret < 0) {
 		return ret;
-	if (!ctx.found)
+	}
+	if (!ctx.found) {
 		return -ENODEV;
+	}
 
-	if (copy_to_user((void __user *)arg, &query, sizeof(query)))
+	if (copy_to_user((void __user *)arg, &query, sizeof(query))) {
 		return -EFAULT;
+	}
 
 	return 0;
 }
@@ -209,8 +225,9 @@ static long pdm_ctl_get_device_by_name(unsigned long arg)
 	struct pdm_ctl_match_ctx ctx;
 	int ret;
 
-	if (copy_from_user(&query, (void __user *)arg, sizeof(query)))
+	if (copy_from_user(&query, (void __user *)arg, sizeof(query))) {
 		return -EFAULT;
+	}
 	query.name[PDM_CTL_NAME_LEN - 1] = '\0';
 
 	memset(&ctx, 0, sizeof(ctx));
@@ -218,13 +235,16 @@ static long pdm_ctl_get_device_by_name(unsigned long arg)
 	ctx.name = query.name;
 
 	ret = pdm_bus_for_each_dev(&ctx, pdm_ctl_match_name_cb);
-	if (ret < 0)
+	if (ret < 0) {
 		return ret;
-	if (!ctx.found)
+	}
+	if (!ctx.found) {
 		return -ENODEV;
+	}
 
-	if (copy_to_user((void __user *)arg, &query, sizeof(query)))
+	if (copy_to_user((void __user *)arg, &query, sizeof(query))) {
 		return -EFAULT;
+	}
 
 	return 0;
 }
@@ -235,10 +255,12 @@ static long pdm_ctl_get_device_by_capability(unsigned long arg)
 	struct pdm_ctl_match_ctx ctx;
 	int ret;
 
-	if (copy_from_user(&query, (void __user *)arg, sizeof(query)))
+	if (copy_from_user(&query, (void __user *)arg, sizeof(query))) {
 		return -EFAULT;
-	if (!query.required_capabilities)
+	}
+	if (!query.required_capabilities) {
 		return -EINVAL;
+	}
 
 	memset(&ctx, 0, sizeof(ctx));
 	ctx.info = &query.info;
@@ -246,13 +268,16 @@ static long pdm_ctl_get_device_by_capability(unsigned long arg)
 	ctx.match_index = query.match_index;
 
 	ret = pdm_bus_for_each_dev(&ctx, pdm_ctl_match_capability_cb);
-	if (ret < 0)
+	if (ret < 0) {
 		return ret;
-	if (!ctx.found)
+	}
+	if (!ctx.found) {
 		return -ENODEV;
+	}
 
-	if (copy_to_user((void __user *)arg, &query, sizeof(query)))
+	if (copy_to_user((void __user *)arg, &query, sizeof(query))) {
 		return -EFAULT;
+	}
 
 	return 0;
 }

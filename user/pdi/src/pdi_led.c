@@ -15,10 +15,12 @@
 static int32_t pdi_led_ioctl_checked(pdi_led_context_t *ctx,
 				     unsigned long request, void *arg)
 {
-	if (pdi_check_ptr(ctx) < 0)
+	if (pdi_check_ptr(ctx) < 0) {
 		return PDI_FAILURE;
-	if (pdi_check_fd(ctx->fd) < 0)
+	}
+	if (pdi_check_fd(ctx->fd) < 0) {
 		return PDI_FAILURE;
+	}
 
 	return pdi_result_from_syscall(pdi_syscall_ioctl(ctx->fd, request, arg));
 }
@@ -27,14 +29,16 @@ int32_t pdi_led_open(pdi_led_context_t *ctx, const char *device_path)
 {
 	const char *path;
 
-	if (pdi_check_ptr(ctx) < 0)
+	if (pdi_check_ptr(ctx) < 0) {
 		return PDI_FAILURE;
+	}
 
 	ctx->fd = -1;
 	path = (device_path != NULL) ? device_path : PDI_LED_DEFAULT_DEVICE;
 	ctx->fd = pdi_syscall_open(path, O_RDWR | O_CLOEXEC);
-	if (ctx->fd < 0)
+	if (ctx->fd < 0) {
 		return PDI_FAILURE;
+	}
 
 	return PDI_SUCCESS;
 }
@@ -46,28 +50,34 @@ int32_t pdi_led_open_by_name(pdi_led_context_t *ctx, const char *name)
 	char path[PDI_DEVICE_PATH_LEN];
 	int32_t ret;
 
-	if (pdi_check_ptr(ctx) < 0)
+	if (pdi_check_ptr(ctx) < 0) {
 		return PDI_FAILURE;
+	}
 	ctx->fd = -1;
-	if (pdi_check_ptr(name) < 0)
+	if (pdi_check_ptr(name) < 0) {
 		return PDI_FAILURE;
+	}
 
 	ret = pdi_ctl_open(&ctl, NULL);
-	if (ret < 0)
+	if (ret < 0) {
 		return ret;
+	}
 
 	ret = pdi_get_device_by_name(&ctl, name, &info);
 	(void)pdi_ctl_close(&ctl);
-	if (ret < 0)
+	if (ret < 0) {
 		return ret;
+	}
 
-	if (info.type != PDM_CTL_DEVICE_TYPE_LED)
+	if (info.type != PDM_CTL_DEVICE_TYPE_LED) {
 		return pdi_fail_no_device();
+	}
 
 	ret = snprintf(path, sizeof(path), PDI_LED_DEVICE_PATH_FORMAT,
 		       info.index);
-	if (ret < 0 || (size_t)ret >= sizeof(path))
+	if (ret < 0 || (size_t)ret >= sizeof(path)) {
 		return pdi_fail_invalid_arg();
+	}
 
 	return pdi_led_open(ctx, path);
 }
@@ -76,10 +86,12 @@ int32_t pdi_led_close(pdi_led_context_t *ctx)
 {
 	int ret;
 
-	if (pdi_check_ptr(ctx) < 0)
+	if (pdi_check_ptr(ctx) < 0) {
 		return PDI_FAILURE;
-	if (pdi_check_fd(ctx->fd) < 0)
+	}
+	if (pdi_check_fd(ctx->fd) < 0) {
 		return PDI_FAILURE;
+	}
 
 	ret = pdi_syscall_close(ctx->fd);
 	ctx->fd = -1;
@@ -88,8 +100,9 @@ int32_t pdi_led_close(pdi_led_context_t *ctx)
 
 int32_t pdi_led_get_info(pdi_led_context_t *ctx, struct pdm_led_info *info)
 {
-	if (pdi_check_ptr(info) < 0)
+	if (pdi_check_ptr(info) < 0) {
 		return PDI_FAILURE;
+	}
 
 	return pdi_led_ioctl_checked(ctx, PDM_LED_IOC_GET_INFO, info);
 }
@@ -97,8 +110,9 @@ int32_t pdi_led_get_info(pdi_led_context_t *ctx, struct pdm_led_info *info)
 int32_t pdi_led_get_state(pdi_led_context_t *ctx,
 			  struct pdm_led_state *state)
 {
-	if (pdi_check_ptr(state) < 0)
+	if (pdi_check_ptr(state) < 0) {
 		return PDI_FAILURE;
+	}
 
 	return pdi_led_ioctl_checked(ctx, PDM_LED_IOC_GET_STATE, state);
 }

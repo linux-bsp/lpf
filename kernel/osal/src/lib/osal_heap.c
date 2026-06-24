@@ -29,18 +29,21 @@ static void osal_heap_add_usage(uint32_t size)
 {
 	mutex_lock(&g_heap_lock);
 	g_heap_current += size;
-	if (g_heap_current > g_heap_peak)
+	if (g_heap_current > g_heap_peak) {
 		g_heap_peak = g_heap_current;
+	}
 	mutex_unlock(&g_heap_lock);
 }
 
 static void osal_heap_sub_usage(uint32_t size)
 {
 	mutex_lock(&g_heap_lock);
-	if (size > g_heap_current)
+	if (size > g_heap_current) {
 		g_heap_current = 0;
-	else
+	}
+	else {
 		g_heap_current -= size;
+	}
 	mutex_unlock(&g_heap_lock);
 }
 
@@ -49,13 +52,15 @@ void *osal_malloc(uint32_t size)
 	struct osal_heap_header *header;
 	size_t total_size;
 
-	if (size > U32_MAX - sizeof(*header))
+	if (size > U32_MAX - sizeof(*header)) {
 		return NULL;
+	}
 
 	total_size = (size_t)size + sizeof(*header);
 	header = kmalloc(total_size, GFP_KERNEL);
-	if (!header)
+	if (!header) {
 		return NULL;
+	}
 
 	header->size = size;
 	header->magic = OSAL_HEAP_MAGIC;
@@ -70,8 +75,9 @@ void *osal_zalloc(uint32_t size)
 	void *ptr;
 
 	ptr = osal_malloc(size);
-	if (ptr)
+	if (ptr) {
 		memset(ptr, 0, size);
+	}
 
 	return ptr;
 }
@@ -81,8 +87,9 @@ void osal_free(void *ptr)
 {
 	struct osal_heap_header *header;
 
-	if (!ptr)
+	if (!ptr) {
 		return;
+	}
 
 	header = osal_heap_header_from_ptr(ptr);
 	if (header->magic != OSAL_HEAP_MAGIC) {
@@ -102,8 +109,9 @@ void *osal_realloc(void *ptr, uint32_t new_size)
 	void *new_ptr;
 	uint32_t copy_size;
 
-	if (!ptr)
+	if (!ptr) {
 		return osal_malloc(new_size);
+	}
 
 	if (new_size == 0) {
 		osal_free(ptr);
@@ -111,12 +119,14 @@ void *osal_realloc(void *ptr, uint32_t new_size)
 	}
 
 	old_header = osal_heap_header_from_ptr(ptr);
-	if (old_header->magic != OSAL_HEAP_MAGIC)
+	if (old_header->magic != OSAL_HEAP_MAGIC) {
 		return NULL;
+	}
 
 	new_ptr = osal_malloc(new_size);
-	if (!new_ptr)
+	if (!new_ptr) {
 		return NULL;
+	}
 
 	copy_size = min(old_header->size, new_size);
 	memcpy(new_ptr, ptr, copy_size);
@@ -128,8 +138,9 @@ EXPORT_SYMBOL_GPL(osal_realloc);
 
 int32_t osal_heap_get_info(uint32_t *free_bytes, uint32_t *total_bytes)
 {
-	if (!free_bytes || !total_bytes)
+	if (!free_bytes || !total_bytes) {
 		return OSAL_ERR_INVALID_POINTER;
+	}
 
 	mutex_lock(&g_heap_lock);
 	*free_bytes = (g_heap_peak > g_heap_current) ?
@@ -144,8 +155,9 @@ EXPORT_SYMBOL_GPL(osal_heap_get_info);
 
 int32_t osal_heap_set_threshold(uint32_t percent)
 {
-	if (percent > OSAL_HEAP_PERCENT_MAX)
+	if (percent > OSAL_HEAP_PERCENT_MAX) {
 		return OSAL_ERR_INVALID_SIZE;
+	}
 
 	mutex_lock(&g_heap_lock);
 	g_heap_threshold = percent;
@@ -161,8 +173,9 @@ int32_t osal_heap_check_threshold(bool *exceeded)
 	uint32_t peak;
 	uint32_t usage_percent;
 
-	if (!exceeded)
+	if (!exceeded) {
 		return OSAL_ERR_INVALID_POINTER;
+	}
 
 	mutex_lock(&g_heap_lock);
 	usage_bytes = g_heap_current;
@@ -184,8 +197,9 @@ EXPORT_SYMBOL_GPL(osal_heap_check_threshold);
 
 int32_t osal_heap_get_stats(uint32_t *current_bytes, uint32_t *peak_bytes)
 {
-	if (!current_bytes || !peak_bytes)
+	if (!current_bytes || !peak_bytes) {
 		return OSAL_ERR_INVALID_POINTER;
+	}
 
 	mutex_lock(&g_heap_lock);
 	*current_bytes = g_heap_current;

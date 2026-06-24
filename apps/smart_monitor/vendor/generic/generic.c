@@ -247,12 +247,15 @@ const char *generic_bkops_status_desc(uint8_t value)
 
 const char *generic_bkops_en_desc(uint8_t value)
 {
-	if (value & 0x01)
+	if (value & 0x01) {
 		return "Manual enabled";
-	else if (value & 0x02)
+	}
+	else if (value & 0x02) {
 		return "Auto enabled";
-	else
+	}
+	else {
 		return "Disabled";
+	}
 }
 
 const char *generic_cache_ctrl_desc(uint8_t value)

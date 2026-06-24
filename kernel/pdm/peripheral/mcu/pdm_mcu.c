@@ -76,10 +76,12 @@ static int pdm_mcu_bus_device_id(struct device_node *np)
 	u32 value;
 
 	if (np) {
-		if (!of_property_read_u32(np, "pdm,id", &value))
+		if (!of_property_read_u32(np, "pdm,id", &value)) {
 			return (int)value;
-		if (!of_property_read_u32(np, "pdm,index", &value))
+		}
+		if (!of_property_read_u32(np, "pdm,index", &value)) {
 			return (int)value;
+		}
 	}
 
 	return -1;
@@ -104,16 +106,18 @@ static int pdm_mcu_record_result(struct pdm_mcu_instance *inst, int ret)
 		inst->state = inst->online ? PDM_MCU_STATE_ERROR : PDM_MCU_STATE_OFFLINE;
 		inst->pdm_dev->last_error = ret;
 		inst->pdm_dev->error_count++;
-		if (inst->online)
+		if (inst->online) {
 			inst->pdm_dev->state = PDM_CTL_DEVICE_STATE_ERROR;
+		}
 		return ret;
 	}
 
 	inst->last_error = 0;
 	inst->state = inst->online ? PDM_MCU_STATE_READY : PDM_MCU_STATE_OFFLINE;
 	inst->pdm_dev->last_error = 0;
-	if (inst->online)
+	if (inst->online) {
 		inst->pdm_dev->state = PDM_CTL_DEVICE_STATE_BOUND;
+	}
 	return ret;
 }
 
@@ -128,8 +132,9 @@ static long pdm_mcu_get_info(struct pdm_client *client, unsigned long arg)
 		.max_devices = (u32)atomic_read(&pdm_mcu_device_count),
 	};
 
-	if (copy_to_user((void __user *)arg, &info, sizeof(info)))
+	if (copy_to_user((void __user *)arg, &info, sizeof(info))) {
 		return -EFAULT;
+	}
 	return 0;
 }
 
@@ -138,8 +143,9 @@ static long pdm_mcu_get_version(struct pdm_mcu_instance *inst, unsigned long arg
 	struct pdm_mcu_version version;
 	int ret;
 
-	if (copy_from_user(&version, (void __user *)arg, sizeof(version)))
+	if (copy_from_user(&version, (void __user *)arg, sizeof(version))) {
 		return -EFAULT;
+	}
 
 	ret = pdm_mcu_claim_device(inst);
 	if (!ret) {
@@ -147,11 +153,13 @@ static long pdm_mcu_get_version(struct pdm_mcu_instance *inst, unsigned long arg
 	}
 	ret = pdm_mcu_record_result(inst, ret);
 	pdm_mcu_release_device(inst);
-	if (ret)
+	if (ret) {
 		return ret;
+	}
 
-	if (copy_to_user((void __user *)arg, &version, sizeof(version)))
+	if (copy_to_user((void __user *)arg, &version, sizeof(version))) {
 		return -EFAULT;
+	}
 	return 0;
 }
 
@@ -160,8 +168,9 @@ static long pdm_mcu_get_status(struct pdm_mcu_instance *inst, unsigned long arg)
 	struct pdm_mcu_status status;
 	int ret;
 
-	if (copy_from_user(&status, (void __user *)arg, sizeof(status)))
+	if (copy_from_user(&status, (void __user *)arg, sizeof(status))) {
 		return -EFAULT;
+	}
 
 	ret = pdm_mcu_claim_device(inst);
 	if (!ret) {
@@ -169,11 +178,13 @@ static long pdm_mcu_get_status(struct pdm_mcu_instance *inst, unsigned long arg)
 	}
 	ret = pdm_mcu_record_result(inst, ret);
 	pdm_mcu_release_device(inst);
-	if (ret)
+	if (ret) {
 		return ret;
+	}
 
-	if (copy_to_user((void __user *)arg, &status, sizeof(status)))
+	if (copy_to_user((void __user *)arg, &status, sizeof(status))) {
 		return -EFAULT;
+	}
 	return 0;
 }
 
@@ -181,10 +192,12 @@ static int pdm_mcu_claim_device(struct pdm_mcu_instance *inst)
 {
 	mutex_lock(&inst->lock);
 
-	if (!inst->online)
+	if (!inst->online) {
 		return -ENODEV;
-	if (!inst->ops)
+	}
+	if (!inst->ops) {
 		return -EOPNOTSUPP;
+	}
 
 	return 0;
 }
@@ -199,8 +212,9 @@ static long pdm_mcu_reset(struct pdm_mcu_instance *inst, unsigned long arg)
 	u32 index;
 	int ret;
 
-	if (copy_from_user(&index, (void __user *)arg, sizeof(index)))
+	if (copy_from_user(&index, (void __user *)arg, sizeof(index))) {
 		return -EFAULT;
+	}
 
 	ret = pdm_mcu_claim_device(inst);
 	if (!ret) {
@@ -216,8 +230,9 @@ static long pdm_mcu_command_ioctl(struct pdm_mcu_instance *inst, unsigned long a
 	struct pdm_mcu_command command;
 	int ret;
 
-	if (copy_from_user(&command, (void __user *)arg, sizeof(command)))
+	if (copy_from_user(&command, (void __user *)arg, sizeof(command))) {
 		return -EFAULT;
+	}
 
 	ret = pdm_mcu_claim_device(inst);
 	if (!ret) {
@@ -225,11 +240,13 @@ static long pdm_mcu_command_ioctl(struct pdm_mcu_instance *inst, unsigned long a
 	}
 	ret = pdm_mcu_record_result(inst, ret);
 	pdm_mcu_release_device(inst);
-	if (ret)
+	if (ret) {
 		return ret;
+	}
 
-	if (copy_to_user((void __user *)arg, &command, sizeof(command)))
+	if (copy_to_user((void __user *)arg, &command, sizeof(command))) {
 		return -EFAULT;
+	}
 	return 0;
 }
 
@@ -238,8 +255,9 @@ static long pdm_mcu_read_data_ioctl(struct pdm_mcu_instance *inst, unsigned long
 	struct pdm_mcu_data data;
 	int ret;
 
-	if (copy_from_user(&data, (void __user *)arg, sizeof(data)))
+	if (copy_from_user(&data, (void __user *)arg, sizeof(data))) {
 		return -EFAULT;
+	}
 
 	ret = pdm_mcu_claim_device(inst);
 	if (!ret) {
@@ -247,11 +265,13 @@ static long pdm_mcu_read_data_ioctl(struct pdm_mcu_instance *inst, unsigned long
 	}
 	ret = pdm_mcu_record_result(inst, ret);
 	pdm_mcu_release_device(inst);
-	if (ret)
+	if (ret) {
 		return ret;
+	}
 
-	if (copy_to_user((void __user *)arg, &data, sizeof(data)))
+	if (copy_to_user((void __user *)arg, &data, sizeof(data))) {
 		return -EFAULT;
+	}
 	return 0;
 }
 
@@ -260,8 +280,9 @@ static long pdm_mcu_write_data_ioctl(struct pdm_mcu_instance *inst, unsigned lon
 	struct pdm_mcu_data data;
 	int ret;
 
-	if (copy_from_user(&data, (void __user *)arg, sizeof(data)))
+	if (copy_from_user(&data, (void __user *)arg, sizeof(data))) {
 		return -EFAULT;
+	}
 
 	ret = pdm_mcu_claim_device(inst);
 	if (!ret) {
@@ -277,8 +298,9 @@ static long pdm_mcu_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
 	struct pdm_client *client = pdm_client_from_file(filp);
 	struct pdm_mcu_instance *inst;
 
-	if (!client)
+	if (!client) {
 		return -ENODEV;
+	}
 	inst = container_of(client, struct pdm_mcu_instance, client);
 
 	switch (cmd) {
@@ -315,8 +337,9 @@ static void pdm_mcu_client_release(struct pdm_client *client)
 {
 	struct pdm_mcu_instance *inst;
 
-	if (!client)
+	if (!client) {
 		return;
+	}
 
 	inst = container_of(client, struct pdm_mcu_instance, client);
 	kfree(inst);
@@ -329,8 +352,9 @@ static int pdm_mcu_probe(struct pdm_device *pdm_dev)
 	int ret;
 
 	inst = kzalloc(sizeof(*inst), GFP_KERNEL);
-	if (!inst)
+	if (!inst) {
 		return -ENOMEM;
+	}
 
 	inst->pdm_dev = pdm_dev;
 	inst->ops = pdm_mcu_transport_select(pdm_dev->compatible);
@@ -346,14 +370,16 @@ static int pdm_mcu_probe(struct pdm_device *pdm_dev)
 	mutex_init(&inst->lock);
 
 	ret = inst->ops->setup(inst);
-	if (ret)
+	if (ret) {
 		goto err_free;
+	}
 
 	snprintf(nodename, sizeof(nodename), "mcu%d", pdm_dev->id);
 	ret = pdm_client_register(&inst->client, pdm_dev, "pdm-mcu",
 				  nodename, &pdm_mcu_fops, pdm_mcu_client_release);
-	if (ret)
+	if (ret) {
 		goto err_cleanup_transport;
+	}
 
 	pdm_dev->capabilities |= inst->ops->capability;
 	pdm_device_set_drvdata(pdm_dev, inst);
@@ -373,8 +399,9 @@ static void pdm_mcu_remove(struct pdm_device *pdm_dev)
 {
 	struct pdm_mcu_instance *inst = pdm_device_get_drvdata(pdm_dev);
 
-	if (!inst)
+	if (!inst) {
 		return;
+	}
 
 	atomic_dec_if_positive(&pdm_mcu_device_count);
 	pdm_device_set_drvdata(pdm_dev, NULL);
@@ -382,8 +409,9 @@ static void pdm_mcu_remove(struct pdm_device *pdm_dev)
 	mutex_lock(&inst->lock);
 	inst->online = false;
 	inst->state = PDM_MCU_STATE_OFFLINE;
-	if (inst->ops && inst->ops->cleanup)
+	if (inst->ops && inst->ops->cleanup) {
 		inst->ops->cleanup(inst);
+	}
 	mutex_unlock(&inst->lock);
 
 	pdm_client_unregister(&inst->client);
@@ -400,19 +428,23 @@ int pdm_mcu_register_bus_device(struct device *parent,
 	int ret;
 	int id;
 
-	if (!parent || !bus_dev)
+	if (!parent || !bus_dev) {
 		return -EINVAL;
+	}
 
 	np = parent->of_node;
 	compatible = pdm_mcu_default_compatible(type);
-	if (np)
+	if (np) {
 		of_property_read_string(np, "compatible", &compatible);
-	if (!compatible)
+	}
+	if (!compatible) {
 		return -EINVAL;
+	}
 
 	pdm_dev = pdm_device_alloc(0);
-	if (!pdm_dev)
+	if (!pdm_dev) {
 		return -ENOMEM;
+	}
 
 	id = pdm_mcu_bus_device_id(np);
 	pdm_dev->dev.parent = parent;
@@ -424,10 +456,12 @@ int pdm_mcu_register_bus_device(struct device *parent,
 	bus_dev->pdm_dev = pdm_dev;
 
 	if (id >= 0)
+	{
 		snprintf(name, sizeof(name), "%s.pdm-mcu.%d",
 			 dev_name(parent), id);
-	else
+	} else {
 		snprintf(name, sizeof(name), "%s.pdm-mcu", dev_name(parent));
+	}
 	ret = pdm_device_register(pdm_dev, name);
 	if (ret) {
 		bus_dev->pdm_dev = NULL;
@@ -440,8 +474,9 @@ int pdm_mcu_register_bus_device(struct device *parent,
 
 void pdm_mcu_unregister_bus_device(struct pdm_mcu_bus_device *bus_dev)
 {
-	if (!bus_dev || !bus_dev->pdm_dev)
+	if (!bus_dev || !bus_dev->pdm_dev) {
 		return;
+	}
 
 	pdm_device_unregister(bus_dev->pdm_dev);
 	bus_dev->pdm_dev = NULL;

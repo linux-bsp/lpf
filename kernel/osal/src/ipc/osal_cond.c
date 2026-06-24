@@ -9,8 +9,9 @@ int32_t osal_cond_init(osal_cond_t *cond, const osal_cond_attr_t *attr)
 {
 	(void)attr;
 
-	if (!cond)
+	if (!cond) {
 		return OSAL_ERR_INVALID_POINTER;
+	}
 
 	init_waitqueue_head(&cond->waitq);
 	atomic_set(&cond->generation, 0);
@@ -20,8 +21,9 @@ EXPORT_SYMBOL_GPL(osal_cond_init);
 
 int32_t osal_cond_destroy(osal_cond_t *cond)
 {
-	if (!cond)
+	if (!cond) {
 		return OSAL_ERR_INVALID_POINTER;
+	}
 
 	return OSAL_SUCCESS;
 }
@@ -33,8 +35,9 @@ static int32_t osal_cond_wait_common(osal_cond_t *cond, osal_mutex_t *mutex,
 	long ret;
 	int generation;
 
-	if (!cond || !mutex)
+	if (!cond || !mutex) {
 		return OSAL_ERR_INVALID_POINTER;
+	}
 
 	generation = atomic_read(&cond->generation);
 	osal_mutex_unlock(mutex);
@@ -52,10 +55,12 @@ static int32_t osal_cond_wait_common(osal_cond_t *cond, osal_mutex_t *mutex,
 
 	osal_mutex_lock(mutex);
 
-	if (ret == 0 && timed)
+	if (ret == 0 && timed) {
 		return OSAL_ERR_TIMEOUT;
-	if (ret < 0)
+	}
+	if (ret < 0) {
 		return OSAL_ERR_INTERRUPTED;
+	}
 
 	return OSAL_SUCCESS;
 }
@@ -69,8 +74,9 @@ EXPORT_SYMBOL_GPL(osal_cond_wait);
 int32_t osal_cond_timed_wait(osal_cond_t *cond, osal_mutex_t *mutex,
 			     uint32_t timeout_ms)
 {
-	if (timeout_ms == 0)
+	if (timeout_ms == 0) {
 		return osal_cond_wait_common(cond, mutex, 0, true);
+	}
 
 	return osal_cond_wait_common(cond, mutex, timeout_ms, true);
 }
@@ -78,8 +84,9 @@ EXPORT_SYMBOL_GPL(osal_cond_timed_wait);
 
 int32_t osal_cond_signal(osal_cond_t *cond)
 {
-	if (!cond)
+	if (!cond) {
 		return OSAL_ERR_INVALID_POINTER;
+	}
 
 	atomic_inc(&cond->generation);
 	wake_up_interruptible(&cond->waitq);
@@ -89,8 +96,9 @@ EXPORT_SYMBOL_GPL(osal_cond_signal);
 
 int32_t osal_cond_broadcast(osal_cond_t *cond)
 {
-	if (!cond)
+	if (!cond) {
 		return OSAL_ERR_INVALID_POINTER;
+	}
 
 	atomic_inc(&cond->generation);
 	wake_up_interruptible_all(&cond->waitq);

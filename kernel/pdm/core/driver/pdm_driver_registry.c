@@ -22,8 +22,9 @@ static void pdm_driver_entries_exit_count(size_t count)
 
 	while (count) {
 		entry = __start_pdm_driver_entries + --count;
-		if (!entry->exit)
+		if (!entry->exit) {
 			continue;
+		}
 
 		LOG_DEBUG("Unregistering PDM driver [%s]",
 			  entry->name ? entry->name : "unknown");

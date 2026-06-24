@@ -389,8 +389,9 @@ static void _rotate_log_file(void)
 	uint32_t i;
 	uint32_t max_files;
 
-	if (g_log_file_path[0] == '\0')
+	if (g_log_file_path[0] == '\0') {
 		return;
+	}
 
 	/* 读取配置（需要临时获取 config_mutex） */
 	osal_mutex_unlock(&g_log_mutex);
@@ -453,8 +454,9 @@ static void _check_and_rotate_log(void)
 	int64_t file_size;
 	uint32_t max_size;
 
-	if (NULL == g_log_file || g_log_file_path[0] == '\0')
+	if (NULL == g_log_file || g_log_file_path[0] == '\0') {
 		return;
+	}
 
 	/* 获取文件大小 */
 	fseek(g_log_file, 0, SEEK_END);
@@ -549,8 +551,9 @@ static void _send_remote_log(const char *log_message)
  */
 static const char *_extract_filename(const char *path)
 {
-	if (path == NULL)
+	if (path == NULL) {
 		return "unknown";
+	}
 
 	const char *filename = strrchr(path, '/');
 	return filename ? filename + 1 : path;
@@ -574,25 +577,29 @@ static void _log_internal_ex(log_level_t level, const char *file,
 	const char *filename = _extract_filename(file);
 	log_level_t current_level;
 
-	if (!_log_is_ready())
+	if (!_log_is_ready()) {
 		return;
+	}
 
-	if (format == NULL)
+	if (format == NULL) {
 		return;
+	}
 
 	/* 快速路径：无锁读取日志级别（使用原子操作） */
 	current_level = __atomic_load_n(&g_log_level, __ATOMIC_RELAXED);
 
 	/* 第一级过滤：检查日志级别（快速返回） */
-	if (level < current_level)
+	if (level < current_level) {
 		return;
+	}
 
 	/* 延迟格式化：只有通过级别检查才进行格式化 */
 	vsnprintf(message, OSAL_sizeof(message), format, args);
 
 	/* 采样和过滤检查 */
-	if (!_should_log_message(message))
+	if (!_should_log_message(message)) {
 		return;
+	}
 
 	/* 加锁（临界区：文件操作和控制台输出） */
 	osal_mutex_lock(&g_log_mutex);
@@ -643,18 +650,21 @@ static void _log_internal(log_level_t level, const char *format, va_list args)
 	char message[OSAL_LOG_MESSAGE_SIZE];
 	log_level_t current_level;
 
-	if (!_log_is_ready())
+	if (!_log_is_ready()) {
 		return;
+	}
 
-	if (format == NULL)
+	if (format == NULL) {
 		return;
+	}
 
 	/* 快速路径：无锁读取日志级别 */
 	current_level = __atomic_load_n(&g_log_level, __ATOMIC_RELAXED);
 
 	/* 检查日志级别 */
-	if (level < current_level)
+	if (level < current_level) {
 		return;
+	}
 
 	/* 格式化消息 */
 	vsnprintf(message, OSAL_sizeof(message), format, args);
@@ -699,10 +709,12 @@ void osal_log(int32_t level, const char *format, ...)
 {
 	va_list args;
 
-	if (level < LOG_LEVEL_DEBUG || level > LOG_LEVEL_FATAL)
+	if (level < LOG_LEVEL_DEBUG || level > LOG_LEVEL_FATAL) {
 		return;
-	if (format == NULL)
+	}
+	if (format == NULL) {
 		return;
+	}
 
 	va_start(args, format);
 	_log_internal(level, format, args);
@@ -732,10 +744,12 @@ void osal_log_emit(int32_t level, const char *file, int32_t line,
 	va_list args;
 
 	/* 参数合法性检查 */
-	if (level < LOG_LEVEL_DEBUG || level > LOG_LEVEL_FATAL)
+	if (level < LOG_LEVEL_DEBUG || level > LOG_LEVEL_FATAL) {
 		return;
-	if (format == NULL)
+	}
+	if (format == NULL) {
 		return;
+	}
 
 	va_start(args, format);
 	_log_internal_ex(level, file, line, format, args);
@@ -751,8 +765,9 @@ void osal_printf(const char *format, ...)
 	va_list args;
 	int len;
 
-	if (format == NULL)
+	if (format == NULL) {
 		return;
+	}
 
 	va_start(args, format);
 	len = vsnprintf(buffer, OSAL_sizeof(buffer), format, args);
@@ -779,17 +794,21 @@ void osal_log_structured(int32_t level, const char *message,
 	osal_size_t offset = 0;
 	log_level_t current_level;
 
-	if (level < LOG_LEVEL_DEBUG || level > LOG_LEVEL_FATAL)
+	if (level < LOG_LEVEL_DEBUG || level > LOG_LEVEL_FATAL) {
 		return;
-	if (message == NULL)
+	}
+	if (message == NULL) {
 		return;
+	}
 
-	if (!_log_is_ready())
+	if (!_log_is_ready()) {
 		return;
+	}
 
 	current_level = __atomic_load_n(&g_log_level, __ATOMIC_RELAXED);
-	if (level < current_level)
+	if (level < current_level) {
 		return;
+	}
 
 	/* 构造键值对字符串 */
 	kv_buffer[0] = '\0';
@@ -813,8 +832,9 @@ void osal_log_structured(int32_t level, const char *message,
 			 kv_buffer);
 
 	/* 采样和过滤检查 */
-	if (!_should_log_message(full_message))
+	if (!_should_log_message(full_message)) {
 		return;
+	}
 
 	/* 加锁 */
 	osal_mutex_lock(&g_log_mutex);

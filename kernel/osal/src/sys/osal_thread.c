@@ -29,18 +29,23 @@ static int32_t osal_thread_errno_to_status(int ret)
 {
 	int err;
 
-	if (ret >= 0)
+	if (ret >= 0) {
 		return OSAL_SUCCESS;
+	}
 
 	err = -ret;
-	if (err == ENOMEM)
+	if (err == ENOMEM) {
 		return OSAL_ERR_NO_MEMORY;
-	if (err == EINVAL)
+	}
+	if (err == EINVAL) {
 		return OSAL_ERR_INVALID_PARAM;
-	if (err == EBUSY)
+	}
+	if (err == EBUSY) {
 		return OSAL_ERR_BUSY;
-	if (err == EINTR)
+	}
+	if (err == EINTR) {
 		return OSAL_ERR_INTERRUPTED;
+	}
 
 	return OSAL_ERR_GENERIC;
 }
@@ -50,8 +55,9 @@ static osal_thread_t osal_thread_find_current_locked(void)
 	osal_thread_t thread;
 
 	list_for_each_entry(thread, &g_thread_registry, node) {
-		if (thread->task == current)
+		if (thread->task == current) {
 			return thread;
+		}
 	}
 
 	return NULL;
@@ -71,8 +77,9 @@ static osal_thread_t osal_thread_find_current(void)
 static void osal_thread_unregister(osal_thread_t thread)
 {
 	mutex_lock(&g_thread_registry_lock);
-	if (!list_empty(&thread->node))
+	if (!list_empty(&thread->node)) {
 		list_del_init(&thread->node);
+	}
 	mutex_unlock(&g_thread_registry_lock);
 }
 
@@ -99,8 +106,9 @@ static int osal_thread_trampoline(void *data)
 
 	retval = thread->start_routine(thread->arg);
 
-	if (osal_thread_complete(thread, retval))
+	if (osal_thread_complete(thread, retval)) {
 		kfree(thread);
+	}
 
 	return 0;
 }
@@ -112,12 +120,14 @@ int32_t osal_thread_create(osal_thread_t *thread,
 	osal_thread_t ctx;
 	const char *name = "osal_thread";
 
-	if (!thread || !start_routine)
+	if (!thread || !start_routine) {
 		return OSAL_ERR_INVALID_POINTER;
+	}
 
 	ctx = kzalloc(sizeof(*ctx), GFP_KERNEL);
-	if (!ctx)
+	if (!ctx) {
 		return OSAL_ERR_NO_MEMORY;
+	}
 
 	init_completion(&ctx->done);
 	mutex_init(&ctx->lock);
@@ -127,8 +137,9 @@ int32_t osal_thread_create(osal_thread_t *thread,
 	if (attr) {
 		ctx->detached =
 			(attr->detach_state == OSAL_THREAD_CREATE_DETACHED);
-		if (attr->name[0] != '\0')
+		if (attr->name[0] != '\0') {
 			name = attr->name;
+		}
 	}
 
 	ctx->task = kthread_create(osal_thread_trampoline, ctx, "%s", name);
@@ -151,8 +162,9 @@ EXPORT_SYMBOL_GPL(osal_thread_create);
 
 int32_t osal_thread_join(osal_thread_t thread, void **retval)
 {
-	if (!thread)
+	if (!thread) {
 		return OSAL_ERR_INVALID_POINTER;
+	}
 
 	mutex_lock(&thread->lock);
 	if (thread->detached || thread->joined) {
@@ -163,8 +175,9 @@ int32_t osal_thread_join(osal_thread_t thread, void **retval)
 	mutex_unlock(&thread->lock);
 
 	wait_for_completion(&thread->done);
-	if (retval)
+	if (retval) {
 		*retval = thread->retval;
+	}
 
 	kfree(thread);
 	return OSAL_SUCCESS;
@@ -175,8 +188,9 @@ int32_t osal_thread_detach(osal_thread_t thread)
 {
 	bool free_thread = false;
 
-	if (!thread)
+	if (!thread) {
 		return OSAL_ERR_INVALID_POINTER;
+	}
 
 	mutex_lock(&thread->lock);
 	if (thread->joined) {
@@ -187,8 +201,9 @@ int32_t osal_thread_detach(osal_thread_t thread)
 	free_thread = thread->completed;
 	mutex_unlock(&thread->lock);
 
-	if (free_thread)
+	if (free_thread) {
 		kfree(thread);
+	}
 
 	return OSAL_SUCCESS;
 }
@@ -214,8 +229,9 @@ void osal_thread_exit(void *retval)
 	thread = osal_thread_find_current_locked();
 	mutex_unlock(&g_thread_registry_lock);
 
-	if (thread && osal_thread_complete(thread, retval))
+	if (thread && osal_thread_complete(thread, retval)) {
 		kfree(thread);
+	}
 
 	kthread_complete_and_exit(NULL, 0);
 }
@@ -225,8 +241,9 @@ int32_t osal_thread_cancel(osal_thread_t thread)
 {
 	int ret;
 
-	if (!thread || !thread->task)
+	if (!thread || !thread->task) {
 		return OSAL_ERR_INVALID_POINTER;
+	}
 
 	mutex_lock(&thread->lock);
 	if (thread->detached || thread->joined) {
@@ -249,8 +266,9 @@ EXPORT_SYMBOL_GPL(osal_thread_should_stop);
 
 int32_t osal_thread_attr_init(osal_thread_attr_t *attr)
 {
-	if (!attr)
+	if (!attr) {
 		return OSAL_ERR_INVALID_POINTER;
+	}
 
 	memset(attr, 0, sizeof(*attr));
 	attr->detach_state = OSAL_THREAD_CREATE_JOINABLE;
@@ -261,8 +279,9 @@ EXPORT_SYMBOL_GPL(osal_thread_attr_init);
 
 int32_t osal_thread_attr_destroy(osal_thread_attr_t *attr)
 {
-	if (!attr)
+	if (!attr) {
 		return OSAL_ERR_INVALID_POINTER;
+	}
 
 	return OSAL_SUCCESS;
 }
@@ -271,8 +290,9 @@ EXPORT_SYMBOL_GPL(osal_thread_attr_destroy);
 int32_t osal_thread_attr_set_stack_size(osal_thread_attr_t *attr,
 					osal_size_t stacksize)
 {
-	if (!attr)
+	if (!attr) {
 		return OSAL_ERR_INVALID_POINTER;
+	}
 
 	attr->stack_size = stacksize;
 	return OSAL_SUCCESS;
@@ -282,8 +302,9 @@ EXPORT_SYMBOL_GPL(osal_thread_attr_set_stack_size);
 int32_t osal_thread_attr_get_stack_size(const osal_thread_attr_t *attr,
 					osal_size_t *stacksize)
 {
-	if (!attr || !stacksize)
+	if (!attr || !stacksize) {
 		return OSAL_ERR_INVALID_POINTER;
+	}
 
 	*stacksize = attr->stack_size;
 	return OSAL_SUCCESS;
@@ -293,11 +314,13 @@ EXPORT_SYMBOL_GPL(osal_thread_attr_get_stack_size);
 int32_t osal_thread_attr_set_detach_state(osal_thread_attr_t *attr,
 					  int32_t detachstate)
 {
-	if (!attr)
+	if (!attr) {
 		return OSAL_ERR_INVALID_POINTER;
+	}
 	if (detachstate != OSAL_THREAD_CREATE_JOINABLE &&
-	    detachstate != OSAL_THREAD_CREATE_DETACHED)
+	    detachstate != OSAL_THREAD_CREATE_DETACHED) {
 		return OSAL_ERR_INVALID_PARAM;
+	}
 
 	attr->detach_state = detachstate;
 	return OSAL_SUCCESS;
@@ -307,8 +330,9 @@ EXPORT_SYMBOL_GPL(osal_thread_attr_set_detach_state);
 int32_t osal_thread_attr_get_detach_state(const osal_thread_attr_t *attr,
 					  int32_t *detachstate)
 {
-	if (!attr || !detachstate)
+	if (!attr || !detachstate) {
 		return OSAL_ERR_INVALID_POINTER;
+	}
 
 	*detachstate = attr->detach_state;
 	return OSAL_SUCCESS;
@@ -318,8 +342,9 @@ EXPORT_SYMBOL_GPL(osal_thread_attr_get_detach_state);
 int32_t osal_thread_attr_set_sched_policy(osal_thread_attr_t *attr,
 					  int32_t policy)
 {
-	if (!attr)
+	if (!attr) {
 		return OSAL_ERR_INVALID_POINTER;
+	}
 
 	attr->sched_policy = policy;
 	return OSAL_SUCCESS;
@@ -329,8 +354,9 @@ EXPORT_SYMBOL_GPL(osal_thread_attr_set_sched_policy);
 int32_t osal_thread_attr_set_sched_param(osal_thread_attr_t *attr,
 					 const osal_sched_param_t *param)
 {
-	if (!attr || !param)
+	if (!attr || !param) {
 		return OSAL_ERR_INVALID_POINTER;
+	}
 
 	attr->sched_priority = param->sched_priority;
 	return OSAL_SUCCESS;
@@ -339,8 +365,9 @@ EXPORT_SYMBOL_GPL(osal_thread_attr_set_sched_param);
 
 int32_t osal_thread_attr_set_name(osal_thread_attr_t *attr, const char *name)
 {
-	if (!attr || !name)
+	if (!attr || !name) {
 		return OSAL_ERR_INVALID_POINTER;
+	}
 
 	strscpy(attr->name, name, sizeof(attr->name));
 	return OSAL_SUCCESS;

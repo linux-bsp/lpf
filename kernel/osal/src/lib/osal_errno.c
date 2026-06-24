@@ -6,8 +6,9 @@
 
 const char *osal_get_status_name(int32_t status_code)
 {
-	if (status_code < 0)
+	if (status_code < 0) {
 		status_code = -status_code;
+	}
 
 	switch (status_code) {
 	case OSAL_SUCCESS:

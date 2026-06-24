@@ -65,10 +65,12 @@ static int pdm_of_bus_child_id(struct device_node *child)
 {
 	u32 reg;
 
-	if (!of_property_read_u32(child, "pdm,id", &reg))
+	if (!of_property_read_u32(child, "pdm,id", &reg)) {
 		return (int)reg;
-	if (of_property_read_u32(child, "reg", &reg) == 0)
+	}
+	if (of_property_read_u32(child, "reg", &reg) == 0) {
 		return (int)reg;
+	}
 
 	return -1;
 }
@@ -83,8 +85,9 @@ static int pdm_of_bus_probe(struct platform_device *pdev)
 	LOG_INFO("Probing PDM OF bus enumerator");
 
 	ctrl = devm_kzalloc(&pdev->dev, sizeof(*ctrl), GFP_KERNEL);
-	if (!ctrl)
+	if (!ctrl) {
 		return -ENOMEM;
+	}
 
 	ctrl->pdev = pdev;
 	INIT_LIST_HEAD(&ctrl->devices);
@@ -124,11 +127,13 @@ static int pdm_of_bus_probe(struct platform_device *pdev)
 		pdm_device_set_requested_id(pdm_dev, device_id);
 
 		if (device_id >= 0)
+		{
 			snprintf(name, sizeof(name), "%s.%s.%d",
 				 dev_name(&pdev->dev), child->name, device_id);
-		else
+		} else {
 			snprintf(name, sizeof(name), "%s.%s.auto%d",
 				 dev_name(&pdev->dev), child->name, auto_name_id++);
+		}
 
 		ret = pdm_device_register(pdm_dev, name);
 		if (ret) {
@@ -159,8 +164,9 @@ static void pdm_of_bus_remove(struct platform_device *pdev)
 {
 	struct pdm_of_bus *ctrl = platform_get_drvdata(pdev);
 
-	if (!ctrl)
+	if (!ctrl) {
 		return;
+	}
 
 	LOG_INFO("Removing PDM OF bus enumerator");
 	pdm_of_bus_unregister_devices(ctrl);

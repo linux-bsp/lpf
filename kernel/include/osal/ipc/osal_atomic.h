@@ -66,12 +66,14 @@ osal_atomic_compare_exchange_strong(osal_atomic_uint32_t *atomic,
 {
 	int exp;
 
-	if (!expected)
+	if (!expected) {
 		return false;
+	}
 
 	exp = (int)*expected;
-	if (atomic_cmpxchg(&atomic->value, exp, (int)desired) == exp)
+	if (atomic_cmpxchg(&atomic->value, exp, (int)desired) == exp) {
 		return true;
+	}
 
 	*expected = (uint32_t)atomic_read(&atomic->value);
 	return false;
@@ -122,12 +124,14 @@ osal_atomic_compare_exchange_strong_u64(osal_atomic_uint64_t *atomic,
 {
 	s64 exp;
 
-	if (!expected)
+	if (!expected) {
 		return false;
+	}
 
 	exp = (s64)*expected;
-	if (atomic64_cmpxchg(&atomic->value, exp, (s64)desired) == exp)
+	if (atomic64_cmpxchg(&atomic->value, exp, (s64)desired) == exp) {
 		return true;
+	}
 
 	*expected = (uint64_t)atomic64_read(&atomic->value);
 	return false;
@@ -156,8 +160,9 @@ osal_atomic_compare_exchange_strong_bool(osal_atomic_bool_t *atomic,
 	uint32_t exp;
 	bool ret;
 
-	if (!expected)
+	if (!expected) {
 		return false;
+	}
 
 	exp = *expected ? 1U : 0U;
 	ret = osal_atomic_compare_exchange_strong(

@@ -16,9 +16,13 @@
  * 辅助函数 - 检查字符串是否全为数字
  ******************************************************************************/
 static int is_numeric(const char *str) {
-    if (!str || !*str) return 0;
+    if (!str || !*str) {
+        return 0;
+    }
     while (*str) {
-        if (!isdigit(*str)) return 0;
+        if (!isdigit(*str)) {
+            return 0;
+        }
         str++;
     }
     return 1;
@@ -34,7 +38,9 @@ static int read_process_status(pid_t pid, process_mem_info_t *proc) {
 
     snprintf(path, sizeof(path), "/proc/%d/status", pid);
     fp = fopen(path, "r");
-    if (!fp) return -1;
+    if (!fp) {
+        return -1;
+    }
 
     proc->pid = pid;
     proc->vm_rss = 0;
@@ -73,7 +79,9 @@ int collect_processes_memory(processes_mem_info_t *processes) {
     DIR *dir;
     struct dirent *entry;
 
-    if (!processes) return -1;
+    if (!processes) {
+        return -1;
+    }
     memset(processes, 0, sizeof(processes_mem_info_t));
 
     dir = opendir("/proc");
@@ -84,7 +92,9 @@ int collect_processes_memory(processes_mem_info_t *processes) {
 
     while ((entry = readdir(dir)) != NULL && processes->count < MAX_PROCESSES) {
         /* 只处理数字命名的目录 (进程ID) */
-        if (!is_numeric(entry->d_name)) continue;
+        if (!is_numeric(entry->d_name)) {
+            continue;
+        }
 
         pid_t pid = atoi(entry->d_name);
         process_mem_info_t *proc = &processes->processes[processes->count];
@@ -111,7 +121,9 @@ static int read_thread_status(pid_t pid, pid_t tid, thread_mem_info_t *thread,
 
     snprintf(path, sizeof(path), "/proc/%d/task/%d/status", pid, tid);
     fp = fopen(path, "r");
-    if (!fp) return -1;
+    if (!fp) {
+        return -1;
+    }
 
     thread->pid = pid;
     thread->tid = tid;
@@ -139,7 +151,9 @@ int collect_threads_memory(threads_mem_info_t *threads, int top_n) {
     char task_path[256];
     char proc_name[MAX_NAME_LEN];
 
-    if (!threads) return -1;
+    if (!threads) {
+        return -1;
+    }
     memset(threads, 0, sizeof(threads_mem_info_t));
 
     proc_dir = opendir("/proc");
@@ -150,7 +164,9 @@ int collect_threads_memory(threads_mem_info_t *threads, int top_n) {
 
     /* 遍历所有进程 */
     while ((proc_entry = readdir(proc_dir)) != NULL) {
-        if (!is_numeric(proc_entry->d_name)) continue;
+        if (!is_numeric(proc_entry->d_name)) {
+            continue;
+        }
 
         pid_t pid = atoi(proc_entry->d_name);
 
@@ -173,12 +189,16 @@ int collect_threads_memory(threads_mem_info_t *threads, int top_n) {
         /* 打开task目录 */
         snprintf(task_path, sizeof(task_path), "/proc/%d/task", pid);
         task_dir = opendir(task_path);
-        if (!task_dir) continue;
+        if (!task_dir) {
+            continue;
+        }
 
         /* 遍历所有线程 */
         while ((task_entry = readdir(task_dir)) != NULL &&
                threads->count < MAX_THREADS) {
-            if (!is_numeric(task_entry->d_name)) continue;
+            if (!is_numeric(task_entry->d_name)) {
+                continue;
+            }
 
             pid_t tid = atoi(task_entry->d_name);
             thread_mem_info_t *thread = &threads->threads[threads->count];
@@ -212,7 +232,9 @@ static int compare_process_rss(const void *a, const void *b) {
 }
 
 void sort_processes_by_rss(processes_mem_info_t *processes) {
-    if (!processes || processes->count == 0) return;
+    if (!processes || processes->count == 0) {
+        return;
+    }
     qsort(processes->processes, processes->count,
           sizeof(process_mem_info_t), compare_process_rss);
 }
@@ -227,7 +249,9 @@ static int compare_thread_rss(const void *a, const void *b) {
 }
 
 void sort_threads_by_rss(threads_mem_info_t *threads) {
-    if (!threads || threads->count == 0) return;
+    if (!threads || threads->count == 0) {
+        return;
+    }
     qsort(threads->threads, threads->count,
           sizeof(thread_mem_info_t), compare_thread_rss);
 }

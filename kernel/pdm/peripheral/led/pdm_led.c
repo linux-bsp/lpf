@@ -110,10 +110,12 @@ static bool pdm_led_is_generic_compatible(const char *compatible)
 
 static bool pdm_led_match(const struct pdm_device *pdm_dev)
 {
-	if (!pdm_dev)
+	if (!pdm_dev) {
 		return false;
-	if (pdm_led_is_generic_compatible(pdm_dev->compatible))
+	}
+	if (pdm_led_is_generic_compatible(pdm_dev->compatible)) {
 		return true;
+	}
 
 	return pdm_backend_find(PDM_CTL_DEVICE_TYPE_LED,
 				PDM_BACKEND_CLASS_CONTROL,
@@ -130,26 +132,30 @@ static int pdm_led_read_dt_config(struct pdm_led_instance *inst)
 	inst->brightness = 0;
 	inst->enabled = 0;
 
-	if (!np)
+	if (!np) {
 		return 0;
+	}
 
 	if (!of_property_read_u32(np, "max-brightness", &value)) {
-		if (!value)
+		if (!value) {
 			return -EINVAL;
+		}
 		inst->max_brightness = value;
 	}
 
 	if (!of_property_read_u32(np, "default-brightness", &value)) {
-		if (value > inst->max_brightness)
+		if (value > inst->max_brightness) {
 			return -ERANGE;
+		}
 		inst->brightness = value;
 	}
 
 	if (!of_property_read_string(np, "default-state", &default_state)) {
 		if (!strcmp(default_state, "on")) {
 			inst->enabled = 1;
-			if (!inst->brightness)
+			if (!inst->brightness) {
 				inst->brightness = inst->max_brightness;
+			}
 		} else if (!strcmp(default_state, "off")) {
 			inst->enabled = 0;
 		} else if (!strcmp(default_state, "keep")) {
@@ -175,8 +181,9 @@ static long pdm_led_get_info(struct pdm_client *client, unsigned long arg)
 		.max_devices = (u32)atomic_read(&pdm_led_device_count),
 	};
 
-	if (copy_to_user((void __user *)arg, &info, sizeof(info)))
+	if (copy_to_user((void __user *)arg, &info, sizeof(info))) {
 		return -EFAULT;
+	}
 	return 0;
 }
 
@@ -185,8 +192,9 @@ static long pdm_led_get_state(struct pdm_led_instance *inst, unsigned long arg)
 	struct pdm_led_state state;
 	int ret = 0;
 
-	if (copy_from_user(&state, (void __user *)arg, sizeof(state)))
+	if (copy_from_user(&state, (void __user *)arg, sizeof(state))) {
 		return -EFAULT;
+	}
 
 	mutex_lock(&inst->lock);
 	if (!inst->online) {
@@ -200,18 +208,21 @@ static long pdm_led_get_state(struct pdm_led_instance *inst, unsigned long arg)
 
 out_unlock:
 	mutex_unlock(&inst->lock);
-	if (ret)
+	if (ret) {
 		return ret;
+	}
 
-	if (copy_to_user((void __user *)arg, &state, sizeof(state)))
+	if (copy_to_user((void __user *)arg, &state, sizeof(state))) {
 		return -EFAULT;
+	}
 	return 0;
 }
 
 static int pdm_led_apply_locked(struct pdm_led_instance *inst)
 {
-	if (!inst->ops || !inst->ops->apply)
+	if (!inst->ops || !inst->ops->apply) {
 		return -EOPNOTSUPP;
+	}
 
 	return inst->ops->apply(inst);
 }
@@ -224,10 +235,12 @@ static long pdm_led_set_brightness(struct pdm_led_instance *inst,
 	u32 old_enabled;
 	int ret;
 
-	if (copy_from_user(&brightness, (void __user *)arg, sizeof(brightness)))
+	if (copy_from_user(&brightness, (void __user *)arg, sizeof(brightness))) {
 		return -EFAULT;
-	if (brightness.brightness > inst->max_brightness)
+	}
+	if (brightness.brightness > inst->max_brightness) {
 		return -ERANGE;
+	}
 
 	mutex_lock(&inst->lock);
 	if (!inst->online) {
@@ -238,8 +251,9 @@ static long pdm_led_set_brightness(struct pdm_led_instance *inst,
 	old_brightness = inst->brightness;
 	old_enabled = inst->enabled;
 	inst->brightness = brightness.brightness;
-	if (brightness.brightness)
+	if (brightness.brightness) {
 		inst->enabled = 1;
+	}
 
 	ret = pdm_led_apply_locked(inst);
 	if (ret) {
@@ -259,8 +273,9 @@ static long pdm_led_set_enabled(struct pdm_led_instance *inst,
 	u32 old_enabled;
 	int ret;
 
-	if (copy_from_user(&index, (void __user *)arg, sizeof(index)))
+	if (copy_from_user(&index, (void __user *)arg, sizeof(index))) {
 		return -EFAULT;
+	}
 
 	mutex_lock(&inst->lock);
 	if (!inst->online) {
@@ -271,8 +286,9 @@ static long pdm_led_set_enabled(struct pdm_led_instance *inst,
 	old_enabled = inst->enabled;
 	inst->enabled = enabled ? 1U : 0U;
 	ret = pdm_led_apply_locked(inst);
-	if (ret)
+	if (ret) {
 		inst->enabled = old_enabled;
+	}
 
 out_unlock:
 	mutex_unlock(&inst->lock);
@@ -284,8 +300,9 @@ static long pdm_led_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
 	struct pdm_client *client = pdm_client_from_file(filp);
 	struct pdm_led_instance *inst;
 
-	if (!client)
+	if (!client) {
 		return -ENODEV;
+	}
 	inst = container_of(client, struct pdm_led_instance, client);
 
 	switch (cmd) {
@@ -308,8 +325,9 @@ static void pdm_led_client_release(struct pdm_client *client)
 {
 	struct pdm_led_instance *inst;
 
-	if (!client)
+	if (!client) {
 		return;
+	}
 
 	inst = container_of(client, struct pdm_led_instance, client);
 	kfree(inst);
@@ -322,8 +340,9 @@ static int pdm_led_probe(struct pdm_device *pdm_dev)
 	int ret;
 
 	inst = kzalloc(sizeof(*inst), GFP_KERNEL);
-	if (!inst)
+	if (!inst) {
 		return -ENOMEM;
+	}
 
 	inst->pdm_dev = pdm_dev;
 	inst->ops = pdm_led_backend_select(pdm_dev->compatible);
@@ -331,22 +350,26 @@ static int pdm_led_probe(struct pdm_device *pdm_dev)
 	inst->online = true;
 
 	ret = pdm_led_read_dt_config(inst);
-	if (ret)
+	if (ret) {
 		goto err_free;
+	}
 
 	ret = inst->ops->setup(inst);
-	if (ret)
+	if (ret) {
 		goto err_free;
+	}
 
 	ret = pdm_led_apply_locked(inst);
-	if (ret)
+	if (ret) {
 		goto err_cleanup_backend;
+	}
 
 	snprintf(nodename, sizeof(nodename), "led%d", pdm_dev->id);
 	ret = pdm_client_register(&inst->client, pdm_dev, "pdm-led",
 				  nodename, &pdm_led_fops, pdm_led_client_release);
-	if (ret)
+	if (ret) {
 		goto err_cleanup_backend;
+	}
 
 	pdm_dev->capabilities |= inst->ops->capability;
 	pdm_device_set_drvdata(pdm_dev, inst);
@@ -366,16 +389,18 @@ static void pdm_led_remove(struct pdm_device *pdm_dev)
 {
 	struct pdm_led_instance *inst = pdm_device_get_drvdata(pdm_dev);
 
-	if (!inst)
+	if (!inst) {
 		return;
+	}
 
 	atomic_dec_if_positive(&pdm_led_device_count);
 	pdm_device_set_drvdata(pdm_dev, NULL);
 
 	mutex_lock(&inst->lock);
 	inst->online = false;
-	if (inst->ops && inst->ops->cleanup)
+	if (inst->ops && inst->ops->cleanup) {
 		inst->ops->cleanup(inst);
+	}
 	mutex_unlock(&inst->lock);
 
 	pdm_client_unregister(&inst->client);
@@ -385,13 +410,15 @@ const struct pdm_led_backend_ops *pdm_led_backend_select(const char *compatible)
 {
 	const struct pdm_backend_entry *entry;
 
-	if (pdm_led_is_generic_compatible(compatible))
+	if (pdm_led_is_generic_compatible(compatible)) {
 		return &pdm_led_memory_ops;
+	}
 
 	entry = pdm_backend_find(PDM_CTL_DEVICE_TYPE_LED,
 				 PDM_BACKEND_CLASS_CONTROL, compatible);
-	if (entry)
+	if (entry) {
 		return entry->ops;
+	}
 
 	return &pdm_led_memory_ops;
 }

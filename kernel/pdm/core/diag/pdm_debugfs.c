@@ -50,18 +50,22 @@ static ssize_t pdm_debugfs_write(struct file *file,
 	int32_t status;
 	int ret;
 
-	if (!entry || !entry->write)
+	if (!entry || !entry->write) {
 		return -EOPNOTSUPP;
+	}
 
-	if (count == 0)
+	if (count == 0) {
 		return 0;
+	}
 
-	if (count > PDM_DEBUGFS_WRITE_MAX_SIZE)
+	if (count > PDM_DEBUGFS_WRITE_MAX_SIZE) {
 		return -E2BIG;
+	}
 
 	command = osal_malloc(count + 1);
-	if (!command)
+	if (!command) {
 		return -ENOMEM;
+	}
 
 	status = osal_copy_from_user(command, buffer, count);
 	if (status != OSAL_SUCCESS) {
@@ -72,11 +76,13 @@ static ssize_t pdm_debugfs_write(struct file *file,
 
 	ret = entry->write(command, count, entry->data);
 	osal_free(command);
-	if (ret)
+	if (ret) {
 		return ret;
+	}
 
-	if (ppos)
+	if (ppos) {
 		*ppos += count;
+	}
 
 	return count;
 }
@@ -85,12 +91,14 @@ static int pdm_debugfs_lock_init(void)
 {
 	int ret;
 
-	if (g_lpf_debugfs_lock_ready)
+	if (g_lpf_debugfs_lock_ready) {
 		return 0;
+	}
 
 	ret = osal_mutex_init(&g_lpf_debugfs_lock, NULL);
-	if (ret != OSAL_SUCCESS)
+	if (ret != OSAL_SUCCESS) {
 		return -ret;
+	}
 
 	g_lpf_debugfs_lock_ready = true;
 	return 0;
@@ -101,8 +109,9 @@ static pdm_debugfs_root_t *pdm_debugfs_find_root_locked(const char *root_name)
 	pdm_debugfs_root_t *root;
 
 	list_for_each_entry(root, &g_lpf_debugfs_roots, node) {
-		if (0 == osal_strcmp(root->name, root_name))
+		if (0 == osal_strcmp(root->name, root_name)) {
 			return root;
+		}
 	}
 
 	return NULL;
@@ -114,12 +123,14 @@ static int pdm_debugfs_root_get(const char *root_name,
 	pdm_debugfs_root_t *root;
 	int ret;
 
-	if (!root_name || !root_out || root_name[0] == '\0')
+	if (!root_name || !root_out || root_name[0] == '\0') {
 		return -EINVAL;
+	}
 
 	ret = pdm_debugfs_lock_init();
-	if (ret)
+	if (ret) {
 		return ret;
+	}
 
 	osal_mutex_lock(&g_lpf_debugfs_lock);
 	root = pdm_debugfs_find_root_locked(root_name);
@@ -163,8 +174,9 @@ static void pdm_debugfs_root_put(const char *root_name)
 {
 	pdm_debugfs_root_t *root;
 
-	if (!root_name || !g_lpf_debugfs_lock_ready)
+	if (!root_name || !g_lpf_debugfs_lock_ready) {
 		return;
+	}
 
 	osal_mutex_lock(&g_lpf_debugfs_lock);
 	root = pdm_debugfs_find_root_locked(root_name);
@@ -173,8 +185,9 @@ static void pdm_debugfs_root_put(const char *root_name)
 		return;
 	}
 
-	if (root->users > 0)
+	if (root->users > 0) {
 		root->users--;
+	}
 	if (root->users == 0 && root->root) {
 		debugfs_remove_recursive(root->root);
 		root->root = NULL;
@@ -189,16 +202,19 @@ int pdm_debugfs_register(pdm_debugfs_entry_t *entry, const char *root_name,
 	pdm_debugfs_root_t *root = NULL;
 	int ret;
 
-	if (!entry || !root_name || !name || !write)
+	if (!entry || !root_name || !name || !write) {
 		return -EINVAL;
+	}
 
 	osal_memset(entry, 0, sizeof(*entry));
 
 	ret = pdm_debugfs_root_get(root_name, &root);
-	if (ret == -ENODEV)
+	if (ret == -ENODEV) {
 		return 0;
-	if (ret)
+	}
+	if (ret) {
 		return ret;
+	}
 
 	osal_strncpy(entry->root_name, root_name, sizeof(entry->root_name));
 	entry->root_name[sizeof(entry->root_name) - 1U] = '\0';
@@ -223,8 +239,9 @@ void pdm_debugfs_unregister(pdm_debugfs_entry_t *entry)
 {
 	char root_name[PDM_DEBUGFS_ROOT_NAME_LEN];
 
-	if (!entry || !entry->entry)
+	if (!entry || !entry->entry) {
 		return;
+	}
 
 	osal_strncpy(root_name, entry->root_name, sizeof(root_name));
 	root_name[sizeof(root_name) - 1U] = '\0';

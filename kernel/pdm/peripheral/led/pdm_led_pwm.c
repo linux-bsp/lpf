@@ -52,8 +52,9 @@ static void pdm_led_pwm_cleanup(struct pdm_led_instance *inst)
 {
 	struct pwm_state state;
 
-	if (!inst->hw.pwmdev)
+	if (!inst->hw.pwmdev) {
 		return;
+	}
 
 	pwm_get_state(inst->hw.pwmdev, &state);
 	state.enabled = false;
@@ -68,12 +69,14 @@ static int pdm_led_pwm_apply(struct pdm_led_instance *inst)
 	struct pwm_state state;
 	int ret;
 
-	if (!inst->hw.pwmdev)
+	if (!inst->hw.pwmdev) {
 		return -ENODEV;
+	}
 
 	pwm_init_state(inst->hw.pwmdev, &state);
-	if (!state.period)
+	if (!state.period) {
 		return -EINVAL;
+	}
 
 	if (!inst->enabled || !inst->brightness) {
 		state.enabled = false;
@@ -84,8 +87,9 @@ static int pdm_led_pwm_apply(struct pdm_led_instance *inst)
 	state.enabled = true;
 	ret = pwm_set_relative_duty_cycle(&state, inst->brightness,
 					    inst->max_brightness);
-	if (ret)
+	if (ret) {
 		return ret;
+	}
 
 	return pwm_apply_might_sleep(inst->hw.pwmdev, &state);
 }

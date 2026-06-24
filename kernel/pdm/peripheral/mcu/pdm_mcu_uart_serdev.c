@@ -55,14 +55,16 @@ static size_t pdm_mcu_serdev_receive_buf(struct serdev_device *serdev,
 	struct pdm_mcu_instance *inst;
 	size_t copied;
 
-	if (!bus_dev || !bus_dev->inst)
+	if (!bus_dev || !bus_dev->inst) {
 		return 0;
+	}
 
 	inst = bus_dev->inst;
 	copied = kfifo_in_spinlocked(&inst->transport.uart.rx_fifo, data, count,
 				       &inst->transport.uart.rx_lock);
-	if (copied)
+	if (copied) {
 		wake_up_interruptible(&inst->transport.uart.rx_wait);
+	}
 	return copied;
 }
 
@@ -70,13 +72,16 @@ static bool pdm_mcu_uart_hw_flow_control(struct device_node *np)
 {
 	const char *flow;
 
-	if (!np)
+	if (!np) {
 		return false;
-	if (of_property_read_bool(np, "uart-has-rtscts"))
+	}
+	if (of_property_read_bool(np, "uart-has-rtscts")) {
 		return true;
+	}
 	if (!of_property_read_string(np, "flow-control", &flow) &&
-	    !strcmp(flow, "hw"))
+	    !strcmp(flow, "hw")) {
 		return true;
+	}
 	return false;
 }
 
@@ -85,8 +90,9 @@ static int pdm_mcu_serdev_probe(struct serdev_device *serdev)
 	struct pdm_mcu_bus_device *bus_dev;
 
 	bus_dev = devm_kzalloc(&serdev->dev, sizeof(*bus_dev), GFP_KERNEL);
-	if (!bus_dev)
+	if (!bus_dev) {
 		return -ENOMEM;
+	}
 
 	bus_dev->bus.serdev = serdev;
 	serdev_device_set_drvdata(serdev, bus_dev);
@@ -109,8 +115,9 @@ int pdm_mcu_uart_write_bus(struct pdm_mcu_instance *inst,
 	unsigned long deadline;
 	size_t done = 0;
 
-	if (!serdev)
+	if (!serdev) {
 		return -ENODEV;
+	}
 
 	deadline = pdm_mcu_uart_serdev_deadline(
 		inst->transport.uart.rx_timeout_ms);
@@ -125,10 +132,12 @@ int pdm_mcu_uart_write_bus(struct pdm_mcu_instance *inst,
 					inst->transport.uart.rx_timeout_ms));
 			continue;
 		}
-		if (ret && ret != -EAGAIN)
+		if (ret && ret != -EAGAIN) {
 			return ret;
-		if (time_after(jiffies, deadline))
+		}
+		if (time_after(jiffies, deadline)) {
 			return done ? (int)done : -ETIMEDOUT;
+		}
 		msleep(1);
 	}
 
@@ -141,10 +150,12 @@ int pdm_mcu_uart_read_bus(struct pdm_mcu_instance *inst, u8 *buf,
 	unsigned long deadline;
 	size_t done = 0;
 
-	if (!inst->transport.uart.serdev)
+	if (!inst->transport.uart.serdev) {
 		return -ENODEV;
-	if (!len)
+	}
+	if (!len) {
 		return 0;
+	}
 
 	deadline = pdm_mcu_uart_serdev_deadline(
 		inst->transport.uart.rx_timeout_ms);
@@ -161,20 +172,24 @@ int pdm_mcu_uart_read_bus(struct pdm_mcu_instance *inst, u8 *buf,
 			continue;
 		}
 
-		if (time_after_eq(jiffies, deadline))
+		if (time_after_eq(jiffies, deadline)) {
 			return done ? (int)done : -ETIMEDOUT;
+		}
 
 		wait_left = deadline - jiffies;
-		if (wait_left <= 0)
+		if (wait_left <= 0) {
 			wait_left = 1;
+		}
 		ret = wait_event_interruptible_timeout(inst->transport.uart.rx_wait,
 			!kfifo_is_empty(&inst->transport.uart.rx_fifo) ||
 			!inst->online,
 			wait_left);
-		if (ret < 0)
+		if (ret < 0) {
 			return ret;
-		if (!ret && time_after_eq(jiffies, deadline))
+		}
+		if (!ret && time_after_eq(jiffies, deadline)) {
 			return done ? (int)done : -ETIMEDOUT;
+		}
 	}
 
 	return (int)done;
@@ -189,12 +204,14 @@ int pdm_mcu_uart_setup_bus(struct pdm_mcu_instance *inst)
 	int ret;
 
 	if (!bus_dev || bus_dev->type != PDM_MCU_BACKEND_UART ||
-	    !bus_dev->bus.serdev)
+	    !bus_dev->bus.serdev) {
 		return -ENODEV;
+	}
 
 	serdev = bus_dev->bus.serdev;
-	if (!serdev)
+	if (!serdev) {
 		return -ENODEV;
+	}
 
 	inst->transport.uart.serdev = serdev;
 	inst->transport.uart.bus_dev = bus_dev;
@@ -205,11 +222,14 @@ int pdm_mcu_uart_setup_bus(struct pdm_mcu_instance *inst)
 	init_waitqueue_head(&inst->transport.uart.rx_wait);
 
 	if (np) {
-		if (!of_property_read_u32(np, "rx-timeout-ms", &value))
+		if (!of_property_read_u32(np, "rx-timeout-ms", &value)) {
 			inst->transport.uart.rx_timeout_ms = value;
+		}
 		if (!of_property_read_u32(np, "current-speed", &value) ||
 		    !of_property_read_u32(np, "baudrate", &value))
+		{
 			inst->transport.uart.baudrate = value;
+		}
 	}
 
 	bus_dev->inst = inst;
@@ -223,8 +243,9 @@ int pdm_mcu_uart_setup_bus(struct pdm_mcu_instance *inst)
 
 	value = serdev_device_set_baudrate(serdev,
 					 inst->transport.uart.baudrate);
-	if (value)
+	if (value) {
 		inst->transport.uart.baudrate = value;
+	}
 	serdev_device_set_flow_control(serdev,
 				       pdm_mcu_uart_hw_flow_control(np));
 
@@ -238,11 +259,13 @@ void pdm_mcu_uart_cleanup_bus(struct pdm_mcu_instance *inst)
 	struct serdev_device *serdev = inst->transport.uart.serdev;
 	struct pdm_mcu_bus_device *bus_dev = inst->transport.uart.bus_dev;
 
-	if (!serdev)
+	if (!serdev) {
 		return;
+	}
 
-	if (bus_dev)
+	if (bus_dev) {
 		bus_dev->inst = NULL;
+	}
 	wake_up_interruptible(&inst->transport.uart.rx_wait);
 	serdev_device_close(serdev);
 	serdev_device_set_client_ops(serdev, NULL);

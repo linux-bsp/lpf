@@ -25,7 +25,9 @@ int collect_system_memory(system_mem_info_t *info) {
     char key[64];
     mem_size_t value;
 
-    if (!info) return -1;
+    if (!info) {
+        return -1;
+    }
     memset(info, 0, sizeof(system_mem_info_t));
 
     fp = fopen(PROC_MEMINFO, "r");
@@ -70,7 +72,9 @@ int collect_system_memory(system_mem_info_t *info) {
  * 采集内核内存信息
  ******************************************************************************/
 int collect_kernel_memory(kernel_mem_info_t *kernel, const system_mem_info_t *sys) {
-    if (!kernel || !sys) return -1;
+    if (!kernel || !sys) {
+        return -1;
+    }
 
     kernel->slab = sys->slab;
     kernel->kernel_stack = sys->kernel_stack;
@@ -90,7 +94,9 @@ int collect_reserved_memory(reserved_mem_info_t *reserved) {
     struct dirent *entry;
     const char *dt_path = "/proc/device-tree/reserved-memory";
 
-    if (!reserved) return -1;
+    if (!reserved) {
+        return -1;
+    }
     memset(reserved, 0, sizeof(reserved_mem_info_t));
 
     /* 先尝试从设备树读取 */
@@ -162,7 +168,9 @@ int collect_reserved_memory(reserved_mem_info_t *reserved) {
 
                         /* 去掉@后的地址 */
                         char *at = strchr(region->name, '@');
-                        if (at) *at = '\0';
+                        if (at) {
+                            *at = '\0';
+                        }
 
                         reserved->count++;
                     }
@@ -183,7 +191,9 @@ int collect_reserved_memory(reserved_mem_info_t *reserved) {
         char line[512];
         while (fgets(line, sizeof(line), fp) && reserved->count < MAX_RESERVED_REGIONS) {
             char *colon = strchr(line, ':');
-            if (!colon) continue;
+            if (!colon) {
+                continue;
+            }
 
             /* 检查是否是Reserved */
             if (strstr(line, "Reserved")) {
@@ -196,9 +206,13 @@ int collect_reserved_memory(reserved_mem_info_t *reserved) {
                     region->size = (end - start + 1) / 1024;
 
                     char *name_start = colon + 1;
-                    while (*name_start == ' ') name_start++;
+                    while (*name_start == ' ') {
+                        name_start++;
+                    }
                     char *name_end = strchr(name_start, '\n');
-                    if (name_end) *name_end = '\0';
+                    if (name_end) {
+                        *name_end = '\0';
+                    }
 
                     snprintf(region->name, sizeof(region->name), "%s", name_start);
 
@@ -219,7 +233,9 @@ int collect_zones_info(zones_info_t *zones) {
     FILE *fp;
     char line[256];
 
-    if (!zones) return -1;
+    if (!zones) {
+        return -1;
+    }
     memset(zones, 0, sizeof(zones_info_t));
 
     fp = fopen(PROC_ZONEINFO, "r");
@@ -269,7 +285,9 @@ int collect_zones_info(zones_info_t *zones) {
  * 计算内存健康状态
  ******************************************************************************/
 void calculate_memory_health(memory_health_t *health, const system_mem_info_t *sys) {
-    if (!health || !sys || sys->total == 0) return;
+    if (!health || !sys || sys->total == 0) {
+        return;
+    }
 
     health->usage_percent = (int)((sys->used * 100) / sys->total);
     health->available_percent = (int)((sys->available * 100) / sys->total);
@@ -288,7 +306,9 @@ void calculate_memory_health(memory_health_t *health, const system_mem_info_t *s
  * 计算内存矩阵
  ******************************************************************************/
 void calculate_memory_matrix(memory_matrix_t *matrix, const memory_statistics_t *stats) {
-    if (!matrix || !stats) return;
+    if (!matrix || !stats) {
+        return;
+    }
 
     matrix->total = stats->system.total;
 

@@ -48,8 +48,9 @@ static const char *osal_log_basename(const char *path)
 {
 	const char *name;
 
-	if (!path)
+	if (!path) {
 		return "";
+	}
 
 	name = strrchr(path, '/');
 	return name ? name + 1 : path;
@@ -139,9 +140,10 @@ void osal_log_structured(int32_t level, const char *message,
 
 	osal_log(level, "message=%s", message ? message : "");
 	for (i = 0; i < kv_count; i++) {
-		if (kv_pairs[i].key)
+		if (kv_pairs[i].key) {
 			osal_log(level, "%s=%s", kv_pairs[i].key,
 				 kv_pairs[i].value ? kv_pairs[i].value : "");
+		}
 	}
 }
 EXPORT_SYMBOL_GPL(osal_log_structured);
@@ -161,10 +163,12 @@ EXPORT_SYMBOL_GPL(osal_printf);
 
 void osal_log_get_stats(uint64_t *total_count, uint64_t *dropped_count)
 {
-	if (total_count)
+	if (total_count) {
 		*total_count = (uint64_t)atomic64_read(&g_log_total);
-	if (dropped_count)
+	}
+	if (dropped_count) {
 		*dropped_count = (uint64_t)atomic64_read(&g_log_dropped);
+	}
 }
 EXPORT_SYMBOL_GPL(osal_log_get_stats);
 

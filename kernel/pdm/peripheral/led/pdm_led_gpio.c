@@ -38,8 +38,9 @@ static int pdm_led_gpio_setup(struct pdm_led_instance *inst)
 	struct gpio_desc *gpiod;
 
 	gpiod = gpiod_get(dev, "led", GPIOD_OUT_LOW);
-	if (PTR_ERR(gpiod) == -ENOENT)
+	if (PTR_ERR(gpiod) == -ENOENT) {
 		gpiod = gpiod_get(dev, NULL, GPIOD_OUT_LOW);
+	}
 	if (IS_ERR(gpiod)) {
 		LOG_ERROR("Failed to get GPIO for %s: %ld",
 			  dev_name(dev), PTR_ERR(gpiod));
@@ -52,8 +53,9 @@ static int pdm_led_gpio_setup(struct pdm_led_instance *inst)
 
 static void pdm_led_gpio_cleanup(struct pdm_led_instance *inst)
 {
-	if (!inst->hw.gpiod)
+	if (!inst->hw.gpiod) {
 		return;
+	}
 
 	gpiod_set_value_cansleep(inst->hw.gpiod, 0);
 	gpiod_put(inst->hw.gpiod);
@@ -64,8 +66,9 @@ static int pdm_led_gpio_apply(struct pdm_led_instance *inst)
 {
 	int value;
 
-	if (!inst->hw.gpiod)
+	if (!inst->hw.gpiod) {
 		return -ENODEV;
+	}
 
 	value = inst->enabled && inst->brightness ? 1 : 0;
 	gpiod_set_value_cansleep(inst->hw.gpiod, value);

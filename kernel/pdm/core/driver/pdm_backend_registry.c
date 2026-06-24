@@ -22,12 +22,14 @@ static bool pdm_backend_entry_matches(const struct pdm_backend_entry *entry,
 {
 	const struct of_device_id *match;
 
-	if (!entry || !compatible || !entry->matches)
+	if (!entry || !compatible || !entry->matches) {
 		return false;
+	}
 
 	for (match = entry->matches; match->compatible[0]; match++) {
-		if (!strcmp(match->compatible, compatible))
+		if (!strcmp(match->compatible, compatible)) {
 			return true;
+		}
 	}
 
 	return false;
@@ -39,8 +41,9 @@ static void pdm_backend_entries_exit_count(size_t count)
 
 	while (count) {
 		entry = __start_pdm_backend_entries + --count;
-		if (!entry->exit)
+		if (!entry->exit) {
 			continue;
+		}
 
 		LOG_DEBUG("Exiting backend [%s]",
 			  entry->name ? entry->name : "unknown");
@@ -103,9 +106,12 @@ const struct pdm_backend_entry *pdm_backend_find(u32 device_type,
 	     entry < __stop_pdm_backend_entries; entry++) {
 		if (entry->device_type != device_type ||
 		    entry->backend_class != backend_class)
+		{
 			continue;
-		if (pdm_backend_entry_matches(entry, compatible))
+		}
+		if (pdm_backend_entry_matches(entry, compatible)) {
 			return entry;
+		}
 	}
 
 	return NULL;

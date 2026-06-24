@@ -43,8 +43,9 @@ struct pdm_device *pdm_device_alloc(unsigned int size)
 	struct pdm_device *pdm_dev;
 
 	pdm_dev = kzalloc(sizeof(*pdm_dev) + size, GFP_KERNEL);
-	if (!pdm_dev)
+	if (!pdm_dev) {
 		return NULL;
+	}
 
 	device_initialize(&pdm_dev->dev);
 	pdm_dev->dev.bus = &pdm_bus_type;
@@ -62,8 +63,9 @@ int pdm_device_register(struct pdm_device *pdm_dev, const char *name)
 {
 	int ret;
 
-	if (!pdm_dev || !name)
+	if (!pdm_dev || !name) {
 		return -EINVAL;
+	}
 
 	ret = dev_set_name(&pdm_dev->dev, "%s", name);
 	if (ret) {
@@ -88,8 +90,9 @@ EXPORT_SYMBOL_GPL(pdm_device_register);
 
 void pdm_device_unregister(struct pdm_device *pdm_dev)
 {
-	if (!pdm_dev)
+	if (!pdm_dev) {
 		return;
+	}
 
 	LOG_DEBUG("Unregistering device [%s]",
 		  dev_name(&pdm_dev->dev));
@@ -99,12 +102,14 @@ EXPORT_SYMBOL_GPL(pdm_device_unregister);
 
 void pdm_device_set_requested_id(struct pdm_device *pdm_dev, int id)
 {
-	if (!pdm_dev)
+	if (!pdm_dev) {
 		return;
+	}
 
 	pdm_dev->requested_id = id;
-	if (!pdm_dev->id_allocated)
+	if (!pdm_dev->id_allocated) {
 		pdm_dev->id = id;
+	}
 }
 EXPORT_SYMBOL_GPL(pdm_device_set_requested_id);
 
@@ -113,27 +118,33 @@ int pdm_device_bind(struct pdm_device *pdm_dev, u32 type, u64 capabilities)
 	struct ida *ida;
 	int id;
 
-	if (!pdm_dev)
+	if (!pdm_dev) {
 		return -EINVAL;
+	}
 
 	ida = pdm_device_ida_for_type(type);
-	if (!ida)
+	if (!ida) {
 		return -EINVAL;
+	}
 
 	if (pdm_dev->id_allocated) {
-		if (pdm_dev->type != type)
+		if (pdm_dev->type != type) {
 			return -EBUSY;
+		}
 		pdm_dev->capabilities |= capabilities;
 		return 0;
 	}
 
-	if (pdm_dev->requested_id >= 0)
+	if (pdm_dev->requested_id >= 0) {
 		id = ida_alloc_range(ida, pdm_dev->requested_id, pdm_dev->requested_id,
 				     GFP_KERNEL);
-	else
+	}
+	else {
 		id = ida_alloc(ida, GFP_KERNEL);
-	if (id < 0)
+	}
+	if (id < 0) {
 		return id;
+	}
 
 	pdm_dev->id = id;
 	pdm_dev->id_allocated = true;
@@ -148,12 +159,14 @@ void pdm_device_unbind(struct pdm_device *pdm_dev)
 {
 	struct ida *ida;
 
-	if (!pdm_dev || !pdm_dev->id_allocated)
+	if (!pdm_dev || !pdm_dev->id_allocated) {
 		return;
+	}
 
 	ida = pdm_device_ida_for_type(pdm_dev->type);
-	if (ida)
+	if (ida) {
 		ida_free(ida, pdm_dev->id);
+	}
 
 	pdm_dev->id_allocated = false;
 	pdm_dev->id = pdm_dev->requested_id;

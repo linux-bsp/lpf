@@ -63,8 +63,9 @@ static inline void pdm_device_set_state(struct pdm_device *pdm_dev, u32 state)
 
 static inline void pdm_device_record_error(struct pdm_device *pdm_dev, int error)
 {
-	if (!pdm_dev || !error)
+	if (!pdm_dev || !error) {
 		return;
+	}
 
 	pdm_dev->last_error = error;
 	pdm_dev->error_count++;
@@ -73,16 +74,18 @@ static inline void pdm_device_record_error(struct pdm_device *pdm_dev, int error
 
 static inline struct pdm_device *pdm_device_get(struct pdm_device *pdm_dev)
 {
-	if (!pdm_dev || !get_device(&pdm_dev->dev))
+	if (!pdm_dev || !get_device(&pdm_dev->dev)) {
 		return NULL;
+	}
 
 	return pdm_dev;
 }
 
 static inline void pdm_device_put(struct pdm_device *pdm_dev)
 {
-	if (pdm_dev)
+	if (pdm_dev) {
 		put_device(&pdm_dev->dev);
+	}
 }
 
 struct pdm_device *pdm_device_alloc(unsigned int size);

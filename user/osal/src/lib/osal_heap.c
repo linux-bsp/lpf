@@ -49,8 +49,9 @@ static uint32_t _read_memory_from_proc(const char *field)
 	uint32_t value;
 
 	fp = fopen("/proc/self/status", "r");
-	if (NULL == fp)
+	if (NULL == fp) {
 		return 0;
+	}
 
 	value = 0;
 	while (NULL != fgets(line, OSAL_sizeof(line), fp)) {
@@ -68,8 +69,9 @@ int32_t osal_heap_get_info(uint32_t *free_bytes, uint32_t *total_bytes)
 	uint32_t vm_rss;
 	uint32_t vm_peak;
 
-	if (NULL == free_bytes || NULL == total_bytes)
+	if (NULL == free_bytes || NULL == total_bytes) {
 		return OSAL_ERR_INVALID_POINTER;
+	}
 
 	vm_rss = _read_memory_from_proc("VmRSS:");
 	vm_peak = _read_memory_from_proc("VmPeak:");
@@ -82,8 +84,9 @@ int32_t osal_heap_get_info(uint32_t *free_bytes, uint32_t *total_bytes)
 		vm_peak = g_heap_monitor.peak_usage;
 	} else {
 		g_heap_monitor.current_usage = vm_rss;
-		if (vm_rss > g_heap_monitor.peak_usage)
+		if (vm_rss > g_heap_monitor.peak_usage) {
 			g_heap_monitor.peak_usage = vm_rss;
+		}
 	}
 
 	pthread_mutex_unlock(&g_heap_monitor.lock);
@@ -96,8 +99,9 @@ int32_t osal_heap_get_info(uint32_t *free_bytes, uint32_t *total_bytes)
 
 int32_t osal_heap_set_threshold(uint32_t percent)
 {
-	if (percent > OSAL_HEAP_PERCENT_MAX)
+	if (percent > OSAL_HEAP_PERCENT_MAX) {
 		return OSAL_ERR_INVALID_SIZE;
+	}
 
 	pthread_mutex_lock(&g_heap_monitor.lock);
 	g_heap_monitor.threshold_percent = percent;
@@ -111,8 +115,9 @@ int32_t osal_heap_check_threshold(bool *exceeded)
 	uint32_t free_bytes, total_bytes;
 	uint32_t usage_percent;
 
-	if (NULL == exceeded)
+	if (NULL == exceeded) {
 		return OSAL_ERR_INVALID_POINTER;
+	}
 
 	osal_heap_get_info(&free_bytes, &total_bytes);
 
@@ -142,8 +147,9 @@ int32_t osal_heap_check_threshold(bool *exceeded)
 
 int32_t osal_heap_get_stats(uint32_t *current, uint32_t *peak)
 {
-	if (NULL == current || NULL == peak)
+	if (NULL == current || NULL == peak) {
 		return OSAL_ERR_INVALID_POINTER;
+	}
 
 	pthread_mutex_lock(&g_heap_monitor.lock);
 	*current = g_heap_monitor.current_usage;

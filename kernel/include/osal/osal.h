@@ -46,8 +46,9 @@ static inline int32_t osal_get_local_time(OS_time_t *time_struct)
 {
 	struct timespec64 ts;
 
-	if (!time_struct)
+	if (!time_struct) {
 		return OSAL_ERR_INVALID_POINTER;
+	}
 
 	ktime_get_real_ts64(&ts);
 	time_struct->seconds = (uint32_t)ts.tv_sec;

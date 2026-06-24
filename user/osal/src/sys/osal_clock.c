@@ -12,8 +12,9 @@ int32_t osal_get_local_time(OS_time_t *time_struct)
 {
 	struct timeval tv;
 
-	if (NULL == time_struct)
+	if (NULL == time_struct) {
 		return OSAL_ERR_INVALID_POINTER;
+	}
 
 	gettimeofday(&tv, NULL);
 	time_struct->seconds = tv.tv_sec;

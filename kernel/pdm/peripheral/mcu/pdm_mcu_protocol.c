@@ -27,18 +27,20 @@ static void pdm_mcu_protocol_encode_be32(u8 *buf, u32 value)
 
 static u32 pdm_mcu_protocol_max_tx(const struct pdm_mcu_instance *inst)
 {
-	if (inst->ops->max_tx_size)
+	if (inst->ops->max_tx_size) {
 		return min_t(u32, inst->ops->max_tx_size,
 			     PDM_MCU_MAX_TRANSFER_SIZE);
+	}
 
 	return PDM_MCU_MAX_TRANSFER_SIZE;
 }
 
 static u32 pdm_mcu_protocol_max_rx(const struct pdm_mcu_instance *inst)
 {
-	if (inst->ops->max_rx_size)
+	if (inst->ops->max_rx_size) {
 		return min_t(u32, inst->ops->max_rx_size,
 			     PDM_MCU_MAX_TRANSFER_SIZE);
+	}
 
 	return PDM_MCU_MAX_TRANSFER_SIZE;
 }
@@ -48,20 +50,25 @@ static int pdm_mcu_protocol_xfer(struct pdm_mcu_instance *inst,
 {
 	int ret;
 
-	if (!inst->ops->xfer)
+	if (!inst->ops->xfer) {
 		return -EOPNOTSUPP;
-	if ((xfer->tx_len && !xfer->tx) || (xfer->rx_len && !xfer->rx))
+	}
+	if ((xfer->tx_len && !xfer->tx) || (xfer->rx_len && !xfer->rx)) {
 		return -EINVAL;
+	}
 	if (xfer->tx_len > pdm_mcu_protocol_max_tx(inst) ||
-	    xfer->rx_len > pdm_mcu_protocol_max_rx(inst))
+	    xfer->rx_len > pdm_mcu_protocol_max_rx(inst)) {
 		return -EMSGSIZE;
+	}
 
 	xfer->actual_rx_len = 0;
 	ret = inst->ops->xfer(inst, xfer);
-	if (ret)
+	if (ret) {
 		return ret;
-	if (xfer->actual_rx_len > xfer->rx_len)
+	}
+	if (xfer->actual_rx_len > xfer->rx_len) {
 		return -EMSGSIZE;
+	}
 
 	return 0;
 }
@@ -82,10 +89,12 @@ static int pdm_mcu_protocol_cmd_xfer(struct pdm_mcu_instance *inst,
 	int ret;
 
 	ret = pdm_mcu_protocol_xfer(inst, &xfer);
-	if (ret)
+	if (ret) {
 		return ret;
-	if (response_len)
+	}
+	if (response_len) {
 		*response_len = xfer.actual_rx_len;
+	}
 	return 0;
 }
 
@@ -99,10 +108,12 @@ static int pdm_mcu_protocol_cmd_expect(struct pdm_mcu_instance *inst,
 
 	ret = pdm_mcu_protocol_cmd_xfer(inst, command, payload, payload_len,
 					 response, &rx_len);
-	if (ret)
+	if (ret) {
 		return ret;
-	if (rx_len < response_len)
+	}
+	if (rx_len < response_len) {
 		return -EIO;
+	}
 
 	return 0;
 }
@@ -151,14 +162,16 @@ int pdm_mcu_protocol_command(struct pdm_mcu_instance *inst,
 	int ret;
 
 	if (command->tx_len > PDM_MCU_MAX_TRANSFER_SIZE ||
-	    command->rx_len > PDM_MCU_MAX_TRANSFER_SIZE)
+	    command->rx_len > PDM_MCU_MAX_TRANSFER_SIZE) {
 		return -EMSGSIZE;
+	}
 
 	ret = pdm_mcu_protocol_cmd_xfer(inst, command->command,
 					 command->tx_data, command->tx_len,
 					 command->rx_data, &rx_len);
-	if (ret)
+	if (ret) {
 		return ret;
+	}
 
 	command->rx_len = rx_len;
 	return 0;
@@ -176,10 +189,12 @@ int pdm_mcu_protocol_read_data(struct pdm_mcu_instance *inst,
 	int ret;
 
 	ret = pdm_mcu_protocol_xfer(inst, &xfer);
-	if (ret)
+	if (ret) {
 		return ret;
-	if (xfer.actual_rx_len > PDM_MCU_MAX_TRANSFER_SIZE)
+	}
+	if (xfer.actual_rx_len > PDM_MCU_MAX_TRANSFER_SIZE) {
 		return -EMSGSIZE;
+	}
 
 	data->address = xfer.id;
 	data->len = xfer.actual_rx_len;

@@ -16,13 +16,16 @@ EXPORT_SYMBOL_GPL(osal_msleep);
 
 int32_t osal_usleep(uint32_t usec)
 {
-	if (usec == 0)
+	if (usec == 0) {
 		return OSAL_SUCCESS;
+	}
 
-	if (usec < 10)
+	if (usec < 10) {
 		udelay(usec);
-	else
+	}
+	else {
 		usleep_range(usec, usec + min(usec / 8U, 1000U));
+	}
 
 	return OSAL_SUCCESS;
 }
@@ -33,8 +36,9 @@ int32_t osal_sleep(uint32_t sec)
 	uint64_t msec;
 
 	msec = (uint64_t)sec * OSAL_MSEC_PER_SEC;
-	if (msec > U32_MAX)
+	if (msec > U32_MAX) {
 		return OSAL_ERR_INVALID_SIZE;
+	}
 
 	return osal_msleep((uint32_t)msec);
 }
@@ -45,8 +49,9 @@ int32_t osal_nanosleep(uint64_t nsec)
 	uint64_t usec;
 
 	usec = DIV_ROUND_UP_ULL(nsec, OSAL_NSEC_PER_USEC);
-	if (usec > U32_MAX)
+	if (usec > U32_MAX) {
 		return OSAL_ERR_INVALID_SIZE;
+	}
 
 	return osal_usleep((uint32_t)usec);
 }

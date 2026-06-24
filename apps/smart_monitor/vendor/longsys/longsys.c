@@ -10,12 +10,14 @@ static int contains_casefold(const char *haystack, const char *needle)
 {
 	size_t needle_len;
 
-	if (!haystack || !needle)
+	if (!haystack || !needle) {
 		return 0;
+	}
 
 	needle_len = strlen(needle);
-	if (needle_len == 0)
+	if (needle_len == 0) {
 		return 1;
+	}
 
 	for (; *haystack; haystack++) {
 		size_t i;
@@ -24,13 +26,16 @@ static int contains_casefold(const char *haystack, const char *needle)
 			unsigned char h = (unsigned char)haystack[i];
 			unsigned char n = (unsigned char)needle[i];
 
-			if (!h)
+			if (!h) {
 				return 0;
-			if (tolower(h) != tolower(n))
+			}
+			if (tolower(h) != tolower(n)) {
 				break;
+			}
 		}
-		if (i == needle_len)
+		if (i == needle_len) {
 			return 1;
+		}
 	}
 
 	return 0;
@@ -38,8 +43,9 @@ static int contains_casefold(const char *haystack, const char *needle)
 
 static int longsys_match(const struct smart_device_info *info)
 {
-	if (!info)
+	if (!info) {
 		return 0;
+	}
 
 	return contains_casefold(info->sysfs_name, "longsys") ||
 	       contains_casefold(info->sysfs_name, "foresee") ||

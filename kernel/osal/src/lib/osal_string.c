@@ -144,8 +144,9 @@ int32_t osal_atoi(const char *nptr)
 {
 	long value = 0;
 
-	if (kstrtol(nptr, 0, &value))
+	if (kstrtol(nptr, 0, &value)) {
 		return 0;
+	}
 
 	return (int32_t)value;
 }
@@ -155,8 +156,9 @@ long osal_atol(const char *nptr)
 {
 	long value = 0;
 
-	if (kstrtol(nptr, 0, &value))
+	if (kstrtol(nptr, 0, &value)) {
 		return 0;
+	}
 
 	return value;
 }
@@ -166,14 +168,17 @@ long osal_strtol(const char *nptr, char **endptr, int32_t base)
 {
 	long value = 0;
 
-	if (endptr)
+	if (endptr) {
 		*endptr = (char *)nptr;
+	}
 
-	if (kstrtol(nptr, base, &value))
+	if (kstrtol(nptr, base, &value)) {
 		return 0;
+	}
 
-	if (endptr)
+	if (endptr) {
 		*endptr = (char *)nptr + strlen(nptr);
+	}
 
 	return value;
 }

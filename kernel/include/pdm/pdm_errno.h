@@ -9,39 +9,52 @@
 
 static inline long pdm_status_to_errno(int32_t status)
 {
-	if (status <= 0)
+	if (status <= 0) {
 		return status;
+	}
 
 	if (status == OSAL_ERR_INVALID_POINTER ||
-	    status == OSAL_ERR_BAD_ADDRESS)
+	    status == OSAL_ERR_BAD_ADDRESS) {
 		return -EFAULT;
+	}
 
 	if (status == OSAL_ERR_INVALID_PARAM ||
 	    status == OSAL_ERR_INVALID_SIZE ||
-	    status == OSAL_ERR_INVALID_ID)
+	    status == OSAL_ERR_INVALID_ID) {
 		return -EINVAL;
+	}
 
-	if (status == OSAL_ERR_NO_MEMORY)
+	if (status == OSAL_ERR_NO_MEMORY) {
 		return -ENOMEM;
-	if (status == OSAL_ENODEV)
+	}
+	if (status == OSAL_ENODEV) {
 		return -ENODEV;
-	if (status == OSAL_ENOENT)
+	}
+	if (status == OSAL_ENOENT) {
 		return -ENOENT;
-	if (status == OSAL_ERR_TIMEOUT)
+	}
+	if (status == OSAL_ERR_TIMEOUT) {
 		return -ETIMEDOUT;
-	if (status == OSAL_ERR_BUSY)
+	}
+	if (status == OSAL_ERR_BUSY) {
 		return -EBUSY;
-	if (status == OSAL_ERR_NOT_SUPPORTED)
+	}
+	if (status == OSAL_ERR_NOT_SUPPORTED) {
 		return -EOPNOTSUPP;
-	if (status == OSAL_ERR_NOT_IMPLEMENTED)
+	}
+	if (status == OSAL_ERR_NOT_IMPLEMENTED) {
 		return -ENOSYS;
+	}
 	if (status == OSAL_ERR_ALREADY_EXISTS ||
-	    status == OSAL_ERR_NAME_TAKEN)
+	    status == OSAL_ERR_NAME_TAKEN) {
 		return -EEXIST;
-	if (status == OSAL_ERR_RESOURCE_LIMIT)
+	}
+	if (status == OSAL_ERR_RESOURCE_LIMIT) {
 		return -EMFILE;
-	if (status == OSAL_ERR_INVALID_STATE)
+	}
+	if (status == OSAL_ERR_INVALID_STATE) {
 		return -EINVAL;
+	}
 
 	return -EIO;
 }

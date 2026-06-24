@@ -36,8 +36,9 @@ static int pdm_proc_open(struct inode *inode, struct file *file)
 {
 	pdm_proc_entry_t *entry = pde_data(inode);
 
-	if (!entry || !entry->show)
+	if (!entry || !entry->show) {
 		return -EINVAL;
+	}
 
 	return single_open(file, entry->show, entry->data);
 }
@@ -50,18 +51,22 @@ static ssize_t pdm_proc_write(struct file *file, const char __user *buffer,
 	int32_t status;
 	int ret;
 
-	if (!entry || !entry->write)
+	if (!entry || !entry->write) {
 		return -EOPNOTSUPP;
+	}
 
-	if (count == 0)
+	if (count == 0) {
 		return 0;
+	}
 
-	if (count > PDM_PROC_WRITE_MAX_SIZE)
+	if (count > PDM_PROC_WRITE_MAX_SIZE) {
 		return -E2BIG;
+	}
 
 	command = osal_malloc(count + 1);
-	if (!command)
+	if (!command) {
 		return -ENOMEM;
+	}
 
 	status = osal_copy_from_user(command, buffer, count);
 	if (status != OSAL_SUCCESS) {
@@ -72,11 +77,13 @@ static ssize_t pdm_proc_write(struct file *file, const char __user *buffer,
 
 	ret = entry->write(command, count, entry->data);
 	osal_free(command);
-	if (ret)
+	if (ret) {
 		return ret;
+	}
 
-	if (ppos)
+	if (ppos) {
 		*ppos += count;
+	}
 
 	return count;
 }
@@ -87,8 +94,9 @@ static int pdm_proc_root_init(void)
 
 	if (!g_lpf_proc_lock_ready) {
 		ret = osal_mutex_init(&g_lpf_proc_lock, NULL);
-		if (ret != OSAL_SUCCESS)
+		if (ret != OSAL_SUCCESS) {
 			return -ret;
+		}
 		g_lpf_proc_lock_ready = true;
 	}
 
@@ -108,12 +116,14 @@ static int pdm_proc_root_init(void)
 
 static void pdm_proc_root_deinit(void)
 {
-	if (!g_lpf_proc_lock_ready)
+	if (!g_lpf_proc_lock_ready) {
 		return;
+	}
 
 	osal_mutex_lock(&g_lpf_proc_lock);
-	if (g_lpf_proc_users > 0)
+	if (g_lpf_proc_users > 0) {
 		g_lpf_proc_users--;
+	}
 	if (g_lpf_proc_users == 0 && g_lpf_proc_root) {
 		proc_remove(g_lpf_proc_root);
 		g_lpf_proc_root = NULL;
@@ -128,12 +138,14 @@ int pdm_proc_register(pdm_proc_entry_t *entry, const char *name,
 	umode_t mode;
 	int ret;
 
-	if (!entry || !name || !show)
+	if (!entry || !name || !show) {
 		return -EINVAL;
+	}
 
 	ret = pdm_proc_root_init();
-	if (ret)
+	if (ret) {
 		return ret;
+	}
 
 	osal_memset(entry, 0, sizeof(*entry));
 	entry->name = name;
@@ -156,8 +168,9 @@ EXPORT_SYMBOL_GPL(pdm_proc_register);
 
 void pdm_proc_unregister(pdm_proc_entry_t *entry)
 {
-	if (!entry || !entry->entry)
+	if (!entry || !entry->entry) {
 		return;
+	}
 
 	proc_remove(entry->entry);
 	osal_memset(entry, 0, sizeof(*entry));

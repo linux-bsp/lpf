@@ -76,8 +76,9 @@ static int pdm_mcu_uart_write_exact(struct pdm_mcu_instance *inst,
 	int ret;
 
 	ret = pdm_mcu_uart_write_bytes(inst, buf, len);
-	if (ret < 0)
+	if (ret < 0) {
 		return ret;
+	}
 
 	return ret == len ? 0 : -EIO;
 }
@@ -89,30 +90,37 @@ static int pdm_mcu_uart_cmd_xfer(struct pdm_mcu_instance *inst, u32 command,
 	u32 expect = rx_len ? *rx_len : 0;
 	int ret;
 
-	if (tx_len + PDM_MCU_TRANSPORT_ID_BYTES > sizeof(buf))
+	if (tx_len + PDM_MCU_TRANSPORT_ID_BYTES > sizeof(buf)) {
 		return -EMSGSIZE;
-	if (expect > PDM_MCU_MAX_TRANSFER_SIZE)
+	}
+	if (expect > PDM_MCU_MAX_TRANSFER_SIZE) {
 		return -EMSGSIZE;
+	}
 
 	pdm_mcu_uart_encode_be32(buf, command);
-	if (tx_len)
+	if (tx_len) {
 		memcpy(buf + PDM_MCU_TRANSPORT_ID_BYTES, tx, tx_len);
+	}
 
 	ret = pdm_mcu_uart_write_exact(inst, buf,
 					tx_len + PDM_MCU_TRANSPORT_ID_BYTES);
-	if (ret)
+	if (ret) {
 		return ret;
+	}
 	if (!expect) {
-		if (rx_len)
+		if (rx_len) {
 			*rx_len = 0;
+		}
 		return 0;
 	}
 
 	ret = pdm_mcu_uart_read_bytes(inst, rx, expect);
-	if (ret < 0)
+	if (ret < 0) {
 		return ret;
-	if (rx_len)
+	}
+	if (rx_len) {
 		*rx_len = ret;
+	}
 	return 0;
 }
 
@@ -123,8 +131,9 @@ static int pdm_mcu_uart_data_read(struct pdm_mcu_instance *inst,
 
 	(void)address;
 	ret = pdm_mcu_uart_read_bytes(inst, buf, *len);
-	if (ret < 0)
+	if (ret < 0) {
 		return ret;
+	}
 
 	*len = ret;
 	return 0;
@@ -148,15 +157,17 @@ static int pdm_mcu_uart_xfer(struct pdm_mcu_instance *inst,
 		len = xfer->rx_len;
 		ret = pdm_mcu_uart_cmd_xfer(inst, xfer->id, xfer->tx,
 					    xfer->tx_len, xfer->rx, &len);
-		if (ret)
+		if (ret) {
 			return ret;
+		}
 		xfer->actual_rx_len = len;
 		return 0;
 	case PDM_MCU_XFER_DATA_READ:
 		len = xfer->rx_len;
 		ret = pdm_mcu_uart_data_read(inst, &xfer->id, xfer->rx, &len);
-		if (ret)
+		if (ret) {
 			return ret;
+		}
 		xfer->actual_rx_len = len;
 		return 0;
 	case PDM_MCU_XFER_DATA_WRITE:

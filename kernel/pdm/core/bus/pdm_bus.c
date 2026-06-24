@@ -56,14 +56,16 @@ static int pdm_bus_device_probe(struct device *dev)
 	struct pdm_driver *pdm_drv;
 	int ret;
 
-	if (!dev || !dev->driver)
+	if (!dev || !dev->driver) {
 		return -EINVAL;
+	}
 
 	pdm_dev = dev_to_pdm_device(dev);
 	pdm_drv = drv_to_pdm_driver(dev->driver);
 
-	if (!pdm_drv->probe)
+	if (!pdm_drv->probe) {
 		return -ENODEV;
+	}
 
 	LOG_DEBUG("Probing device [%s] with driver [%s]",
 		  dev_name(dev), pdm_drv->driver.name);
@@ -91,15 +93,17 @@ static void pdm_bus_device_remove(struct device *dev)
 	struct pdm_device *pdm_dev;
 	struct pdm_driver *pdm_drv;
 
-	if (!dev || !dev->driver)
+	if (!dev || !dev->driver) {
 		return;
+	}
 
 	pdm_dev = dev_to_pdm_device(dev);
 	pdm_drv = drv_to_pdm_driver(dev->driver);
 
 	LOG_DEBUG("Removing device [%s]", dev_name(dev));
-	if (pdm_drv->remove)
+	if (pdm_drv->remove) {
 		pdm_drv->remove(pdm_dev);
+	}
 	pdm_device_unbind(pdm_dev);
 }
 
@@ -108,12 +112,14 @@ static int pdm_bus_match_compatible(const struct pdm_device *pdm_dev,
 {
 	const struct of_device_id *match;
 
-	if (!pdm_dev->compatible || !drv->of_match_table)
+	if (!pdm_dev->compatible || !drv->of_match_table) {
 		return 0;
+	}
 
 	for (match = drv->of_match_table; match->compatible[0]; match++) {
-		if (strcmp(match->compatible, pdm_dev->compatible) == 0)
+		if (strcmp(match->compatible, pdm_dev->compatible) == 0) {
 			return 1;
+		}
 	}
 
 	return 0;
@@ -125,16 +131,19 @@ static int pdm_bus_device_match_impl(struct device *dev,
 	struct pdm_device *pdm_dev;
 	struct pdm_driver *pdm_drv;
 
-	if (!dev || !drv)
+	if (!dev || !drv) {
 		return 0;
+	}
 
 	pdm_dev = dev_to_pdm_device(dev);
 	pdm_drv = drv_to_pdm_driver(drv);
-	if (pdm_drv->match)
+	if (pdm_drv->match) {
 		return pdm_drv->match(pdm_dev) ? 1 : 0;
+	}
 
-	if (dev->of_node && of_driver_match_device(dev, drv))
+	if (dev->of_node && of_driver_match_device(dev, drv)) {
 		return 1;
+	}
 
 	return pdm_bus_match_compatible(pdm_dev, drv);
 }
@@ -158,8 +167,9 @@ struct pdm_device *pdm_bus_find_device_by_parent(struct device *parent)
 
 	dev = bus_find_device(&pdm_bus_type, NULL, parent,
 			      pdm_bus_device_match_parent);
-	if (!dev)
+	if (!dev) {
 		return NULL;
+	}
 
 	return dev_to_pdm_device(dev);
 }
@@ -175,11 +185,13 @@ int pdm_bus_register_driver(struct module *owner, struct pdm_driver *driver)
 {
 	int ret;
 
-	if (!driver || !driver->driver.name)
+	if (!driver || !driver->driver.name) {
 		return -EINVAL;
+	}
 
-	if (driver->of_match_table && !driver->driver.of_match_table)
+	if (driver->of_match_table && !driver->driver.of_match_table) {
 		driver->driver.of_match_table = driver->of_match_table;
+	}
 
 	driver->driver.owner = owner;
 	driver->driver.bus = &pdm_bus_type;
@@ -198,8 +210,9 @@ EXPORT_SYMBOL_GPL(pdm_bus_register_driver);
 
 void pdm_bus_unregister_driver(struct pdm_driver *driver)
 {
-	if (!driver)
+	if (!driver) {
 		return;
+	}
 
 	driver_unregister(&driver->driver);
 	LOG_DEBUG("Driver [%s] unregistered", driver->driver.name);

@@ -71,8 +71,9 @@ static void pdm_mcu_spi_encode_prefix(u8 *buf, u32 value, u8 bytes)
 {
 	u8 i;
 
-	for (i = 0; i < bytes; i++)
+	for (i = 0; i < bytes; i++) {
 		buf[i] = (u8)(value >> (8U * (bytes - i - 1U)));
+	}
 }
 
 static u8 pdm_mcu_spi_prefix_bytes(struct device_node *np,
@@ -82,11 +83,13 @@ static u8 pdm_mcu_spi_prefix_bytes(struct device_node *np,
 {
 	u32 value;
 
-	if (!np)
+	if (!np) {
 		return default_value;
+	}
 	if (!of_property_read_u32(np, pdm_name, &value) ||
-	    !of_property_read_u32(np, plain_name, &value))
+	    !of_property_read_u32(np, plain_name, &value)) {
 		return min_t(u32, value, PDM_MCU_MAX_PREFIX_BYTES);
+	}
 	return default_value;
 }
 
@@ -97,10 +100,12 @@ static int pdm_mcu_spi_bus_xfer(struct pdm_mcu_instance *inst,
 	struct spi_transfer xfers[2] = { };
 	int xfer_count = 0;
 
-	if (!spi)
+	if (!spi) {
 		return -ENODEV;
-	if (!tx_len && !rx_len)
+	}
+	if (!tx_len && !rx_len) {
 		return 0;
+	}
 
 	if (tx_len) {
 		xfers[xfer_count].tx_buf = tx;
@@ -122,8 +127,9 @@ static int pdm_mcu_spi_setup(struct pdm_mcu_instance *inst)
 	struct device_node *np = inst->pdm_dev->dev.of_node;
 	u32 value;
 
-	if (!bus_dev || bus_dev->type != PDM_MCU_BACKEND_SPI || !bus_dev->bus.spi)
+	if (!bus_dev || bus_dev->type != PDM_MCU_BACKEND_SPI || !bus_dev->bus.spi) {
 		return -ENODEV;
+	}
 
 	inst->transport.spi.spi = bus_dev->bus.spi;
 	inst->transport.spi.rx_timeout_ms = PDM_MCU_DEFAULT_RX_TIMEOUT_MS;
@@ -133,8 +139,9 @@ static int pdm_mcu_spi_setup(struct pdm_mcu_instance *inst)
 	inst->transport.spi.address_bytes =
 		pdm_mcu_spi_prefix_bytes(np, "address-bytes",
 					 "pdm,address-bytes", 1U);
-	if (np && !of_property_read_u32(np, "rx-timeout-ms", &value))
+	if (np && !of_property_read_u32(np, "rx-timeout-ms", &value)) {
 		inst->transport.spi.rx_timeout_ms = value;
+	}
 
 	bus_dev->inst = inst;
 	LOG_INFO("Bound SPI transport to %s",
@@ -146,8 +153,9 @@ static void pdm_mcu_spi_cleanup(struct pdm_mcu_instance *inst)
 {
 	struct pdm_mcu_bus_device *bus_dev = inst->pdm_dev->config_data;
 
-	if (bus_dev && bus_dev->inst == inst)
+	if (bus_dev && bus_dev->inst == inst) {
 		bus_dev->inst = NULL;
+	}
 	inst->transport.spi.spi = NULL;
 }
 
@@ -159,22 +167,28 @@ static int pdm_mcu_spi_cmd_xfer(struct pdm_mcu_instance *inst, u32 command,
 	u32 expect = rx_len ? *rx_len : 0;
 	int ret;
 
-	if (!prefix)
+	if (!prefix) {
 		return -EOPNOTSUPP;
-	if (tx_len + prefix > sizeof(buf))
+	}
+	if (tx_len + prefix > sizeof(buf)) {
 		return -EMSGSIZE;
-	if (expect > PDM_MCU_MAX_TRANSFER_SIZE)
+	}
+	if (expect > PDM_MCU_MAX_TRANSFER_SIZE) {
 		return -EMSGSIZE;
+	}
 
 	pdm_mcu_spi_encode_prefix(buf, command, prefix);
-	if (tx_len)
+	if (tx_len) {
 		memcpy(buf + prefix, tx, tx_len);
+	}
 
 	ret = pdm_mcu_spi_bus_xfer(inst, buf, tx_len + prefix, rx, expect);
-	if (ret)
+	if (ret) {
 		return ret;
-	if (rx_len)
+	}
+	if (rx_len) {
 		*rx_len = expect;
+	}
 	return 0;
 }
 
@@ -184,10 +198,12 @@ static int pdm_mcu_spi_data_read(struct pdm_mcu_instance *inst,
 	u8 tx[PDM_MCU_MAX_PREFIX_BYTES];
 	u8 prefix = inst->transport.spi.address_bytes;
 
-	if (*len > PDM_MCU_MAX_TRANSFER_SIZE)
+	if (*len > PDM_MCU_MAX_TRANSFER_SIZE) {
 		return -EMSGSIZE;
-	if (prefix)
+	}
+	if (prefix) {
 		pdm_mcu_spi_encode_prefix(tx, *address, prefix);
+	}
 
 	return pdm_mcu_spi_bus_xfer(inst, tx, prefix, buf, *len);
 }
@@ -198,12 +214,15 @@ static int pdm_mcu_spi_data_write(struct pdm_mcu_instance *inst, u32 address,
 	u8 tx[PDM_MCU_MAX_TRANSFER_SIZE + PDM_MCU_MAX_PREFIX_BYTES];
 	u8 prefix = inst->transport.spi.address_bytes;
 
-	if (len + prefix > sizeof(tx))
+	if (len + prefix > sizeof(tx)) {
 		return -EMSGSIZE;
-	if (prefix)
+	}
+	if (prefix) {
 		pdm_mcu_spi_encode_prefix(tx, address, prefix);
-	if (len)
+	}
+	if (len) {
 		memcpy(tx + prefix, buf, len);
+	}
 
 	return pdm_mcu_spi_bus_xfer(inst, tx, prefix + len, NULL, 0);
 }
@@ -219,15 +238,17 @@ static int pdm_mcu_spi_xfer(struct pdm_mcu_instance *inst,
 		len = xfer->rx_len;
 		ret = pdm_mcu_spi_cmd_xfer(inst, xfer->id, xfer->tx,
 					   xfer->tx_len, xfer->rx, &len);
-		if (ret)
+		if (ret) {
 			return ret;
+		}
 		xfer->actual_rx_len = len;
 		return 0;
 	case PDM_MCU_XFER_DATA_READ:
 		len = xfer->rx_len;
 		ret = pdm_mcu_spi_data_read(inst, &xfer->id, xfer->rx, &len);
-		if (ret)
+		if (ret) {
 			return ret;
+		}
 		xfer->actual_rx_len = len;
 		return 0;
 	case PDM_MCU_XFER_DATA_WRITE:
@@ -243,8 +264,9 @@ static int pdm_mcu_spi_probe(struct spi_device *spi)
 	struct pdm_mcu_bus_device *bus_dev;
 
 	bus_dev = devm_kzalloc(&spi->dev, sizeof(*bus_dev), GFP_KERNEL);
-	if (!bus_dev)
+	if (!bus_dev) {
 		return -ENOMEM;
+	}
 
 	bus_dev->bus.spi = spi;
 	spi_set_drvdata(spi, bus_dev);

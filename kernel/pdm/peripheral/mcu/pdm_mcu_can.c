@@ -52,16 +52,18 @@ static const struct pdm_mcu_transport_ops pdm_mcu_can_ops = {
 
 static canid_t pdm_mcu_can_make_id(struct pdm_mcu_instance *inst, u32 id)
 {
-	if (inst->transport.can.extended_id || id > CAN_SFF_MASK)
+	if (inst->transport.can.extended_id || id > CAN_SFF_MASK) {
 		return (id & CAN_EFF_MASK) | CAN_EFF_FLAG;
+	}
 
 	return id & CAN_SFF_MASK;
 }
 
 static u32 pdm_mcu_can_strip_id(canid_t can_id)
 {
-	if (can_id & CAN_EFF_FLAG)
+	if (can_id & CAN_EFF_FLAG) {
 		return can_id & CAN_EFF_MASK;
+	}
 
 	return can_id & CAN_SFF_MASK;
 }
@@ -74,22 +76,26 @@ static int pdm_mcu_can_send_frame(struct pdm_mcu_instance *inst, u32 id,
 	struct kvec vec;
 	int ret;
 
-	if (!inst->transport.can.sock)
+	if (!inst->transport.can.sock) {
 		return -ENODEV;
-	if (len > CAN_MAX_DLEN)
+	}
+	if (len > CAN_MAX_DLEN) {
 		return -EMSGSIZE;
+	}
 
 	frame.can_id = pdm_mcu_can_make_id(inst, id);
 	frame.len = len;
-	if (len)
+	if (len) {
 		memcpy(frame.data, data, len);
+	}
 
 	vec.iov_base = &frame;
 	vec.iov_len = sizeof(frame);
 	ret = kernel_sendmsg(inst->transport.can.sock, &msg, &vec, 1,
 			     sizeof(frame));
-	if (ret < 0)
+	if (ret < 0) {
 		return ret;
+	}
 
 	return ret == sizeof(frame) ? 0 : -EIO;
 }
@@ -103,26 +109,32 @@ static int pdm_mcu_can_recv_frame(struct pdm_mcu_instance *inst, u32 *id,
 	u32 max_len = *len;
 	int ret;
 
-	if (!inst->transport.can.sock)
+	if (!inst->transport.can.sock) {
 		return -ENODEV;
-	if (max_len > PDM_MCU_MAX_TRANSFER_SIZE)
+	}
+	if (max_len > PDM_MCU_MAX_TRANSFER_SIZE) {
 		return -EMSGSIZE;
+	}
 
 	vec.iov_base = &frame;
 	vec.iov_len = sizeof(frame);
 	ret = kernel_recvmsg(inst->transport.can.sock, &msg, &vec, 1,
 			     sizeof(frame), 0);
-	if (ret < 0)
+	if (ret < 0) {
 		return ret;
-	if (ret != sizeof(frame))
+	}
+	if (ret != sizeof(frame)) {
 		return -EIO;
-	if (frame.len > max_len)
+	}
+	if (frame.len > max_len) {
 		return -EMSGSIZE;
+	}
 
 	*id = pdm_mcu_can_strip_id(frame.can_id);
 	*len = frame.len;
-	if (frame.len)
+	if (frame.len) {
 		memcpy(data, frame.data, frame.len);
+	}
 	return 0;
 }
 
@@ -131,14 +143,17 @@ static struct net_device *pdm_mcu_can_find_netdev(struct device_node *np)
 	struct device_node *can_np;
 	struct net_device *netdev;
 
-	if (!np)
+	if (!np) {
 		return NULL;
+	}
 
 	can_np = of_parse_phandle(np, "can-controller", 0);
-	if (!can_np)
+	if (!can_np) {
 		can_np = of_parse_phandle(np, "can", 0);
-	if (!can_np)
+	}
+	if (!can_np) {
 		return NULL;
+	}
 
 	netdev = of_find_net_device_by_node(can_np);
 	of_node_put(can_np);
@@ -154,25 +169,30 @@ static int pdm_mcu_can_setup(struct pdm_mcu_instance *inst)
 	int ret;
 
 	netdev = pdm_mcu_can_find_netdev(np);
-	if (!netdev)
+	if (!netdev) {
 		return -ENODEV;
+	}
 
 	inst->transport.can.rx_timeout_ms = PDM_MCU_DEFAULT_RX_TIMEOUT_MS;
 	if (np) {
-		if (!of_property_read_u32(np, "rx-timeout-ms", &value))
+		if (!of_property_read_u32(np, "rx-timeout-ms", &value)) {
 			inst->transport.can.rx_timeout_ms = value;
+		}
 		inst->transport.can.extended_id =
 			of_property_read_bool(np, "can-extended-id");
 	}
 
 	ret = sock_create_kern(&init_net, PF_CAN, SOCK_RAW, CAN_RAW,
 			       &inst->transport.can.sock);
-	if (ret)
+	if (ret) {
 		goto err_put_netdev;
+	}
 
 	if (inst->transport.can.sock->sk)
+	{
 		inst->transport.can.sock->sk->sk_rcvtimeo =
 			msecs_to_jiffies(inst->transport.can.rx_timeout_ms);
+	}
 
 	addr.can_family = AF_CAN;
 	addr.can_ifindex = netdev->ifindex;
@@ -183,8 +203,9 @@ static int pdm_mcu_can_setup(struct pdm_mcu_instance *inst)
 	ret = kernel_bind(inst->transport.can.sock, (struct sockaddr *)&addr,
 			  sizeof(addr));
 #endif
-	if (ret)
+	if (ret) {
 		goto err_release_sock;
+	}
 
 	inst->transport.can.netdev = netdev;
 	LOG_INFO("Bound CAN transport to %s", dev_name(&netdev->dev));
@@ -216,10 +237,12 @@ static int pdm_mcu_can_cmd_xfer(struct pdm_mcu_instance *inst, u32 command,
 	int ret;
 
 	ret = pdm_mcu_can_send_frame(inst, command, tx, tx_len);
-	if (ret)
+	if (ret) {
 		return ret;
-	if (!rx_len || !*rx_len)
+	}
+	if (!rx_len || !*rx_len) {
 		return 0;
+	}
 
 	return pdm_mcu_can_recv_frame(inst, &command, rx, rx_len);
 }
@@ -247,15 +270,17 @@ static int pdm_mcu_can_xfer(struct pdm_mcu_instance *inst,
 		len = xfer->rx_len;
 		ret = pdm_mcu_can_cmd_xfer(inst, xfer->id, xfer->tx,
 					   xfer->tx_len, xfer->rx, &len);
-		if (ret)
+		if (ret) {
 			return ret;
+		}
 		xfer->actual_rx_len = len;
 		return 0;
 	case PDM_MCU_XFER_DATA_READ:
 		len = xfer->rx_len;
 		ret = pdm_mcu_can_data_read(inst, &xfer->id, xfer->rx, &len);
-		if (ret)
+		if (ret) {
 			return ret;
+		}
 		xfer->actual_rx_len = len;
 		return 0;
 	case PDM_MCU_XFER_DATA_WRITE:

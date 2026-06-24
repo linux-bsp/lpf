@@ -93,11 +93,13 @@ uint16_t osal_crc16_ccitt(const uint8_t *data, size_t len)
 	uint16_t crc = 0xFFFF;
 	size_t i;
 
-	if (!data)
+	if (!data) {
 		return crc;
+	}
 
-	for (i = 0; i < len; i++)
+	for (i = 0; i < len; i++) {
 		crc = (crc << 8) ^ crc16_ccitt_table[(crc >> 8) ^ data[i]];
+	}
 
 	return crc;
 }
@@ -109,11 +111,13 @@ uint16_t osal_crc16_ccitt_update(uint16_t crc, const uint8_t *data, size_t len)
 {
 	size_t i;
 
-	if (!data)
+	if (!data) {
 		return crc;
+	}
 
-	for (i = 0; i < len; i++)
+	for (i = 0; i < len; i++) {
 		crc = (crc << 8) ^ crc16_ccitt_table[(crc >> 8) ^ data[i]];
+	}
 
 	return crc;
 }
@@ -128,8 +132,9 @@ uint16_t osal_crc16_modbus(const uint8_t *data, size_t len)
 	size_t i;
 	int j;
 
-	if (!data)
+	if (!data) {
 		return crc;
+	}
 
 	for (i = 0; i < len; i++) {
 		crc ^= data[i];
@@ -153,11 +158,13 @@ uint32_t osal_crc32(const uint8_t *data, size_t len)
 	uint32_t crc = 0xFFFFFFFF;
 	size_t i;
 
-	if (!data)
+	if (!data) {
 		return 0;
+	}
 
-	for (i = 0; i < len; i++)
+	for (i = 0; i < len; i++) {
 		crc = (crc >> 8) ^ crc32_table[(crc ^ data[i]) & 0xFF];
+	}
 
 	return crc ^ 0xFFFFFFFF;
 }

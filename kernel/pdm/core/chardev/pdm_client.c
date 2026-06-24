@@ -36,8 +36,9 @@ static umode_t pdm_client_devnode_mode(void)
 	unsigned int mode = 0660;
 
 #ifdef CONFIG_PDM_INSTANCE_DEVNODE_MODE
-	if (kstrtouint(CONFIG_PDM_INSTANCE_DEVNODE_MODE, 8, &mode) != 0)
+	if (kstrtouint(CONFIG_PDM_INSTANCE_DEVNODE_MODE, 8, &mode) != 0) {
 		mode = 0660;
+	}
 #endif
 
 	return (umode_t)(mode & 0777U);
@@ -49,8 +50,9 @@ static char *pdm_client_devnode(struct device *dev, umode_t *mode)
 static char *pdm_client_devnode(const struct device *dev, umode_t *mode)
 #endif
 {
-	if (mode)
+	if (mode) {
 		*mode = pdm_client_devnode_mode();
+	}
 
 	return kasprintf(GFP_KERNEL, "pdm/%s", dev_name(dev));
 }
@@ -70,20 +72,23 @@ static void pdm_client_device_release(struct device *dev)
 		client->minor = -1;
 	}
 
-	if (release)
+	if (release) {
 		release(client);
+	}
 }
 
 int pdm_client_default_open(struct inode *inode, struct file *filp)
 {
 	struct pdm_client *client;
 
-	if (!inode || !filp)
+	if (!inode || !filp) {
 		return -EINVAL;
+	}
 
 	client = container_of(inode->i_cdev, struct pdm_client, cdev);
-	if (!get_device(&client->dev))
+	if (!get_device(&client->dev)) {
 		return -ENODEV;
+	}
 
 	atomic_inc(&client->open_count);
 	filp->private_data = client;
@@ -114,15 +119,18 @@ int pdm_client_register(struct pdm_client *client, struct pdm_device *pdm_dev,
 	int minor;
 	int ret;
 
-	if (!client || !pdm_dev || !name || !nodename || !fops)
+	if (!client || !pdm_dev || !name || !nodename || !fops) {
 		return -EINVAL;
-	if (strchr(nodename, '/'))
+	}
+	if (strchr(nodename, '/')) {
 		return -EINVAL;
+	}
 
 	minor = ida_alloc_max(&pdm_client_ida, PDM_CLIENT_MINORS - 1,
 				    GFP_KERNEL);
-	if (minor < 0)
+	if (minor < 0) {
 		return minor;
+	}
 
 	memset(client, 0, sizeof(*client));
 	client->minor = -1;
@@ -144,8 +152,9 @@ int pdm_client_register(struct pdm_client *client, struct pdm_device *pdm_dev,
 	}
 
 	ret = dev_set_name(&client->dev, "%s", client->nodename);
-	if (ret)
+	if (ret) {
 		goto err_put_device;
+	}
 
 	cdev_init(&client->cdev, client->fops);
 	client->cdev.owner = client->fops->owner;
@@ -170,8 +179,9 @@ EXPORT_SYMBOL_GPL(pdm_client_register);
 
 void pdm_client_unregister(struct pdm_client *client)
 {
-	if (!client || !client->registered)
+	if (!client || !client->registered) {
 		return;
+	}
 
 	client->registered = false;
 	cdev_device_del(&client->cdev, &client->dev);

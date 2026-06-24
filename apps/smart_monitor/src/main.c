@@ -57,10 +57,12 @@ static int build_device_path(const char *arg, char *path, size_t path_len)
 {
 	int ret;
 
-	if (strncmp(arg, "/dev/", 5) == 0)
+	if (strncmp(arg, "/dev/", 5) == 0) {
 		ret = snprintf(path, path_len, "%s", arg);
-	else
+	}
+	else {
 		ret = snprintf(path, path_len, "/dev/%s", arg);
+	}
 
 	if (ret < 0 || (size_t)ret >= path_len) {
 		fprintf(stderr, "Device path is too long: %s\n", arg);
@@ -87,12 +89,14 @@ static int read_sysfs_value(const char *block_name, const char *file,
 
 	ret = snprintf(path, sizeof(path), "/sys/block/%s/device/%s",
 		       block_name, file);
-	if (ret < 0 || (size_t)ret >= sizeof(path))
+	if (ret < 0 || (size_t)ret >= sizeof(path)) {
 		return -1;
+	}
 
 	fp = fopen(path, "r");
-	if (!fp)
+	if (!fp) {
 		return -1;
+	}
 
 	if (!fgets(buf, buf_len, fp)) {
 		fclose(fp);
@@ -125,8 +129,9 @@ static int read_ext_csd(int fd, uint8_t ext_csd[EMMC_EXT_CSD_SIZE])
 	cmd.blocks = 1;
 	mmc_ioc_cmd_set_data(cmd, ext_csd);
 
-	if (ioctl(fd, MMC_IOC_CMD, &cmd) < 0)
+	if (ioctl(fd, MMC_IOC_CMD, &cmd) < 0) {
 		return -1;
+	}
 
 	return 0;
 }
@@ -138,20 +143,23 @@ const struct smart_vendor *smart_vendor_find(const char *requested,
 
 	if (requested && strcmp(requested, "auto") != 0) {
 		for (i = 0; i < sizeof(vendor_table) / sizeof(vendor_table[0]); i++) {
-			if (strcmp(requested, vendor_table[i]->name) == 0)
+			if (strcmp(requested, vendor_table[i]->name) == 0) {
 				return vendor_table[i];
+			}
 		}
 
 		return NULL;
 	}
 
 	for (i = 0; i < sizeof(vendor_table) / sizeof(vendor_table[0]); i++) {
-		if (vendor_table[i]->match && vendor_table[i]->match(info))
+		if (vendor_table[i]->match && vendor_table[i]->match(info)) {
 			return vendor_table[i];
+		}
 	}
 
-	if (sizeof(vendor_table) / sizeof(vendor_table[0]) == 1)
+	if (sizeof(vendor_table) / sizeof(vendor_table[0]) == 1) {
 		return vendor_table[0];
+	}
 
 	return NULL;
 }
@@ -161,12 +169,15 @@ static void print_device_header(const struct smart_device_info *info,
 {
 	printf("Device        : %s\n", device_path);
 	printf("Block name    : %s\n", info->block_name);
-	if (info->sysfs_name && info->sysfs_name[0] != '\0')
+	if (info->sysfs_name && info->sysfs_name[0] != '\0') {
 		printf("Product name  : %s\n", info->sysfs_name);
-	if (info->manfid && info->manfid[0] != '\0')
+	}
+	if (info->manfid && info->manfid[0] != '\0') {
 		printf("Manufacturer  : %s\n", info->manfid);
-	if (info->cid && info->cid[0] != '\0')
+	}
+	if (info->cid && info->cid[0] != '\0') {
 		printf("CID           : %s\n", info->cid);
+	}
 	printf("\n");
 }
 
@@ -237,8 +248,9 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	if (build_device_path(device_arg, device_path, sizeof(device_path)) < 0)
+	if (build_device_path(device_arg, device_path, sizeof(device_path)) < 0) {
 		return EXIT_FAILURE;
+	}
 
 	fd = open(device_path, O_RDONLY);
 	if (fd < 0) {
