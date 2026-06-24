@@ -143,7 +143,7 @@ int pdm_proc_register(pdm_proc_entry_t *entry, const char *name,
 		return -ENOMEM;
 	}
 
-	LOG_INFO(name, "/proc/%s/%s ready", PDM_PROC_ROOT_NAME, name);
+	LOG_INFO("/proc/%s/%s ready", PDM_PROC_ROOT_NAME, name);
 	return 0;
 }
 EXPORT_SYMBOL_GPL(pdm_proc_register);

@@ -152,7 +152,7 @@ static int pdm_mcu_can_setup(struct pdm_mcu_instance *inst)
 	if (ret)
 		goto err_release_sock;
 
-	LOG_INFO("PDM-MCU-CAN", "Bound CAN transport to %s",
+	LOG_INFO("Bound CAN transport to %s",
 		 inst->transport.can.ifname);
 	dev_put(netdev);
 	return 0;

@@ -144,14 +144,14 @@ int pdm_client_register(struct pdm_client *client, struct pdm_device *pdm_dev,
 
 	ret = cdev_device_add(&client->cdev, &client->dev);
 	if (ret) {
-		LOG_ERROR("PDM-CLIENT", "Failed to register /dev/pdm/%s: %d",
+		LOG_ERROR("Failed to register /dev/pdm/%s: %d",
 			  client->nodename, ret);
 		goto err_put_device;
 	}
 
 	client->release = release;
 	client->registered = true;
-	LOG_INFO("PDM-CLIENT", "/dev/pdm/%s registered", client->nodename);
+	LOG_INFO("/dev/pdm/%s registered", client->nodename);
 	return 0;
 
 err_put_device:
@@ -167,7 +167,7 @@ void pdm_client_unregister(struct pdm_client *client)
 
 	client->registered = false;
 	cdev_device_del(&client->cdev, &client->dev);
-	LOG_INFO("PDM-CLIENT", "/dev/pdm/%s unregistered", client->nodename);
+	LOG_INFO("/dev/pdm/%s unregistered", client->nodename);
 	put_device(&client->dev);
 }
 EXPORT_SYMBOL_GPL(pdm_client_unregister);
@@ -191,20 +191,20 @@ int pdm_client_init(void)
 	ret = alloc_chrdev_region(&pdm_client_devt, 0, PDM_CLIENT_MINORS,
 				  "pdm_client");
 	if (ret) {
-		LOG_ERROR("PDM-CLIENT", "Failed to allocate device region: %d",
+		LOG_ERROR("Failed to allocate device region: %d",
 			  ret);
 		return ret;
 	}
 
 	ret = class_register(&pdm_client_class);
 	if (ret) {
-		LOG_ERROR("PDM-CLIENT", "Failed to register client class: %d",
+		LOG_ERROR("Failed to register client class: %d",
 			  ret);
 		unregister_chrdev_region(pdm_client_devt, PDM_CLIENT_MINORS);
 		return ret;
 	}
 
-	LOG_INFO("PDM-CLIENT", "PDM client class initialized");
+	LOG_INFO("PDM client class initialized");
 	return 0;
 }
 
@@ -213,7 +213,7 @@ void pdm_client_exit(void)
 	class_unregister(&pdm_client_class);
 	unregister_chrdev_region(pdm_client_devt, PDM_CLIENT_MINORS);
 	ida_destroy(&pdm_client_ida);
-	LOG_INFO("PDM-CLIENT", "PDM client class exited");
+	LOG_INFO("PDM client class exited");
 }
 
 MODULE_LICENSE("GPL");

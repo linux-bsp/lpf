@@ -205,7 +205,7 @@ int pdm_debugfs_register(pdm_debugfs_entry_t *entry, const char *root_name,
 		return ret;
 	}
 
-	LOG_INFO(name, "/sys/kernel/debug/%s/%s ready", root_name, name);
+	LOG_INFO("/sys/kernel/debug/%s/%s ready", root_name, name);
 	return 0;
 }
 EXPORT_SYMBOL_GPL(pdm_debugfs_register);

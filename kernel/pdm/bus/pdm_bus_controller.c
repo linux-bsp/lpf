@@ -33,7 +33,7 @@ static void pdm_bus_controller_unregister_devices(struct pdm_bus_controller *ctr
 	struct pdm_device_list_entry *entry, *tmp;
 
 	list_for_each_entry_safe(entry, tmp, &ctrl->devices, node) {
-		LOG_DEBUG("PDM-BUS-CTRL", "Unregistering device: %s",
+		LOG_DEBUG("Unregistering device: %s",
 			  dev_name(&entry->pdm_dev->dev));
 		pdm_device_unregister(entry->pdm_dev);
 		list_del(&entry->node);
@@ -60,7 +60,7 @@ static int pdm_bus_controller_probe(struct platform_device *pdev)
 	int auto_name_id = 0;
 	int ret = 0;
 
-	LOG_INFO("PDM-BUS-CTRL", "Probing PDM bus controller");
+	LOG_INFO("Probing PDM bus controller");
 
 	ctrl = devm_kzalloc(&pdev->dev, sizeof(*ctrl), GFP_KERNEL);
 	if (!ctrl)
@@ -79,8 +79,7 @@ static int pdm_bus_controller_probe(struct platform_device *pdev)
 
 		ret = of_property_read_string(child, "compatible", &compatible);
 		if (ret) {
-			LOG_WARN("PDM-BUS-CTRL",
-				 "Child node %s has no compatible string, skipping",
+			LOG_WARN("Child node %s has no compatible string, skipping",
 				 child->name);
 			continue;
 		}
@@ -113,8 +112,7 @@ static int pdm_bus_controller_probe(struct platform_device *pdev)
 
 		ret = pdm_device_register(pdm_dev, name);
 		if (ret) {
-			LOG_ERROR("PDM-BUS-CTRL",
-				  "Failed to register device %s, error %d",
+			LOG_ERROR("Failed to register device %s, error %d",
 				  name, ret);
 			goto err_cleanup;
 		}
@@ -123,12 +121,11 @@ static int pdm_bus_controller_probe(struct platform_device *pdev)
 		list_add_tail(&entry->node, &ctrl->devices);
 		ctrl->device_count++;
 
-		LOG_INFO("PDM-BUS-CTRL", "Created device: %s (compatible: %s)",
+		LOG_INFO("Created device: %s (compatible: %s)",
 			 name, compatible);
 	}
 
-	LOG_INFO("PDM-BUS-CTRL",
-		 "PDM bus controller probe complete, %d devices created",
+	LOG_INFO("PDM bus controller probe complete, %d devices created",
 		 ctrl->device_count);
 	return 0;
 
@@ -145,9 +142,9 @@ static void pdm_bus_controller_remove(struct platform_device *pdev)
 	if (!ctrl)
 		return;
 
-	LOG_INFO("PDM-BUS-CTRL", "Removing PDM bus controller");
+	LOG_INFO("Removing PDM bus controller");
 	pdm_bus_controller_unregister_devices(ctrl);
-	LOG_INFO("PDM-BUS-CTRL", "PDM bus controller removed");
+	LOG_INFO("PDM bus controller removed");
 }
 
 static const struct of_device_id pdm_bus_controller_of_match[] = {
@@ -171,19 +168,18 @@ int pdm_bus_controller_init(void)
 
 	ret = platform_driver_register(&pdm_bus_controller_driver);
 	if (ret) {
-		LOG_ERROR("PDM-BUS-CTRL",
-			  "Failed to register platform driver, error %d", ret);
+		LOG_ERROR("Failed to register platform driver, error %d", ret);
 		return ret;
 	}
 
-	LOG_INFO("PDM-BUS-CTRL", "PDM bus controller driver registered");
+	LOG_INFO("PDM bus controller driver registered");
 	return 0;
 }
 
 void pdm_bus_controller_exit(void)
 {
 	platform_driver_unregister(&pdm_bus_controller_driver);
-	LOG_INFO("PDM-BUS-CTRL", "PDM bus controller driver unregistered");
+	LOG_INFO("PDM bus controller driver unregistered");
 }
 
 MODULE_LICENSE("GPL");

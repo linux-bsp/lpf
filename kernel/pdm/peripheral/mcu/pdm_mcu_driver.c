@@ -100,7 +100,7 @@ int pdm_mcu_register_native_device(struct device *parent,
 		return ret;
 	}
 
-	LOG_INFO("PDM-MCU", "Created native %s device %s",
+	LOG_INFO("Created native %s device %s",
 		 pdm_mcu_default_compatible(type), name);
 	return 0;
 }
@@ -451,7 +451,7 @@ static int pdm_mcu_probe(struct pdm_device *pdm_dev)
 	pdm_dev->capabilities |= inst->ops->capability;
 	pdm_device_set_drvdata(pdm_dev, inst);
 	atomic_inc(&pdm_mcu_device_count);
-	LOG_INFO("PDM-MCU", "Registered MCU %s transport for %s",
+	LOG_INFO("Registered MCU %s transport for %s",
 		 inst->ops->name, dev_name(&pdm_dev->dev));
 	return 0;
 

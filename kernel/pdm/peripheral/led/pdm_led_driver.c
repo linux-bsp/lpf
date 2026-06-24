@@ -322,7 +322,7 @@ static int pdm_led_probe(struct pdm_device *pdm_dev)
 	pdm_dev->capabilities |= inst->ops->capability;
 	pdm_device_set_drvdata(pdm_dev, inst);
 	atomic_inc(&pdm_led_device_count);
-	LOG_INFO("PDM-LED", "Registered LED %s backend for %s",
+	LOG_INFO("Registered LED %s backend for %s",
 		 inst->ops->name, dev_name(&pdm_dev->dev));
 	return 0;
 

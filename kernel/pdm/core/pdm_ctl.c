@@ -283,17 +283,17 @@ int pdm_ctl_init(void)
 
 	ret = misc_register(&pdm_ctl_miscdev);
 	if (ret) {
-		LOG_ERROR("PDM-CTL", "Failed to register /dev/%s: %d",
+		LOG_ERROR("Failed to register /dev/%s: %d",
 			  PDM_CTL_DEVICE_NAME, ret);
 		return ret;
 	}
 
-	LOG_INFO("PDM-CTL", "/dev/%s registered", PDM_CTL_DEVICE_NAME);
+	LOG_INFO("/dev/%s registered", PDM_CTL_DEVICE_NAME);
 	return 0;
 }
 
 void pdm_ctl_exit(void)
 {
 	misc_deregister(&pdm_ctl_miscdev);
-	LOG_INFO("PDM-CTL", "/dev/%s unregistered", PDM_CTL_DEVICE_NAME);
+	LOG_INFO("/dev/%s unregistered", PDM_CTL_DEVICE_NAME);
 }

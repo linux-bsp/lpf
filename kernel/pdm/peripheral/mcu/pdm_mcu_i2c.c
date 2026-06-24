@@ -95,7 +95,7 @@ static int pdm_mcu_i2c_setup(struct pdm_mcu_instance *inst)
 		inst->transport.i2c.rx_timeout_ms = value;
 
 	native->inst = inst;
-	LOG_INFO("PDM-MCU-I2C", "Bound I2C transport to %s addr=0x%02x",
+	LOG_INFO("Bound I2C transport to %s addr=0x%02x",
 		 dev_name(&native->bus.i2c->dev), native->bus.i2c->addr);
 	return 0;
 }

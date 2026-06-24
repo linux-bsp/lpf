@@ -111,7 +111,7 @@ static int pdm_mock_register_one(struct pdm_mock_device_entry *entry,
 	}
 
 	entry->pdm_dev = pdm_dev;
-	LOG_INFO("PDM-MOCK", "Created mock device: %s (%s)", name,
+	LOG_INFO("Created mock device: %s (%s)", name,
 		 desc->compatible);
 	return 0;
 
@@ -133,7 +133,7 @@ int pdm_mock_devices_init(void)
 			goto err_unregister;
 	}
 
-	LOG_INFO("PDM-MOCK", "PDM mock devices initialized");
+	LOG_INFO("PDM mock devices initialized");
 	return 0;
 
 err_unregister:
@@ -149,7 +149,7 @@ void pdm_mock_devices_exit(void)
 	for (i = ARRAY_SIZE(pdm_mock_devices) - 1; i >= 0; i--)
 		pdm_mock_unregister_one(&pdm_mock_devices[i]);
 
-	LOG_INFO("PDM-MOCK", "PDM mock devices exited");
+	LOG_INFO("PDM mock devices exited");
 }
 
 MODULE_LICENSE("GPL");

@@ -28,7 +28,7 @@ make
 static void worker_task(void *arg)
 {
     while (!OSAL_TaskShouldShutdown()) {
-        LOG_INFO("Worker", "Running...");
+        LOG_INFO("Running...");
         OSAL_TaskDelay(1000);
     }
 }

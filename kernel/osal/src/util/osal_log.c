@@ -9,10 +9,6 @@
 static atomic64_t g_log_total = ATOMIC64_INIT(0);
 static atomic64_t g_log_dropped = ATOMIC64_INIT(0);
 static int32_t g_log_level = OSAL_LOG_DEFAULT_LEVEL;
-static int32_t g_module_levels[LOG_MODULE_MAX] = {
-	[0 ... LOG_MODULE_MAX - 1] = OSAL_LOG_DEFAULT_LEVEL,
-};
-
 static const char *osal_log_level_name(int32_t level)
 {
 	switch (level) {
@@ -90,22 +86,6 @@ void osal_log_set_max_files(uint32_t max_files)
 }
 EXPORT_SYMBOL_GPL(osal_log_set_max_files);
 
-void osal_log_set_module_level(log_module_t module, int32_t level)
-{
-	if (module >= 0 && module < LOG_MODULE_MAX)
-		g_module_levels[module] = level;
-}
-EXPORT_SYMBOL_GPL(osal_log_set_module_level);
-
-int32_t osal_log_get_module_level(log_module_t module)
-{
-	if (module >= 0 && module < LOG_MODULE_MAX)
-		return g_module_levels[module];
-
-	return g_log_level;
-}
-EXPORT_SYMBOL_GPL(osal_log_get_module_level);
-
 int32_t osal_log_set_filter(const char *pattern)
 {
 	(void)pattern;
@@ -132,12 +112,10 @@ void osal_log_disable_remote(void)
 }
 EXPORT_SYMBOL_GPL(osal_log_disable_remote);
 
-void osal_log(int32_t level, const char *module, const char *format, ...)
+void osal_log(int32_t level, const char *format, ...)
 {
 	va_list args;
 	char message[OSAL_LOG_MESSAGE_SIZE];
-
-	(void)module;
 
 	if (level < g_log_level) {
 		atomic64_inc(&g_log_dropped);
@@ -154,17 +132,15 @@ void osal_log(int32_t level, const char *module, const char *format, ...)
 }
 EXPORT_SYMBOL_GPL(osal_log);
 
-void osal_log_structured(int32_t level, log_module_t module,
-			 const char *message, const log_kv_pair_t *kv_pairs,
-			 uint32_t kv_count)
+void osal_log_structured(int32_t level, const char *message,
+			 const log_kv_pair_t *kv_pairs, uint32_t kv_count)
 {
 	uint32_t i;
 
-	osal_log(level, "STRUCT", "module=%d message=%s", module,
-		 message ? message : "");
+	osal_log(level, "message=%s", message ? message : "");
 	for (i = 0; i < kv_count; i++) {
 		if (kv_pairs[i].key)
-			osal_log(level, "STRUCT", "%s=%s", kv_pairs[i].key,
+			osal_log(level, "%s=%s", kv_pairs[i].key,
 				 kv_pairs[i].value ? kv_pairs[i].value : "");
 	}
 }
@@ -192,15 +168,12 @@ void osal_log_get_stats(uint64_t *total_count, uint64_t *dropped_count)
 }
 EXPORT_SYMBOL_GPL(osal_log_get_stats);
 
-void osal_log_emit(int32_t level, const char *module, const char *file,
-		   const char *func, int32_t line, const char *format, ...)
+void osal_log_emit(int32_t level, const char *file, int32_t line,
+		   const char *format, ...)
 {
 	va_list args;
 	char message[OSAL_LOG_MESSAGE_SIZE];
 	const char *filename = osal_log_basename(file);
-
-	(void)module;
-	(void)func;
 
 	if (level < g_log_level) {
 		atomic64_inc(&g_log_dropped);

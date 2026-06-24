@@ -25,7 +25,7 @@ static void pdm_driver_entries_exit_count(size_t count)
 		if (!entry->exit)
 			continue;
 
-		LOG_DEBUG("PDM-BUS", "Unregistering PDM driver [%s]",
+		LOG_DEBUG("Unregistering PDM driver [%s]",
 			  entry->name ? entry->name : "unknown");
 		entry->exit();
 	}
@@ -40,16 +40,16 @@ int pdm_driver_entries_init(void)
 	for (entry = __start_pdm_driver_entries;
 	     entry < __stop_pdm_driver_entries; entry++) {
 		if (!entry->name || !entry->init || !entry->exit) {
-			LOG_ERROR("PDM-BUS", "Invalid PDM driver entry at index %zu",
+			LOG_ERROR("Invalid PDM driver entry at index %zu",
 				  count);
 			ret = -EINVAL;
 			goto err_exit_registered;
 		}
 
-		LOG_DEBUG("PDM-BUS", "Registering PDM driver [%s]", entry->name);
+		LOG_DEBUG("Registering PDM driver [%s]", entry->name);
 		ret = entry->init();
 		if (ret) {
-			LOG_ERROR("PDM-BUS", "Failed to register PDM driver [%s]: %d",
+			LOG_ERROR("Failed to register PDM driver [%s]: %d",
 				  entry->name, ret);
 			goto err_exit_registered;
 		}

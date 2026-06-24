@@ -3,7 +3,6 @@
  *
  * 功能特性：
  * - 分级日志（DEBUG/INFO/WARN/ERROR/FATAL）
- * - 模块级日志控制
  * - 结构化日志支持
  * - 日志过滤和采样
  * - 远程日志传输（UDP）
@@ -68,10 +67,6 @@ typedef enum {
  */
 static atomic_int g_log_state = ATOMIC_VAR_INIT(LOG_STATE_UNINITIALIZED);
 static _Atomic log_level_t g_log_level = LOG_LEVEL_INFO; /* 使用原子类型 */
-static log_level_t g_module_levels[LOG_MODULE_MAX]; /* 模块级日志级别 */
-static bool g_module_level_set[LOG_MODULE_MAX] = {
-	false
-}; /* 是否设置了模块级别 */
 static FILE *g_log_file = NULL;
 static osal_mutex_t g_log_mutex = OSAL_MUTEX_INITIALIZER; /* 保护文件操作 */
 static osal_mutex_t g_config_mutex = OSAL_MUTEX_INITIALIZER; /* 保护配置变量 */
@@ -122,13 +117,6 @@ static bool _log_is_ready(void)
 
 static void _reset_log_config_unlocked(void)
 {
-	uint32_t i;
-
-	for (i = 0; i < LOG_MODULE_MAX; i++) {
-		g_module_level_set[i] = false;
-		g_module_levels[i] = LOG_LEVEL_INFO;
-	}
-
 	g_log_filter_enabled = false;
 	g_log_sampling_rate = 1;
 	g_log_counter = 0;
@@ -164,7 +152,7 @@ int32_t osal_log_init(const char *log_file_path, int32_t level)
 		__atomic_store_n(&g_log_level, level, __ATOMIC_RELAXED);
 	}
 
-	/* 初始化模块级别为未设置 */
+	/* 初始化日志配置 */
 	osal_mutex_lock(&g_config_mutex);
 	_reset_log_config_unlocked();
 	osal_mutex_unlock(&g_config_mutex);
@@ -242,38 +230,6 @@ void osal_log_set_level(int32_t level)
 	if (level >= LOG_LEVEL_DEBUG && level <= LOG_LEVEL_FATAL) {
 		__atomic_store_n(&g_log_level, level, __ATOMIC_RELAXED);
 	}
-}
-
-/**
- * @brief 设置模块日志级别
- */
-void osal_log_set_module_level(log_module_t module, int32_t level)
-{
-	if (module < LOG_MODULE_MAX && level >= LOG_LEVEL_DEBUG &&
-		level <= LOG_LEVEL_FATAL) {
-		osal_mutex_lock(&g_config_mutex);
-		g_module_levels[module] = level;
-		g_module_level_set[module] = true;
-		osal_mutex_unlock(&g_config_mutex);
-	}
-}
-
-/**
- * @brief 获取模块日志级别
- */
-int32_t osal_log_get_module_level(log_module_t module)
-{
-	int32_t level;
-
-	osal_mutex_lock(&g_config_mutex);
-	if (module < LOG_MODULE_MAX && g_module_level_set[module]) {
-		level = g_module_levels[module];
-	} else {
-		level = g_log_level; /* 返回全局级别 */
-	}
-	osal_mutex_unlock(&g_config_mutex);
-
-	return level;
 }
 
 /**
@@ -610,9 +566,8 @@ static const char *_extract_filename(const char *path)
  *
  * 参考 spdlog 的两级过滤设计
  */
-static void _log_internal_ex(log_level_t level, const char *module,
-							 const char *file, const char *func, int32_t line,
-							 const char *format, va_list args)
+static void _log_internal_ex(log_level_t level, const char *file,
+							 int32_t line, const char *format, va_list args)
 {
 	char message[OSAL_LOG_MESSAGE_SIZE];
 	char full_log[OSAL_LOG_MESSAGE_SIZE + 256];
@@ -622,8 +577,6 @@ static void _log_internal_ex(log_level_t level, const char *module,
 	if (!_log_is_ready())
 		return;
 
-	(void)module;
-	(void)func;
 	if (format == NULL)
 		return;
 
@@ -685,8 +638,7 @@ static void _log_internal_ex(log_level_t level, const char *module,
  *
  * 性能优化：使用原子操作进行快速路径级别检查
  */
-static void _log_internal(log_level_t level, const char *module,
-						  const char *format, va_list args)
+static void _log_internal(log_level_t level, const char *format, va_list args)
 {
 	char message[OSAL_LOG_MESSAGE_SIZE];
 	log_level_t current_level;
@@ -694,7 +646,6 @@ static void _log_internal(log_level_t level, const char *module,
 	if (!_log_is_ready())
 		return;
 
-	(void)module;
 	if (format == NULL)
 		return;
 
@@ -744,7 +695,7 @@ static void _log_internal(log_level_t level, const char *module,
 /**
  * @brief 通用日志函数（兼容旧接口）
  */
-void osal_log(int32_t level, const char *module, const char *format, ...)
+void osal_log(int32_t level, const char *format, ...)
 {
 	va_list args;
 
@@ -754,7 +705,7 @@ void osal_log(int32_t level, const char *module, const char *format, ...)
 		return;
 
 	va_start(args, format);
-	_log_internal(level, module, format, args);
+	_log_internal(level, format, args);
 	va_end(args);
 }
 
@@ -770,15 +721,13 @@ void osal_log(int32_t level, const char *module, const char *format, ...)
  * 4. 参考 Linux kernel vprintk_emit 和 spdlog 设计
  *
  * @param[in] level 日志级别（OS_LOG_LEVEL_DEBUG ~ OS_LOG_LEVEL_FATAL）
- * @param[in] module 模块名称（字符串）
  * @param[in] file 源文件名（__FILE__）
- * @param[in] func 函数名（__func__）
  * @param[in] line 行号（__LINE__）
  * @param[in] format 格式化字符串（printf 风格）
  * @param[in] ... 可变参数
  */
-void osal_log_emit(int32_t level, const char *module, const char *file,
-				   const char *func, int32_t line, const char *format, ...)
+void osal_log_emit(int32_t level, const char *file, int32_t line,
+				   const char *format, ...)
 {
 	va_list args;
 
@@ -789,12 +738,12 @@ void osal_log_emit(int32_t level, const char *module, const char *file,
 		return;
 
 	va_start(args, format);
-	_log_internal_ex(level, module, file, func, line, format, args);
+	_log_internal_ex(level, file, line, format, args);
 	va_end(args);
 }
 
 /**
- * @brief 简单打印（不带日志级别和模块名）
+ * @brief 简单打印（不带日志级别）
  */
 void osal_printf(const char *format, ...)
 {
@@ -820,9 +769,8 @@ void osal_printf(const char *format, ...)
 /**
  * @brief 结构化日志函数
  */
-void osal_log_structured(int32_t level, log_module_t module,
-						 const char *message, const log_kv_pair_t *kv_pairs,
-						 uint32_t kv_count)
+void osal_log_structured(int32_t level, const char *message,
+						 const log_kv_pair_t *kv_pairs, uint32_t kv_count)
 {
 	char full_message[OSAL_LOG_MESSAGE_SIZE];
 	char kv_buffer[512];
@@ -830,8 +778,6 @@ void osal_log_structured(int32_t level, log_module_t module,
 	uint32_t i;
 	osal_size_t offset = 0;
 	log_level_t current_level;
-	log_level_t module_level;
-	bool module_level_set;
 
 	if (level < LOG_LEVEL_DEBUG || level > LOG_LEVEL_FATAL)
 		return;
@@ -841,25 +787,9 @@ void osal_log_structured(int32_t level, log_module_t module,
 	if (!_log_is_ready())
 		return;
 
-	/* 读取日志级别配置 */
-	osal_mutex_lock(&g_config_mutex);
-	current_level = g_log_level;
-	if (module < LOG_MODULE_MAX) {
-		module_level_set = g_module_level_set[module];
-		module_level = g_module_levels[module];
-	} else {
-		module_level_set = false;
-		module_level = LOG_LEVEL_INFO;
-	}
-	osal_mutex_unlock(&g_config_mutex);
-
-	/* 检查模块级别 */
-	if (module < LOG_MODULE_MAX && module_level_set) {
-		if (level < module_level)
-			return;
-	} else if (level < current_level) {
+	current_level = __atomic_load_n(&g_log_level, __ATOMIC_RELAXED);
+	if (level < current_level)
 		return;
-	}
 
 	/* 构造键值对字符串 */
 	kv_buffer[0] = '\0';

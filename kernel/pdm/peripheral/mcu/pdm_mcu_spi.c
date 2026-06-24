@@ -87,7 +87,7 @@ static int pdm_mcu_spi_setup(struct pdm_mcu_instance *inst)
 		inst->transport.spi.rx_timeout_ms = value;
 
 	native->inst = inst;
-	LOG_INFO("PDM-MCU-SPI", "Bound SPI transport to %s",
+	LOG_INFO("Bound SPI transport to %s",
 		 dev_name(&native->bus.spi->dev));
 	return 0;
 }

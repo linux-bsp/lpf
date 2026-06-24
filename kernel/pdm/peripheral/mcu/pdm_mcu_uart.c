@@ -192,7 +192,7 @@ static int pdm_mcu_uart_setup_serdev(struct pdm_mcu_instance *inst,
 	serdev_device_set_flow_control(serdev,
 				       pdm_mcu_uart_hw_flow_control(np));
 
-	LOG_INFO("PDM-MCU-UART", "Opened serdev %s baud=%u",
+	LOG_INFO("Opened serdev %s baud=%u",
 		 dev_name(&serdev->dev), inst->transport.uart.baudrate);
 	return 0;
 }
@@ -345,12 +345,12 @@ static int pdm_mcu_uart_setup_file(struct pdm_mcu_instance *inst)
 	if (IS_ERR(inst->transport.uart.file)) {
 		ret = PTR_ERR(inst->transport.uart.file);
 		inst->transport.uart.file = NULL;
-		LOG_ERROR("PDM-MCU-UART", "Failed to open %s: %d",
+		LOG_ERROR("Failed to open %s: %d",
 			  inst->transport.uart.path, ret);
 		return ret;
 	}
 
-	LOG_INFO("PDM-MCU-UART", "Opened %s%s%u",
+	LOG_INFO("Opened %s%s%u",
 		 inst->transport.uart.path,
 		 inst->transport.uart.baudrate ? " baud=" : "",
 		 inst->transport.uart.baudrate);

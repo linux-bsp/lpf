@@ -3,7 +3,6 @@
  *
  * 功能特性：
  * - 分级日志（DEBUG/INFO/WARN/ERROR/FATAL）
- * - 模块级日志控制
  * - 结构化日志支持
  * - 日志过滤和采样
  * - 远程日志传输（syslog/UDP）
@@ -31,7 +30,6 @@
 /* 日志缓冲区大小 */
 #define OSAL_LOG_PATH_SIZE 0x100U /* 日志路径缓冲区大小 */
 #define OSAL_LOG_FILENAME_SIZE 0x200U /* 日志文件名缓冲区大小 */
-#define OSAL_LOG_TIMESTAMP_SIZE 0x40U /* 时间戳缓冲区大小 */
 
 #ifdef CONFIG_LOG_BUFFER_SIZE
 #define OSAL_LOG_MESSAGE_SIZE CONFIG_LOG_BUFFER_SIZE
@@ -39,7 +37,6 @@
 #define OSAL_LOG_MESSAGE_SIZE 0x400U /* 日志消息缓冲区大小 */
 #endif
 
-#define OSAL_LOG_MAX_MODULES 0x20U /* 最大模块数 */
 #define OSAL_LOG_MAX_KV_PAIRS 0x8U /* 结构化日志最大键值对数 */
 
 /*
@@ -64,20 +61,6 @@
 #endif
 
 /*
- * 日志模块枚举
- */
-typedef enum {
-	LOG_MODULE_OSAL = 0x0,
-	LOG_MODULE_LPF_HW,
-	LOG_MODULE_LPF_CONFIG,
-	LOG_MODULE_PDI,
-	LOG_MODULE_ACONFIG,
-	LOG_MODULE_APP,
-	LOG_MODULE_TEST,
-	LOG_MODULE_MAX
-} log_module_t;
-
-/*
  * 结构化日志键值对
  */
 typedef struct {
@@ -96,87 +79,87 @@ typedef struct {
  *
  * 参考：Linux kernel pr_debug/pr_info 设计模式
  */
-#define LOG_DEBUG(module, ...)                                            \
-	do {                                                                  \
-		if (OS_LOG_LEVEL_DEBUG >= OSAL_LOG_COMPILE_LEVEL)                 \
-			osal_log_emit(OS_LOG_LEVEL_DEBUG, module, __FILE__, __func__, \
-						  __LINE__, __VA_ARGS__);                         \
+#define LOG_DEBUG(...)                                               \
+	do {                                                              \
+		if (OS_LOG_LEVEL_DEBUG >= OSAL_LOG_COMPILE_LEVEL)             \
+			osal_log_emit(OS_LOG_LEVEL_DEBUG, __FILE__, __LINE__,       \
+						  __VA_ARGS__);                                      \
 	} while (0)
 
-#define LOG_INFO(module, ...)                                            \
-	do {                                                                 \
-		if (OS_LOG_LEVEL_INFO >= OSAL_LOG_COMPILE_LEVEL)                 \
-			osal_log_emit(OS_LOG_LEVEL_INFO, module, __FILE__, __func__, \
-						  __LINE__, __VA_ARGS__);                        \
+#define LOG_INFO(...)                                               \
+	do {                                                             \
+		if (OS_LOG_LEVEL_INFO >= OSAL_LOG_COMPILE_LEVEL)             \
+			osal_log_emit(OS_LOG_LEVEL_INFO, __FILE__, __LINE__,       \
+						  __VA_ARGS__);                                     \
 	} while (0)
 
-#define LOG_WARN(module, ...)                                            \
-	do {                                                                 \
-		if (OS_LOG_LEVEL_WARN >= OSAL_LOG_COMPILE_LEVEL)                 \
-			osal_log_emit(OS_LOG_LEVEL_WARN, module, __FILE__, __func__, \
-						  __LINE__, __VA_ARGS__);                        \
+#define LOG_WARN(...)                                               \
+	do {                                                             \
+		if (OS_LOG_LEVEL_WARN >= OSAL_LOG_COMPILE_LEVEL)             \
+			osal_log_emit(OS_LOG_LEVEL_WARN, __FILE__, __LINE__,       \
+						  __VA_ARGS__);                                     \
 	} while (0)
 
-#define LOG_ERROR(module, ...)                                            \
-	do {                                                                  \
-		if (OS_LOG_LEVEL_ERROR >= OSAL_LOG_COMPILE_LEVEL)                 \
-			osal_log_emit(OS_LOG_LEVEL_ERROR, module, __FILE__, __func__, \
-						  __LINE__, __VA_ARGS__);                         \
+#define LOG_ERROR(...)                                               \
+	do {                                                              \
+		if (OS_LOG_LEVEL_ERROR >= OSAL_LOG_COMPILE_LEVEL)             \
+			osal_log_emit(OS_LOG_LEVEL_ERROR, __FILE__, __LINE__,       \
+						  __VA_ARGS__);                                      \
 	} while (0)
 
-#define LOG_FATAL(module, ...)                                            \
-	do {                                                                  \
-		if (OS_LOG_LEVEL_FATAL >= OSAL_LOG_COMPILE_LEVEL)                 \
-			osal_log_emit(OS_LOG_LEVEL_FATAL, module, __FILE__, __func__, \
-						  __LINE__, __VA_ARGS__);                         \
+#define LOG_FATAL(...)                                               \
+	do {                                                              \
+		if (OS_LOG_LEVEL_FATAL >= OSAL_LOG_COMPILE_LEVEL)             \
+			osal_log_emit(OS_LOG_LEVEL_FATAL, __FILE__, __LINE__,       \
+						  __VA_ARGS__);                                      \
 	} while (0)
 
 /*
  * 仅打印一次的日志宏（防止日志洪水）
  * 使用静态变量确保同一日志点只输出一次
  */
-#define LOG_DEBUG_ONCE(module, ...)                                       \
-	do {                                                                  \
-		static uint8_t __logged = 0;                                      \
-		if (!__logged && OS_LOG_LEVEL_DEBUG >= OSAL_LOG_COMPILE_LEVEL) {  \
-			__logged = 1;                                                 \
-			osal_log_emit(OS_LOG_LEVEL_DEBUG, module, __FILE__, __func__, \
-						  __LINE__, __VA_ARGS__);                         \
-		}                                                                 \
+#define LOG_DEBUG_ONCE(...)                                          \
+	do {                                                              \
+		static uint8_t __logged = 0;                                  \
+		if (!__logged && OS_LOG_LEVEL_DEBUG >= OSAL_LOG_COMPILE_LEVEL) { \
+			__logged = 1;                                         \
+			osal_log_emit(OS_LOG_LEVEL_DEBUG, __FILE__, __LINE__,  \
+						  __VA_ARGS__);                                \
+		}                                                           \
 	} while (0)
 
-#define LOG_WARN_ONCE(module, ...)                                       \
-	do {                                                                 \
-		static uint8_t __logged = 0;                                     \
-		if (!__logged && OS_LOG_LEVEL_WARN >= OSAL_LOG_COMPILE_LEVEL) {  \
-			__logged = 1;                                                \
-			osal_log_emit(OS_LOG_LEVEL_WARN, module, __FILE__, __func__, \
-						  __LINE__, __VA_ARGS__);                        \
-		}                                                                \
+#define LOG_WARN_ONCE(...)                                          \
+	do {                                                             \
+		static uint8_t __logged = 0;                                 \
+		if (!__logged && OS_LOG_LEVEL_WARN >= OSAL_LOG_COMPILE_LEVEL) { \
+			__logged = 1;                                        \
+			osal_log_emit(OS_LOG_LEVEL_WARN, __FILE__, __LINE__,   \
+						  __VA_ARGS__);                               \
+		}                                                          \
 	} while (0)
 
-#define LOG_ERROR_ONCE(module, ...)                                       \
-	do {                                                                  \
-		static uint8_t __logged = 0;                                      \
-		if (!__logged && OS_LOG_LEVEL_ERROR >= OSAL_LOG_COMPILE_LEVEL) {  \
-			__logged = 1;                                                 \
-			osal_log_emit(OS_LOG_LEVEL_ERROR, module, __FILE__, __func__, \
-						  __LINE__, __VA_ARGS__);                         \
-		}                                                                 \
+#define LOG_ERROR_ONCE(...)                                          \
+	do {                                                              \
+		static uint8_t __logged = 0;                                  \
+		if (!__logged && OS_LOG_LEVEL_ERROR >= OSAL_LOG_COMPILE_LEVEL) { \
+			__logged = 1;                                         \
+			osal_log_emit(OS_LOG_LEVEL_ERROR, __FILE__, __LINE__,  \
+						  __VA_ARGS__);                                \
+		}                                                           \
 	} while (0)
 
 /*
  * 结构化日志宏（便捷接口）
  * 使用示例：
- *   LOG_STRUCTURED(LOG_MODULE_PDI, "channel_switch",
+ *   LOG_STRUCTURED("channel_switch",
  *                  "from", "ethernet",
  *                  "to", "uart",
  *                  "reason", "timeout");
  */
-#define LOG_STRUCTURED(module, msg, ...)                                \
+#define LOG_STRUCTURED(msg, ...)                                    \
 	do {                                                                \
 		log_kv_pair_t __kv_pairs[] = { __VA_ARGS__ };                   \
-		osal_log_structured(OS_LOG_LEVEL_INFO, module, msg, __kv_pairs, \
+		osal_log_structured(OS_LOG_LEVEL_INFO, msg, __kv_pairs,         \
 							OSAL_sizeof(__kv_pairs) /                   \
 								OSAL_sizeof(log_kv_pair_t));            \
 	} while (0)
@@ -220,22 +203,6 @@ void osal_log_set_max_file_size(uint32_t size_bytes);
 void osal_log_set_max_files(uint32_t max_files);
 
 /**
- * @brief 设置模块日志级别
- *
- * @param[in] module 模块ID
- * @param[in] level 日志级别
- */
-void osal_log_set_module_level(log_module_t module, int32_t level);
-
-/**
- * @brief 获取模块日志级别
- *
- * @param[in] module 模块ID
- * @return 日志级别
- */
-int32_t osal_log_get_module_level(log_module_t module);
-
-/**
  * @brief 设置日志过滤器（正则表达式）
  *
  * @param[in] pattern 过滤模式，NULL表示清除过滤器
@@ -268,27 +235,24 @@ void osal_log_disable_remote(void);
  * @brief 通用日志函数
  *
  * @param[in] level 日志级别
- * @param[in] module 模块名称
  * @param[in] format 格式化字符串
  * @param[in] ... 可变参数
  */
-void osal_log(int32_t level, const char *module, const char *format, ...);
+void osal_log(int32_t level, const char *format, ...);
 
 /**
  * @brief 结构化日志函数
  *
  * @param[in] level 日志级别
- * @param[in] module 模块ID
  * @param[in] message 日志消息
  * @param[in] kv_pairs 键值对数组
  * @param[in] kv_count 键值对数量
  */
-void osal_log_structured(int32_t level, log_module_t module,
-						 const char *message, const log_kv_pair_t *kv_pairs,
-						 uint32_t kv_count);
+void osal_log_structured(int32_t level, const char *message,
+						 const log_kv_pair_t *kv_pairs, uint32_t kv_count);
 
 /**
- * @brief 简单打印（不带日志级别和模块名）
+ * @brief 简单打印（不带日志级别）
  */
 void osal_printf(const char *format, ...);
 
@@ -304,8 +268,8 @@ void osal_log_get_stats(uint64_t *total_count, uint64_t *dropped_count);
  * 统一的底层日志实现函数
  * 所有日志宏最终调用此函数
  */
-void osal_log_emit(int32_t level, const char *module, const char *file,
-				   const char *func, int32_t line, const char *format, ...)
-	__attribute__((format(printf, 6, 7)));
+void osal_log_emit(int32_t level, const char *file, int32_t line,
+				   const char *format, ...)
+	__attribute__((format(printf, 4, 5)));
 
 #endif /* OSAL_LOG_H */

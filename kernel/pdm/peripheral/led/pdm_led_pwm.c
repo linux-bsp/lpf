@@ -28,7 +28,7 @@ static int pdm_led_pwm_setup(struct pdm_led_instance *inst)
 
 	pwmdev = pwm_get(dev, NULL);
 	if (IS_ERR(pwmdev)) {
-		LOG_ERROR("PDM-LED-PWM", "Failed to get PWM for %s: %ld",
+		LOG_ERROR("Failed to get PWM for %s: %ld",
 			  dev_name(dev), PTR_ERR(pwmdev));
 		return PTR_ERR(pwmdev);
 	}

@@ -56,12 +56,12 @@ int pdm_bus_register_driver(struct module *owner, struct pdm_driver *driver)
 
 	ret = driver_register(&driver->driver);
 	if (ret) {
-		LOG_ERROR("PDM-BUS", "Failed to register driver [%s], error %d",
+		LOG_ERROR("Failed to register driver [%s], error %d",
 			  driver->driver.name, ret);
 		return ret;
 	}
 
-	LOG_DEBUG("PDM-BUS", "Driver [%s] registered", driver->driver.name);
+	LOG_DEBUG("Driver [%s] registered", driver->driver.name);
 	return 0;
 }
 EXPORT_SYMBOL_GPL(pdm_bus_register_driver);
@@ -72,7 +72,7 @@ void pdm_bus_unregister_driver(struct pdm_driver *driver)
 		return;
 
 	driver_unregister(&driver->driver);
-	LOG_DEBUG("PDM-BUS", "Driver [%s] unregistered", driver->driver.name);
+	LOG_DEBUG("Driver [%s] unregistered", driver->driver.name);
 }
 EXPORT_SYMBOL_GPL(pdm_bus_unregister_driver);
 
@@ -91,7 +91,7 @@ static int pdm_bus_device_probe(struct device *dev)
 	if (!pdm_drv->probe)
 		return -ENODEV;
 
-	LOG_DEBUG("PDM-BUS", "Probing device [%s] with driver [%s]",
+	LOG_DEBUG("Probing device [%s] with driver [%s]",
 		  dev_name(dev), pdm_drv->driver.name);
 	ret = pdm_device_bind(pdm_dev, pdm_drv->device_type,
 			      pdm_drv->capabilities);
@@ -123,7 +123,7 @@ static void pdm_bus_device_remove(struct device *dev)
 	pdm_dev = dev_to_pdm_device(dev);
 	pdm_drv = drv_to_pdm_driver(dev->driver);
 
-	LOG_DEBUG("PDM-BUS", "Removing device [%s]", dev_name(dev));
+	LOG_DEBUG("Removing device [%s]", dev_name(dev));
 	if (pdm_drv->remove)
 		pdm_drv->remove(pdm_dev);
 	pdm_device_unbind(pdm_dev);
@@ -197,18 +197,18 @@ int pdm_bus_init(void)
 
 	ret = bus_register(&pdm_bus_type);
 	if (ret < 0) {
-		LOG_ERROR("PDM-BUS", "Failed to register bus, error %d", ret);
+		LOG_ERROR("Failed to register bus, error %d", ret);
 		return ret;
 	}
 
-	LOG_INFO("PDM-BUS", "PDM bus initialized");
+	LOG_INFO("PDM bus initialized");
 	return 0;
 }
 
 void pdm_bus_exit(void)
 {
 	bus_unregister(&pdm_bus_type);
-	LOG_INFO("PDM-BUS", "PDM bus unregistered");
+	LOG_INFO("PDM bus unregistered");
 }
 
 MODULE_LICENSE("GPL");

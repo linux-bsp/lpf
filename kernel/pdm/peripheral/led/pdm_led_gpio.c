@@ -30,7 +30,7 @@ static int pdm_led_gpio_setup(struct pdm_led_instance *inst)
 	if (PTR_ERR(gpiod) == -ENOENT)
 		gpiod = gpiod_get(dev, NULL, GPIOD_OUT_LOW);
 	if (IS_ERR(gpiod)) {
-		LOG_ERROR("PDM-LED-GPIO", "Failed to get GPIO for %s: %ld",
+		LOG_ERROR("Failed to get GPIO for %s: %ld",
 			  dev_name(dev), PTR_ERR(gpiod));
 		return PTR_ERR(gpiod);
 	}

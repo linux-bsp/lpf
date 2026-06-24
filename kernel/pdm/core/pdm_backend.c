@@ -42,7 +42,7 @@ static void pdm_backend_entries_exit_count(size_t count)
 		if (!entry->exit)
 			continue;
 
-		LOG_DEBUG("PDM-BACKEND", "Exiting backend [%s]",
+		LOG_DEBUG("Exiting backend [%s]",
 			  entry->name ? entry->name : "unknown");
 		entry->exit();
 	}
@@ -58,18 +58,18 @@ int pdm_backend_entries_init(void)
 	     entry < __stop_pdm_backend_entries; entry++) {
 		if (!entry->name || !entry->matches || !entry->ops ||
 		    (!!entry->init != !!entry->exit)) {
-			LOG_ERROR("PDM-BACKEND", "Invalid backend entry at index %zu",
+			LOG_ERROR("Invalid backend entry at index %zu",
 				  count);
 			ret = -EINVAL;
 			goto err_exit_registered;
 		}
 
 		if (entry->init) {
-			LOG_DEBUG("PDM-BACKEND", "Initializing backend [%s]",
+			LOG_DEBUG("Initializing backend [%s]",
 				  entry->name);
 			ret = entry->init();
 			if (ret) {
-				LOG_ERROR("PDM-BACKEND", "Failed to initialize backend [%s]: %d",
+				LOG_ERROR("Failed to initialize backend [%s]: %d",
 					  entry->name, ret);
 				goto err_exit_registered;
 			}

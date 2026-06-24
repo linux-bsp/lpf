@@ -32,7 +32,7 @@ static void pdm_device_release(struct device *dev)
 {
 	struct pdm_device *pdm_dev = dev_to_pdm_device(dev);
 
-	LOG_DEBUG("PDM-DEVICE", "Releasing device [%s]", dev_name(dev));
+	LOG_DEBUG("Releasing device [%s]", dev_name(dev));
 	pdm_device_unbind(pdm_dev);
 	of_node_put(dev->of_node);
 	kfree(pdm_dev);
@@ -67,7 +67,7 @@ int pdm_device_register(struct pdm_device *pdm_dev, const char *name)
 
 	ret = dev_set_name(&pdm_dev->dev, "%s", name);
 	if (ret) {
-		LOG_ERROR("PDM-DEVICE", "Failed to name device [%s], error %d",
+		LOG_ERROR("Failed to name device [%s], error %d",
 			  name, ret);
 		put_device(&pdm_dev->dev);
 		return ret;
@@ -75,13 +75,13 @@ int pdm_device_register(struct pdm_device *pdm_dev, const char *name)
 
 	ret = device_add(&pdm_dev->dev);
 	if (ret) {
-		LOG_ERROR("PDM-DEVICE", "Failed to register device [%s], error %d",
+		LOG_ERROR("Failed to register device [%s], error %d",
 			  name, ret);
 		put_device(&pdm_dev->dev);
 		return ret;
 	}
 
-	LOG_DEBUG("PDM-DEVICE", "Device [%s] registered", name);
+	LOG_DEBUG("Device [%s] registered", name);
 	return 0;
 }
 EXPORT_SYMBOL_GPL(pdm_device_register);
@@ -91,7 +91,7 @@ void pdm_device_unregister(struct pdm_device *pdm_dev)
 	if (!pdm_dev)
 		return;
 
-	LOG_DEBUG("PDM-DEVICE", "Unregistering device [%s]",
+	LOG_DEBUG("Unregistering device [%s]",
 		  dev_name(&pdm_dev->dev));
 	device_unregister(&pdm_dev->dev);
 }
