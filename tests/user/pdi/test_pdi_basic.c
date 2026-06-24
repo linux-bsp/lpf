@@ -120,10 +120,8 @@ static int test_mcu_validation(void)
 	struct pdm_mcu_version version;
 	struct pdm_mcu_status status;
 	struct pdm_mcu_command command;
-	struct pdm_mcu_data data;
 
 	memset(&command, 0, sizeof(command));
-	memset(&data, 0, sizeof(data));
 
 	errno = 0;
 	if (expect_failure_errno(pdi_mcu_open(NULL, NULL), EINVAL)) {
@@ -211,26 +209,6 @@ static int test_mcu_validation(void)
 	errno = 0;
 	if (expect_failure_errno(pdi_mcu_command(&ctx, &command), EBADF)) {
 		return 117;
-	}
-
-	errno = 0;
-	if (expect_failure_errno(pdi_mcu_read_data(&ctx, NULL), EINVAL)) {
-		return 118;
-	}
-
-	errno = 0;
-	if (expect_failure_errno(pdi_mcu_read_data(&ctx, &data), EBADF)) {
-		return 119;
-	}
-
-	errno = 0;
-	if (expect_failure_errno(pdi_mcu_write_data(&ctx, NULL), EINVAL)) {
-		return 120;
-	}
-
-	errno = 0;
-	if (expect_failure_errno(pdi_mcu_write_data(&ctx, &data), EBADF)) {
-		return 121;
 	}
 
 	return 0;

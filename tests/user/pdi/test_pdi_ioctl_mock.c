@@ -191,37 +191,17 @@ static int mock_ioctl(int fd, unsigned long request, void *arg)
 		struct pdm_mcu_command *command = arg;
 
 		if (command->index != 0 || command->command != 0x22 ||
-		    command->tx_len != 2 || command->tx_data[0] != 0xAA ||
+		    command->flags != PDM_MCU_CMD_F_NEED_RESPONSE ||
+		    command->tx_len != 2 || command->rx_len != 2 ||
+		    command->tx_data[0] != 0xAA ||
 		    command->tx_data[1] != 0x55)
 		{
 			return -1;
 		}
-		command->rx_len = 2;
+		command->actual_rx_len = 2;
 		command->rx_data[0] = 0x12;
 		command->rx_data[1] = 0x34;
 		return 0;
-	}
-	case PDM_MCU_IOC_READ_DATA: {
-		struct pdm_mcu_data *data = arg;
-
-		if (data->index != 0 || data->address != 0x1000 ||
-		    data->len != 3)
-		{
-			return -1;
-		}
-		data->data[0] = 0x01;
-		data->data[1] = 0x02;
-		data->data[2] = 0x03;
-		return 0;
-	}
-	case PDM_MCU_IOC_WRITE_DATA: {
-		const struct pdm_mcu_data *data = arg;
-
-		return data->index == 0 && data->address == 0x2000 &&
-			       data->len == 2 && data->data[0] == 0xFE &&
-			       data->data[1] == 0xED ?
-			       0 :
-			       -1;
 	}
 	case PDM_LED_IOC_GET_STATE: {
 		struct pdm_led_state *state = arg;
@@ -452,7 +432,6 @@ static int test_mcu_operations(void)
 	struct pdm_mcu_version version;
 	struct pdm_mcu_status status;
 	struct pdm_mcu_command command;
-	struct pdm_mcu_data data;
 
 	mock_reset();
 	pdi_syscall_set_ops(&g_mock_ops);
@@ -497,6 +476,7 @@ static int test_mcu_operations(void)
 
 	memset(&command, 0, sizeof(command));
 	command.command = 0x22;
+	command.flags = PDM_MCU_CMD_F_NEED_RESPONSE;
 	command.tx_len = 2;
 	command.rx_len = 2;
 	command.tx_data[0] = 0xAA;
@@ -505,35 +485,10 @@ static int test_mcu_operations(void)
 		return 106;
 	}
 	if (g_mock.last_request != PDM_MCU_IOC_COMMAND ||
-	    command.rx_len != 2 || command.rx_data[0] != 0x12 ||
+	    command.actual_rx_len != 2 || command.rx_data[0] != 0x12 ||
 	    command.rx_data[1] != 0x34)
 	{
 		return 107;
-	}
-
-	memset(&data, 0, sizeof(data));
-	data.address = 0x1000;
-	data.len = 3;
-	if (pdi_mcu_read_data(&ctx, &data) != 0) {
-		return 108;
-	}
-	if (g_mock.last_request != PDM_MCU_IOC_READ_DATA ||
-	    data.data[0] != 0x01 || data.data[1] != 0x02 ||
-	    data.data[2] != 0x03)
-	{
-		return 109;
-	}
-
-	memset(&data, 0, sizeof(data));
-	data.address = 0x2000;
-	data.len = 2;
-	data.data[0] = 0xFE;
-	data.data[1] = 0xED;
-	if (pdi_mcu_write_data(&ctx, &data) != 0) {
-		return 110;
-	}
-	if (g_mock.last_request != PDM_MCU_IOC_WRITE_DATA) {
-		return 111;
 	}
 
 	pdi_syscall_reset_ops();

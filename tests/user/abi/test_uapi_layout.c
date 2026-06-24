@@ -48,8 +48,7 @@ ABI_OFFSET(struct pdm_ctl_device_name_query, info, 64);
 ABI_SIZE(struct pdm_mcu_info, 24);
 ABI_SIZE(struct pdm_mcu_version, 40);
 ABI_SIZE(struct pdm_mcu_status, 40);
-ABI_SIZE(struct pdm_mcu_command, 528);
-ABI_SIZE(struct pdm_mcu_data, 268);
+ABI_SIZE(struct pdm_mcu_command, 536);
 
 ABI_SIZE(struct pdm_led_info, 24);
 ABI_SIZE(struct pdm_led_state, 16);
@@ -85,13 +84,6 @@ ABI_ASSERT(PDM_MCU_IOC_RESET == _IOW(PDM_MCU_IOC_MAGIC, 0x04, __u32),
 ABI_ASSERT(PDM_MCU_IOC_COMMAND ==
 		   _IOWR(PDM_MCU_IOC_MAGIC, 0x05, struct pdm_mcu_command),
 	   mcu_command_ioctl);
-ABI_ASSERT(PDM_MCU_IOC_READ_DATA ==
-		   _IOWR(PDM_MCU_IOC_MAGIC, 0x06, struct pdm_mcu_data),
-	   mcu_read_data_ioctl);
-ABI_ASSERT(PDM_MCU_IOC_WRITE_DATA ==
-		   _IOW(PDM_MCU_IOC_MAGIC, 0x07, struct pdm_mcu_data),
-	   mcu_write_data_ioctl);
-
 ABI_ASSERT(PDM_LED_IOC_GET_INFO ==
 		   _IOR(PDM_LED_IOC_MAGIC, 0x01, struct pdm_led_info),
 	   led_get_info_ioctl);

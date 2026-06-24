@@ -68,7 +68,7 @@ static bool pdm_mcu_match(const struct pdm_device *pdm_dev)
 	return pdm_dev && pdm_mcu_has_transport_compatible(pdm_dev->compatible);
 }
 
-static int pdm_mcu_record_result(struct pdm_mcu_instance *inst, int ret)
+static void pdm_mcu_update_state_locked(struct pdm_mcu_instance *inst, int ret)
 {
 	if (ret < 0) {
 		inst->last_error = ret;
@@ -78,7 +78,7 @@ static int pdm_mcu_record_result(struct pdm_mcu_instance *inst, int ret)
 		if (inst->online) {
 			inst->pdm_dev->state = PDM_CTL_DEVICE_STATE_ERROR;
 		}
-		return ret;
+		return;
 	}
 
 	inst->last_error = 0;
@@ -87,25 +87,30 @@ static int pdm_mcu_record_result(struct pdm_mcu_instance *inst, int ret)
 	if (inst->online) {
 		inst->pdm_dev->state = PDM_CTL_DEVICE_STATE_BOUND;
 	}
-	return ret;
 }
 
 static int pdm_mcu_claim_device(struct pdm_mcu_instance *inst)
 {
+	int ret = 0;
+
 	mutex_lock(&inst->lock);
 
 	if (!inst->online) {
-		return -ENODEV;
+		ret = -ENODEV;
+	} else if (!inst->ops) {
+		ret = -EOPNOTSUPP;
 	}
-	if (!inst->ops) {
-		return -EOPNOTSUPP;
+	if (ret) {
+		pdm_mcu_update_state_locked(inst, ret);
+		mutex_unlock(&inst->lock);
 	}
 
-	return 0;
+	return ret;
 }
 
-static void pdm_mcu_release_device(struct pdm_mcu_instance *inst)
+static void pdm_mcu_release_device(struct pdm_mcu_instance *inst, int ret)
 {
+	pdm_mcu_update_state_locked(inst, ret);
 	mutex_unlock(&inst->lock);
 }
 
@@ -136,11 +141,11 @@ static long pdm_mcu_get_version(struct pdm_mcu_instance *inst, unsigned long arg
 	}
 
 	ret = pdm_mcu_claim_device(inst);
-	if (!ret) {
-		ret = pdm_mcu_protocol_get_version(inst, &version);
+	if (ret) {
+		return ret;
 	}
-	ret = pdm_mcu_record_result(inst, ret);
-	pdm_mcu_release_device(inst);
+	ret = pdm_mcu_protocol_get_version(inst, &version);
+	pdm_mcu_release_device(inst, ret);
 	if (ret) {
 		return ret;
 	}
@@ -161,11 +166,11 @@ static long pdm_mcu_get_status(struct pdm_mcu_instance *inst, unsigned long arg)
 	}
 
 	ret = pdm_mcu_claim_device(inst);
-	if (!ret) {
-		ret = pdm_mcu_protocol_get_status(inst, &status);
+	if (ret) {
+		return ret;
 	}
-	ret = pdm_mcu_record_result(inst, ret);
-	pdm_mcu_release_device(inst);
+	ret = pdm_mcu_protocol_get_status(inst, &status);
+	pdm_mcu_release_device(inst, ret);
 	if (ret) {
 		return ret;
 	}
@@ -186,11 +191,11 @@ static long pdm_mcu_reset(struct pdm_mcu_instance *inst, unsigned long arg)
 	}
 
 	ret = pdm_mcu_claim_device(inst);
-	if (!ret) {
-		ret = pdm_mcu_protocol_reset(inst, index);
+	if (ret) {
+		return ret;
 	}
-	ret = pdm_mcu_record_result(inst, ret);
-	pdm_mcu_release_device(inst);
+	ret = pdm_mcu_protocol_reset(inst, index);
+	pdm_mcu_release_device(inst, ret);
 	return ret;
 }
 
@@ -204,11 +209,11 @@ static long pdm_mcu_command_ioctl(struct pdm_mcu_instance *inst, unsigned long a
 	}
 
 	ret = pdm_mcu_claim_device(inst);
-	if (!ret) {
-		ret = pdm_mcu_protocol_command(inst, &command);
+	if (ret) {
+		return ret;
 	}
-	ret = pdm_mcu_record_result(inst, ret);
-	pdm_mcu_release_device(inst);
+	ret = pdm_mcu_protocol_command(inst, &command);
+	pdm_mcu_release_device(inst, ret);
 	if (ret) {
 		return ret;
 	}
@@ -217,49 +222,6 @@ static long pdm_mcu_command_ioctl(struct pdm_mcu_instance *inst, unsigned long a
 		return -EFAULT;
 	}
 	return 0;
-}
-
-static long pdm_mcu_read_data_ioctl(struct pdm_mcu_instance *inst, unsigned long arg)
-{
-	struct pdm_mcu_data data;
-	int ret;
-
-	if (copy_from_user(&data, (void __user *)arg, sizeof(data))) {
-		return -EFAULT;
-	}
-
-	ret = pdm_mcu_claim_device(inst);
-	if (!ret) {
-		ret = pdm_mcu_protocol_read_data(inst, &data);
-	}
-	ret = pdm_mcu_record_result(inst, ret);
-	pdm_mcu_release_device(inst);
-	if (ret) {
-		return ret;
-	}
-
-	if (copy_to_user((void __user *)arg, &data, sizeof(data))) {
-		return -EFAULT;
-	}
-	return 0;
-}
-
-static long pdm_mcu_write_data_ioctl(struct pdm_mcu_instance *inst, unsigned long arg)
-{
-	struct pdm_mcu_data data;
-	int ret;
-
-	if (copy_from_user(&data, (void __user *)arg, sizeof(data))) {
-		return -EFAULT;
-	}
-
-	ret = pdm_mcu_claim_device(inst);
-	if (!ret) {
-		ret = pdm_mcu_protocol_write_data(inst, &data);
-	}
-	ret = pdm_mcu_record_result(inst, ret);
-	pdm_mcu_release_device(inst);
-	return ret;
 }
 
 static long pdm_mcu_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
@@ -283,10 +245,6 @@ static long pdm_mcu_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
 		return pdm_mcu_reset(inst, arg);
 	case PDM_MCU_IOC_COMMAND:
 		return pdm_mcu_command_ioctl(inst, arg);
-	case PDM_MCU_IOC_READ_DATA:
-		return pdm_mcu_read_data_ioctl(inst, arg);
-	case PDM_MCU_IOC_WRITE_DATA:
-		return pdm_mcu_write_data_ioctl(inst, arg);
 	default:
 		return -ENOTTY;
 	}

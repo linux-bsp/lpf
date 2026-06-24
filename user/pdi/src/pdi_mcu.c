@@ -141,23 +141,3 @@ int32_t pdi_mcu_command(pdi_mcu_context_t *ctx,
 
 	return pdi_mcu_ioctl_checked(ctx, PDM_MCU_IOC_COMMAND, command);
 }
-
-int32_t pdi_mcu_read_data(pdi_mcu_context_t *ctx,
-			  struct pdm_mcu_data *data)
-{
-	if (pdi_check_ptr(data) < 0) {
-		return PDI_FAILURE;
-	}
-
-	return pdi_mcu_ioctl_checked(ctx, PDM_MCU_IOC_READ_DATA, data);
-}
-
-int32_t pdi_mcu_write_data(pdi_mcu_context_t *ctx,
-			   const struct pdm_mcu_data *data)
-{
-	if (pdi_check_ptr(data) < 0) {
-		return PDI_FAILURE;
-	}
-
-	return pdi_mcu_ioctl_checked(ctx, PDM_MCU_IOC_WRITE_DATA, (void *)data);
-}

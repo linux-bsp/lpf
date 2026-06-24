@@ -14,7 +14,6 @@
 #define PDM_MCU_ABI_VERSION 0x00010000U
 #define PDM_MCU_DEVICE_NAME "pdm_mcu"
 #define PDM_MCU_MAX_TRANSFER_SIZE 256U
-#define PDM_MCU_MAX_WRITE_SIZE 248U
 
 enum pdm_mcu_state {
 	PDM_MCU_STATE_UNINITIALIZED = 0x00,
@@ -54,20 +53,17 @@ struct pdm_mcu_status {
 	__u64 timestamp_us;
 };
 
+#define PDM_MCU_CMD_F_NEED_RESPONSE (1U << 0)
+
 struct pdm_mcu_command {
 	__u32 index;
 	__u32 command;
+	__u32 flags;
 	__u32 tx_len;
 	__u32 rx_len;
+	__u32 actual_rx_len;
 	__u8 tx_data[PDM_MCU_MAX_TRANSFER_SIZE];
 	__u8 rx_data[PDM_MCU_MAX_TRANSFER_SIZE];
-};
-
-struct pdm_mcu_data {
-	__u32 index;
-	__u32 address;
-	__u32 len;
-	__u8 data[PDM_MCU_MAX_TRANSFER_SIZE];
 };
 
 #define PDM_MCU_IOC_MAGIC 'M'
@@ -80,9 +76,5 @@ struct pdm_mcu_data {
 #define PDM_MCU_IOC_RESET _IOW(PDM_MCU_IOC_MAGIC, 0x04, __u32)
 #define PDM_MCU_IOC_COMMAND \
 	_IOWR(PDM_MCU_IOC_MAGIC, 0x05, struct pdm_mcu_command)
-#define PDM_MCU_IOC_READ_DATA \
-	_IOWR(PDM_MCU_IOC_MAGIC, 0x06, struct pdm_mcu_data)
-#define PDM_MCU_IOC_WRITE_DATA \
-	_IOW(PDM_MCU_IOC_MAGIC, 0x07, struct pdm_mcu_data)
 
 #endif /* PDM_MCU_UAPI_H */

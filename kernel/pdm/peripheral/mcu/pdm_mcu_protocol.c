@@ -79,8 +79,7 @@ static int pdm_mcu_protocol_cmd_xfer(struct pdm_mcu_instance *inst,
 				     u32 *response_len)
 {
 	struct pdm_mcu_xfer xfer = {
-		.type = PDM_MCU_XFER_CMD,
-		.id = command,
+		.command = command,
 		.tx = payload,
 		.tx_len = payload_len,
 		.rx = response,
@@ -159,59 +158,30 @@ int pdm_mcu_protocol_command(struct pdm_mcu_instance *inst,
 			     struct pdm_mcu_command *command)
 {
 	u32 rx_len = command->rx_len;
+	bool need_response = command->flags & PDM_MCU_CMD_F_NEED_RESPONSE;
 	int ret;
 
+	if (command->flags & ~PDM_MCU_CMD_F_NEED_RESPONSE) {
+		return -EINVAL;
+	}
 	if (command->tx_len > PDM_MCU_MAX_TRANSFER_SIZE ||
 	    command->rx_len > PDM_MCU_MAX_TRANSFER_SIZE) {
 		return -EMSGSIZE;
 	}
+	if (!need_response && command->rx_len) {
+		return -EINVAL;
+	}
 
 	ret = pdm_mcu_protocol_cmd_xfer(inst, command->command,
 					 command->tx_data, command->tx_len,
-					 command->rx_data, &rx_len);
+					 need_response ? command->rx_data : NULL,
+					 need_response ? &rx_len : NULL);
 	if (ret) {
 		return ret;
 	}
 
-	command->rx_len = rx_len;
+	command->actual_rx_len = need_response ? rx_len : 0;
 	return 0;
-}
-
-int pdm_mcu_protocol_read_data(struct pdm_mcu_instance *inst,
-			       struct pdm_mcu_data *data)
-{
-	struct pdm_mcu_xfer xfer = {
-		.type = PDM_MCU_XFER_DATA_READ,
-		.id = data->address,
-		.rx = data->data,
-		.rx_len = data->len,
-	};
-	int ret;
-
-	ret = pdm_mcu_protocol_xfer(inst, &xfer);
-	if (ret) {
-		return ret;
-	}
-	if (xfer.actual_rx_len > PDM_MCU_MAX_TRANSFER_SIZE) {
-		return -EMSGSIZE;
-	}
-
-	data->address = xfer.id;
-	data->len = xfer.actual_rx_len;
-	return 0;
-}
-
-int pdm_mcu_protocol_write_data(struct pdm_mcu_instance *inst,
-				const struct pdm_mcu_data *data)
-{
-	struct pdm_mcu_xfer xfer = {
-		.type = PDM_MCU_XFER_DATA_WRITE,
-		.id = data->address,
-		.tx = data->data,
-		.tx_len = data->len,
-	};
-
-	return pdm_mcu_protocol_xfer(inst, &xfer);
 }
 
 MODULE_LICENSE("GPL");

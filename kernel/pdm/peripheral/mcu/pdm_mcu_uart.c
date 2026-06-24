@@ -96,58 +96,20 @@ static int pdm_mcu_uart_cmd_xfer(struct pdm_mcu_instance *inst, u32 command,
 	return 0;
 }
 
-static int pdm_mcu_uart_data_read(struct pdm_mcu_instance *inst,
-				  u32 *address, u8 *buf, u32 *len)
-{
-	int ret;
-
-	(void)address;
-	ret = pdm_mcu_uart_read_bytes(inst, buf, *len);
-	if (ret < 0) {
-		return ret;
-	}
-
-	*len = ret;
-	return 0;
-}
-
-static int pdm_mcu_uart_data_write(struct pdm_mcu_instance *inst, u32 address,
-				   const u8 *buf, u32 len)
-{
-	(void)address;
-	return pdm_mcu_uart_write_exact(inst, buf, len);
-}
-
 static int pdm_mcu_uart_xfer(struct pdm_mcu_instance *inst,
 			     struct pdm_mcu_xfer *xfer)
 {
-	u32 len;
+	u32 len = xfer->rx_len;
 	int ret;
 
-	switch (xfer->type) {
-	case PDM_MCU_XFER_CMD:
-		len = xfer->rx_len;
-		ret = pdm_mcu_uart_cmd_xfer(inst, xfer->id, xfer->tx,
-					    xfer->tx_len, xfer->rx, &len);
-		if (ret) {
-			return ret;
-		}
-		xfer->actual_rx_len = len;
-		return 0;
-	case PDM_MCU_XFER_DATA_READ:
-		len = xfer->rx_len;
-		ret = pdm_mcu_uart_data_read(inst, &xfer->id, xfer->rx, &len);
-		if (ret) {
-			return ret;
-		}
-		xfer->actual_rx_len = len;
-		return 0;
-	case PDM_MCU_XFER_DATA_WRITE:
-		return pdm_mcu_uart_data_write(inst, xfer->id, xfer->tx,
-					       xfer->tx_len);
-	default:
-		return -EINVAL;
+	ret = pdm_mcu_uart_cmd_xfer(inst, xfer->command, xfer->tx,
+				    xfer->tx_len, xfer->rx, &len);
+	if (ret) {
+		return ret;
 	}
+
+	xfer->actual_rx_len = len;
+	return 0;
 }
 
 int __weak pdm_mcu_uart_write_bus(struct pdm_mcu_instance *inst,

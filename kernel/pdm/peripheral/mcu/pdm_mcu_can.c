@@ -218,48 +218,20 @@ static int pdm_mcu_can_cmd_xfer(struct pdm_mcu_instance *inst, u32 command,
 	return pdm_mcu_can_recv_frame(inst, &command, rx, rx_len);
 }
 
-static int pdm_mcu_can_data_read(struct pdm_mcu_instance *inst,
-				 u32 *address, u8 *buf, u32 *len)
-{
-	return pdm_mcu_can_recv_frame(inst, address, buf, len);
-}
-
-static int pdm_mcu_can_data_write(struct pdm_mcu_instance *inst, u32 address,
-				  const u8 *buf, u32 len)
-{
-	return pdm_mcu_can_send_frame(inst, address, buf, len);
-}
-
 static int pdm_mcu_can_xfer(struct pdm_mcu_instance *inst,
 			    struct pdm_mcu_xfer *xfer)
 {
-	u32 len;
+	u32 len = xfer->rx_len;
 	int ret;
 
-	switch (xfer->type) {
-	case PDM_MCU_XFER_CMD:
-		len = xfer->rx_len;
-		ret = pdm_mcu_can_cmd_xfer(inst, xfer->id, xfer->tx,
-					   xfer->tx_len, xfer->rx, &len);
-		if (ret) {
-			return ret;
-		}
-		xfer->actual_rx_len = len;
-		return 0;
-	case PDM_MCU_XFER_DATA_READ:
-		len = xfer->rx_len;
-		ret = pdm_mcu_can_data_read(inst, &xfer->id, xfer->rx, &len);
-		if (ret) {
-			return ret;
-		}
-		xfer->actual_rx_len = len;
-		return 0;
-	case PDM_MCU_XFER_DATA_WRITE:
-		return pdm_mcu_can_data_write(inst, xfer->id, xfer->tx,
-					      xfer->tx_len);
-	default:
-		return -EINVAL;
+	ret = pdm_mcu_can_cmd_xfer(inst, xfer->command, xfer->tx,
+				   xfer->tx_len, xfer->rx, &len);
+	if (ret) {
+		return ret;
 	}
+
+	xfer->actual_rx_len = len;
+	return 0;
 }
 
 static const struct of_device_id pdm_mcu_can_of_match[] = {

@@ -35,15 +35,8 @@ struct socket;
 struct spi_device;
 struct pdm_mcu_instance;
 
-enum pdm_mcu_xfer_type {
-	PDM_MCU_XFER_CMD,
-	PDM_MCU_XFER_DATA_READ,
-	PDM_MCU_XFER_DATA_WRITE,
-};
-
 struct pdm_mcu_xfer {
-	enum pdm_mcu_xfer_type type;
-	u32 id;
+	u32 command;
 	const u8 *tx;
 	u32 tx_len;
 	u8 *rx;
@@ -101,13 +94,11 @@ struct pdm_mcu_instance {
 			struct i2c_client *client;
 			u32 rx_timeout_ms;
 			u8 command_bytes;
-			u8 address_bytes;
 		} i2c;
 		struct {
 			struct spi_device *spi;
 			u32 rx_timeout_ms;
 			u8 command_bytes;
-			u8 address_bytes;
 		} spi;
 	} transport;
 };
@@ -121,10 +112,6 @@ int pdm_mcu_protocol_get_status(struct pdm_mcu_instance *inst,
 int pdm_mcu_protocol_reset(struct pdm_mcu_instance *inst, u32 index);
 int pdm_mcu_protocol_command(struct pdm_mcu_instance *inst,
 			     struct pdm_mcu_command *command);
-int pdm_mcu_protocol_read_data(struct pdm_mcu_instance *inst,
-			       struct pdm_mcu_data *data);
-int pdm_mcu_protocol_write_data(struct pdm_mcu_instance *inst,
-				const struct pdm_mcu_data *data);
 
 int pdm_mcu_uart_setup_bus(struct pdm_mcu_instance *inst);
 void pdm_mcu_uart_cleanup_bus(struct pdm_mcu_instance *inst);

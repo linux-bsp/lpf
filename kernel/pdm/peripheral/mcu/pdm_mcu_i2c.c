@@ -94,9 +94,6 @@ static int pdm_mcu_i2c_setup(struct pdm_mcu_instance *inst)
 	inst->transport.i2c.command_bytes =
 		pdm_mcu_i2c_prefix_bytes(np, "command-bytes",
 					 "pdm,command-bytes", 1U);
-	inst->transport.i2c.address_bytes =
-		pdm_mcu_i2c_prefix_bytes(np, "address-bytes",
-					 "pdm,address-bytes", 1U);
 	if (np && !of_property_read_u32(np, "rx-timeout-ms", &value)) {
 		inst->transport.i2c.rx_timeout_ms = value;
 	}
@@ -150,71 +147,20 @@ static int pdm_mcu_i2c_cmd_xfer(struct pdm_mcu_instance *inst, u32 command,
 	return 0;
 }
 
-static int pdm_mcu_i2c_data_read(struct pdm_mcu_instance *inst,
-				 u32 *address, u8 *buf, u32 *len)
-{
-	u8 tx[PDM_MCU_MAX_PREFIX_BYTES];
-	u8 prefix = inst->transport.i2c.address_bytes;
-
-	if (*len > PDM_MCU_MAX_TRANSFER_SIZE) {
-		return -EMSGSIZE;
-	}
-	if (prefix) {
-		pdm_mcu_i2c_encode_prefix(tx, *address, prefix);
-	}
-
-	return pdm_mcu_i2c_bus_xfer(inst, tx, prefix, buf, *len);
-}
-
-static int pdm_mcu_i2c_data_write(struct pdm_mcu_instance *inst, u32 address,
-				  const u8 *buf, u32 len)
-{
-	u8 tx[PDM_MCU_MAX_TRANSFER_SIZE + PDM_MCU_MAX_PREFIX_BYTES];
-	u8 prefix = inst->transport.i2c.address_bytes;
-
-	if (len + prefix > sizeof(tx)) {
-		return -EMSGSIZE;
-	}
-	if (prefix) {
-		pdm_mcu_i2c_encode_prefix(tx, address, prefix);
-	}
-	if (len) {
-		memcpy(tx + prefix, buf, len);
-	}
-
-	return pdm_mcu_i2c_bus_xfer(inst, tx, prefix + len, NULL, 0);
-}
-
 static int pdm_mcu_i2c_xfer(struct pdm_mcu_instance *inst,
 			    struct pdm_mcu_xfer *xfer)
 {
-	u32 len;
+	u32 len = xfer->rx_len;
 	int ret;
 
-	switch (xfer->type) {
-	case PDM_MCU_XFER_CMD:
-		len = xfer->rx_len;
-		ret = pdm_mcu_i2c_cmd_xfer(inst, xfer->id, xfer->tx,
-					   xfer->tx_len, xfer->rx, &len);
-		if (ret) {
-			return ret;
-		}
-		xfer->actual_rx_len = len;
-		return 0;
-	case PDM_MCU_XFER_DATA_READ:
-		len = xfer->rx_len;
-		ret = pdm_mcu_i2c_data_read(inst, &xfer->id, xfer->rx, &len);
-		if (ret) {
-			return ret;
-		}
-		xfer->actual_rx_len = len;
-		return 0;
-	case PDM_MCU_XFER_DATA_WRITE:
-		return pdm_mcu_i2c_data_write(inst, xfer->id, xfer->tx,
-					      xfer->tx_len);
-	default:
-		return -EINVAL;
+	ret = pdm_mcu_i2c_cmd_xfer(inst, xfer->command, xfer->tx,
+				   xfer->tx_len, xfer->rx, &len);
+	if (ret) {
+		return ret;
 	}
+
+	xfer->actual_rx_len = len;
+	return 0;
 }
 
 static int pdm_mcu_i2c_probe(struct i2c_client *client)
