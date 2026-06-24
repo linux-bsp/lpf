@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 /**
- * @file pdm_bus_controller.c
- * @brief PDM Bus Controller - creates PDM devices from Device Tree
+ * @file pdm_of_bus.c
+ * @brief PDM OF Bus Enumerator - creates PDM devices from Device Tree
  */
 
 #include <linux/module.h>
@@ -10,14 +10,14 @@
 #include <linux/platform_device.h>
 #include <linux/slab.h>
 
-#include "pdm/core/pdm_bus.h"
-#include "pdm/core/pdm_device.h"
-#include "pdm_bus_controller.h"
+#include "pdm/core/bus/pdm_bus.h"
+#include "pdm/core/device/pdm_device.h"
+#include "pdm_of_bus.h"
 #include "osal.h"
 
 #define PDM_BUS_DEVICE_NAME_LEN 96
 
-struct pdm_bus_controller {
+struct pdm_of_bus {
 	struct platform_device *pdev;
 	struct list_head devices;
 	int device_count;
@@ -28,7 +28,7 @@ struct pdm_device_list_entry {
 	struct pdm_device *pdm_dev;
 };
 
-static void pdm_bus_controller_unregister_devices(struct pdm_bus_controller *ctrl)
+static void pdm_of_bus_unregister_devices(struct pdm_of_bus *ctrl)
 {
 	struct pdm_device_list_entry *entry, *tmp;
 
@@ -41,7 +41,7 @@ static void pdm_bus_controller_unregister_devices(struct pdm_bus_controller *ctr
 	}
 }
 
-static int pdm_bus_controller_child_id(struct device_node *child)
+static int pdm_of_bus_child_id(struct device_node *child)
 {
 	u32 reg;
 
@@ -53,14 +53,14 @@ static int pdm_bus_controller_child_id(struct device_node *child)
 	return -1;
 }
 
-static int pdm_bus_controller_probe(struct platform_device *pdev)
+static int pdm_of_bus_probe(struct platform_device *pdev)
 {
-	struct pdm_bus_controller *ctrl;
+	struct pdm_of_bus *ctrl;
 	struct device_node *child;
 	int auto_name_id = 0;
 	int ret = 0;
 
-	LOG_INFO("Probing PDM bus controller");
+	LOG_INFO("Probing PDM OF bus enumerator");
 
 	ctrl = devm_kzalloc(&pdev->dev, sizeof(*ctrl), GFP_KERNEL);
 	if (!ctrl)
@@ -97,7 +97,7 @@ static int pdm_bus_controller_probe(struct platform_device *pdev)
 			goto err_cleanup;
 		}
 
-		device_id = pdm_bus_controller_child_id(child);
+		device_id = pdm_of_bus_child_id(child);
 		pdm_dev->dev.parent = &pdev->dev;
 		pdm_dev->dev.of_node = of_node_get(child);
 		pdm_dev->compatible = compatible;
@@ -125,63 +125,63 @@ static int pdm_bus_controller_probe(struct platform_device *pdev)
 			 name, compatible);
 	}
 
-	LOG_INFO("PDM bus controller probe complete, %d devices created",
+	LOG_INFO("PDM OF bus enumerator probe complete, %d devices created",
 		 ctrl->device_count);
 	return 0;
 
 err_cleanup:
-	pdm_bus_controller_unregister_devices(ctrl);
+	pdm_of_bus_unregister_devices(ctrl);
 	of_node_put(child);
 	return ret;
 }
 
-static void pdm_bus_controller_remove(struct platform_device *pdev)
+static void pdm_of_bus_remove(struct platform_device *pdev)
 {
-	struct pdm_bus_controller *ctrl = platform_get_drvdata(pdev);
+	struct pdm_of_bus *ctrl = platform_get_drvdata(pdev);
 
 	if (!ctrl)
 		return;
 
-	LOG_INFO("Removing PDM bus controller");
-	pdm_bus_controller_unregister_devices(ctrl);
-	LOG_INFO("PDM bus controller removed");
+	LOG_INFO("Removing PDM OF bus enumerator");
+	pdm_of_bus_unregister_devices(ctrl);
+	LOG_INFO("PDM OF bus enumerator removed");
 }
 
-static const struct of_device_id pdm_bus_controller_of_match[] = {
+static const struct of_device_id pdm_of_bus_of_match[] = {
 	{ .compatible = "vendor,pdm-bus" },
 	{ }
 };
-MODULE_DEVICE_TABLE(of, pdm_bus_controller_of_match);
+MODULE_DEVICE_TABLE(of, pdm_of_bus_of_match);
 
-static struct platform_driver pdm_bus_controller_driver = {
-	.probe = pdm_bus_controller_probe,
-	.remove = pdm_bus_controller_remove,
+static struct platform_driver pdm_of_bus_driver = {
+	.probe = pdm_of_bus_probe,
+	.remove = pdm_of_bus_remove,
 	.driver = {
 		.name = "pdm-bus-controller",
-		.of_match_table = pdm_bus_controller_of_match,
+		.of_match_table = pdm_of_bus_of_match,
 	},
 };
 
-int pdm_bus_controller_init(void)
+int pdm_of_bus_init(void)
 {
 	int ret;
 
-	ret = platform_driver_register(&pdm_bus_controller_driver);
+	ret = platform_driver_register(&pdm_of_bus_driver);
 	if (ret) {
 		LOG_ERROR("Failed to register platform driver, error %d", ret);
 		return ret;
 	}
 
-	LOG_INFO("PDM bus controller driver registered");
+	LOG_INFO("PDM OF bus enumerator driver registered");
 	return 0;
 }
 
-void pdm_bus_controller_exit(void)
+void pdm_of_bus_exit(void)
 {
-	platform_driver_unregister(&pdm_bus_controller_driver);
-	LOG_INFO("PDM bus controller driver unregistered");
+	platform_driver_unregister(&pdm_of_bus_driver);
+	LOG_INFO("PDM OF bus enumerator driver unregistered");
 }
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("PDM Team");
-MODULE_DESCRIPTION("PDM Bus Controller - Creates devices from Device Tree");
+MODULE_DESCRIPTION("PDM OF Bus Enumerator - Creates devices from Device Tree");

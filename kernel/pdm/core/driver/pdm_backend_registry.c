@@ -9,7 +9,7 @@
 #include <linux/module.h>
 #include <linux/string.h>
 
-#include "pdm/core/pdm_backend.h"
+#include "pdm/core/driver/pdm_backend.h"
 #include "osal.h"
 
 extern const struct pdm_backend_entry __start_pdm_backend_entries[];

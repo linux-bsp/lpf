@@ -4,7 +4,7 @@
 
 PDM v1 does not expose an asynchronous userspace event stream.
 
-The PDM Core event notifier remains a kernel-only mechanism for in-kernel
+The PDM kernel event notifier remains a kernel-only mechanism for in-kernel
 framework and service coordination. Userspace observes PDM device lifecycle and
 health through synchronous snapshots:
 

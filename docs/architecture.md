@@ -25,21 +25,26 @@ PDM devices can be created from:
 
 ## Kernel Layout
 
-- `kernel/pdm/bus/`: Linux bus integration, `struct pdm_device`, driver
-  registration, and the generic PDM bus controller.
-- `kernel/pdm/core/`: module lifecycle, `/dev/pdm_ctl`, shared client node,
-  sysfs, procfs, debugfs, and backend registry helpers.
+- `kernel/pdm/core/pdm_core.c`: `pdm.ko` module entry and lifecycle ordering.
+- `kernel/pdm/core/bus/`: Linux `bus_type` integration and bus driver binding.
+- `kernel/pdm/core/device/`: `struct pdm_device` lifecycle and Device Tree bus enumeration.
+- `kernel/pdm/core/driver/`: linker-section registries for PDM drivers and backends.
+- `kernel/pdm/core/chardev/`: `/dev/pdm_ctl` discovery node and per-instance `/dev/pdm/*` client nodes.
+- `kernel/pdm/core/diag/`: sysfs, procfs, and debugfs helpers.
 - `kernel/pdm/peripheral/`: reusable peripheral drivers such as MCU and LED.
 - `kernel/pdm/mock/`: synthetic devices for x86 smoke tests.
-- `kernel/include/pdm/core/`: kernel-internal PDM APIs exported across PDM
-  source files.
+- `kernel/include/pdm/core/bus/`: cross-module bus APIs.
+- `kernel/include/pdm/core/device/`: cross-module device model APIs.
+- `kernel/include/pdm/core/driver/`: backend registration APIs used by transport/control implementations.
+- `kernel/include/pdm/core/chardev/`: shared character-device client APIs.
+- `kernel/include/pdm/core/diag/`: optional diagnostic interface APIs.
 - `uapi/pdm/`: userspace/kernel ioctl ABI headers.
 - `user/pdi/`: userspace C wrappers over the PDM UAPI nodes.
 
 ## Registration Model
 
 PDM bus drivers use `pdm_driver_register(name, init, exit)`. Entries are placed
-in the `pdm_driver_entries` linker section and initialized by PDM Core. Exit
+in the `pdm_driver_entries` linker section and initialized by the `pdm.ko` module entry. Exit
 callbacks run in reverse order during module unload.
 
 Peripheral hardware or transport implementations use `pdm_backend_register()`.

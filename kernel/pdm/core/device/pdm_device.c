@@ -9,8 +9,8 @@
 #include <linux/idr.h>
 #include <linux/slab.h>
 
-#include "pdm/core/pdm_bus.h"
-#include "pdm/core/pdm_device.h"
+#include "pdm/core/bus/pdm_bus.h"
+#include "pdm/core/device/pdm_device.h"
 #include "osal.h"
 
 static DEFINE_IDA(pdm_device_mcu_ida);

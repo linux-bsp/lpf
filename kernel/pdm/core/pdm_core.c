@@ -2,13 +2,13 @@
 
 #include <linux/module.h>
 
-#include "../bus/pdm_bus_controller.h"
-#include "pdm_ctl.h"
+#include "device/pdm_of_bus.h"
+#include "chardev/pdm_ctl.h"
 #include "../mock/pdm_mock_devices.h"
-#include "pdm/core/pdm_client.h"
-#include "pdm/core/pdm_backend.h"
-#include "pdm/core/pdm_bus.h"
-#include "pdm/core/pdm_device.h"
+#include "pdm/core/chardev/pdm_client.h"
+#include "pdm/core/driver/pdm_backend.h"
+#include "pdm/core/bus/pdm_bus.h"
+#include "pdm/core/device/pdm_device.h"
 #include "pdm/pdm_errno.h"
 #include "generated/gen_version.h"
 
@@ -26,15 +26,15 @@ static void pdm_print_version(void)
 }
 
 /**
- * @brief PDM Core 模块初始化
+ * @brief PDM module 初始化
  */
-static int __init pdm_core_module_init(void)
+static int __init pdm_module_init(void)
 {
 	int ret;
 
 	pdm_print_version();
 
-	LOG_INFO("Initializing PDM Core with Linux bus_type");
+	LOG_INFO("Initializing PDM module with Linux bus_type");
 
 	ret = pdm_bus_init();
 	if (ret) {
@@ -72,13 +72,13 @@ static int __init pdm_core_module_init(void)
 		goto err_backends;
 	}
 
-	ret = pdm_bus_controller_init();
+	ret = pdm_of_bus_init();
 	if (ret) {
-		LOG_ERROR("Failed to register bus controller: %d", ret);
+		LOG_ERROR("Failed to register OF bus enumerator: %d", ret);
 		goto err_mock_devices;
 	}
 
-	LOG_INFO("PDM Core initialized successfully");
+	LOG_INFO("PDM module initialized successfully");
 	return 0;
 
 err_mock_devices:
@@ -97,11 +97,11 @@ err_bus:
 }
 
 /**
- * @brief PDM Core 模块退出
+ * @brief PDM module 退出
  */
-static void __exit pdm_core_module_exit(void)
+static void __exit pdm_module_exit(void)
 {
-	pdm_bus_controller_exit();
+	pdm_of_bus_exit();
 	pdm_mock_devices_exit();
 	pdm_backend_entries_exit();
 	pdm_driver_entries_exit();
@@ -110,11 +110,11 @@ static void __exit pdm_core_module_exit(void)
 	pdm_bus_exit();
 	pdm_device_ids_destroy();
 
-	LOG_INFO("PDM Core exited");
+	LOG_INFO("PDM module exited");
 }
 
-module_init(pdm_core_module_init);
-module_exit(pdm_core_module_exit);
+module_init(pdm_module_init);
+module_exit(pdm_module_exit);
 
 MODULE_AUTHOR("PDM");
 MODULE_DESCRIPTION("PDM core device model with Linux bus_type");

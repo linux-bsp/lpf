@@ -1,11 +1,11 @@
 # PDM Bus Device Tree Notes
 
-PDM Core creates devices from children of a `vendor,pdm-bus` controller node.
+The PDM OF bus enumerator creates devices from children of a `vendor,pdm-bus` controller node.
 Native MCU transports can also create PDM devices from children of UART, I2C,
 and SPI controller nodes. Each PDM device appears on `/sys/bus/pdm` and, after
 driver binding, one userspace node under `/dev/pdm/`.
 
-Userspace instance numbers are owned by PDM Core. Set `pdm,id` when a stable
+Userspace instance numbers are owned by the PDM device model. Set `pdm,id` when a stable
 `/dev/pdm/<type>N` node is required; otherwise PDM allocates the next free
 number for the matched peripheral type.
 
@@ -92,7 +92,7 @@ node below the UART controller:
 ```
 
 I2C and SPI MCU transports are described below their native Linux controller
-nodes. `pdm,id` selects the `/dev/pdm/mcuN` index. If it is omitted, PDM Core
+nodes. `pdm,id` selects the `/dev/pdm/mcuN` index. If it is omitted, the PDM device model
 allocates the next free MCU index; the native `reg` property remains the I2C
 address or SPI chip select and is not used as a userspace instance number.
 

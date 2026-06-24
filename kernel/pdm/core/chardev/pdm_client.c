@@ -12,7 +12,7 @@
 #include <linux/string.h>
 #include <linux/version.h>
 
-#include "pdm/core/pdm_client.h"
+#include "pdm/core/chardev/pdm_client.h"
 #include "osal.h"
 
 static dev_t pdm_client_devt;

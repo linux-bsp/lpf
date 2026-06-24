@@ -8,7 +8,7 @@
 #include <linux/kernel.h>
 #include <linux/module.h>
 
-#include "pdm/core/pdm_bus.h"
+#include "pdm/core/bus/pdm_bus.h"
 #include "osal.h"
 
 extern const struct pdm_driver_entry __start_pdm_driver_entries[];

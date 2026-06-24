@@ -13,7 +13,7 @@
 #include <linux/fs.h>
 #include <linux/types.h>
 
-#include "pdm/core/pdm_device.h"
+#include "pdm/core/device/pdm_device.h"
 
 #define PDM_CLIENT_NAME_LEN 64U
 #define PDM_CLIENT_NODE_LEN 64U

@@ -11,8 +11,8 @@
 #include <linux/types.h>
 #include <linux/wait.h>
 
-#include "pdm/core/pdm_client.h"
-#include "pdm/core/pdm_device.h"
+#include "pdm/core/chardev/pdm_client.h"
+#include "pdm/core/device/pdm_device.h"
 #include "pdm/pdm_mcu.h"
 
 #define PDM_MCU_DEFAULT_RX_TIMEOUT_MS 100U

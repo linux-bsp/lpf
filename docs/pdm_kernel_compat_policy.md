@@ -19,7 +19,7 @@ implemented in PDM compat wrappers before the product enables that target.
 
 - Linux version and feature checks belong in `kernel/include/pdm/compat/pdm_compat_*`
   headers or small compatibility wrappers next to the affected subsystem code.
-- PDM Core, peripheral drivers, backend implementations, and userspace-facing
+- PDM module infrastructure, peripheral drivers, backend implementations, and userspace-facing
   logic must not scatter direct `LINUX_VERSION_CODE` checks.
 - Use feature-style helpers such as `PDM_KERNEL_HAS_SYSFS_EMIT` instead of
   scattering raw version comparisons.

@@ -8,7 +8,7 @@
 #include <linux/gpio/consumer.h>
 #include <linux/module.h>
 
-#include "pdm/core/pdm_backend.h"
+#include "pdm/core/driver/pdm_backend.h"
 #include "pdm_led_internal.h"
 #include "osal.h"
 

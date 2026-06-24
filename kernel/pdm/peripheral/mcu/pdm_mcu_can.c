@@ -17,7 +17,7 @@
 #include <net/sock.h>
 
 #include "pdm/compat/pdm_compat_features.h"
-#include "pdm/core/pdm_backend.h"
+#include "pdm/core/driver/pdm_backend.h"
 #include "pdm_mcu_internal.h"
 #include "osal.h"
 

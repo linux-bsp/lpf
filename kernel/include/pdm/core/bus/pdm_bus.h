@@ -13,7 +13,7 @@
 #include <linux/module.h>
 #include <linux/version.h>
 
-#include "pdm/core/pdm_device.h"
+#include "pdm/core/device/pdm_device.h"
 
 /**
  * struct pdm_driver - PDM driver wrapper around struct device_driver

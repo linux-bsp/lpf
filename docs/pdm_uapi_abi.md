@@ -12,7 +12,7 @@ and ABI version constants.
 - The header must compile in both kernel and userspace builds.
 - UAPI structures use Linux fixed-width types such as `__u32`, `__s32`, and
   `__u64`.
-- UAPI structures must not expose kernel-only PDM Core, PDM bus, backend,
+- UAPI structures must not expose kernel-only PDM module infrastructure, PDM bus, backend,
   peripheral, or OSAL internal types.
 - UAPI headers must not expose PDI context types, helper functions, default
   device paths, or SDK open/discovery policy.

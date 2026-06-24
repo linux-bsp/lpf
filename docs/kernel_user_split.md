@@ -11,12 +11,22 @@ kernel/
   include/
     osal/          # kernel OSAL headers
     pdm/           # kernel-internal PDM headers
+      core/
+        bus/       # bus API
+        device/    # device model API
+        driver/    # backend/driver registration API
+        chardev/   # shared character-device client API
+        diag/      # procfs/debugfs helper API
       compat/      # kernel API feature helpers
-      core/        # PDM bus, device, client, backend APIs
   osal/            # builds osal.ko
   pdm/
-    bus/           # Linux bus_type and PDM device registration
-    core/          # module lifecycle, ctl/client nodes, registries, fs helpers
+    core/
+      pdm_core.c   # pdm.ko module entry and lifecycle ordering
+      bus/         # Linux bus_type integration
+      device/      # PDM device lifecycle and OF bus enumerator
+      driver/      # driver/backend linker-section registries
+      chardev/     # /dev/pdm_ctl and /dev/pdm/* node support
+      diag/        # sysfs/procfs/debugfs helpers
     peripheral/    # MCU, LED, and future peripheral drivers/backends
     mock/          # synthetic test devices
 

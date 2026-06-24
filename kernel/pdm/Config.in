@@ -1,12 +1,12 @@
-# PDM Core Configuration
+# PDM Module Configuration
 
 menuconfig PDM
-	tristate "PDM core device model"
+	tristate "PDM kernel device model"
 	default m
 	depends on OSAL
 	depends on m
 	help
-	  PDM Core provides a Linux bus_type implementation for PDM devices.
+	  PDM provides a Linux bus_type implementation for PDM devices.
 	  Device configuration uses Device Tree exclusively.
 
 	  If unsure, say Y when enabling PDM peripheral services.

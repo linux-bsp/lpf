@@ -6,7 +6,7 @@ Dependencies should point downward through the current PDM stack:
 
 ```text
 Application -> PDI -> UAPI/ioctl -> PDM peripheral driver
-            -> PDM bus/core helpers -> Linux subsystem or controller driver
+            -> PDM model, registry, and chardev helpers -> Linux subsystem or controller driver
 ```
 
 Cross-layer shortcuts are architecture debt unless they are documented as a
@@ -59,7 +59,7 @@ backend init/exit hooks.
 - Must not expose kernel-private PDM structs, backend ops, OSAL objects, or PDI
   context types.
 
-### PDM Core
+### PDM Module Infrastructure
 
 - Owns Linux `bus_type` registration, PDM device lifecycle, driver matching,
   `/dev/pdm_ctl`, shared client node policy, sysfs, procfs, debugfs, and module
@@ -103,6 +103,6 @@ backend init/exit hooks.
 - Product-specific business logic under shared PDM driver directories.
 - New fixed global registries when the section-based driver or backend registry
   is sufficient.
-- PDM Core manually calling each MCU, LED, or future peripheral backend init.
+- PDM module init manually calling each MCU, LED, or future peripheral backend init.
 - UAPI structs carrying kernel pointers, private structs, or backend-specific
   implementation details.
