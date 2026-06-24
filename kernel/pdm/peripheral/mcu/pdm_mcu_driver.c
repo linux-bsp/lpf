@@ -13,7 +13,6 @@
 #include <linux/string.h>
 #include <linux/uaccess.h>
 
-#include "../pdm_peripheral.h"
 #include "pdm_mcu_internal.h"
 
 #include "pdm/core/pdm_backend.h"
@@ -509,12 +508,12 @@ static struct pdm_driver pdm_mcu_driver = {
 	.remove = pdm_mcu_remove,
 };
 
-int pdm_mcu_driver_init(void)
+static int pdm_mcu_driver_init(void)
 {
 	return pdm_bus_register_driver(THIS_MODULE, &pdm_mcu_driver);
 }
 
-void pdm_mcu_driver_exit(void)
+static void pdm_mcu_driver_exit(void)
 {
 	pdm_bus_unregister_driver(&pdm_mcu_driver);
 }

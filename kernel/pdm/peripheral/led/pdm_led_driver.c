@@ -12,7 +12,6 @@
 #include <linux/string.h>
 #include <linux/uaccess.h>
 
-#include "../pdm_peripheral.h"
 #include "pdm_led_internal.h"
 
 #include "pdm/core/pdm_backend.h"
@@ -375,12 +374,12 @@ static struct pdm_driver pdm_led_driver = {
 	.remove = pdm_led_remove,
 };
 
-int pdm_led_driver_init(void)
+static int pdm_led_driver_init(void)
 {
 	return pdm_bus_register_driver(THIS_MODULE, &pdm_led_driver);
 }
 
-void pdm_led_driver_exit(void)
+static void pdm_led_driver_exit(void)
 {
 	pdm_bus_unregister_driver(&pdm_led_driver);
 }
