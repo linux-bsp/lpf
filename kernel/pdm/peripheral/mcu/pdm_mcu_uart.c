@@ -218,77 +218,48 @@ static void pdm_mcu_uart_cleanup(struct pdm_mcu_instance *inst)
 	inst->transport.uart.file = NULL;
 }
 
-static int pdm_mcu_uart_reset(struct pdm_mcu_instance *inst)
+static int pdm_mcu_uart_write(struct pdm_mcu_instance *inst,
+				     const u8 *buf, u32 len)
 {
-	(void)inst;
-	return 0;
+	return pdm_mcu_uart_write_bytes(inst, buf, len);
 }
 
-static int pdm_mcu_uart_command(struct pdm_mcu_instance *inst,
-				struct pdm_mcu_command *command)
+static int pdm_mcu_uart_read(struct pdm_mcu_instance *inst, u8 *buf, u32 len)
+{
+	return pdm_mcu_uart_read_bytes(inst, buf, len);
+}
+
+static int pdm_mcu_uart_xfer(struct pdm_mcu_instance *inst,
+			     const u8 *tx, u32 tx_len, u8 *rx, u32 rx_len)
 {
 	int ret;
 
-	if (command->tx_len > PDM_MCU_MAX_TRANSFER_SIZE ||
-	    command->rx_len > PDM_MCU_MAX_TRANSFER_SIZE)
-		return -EMSGSIZE;
-
-	if (command->tx_len) {
-		ret = pdm_mcu_uart_write_bytes(inst, command->tx_data,
-					       command->tx_len);
+	if (tx_len) {
+		ret = pdm_mcu_uart_write_bytes(inst, tx, tx_len);
 		if (ret < 0)
 			return ret;
+		if (ret != tx_len)
+			return -EIO;
 	}
 
-	if (!command->rx_len)
+	if (!rx_len)
 		return 0;
 
-	ret = pdm_mcu_uart_read_bytes(inst, command->rx_data, command->rx_len);
-	if (ret < 0)
-		return ret;
-	command->rx_len = ret;
-	return 0;
-}
-
-static int pdm_mcu_uart_read_data(struct pdm_mcu_instance *inst,
-				  struct pdm_mcu_data *data)
-{
-	int ret;
-
-	if (data->len > PDM_MCU_MAX_TRANSFER_SIZE)
-		return -EMSGSIZE;
-
-	ret = pdm_mcu_uart_read_bytes(inst, data->data, data->len);
-	if (ret < 0)
-		return ret;
-	data->len = ret;
-	return 0;
-}
-
-static int pdm_mcu_uart_write_data(struct pdm_mcu_instance *inst,
-				   const struct pdm_mcu_data *data)
-{
-	int ret;
-
-	if (data->len > PDM_MCU_MAX_TRANSFER_SIZE)
-		return -EMSGSIZE;
-
-	ret = pdm_mcu_uart_write_bytes(inst, data->data, data->len);
-	if (ret < 0)
-		return ret;
-	return ret == data->len ? 0 : -EIO;
+	return pdm_mcu_uart_read_bytes(inst, rx, rx_len);
 }
 
 static const struct pdm_mcu_transport_ops pdm_mcu_uart_ops = {
 	.type = PDM_MCU_BACKEND_UART,
 	.name = "uart",
 	.capability = PDM_CTL_DEVICE_CAP_TRANSPORT_UART,
+	.max_tx_size = PDM_MCU_MAX_TRANSFER_SIZE,
+	.max_rx_size = PDM_MCU_MAX_TRANSFER_SIZE,
+	.flags = PDM_MCU_TRANSPORT_F_BYTE_STREAM,
 	.setup = pdm_mcu_uart_setup,
 	.cleanup = pdm_mcu_uart_cleanup,
-	.reset = pdm_mcu_uart_reset,
-	.command = pdm_mcu_uart_command,
-	.read_data = pdm_mcu_uart_read_data,
-	.write_data = pdm_mcu_uart_write_data,
+	.write = pdm_mcu_uart_write,
+	.read = pdm_mcu_uart_read,
+	.xfer = pdm_mcu_uart_xfer,
 };
 
 pdm_backend_register(mcu_uart, PDM_CTL_DEVICE_TYPE_MCU,

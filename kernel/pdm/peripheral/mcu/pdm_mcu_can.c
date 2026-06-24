@@ -13,6 +13,7 @@
 #include <linux/netdevice.h>
 #include <linux/of.h>
 #include <linux/socket.h>
+#include <linux/string.h>
 #include <net/net_namespace.h>
 #include <net/sock.h>
 
@@ -173,76 +174,82 @@ static void pdm_mcu_can_cleanup(struct pdm_mcu_instance *inst)
 	inst->transport.can.sock = NULL;
 }
 
-static int pdm_mcu_can_reset(struct pdm_mcu_instance *inst)
+static u32 pdm_mcu_can_decode_be32(const u8 *buf)
 {
-	(void)inst;
-	return 0;
+	return ((u32)buf[0] << 24) | ((u32)buf[1] << 16) |
+	       ((u32)buf[2] << 8) | (u32)buf[3];
 }
 
-static int pdm_mcu_can_command(struct pdm_mcu_instance *inst,
-			       struct pdm_mcu_command *command)
+static void pdm_mcu_can_encode_be32(u8 *buf, u32 value)
+{
+	buf[0] = (u8)(value >> 24);
+	buf[1] = (u8)(value >> 16);
+	buf[2] = (u8)(value >> 8);
+	buf[3] = (u8)value;
+}
+
+static int pdm_mcu_can_write(struct pdm_mcu_instance *inst,
+				    const u8 *buf, u32 len)
 {
 	u32 id;
-	u32 rx_len;
-	int ret;
 
-	if (command->tx_len > CAN_MAX_DLEN || command->rx_len > CAN_MAX_DLEN)
+	if (len < PDM_MCU_TRANSPORT_ID_BYTES)
+		return -EINVAL;
+	if (len - PDM_MCU_TRANSPORT_ID_BYTES > CAN_MAX_DLEN)
 		return -EMSGSIZE;
 
-	ret = pdm_mcu_can_send_frame(inst, command->command,
-				      command->tx_data, command->tx_len);
+	id = pdm_mcu_can_decode_be32(buf);
+	return pdm_mcu_can_send_frame(inst, id,
+		buf + PDM_MCU_TRANSPORT_ID_BYTES,
+		len - PDM_MCU_TRANSPORT_ID_BYTES) ?:
+		(int)len;
+}
+
+static int pdm_mcu_can_read(struct pdm_mcu_instance *inst, u8 *buf, u32 len)
+{
+	u32 id;
+	u32 payload_len;
+	int ret;
+
+	if (len < PDM_MCU_TRANSPORT_ID_BYTES)
+		return -EINVAL;
+
+	payload_len = min_t(u32, len - PDM_MCU_TRANSPORT_ID_BYTES, CAN_MAX_DLEN);
+	ret = pdm_mcu_can_recv_frame(inst, &id,
+		buf + PDM_MCU_TRANSPORT_ID_BYTES, &payload_len);
 	if (ret)
 		return ret;
 
-	if (!command->rx_len)
+	pdm_mcu_can_encode_be32(buf, id);
+	return payload_len + PDM_MCU_TRANSPORT_ID_BYTES;
+}
+
+static int pdm_mcu_can_xfer(struct pdm_mcu_instance *inst,
+			    const u8 *tx, u32 tx_len, u8 *rx, u32 rx_len)
+{
+	int ret;
+
+	ret = pdm_mcu_can_write(inst, tx, tx_len);
+	if (ret < 0)
+		return ret;
+	if (!rx_len)
 		return 0;
 
-	rx_len = command->rx_len;
-	ret = pdm_mcu_can_recv_frame(inst, &id, command->rx_data, &rx_len);
-	if (ret)
-		return ret;
-	command->rx_len = rx_len;
-	return 0;
-}
-
-static int pdm_mcu_can_read_data(struct pdm_mcu_instance *inst,
-				 struct pdm_mcu_data *data)
-{
-	u32 id;
-	u32 len;
-	int ret;
-
-	if (data->len > PDM_MCU_MAX_TRANSFER_SIZE)
-		return -EMSGSIZE;
-
-	len = data->len ? min_t(u32, data->len, CAN_MAX_DLEN) : CAN_MAX_DLEN;
-	ret = pdm_mcu_can_recv_frame(inst, &id, data->data, &len);
-	if (ret)
-		return ret;
-	data->address = id;
-	data->len = len;
-	return 0;
-}
-
-static int pdm_mcu_can_write_data(struct pdm_mcu_instance *inst,
-				  const struct pdm_mcu_data *data)
-{
-	if (data->len > CAN_MAX_DLEN)
-		return -EMSGSIZE;
-
-	return pdm_mcu_can_send_frame(inst, data->address, data->data, data->len);
+	return pdm_mcu_can_read(inst, rx, rx_len);
 }
 
 static const struct pdm_mcu_transport_ops pdm_mcu_can_ops = {
 	.type = PDM_MCU_BACKEND_CAN,
 	.name = "can",
 	.capability = PDM_CTL_DEVICE_CAP_TRANSPORT_CAN,
+	.max_tx_size = PDM_MCU_TRANSPORT_ID_BYTES + CAN_MAX_DLEN,
+	.max_rx_size = PDM_MCU_TRANSPORT_ID_BYTES + CAN_MAX_DLEN,
+	.flags = PDM_MCU_TRANSPORT_F_FRAME_ID_U32,
 	.setup = pdm_mcu_can_setup,
 	.cleanup = pdm_mcu_can_cleanup,
-	.reset = pdm_mcu_can_reset,
-	.command = pdm_mcu_can_command,
-	.read_data = pdm_mcu_can_read_data,
-	.write_data = pdm_mcu_can_write_data,
+	.write = pdm_mcu_can_write,
+	.read = pdm_mcu_can_read,
+	.xfer = pdm_mcu_can_xfer,
 };
 
 pdm_backend_register(mcu_can, PDM_CTL_DEVICE_TYPE_MCU,

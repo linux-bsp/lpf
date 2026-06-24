@@ -31,14 +31,6 @@ static u8 pdm_mcu_i2c_prefix_bytes(struct device_node *np,
 	return default_value;
 }
 
-static void pdm_mcu_i2c_encode_prefix(u8 *buf, u32 value, u8 bytes)
-{
-	u8 i;
-
-	for (i = 0; i < bytes; i++)
-		buf[i] = (u8)(value >> (8U * (bytes - i - 1U)));
-}
-
 static int pdm_mcu_i2c_xfer(struct pdm_mcu_instance *inst,
 			    const u8 *tx, u32 tx_len, u8 *rx, u32 rx_len)
 {
@@ -108,91 +100,16 @@ static void pdm_mcu_i2c_cleanup(struct pdm_mcu_instance *inst)
 	inst->transport.i2c.client = NULL;
 }
 
-static int pdm_mcu_i2c_reset(struct pdm_mcu_instance *inst)
-{
-	(void)inst;
-	return 0;
-}
-
-static int pdm_mcu_i2c_command(struct pdm_mcu_instance *inst,
-			       struct pdm_mcu_command *command)
-{
-	u8 tx[PDM_MCU_MAX_TRANSFER_SIZE + PDM_MCU_MAX_PREFIX_BYTES];
-	u32 tx_len;
-	u8 prefix;
-	int ret;
-
-	if (command->tx_len > PDM_MCU_MAX_TRANSFER_SIZE ||
-	    command->rx_len > PDM_MCU_MAX_TRANSFER_SIZE)
-		return -EMSGSIZE;
-
-	prefix = inst->transport.i2c.command_bytes;
-	if (command->tx_len + prefix > sizeof(tx))
-		return -EMSGSIZE;
-
-	if (prefix)
-		pdm_mcu_i2c_encode_prefix(tx, command->command, prefix);
-	if (command->tx_len)
-		memcpy(tx + prefix, command->tx_data, command->tx_len);
-	tx_len = prefix + command->tx_len;
-
-	ret = pdm_mcu_i2c_xfer(inst, tx, tx_len,
-				 command->rx_data, command->rx_len);
-	if (ret)
-		return ret;
-	return 0;
-}
-
-static int pdm_mcu_i2c_read_data(struct pdm_mcu_instance *inst,
-				 struct pdm_mcu_data *data)
-{
-	u8 tx[PDM_MCU_MAX_PREFIX_BYTES];
-	u8 prefix;
-	int ret;
-
-	if (data->len > PDM_MCU_MAX_TRANSFER_SIZE)
-		return -EMSGSIZE;
-
-	prefix = inst->transport.i2c.address_bytes;
-	if (prefix)
-		pdm_mcu_i2c_encode_prefix(tx, data->address, prefix);
-
-	ret = pdm_mcu_i2c_xfer(inst, tx, prefix, data->data, data->len);
-	if (ret)
-		return ret;
-	return 0;
-}
-
-static int pdm_mcu_i2c_write_data(struct pdm_mcu_instance *inst,
-				  const struct pdm_mcu_data *data)
-{
-	u8 tx[PDM_MCU_MAX_TRANSFER_SIZE + PDM_MCU_MAX_PREFIX_BYTES];
-	u8 prefix;
-
-	if (data->len > PDM_MCU_MAX_TRANSFER_SIZE)
-		return -EMSGSIZE;
-
-	prefix = inst->transport.i2c.address_bytes;
-	if (data->len + prefix > sizeof(tx))
-		return -EMSGSIZE;
-	if (prefix)
-		pdm_mcu_i2c_encode_prefix(tx, data->address, prefix);
-	if (data->len)
-		memcpy(tx + prefix, data->data, data->len);
-
-	return pdm_mcu_i2c_xfer(inst, tx, prefix + data->len, NULL, 0);
-}
-
 static const struct pdm_mcu_transport_ops pdm_mcu_i2c_ops = {
 	.type = PDM_MCU_BACKEND_I2C,
 	.name = "i2c",
 	.capability = PDM_CTL_DEVICE_CAP_TRANSPORT_I2C,
+	.max_tx_size = PDM_MCU_MAX_TRANSFER_SIZE + PDM_MCU_MAX_PREFIX_BYTES,
+	.max_rx_size = PDM_MCU_MAX_TRANSFER_SIZE,
+	.flags = PDM_MCU_TRANSPORT_F_REGISTER_BUS,
 	.setup = pdm_mcu_i2c_setup,
 	.cleanup = pdm_mcu_i2c_cleanup,
-	.reset = pdm_mcu_i2c_reset,
-	.command = pdm_mcu_i2c_command,
-	.read_data = pdm_mcu_i2c_read_data,
-	.write_data = pdm_mcu_i2c_write_data,
+	.xfer = pdm_mcu_i2c_xfer,
 };
 
 static int pdm_mcu_i2c_probe(struct i2c_client *client)

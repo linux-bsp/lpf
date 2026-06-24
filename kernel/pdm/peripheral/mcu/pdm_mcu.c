@@ -237,7 +237,7 @@ static long pdm_mcu_reset(struct pdm_mcu_instance *inst, unsigned long arg)
 	mutex_lock(&inst->lock);
 	ret = pdm_mcu_require_online_locked(inst);
 	if (!ret)
-		ret = inst->ops->reset(inst);
+		ret = pdm_mcu_protocol_reset(inst);
 	ret = pdm_mcu_record_result(inst, ret);
 	mutex_unlock(&inst->lock);
 	return ret;
@@ -254,7 +254,7 @@ static long pdm_mcu_command_ioctl(struct pdm_mcu_instance *inst, unsigned long a
 	mutex_lock(&inst->lock);
 	ret = pdm_mcu_require_online_locked(inst);
 	if (!ret)
-		ret = inst->ops->command(inst, &command);
+		ret = pdm_mcu_protocol_command(inst, &command);
 	ret = pdm_mcu_record_result(inst, ret);
 	mutex_unlock(&inst->lock);
 	if (ret)
@@ -276,7 +276,7 @@ static long pdm_mcu_read_data_ioctl(struct pdm_mcu_instance *inst, unsigned long
 	mutex_lock(&inst->lock);
 	ret = pdm_mcu_require_online_locked(inst);
 	if (!ret)
-		ret = inst->ops->read_data(inst, &data);
+		ret = pdm_mcu_protocol_read_data(inst, &data);
 	ret = pdm_mcu_record_result(inst, ret);
 	mutex_unlock(&inst->lock);
 	if (ret)
@@ -298,7 +298,7 @@ static long pdm_mcu_write_data_ioctl(struct pdm_mcu_instance *inst, unsigned lon
 	mutex_lock(&inst->lock);
 	ret = pdm_mcu_require_online_locked(inst);
 	if (!ret)
-		ret = inst->ops->write_data(inst, &data);
+		ret = pdm_mcu_protocol_write_data(inst, &data);
 	ret = pdm_mcu_record_result(inst, ret);
 	mutex_unlock(&inst->lock);
 	return ret;

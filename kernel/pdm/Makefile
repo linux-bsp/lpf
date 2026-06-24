@@ -23,6 +23,8 @@ pdm-y += pdm/core/diag/pdm_sysfs.o
 pdm-y += pdm/core/driver/pdm_driver_registry.o
 pdm-y += pdm/core/driver/pdm_backend_registry.o
 
+pdm-y += pdm/peripheral/mcu/pdm_mcu_protocol.o
+
 # Automatic PDM bus driver entries must be linked between these markers.
 pdm-y += pdm/core/driver/pdm_driver_registry_start.o
 pdm-y += pdm/peripheral/mcu/pdm_mcu.o
