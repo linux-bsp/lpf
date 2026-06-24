@@ -48,21 +48,24 @@ static inline int pdm_compat_i2c_probe(struct i2c_client *client)
 	return driver->probe(client);
 }
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0)
-static inline void pdm_compat_i2c_remove(struct i2c_client *client)
-#else
-static inline int pdm_compat_i2c_remove(struct i2c_client *client)
-#endif
+static inline void pdm_compat_i2c_remove_device(struct i2c_client *client)
 {
 	struct pdm_compat_i2c_driver *driver;
 
 	driver = pdm_compat_i2c_from_client(client);
 	if (driver && driver->remove)
 		driver->remove(client);
+}
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 1, 0)
+static inline void pdm_compat_i2c_remove_void(struct i2c_client *client)
+{
+	pdm_compat_i2c_remove_device(client);
+}
+
+static inline int pdm_compat_i2c_remove_int(struct i2c_client *client)
+{
+	pdm_compat_i2c_remove_device(client);
 	return 0;
-#endif
 }
 
 static inline int
@@ -73,10 +76,14 @@ pdm_compat_i2c_driver_register(struct pdm_compat_i2c_driver *driver)
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 3, 0)
 	driver->driver.probe = pdm_compat_i2c_probe;
+	driver->driver.remove = pdm_compat_i2c_remove_void;
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0)
+	driver->driver.probe_new = pdm_compat_i2c_probe;
+	driver->driver.remove = pdm_compat_i2c_remove_void;
 #else
 	driver->driver.probe_new = pdm_compat_i2c_probe;
+	driver->driver.remove = pdm_compat_i2c_remove_int;
 #endif
-	driver->driver.remove = pdm_compat_i2c_remove;
 
 	return i2c_register_driver(THIS_MODULE, &driver->driver);
 }
