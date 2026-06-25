@@ -22,8 +22,12 @@ pdm-y += pdm/registry/pdm_backend_registry.o
 
 pdm-y += pdm/drivers/mcu/pdm_mcu_protocol.o
 
-# Automatic PDM bus driver and backend entries
+# Automatic PDM bus driver entries must be linked between these markers.
+pdm-y += pdm/registry/pdm_driver_registry_start.o
 pdm-y += pdm/drivers/mcu/pdm_mcu.o
+
+# Automatic PDM backend entries must be linked between these markers.
+pdm-y += pdm/registry/pdm_backend_registry_start.o
 pdm-y += pdm/drivers/mcu/pdm_mcu_diag.o
 pdm-y += pdm/drivers/mcu/pdm_mcu_uart.o
 pdm-$(CONFIG_PDM_MCU_UART_SERDEV) += pdm/drivers/mcu/pdm_mcu_uart_serdev.o
@@ -34,4 +38,6 @@ pdm-y += pdm/drivers/led/pdm_led.o
 pdm-y += pdm/drivers/led/pdm_led_diag.o
 pdm-$(CONFIG_PDM_LED_GPIO) += pdm/drivers/led/pdm_led_gpio.o
 pdm-$(CONFIG_PDM_LED_PWM) += pdm/drivers/led/pdm_led_pwm.o
+pdm-y += pdm/registry/pdm_backend_registry_stop.o
+pdm-y += pdm/registry/pdm_driver_registry_stop.o
 pdm-$(CONFIG_PDM_MOCK_DEVICES) += pdm/drivers/mock/pdm_mock_devices.o

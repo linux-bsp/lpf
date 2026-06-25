@@ -12,26 +12,8 @@
 #include "pdm/registry/pdm_backend.h"
 #include "osal.h"
 
-/* Delimit pdm_backend_entries inside pdm.ko without a linker script. */
-asm(
-".section pdm_backend_entries,\"a\"\n"
-".balign 8\n"
-".globl __start_pdm_backend_entries\n"
-"__start_pdm_backend_entries:\n"
-".previous\n"
-);
-
 extern const struct pdm_backend_entry __start_pdm_backend_entries[];
 extern const struct pdm_backend_entry __stop_pdm_backend_entries[];
-
-/* Keep this object after all pdm_backend_register() users in pdm-y. */
-asm(
-".section pdm_backend_entries,\"a\"\n"
-".balign 8\n"
-".globl __stop_pdm_backend_entries\n"
-"__stop_pdm_backend_entries:\n"
-".previous\n"
-);
 
 static size_t pdm_backend_entries_initialized;
 
