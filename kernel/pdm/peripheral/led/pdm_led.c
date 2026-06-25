@@ -54,7 +54,7 @@ static bool pdm_led_match(const struct pdm_device *pdm_dev)
 		return true;
 	}
 
-	return pdm_backend_find(PDM_CTL_DEVICE_TYPE_LED,
+	return pdm_backend_find(PDM_LED_DEVICE_TYPE,
 				PDM_BACKEND_CLASS_CONTROL,
 				pdm_dev->compatible) != NULL;
 }
@@ -283,7 +283,7 @@ static void pdm_led_client_release(struct pdm_client *client)
 static const struct pdm_led_backend_ops pdm_led_memory_ops = {
 	.type = PDM_LED_BACKEND_MEMORY,
 	.name = "memory",
-	.capability = PDM_CTL_DEVICE_CAP_NONE,
+	.capability = PDM_LED_CAP_NONE,
 	.setup = pdm_led_memory_setup,
 	.cleanup = pdm_led_memory_cleanup,
 	.apply = pdm_led_memory_apply,
@@ -297,7 +297,7 @@ const struct pdm_led_backend_ops *pdm_led_backend_select(const char *compatible)
 		return &pdm_led_memory_ops;
 	}
 
-	entry = pdm_backend_find(PDM_CTL_DEVICE_TYPE_LED,
+	entry = pdm_backend_find(PDM_LED_DEVICE_TYPE,
 				 PDM_BACKEND_CLASS_CONTROL, compatible);
 	if (entry) {
 		return entry->ops;
@@ -392,8 +392,8 @@ static struct pdm_driver pdm_led_driver = {
 		.name = "pdm-led",
 		.of_match_table = pdm_led_of_match,
 	},
-	.device_type = PDM_CTL_DEVICE_TYPE_LED,
-	.capabilities = PDM_CTL_DEVICE_CAP_USER_IOCTL,
+	.device_type = PDM_LED_DEVICE_TYPE,
+	.capabilities = PDM_LED_CAP_USER_IOCTL,
 	.match = pdm_led_match,
 	.probe = pdm_led_probe,
 	.remove = pdm_led_remove,

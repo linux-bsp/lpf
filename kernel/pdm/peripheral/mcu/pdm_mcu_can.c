@@ -19,6 +19,7 @@
 
 #include "pdm/compat/pdm_compat_features.h"
 #include "pdm/core/driver/pdm_backend.h"
+#include "pdm/pdm_mcu.h"
 #include "pdm_mcu_internal.h"
 #include "osal.h"
 
@@ -243,7 +244,7 @@ MODULE_DEVICE_TABLE(of, pdm_mcu_can_of_match);
 
 static const struct pdm_mcu_transport_ops pdm_mcu_can_ops = {
 	.name = "can",
-	.capability = PDM_CTL_DEVICE_CAP_TRANSPORT_CAN,
+	.capability = PDM_MCU_CAP_TRANSPORT_CAN,
 	.max_tx_size = CAN_MAX_DLEN,
 	.max_rx_size = CAN_MAX_DLEN,
 	.setup = pdm_mcu_can_setup,
@@ -251,6 +252,6 @@ static const struct pdm_mcu_transport_ops pdm_mcu_can_ops = {
 	.xfer = pdm_mcu_can_xfer,
 };
 
-pdm_backend_register(mcu_can, PDM_CTL_DEVICE_TYPE_MCU,
+pdm_backend_register(mcu_can, PDM_MCU_DEVICE_TYPE,
 		     PDM_BACKEND_CLASS_TRANSPORT, pdm_mcu_can_of_match,
 		     &pdm_mcu_can_ops, NULL, NULL);

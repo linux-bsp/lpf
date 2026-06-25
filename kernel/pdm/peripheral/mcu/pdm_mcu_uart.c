@@ -9,6 +9,7 @@
 #include <linux/string.h>
 
 #include "pdm/core/driver/pdm_backend.h"
+#include "pdm/pdm_mcu.h"
 #include "pdm_mcu_internal.h"
 #include "osal.h"
 
@@ -159,7 +160,7 @@ MODULE_DEVICE_TABLE(of, pdm_mcu_uart_of_match);
 
 static const struct pdm_mcu_transport_ops pdm_mcu_uart_ops = {
 	.name = "uart",
-	.capability = PDM_CTL_DEVICE_CAP_TRANSPORT_UART,
+	.capability = PDM_MCU_CAP_TRANSPORT_UART,
 	.max_tx_size = PDM_MCU_MAX_TRANSFER_SIZE,
 	.max_rx_size = PDM_MCU_MAX_TRANSFER_SIZE,
 	.setup = pdm_mcu_uart_setup,
@@ -167,7 +168,7 @@ static const struct pdm_mcu_transport_ops pdm_mcu_uart_ops = {
 	.xfer = pdm_mcu_uart_xfer,
 };
 
-pdm_backend_register(mcu_uart, PDM_CTL_DEVICE_TYPE_MCU,
+pdm_backend_register(mcu_uart, PDM_MCU_DEVICE_TYPE,
 		     PDM_BACKEND_CLASS_TRANSPORT, pdm_mcu_uart_of_match,
 		     &pdm_mcu_uart_ops, pdm_mcu_uart_driver_register,
 		     pdm_mcu_uart_driver_unregister);

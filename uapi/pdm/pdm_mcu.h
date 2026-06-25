@@ -15,6 +15,17 @@
 #define PDM_MCU_DEVICE_NAME "pdm_mcu"
 #define PDM_MCU_MAX_TRANSFER_SIZE 256U
 
+/* MCU device type identifier - shared between kernel and userspace */
+#define PDM_MCU_DEVICE_TYPE 0x01
+
+/* MCU capability flags - shared between kernel and userspace */
+#define PDM_MCU_CAP_NONE           0ULL
+#define PDM_MCU_CAP_TRANSPORT_CAN  (1ULL << 0)
+#define PDM_MCU_CAP_TRANSPORT_UART (1ULL << 1)
+#define PDM_MCU_CAP_TRANSPORT_I2C  (1ULL << 2)
+#define PDM_MCU_CAP_TRANSPORT_SPI  (1ULL << 3)
+#define PDM_MCU_CAP_USER_IOCTL     (1ULL << 16)
+
 enum pdm_mcu_state {
 	PDM_MCU_STATE_UNINITIALIZED = 0x00,
 	PDM_MCU_STATE_INIT = 0x01,

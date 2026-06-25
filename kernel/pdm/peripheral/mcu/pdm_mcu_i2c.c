@@ -13,6 +13,7 @@
 
 #include "pdm/compat/pdm_compat_i2c.h"
 #include "pdm/core/driver/pdm_backend.h"
+#include "pdm/pdm_mcu.h"
 #include "pdm_mcu_internal.h"
 #include "osal.h"
 
@@ -202,7 +203,7 @@ MODULE_DEVICE_TABLE(i2c, pdm_mcu_i2c_id);
 
 static const struct pdm_mcu_transport_ops pdm_mcu_i2c_ops = {
 	.name = "i2c",
-	.capability = PDM_CTL_DEVICE_CAP_TRANSPORT_I2C,
+	.capability = PDM_MCU_CAP_TRANSPORT_I2C,
 	.max_tx_size = PDM_MCU_MAX_TRANSFER_SIZE,
 	.max_rx_size = PDM_MCU_MAX_TRANSFER_SIZE,
 	.setup = pdm_mcu_i2c_setup,
@@ -232,7 +233,7 @@ static void pdm_mcu_i2c_driver_unregister(void)
 	pdm_compat_i2c_driver_unregister(&pdm_mcu_i2c_driver);
 }
 
-pdm_backend_register(mcu_i2c, PDM_CTL_DEVICE_TYPE_MCU,
+pdm_backend_register(mcu_i2c, PDM_MCU_DEVICE_TYPE,
 		     PDM_BACKEND_CLASS_TRANSPORT, pdm_mcu_i2c_of_match,
 		     &pdm_mcu_i2c_ops, pdm_mcu_i2c_driver_register,
 		     pdm_mcu_i2c_driver_unregister);

@@ -9,6 +9,7 @@
 #include <linux/module.h>
 
 #include "pdm/core/driver/pdm_backend.h"
+#include "pdm/pdm_led.h"
 #include "pdm_led_internal.h"
 #include "osal.h"
 
@@ -65,12 +66,12 @@ MODULE_DEVICE_TABLE(of, pdm_led_gpio_of_match);
 static const struct pdm_led_backend_ops pdm_led_gpio_ops = {
 	.type = PDM_LED_BACKEND_GPIO,
 	.name = "gpio",
-	.capability = PDM_CTL_DEVICE_CAP_CONTROL_GPIO,
+	.capability = PDM_LED_CAP_GPIO,
 	.setup = pdm_led_gpio_setup,
 	.cleanup = pdm_led_gpio_cleanup,
 	.apply = pdm_led_gpio_apply,
 };
 
-pdm_backend_register(led_gpio, PDM_CTL_DEVICE_TYPE_LED,
+pdm_backend_register(led_gpio, PDM_LED_DEVICE_TYPE,
 		     PDM_BACKEND_CLASS_CONTROL, pdm_led_gpio_of_match,
 		     &pdm_led_gpio_ops, NULL, NULL);

@@ -276,7 +276,7 @@ const struct pdm_mcu_transport_ops *pdm_mcu_transport_select(const char *compati
 {
 	const struct pdm_backend_entry *entry;
 
-	entry = pdm_backend_find(PDM_CTL_DEVICE_TYPE_MCU,
+	entry = pdm_backend_find(PDM_MCU_DEVICE_TYPE,
 				 PDM_BACKEND_CLASS_TRANSPORT, compatible);
 	return entry ? entry->ops : NULL;
 }
@@ -433,8 +433,8 @@ static struct pdm_driver pdm_mcu_driver = {
 		.name = "pdm-mcu",
 		.of_match_table = pdm_mcu_of_match,
 	},
-	.device_type = PDM_CTL_DEVICE_TYPE_MCU,
-	.capabilities = PDM_CTL_DEVICE_CAP_USER_IOCTL,
+	.device_type = PDM_MCU_DEVICE_TYPE,
+	.capabilities = PDM_MCU_CAP_USER_IOCTL,
 	.match = pdm_mcu_match,
 	.probe = pdm_mcu_probe,
 	.remove = pdm_mcu_remove,

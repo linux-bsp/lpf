@@ -11,6 +11,15 @@
 #define PDM_LED_ABI_VERSION 0x00010000U
 #define PDM_LED_DEVICE_NAME "pdm_led"
 
+/* LED device type identifier - shared between kernel and userspace */
+#define PDM_LED_DEVICE_TYPE 0x02
+
+/* LED capability flags - shared between kernel and userspace */
+#define PDM_LED_CAP_NONE        0ULL
+#define PDM_LED_CAP_GPIO        (1ULL << 8)
+#define PDM_LED_CAP_PWM         (1ULL << 9)
+#define PDM_LED_CAP_USER_IOCTL  (1ULL << 16)
+
 struct pdm_led_info {
 	__u32 abi_version;
 	__u32 module_version_major;

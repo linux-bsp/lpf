@@ -13,6 +13,7 @@
 
 #include "pdm/compat/pdm_compat_features.h"
 #include "pdm/core/driver/pdm_backend.h"
+#include "pdm/pdm_mcu.h"
 #include "pdm_mcu_internal.h"
 #include "osal.h"
 
@@ -200,7 +201,7 @@ MODULE_DEVICE_TABLE(spi, pdm_mcu_spi_id);
 
 static const struct pdm_mcu_transport_ops pdm_mcu_spi_ops = {
 	.name = "spi",
-	.capability = PDM_CTL_DEVICE_CAP_TRANSPORT_SPI,
+	.capability = PDM_MCU_CAP_TRANSPORT_SPI,
 	.max_tx_size = PDM_MCU_MAX_TRANSFER_SIZE,
 	.max_rx_size = PDM_MCU_MAX_TRANSFER_SIZE,
 	.setup = pdm_mcu_spi_setup,
@@ -228,7 +229,7 @@ static void pdm_mcu_spi_driver_unregister(void)
 	spi_unregister_driver(&pdm_mcu_spi_driver);
 }
 
-pdm_backend_register(mcu_spi, PDM_CTL_DEVICE_TYPE_MCU,
+pdm_backend_register(mcu_spi, PDM_MCU_DEVICE_TYPE,
 		     PDM_BACKEND_CLASS_TRANSPORT, pdm_mcu_spi_of_match,
 		     &pdm_mcu_spi_ops, pdm_mcu_spi_driver_register,
 		     pdm_mcu_spi_driver_unregister);
