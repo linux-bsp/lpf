@@ -15,7 +15,7 @@
 #include <linux/mutex.h>
 #include <linux/types.h>
 
-#include "pdm/core/cdev/pdm_cdev.h"
+#include "pdm/core/bus/pdm_cdev.h"
 #include "pdm/core/bus/pdm_device.h"
 
 /**

@@ -9,9 +9,7 @@ pdm-y := pdm/pdm.o
 pdm-y += pdm/core/bus/pdm_bus.o
 pdm-y += pdm/core/bus/pdm_device.o
 pdm-y += pdm/core/bus/pdm_of_bus.o
-
-# Core userspace device nodes
-pdm-y += pdm/core/cdev/pdm_cdev.o
+pdm-y += pdm/core/bus/pdm_cdev.o
 
 # Core diagnostics interfaces
 pdm-y += pdm/core/diag/pdm_debugfs.o

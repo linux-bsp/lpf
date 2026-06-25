@@ -16,7 +16,7 @@
 #include <linux/miscdevice.h>
 #include <linux/uaccess.h>
 
-#include "pdm/core/cdev/pdm_cdev.h"
+#include "pdm/core/bus/pdm_cdev.h"
 #include "pdm/core/bus/pdm_bus.h"
 #include "pdm/core/bus/pdm_device.h"
 #include "pdm/pdm_manager.h"

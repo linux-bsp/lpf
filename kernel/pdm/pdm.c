@@ -3,7 +3,7 @@
 #include <linux/module.h>
 
 #include "drivers/mock/pdm_mock_devices.h"
-#include "pdm/core/cdev/pdm_cdev.h"
+#include "pdm/core/bus/pdm_cdev.h"
 #include "pdm/core/registry/pdm_backend.h"
 #include "pdm/core/bus/pdm_bus.h"
 #include "pdm/core/bus/pdm_device.h"
