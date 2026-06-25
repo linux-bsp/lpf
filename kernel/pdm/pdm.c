@@ -7,8 +7,8 @@
 #include "pdm/registry/pdm_backend.h"
 #include "pdm/bus/pdm_bus.h"
 #include "pdm/bus/pdm_device.h"
-#include "pdm/pdm_errno.h"
 #include "generated/gen_version.h"
+#include "osal.h"
 
 static void pdm_print_version(void)
 {

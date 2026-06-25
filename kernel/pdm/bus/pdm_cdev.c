@@ -20,7 +20,6 @@
 #include "pdm/bus/pdm_bus.h"
 #include "pdm/bus/pdm_device.h"
 #include "pdm/pdm_manager.h"
-#include "pdm/pdm_errno.h"
 #include "osal.h"
 
 static dev_t pdm_cdev_devt;
