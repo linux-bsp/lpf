@@ -11,8 +11,26 @@
 #include "pdm/core/bus/pdm_bus.h"
 #include "osal.h"
 
+/* Delimit pdm_driver_entries inside pdm.ko without a linker script. */
+asm(
+".section pdm_driver_entries,\"a\"\n"
+".balign 8\n"
+".globl __start_pdm_driver_entries\n"
+"__start_pdm_driver_entries:\n"
+".previous\n"
+);
+
 extern const struct pdm_driver_entry __start_pdm_driver_entries[];
 extern const struct pdm_driver_entry __stop_pdm_driver_entries[];
+
+/* Keep this object after all pdm_driver_register() users in pdm-y. */
+asm(
+".section pdm_driver_entries,\"a\"\n"
+".balign 8\n"
+".globl __stop_pdm_driver_entries\n"
+"__stop_pdm_driver_entries:\n"
+".previous\n"
+);
 
 static size_t pdm_driver_entries_initialized;
 
