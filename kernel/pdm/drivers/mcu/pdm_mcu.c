@@ -17,7 +17,7 @@
 
 #include "pdm/core/registry/pdm_backend.h"
 #include "pdm/core/bus/pdm_bus.h"
-#include "pdm/pdm_ctl.h"
+#include "pdm/pdm_manager.h"
 #include "osal.h"
 
 #define PDM_MCU_BUS_DEVICE_NAME_LEN 96
@@ -76,7 +76,7 @@ static void pdm_mcu_update_state_locked(struct pdm_mcu_instance *inst, int ret)
 		inst->base.pdm_dev->last_error = ret;
 		inst->base.pdm_dev->error_count++;
 		if (inst->base.online) {
-			inst->base.pdm_dev->state = PDM_CTL_DEVICE_STATE_ERROR;
+			inst->base.pdm_dev->state = PDM_MANAGER_DEVICE_STATE_ERROR;
 		}
 		return;
 	}
@@ -85,7 +85,7 @@ static void pdm_mcu_update_state_locked(struct pdm_mcu_instance *inst, int ret)
 	inst->state = inst->base.online ? PDM_MCU_STATE_READY : PDM_MCU_STATE_OFFLINE;
 	inst->base.pdm_dev->last_error = 0;
 	if (inst->base.online) {
-		inst->base.pdm_dev->state = PDM_CTL_DEVICE_STATE_BOUND;
+		inst->base.pdm_dev->state = PDM_MANAGER_DEVICE_STATE_BOUND;
 	}
 }
 

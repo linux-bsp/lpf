@@ -46,7 +46,7 @@ int32_t pdi_mcu_open(pdi_mcu_context_t *ctx, const char *device_path)
 int32_t pdi_mcu_open_by_name(pdi_mcu_context_t *ctx, const char *name)
 {
 	pdi_ctl_context_t ctl;
-	struct pdm_ctl_device_info info;
+	struct pdm_manager_device_info info;
 	char path[PDI_DEVICE_PATH_LEN];
 	int32_t ret;
 
@@ -69,7 +69,7 @@ int32_t pdi_mcu_open_by_name(pdi_mcu_context_t *ctx, const char *name)
 		return ret;
 	}
 
-	if (info.type != PDM_CTL_DEVICE_TYPE_MCU) {
+	if (info.type != PDM_MANAGER_DEVICE_TYPE_MCU) {
 		return pdi_fail_no_device();
 	}
 

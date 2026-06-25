@@ -19,9 +19,9 @@ static DEFINE_IDA(pdm_device_led_ida);
 static struct ida *pdm_device_ida_for_type(u32 type)
 {
 	switch (type) {
-	case PDM_CTL_DEVICE_TYPE_MCU:
+	case PDM_MANAGER_DEVICE_TYPE_MCU:
 		return &pdm_device_mcu_ida;
-	case PDM_CTL_DEVICE_TYPE_LED:
+	case PDM_MANAGER_DEVICE_TYPE_LED:
 		return &pdm_device_led_ida;
 	default:
 		return NULL;
@@ -50,8 +50,8 @@ struct pdm_device *pdm_device_alloc(unsigned int size)
 	device_initialize(&pdm_dev->dev);
 	pdm_dev->dev.bus = &pdm_bus_type;
 	pdm_dev->dev.release = pdm_device_release;
-	pdm_dev->type = PDM_CTL_DEVICE_TYPE_INVALID;
-	pdm_dev->state = PDM_CTL_DEVICE_STATE_REGISTERED;
+	pdm_dev->type = PDM_MANAGER_DEVICE_TYPE_INVALID;
+	pdm_dev->state = PDM_MANAGER_DEVICE_STATE_REGISTERED;
 	pdm_dev->id = -1;
 	pdm_dev->requested_id = -1;
 
@@ -150,7 +150,7 @@ int pdm_device_bind(struct pdm_device *pdm_dev, u32 type, u64 capabilities)
 	pdm_dev->id_allocated = true;
 	pdm_dev->type = type;
 	pdm_dev->capabilities |= capabilities;
-	pdm_device_set_state(pdm_dev, PDM_CTL_DEVICE_STATE_REGISTERED);
+	pdm_device_set_state(pdm_dev, PDM_MANAGER_DEVICE_STATE_REGISTERED);
 	return 0;
 }
 EXPORT_SYMBOL_GPL(pdm_device_bind);
@@ -170,9 +170,9 @@ void pdm_device_unbind(struct pdm_device *pdm_dev)
 
 	pdm_dev->id_allocated = false;
 	pdm_dev->id = pdm_dev->requested_id;
-	pdm_dev->type = PDM_CTL_DEVICE_TYPE_INVALID;
-	pdm_dev->capabilities = PDM_CTL_DEVICE_CAP_NONE;
-	pdm_device_set_state(pdm_dev, PDM_CTL_DEVICE_STATE_REGISTERED);
+	pdm_dev->type = PDM_MANAGER_DEVICE_TYPE_INVALID;
+	pdm_dev->capabilities = PDM_MANAGER_DEVICE_CAP_NONE;
+	pdm_device_set_state(pdm_dev, PDM_MANAGER_DEVICE_STATE_REGISTERED);
 }
 EXPORT_SYMBOL_GPL(pdm_device_unbind);
 

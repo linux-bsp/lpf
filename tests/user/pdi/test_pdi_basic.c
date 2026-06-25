@@ -16,8 +16,8 @@ static int expect_failure_errno(int32_t ret, int expected_errno)
 static int test_ctl_validation(void)
 {
 	pdi_ctl_context_t ctx = { .fd = -1 };
-	struct pdm_ctl_info info;
-	struct pdm_ctl_device_info device;
+	struct pdm_manager_info info;
+	struct pdm_manager_device_info device;
 	uint32_t count = 0;
 
 	errno = 0;
@@ -93,7 +93,7 @@ static int test_ctl_validation(void)
 
 	errno = 0;
 	if (expect_failure_errno(
-		    pdi_get_device_by_capability(&ctx, PDM_CTL_DEVICE_CAP_NONE,
+		    pdi_get_device_by_capability(&ctx, PDM_MANAGER_DEVICE_CAP_NONE,
 						 0, &device),
 		    EINVAL))
 	{
@@ -103,7 +103,7 @@ static int test_ctl_validation(void)
 	errno = 0;
 	if (expect_failure_errno(
 		    pdi_get_device_by_capability(&ctx,
-						 PDM_CTL_DEVICE_CAP_USER_IOCTL,
+						 PDM_MANAGER_DEVICE_CAP_USER_IOCTL,
 						 0, NULL),
 		    EINVAL))
 	{

@@ -2,7 +2,7 @@
 
 #include <stddef.h>
 
-#include "pdm/pdm_ctl.h"
+#include "pdm/pdm_manager.h"
 #include "pdm/pdm_led.h"
 #include "pdm/pdm_mcu.h"
 
@@ -13,37 +13,37 @@
 	_Static_assert(offsetof(type, member) == (offset), \
 		       "offsetof(" #type "." #member ")")
 
-ABI_ASSERT(PDM_CTL_ABI_VERSION == 0x00010000U, ctl_abi_version);
+ABI_ASSERT(PDM_MANAGER_ABI_VERSION == 0x00010000U, ctl_abi_version);
 ABI_ASSERT(PDM_MCU_ABI_VERSION == 0x00010000U, mcu_abi_version);
 ABI_ASSERT(PDM_LED_ABI_VERSION == 0x00010000U, led_abi_version);
 
-ABI_SIZE(struct pdm_ctl_info, 24);
-ABI_OFFSET(struct pdm_ctl_info, abi_version, 0);
-ABI_OFFSET(struct pdm_ctl_info, module_version_major, 4);
-ABI_OFFSET(struct pdm_ctl_info, module_version_minor, 8);
-ABI_OFFSET(struct pdm_ctl_info, module_version_patch, 12);
-ABI_OFFSET(struct pdm_ctl_info, open_count, 16);
-ABI_OFFSET(struct pdm_ctl_info, device_count, 20);
+ABI_SIZE(struct pdm_manager_info, 24);
+ABI_OFFSET(struct pdm_manager_info, abi_version, 0);
+ABI_OFFSET(struct pdm_manager_info, module_version_major, 4);
+ABI_OFFSET(struct pdm_manager_info, module_version_minor, 8);
+ABI_OFFSET(struct pdm_manager_info, module_version_patch, 12);
+ABI_OFFSET(struct pdm_manager_info, open_count, 16);
+ABI_OFFSET(struct pdm_manager_info, device_count, 20);
 
-ABI_SIZE(struct pdm_ctl_device_info, 160);
-ABI_OFFSET(struct pdm_ctl_device_info, type, 0);
-ABI_OFFSET(struct pdm_ctl_device_info, index, 4);
-ABI_OFFSET(struct pdm_ctl_device_info, state, 8);
-ABI_OFFSET(struct pdm_ctl_device_info, last_error, 12);
-ABI_OFFSET(struct pdm_ctl_device_info, error_count, 16);
-ABI_OFFSET(struct pdm_ctl_device_info, capabilities, 24);
-ABI_OFFSET(struct pdm_ctl_device_info, name, 32);
-ABI_OFFSET(struct pdm_ctl_device_info, driver_name, 96);
+ABI_SIZE(struct pdm_manager_device_info, 160);
+ABI_OFFSET(struct pdm_manager_device_info, type, 0);
+ABI_OFFSET(struct pdm_manager_device_info, index, 4);
+ABI_OFFSET(struct pdm_manager_device_info, state, 8);
+ABI_OFFSET(struct pdm_manager_device_info, last_error, 12);
+ABI_OFFSET(struct pdm_manager_device_info, error_count, 16);
+ABI_OFFSET(struct pdm_manager_device_info, capabilities, 24);
+ABI_OFFSET(struct pdm_manager_device_info, name, 32);
+ABI_OFFSET(struct pdm_manager_device_info, driver_name, 96);
 
-ABI_SIZE(struct pdm_ctl_device_query, 176);
-ABI_OFFSET(struct pdm_ctl_device_query, match_index, 0);
-ABI_OFFSET(struct pdm_ctl_device_query, reserved, 4);
-ABI_OFFSET(struct pdm_ctl_device_query, required_capabilities, 8);
-ABI_OFFSET(struct pdm_ctl_device_query, info, 16);
+ABI_SIZE(struct pdm_manager_device_query, 176);
+ABI_OFFSET(struct pdm_manager_device_query, match_index, 0);
+ABI_OFFSET(struct pdm_manager_device_query, reserved, 4);
+ABI_OFFSET(struct pdm_manager_device_query, required_capabilities, 8);
+ABI_OFFSET(struct pdm_manager_device_query, info, 16);
 
-ABI_SIZE(struct pdm_ctl_device_name_query, 224);
-ABI_OFFSET(struct pdm_ctl_device_name_query, name, 0);
-ABI_OFFSET(struct pdm_ctl_device_name_query, info, 64);
+ABI_SIZE(struct pdm_manager_device_name_query, 224);
+ABI_OFFSET(struct pdm_manager_device_name_query, name, 0);
+ABI_OFFSET(struct pdm_manager_device_name_query, info, 64);
 
 ABI_SIZE(struct pdm_mcu_info, 24);
 ABI_SIZE(struct pdm_mcu_version, 40);
@@ -54,20 +54,20 @@ ABI_SIZE(struct pdm_led_info, 24);
 ABI_SIZE(struct pdm_led_state, 16);
 ABI_SIZE(struct pdm_led_brightness, 8);
 
-ABI_ASSERT(PDM_CTL_IOC_GET_INFO ==
-		   _IOR(PDM_CTL_IOC_MAGIC, 0x01, struct pdm_ctl_info),
+ABI_ASSERT(PDM_MANAGER_IOC_GET_INFO ==
+		   _IOR(PDM_MANAGER_IOC_MAGIC, 0x01, struct pdm_manager_info),
 	   ctl_get_info_ioctl);
-ABI_ASSERT(PDM_CTL_IOC_GET_DEVICE ==
-		   _IOWR(PDM_CTL_IOC_MAGIC, 0x02,
-			 struct pdm_ctl_device_query),
+ABI_ASSERT(PDM_MANAGER_IOC_GET_DEVICE ==
+		   _IOWR(PDM_MANAGER_IOC_MAGIC, 0x02,
+			 struct pdm_manager_device_query),
 	   ctl_get_device_ioctl);
-ABI_ASSERT(PDM_CTL_IOC_GET_DEVICE_BY_NAME ==
-		   _IOWR(PDM_CTL_IOC_MAGIC, 0x03,
-			 struct pdm_ctl_device_name_query),
+ABI_ASSERT(PDM_MANAGER_IOC_GET_DEVICE_BY_NAME ==
+		   _IOWR(PDM_MANAGER_IOC_MAGIC, 0x03,
+			 struct pdm_manager_device_name_query),
 	   ctl_get_device_by_name_ioctl);
-ABI_ASSERT(PDM_CTL_IOC_GET_DEVICE_BY_CAPABILITY ==
-		   _IOWR(PDM_CTL_IOC_MAGIC, 0x04,
-			 struct pdm_ctl_device_query),
+ABI_ASSERT(PDM_MANAGER_IOC_GET_DEVICE_BY_CAPABILITY ==
+		   _IOWR(PDM_MANAGER_IOC_MAGIC, 0x04,
+			 struct pdm_manager_device_query),
 	   ctl_get_device_by_capability_ioctl);
 
 ABI_ASSERT(PDM_MCU_IOC_GET_INFO ==

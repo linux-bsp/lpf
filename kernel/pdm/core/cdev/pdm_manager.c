@@ -11,16 +11,16 @@
 #include <linux/string.h>
 #include <linux/uaccess.h>
 
-#include "pdm_ctl.h"
+#include "pdm_manager.h"
 
 #include "pdm/core/bus/pdm_bus.h"
 #include "pdm/core/bus/pdm_device.h"
-#include "pdm/pdm_ctl.h"
+#include "pdm/pdm_manager.h"
 #include "pdm/pdm_errno.h"
 #include "osal.h"
 
-struct pdm_ctl_match_ctx {
-	struct pdm_ctl_device_info *info;
+struct pdm_manager_match_ctx {
+	struct pdm_manager_device_info *info;
 	const char *name;
 	u64 required_capabilities;
 	u32 match_index;
@@ -28,21 +28,21 @@ struct pdm_ctl_match_ctx {
 	bool found;
 };
 
-static atomic_t pdm_ctl_open_count = ATOMIC_INIT(0);
+static atomic_t pdm_manager_open_count = ATOMIC_INIT(0);
 
-static bool pdm_ctl_device_visible(const struct pdm_device *pdm_dev)
+static bool pdm_manager_device_visible(const struct pdm_device *pdm_dev)
 {
 	if (!pdm_dev || !pdm_dev->id_allocated ||
-	    pdm_dev->type == PDM_CTL_DEVICE_TYPE_INVALID) {
+	    pdm_dev->type == PDM_MANAGER_DEVICE_TYPE_INVALID) {
 		return false;
 	}
 
-	return pdm_dev->state == PDM_CTL_DEVICE_STATE_BOUND ||
-	       pdm_dev->state == PDM_CTL_DEVICE_STATE_ERROR;
+	return pdm_dev->state == PDM_MANAGER_DEVICE_STATE_BOUND ||
+	       pdm_dev->state == PDM_MANAGER_DEVICE_STATE_ERROR;
 }
 
-static void pdm_ctl_fill_device_info(struct device *dev,
-				     struct pdm_ctl_device_info *info)
+static void pdm_manager_fill_device_info(struct device *dev,
+				     struct pdm_manager_device_info *info)
 {
 	struct pdm_device *pdm_dev = dev_to_pdm_device(dev);
 
@@ -60,12 +60,12 @@ static void pdm_ctl_fill_device_info(struct device *dev,
 	}
 }
 
-static int pdm_ctl_count_cb(struct device *dev, void *data)
+static int pdm_manager_count_cb(struct device *dev, void *data)
 {
 	u32 *count = data;
 	struct pdm_device *pdm_dev = dev_to_pdm_device(dev);
 
-	if (!pdm_ctl_device_visible(pdm_dev)) {
+	if (!pdm_manager_device_visible(pdm_dev)) {
 		return 0;
 	}
 
@@ -73,12 +73,12 @@ static int pdm_ctl_count_cb(struct device *dev, void *data)
 	return 0;
 }
 
-static int pdm_ctl_match_index_cb(struct device *dev, void *data)
+static int pdm_manager_match_index_cb(struct device *dev, void *data)
 {
-	struct pdm_ctl_match_ctx *ctx = data;
+	struct pdm_manager_match_ctx *ctx = data;
 	struct pdm_device *pdm_dev = dev_to_pdm_device(dev);
 
-	if (!pdm_ctl_device_visible(pdm_dev)) {
+	if (!pdm_manager_device_visible(pdm_dev)) {
 		return 0;
 	}
 
@@ -86,35 +86,35 @@ static int pdm_ctl_match_index_cb(struct device *dev, void *data)
 		return 0;
 	}
 
-	pdm_ctl_fill_device_info(dev, ctx->info);
+	pdm_manager_fill_device_info(dev, ctx->info);
 	ctx->found = true;
 	return 1;
 }
 
-static int pdm_ctl_match_name_cb(struct device *dev, void *data)
+static int pdm_manager_match_name_cb(struct device *dev, void *data)
 {
-	struct pdm_ctl_match_ctx *ctx = data;
+	struct pdm_manager_match_ctx *ctx = data;
 	struct pdm_device *pdm_dev = dev_to_pdm_device(dev);
 
-	if (!pdm_ctl_device_visible(pdm_dev)) {
+	if (!pdm_manager_device_visible(pdm_dev)) {
 		return 0;
 	}
 
-	if (strncmp(dev_name(dev), ctx->name, PDM_CTL_NAME_LEN) != 0) {
+	if (strncmp(dev_name(dev), ctx->name, PDM_MANAGER_NAME_LEN) != 0) {
 		return 0;
 	}
 
-	pdm_ctl_fill_device_info(dev, ctx->info);
+	pdm_manager_fill_device_info(dev, ctx->info);
 	ctx->found = true;
 	return 1;
 }
 
-static int pdm_ctl_match_capability_cb(struct device *dev, void *data)
+static int pdm_manager_match_capability_cb(struct device *dev, void *data)
 {
-	struct pdm_ctl_match_ctx *ctx = data;
+	struct pdm_manager_match_ctx *ctx = data;
 	struct pdm_device *pdm_dev = dev_to_pdm_device(dev);
 
-	if (!pdm_ctl_device_visible(pdm_dev)) {
+	if (!pdm_manager_device_visible(pdm_dev)) {
 		return 0;
 	}
 
@@ -127,25 +127,25 @@ static int pdm_ctl_match_capability_cb(struct device *dev, void *data)
 		return 0;
 	}
 
-	pdm_ctl_fill_device_info(dev, ctx->info);
+	pdm_manager_fill_device_info(dev, ctx->info);
 	ctx->found = true;
 	return 1;
 }
 
-static long pdm_ctl_get_info(unsigned long arg)
+static long pdm_manager_get_info(unsigned long arg)
 {
-	struct pdm_ctl_info info;
+	struct pdm_manager_info info;
 	u32 device_count = 0;
 	int ret;
 
 	memset(&info, 0, sizeof(info));
-	info.abi_version = PDM_CTL_ABI_VERSION;
+	info.abi_version = PDM_MANAGER_ABI_VERSION;
 	info.module_version_major = 1;
 	info.module_version_minor = 0;
 	info.module_version_patch = 0;
-	info.open_count = (u32)atomic_read(&pdm_ctl_open_count);
+	info.open_count = (u32)atomic_read(&pdm_manager_open_count);
 
-	ret = pdm_bus_for_each_dev(&device_count, pdm_ctl_count_cb);
+	ret = pdm_bus_for_each_dev(&device_count, pdm_manager_count_cb);
 	if (ret < 0) {
 		return ret;
 	}
@@ -158,10 +158,10 @@ static long pdm_ctl_get_info(unsigned long arg)
 	return 0;
 }
 
-static long pdm_ctl_get_device(unsigned long arg)
+static long pdm_manager_get_device(unsigned long arg)
 {
-	struct pdm_ctl_device_query query;
-	struct pdm_ctl_match_ctx ctx;
+	struct pdm_manager_device_query query;
+	struct pdm_manager_match_ctx ctx;
 	int ret;
 
 	if (copy_from_user(&query, (void __user *)arg, sizeof(query))) {
@@ -172,7 +172,7 @@ static long pdm_ctl_get_device(unsigned long arg)
 	ctx.info = &query.info;
 	ctx.match_index = query.match_index;
 
-	ret = pdm_bus_for_each_dev(&ctx, pdm_ctl_match_index_cb);
+	ret = pdm_bus_for_each_dev(&ctx, pdm_manager_match_index_cb);
 	if (ret < 0) {
 		return ret;
 	}
@@ -187,22 +187,22 @@ static long pdm_ctl_get_device(unsigned long arg)
 	return 0;
 }
 
-static long pdm_ctl_get_device_by_name(unsigned long arg)
+static long pdm_manager_get_device_by_name(unsigned long arg)
 {
-	struct pdm_ctl_device_name_query query;
-	struct pdm_ctl_match_ctx ctx;
+	struct pdm_manager_device_name_query query;
+	struct pdm_manager_match_ctx ctx;
 	int ret;
 
 	if (copy_from_user(&query, (void __user *)arg, sizeof(query))) {
 		return -EFAULT;
 	}
-	query.name[PDM_CTL_NAME_LEN - 1] = '\0';
+	query.name[PDM_MANAGER_NAME_LEN - 1] = '\0';
 
 	memset(&ctx, 0, sizeof(ctx));
 	ctx.info = &query.info;
 	ctx.name = query.name;
 
-	ret = pdm_bus_for_each_dev(&ctx, pdm_ctl_match_name_cb);
+	ret = pdm_bus_for_each_dev(&ctx, pdm_manager_match_name_cb);
 	if (ret < 0) {
 		return ret;
 	}
@@ -217,10 +217,10 @@ static long pdm_ctl_get_device_by_name(unsigned long arg)
 	return 0;
 }
 
-static long pdm_ctl_get_device_by_capability(unsigned long arg)
+static long pdm_manager_get_device_by_capability(unsigned long arg)
 {
-	struct pdm_ctl_device_query query;
-	struct pdm_ctl_match_ctx ctx;
+	struct pdm_manager_device_query query;
+	struct pdm_manager_match_ctx ctx;
 	int ret;
 
 	if (copy_from_user(&query, (void __user *)arg, sizeof(query))) {
@@ -235,7 +235,7 @@ static long pdm_ctl_get_device_by_capability(unsigned long arg)
 	ctx.required_capabilities = query.required_capabilities;
 	ctx.match_index = query.match_index;
 
-	ret = pdm_bus_for_each_dev(&ctx, pdm_ctl_match_capability_cb);
+	ret = pdm_bus_for_each_dev(&ctx, pdm_manager_match_capability_cb);
 	if (ret < 0) {
 		return ret;
 	}
@@ -250,74 +250,74 @@ static long pdm_ctl_get_device_by_capability(unsigned long arg)
 	return 0;
 }
 
-static long pdm_ctl_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+static long pdm_manager_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
 	(void)filp;
 
 	switch (cmd) {
-	case PDM_CTL_IOC_GET_INFO:
-		return pdm_ctl_get_info(arg);
-	case PDM_CTL_IOC_GET_DEVICE:
-		return pdm_ctl_get_device(arg);
-	case PDM_CTL_IOC_GET_DEVICE_BY_NAME:
-		return pdm_ctl_get_device_by_name(arg);
-	case PDM_CTL_IOC_GET_DEVICE_BY_CAPABILITY:
-		return pdm_ctl_get_device_by_capability(arg);
+	case PDM_MANAGER_IOC_GET_INFO:
+		return pdm_manager_get_info(arg);
+	case PDM_MANAGER_IOC_GET_DEVICE:
+		return pdm_manager_get_device(arg);
+	case PDM_MANAGER_IOC_GET_DEVICE_BY_NAME:
+		return pdm_manager_get_device_by_name(arg);
+	case PDM_MANAGER_IOC_GET_DEVICE_BY_CAPABILITY:
+		return pdm_manager_get_device_by_capability(arg);
 	default:
 		return -ENOTTY;
 	}
 }
 
-static int pdm_ctl_open(struct inode *inode, struct file *filp)
+static int pdm_manager_open(struct inode *inode, struct file *filp)
 {
 	(void)inode;
 	(void)filp;
-	atomic_inc(&pdm_ctl_open_count);
+	atomic_inc(&pdm_manager_open_count);
 	return 0;
 }
 
-static int pdm_ctl_release(struct inode *inode, struct file *filp)
+static int pdm_manager_release(struct inode *inode, struct file *filp)
 {
 	(void)inode;
 	(void)filp;
-	atomic_dec_if_positive(&pdm_ctl_open_count);
+	atomic_dec_if_positive(&pdm_manager_open_count);
 	return 0;
 }
 
-static const struct file_operations pdm_ctl_fops = {
+static const struct file_operations pdm_manager_fops = {
 	.owner = THIS_MODULE,
-	.open = pdm_ctl_open,
-	.release = pdm_ctl_release,
-	.unlocked_ioctl = pdm_ctl_ioctl,
+	.open = pdm_manager_open,
+	.release = pdm_manager_release,
+	.unlocked_ioctl = pdm_manager_ioctl,
 #ifdef CONFIG_COMPAT
-	.compat_ioctl = pdm_ctl_ioctl,
+	.compat_ioctl = pdm_manager_ioctl,
 #endif
 };
 
-static struct miscdevice pdm_ctl_miscdev = {
+static struct miscdevice pdm_manager_miscdev = {
 	.minor = MISC_DYNAMIC_MINOR,
-	.name = PDM_CTL_DEVICE_NAME,
-	.fops = &pdm_ctl_fops,
+	.name = PDM_MANAGER_DEVICE_NAME,
+	.fops = &pdm_manager_fops,
 	.mode = 0666,
 };
 
-int pdm_ctl_init(void)
+int pdm_manager_init(void)
 {
 	int ret;
 
-	ret = misc_register(&pdm_ctl_miscdev);
+	ret = misc_register(&pdm_manager_miscdev);
 	if (ret) {
 		LOG_ERROR("Failed to register /dev/%s: %d",
-			  PDM_CTL_DEVICE_NAME, ret);
+			  PDM_MANAGER_DEVICE_NAME, ret);
 		return ret;
 	}
 
-	LOG_INFO("/dev/%s registered", PDM_CTL_DEVICE_NAME);
+	LOG_INFO("/dev/%s registered", PDM_MANAGER_DEVICE_NAME);
 	return 0;
 }
 
-void pdm_ctl_exit(void)
+void pdm_manager_exit(void)
 {
-	misc_deregister(&pdm_ctl_miscdev);
-	LOG_INFO("/dev/%s unregistered", PDM_CTL_DEVICE_NAME);
+	misc_deregister(&pdm_manager_miscdev);
+	LOG_INFO("/dev/%s unregistered", PDM_MANAGER_DEVICE_NAME);
 }

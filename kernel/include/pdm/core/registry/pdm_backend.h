@@ -11,7 +11,7 @@
 #include <linux/mod_devicetable.h>
 #include <linux/types.h>
 
-#include "pdm/pdm_ctl.h"
+#include "pdm/pdm_manager.h"
 
 #define pdm_backend_register(_name, _device_type, _class, _matches, _ops, \
 			     _init, _exit) \

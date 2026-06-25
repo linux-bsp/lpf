@@ -55,7 +55,7 @@ static int pdm_bus_device_probe(struct device *dev)
 		return ret;
 	}
 
-	pdm_device_set_state(pdm_dev, PDM_CTL_DEVICE_STATE_BOUND);
+	pdm_device_set_state(pdm_dev, PDM_MANAGER_DEVICE_STATE_BOUND);
 	pdm_dev->last_error = 0;
 	return 0;
 }

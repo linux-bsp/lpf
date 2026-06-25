@@ -10,7 +10,7 @@
 #include <linux/device.h>
 #include <linux/types.h>
 
-#include "pdm/pdm_ctl.h"
+#include "pdm/pdm_manager.h"
 
 #define dev_to_pdm_device(__dev) \
 	container_of(__dev, struct pdm_device, dev)
@@ -23,7 +23,7 @@
  * @dev: Embedded Linux device.
  * @compatible: Primary Device Tree compatible string.
  * @config_data: Optional driver/controller-owned configuration payload.
- * @type: PDM_CTL_DEVICE_TYPE_* value exposed through /dev/pdm_ctl.
+ * @type: PDM_MANAGER_DEVICE_TYPE_* value exposed through /dev/pdm_ctl.
  * @capabilities: PDM capability flags exposed by the concrete driver.
  * @state: Discovery state exported through /dev/pdm_ctl.
  * @last_error: Last probe/runtime error exported through /dev/pdm_ctl.
@@ -69,7 +69,7 @@ static inline void pdm_device_record_error(struct pdm_device *pdm_dev, int error
 
 	pdm_dev->last_error = error;
 	pdm_dev->error_count++;
-	pdm_dev->state = PDM_CTL_DEVICE_STATE_ERROR;
+	pdm_dev->state = PDM_MANAGER_DEVICE_STATE_ERROR;
 }
 
 static inline struct pdm_device *pdm_device_get(struct pdm_device *pdm_dev)

@@ -3,7 +3,7 @@
 #include <linux/module.h>
 
 #include "core/bus/pdm_of_bus.h"
-#include "core/cdev/pdm_ctl.h"
+#include "core/cdev/pdm_manager.h"
 #include "drivers/mock/pdm_mock_devices.h"
 #include "pdm/core/cdev/pdm_cdev.h"
 #include "pdm/core/registry/pdm_backend.h"
@@ -42,7 +42,7 @@ static int __init pdm_module_init(void)
 		return ret;
 	}
 
-	ret = pdm_ctl_init();
+	ret = pdm_manager_init();
 	if (ret) {
 		LOG_ERROR("Failed to initialize PDM control node: %d", ret);
 		goto err_bus;
@@ -90,7 +90,7 @@ err_drivers:
 err_client:
 	pdm_cdev_exit();
 err_ctl:
-	pdm_ctl_exit();
+	pdm_manager_exit();
 err_bus:
 	pdm_bus_exit();
 	return ret;
@@ -106,7 +106,7 @@ static void __exit pdm_module_exit(void)
 	pdm_backend_entries_exit();
 	pdm_driver_entries_exit();
 	pdm_cdev_exit();
-	pdm_ctl_exit();
+	pdm_manager_exit();
 	pdm_bus_exit();
 	pdm_device_ids_destroy();
 

@@ -57,20 +57,20 @@ int32_t pdi_ctl_close(pdi_ctl_context_t *ctx)
 	return pdi_result_from_syscall(ret);
 }
 
-int32_t pdi_ctl_get_info(pdi_ctl_context_t *ctx, struct pdm_ctl_info *info)
+int32_t pdi_ctl_get_info(pdi_ctl_context_t *ctx, struct pdm_manager_info *info)
 {
 	if (pdi_check_ptr(info) < 0) {
 		return PDI_FAILURE;
 	}
 
-	return pdi_ctl_ioctl_checked(ctx, PDM_CTL_IOC_GET_INFO, info);
+	return pdi_ctl_ioctl_checked(ctx, PDM_MANAGER_IOC_GET_INFO, info);
 }
 
 int32_t pdi_list_devices(pdi_ctl_context_t *ctx,
-			 struct pdm_ctl_device_info *devices,
+			 struct pdm_manager_device_info *devices,
 			 uint32_t *count)
 {
-	struct pdm_ctl_device_query query;
+	struct pdm_manager_device_query query;
 	uint32_t requested;
 	uint32_t i;
 	int32_t ret;
@@ -83,7 +83,7 @@ int32_t pdi_list_devices(pdi_ctl_context_t *ctx,
 	for (i = 0; i < requested; i++) {
 		memset(&query, 0, sizeof(query));
 		query.match_index = i;
-		ret = pdi_ctl_ioctl_checked(ctx, PDM_CTL_IOC_GET_DEVICE,
+		ret = pdi_ctl_ioctl_checked(ctx, PDM_MANAGER_IOC_GET_DEVICE,
 					    &query);
 		if (ret < 0) {
 			if (i == 0) {
@@ -102,9 +102,9 @@ int32_t pdi_list_devices(pdi_ctl_context_t *ctx,
 }
 
 int32_t pdi_get_device_by_name(pdi_ctl_context_t *ctx, const char *name,
-			       struct pdm_ctl_device_info *info)
+			       struct pdm_manager_device_info *info)
 {
-	struct pdm_ctl_device_name_query query;
+	struct pdm_manager_device_name_query query;
 	int32_t ret;
 
 	if (pdi_check_ptr(name) < 0) {
@@ -117,7 +117,7 @@ int32_t pdi_get_device_by_name(pdi_ctl_context_t *ctx, const char *name,
 	memset(&query, 0, sizeof(query));
 	strncpy(query.name, name, sizeof(query.name) - 1U);
 
-	ret = pdi_ctl_ioctl_checked(ctx, PDM_CTL_IOC_GET_DEVICE_BY_NAME,
+	ret = pdi_ctl_ioctl_checked(ctx, PDM_MANAGER_IOC_GET_DEVICE_BY_NAME,
 				    &query);
 	if (ret < 0) {
 		return ret;
@@ -130,15 +130,15 @@ int32_t pdi_get_device_by_name(pdi_ctl_context_t *ctx, const char *name,
 int32_t pdi_get_device_by_capability(pdi_ctl_context_t *ctx,
 				     uint64_t required_capabilities,
 				     uint32_t match_index,
-				     struct pdm_ctl_device_info *info)
+				     struct pdm_manager_device_info *info)
 {
-	struct pdm_ctl_device_query query;
+	struct pdm_manager_device_query query;
 	int32_t ret;
 
 	if (pdi_check_ptr(info) < 0) {
 		return PDI_FAILURE;
 	}
-	if (required_capabilities == PDM_CTL_DEVICE_CAP_NONE) {
+	if (required_capabilities == PDM_MANAGER_DEVICE_CAP_NONE) {
 		return pdi_fail_invalid_arg();
 	}
 
@@ -147,7 +147,7 @@ int32_t pdi_get_device_by_capability(pdi_ctl_context_t *ctx,
 	query.required_capabilities = required_capabilities;
 
 	ret = pdi_ctl_ioctl_checked(ctx,
-				    PDM_CTL_IOC_GET_DEVICE_BY_CAPABILITY,
+				    PDM_MANAGER_IOC_GET_DEVICE_BY_CAPABILITY,
 				    &query);
 	if (ret < 0) {
 		return ret;
