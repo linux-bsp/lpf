@@ -16,7 +16,7 @@
 #include "pdm_mcu_internal.h"
 
 #include "pdm/core/registry/pdm_backend.h"
-#include "pdm/core/pdm_bus.h"
+#include "pdm/core/bus/pdm_bus.h"
 #include "pdm/pdm_ctl.h"
 #include "osal.h"
 

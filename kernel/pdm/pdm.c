@@ -2,13 +2,13 @@
 
 #include <linux/module.h>
 
-#include "pdm_of_bus.h"
-#include "cdev/pdm_ctl.h"
-#include "../drivers/mock/pdm_mock_devices.h"
+#include "core/bus/pdm_of_bus.h"
+#include "core/cdev/pdm_ctl.h"
+#include "drivers/mock/pdm_mock_devices.h"
 #include "pdm/core/cdev/pdm_cdev.h"
 #include "pdm/core/registry/pdm_backend.h"
-#include "pdm/core/pdm_bus.h"
-#include "pdm/core/pdm_device.h"
+#include "pdm/core/bus/pdm_bus.h"
+#include "pdm/core/bus/pdm_device.h"
 #include "pdm/pdm_errno.h"
 #include "generated/gen_version.h"
 

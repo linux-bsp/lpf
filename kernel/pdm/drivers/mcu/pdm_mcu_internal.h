@@ -11,7 +11,7 @@
 #include <linux/wait.h>
 
 #include "pdm/core/cdev/pdm_cdev.h"
-#include "pdm/core/pdm_device.h"
+#include "pdm/core/bus/pdm_device.h"
 #include "pdm/core/registry/pdm_driver.h"
 #include "pdm/pdm_mcu.h"
 

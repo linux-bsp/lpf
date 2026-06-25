@@ -13,8 +13,8 @@
 
 #include "pdm_ctl.h"
 
-#include "pdm/core/pdm_bus.h"
-#include "pdm/core/pdm_device.h"
+#include "pdm/core/bus/pdm_bus.h"
+#include "pdm/core/bus/pdm_device.h"
 #include "pdm/pdm_ctl.h"
 #include "pdm/pdm_errno.h"
 #include "osal.h"

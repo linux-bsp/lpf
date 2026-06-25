@@ -3,21 +3,21 @@
 obj-$(CONFIG_PDM) += pdm.o
 
 # Core module entry
-pdm-y := pdm/core/pdm_core.o
+pdm-y := pdm/pdm.o
 
 # Core bus and device model
-pdm-y += pdm/core/pdm_bus.o
-pdm-y += pdm/core/pdm_device.o
-pdm-y += pdm/core/pdm_of_bus.o
+pdm-y += pdm/core/bus/pdm_bus.o
+pdm-y += pdm/core/bus/pdm_device.o
+pdm-y += pdm/core/bus/pdm_of_bus.o
 
 # Core userspace device nodes
 pdm-y += pdm/core/cdev/pdm_ctl.o
 pdm-y += pdm/core/cdev/pdm_cdev.o
 
 # Core diagnostics interfaces
-pdm-y += pdm/core/pdm_debugfs.o
-pdm-y += pdm/core/pdm_proc.o
-pdm-y += pdm/core/pdm_sysfs.o
+pdm-y += pdm/core/diag/pdm_debugfs.o
+pdm-y += pdm/core/diag/pdm_proc.o
+pdm-y += pdm/core/diag/pdm_sysfs.o
 
 # Core driver/backend registries
 pdm-y += pdm/core/registry/pdm_driver_registry.o

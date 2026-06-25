@@ -7,7 +7,7 @@
 #include <linux/types.h>
 
 #include "pdm/core/cdev/pdm_cdev.h"
-#include "pdm/core/pdm_device.h"
+#include "pdm/core/bus/pdm_device.h"
 #include "pdm/core/registry/pdm_driver.h"
 
 #define PDM_LED_DEFAULT_MAX_BRIGHTNESS 255U
