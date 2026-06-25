@@ -40,28 +40,49 @@ static const char *pdm_mcu_state_str(u32 state)
 	}
 }
 
+/* Helper to match device by index during iteration */
+struct mcu_find_ctx {
+	u32 target_index;
+	u32 current_index;
+	struct pdm_mcu_instance *result;
+};
+
+static int pdm_mcu_match_by_index(struct device *dev, void *data)
+{
+	struct mcu_find_ctx *ctx = data;
+	struct pdm_device *pdm_dev;
+	struct pdm_mcu_instance *inst;
+
+	pdm_dev = dev_to_pdm_device(dev);
+	inst = pdm_device_get_drvdata(pdm_dev);
+
+	if (ctx->current_index == ctx->target_index) {
+		ctx->result = inst;
+		return 1; /* Stop iteration */
+	}
+
+	ctx->current_index++;
+	return 0; /* Continue iteration */
+}
+
 /* Helper function to find MCU instance by index */
 static struct pdm_mcu_instance *pdm_mcu_find_instance(u32 index)
 {
-	struct pdm_device *pdm_dev;
-	struct device *dev;
 	struct device_driver *drv;
-	char devname[32];
+	struct mcu_find_ctx ctx = {
+		.target_index = index,
+		.current_index = 0,
+		.result = NULL,
+	};
 
 	drv = driver_find("pdm-mcu", &pdm_bus_type);
 	if (!drv) {
 		return NULL;
 	}
 
-	snprintf(devname, sizeof(devname), "pdm-mcu.%u", index);
-	dev = driver_find_device_by_name(drv, devname);
-	if (!dev) {
-		return NULL;
-	}
+	(void)driver_for_each_device(drv, NULL, &ctx, pdm_mcu_match_by_index);
 
-	pdm_dev = dev_to_pdm_device(dev);
-	put_device(dev);
-	return pdm_device_get_drvdata(pdm_dev);
+	return ctx.result;
 }
 
 /* Proc show function */
