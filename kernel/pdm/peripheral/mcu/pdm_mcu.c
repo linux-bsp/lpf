@@ -91,27 +91,26 @@ static void pdm_mcu_update_state_locked(struct pdm_mcu_instance *inst, int ret)
 
 static int pdm_mcu_claim_device(struct pdm_mcu_instance *inst)
 {
-	int ret = 0;
+	int ret;
 
-	mutex_lock(&inst->base.lock);
-
-	if (!inst->base.online) {
-		ret = -ENODEV;
-	} else if (!inst->ops) {
-		ret = -EOPNOTSUPP;
-	}
+	ret = pdm_driver_claim(&inst->base);
 	if (ret) {
-		pdm_mcu_update_state_locked(inst, ret);
-		mutex_unlock(&inst->base.lock);
+		return ret;
 	}
 
-	return ret;
+	/* Additional MCU-specific checks */
+	if (!inst->ops) {
+		pdm_driver_release(&inst->base);
+		return -EOPNOTSUPP;
+	}
+
+	return 0;
 }
 
 static void pdm_mcu_release_device(struct pdm_mcu_instance *inst, int ret)
 {
 	pdm_mcu_update_state_locked(inst, ret);
-	mutex_unlock(&inst->base.lock);
+	pdm_driver_release(&inst->base);
 }
 
 static long pdm_mcu_get_info(struct pdm_client *client, unsigned long arg)
@@ -122,7 +121,7 @@ static long pdm_mcu_get_info(struct pdm_client *client, unsigned long arg)
 		.module_version_minor = 0,
 		.module_version_patch = 0,
 		.open_count = pdm_client_open_count(client),
-		.max_devices = (u32)atomic_read(&pdm_mcu_device_count),
+		.max_devices = pdm_driver_count_get(&pdm_mcu_device_count),
 	};
 
 	if (copy_to_user((void __user *)arg, &info, sizeof(info))) {
@@ -314,7 +313,7 @@ static int pdm_mcu_probe(struct pdm_device *pdm_dev)
 
 	pdm_dev->capabilities |= inst->ops->capability;
 	pdm_device_set_drvdata(pdm_dev, inst);
-	atomic_inc(&pdm_mcu_device_count);
+	pdm_driver_count_inc(&pdm_mcu_device_count);
 	LOG_INFO("Registered MCU %s transport for %s",
 		 inst->ops->name, dev_name(&pdm_dev->dev));
 	return 0;
@@ -334,7 +333,7 @@ static void pdm_mcu_remove(struct pdm_device *pdm_dev)
 		return;
 	}
 
-	atomic_dec_if_positive(&pdm_mcu_device_count);
+	pdm_driver_count_dec(&pdm_mcu_device_count);
 	pdm_device_set_drvdata(pdm_dev, NULL);
 
 	pdm_driver_shutdown(&inst->base);

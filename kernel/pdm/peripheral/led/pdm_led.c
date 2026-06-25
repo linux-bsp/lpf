@@ -115,7 +115,7 @@ static long pdm_led_get_info(struct pdm_client *client, unsigned long arg)
 		.module_version_minor = 0,
 		.module_version_patch = 0,
 		.open_count = pdm_client_open_count(client),
-		.max_devices = (u32)atomic_read(&pdm_led_device_count),
+		.max_devices = pdm_driver_count_get(&pdm_led_device_count),
 	};
 
 	if (copy_to_user((void __user *)arg, &info, sizeof(info))) {
@@ -127,27 +127,22 @@ static long pdm_led_get_info(struct pdm_client *client, unsigned long arg)
 static long pdm_led_get_state(struct pdm_led_instance *inst, unsigned long arg)
 {
 	struct pdm_led_state state;
-	int ret = 0;
+	int ret;
 
 	if (copy_from_user(&state, (void __user *)arg, sizeof(state))) {
 		return -EFAULT;
 	}
 
-	mutex_lock(&inst->base.lock);
-	if (!inst->base.online) {
-		ret = -ENODEV;
-		goto out_unlock;
+	ret = pdm_driver_claim(&inst->base);
+	if (ret) {
+		return ret;
 	}
 
 	state.brightness = inst->brightness;
 	state.max_brightness = inst->max_brightness;
 	state.enabled = inst->enabled;
 
-out_unlock:
-	mutex_unlock(&inst->base.lock);
-	if (ret) {
-		return ret;
-	}
+	pdm_driver_release(&inst->base);
 
 	if (copy_to_user((void __user *)arg, &state, sizeof(state))) {
 		return -EFAULT;
@@ -179,10 +174,9 @@ static long pdm_led_set_brightness(struct pdm_led_instance *inst,
 		return -ERANGE;
 	}
 
-	mutex_lock(&inst->base.lock);
-	if (!inst->base.online) {
-		ret = -ENODEV;
-		goto out_unlock;
+	ret = pdm_driver_claim(&inst->base);
+	if (ret) {
+		return ret;
 	}
 
 	old_brightness = inst->brightness;
@@ -198,8 +192,7 @@ static long pdm_led_set_brightness(struct pdm_led_instance *inst,
 		inst->enabled = old_enabled;
 	}
 
-out_unlock:
-	mutex_unlock(&inst->base.lock);
+	pdm_driver_release(&inst->base);
 	return ret;
 }
 
@@ -214,10 +207,9 @@ static long pdm_led_set_enabled(struct pdm_led_instance *inst,
 		return -EFAULT;
 	}
 
-	mutex_lock(&inst->base.lock);
-	if (!inst->base.online) {
-		ret = -ENODEV;
-		goto out_unlock;
+	ret = pdm_driver_claim(&inst->base);
+	if (ret) {
+		return ret;
 	}
 
 	old_enabled = inst->enabled;
@@ -227,8 +219,7 @@ static long pdm_led_set_enabled(struct pdm_led_instance *inst,
 		inst->enabled = old_enabled;
 	}
 
-out_unlock:
-	mutex_unlock(&inst->base.lock);
+	pdm_driver_release(&inst->base);
 	return ret;
 }
 
@@ -337,7 +328,7 @@ static int pdm_led_probe(struct pdm_device *pdm_dev)
 
 	pdm_dev->capabilities |= inst->ops->capability;
 	pdm_device_set_drvdata(pdm_dev, inst);
-	atomic_inc(&pdm_led_device_count);
+	pdm_driver_count_inc(&pdm_led_device_count);
 	LOG_INFO("Registered LED %s backend for %s",
 		 inst->ops->name, dev_name(&pdm_dev->dev));
 	return 0;
@@ -357,7 +348,7 @@ static void pdm_led_remove(struct pdm_device *pdm_dev)
 		return;
 	}
 
-	atomic_dec_if_positive(&pdm_led_device_count);
+	pdm_driver_count_dec(&pdm_led_device_count);
 	pdm_device_set_drvdata(pdm_dev, NULL);
 
 	pdm_driver_shutdown(&inst->base);

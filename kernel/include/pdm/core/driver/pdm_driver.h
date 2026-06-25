@@ -11,6 +11,7 @@
 #ifndef PDM_DRIVER_HELPER_H
 #define PDM_DRIVER_HELPER_H
 
+#include <linux/atomic.h>
 #include <linux/mutex.h>
 #include <linux/types.h>
 
@@ -32,6 +33,35 @@ struct pdm_driver_instance {
 	struct mutex lock;
 	bool online;
 };
+
+/**
+ * pdm_driver_count_inc() - Increment device count for a driver type
+ * @count: Pointer to atomic device counter
+ */
+static inline void pdm_driver_count_inc(atomic_t *count)
+{
+	atomic_inc(count);
+}
+
+/**
+ * pdm_driver_count_dec() - Decrement device count for a driver type
+ * @count: Pointer to atomic device counter
+ */
+static inline void pdm_driver_count_dec(atomic_t *count)
+{
+	atomic_dec_if_positive(count);
+}
+
+/**
+ * pdm_driver_count_get() - Get current device count
+ * @count: Pointer to atomic device counter
+ *
+ * Returns: Current device count as u32
+ */
+static inline u32 pdm_driver_count_get(atomic_t *count)
+{
+	return (u32)atomic_read(count);
+}
 
 /**
  * pdm_driver_claim() - Acquire device lock and verify it's online
