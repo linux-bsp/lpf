@@ -46,74 +46,41 @@ static u32 pdm_mcu_protocol_max_rx(const struct pdm_mcu_instance *inst)
 }
 
 static int pdm_mcu_protocol_xfer(struct pdm_mcu_instance *inst,
-				   struct pdm_mcu_xfer *xfer)
+				   u32 command, const u8 *tx, u32 tx_len,
+				   u8 *rx, u32 rx_len, u32 *actual_rx_len)
 {
+	struct pdm_mcu_xfer xfer;
 	int ret;
 
 	if (!inst->ops->xfer) {
 		return -EOPNOTSUPP;
 	}
-	if ((xfer->tx_len && !xfer->tx) || (xfer->rx_len && !xfer->rx)) {
+	if ((tx_len && !tx) || (rx_len && !rx)) {
 		return -EINVAL;
 	}
-	if (xfer->tx_len > pdm_mcu_protocol_max_tx(inst) ||
-	    xfer->rx_len > pdm_mcu_protocol_max_rx(inst)) {
+	if (tx_len > pdm_mcu_protocol_max_tx(inst) ||
+	    rx_len > pdm_mcu_protocol_max_rx(inst)) {
 		return -EMSGSIZE;
 	}
 
-	xfer->actual_rx_len = 0;
-	ret = inst->ops->xfer(inst, xfer);
+	xfer.command = command;
+	xfer.tx = tx;
+	xfer.tx_len = tx_len;
+	xfer.rx = rx;
+	xfer.rx_len = rx_len;
+	xfer.actual_rx_len = 0;
+
+	ret = inst->ops->xfer(inst, &xfer);
 	if (ret) {
 		return ret;
 	}
-	if (xfer->actual_rx_len > xfer->rx_len) {
+	if (xfer.actual_rx_len > rx_len) {
 		return -EMSGSIZE;
 	}
 
-	return 0;
-}
-
-static int pdm_mcu_protocol_cmd_xfer(struct pdm_mcu_instance *inst,
-				     u32 command, const u8 *payload,
-				     u32 payload_len, u8 *response,
-				     u32 *response_len)
-{
-	struct pdm_mcu_xfer xfer = {
-		.command = command,
-		.tx = payload,
-		.tx_len = payload_len,
-		.rx = response,
-		.rx_len = response_len ? *response_len : 0,
-	};
-	int ret;
-
-	ret = pdm_mcu_protocol_xfer(inst, &xfer);
-	if (ret) {
-		return ret;
+	if (actual_rx_len) {
+		*actual_rx_len = xfer.actual_rx_len;
 	}
-	if (response_len) {
-		*response_len = xfer.actual_rx_len;
-	}
-	return 0;
-}
-
-static int pdm_mcu_protocol_cmd_expect(struct pdm_mcu_instance *inst,
-				       enum pdm_mcu_protocol_cmd command,
-				       const u8 *payload, u32 payload_len,
-				       u8 *response, u32 response_len)
-{
-	u32 rx_len = response_len;
-	int ret;
-
-	ret = pdm_mcu_protocol_cmd_xfer(inst, command, payload, payload_len,
-					 response, &rx_len);
-	if (ret) {
-		return ret;
-	}
-	if (rx_len < response_len) {
-		return -EIO;
-	}
-
 	return 0;
 }
 
@@ -126,22 +93,40 @@ int pdm_mcu_protocol_get_version(struct pdm_mcu_instance *inst,
 				 struct pdm_mcu_version *version)
 {
 	u8 payload[sizeof(version->index)];
+	u32 rx_len = sizeof(*version);
+	int ret;
 
 	pdm_mcu_protocol_encode_index(payload, version->index);
-	return pdm_mcu_protocol_cmd_expect(inst,
-		PDM_MCU_PROTOCOL_CMD_GET_VERSION, payload, sizeof(payload),
-		(u8 *)version, sizeof(*version));
+	ret = pdm_mcu_protocol_xfer(inst, PDM_MCU_PROTOCOL_CMD_GET_VERSION,
+				     payload, sizeof(payload),
+				     (u8 *)version, rx_len, &rx_len);
+	if (ret) {
+		return ret;
+	}
+	if (rx_len < sizeof(*version)) {
+		return -EIO;
+	}
+	return 0;
 }
 
 int pdm_mcu_protocol_get_status(struct pdm_mcu_instance *inst,
 			       struct pdm_mcu_status *status)
 {
 	u8 payload[sizeof(status->index)];
+	u32 rx_len = sizeof(*status);
+	int ret;
 
 	pdm_mcu_protocol_encode_index(payload, status->index);
-	return pdm_mcu_protocol_cmd_expect(inst,
-		PDM_MCU_PROTOCOL_CMD_GET_STATUS, payload, sizeof(payload),
-		(u8 *)status, sizeof(*status));
+	ret = pdm_mcu_protocol_xfer(inst, PDM_MCU_PROTOCOL_CMD_GET_STATUS,
+				     payload, sizeof(payload),
+				     (u8 *)status, rx_len, &rx_len);
+	if (ret) {
+		return ret;
+	}
+	if (rx_len < sizeof(*status)) {
+		return -EIO;
+	}
+	return 0;
 }
 
 int pdm_mcu_protocol_reset(struct pdm_mcu_instance *inst, u32 index)
@@ -150,8 +135,8 @@ int pdm_mcu_protocol_reset(struct pdm_mcu_instance *inst, u32 index)
 	u32 rx_len = 0;
 
 	pdm_mcu_protocol_encode_index(payload, index);
-	return pdm_mcu_protocol_cmd_xfer(inst, PDM_MCU_PROTOCOL_CMD_RESET,
-					 payload, sizeof(payload), NULL, &rx_len);
+	return pdm_mcu_protocol_xfer(inst, PDM_MCU_PROTOCOL_CMD_RESET,
+				     payload, sizeof(payload), NULL, 0, &rx_len);
 }
 
 int pdm_mcu_protocol_command(struct pdm_mcu_instance *inst,
@@ -172,10 +157,11 @@ int pdm_mcu_protocol_command(struct pdm_mcu_instance *inst,
 		return -EINVAL;
 	}
 
-	ret = pdm_mcu_protocol_cmd_xfer(inst, command->command,
-					 command->tx_data, command->tx_len,
-					 need_response ? command->rx_data : NULL,
-					 need_response ? &rx_len : NULL);
+	ret = pdm_mcu_protocol_xfer(inst, command->command,
+				     command->tx_data, command->tx_len,
+				     need_response ? command->rx_data : NULL,
+				     need_response ? rx_len : 0,
+				     need_response ? &rx_len : NULL);
 	if (ret) {
 		return ret;
 	}

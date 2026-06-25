@@ -72,20 +72,20 @@ static void pdm_mcu_update_state_locked(struct pdm_mcu_instance *inst, int ret)
 {
 	if (ret < 0) {
 		inst->last_error = ret;
-		inst->state = inst->online ? PDM_MCU_STATE_ERROR : PDM_MCU_STATE_OFFLINE;
-		inst->pdm_dev->last_error = ret;
-		inst->pdm_dev->error_count++;
-		if (inst->online) {
-			inst->pdm_dev->state = PDM_CTL_DEVICE_STATE_ERROR;
+		inst->state = inst->base.online ? PDM_MCU_STATE_ERROR : PDM_MCU_STATE_OFFLINE;
+		inst->base.pdm_dev->last_error = ret;
+		inst->base.pdm_dev->error_count++;
+		if (inst->base.online) {
+			inst->base.pdm_dev->state = PDM_CTL_DEVICE_STATE_ERROR;
 		}
 		return;
 	}
 
 	inst->last_error = 0;
-	inst->state = inst->online ? PDM_MCU_STATE_READY : PDM_MCU_STATE_OFFLINE;
-	inst->pdm_dev->last_error = 0;
-	if (inst->online) {
-		inst->pdm_dev->state = PDM_CTL_DEVICE_STATE_BOUND;
+	inst->state = inst->base.online ? PDM_MCU_STATE_READY : PDM_MCU_STATE_OFFLINE;
+	inst->base.pdm_dev->last_error = 0;
+	if (inst->base.online) {
+		inst->base.pdm_dev->state = PDM_CTL_DEVICE_STATE_BOUND;
 	}
 }
 
@@ -93,16 +93,16 @@ static int pdm_mcu_claim_device(struct pdm_mcu_instance *inst)
 {
 	int ret = 0;
 
-	mutex_lock(&inst->lock);
+	mutex_lock(&inst->base.lock);
 
-	if (!inst->online) {
+	if (!inst->base.online) {
 		ret = -ENODEV;
 	} else if (!inst->ops) {
 		ret = -EOPNOTSUPP;
 	}
 	if (ret) {
 		pdm_mcu_update_state_locked(inst, ret);
-		mutex_unlock(&inst->lock);
+		mutex_unlock(&inst->base.lock);
 	}
 
 	return ret;
@@ -111,7 +111,7 @@ static int pdm_mcu_claim_device(struct pdm_mcu_instance *inst)
 static void pdm_mcu_release_device(struct pdm_mcu_instance *inst, int ret)
 {
 	pdm_mcu_update_state_locked(inst, ret);
-	mutex_unlock(&inst->lock);
+	mutex_unlock(&inst->base.lock);
 }
 
 static long pdm_mcu_get_info(struct pdm_client *client, unsigned long arg)
@@ -232,7 +232,7 @@ static long pdm_mcu_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
 	if (!client) {
 		return -ENODEV;
 	}
-	inst = container_of(client, struct pdm_mcu_instance, client);
+	inst = container_of(client, struct pdm_mcu_instance, base.client);
 
 	switch (cmd) {
 	case PDM_MCU_IOC_GET_INFO:
@@ -268,7 +268,7 @@ static void pdm_mcu_client_release(struct pdm_client *client)
 		return;
 	}
 
-	inst = container_of(client, struct pdm_mcu_instance, client);
+	inst = container_of(client, struct pdm_mcu_instance, base.client);
 	kfree(inst);
 }
 
@@ -292,7 +292,7 @@ static int pdm_mcu_probe(struct pdm_device *pdm_dev)
 		return -ENOMEM;
 	}
 
-	inst->pdm_dev = pdm_dev;
+	pdm_driver_init(&inst->base, pdm_dev);
 	inst->ops = pdm_mcu_transport_select(pdm_dev->compatible);
 	if (!inst->ops) {
 		LOG_ERROR("No MCU transport backend for compatible %s",
@@ -301,9 +301,7 @@ static int pdm_mcu_probe(struct pdm_device *pdm_dev)
 		goto err_free;
 	}
 	inst->start_time = ktime_get();
-	inst->online = true;
 	inst->state = PDM_MCU_STATE_READY;
-	mutex_init(&inst->lock);
 
 	ret = inst->ops->setup(inst);
 	if (ret) {
@@ -311,7 +309,7 @@ static int pdm_mcu_probe(struct pdm_device *pdm_dev)
 	}
 
 	snprintf(nodename, sizeof(nodename), "mcu%d", pdm_dev->id);
-	ret = pdm_client_register(&inst->client, pdm_dev, "pdm-mcu",
+	ret = pdm_client_register(&inst->base.client, pdm_dev, "pdm-mcu",
 				  nodename, &pdm_mcu_fops, pdm_mcu_client_release);
 	if (ret) {
 		goto err_cleanup_transport;
@@ -342,15 +340,14 @@ static void pdm_mcu_remove(struct pdm_device *pdm_dev)
 	atomic_dec_if_positive(&pdm_mcu_device_count);
 	pdm_device_set_drvdata(pdm_dev, NULL);
 
-	mutex_lock(&inst->lock);
-	inst->online = false;
+	pdm_driver_shutdown(&inst->base);
 	inst->state = PDM_MCU_STATE_OFFLINE;
 	if (inst->ops && inst->ops->cleanup) {
 		inst->ops->cleanup(inst);
 	}
-	mutex_unlock(&inst->lock);
+	mutex_unlock(&inst->base.lock);
 
-	pdm_client_unregister(&inst->client);
+	pdm_client_unregister(&inst->base.client);
 }
 
 int pdm_mcu_register_bus_device(struct device *parent,

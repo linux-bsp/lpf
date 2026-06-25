@@ -72,8 +72,8 @@ static int pdm_mcu_spi_bus_xfer(struct pdm_mcu_instance *inst,
 
 static int pdm_mcu_spi_setup(struct pdm_mcu_instance *inst)
 {
-	struct pdm_mcu_bus_device *bus_dev = inst->pdm_dev->config_data;
-	struct device_node *np = inst->pdm_dev->dev.of_node;
+	struct pdm_mcu_bus_device *bus_dev = inst->base.pdm_dev->config_data;
+	struct device_node *np = inst->base.pdm_dev->dev.of_node;
 	u32 value;
 
 	if (!bus_dev || bus_dev->type != PDM_MCU_BACKEND_SPI || !bus_dev->bus.spi) {
@@ -97,7 +97,7 @@ static int pdm_mcu_spi_setup(struct pdm_mcu_instance *inst)
 
 static void pdm_mcu_spi_cleanup(struct pdm_mcu_instance *inst)
 {
-	struct pdm_mcu_bus_device *bus_dev = inst->pdm_dev->config_data;
+	struct pdm_mcu_bus_device *bus_dev = inst->base.pdm_dev->config_data;
 
 	if (bus_dev && bus_dev->inst == inst) {
 		bus_dev->inst = NULL;

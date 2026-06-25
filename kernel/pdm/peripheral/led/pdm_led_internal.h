@@ -8,6 +8,7 @@
 
 #include "pdm/core/chardev/pdm_client.h"
 #include "pdm/core/device/pdm_device.h"
+#include "pdm/core/driver/pdm_driver.h"
 
 #define PDM_LED_DEFAULT_MAX_BRIGHTNESS 255U
 
@@ -31,11 +32,8 @@ struct pdm_led_backend_ops {
 };
 
 struct pdm_led_instance {
-	struct pdm_client client;
-	struct pdm_device *pdm_dev;
-	struct mutex lock;
+	struct pdm_driver_instance base;
 	const struct pdm_led_backend_ops *ops;
-	bool online;
 	u32 brightness;
 	u32 max_brightness;
 	u32 enabled;

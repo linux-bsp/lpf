@@ -14,7 +14,7 @@
 
 static int pdm_led_pwm_setup(struct pdm_led_instance *inst)
 {
-	struct device *dev = pdm_device_to_dev(inst->pdm_dev);
+	struct device *dev = pdm_device_to_dev(inst->base.pdm_dev);
 	struct pwm_device *pwmdev;
 
 	pwmdev = pwm_get(dev, NULL);

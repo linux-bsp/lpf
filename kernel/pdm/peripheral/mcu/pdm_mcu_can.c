@@ -134,7 +134,7 @@ static struct net_device *pdm_mcu_can_find_netdev(struct device_node *np)
 
 static int pdm_mcu_can_setup(struct pdm_mcu_instance *inst)
 {
-	struct device_node *np = inst->pdm_dev->dev.of_node;
+	struct device_node *np = inst->base.pdm_dev->dev.of_node;
 	struct sockaddr_can addr = { };
 	struct net_device *netdev;
 	u32 value;

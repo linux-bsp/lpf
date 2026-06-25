@@ -61,7 +61,7 @@ static bool pdm_led_match(const struct pdm_device *pdm_dev)
 
 static int pdm_led_read_dt_config(struct pdm_led_instance *inst)
 {
-	struct device_node *np = inst->pdm_dev->dev.of_node;
+	struct device_node *np = inst->base.pdm_dev->dev.of_node;
 	const char *default_state;
 	u32 value;
 
@@ -133,8 +133,8 @@ static long pdm_led_get_state(struct pdm_led_instance *inst, unsigned long arg)
 		return -EFAULT;
 	}
 
-	mutex_lock(&inst->lock);
-	if (!inst->online) {
+	mutex_lock(&inst->base.lock);
+	if (!inst->base.online) {
 		ret = -ENODEV;
 		goto out_unlock;
 	}
@@ -144,7 +144,7 @@ static long pdm_led_get_state(struct pdm_led_instance *inst, unsigned long arg)
 	state.enabled = inst->enabled;
 
 out_unlock:
-	mutex_unlock(&inst->lock);
+	mutex_unlock(&inst->base.lock);
 	if (ret) {
 		return ret;
 	}
@@ -179,8 +179,8 @@ static long pdm_led_set_brightness(struct pdm_led_instance *inst,
 		return -ERANGE;
 	}
 
-	mutex_lock(&inst->lock);
-	if (!inst->online) {
+	mutex_lock(&inst->base.lock);
+	if (!inst->base.online) {
 		ret = -ENODEV;
 		goto out_unlock;
 	}
@@ -199,7 +199,7 @@ static long pdm_led_set_brightness(struct pdm_led_instance *inst,
 	}
 
 out_unlock:
-	mutex_unlock(&inst->lock);
+	mutex_unlock(&inst->base.lock);
 	return ret;
 }
 
@@ -214,8 +214,8 @@ static long pdm_led_set_enabled(struct pdm_led_instance *inst,
 		return -EFAULT;
 	}
 
-	mutex_lock(&inst->lock);
-	if (!inst->online) {
+	mutex_lock(&inst->base.lock);
+	if (!inst->base.online) {
 		ret = -ENODEV;
 		goto out_unlock;
 	}
@@ -228,7 +228,7 @@ static long pdm_led_set_enabled(struct pdm_led_instance *inst,
 	}
 
 out_unlock:
-	mutex_unlock(&inst->lock);
+	mutex_unlock(&inst->base.lock);
 	return ret;
 }
 
@@ -240,7 +240,7 @@ static long pdm_led_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
 	if (!client) {
 		return -ENODEV;
 	}
-	inst = container_of(client, struct pdm_led_instance, client);
+	inst = container_of(client, struct pdm_led_instance, base.client);
 
 	switch (cmd) {
 	case PDM_LED_IOC_GET_INFO:
@@ -276,7 +276,7 @@ static void pdm_led_client_release(struct pdm_client *client)
 		return;
 	}
 
-	inst = container_of(client, struct pdm_led_instance, client);
+	inst = container_of(client, struct pdm_led_instance, base.client);
 	kfree(inst);
 }
 
@@ -317,10 +317,8 @@ static int pdm_led_probe(struct pdm_device *pdm_dev)
 		return -ENOMEM;
 	}
 
-	inst->pdm_dev = pdm_dev;
+	pdm_driver_init(&inst->base, pdm_dev);
 	inst->ops = pdm_led_backend_select(pdm_dev->compatible);
-	mutex_init(&inst->lock);
-	inst->online = true;
 
 	ret = pdm_led_read_dt_config(inst);
 	if (ret) {
@@ -338,7 +336,7 @@ static int pdm_led_probe(struct pdm_device *pdm_dev)
 	}
 
 	snprintf(nodename, sizeof(nodename), "led%d", pdm_dev->id);
-	ret = pdm_client_register(&inst->client, pdm_dev, "pdm-led",
+	ret = pdm_client_register(&inst->base.client, pdm_dev, "pdm-led",
 				  nodename, &pdm_led_fops, pdm_led_client_release);
 	if (ret) {
 		goto err_cleanup_backend;
@@ -369,14 +367,13 @@ static void pdm_led_remove(struct pdm_device *pdm_dev)
 	atomic_dec_if_positive(&pdm_led_device_count);
 	pdm_device_set_drvdata(pdm_dev, NULL);
 
-	mutex_lock(&inst->lock);
-	inst->online = false;
+	pdm_driver_shutdown(&inst->base);
 	if (inst->ops && inst->ops->cleanup) {
 		inst->ops->cleanup(inst);
 	}
-	mutex_unlock(&inst->lock);
+	mutex_unlock(&inst->base.lock);
 
-	pdm_client_unregister(&inst->client);
+	pdm_client_unregister(&inst->base.client);
 }
 
 static const struct of_device_id pdm_led_of_match[] = {

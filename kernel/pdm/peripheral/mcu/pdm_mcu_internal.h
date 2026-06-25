@@ -12,6 +12,7 @@
 
 #include "pdm/core/chardev/pdm_client.h"
 #include "pdm/core/device/pdm_device.h"
+#include "pdm/core/driver/pdm_driver.h"
 #include "pdm/pdm_mcu.h"
 
 #define PDM_MCU_DEFAULT_RX_TIMEOUT_MS 100U
@@ -66,12 +67,9 @@ struct pdm_mcu_bus_device {
 };
 
 struct pdm_mcu_instance {
-	struct pdm_client client;
-	struct pdm_device *pdm_dev;
-	struct mutex lock;
+	struct pdm_driver_instance base;
 	const struct pdm_mcu_transport_ops *ops;
 	ktime_t start_time;
-	bool online;
 	u32 state;
 	s32 last_error;
 	union {

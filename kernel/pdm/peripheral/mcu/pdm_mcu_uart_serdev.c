@@ -177,7 +177,7 @@ int pdm_mcu_uart_read_bus(struct pdm_mcu_instance *inst, u8 *buf,
 		}
 		ret = wait_event_interruptible_timeout(inst->transport.uart.rx_wait,
 			!kfifo_is_empty(&inst->transport.uart.rx_fifo) ||
-			!inst->online,
+			!inst->base.online,
 			wait_left);
 		if (ret < 0) {
 			return ret;
@@ -192,8 +192,8 @@ int pdm_mcu_uart_read_bus(struct pdm_mcu_instance *inst, u8 *buf,
 
 int pdm_mcu_uart_setup_bus(struct pdm_mcu_instance *inst)
 {
-	struct device_node *np = inst->pdm_dev->dev.of_node;
-	struct pdm_mcu_bus_device *bus_dev = inst->pdm_dev->config_data;
+	struct device_node *np = inst->base.pdm_dev->dev.of_node;
+	struct pdm_mcu_bus_device *bus_dev = inst->base.pdm_dev->config_data;
 	struct serdev_device *serdev;
 	u32 value;
 	int ret;

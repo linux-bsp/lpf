@@ -14,7 +14,7 @@
 
 static int pdm_led_gpio_setup(struct pdm_led_instance *inst)
 {
-	struct device *dev = pdm_device_to_dev(inst->pdm_dev);
+	struct device *dev = pdm_device_to_dev(inst->base.pdm_dev);
 	struct gpio_desc *gpiod;
 
 	gpiod = gpiod_get(dev, "led", GPIOD_OUT_LOW);
