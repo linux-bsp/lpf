@@ -8,6 +8,7 @@
 #define PDM_DEVICE_H
 
 #include <linux/device.h>
+#include <linux/ktime.h>
 #include <linux/types.h>
 
 #include "pdm/pdm_manager.h"
@@ -17,6 +18,34 @@
 
 #define pdm_device_to_dev(__pdm_dev) \
 	(&(__pdm_dev)->dev)
+
+#define PDM_ERROR_HISTORY_SIZE 8
+
+/**
+ * enum pdm_error_type - Error context type
+ * @PDM_ERROR_TYPE_PROBE: Error during device probe
+ * @PDM_ERROR_TYPE_RUNTIME: Error during normal operation
+ * @PDM_ERROR_TYPE_PM: Error during power management
+ */
+enum pdm_error_type {
+	PDM_ERROR_TYPE_PROBE = 0,
+	PDM_ERROR_TYPE_RUNTIME = 1,
+	PDM_ERROR_TYPE_PM = 2,
+};
+
+/**
+ * struct pdm_error_record - Single error record with context
+ * @error_code: Error code (negative errno value)
+ * @error_type: Context where error occurred
+ * @timestamp_ns: When the error occurred (ktime_get_ns)
+ * @count: Number of consecutive occurrences
+ */
+struct pdm_error_record {
+	s32 error_code;
+	u32 error_type;
+	u64 timestamp_ns;
+	u32 count;
+};
 
 /**
  * struct pdm_device - device registered on the PDM bus
@@ -28,6 +57,9 @@
  * @state: Discovery state exported through /dev/pdm_ctl.
  * @last_error: Last probe/runtime error exported through /dev/pdm_ctl.
  * @error_count: Number of recorded errors exported through /dev/pdm_ctl.
+ * @errors: Circular buffer of recent errors with timestamps
+ * @error_write_index: Next slot to write in error history
+ * @total_error_count: Total errors since device registration
  * @id: Stable instance id, normally sourced from the DT reg property.
  * @requested_id: Optional preferred instance id requested by the enumerator.
  * @id_allocated: True once @id has been reserved for @type.
@@ -41,6 +73,12 @@ struct pdm_device {
 	u32 state;
 	s32 last_error;
 	u32 error_count;
+
+	/* Enhanced error tracking */
+	struct pdm_error_record errors[PDM_ERROR_HISTORY_SIZE];
+	u32 error_write_index;
+	u32 total_error_count;
+
 	int id;
 	int requested_id;
 	bool id_allocated;
@@ -61,15 +99,53 @@ static inline void pdm_device_set_state(struct pdm_device *pdm_dev, u32 state)
 	pdm_dev->state = state;
 }
 
-static inline void pdm_device_record_error(struct pdm_device *pdm_dev, int error)
+/**
+ * pdm_device_record_error_type() - Record an error with context
+ * @pdm_dev: PDM device
+ * @error: Error code (negative errno)
+ * @error_type: Context (probe/runtime/pm)
+ */
+static inline void pdm_device_record_error_type(struct pdm_device *pdm_dev,
+						 int error, u32 error_type)
 {
-	if (!pdm_dev || !error) {
+	struct pdm_error_record *rec;
+	u32 idx;
+
+	if (!pdm_dev || !error)
 		return;
+
+	idx = pdm_dev->error_write_index;
+	rec = &pdm_dev->errors[idx];
+
+	/* If same error type and code, just increment count */
+	if (rec->error_code == error && rec->error_type == error_type) {
+		rec->count++;
+		rec->timestamp_ns = ktime_get_ns();
+	} else {
+		/* New error, move to next slot */
+		idx = (idx + 1) % PDM_ERROR_HISTORY_SIZE;
+		rec = &pdm_dev->errors[idx];
+		rec->error_code = error;
+		rec->error_type = error_type;
+		rec->timestamp_ns = ktime_get_ns();
+		rec->count = 1;
+		pdm_dev->error_write_index = idx;
 	}
 
 	pdm_dev->last_error = error;
 	pdm_dev->error_count++;
+	pdm_dev->total_error_count++;
 	pdm_dev->state = PDM_MANAGER_DEVICE_STATE_ERROR;
+}
+
+/**
+ * pdm_device_record_error() - Record an error (runtime context)
+ * @pdm_dev: PDM device
+ * @error: Error code (negative errno)
+ */
+static inline void pdm_device_record_error(struct pdm_device *pdm_dev, int error)
+{
+	pdm_device_record_error_type(pdm_dev, error, PDM_ERROR_TYPE_RUNTIME);
 }
 
 static inline struct pdm_device *pdm_device_get(struct pdm_device *pdm_dev)
@@ -94,6 +170,7 @@ void pdm_device_unregister(struct pdm_device *pdm_dev);
 void pdm_device_set_requested_id(struct pdm_device *pdm_dev, int id);
 int pdm_device_bind(struct pdm_device *pdm_dev, u32 type, u64 capabilities);
 void pdm_device_unbind(struct pdm_device *pdm_dev);
+int pdm_device_ids_init(void);
 void pdm_device_ids_destroy(void);
 
 #endif /* PDM_DEVICE_H */

@@ -17,6 +17,7 @@
 
 #include "pdm/bus/pdm_cdev.h"
 #include "pdm/bus/pdm_device.h"
+#include "pdm/core/pdm_instance.h"
 
 /**
  * struct pdm_driver_instance - Base structure for driver instances
@@ -26,6 +27,9 @@
  * @online: Device is bound and operational
  *
  * PDM drivers should embed this structure and add their specific fields.
+ *
+ * NOTE: This is now a compatibility wrapper. New drivers should use
+ * pdm_instance (no cdev) or pdm_cdev_instance (with cdev) directly.
  */
 struct pdm_driver_instance {
 	struct pdm_cdev cdev;

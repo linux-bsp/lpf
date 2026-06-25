@@ -134,6 +134,49 @@ static int pdm_bus_device_match(struct device *dev,
 }
 #endif
 
+static int pdm_bus_device_suspend(struct device *dev)
+{
+	struct pdm_device *pdm_dev;
+	struct pdm_driver *pdm_drv;
+
+	if (!dev || !dev->driver)
+		return 0;
+
+	pdm_dev = dev_to_pdm_device(dev);
+	pdm_drv = drv_to_pdm_driver(dev->driver);
+
+	if (pdm_drv->suspend) {
+		LOG_DEBUG("Suspending device [%s]", dev_name(dev));
+		return pdm_drv->suspend(pdm_dev);
+	}
+
+	return 0;
+}
+
+static int pdm_bus_device_resume(struct device *dev)
+{
+	struct pdm_device *pdm_dev;
+	struct pdm_driver *pdm_drv;
+
+	if (!dev || !dev->driver)
+		return 0;
+
+	pdm_dev = dev_to_pdm_device(dev);
+	pdm_drv = drv_to_pdm_driver(dev->driver);
+
+	if (pdm_drv->resume) {
+		LOG_DEBUG("Resuming device [%s]", dev_name(dev));
+		return pdm_drv->resume(pdm_dev);
+	}
+
+	return 0;
+}
+
+static const struct dev_pm_ops pdm_bus_pm_ops = {
+	.suspend = pdm_bus_device_suspend,
+	.resume = pdm_bus_device_resume,
+};
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(6, 2, 0)
 struct bus_type pdm_bus_type = {
 #else
@@ -144,6 +187,7 @@ const struct bus_type pdm_bus_type = {
 	.remove     = pdm_bus_device_remove,
 	.match      = pdm_bus_device_match,
 	.dev_groups = pdm_device_attr_groups,
+	.pm         = &pdm_bus_pm_ops,
 };
 EXPORT_SYMBOL_GPL(pdm_bus_type);
 

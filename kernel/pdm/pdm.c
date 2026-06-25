@@ -34,10 +34,16 @@ static int __init pdm_module_init(void)
 
 	LOG_INFO("Initializing PDM module with Linux bus_type");
 
+	ret = pdm_device_ids_init();
+	if (ret) {
+		LOG_ERROR("Failed to initialize PDM ID management: %d", ret);
+		return ret;
+	}
+
 	ret = pdm_bus_init();
 	if (ret) {
 		LOG_ERROR("Failed to initialize PDM bus: %d", ret);
-		return ret;
+		goto err_id;
 	}
 
 	ret = pdm_cdev_init();
@@ -75,6 +81,8 @@ err_cdev:
 	pdm_cdev_exit();
 err_bus:
 	pdm_bus_exit();
+err_id:
+	pdm_device_ids_destroy();
 	return ret;
 }
 

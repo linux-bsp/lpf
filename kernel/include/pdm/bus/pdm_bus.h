@@ -48,6 +48,8 @@
  * @match: Optional service-owned authoritative match callback.
  * @probe: Called after the PDM bus matches a device to this driver.
  * @remove: Called before a bound PDM device is detached.
+ * @suspend: Called during system suspend to save device state.
+ * @resume: Called during system resume to restore device state.
  */
 struct pdm_driver {
 	struct device_driver driver;
@@ -58,6 +60,10 @@ struct pdm_driver {
 	bool (*match)(const struct pdm_device *dev);
 	int (*probe)(struct pdm_device *dev);
 	void (*remove)(struct pdm_device *dev);
+
+	/* Power management callbacks */
+	int (*suspend)(struct pdm_device *dev);
+	int (*resume)(struct pdm_device *dev);
 };
 
 struct pdm_driver_entry {
