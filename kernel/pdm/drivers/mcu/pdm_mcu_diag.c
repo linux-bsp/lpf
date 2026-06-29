@@ -5,7 +5,10 @@
  */
 
 #include <linux/atomic.h>
+#include <linux/delay.h>
 #include <linux/kernel.h>
+#include <linux/sched.h>
+#include <linux/sched/signal.h>
 #include <linux/seq_file.h>
 #include <linux/string.h>
 
@@ -19,6 +22,122 @@
 static pdm_proc_entry_t g_mcu_proc;
 static pdm_debugfs_entry_t g_mcu_debugfs;
 static atomic_t *g_device_count;
+
+#define PDM_MCU_DIAG_LOOP_DEFAULT_COUNT 1000U
+#define PDM_MCU_DIAG_LOOP_MAX_COUNT 1000000U
+#define PDM_MCU_DIAG_LOOP_DEFAULT_DELAY_US 1000U
+#define PDM_MCU_DIAG_LOOP_MAX_DELAY_US 1000000U
+#define PDM_MCU_DIAG_LOOP_DEFAULT_LEN 8U
+
+static void pdm_mcu_diag_fill_pattern(u8 *buf, u32 len, u32 iter)
+{
+	u32 i;
+
+	for (i = 0; i < len; i++) {
+		buf[i] = (u8)(iter + i);
+	}
+}
+
+static void pdm_mcu_diag_loop_delay(u32 delay_us)
+{
+	if (!delay_us) {
+		cond_resched();
+		return;
+	}
+	if (delay_us < 1000U) {
+		usleep_range(delay_us, delay_us + 50U);
+		return;
+	}
+
+	msleep(DIV_ROUND_UP(delay_us, 1000U));
+}
+
+static int pdm_mcu_diag_loop_xfer(struct pdm_mcu_instance *inst, u32 index,
+				  bool read_loop, u32 command_id,
+				  u32 count, u32 delay_us, u32 data_len)
+{
+	struct pdm_mcu_xfer xfer;
+	u8 tx_data[PDM_MCU_MAX_TRANSFER_SIZE];
+	u8 rx_data[PDM_MCU_MAX_TRANSFER_SIZE];
+	bool continuous = count == 0;
+	u64 i;
+	int ret;
+
+	if (!inst->ops || !inst->ops->xfer) {
+		return -EOPNOTSUPP;
+	}
+	if (count > PDM_MCU_DIAG_LOOP_MAX_COUNT ||
+	    delay_us > PDM_MCU_DIAG_LOOP_MAX_DELAY_US) {
+		return -EINVAL;
+	}
+	if (data_len > PDM_MCU_MAX_TRANSFER_SIZE) {
+		return -EMSGSIZE;
+	}
+	if (read_loop && !data_len) {
+		return -EINVAL;
+	}
+
+	if (continuous) {
+		LOG_INFO("MCU %u %s loop start: cmd=0x%x count=continuous delay_us=%u len=%u transport=%s",
+			 index, read_loop ? "read" : "write", command_id,
+			 delay_us, data_len, inst->ops->name);
+	} else {
+		LOG_INFO("MCU %u %s loop start: cmd=0x%x count=%u delay_us=%u len=%u transport=%s",
+			 index, read_loop ? "read" : "write", command_id,
+			 count, delay_us, data_len, inst->ops->name);
+	}
+
+	for (i = 0; continuous || i < count; i++) {
+		if (signal_pending(current)) {
+			LOG_INFO("MCU %u %s loop interrupted at %llu transfers",
+				 index, read_loop ? "read" : "write", i);
+			return -EINTR;
+		}
+
+		memset(&xfer, 0, sizeof(xfer));
+		xfer.command = command_id;
+
+		if (read_loop) {
+			xfer.rx = rx_data;
+			xfer.rx_len = data_len;
+		} else {
+			pdm_mcu_diag_fill_pattern(tx_data, data_len, i);
+			xfer.tx = tx_data;
+			xfer.tx_len = data_len;
+		}
+
+		ret = inst->ops->xfer(inst, &xfer);
+		if (ret) {
+			if (continuous) {
+				LOG_ERROR("MCU %u %s loop failed at %llu: %d",
+					  index, read_loop ? "read" : "write",
+					  i + 1, ret);
+			} else {
+				LOG_ERROR("MCU %u %s loop failed at %llu/%u: %d",
+					  index, read_loop ? "read" : "write",
+					  i + 1, count, ret);
+			}
+			return ret;
+		}
+
+		if (continuous) {
+			LOG_DEBUG("MCU %u %s loop iter=%llu cmd=0x%x tx=%u rx=%u actual_rx=%u",
+				  index, read_loop ? "read" : "write", i + 1,
+				  command_id, xfer.tx_len, xfer.rx_len,
+				  xfer.actual_rx_len);
+		} else {
+			LOG_DEBUG("MCU %u %s loop iter=%llu/%u cmd=0x%x tx=%u rx=%u actual_rx=%u",
+				  index, read_loop ? "read" : "write", i + 1, count,
+				  command_id, xfer.tx_len, xfer.rx_len,
+				  xfer.actual_rx_len);
+		}
+		pdm_mcu_diag_loop_delay(delay_us);
+	}
+
+	LOG_INFO("MCU %u %s loop complete: count=%u", index,
+		 read_loop ? "read" : "write", count);
+	return 0;
+}
 
 static const char *pdm_mcu_state_str(u32 state)
 {
@@ -185,6 +304,10 @@ static int pdm_mcu_proc_write(char *command, size_t count, void *data)
 		LOG_INFO("  version <index>  - Get MCU firmware version");
 		LOG_INFO("  status <index>   - Get MCU status");
 		LOG_INFO("  reset <index>    - Reset MCU");
+		LOG_INFO("  write_loop <index> <cmd_hex> [count] [delay_us] [tx_len]");
+		LOG_INFO("                   - Repeated write-only transfers; count 0 runs until interrupted");
+		LOG_INFO("  read_loop <index> <cmd_hex> [count] [delay_us] [rx_len]");
+		LOG_INFO("                   - Repeated command plus read transfers; count 0 runs until interrupted");
 		LOG_INFO("  help             - Show this help");
 		return 0;
 	}
@@ -233,6 +356,25 @@ static int pdm_mcu_proc_write(char *command, size_t count, void *data)
 		ret = pdm_mcu_protocol_reset(inst, index);
 		if (ret == 0) {
 			LOG_INFO("MCU %u reset successful", index);
+		}
+	} else if (strcmp(cmd, "write_loop") == 0 ||
+		   strcmp(cmd, "read_loop") == 0) {
+		bool read_loop = strcmp(cmd, "read_loop") == 0;
+		u32 command_id;
+		u32 loop_count = PDM_MCU_DIAG_LOOP_DEFAULT_COUNT;
+		u32 delay_us = PDM_MCU_DIAG_LOOP_DEFAULT_DELAY_US;
+		u32 data_len = PDM_MCU_DIAG_LOOP_DEFAULT_LEN;
+
+		n = sscanf(command, "%31s %u %x %u %u %u", cmd, &index,
+			   &command_id, &loop_count, &delay_us, &data_len);
+		if (n < 3) {
+			LOG_ERROR("Usage: %s <index> <cmd_hex> [count] [delay_us] [len]",
+				  read_loop ? "read_loop" : "write_loop");
+			ret = -EINVAL;
+		} else {
+			ret = pdm_mcu_diag_loop_xfer(inst, index, read_loop,
+							command_id, loop_count,
+							delay_us, data_len);
 		}
 	} else {
 		LOG_ERROR("Unknown command '%s'. Use 'help' for usage.", cmd);

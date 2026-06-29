@@ -169,6 +169,9 @@ static int pdm_mcu_can_send_frame(struct pdm_mcu_instance *inst,
 	vec.iov_base = (void *)frame;
 	vec.iov_len = frame_size;
 	ret = kernel_sendmsg(inst->transport.can.sock, &msg, &vec, 1, frame_size);
+	LOG_DEBUG("MCU CAN tx id=0x%x len=%u mtu=%zu ret=%d",
+		  pdm_mcu_can_raw_id(inst, frame->can_id), frame->len,
+		  frame_size, ret);
 	if (ret < 0) {
 		return ret;
 	}
@@ -188,6 +191,7 @@ static int pdm_mcu_can_recv_frame(struct pdm_mcu_instance *inst,
 	ret = kernel_recvmsg(inst->transport.can.sock, &msg, &vec, 1,
 			     sizeof(*frame), 0);
 	if (ret < 0) {
+		LOG_DEBUG("MCU CAN rx ret=%d", ret);
 		return ret;
 	}
 	if (ret != CAN_MTU && ret != CANFD_MTU) {
@@ -203,9 +207,13 @@ static int pdm_mcu_can_recv_frame(struct pdm_mcu_instance *inst,
 	if (ret == CAN_MTU && frame->len > CAN_MAX_DLEN) {
 		return -EPROTO;
 	}
+	LOG_DEBUG("MCU CAN rx id=0x%x len=%u mtu=%d",
+		  pdm_mcu_can_raw_id(inst, frame->can_id), frame->len, ret);
 	if ((frame->can_id & (CAN_ERR_FLAG | CAN_RTR_FLAG)) ||
 	    (frame->can_id & pdm_mcu_can_filter_mask(inst)) !=
 	    (inst->transport.can.rx_id & pdm_mcu_can_filter_mask(inst))) {
+		LOG_DEBUG("MCU CAN rx ignored id=0x%x len=%u",
+			  pdm_mcu_can_raw_id(inst, frame->can_id), frame->len);
 		return -EAGAIN;
 	}
 

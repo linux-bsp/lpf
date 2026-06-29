@@ -24,13 +24,21 @@ static void pdm_mcu_uart_encode_be32(u8 *buf, u32 value)
 static int pdm_mcu_uart_write_bytes(struct pdm_mcu_instance *inst,
 				    const u8 *buf, size_t len)
 {
-	return pdm_mcu_uart_write_bus(inst, buf, len);
+	int ret;
+
+	ret = pdm_mcu_uart_write_bus(inst, buf, len);
+	LOG_DEBUG("MCU UART write len=%zu ret=%d", len, ret);
+	return ret;
 }
 
 static int pdm_mcu_uart_read_bytes(struct pdm_mcu_instance *inst,
 				   u8 *buf, size_t len)
 {
-	return pdm_mcu_uart_read_bus(inst, buf, len);
+	int ret;
+
+	ret = pdm_mcu_uart_read_bus(inst, buf, len);
+	LOG_DEBUG("MCU UART read len=%zu ret=%d", len, ret);
+	return ret;
 }
 
 static int pdm_mcu_uart_setup(struct pdm_mcu_instance *inst)

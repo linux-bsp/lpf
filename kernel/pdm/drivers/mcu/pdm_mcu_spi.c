@@ -49,6 +49,7 @@ static int pdm_mcu_spi_bus_xfer(struct pdm_mcu_instance *inst,
 	struct spi_device *spi = inst->transport.spi.spi;
 	struct spi_transfer xfers[2] = { };
 	int xfer_count = 0;
+	int ret;
 
 	if (!spi) {
 		return -ENODEV;
@@ -68,7 +69,11 @@ static int pdm_mcu_spi_bus_xfer(struct pdm_mcu_instance *inst,
 		xfer_count++;
 	}
 
-	return spi_sync_transfer(spi, xfers, xfer_count);
+	LOG_DEBUG("MCU SPI xfer dev=%s tx_len=%u rx_len=%u xfers=%d",
+		  dev_name(&spi->dev), tx_len, rx_len, xfer_count);
+	ret = spi_sync_transfer(spi, xfers, xfer_count);
+	LOG_DEBUG("MCU SPI xfer dev=%s ret=%d", dev_name(&spi->dev), ret);
+	return ret;
 }
 
 static int pdm_mcu_spi_setup(struct pdm_mcu_instance *inst)

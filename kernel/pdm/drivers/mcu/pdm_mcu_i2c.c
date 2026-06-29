@@ -73,7 +73,10 @@ static int pdm_mcu_i2c_bus_xfer(struct pdm_mcu_instance *inst,
 		msg_count++;
 	}
 
+	LOG_DEBUG("MCU I2C xfer addr=0x%02x tx_len=%u rx_len=%u msgs=%d",
+		  client->addr, tx_len, rx_len, msg_count);
 	ret = i2c_transfer(client->adapter, msgs, msg_count);
+	LOG_DEBUG("MCU I2C xfer addr=0x%02x ret=%d", client->addr, ret);
 	if (ret < 0) {
 		return ret;
 	}
