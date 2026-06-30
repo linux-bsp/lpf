@@ -197,7 +197,7 @@ static int test_mcu_validation(void)
 	}
 
 	errno = 0;
-	if (expect_failure_errno(pdi_mcu_reset(&ctx, 0), EBADF)) {
+	if (expect_failure_errno(pdi_mcu_reset(&ctx), EBADF)) {
 		return 115;
 	}
 
@@ -284,17 +284,17 @@ static int test_led_validation(void)
 	}
 
 	errno = 0;
-	if (expect_failure_errno(pdi_led_set_brightness(&ctx, 0, 1), EBADF)) {
+	if (expect_failure_errno(pdi_led_set_brightness(&ctx, 1), EBADF)) {
 		return 213;
 	}
 
 	errno = 0;
-	if (expect_failure_errno(pdi_led_enable(&ctx, 0), EBADF)) {
+	if (expect_failure_errno(pdi_led_enable(&ctx), EBADF)) {
 		return 214;
 	}
 
 	errno = 0;
-	if (expect_failure_errno(pdi_led_disable(&ctx, 0), EBADF)) {
+	if (expect_failure_errno(pdi_led_disable(&ctx), EBADF)) {
 		return 215;
 	}
 

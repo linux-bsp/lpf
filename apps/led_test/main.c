@@ -21,7 +21,7 @@ static void print_led_info(struct pdm_led_info *info)
 
 static void print_led_state(struct pdm_led_state *state)
 {
-	OSAL_printf("LED State (index %u):\n", state->index);
+	OSAL_printf("LED State:\n");
 	OSAL_printf("  Brightness:     %u / %u\n",
 		    state->brightness, state->max_brightness);
 	OSAL_printf("  Enabled:        %s\n",
@@ -57,7 +57,6 @@ static int test_led_basic(void)
 	OSAL_printf("\n");
 
 	/* Get initial state */
-	state.index = 0;
 	ret = pdi_led_get_state(&ctx, &state);
 	if (ret < 0) {
 		OSAL_printf("Failed to get LED state: %d\n", ret);
@@ -92,7 +91,7 @@ static int test_led_brightness(void)
 
 	/* Enable LED */
 	OSAL_printf("Enabling LED 0...\n");
-	ret = pdi_led_enable(&ctx, 0);
+	ret = pdi_led_enable(&ctx);
 	if (ret < 0) {
 		OSAL_printf("Failed to enable LED: %d\n", ret);
 		goto cleanup;
@@ -103,14 +102,13 @@ static int test_led_brightness(void)
 		uint32_t brightness = brightness_levels[i];
 
 		OSAL_printf("Setting brightness to %u...\n", brightness);
-		ret = pdi_led_set_brightness(&ctx, 0, brightness);
+		ret = pdi_led_set_brightness(&ctx, brightness);
 		if (ret < 0) {
 			OSAL_printf("Failed to set brightness: %d\n", ret);
 			goto cleanup;
 		}
 
 		/* Verify the change */
-		state.index = 0;
 		ret = pdi_led_get_state(&ctx, &state);
 		if (ret < 0) {
 			OSAL_printf("Failed to get LED state: %d\n", ret);
@@ -123,7 +121,7 @@ static int test_led_brightness(void)
 
 	/* Disable LED */
 	OSAL_printf("\nDisabling LED 0...\n");
-	ret = pdi_led_disable(&ctx, 0);
+	ret = pdi_led_disable(&ctx);
 	if (ret < 0) {
 		OSAL_printf("Failed to disable LED: %d\n", ret);
 	}
@@ -150,7 +148,7 @@ static int test_led_toggle(void)
 	}
 
 	/* Set to full brightness */
-	ret = pdi_led_set_brightness(&ctx, 0, 255);
+	ret = pdi_led_set_brightness(&ctx, 255);
 	if (ret < 0) {
 		OSAL_printf("Failed to set brightness: %d\n", ret);
 		goto cleanup;
@@ -159,7 +157,7 @@ static int test_led_toggle(void)
 	/* Toggle LED 5 times */
 	for (i = 0; i < 5; i++) {
 		OSAL_printf("Cycle %d: Enabling LED...\n", i + 1);
-		ret = pdi_led_enable(&ctx, 0);
+		ret = pdi_led_enable(&ctx);
 		if (ret < 0) {
 			OSAL_printf("Failed to enable LED: %d\n", ret);
 			goto cleanup;
@@ -167,7 +165,7 @@ static int test_led_toggle(void)
 		sleep(1);
 
 		OSAL_printf("Cycle %d: Disabling LED...\n", i + 1);
-		ret = pdi_led_disable(&ctx, 0);
+		ret = pdi_led_disable(&ctx);
 		if (ret < 0) {
 			OSAL_printf("Failed to disable LED: %d\n", ret);
 			goto cleanup;

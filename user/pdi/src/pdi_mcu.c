@@ -132,9 +132,9 @@ int32_t pdi_mcu_get_status(pdi_mcu_context_t *ctx,
 	return pdi_mcu_ioctl_checked(ctx, PDM_MCU_IOC_GET_STATUS, status);
 }
 
-int32_t pdi_mcu_reset(pdi_mcu_context_t *ctx, uint32_t index)
+int32_t pdi_mcu_reset(pdi_mcu_context_t *ctx)
 {
-	return pdi_mcu_ioctl_checked(ctx, PDM_MCU_IOC_RESET, &index);
+	return pdi_mcu_ioctl_checked(ctx, PDM_MCU_IOC_RESET, NULL);
 }
 
 int32_t pdi_mcu_command(pdi_mcu_context_t *ctx,

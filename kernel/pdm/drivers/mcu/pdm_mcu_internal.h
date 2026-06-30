@@ -111,7 +111,7 @@ int pdm_mcu_protocol_get_version(struct pdm_mcu_instance *inst,
 				 struct pdm_mcu_version *version);
 int pdm_mcu_protocol_get_status(struct pdm_mcu_instance *inst,
 			       struct pdm_mcu_status *status);
-int pdm_mcu_protocol_reset(struct pdm_mcu_instance *inst, u32 index);
+int pdm_mcu_protocol_reset(struct pdm_mcu_instance *inst);
 int pdm_mcu_protocol_command(struct pdm_mcu_instance *inst,
 			     struct pdm_mcu_command *command);
 

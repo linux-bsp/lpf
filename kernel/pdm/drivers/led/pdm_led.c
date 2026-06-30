@@ -129,9 +129,7 @@ static long pdm_led_get_state(struct pdm_led_instance *inst, unsigned long arg)
 	struct pdm_led_state state;
 	int ret;
 
-	if (copy_from_user(&state, (void __user *)arg, sizeof(state))) {
-		return -EFAULT;
-	}
+	memset(&state, 0, sizeof(state));
 
 	ret = pdm_driver_claim(&inst->base);
 	if (ret) {
@@ -162,7 +160,7 @@ static int pdm_led_apply_locked(struct pdm_led_instance *inst)
 static long pdm_led_set_brightness(struct pdm_led_instance *inst,
 				   unsigned long arg)
 {
-	struct pdm_led_brightness brightness;
+	u32 brightness;
 	u32 old_brightness;
 	u32 old_enabled;
 	int ret;
@@ -170,7 +168,7 @@ static long pdm_led_set_brightness(struct pdm_led_instance *inst,
 	if (copy_from_user(&brightness, (void __user *)arg, sizeof(brightness))) {
 		return -EFAULT;
 	}
-	if (brightness.brightness > inst->max_brightness) {
+	if (brightness > inst->max_brightness) {
 		return -ERANGE;
 	}
 
@@ -181,8 +179,8 @@ static long pdm_led_set_brightness(struct pdm_led_instance *inst,
 
 	old_brightness = inst->brightness;
 	old_enabled = inst->enabled;
-	inst->brightness = brightness.brightness;
-	if (brightness.brightness) {
+	inst->brightness = brightness;
+	if (brightness) {
 		inst->enabled = 1;
 	}
 
@@ -196,16 +194,10 @@ static long pdm_led_set_brightness(struct pdm_led_instance *inst,
 	return ret;
 }
 
-static long pdm_led_set_enabled(struct pdm_led_instance *inst,
-				unsigned long arg, bool enabled)
+static long pdm_led_set_enabled(struct pdm_led_instance *inst, bool enabled)
 {
-	u32 index;
 	u32 old_enabled;
 	int ret;
-
-	if (copy_from_user(&index, (void __user *)arg, sizeof(index))) {
-		return -EFAULT;
-	}
 
 	ret = pdm_driver_claim(&inst->base);
 	if (ret) {
@@ -241,9 +233,9 @@ static long pdm_led_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
 	case PDM_LED_IOC_SET_BRIGHTNESS:
 		return pdm_led_set_brightness(inst, arg);
 	case PDM_LED_IOC_ENABLE:
-		return pdm_led_set_enabled(inst, arg, true);
+		return pdm_led_set_enabled(inst, true);
 	case PDM_LED_IOC_DISABLE:
-		return pdm_led_set_enabled(inst, arg, false);
+		return pdm_led_set_enabled(inst, false);
 	default:
 		return -ENOTTY;
 	}

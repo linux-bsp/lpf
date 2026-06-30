@@ -256,13 +256,17 @@ static struct pdm_mcu_instance *pdm_mcu_find_instance(u32 index)
 		.current_index = 0,
 		.result = NULL,
 	};
+	int ret;
 
 	drv = driver_find("pdm-mcu", &pdm_bus_type);
 	if (!drv) {
 		return NULL;
 	}
 
-	(void)driver_for_each_device(drv, NULL, &ctx, pdm_mcu_match_by_index);
+	ret = driver_for_each_device(drv, NULL, &ctx, pdm_mcu_match_by_index);
+	if (ret < 0) {
+		return NULL;
+	}
 
 	return ctx.result;
 }
@@ -309,7 +313,7 @@ static int pdm_mcu_proc_show(struct seq_file *seq, void *data)
 		}
 
 		/* Get MCU status */
-		status.index = i;
+		memset(&status, 0, sizeof(status));
 		ret = pdm_mcu_protocol_get_status(inst, &status);
 
 		if (ret == 0) {
@@ -396,7 +400,7 @@ static int pdm_mcu_proc_write(char *command, size_t count, void *data)
 	}
 
 	if (strcmp(cmd, "version") == 0) {
-		version.index = index;
+		memset(&version, 0, sizeof(version));
 		ret = pdm_mcu_protocol_get_version(inst, &version);
 		if (ret == 0) {
 			LOG_INFO("MCU %u version: %u.%u.%u.%u (%s)",
@@ -405,7 +409,7 @@ static int pdm_mcu_proc_write(char *command, size_t count, void *data)
 				 version.version_string);
 		}
 	} else if (strcmp(cmd, "status") == 0) {
-		status.index = index;
+		memset(&status, 0, sizeof(status));
 		ret = pdm_mcu_protocol_get_status(inst, &status);
 		if (ret == 0) {
 			LOG_INFO("MCU %u: state=%s online=%s uptime=%us temp=%d.%d°C voltage=%umV",
@@ -418,7 +422,7 @@ static int pdm_mcu_proc_write(char *command, size_t count, void *data)
 				 status.voltage_mv);
 		}
 	} else if (strcmp(cmd, "reset") == 0) {
-		ret = pdm_mcu_protocol_reset(inst, index);
+		ret = pdm_mcu_protocol_reset(inst);
 		if (ret == 0) {
 			LOG_INFO("MCU %u reset successful", index);
 		}
@@ -507,7 +511,7 @@ static int pdm_mcu_debugfs_write(char *command, size_t count, void *data)
 	}
 
 	if (strcmp(cmd, "reset") == 0) {
-		ret = pdm_mcu_protocol_reset(inst, index);
+		ret = pdm_mcu_protocol_reset(inst);
 	} else if (strcmp(cmd, "command") == 0) {
 		/* Parse: "command <index> <cmd_id> [hex bytes...]" */
 		char *p = command;
@@ -537,7 +541,6 @@ static int pdm_mcu_debugfs_write(char *command, size_t count, void *data)
 		}
 
 		memset(&mcu_cmd, 0, sizeof(mcu_cmd));
-		mcu_cmd.index = index;
 		mcu_cmd.command = command_id;
 		mcu_cmd.flags = PDM_MCU_CMD_F_NEED_RESPONSE;
 		mcu_cmd.tx_len = tx_len;
@@ -550,7 +553,7 @@ static int pdm_mcu_debugfs_write(char *command, size_t count, void *data)
 			LOG_INFO("MCU %u command 0x%x: sent %u bytes, received %u bytes",
 				 index, command_id, tx_len, mcu_cmd.actual_rx_len);
 			if (mcu_cmd.actual_rx_len > 0) {
-				char hex_buf[PDM_MCU_MAX_TRANSFER_SIZE * 3 + 1];
+				char hex_buf[32 * 3 + 1];
 				char *p_hex = hex_buf;
 				for (i = 0; i < mcu_cmd.actual_rx_len && i < 32; i++) {
 					p_hex += sprintf(p_hex, "%02x ", mcu_cmd.rx_data[i]);

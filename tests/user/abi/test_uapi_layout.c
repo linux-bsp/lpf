@@ -14,8 +14,8 @@
 		       "offsetof(" #type "." #member ")")
 
 ABI_ASSERT(PDM_MANAGER_ABI_VERSION == 0x00020000U, ctl_abi_version);
-ABI_ASSERT(PDM_MCU_ABI_VERSION == 0x00010000U, mcu_abi_version);
-ABI_ASSERT(PDM_LED_ABI_VERSION == 0x00010000U, led_abi_version);
+ABI_ASSERT(PDM_MCU_ABI_VERSION == 0x00020000U, mcu_abi_version);
+ABI_ASSERT(PDM_LED_ABI_VERSION == 0x00020000U, led_abi_version);
 
 ABI_SIZE(struct pdm_manager_info, 24);
 ABI_OFFSET(struct pdm_manager_info, abi_version, 0);
@@ -51,13 +51,12 @@ ABI_OFFSET(struct pdm_manager_device_name_query, name, 0);
 ABI_OFFSET(struct pdm_manager_device_name_query, info, 64);
 
 ABI_SIZE(struct pdm_mcu_info, 24);
-ABI_SIZE(struct pdm_mcu_version, 40);
-ABI_SIZE(struct pdm_mcu_status, 40);
-ABI_SIZE(struct pdm_mcu_command, 536);
+ABI_SIZE(struct pdm_mcu_version, 36);
+ABI_SIZE(struct pdm_mcu_status, 32);
+ABI_SIZE(struct pdm_mcu_command, 532);
 
 ABI_SIZE(struct pdm_led_info, 24);
-ABI_SIZE(struct pdm_led_state, 16);
-ABI_SIZE(struct pdm_led_brightness, 8);
+ABI_SIZE(struct pdm_led_state, 12);
 
 ABI_ASSERT(PDM_MANAGER_IOC_GET_INFO ==
 		   _IOR(PDM_MANAGER_IOC_MAGIC, 0x01, struct pdm_manager_info),
@@ -79,12 +78,12 @@ ABI_ASSERT(PDM_MCU_IOC_GET_INFO ==
 		   _IOR(PDM_MCU_IOC_MAGIC, 0x01, struct pdm_mcu_info),
 	   mcu_get_info_ioctl);
 ABI_ASSERT(PDM_MCU_IOC_GET_VERSION ==
-		   _IOWR(PDM_MCU_IOC_MAGIC, 0x02, struct pdm_mcu_version),
+		   _IOR(PDM_MCU_IOC_MAGIC, 0x02, struct pdm_mcu_version),
 	   mcu_get_version_ioctl);
 ABI_ASSERT(PDM_MCU_IOC_GET_STATUS ==
-		   _IOWR(PDM_MCU_IOC_MAGIC, 0x03, struct pdm_mcu_status),
+		   _IOR(PDM_MCU_IOC_MAGIC, 0x03, struct pdm_mcu_status),
 	   mcu_get_status_ioctl);
-ABI_ASSERT(PDM_MCU_IOC_RESET == _IOW(PDM_MCU_IOC_MAGIC, 0x04, __u32),
+ABI_ASSERT(PDM_MCU_IOC_RESET == _IO(PDM_MCU_IOC_MAGIC, 0x04),
 	   mcu_reset_ioctl);
 ABI_ASSERT(PDM_MCU_IOC_COMMAND ==
 		   _IOWR(PDM_MCU_IOC_MAGIC, 0x05, struct pdm_mcu_command),
@@ -93,15 +92,14 @@ ABI_ASSERT(PDM_LED_IOC_GET_INFO ==
 		   _IOR(PDM_LED_IOC_MAGIC, 0x01, struct pdm_led_info),
 	   led_get_info_ioctl);
 ABI_ASSERT(PDM_LED_IOC_GET_STATE ==
-		   _IOWR(PDM_LED_IOC_MAGIC, 0x02, struct pdm_led_state),
+		   _IOR(PDM_LED_IOC_MAGIC, 0x02, struct pdm_led_state),
 	   led_get_state_ioctl);
 ABI_ASSERT(PDM_LED_IOC_SET_BRIGHTNESS ==
-		   _IOW(PDM_LED_IOC_MAGIC, 0x03,
-			struct pdm_led_brightness),
+		   _IOW(PDM_LED_IOC_MAGIC, 0x03, __u32),
 	   led_set_brightness_ioctl);
-ABI_ASSERT(PDM_LED_IOC_ENABLE == _IOW(PDM_LED_IOC_MAGIC, 0x04, __u32),
+ABI_ASSERT(PDM_LED_IOC_ENABLE == _IO(PDM_LED_IOC_MAGIC, 0x04),
 	   led_enable_ioctl);
-ABI_ASSERT(PDM_LED_IOC_DISABLE == _IOW(PDM_LED_IOC_MAGIC, 0x05, __u32),
+ABI_ASSERT(PDM_LED_IOC_DISABLE == _IO(PDM_LED_IOC_MAGIC, 0x05),
 	   led_disable_ioctl);
 
 int main(void)

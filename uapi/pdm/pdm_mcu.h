@@ -11,7 +11,7 @@
 #include <linux/ioctl.h>
 #include <linux/types.h>
 
-#define PDM_MCU_ABI_VERSION 0x00010000U
+#define PDM_MCU_ABI_VERSION 0x00020000U
 #define PDM_MCU_DEVICE_NAME "pdm_mcu"
 #define PDM_MCU_MAX_TRANSFER_SIZE 256U
 
@@ -45,7 +45,6 @@ struct pdm_mcu_info {
 };
 
 struct pdm_mcu_version {
-	__u32 index;
 	__u8 major;
 	__u8 minor;
 	__u8 patch;
@@ -54,7 +53,6 @@ struct pdm_mcu_version {
 };
 
 struct pdm_mcu_status {
-	__u32 index;
 	__u32 online;
 	__u32 state;
 	__u32 uptime_sec;
@@ -67,7 +65,6 @@ struct pdm_mcu_status {
 #define PDM_MCU_CMD_F_NEED_RESPONSE (1U << 0)
 
 struct pdm_mcu_command {
-	__u32 index;
 	__u32 command;
 	__u32 flags;
 	__u32 tx_len;
@@ -81,10 +78,10 @@ struct pdm_mcu_command {
 #define PDM_MCU_IOC_GET_INFO \
 	_IOR(PDM_MCU_IOC_MAGIC, 0x01, struct pdm_mcu_info)
 #define PDM_MCU_IOC_GET_VERSION \
-	_IOWR(PDM_MCU_IOC_MAGIC, 0x02, struct pdm_mcu_version)
+	_IOR(PDM_MCU_IOC_MAGIC, 0x02, struct pdm_mcu_version)
 #define PDM_MCU_IOC_GET_STATUS \
-	_IOWR(PDM_MCU_IOC_MAGIC, 0x03, struct pdm_mcu_status)
-#define PDM_MCU_IOC_RESET _IOW(PDM_MCU_IOC_MAGIC, 0x04, __u32)
+	_IOR(PDM_MCU_IOC_MAGIC, 0x03, struct pdm_mcu_status)
+#define PDM_MCU_IOC_RESET _IO(PDM_MCU_IOC_MAGIC, 0x04)
 #define PDM_MCU_IOC_COMMAND \
 	_IOWR(PDM_MCU_IOC_MAGIC, 0x05, struct pdm_mcu_command)
 

@@ -25,10 +25,9 @@ int32_t pdi_led_close(pdi_led_context_t *ctx);
 int32_t pdi_led_get_info(pdi_led_context_t *ctx, struct pdm_led_info *info);
 int32_t pdi_led_get_state(pdi_led_context_t *ctx,
 			  struct pdm_led_state *state);
-int32_t pdi_led_set_brightness(pdi_led_context_t *ctx, uint32_t index,
-			       uint32_t brightness);
-int32_t pdi_led_enable(pdi_led_context_t *ctx, uint32_t index);
-int32_t pdi_led_disable(pdi_led_context_t *ctx, uint32_t index);
+int32_t pdi_led_set_brightness(pdi_led_context_t *ctx, uint32_t brightness);
+int32_t pdi_led_enable(pdi_led_context_t *ctx);
+int32_t pdi_led_disable(pdi_led_context_t *ctx);
 
 #ifdef __cplusplus
 }

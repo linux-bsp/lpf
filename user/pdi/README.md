@@ -13,23 +13,23 @@ Responsibilities:
 Current peripheral APIs:
 
 - Discovery: `pdi_ctl_*`, `pdi_list_devices`, and lookup helpers wrap the LPF
-  control node `/dev/lpf_ctl`; ioctl ABI lives in `uapi/lpf/lpf_ctl.h`; the
+  control node `/dev/pdm_manager`; ioctl ABI lives in `uapi/pdm/pdm_manager.h`; the
   SDK default path is `PDI_CTL_DEFAULT_DEVICE`. Discovery is snapshot-based;
   LPF v1 does not expose asynchronous userspace device event subscriptions.
-- MCU: `pdi_mcu_*` wraps `/dev/lpf/mcuN`; ioctl ABI lives in
-  `uapi/lpf/lpf_mcu.h`; SDK declarations and the default path
+- MCU: `pdi_mcu_*` wraps `/dev/pdm/mcuN`; ioctl ABI lives in
+  `uapi/pdm/pdm_mcu.h`; SDK declarations and the default path
   `PDI_MCU_DEFAULT_DEVICE` live in `pdi/mcu.h`.
-- LED: `pdi_led_*` wraps `/dev/lpf/ledN`; ioctl ABI lives in
-  `uapi/lpf/lpf_led.h`; SDK declarations and the default path
+- LED: `pdi_led_*` wraps `/dev/pdm/ledN`; ioctl ABI lives in
+  `uapi/pdm/pdm_led.h`; SDK declarations and the default path
   `PDI_LED_DEFAULT_DEVICE` live in `pdi/led.h`.
 
-`pdi_mcu_open_by_name()` and `pdi_led_open_by_name()` use `/dev/lpf_ctl` to
-validate the LPF stable device name, then open the matching instance node by
+`pdi_mcu_open_by_name()` and `pdi_led_open_by_name()` use `/dev/pdm_manager` to
+validate the PDM stable device name, then open the matching instance node by
 the discovered index. Applications that need change detection should re-query
 discovery snapshots or per-instance sysfs attributes at their chosen cadence.
 
 Applications should include `pdi/pdi.h` or the SDK headers under
-`user/pdi/include/pdi/`. UAPI headers under `uapi/lpf/` are ABI-only and should
+`user/pdi/include/pdi/`. UAPI headers under `uapi/pdm/` are ABI-only and should
 not grow SDK contexts, helper functions, or default-open policy.
 
 All PDI APIs return `0` on success and `-1` on failure with `errno` set.
@@ -45,5 +45,5 @@ device nodes.
 UAPI and ABI rules for new peripherals are documented in
 `docs/lpf_uapi_abi.md`.
 
-PDI must not reimplement kernel LPF HW, LPF runtime config, or LPF peripheral service
+PDI must not reimplement kernel PDM hardware access, runtime config, or peripheral service
 logic.

@@ -117,24 +117,18 @@ int32_t pdi_led_get_state(pdi_led_context_t *ctx,
 	return pdi_led_ioctl_checked(ctx, PDM_LED_IOC_GET_STATE, state);
 }
 
-int32_t pdi_led_set_brightness(pdi_led_context_t *ctx, uint32_t index,
-			       uint32_t brightness)
+int32_t pdi_led_set_brightness(pdi_led_context_t *ctx, uint32_t brightness)
 {
-	struct pdm_led_brightness request = {
-		.index = index,
-		.brightness = brightness,
-	};
-
 	return pdi_led_ioctl_checked(ctx, PDM_LED_IOC_SET_BRIGHTNESS,
-				     &request);
+				     &brightness);
 }
 
-int32_t pdi_led_enable(pdi_led_context_t *ctx, uint32_t index)
+int32_t pdi_led_enable(pdi_led_context_t *ctx)
 {
-	return pdi_led_ioctl_checked(ctx, PDM_LED_IOC_ENABLE, &index);
+	return pdi_led_ioctl_checked(ctx, PDM_LED_IOC_ENABLE, NULL);
 }
 
-int32_t pdi_led_disable(pdi_led_context_t *ctx, uint32_t index)
+int32_t pdi_led_disable(pdi_led_context_t *ctx)
 {
-	return pdi_led_ioctl_checked(ctx, PDM_LED_IOC_DISABLE, &index);
+	return pdi_led_ioctl_checked(ctx, PDM_LED_IOC_DISABLE, NULL);
 }

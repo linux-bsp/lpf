@@ -27,7 +27,7 @@ int32_t pdi_mcu_get_version(pdi_mcu_context_t *ctx,
 			    struct pdm_mcu_version *version);
 int32_t pdi_mcu_get_status(pdi_mcu_context_t *ctx,
 			   struct pdm_mcu_status *status);
-int32_t pdi_mcu_reset(pdi_mcu_context_t *ctx, uint32_t index);
+int32_t pdi_mcu_reset(pdi_mcu_context_t *ctx);
 int32_t pdi_mcu_command(pdi_mcu_context_t *ctx,
 			struct pdm_mcu_command *command);
 

@@ -21,4 +21,12 @@ config MEMORY_MONITOR
 	  Build the memory_monitor userspace executable for collecting
 	  system, kernel, reserved, process, and thread memory statistics.
 
+config PDEBUG
+	bool "Build pdebug app"
+	depends on PDI
+	help
+	  Build the pdebug userspace hardware debug tool. pdebug uses a
+	  BusyBox-style function table to dispatch PDI-based discovery, MCU,
+	  and LED hardware tests from one executable.
+
 endmenu

@@ -84,19 +84,20 @@ static int pdm_mcu_protocol_xfer(struct pdm_mcu_instance *inst,
 	return 0;
 }
 
-static void pdm_mcu_protocol_encode_index(u8 *buf, u32 index)
+static void pdm_mcu_protocol_encode_instance_id(const struct pdm_mcu_instance *inst,
+						u8 *buf)
 {
-	pdm_mcu_protocol_encode_be32(buf, index);
+	pdm_mcu_protocol_encode_be32(buf, inst->base.pdm_dev->id);
 }
 
 int pdm_mcu_protocol_get_version(struct pdm_mcu_instance *inst,
 				 struct pdm_mcu_version *version)
 {
-	u8 payload[sizeof(version->index)];
+	u8 payload[sizeof(u32)];
 	u32 rx_len = sizeof(*version);
 	int ret;
 
-	pdm_mcu_protocol_encode_index(payload, version->index);
+	pdm_mcu_protocol_encode_instance_id(inst, payload);
 	ret = pdm_mcu_protocol_xfer(inst, PDM_MCU_PROTOCOL_CMD_GET_VERSION,
 				     payload, sizeof(payload),
 				     (u8 *)version, rx_len, &rx_len);
@@ -112,11 +113,11 @@ int pdm_mcu_protocol_get_version(struct pdm_mcu_instance *inst,
 int pdm_mcu_protocol_get_status(struct pdm_mcu_instance *inst,
 			       struct pdm_mcu_status *status)
 {
-	u8 payload[sizeof(status->index)];
+	u8 payload[sizeof(u32)];
 	u32 rx_len = sizeof(*status);
 	int ret;
 
-	pdm_mcu_protocol_encode_index(payload, status->index);
+	pdm_mcu_protocol_encode_instance_id(inst, payload);
 	ret = pdm_mcu_protocol_xfer(inst, PDM_MCU_PROTOCOL_CMD_GET_STATUS,
 				     payload, sizeof(payload),
 				     (u8 *)status, rx_len, &rx_len);
@@ -129,12 +130,12 @@ int pdm_mcu_protocol_get_status(struct pdm_mcu_instance *inst,
 	return 0;
 }
 
-int pdm_mcu_protocol_reset(struct pdm_mcu_instance *inst, u32 index)
+int pdm_mcu_protocol_reset(struct pdm_mcu_instance *inst)
 {
-	u8 payload[sizeof(index)];
+	u8 payload[sizeof(u32)];
 	u32 rx_len = 0;
 
-	pdm_mcu_protocol_encode_index(payload, index);
+	pdm_mcu_protocol_encode_instance_id(inst, payload);
 	return pdm_mcu_protocol_xfer(inst, PDM_MCU_PROTOCOL_CMD_RESET,
 				     payload, sizeof(payload), NULL, 0, &rx_len);
 }

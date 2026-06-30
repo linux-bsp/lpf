@@ -54,13 +54,17 @@ static struct pdm_led_instance *pdm_led_find_instance(u32 index)
 		.current_index = 0,
 		.result = NULL,
 	};
+	int ret;
 
 	drv = driver_find("pdm-led", &pdm_bus_type);
 	if (!drv) {
 		return NULL;
 	}
 
-	(void)driver_for_each_device(drv, NULL, &ctx, pdm_led_match_by_index);
+	ret = driver_for_each_device(drv, NULL, &ctx, pdm_led_match_by_index);
+	if (ret < 0) {
+		return NULL;
+	}
 
 	return ctx.result;
 }

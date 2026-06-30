@@ -9,3 +9,7 @@ endif()
 if(CONFIG_MEMORY_MONITOR)
     add_subdirectory(memory_monitor)
 endif()
+
+if(CONFIG_PDEBUG)
+    add_subdirectory(pdebug)
+endif()

@@ -141,9 +141,7 @@ static long pdm_mcu_get_version(struct pdm_mcu_instance *inst, unsigned long arg
 	struct pdm_mcu_version version;
 	int ret;
 
-	if (copy_from_user(&version, (void __user *)arg, sizeof(version))) {
-		return -EFAULT;
-	}
+	memset(&version, 0, sizeof(version));
 
 	ret = pdm_mcu_claim_device(inst);
 	if (ret) {
@@ -166,9 +164,7 @@ static long pdm_mcu_get_status(struct pdm_mcu_instance *inst, unsigned long arg)
 	struct pdm_mcu_status status;
 	int ret;
 
-	if (copy_from_user(&status, (void __user *)arg, sizeof(status))) {
-		return -EFAULT;
-	}
+	memset(&status, 0, sizeof(status));
 
 	ret = pdm_mcu_claim_device(inst);
 	if (ret) {
@@ -186,20 +182,15 @@ static long pdm_mcu_get_status(struct pdm_mcu_instance *inst, unsigned long arg)
 	return 0;
 }
 
-static long pdm_mcu_reset(struct pdm_mcu_instance *inst, unsigned long arg)
+static long pdm_mcu_reset(struct pdm_mcu_instance *inst)
 {
-	u32 index;
 	int ret;
-
-	if (copy_from_user(&index, (void __user *)arg, sizeof(index))) {
-		return -EFAULT;
-	}
 
 	ret = pdm_mcu_claim_device(inst);
 	if (ret) {
 		return ret;
 	}
-	ret = pdm_mcu_protocol_reset(inst, index);
+	ret = pdm_mcu_protocol_reset(inst);
 	pdm_mcu_release_device(inst, ret);
 	return ret;
 }
@@ -247,7 +238,7 @@ static long pdm_mcu_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
 	case PDM_MCU_IOC_GET_STATUS:
 		return pdm_mcu_get_status(inst, arg);
 	case PDM_MCU_IOC_RESET:
-		return pdm_mcu_reset(inst, arg);
+		return pdm_mcu_reset(inst);
 	case PDM_MCU_IOC_COMMAND:
 		return pdm_mcu_command_ioctl(inst, arg);
 	default:

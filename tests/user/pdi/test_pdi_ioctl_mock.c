@@ -169,9 +169,6 @@ static int mock_ioctl(int fd, unsigned long request, void *arg)
 	case PDM_MCU_IOC_GET_VERSION: {
 		struct pdm_mcu_version *version = arg;
 
-		if (version->index != 0) {
-			return -1;
-		}
 		version->major = 1;
 		version->minor = 2;
 		version->patch = 3;
@@ -183,9 +180,6 @@ static int mock_ioctl(int fd, unsigned long request, void *arg)
 	case PDM_MCU_IOC_GET_STATUS: {
 		struct pdm_mcu_status *status = arg;
 
-		if (status->index != 0) {
-			return -1;
-		}
 		status->online = 1;
 		status->state = PDM_MCU_STATE_READY;
 		status->uptime_sec = 10;
@@ -195,15 +189,12 @@ static int mock_ioctl(int fd, unsigned long request, void *arg)
 		status->timestamp_us = 123456U;
 		return 0;
 	}
-	case PDM_MCU_IOC_RESET: {
-		const uint32_t *index = arg;
-
-		return index && *index == 9 ? 0 : -1;
-	}
+	case PDM_MCU_IOC_RESET:
+		return arg == NULL ? 0 : -1;
 	case PDM_MCU_IOC_COMMAND: {
 		struct pdm_mcu_command *command = arg;
 
-		if (command->index != 0 || command->command != 0x22 ||
+		if (command->command != 0x22 ||
 		    command->flags != PDM_MCU_CMD_F_NEED_RESPONSE ||
 		    command->tx_len != 2 || command->rx_len != 2 ||
 		    command->tx_data[0] != 0xAA ||
@@ -219,9 +210,6 @@ static int mock_ioctl(int fd, unsigned long request, void *arg)
 	case PDM_LED_IOC_GET_STATE: {
 		struct pdm_led_state *state = arg;
 
-		if (state->index != 0) {
-			return -1;
-		}
 		state->brightness = 7;
 		state->max_brightness = 10;
 		state->enabled = 1;
@@ -236,18 +224,13 @@ static int mock_ioctl(int fd, unsigned long request, void *arg)
 		return 0;
 	}
 	case PDM_LED_IOC_SET_BRIGHTNESS: {
-		const struct pdm_led_brightness *brightness = arg;
+		const uint32_t *brightness = arg;
 
-		return brightness->index == 5 && brightness->brightness == 8 ?
-			       0 :
-			       -1;
+		return brightness && *brightness == 8 ? 0 : -1;
 	}
 	case PDM_LED_IOC_ENABLE:
-	case PDM_LED_IOC_DISABLE: {
-		const uint32_t *index = arg;
-
-		return index && *index == 6 ? 0 : -1;
-	}
+	case PDM_LED_IOC_DISABLE:
+		return arg == NULL ? 0 : -1;
 	default:
 		errno = ENOTTY;
 		return -1;
@@ -492,7 +475,7 @@ static int test_mcu_operations(void)
 		return 104;
 	}
 
-	if (pdi_mcu_reset(&ctx, 9) != 0 ||
+	if (pdi_mcu_reset(&ctx) != 0 ||
 	    g_mock.last_request != PDM_MCU_IOC_RESET)
 	{
 		return 105;
@@ -549,19 +532,19 @@ static int test_led_operations(void)
 		return 202;
 	}
 
-	if (pdi_led_set_brightness(&ctx, 5, 8) != 0 ||
+	if (pdi_led_set_brightness(&ctx, 8) != 0 ||
 	    g_mock.last_request != PDM_LED_IOC_SET_BRIGHTNESS)
 	{
 		return 203;
 	}
 
-	if (pdi_led_enable(&ctx, 6) != 0 ||
+	if (pdi_led_enable(&ctx) != 0 ||
 	    g_mock.last_request != PDM_LED_IOC_ENABLE)
 	{
 		return 204;
 	}
 
-	if (pdi_led_disable(&ctx, 6) != 0 ||
+	if (pdi_led_disable(&ctx) != 0 ||
 	    g_mock.last_request != PDM_LED_IOC_DISABLE)
 	{
 		return 205;
