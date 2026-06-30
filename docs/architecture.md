@@ -80,3 +80,47 @@ Add these pieces together when a new peripheral family needs userspace access:
 
 Keep product policy, init scripts, udev rules, and application business logic
 outside this repository.
+
+
+## Active Backend Registry
+
+Each logical peripheral should have exactly one active backend. PDM treats Device Tree as the hardware source of truth and exports the resolved owner and transport through `/dev/pdm_manager` and PDM sysfs attributes. Applications continue to address devices by logical index or name; they should not pass CAN, UART, SPI, or I2C details.
+
+Logical MCU numbering can be pinned with Device Tree aliases. PDM checks `pdm-mcuN` first, then falls back to `pdm,id`, `pdm,index`, or `reg` depending on the enumerator path.
+
+```dts
+/ {
+    aliases {
+        pdm-mcu0 = &power_mcu;
+        pdm-mcu1 = &body_mcu;
+    };
+
+    pdm {
+        compatible = "vendor,pdm-bus";
+
+        body_mcu: mcu {
+            compatible = "pdm,mcu-can";
+            reg = <1>;
+            pdm,owner = "user";
+            can-controller = <&can1>;
+            tx-can-id = <0x321>;
+            rx-can-id = <0x322>;
+        };
+    };
+};
+
+&ecspi2 {
+    power_mcu: mcu {
+        compatible = "pdm,mcu-spi";
+        reg = <0>;
+        pdm,owner = "kernel";
+        spi-max-frequency = <1000000>;
+    };
+};
+```
+
+`pdm,owner = "kernel"` is the default and keeps the current kernel backend behavior. `pdm,owner = "user"` reserves the logical MCU id and exposes the node in discovery, but PDM skips kernel backend binding so a user-space MCU daemon can own the transport.
+
+Kernel-owned I2C, SPI, and serdev UART MCU nodes should remain under their native controller nodes so the native Linux bus creates the `i2c_client`, `spi_device`, or `serdev_device` used by the kernel backend. User-owned CAN/UART logical MCU nodes should be placed under `vendor,pdm-bus` and reference the native controller by phandle; do not duplicate those hardware details in a userspace config file.
+
+The manager v2 device record adds owner, transport, OF node path, and controller path fields. Sysfs also exposes `owner`, `transport`, and `controller_path` for diagnostics.

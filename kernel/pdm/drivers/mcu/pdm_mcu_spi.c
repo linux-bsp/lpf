@@ -12,6 +12,7 @@
 #include <linux/string.h>
 
 #include "pdm/compat/pdm_compat_spi.h"
+#include "pdm/bus/pdm_device.h"
 #include "pdm/registry/pdm_backend.h"
 #include "pdm/pdm_mcu.h"
 #include "pdm_mcu_internal.h"
@@ -163,6 +164,13 @@ static int pdm_mcu_spi_xfer(struct pdm_mcu_instance *inst,
 static int pdm_mcu_spi_probe(struct spi_device *spi)
 {
 	struct pdm_mcu_bus_device *bus_dev;
+
+	if (pdm_device_of_owner(spi->dev.of_node) ==
+	    PDM_MANAGER_DEVICE_OWNER_USER) {
+		LOG_INFO("Skipping user-owned MCU SPI %s",
+			 dev_name(&spi->dev));
+		return -ENODEV;
+	}
 
 	bus_dev = devm_kzalloc(&spi->dev, sizeof(*bus_dev), GFP_KERNEL);
 	if (!bus_dev) {

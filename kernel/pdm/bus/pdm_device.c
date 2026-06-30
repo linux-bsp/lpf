@@ -8,6 +8,7 @@
 #include <linux/module.h>
 #include <linux/of.h>
 #include <linux/slab.h>
+#include <linux/string.h>
 
 #include "pdm/bus/pdm_bus.h"
 #include "pdm/bus/pdm_device.h"
@@ -119,6 +120,116 @@ static void pdm_id_destroy(void)
 	LOG_INFO("PDM ID management destroyed");
 }
 
+static u64 pdm_device_transport_capability(u32 transport)
+{
+	switch (transport) {
+	case PDM_MANAGER_TRANSPORT_CAN:
+		return PDM_MANAGER_DEVICE_CAP_TRANSPORT_CAN;
+	case PDM_MANAGER_TRANSPORT_UART:
+		return PDM_MANAGER_DEVICE_CAP_TRANSPORT_UART;
+	case PDM_MANAGER_TRANSPORT_I2C:
+		return PDM_MANAGER_DEVICE_CAP_TRANSPORT_I2C;
+	case PDM_MANAGER_TRANSPORT_SPI:
+		return PDM_MANAGER_DEVICE_CAP_TRANSPORT_SPI;
+	default:
+		return PDM_MANAGER_DEVICE_CAP_NONE;
+	}
+}
+
+static u32 pdm_device_transport_from_compatible(const char *compatible)
+{
+	if (!compatible)
+		return PDM_MANAGER_TRANSPORT_NONE;
+	if (strstr(compatible, "mcu-can"))
+		return PDM_MANAGER_TRANSPORT_CAN;
+	if (strstr(compatible, "mcu-uart"))
+		return PDM_MANAGER_TRANSPORT_UART;
+	if (strstr(compatible, "mcu-i2c"))
+		return PDM_MANAGER_TRANSPORT_I2C;
+	if (strstr(compatible, "mcu-spi"))
+		return PDM_MANAGER_TRANSPORT_SPI;
+
+	return PDM_MANAGER_TRANSPORT_NONE;
+}
+
+u32 pdm_device_of_owner(struct device_node *np)
+{
+	const char *owner;
+
+	if (!np || of_property_read_string(np, "pdm,owner", &owner))
+		return PDM_MANAGER_DEVICE_OWNER_KERNEL;
+
+	if (!strcmp(owner, "kernel"))
+		return PDM_MANAGER_DEVICE_OWNER_KERNEL;
+	if (!strcmp(owner, "user"))
+		return PDM_MANAGER_DEVICE_OWNER_USER;
+
+	LOG_WARN("Invalid pdm,owner value %s, defaulting to kernel", owner);
+	return PDM_MANAGER_DEVICE_OWNER_KERNEL;
+}
+EXPORT_SYMBOL_GPL(pdm_device_of_owner);
+
+static struct device_node *pdm_device_controller_from_of(struct device_node *np)
+{
+	struct device_node *controller;
+
+	if (!np)
+		return NULL;
+
+	controller = of_parse_phandle(np, "can-controller", 0);
+	if (controller)
+		return controller;
+	controller = of_parse_phandle(np, "can", 0);
+	if (controller)
+		return controller;
+	controller = of_parse_phandle(np, "serial-controller", 0);
+	if (controller)
+		return controller;
+	controller = of_parse_phandle(np, "uart-controller", 0);
+	if (controller)
+		return controller;
+	controller = of_parse_phandle(np, "i2c-controller", 0);
+	if (controller)
+		return controller;
+	controller = of_parse_phandle(np, "spi-controller", 0);
+	if (controller)
+		return controller;
+
+	return NULL;
+}
+
+int pdm_device_of_alias_id(struct device_node *np, const char *stem)
+{
+	int id;
+
+	if (!np || !stem)
+		return -ENODEV;
+
+	id = of_alias_get_id(np, stem);
+	return id >= 0 ? id : -ENODEV;
+}
+EXPORT_SYMBOL_GPL(pdm_device_of_alias_id);
+
+void pdm_device_apply_of_metadata(struct pdm_device *pdm_dev)
+{
+	struct device_node *controller;
+
+	if (!pdm_dev)
+		return;
+
+	pdm_dev->transport = pdm_device_transport_from_compatible(pdm_dev->compatible);
+	pdm_dev->owner = pdm_device_of_owner(pdm_dev->dev.of_node);
+
+	controller = pdm_device_controller_from_of(pdm_dev->dev.of_node);
+	if (controller != pdm_dev->controller_node) {
+		of_node_put(pdm_dev->controller_node);
+		pdm_dev->controller_node = controller;
+	} else if (controller) {
+		of_node_put(controller);
+	}
+}
+EXPORT_SYMBOL_GPL(pdm_device_apply_of_metadata);
+
 /* ========================================================================
  * PDM Device Management
  * ======================================================================== */
@@ -129,6 +240,8 @@ static void pdm_device_release(struct device *dev)
 
 	LOG_DEBUG("Releasing device [%s]", dev_name(dev));
 	pdm_device_unbind(pdm_dev);
+	of_node_put(pdm_dev->controller_node);
+	pdm_dev->controller_node = NULL;
 	of_node_put(dev->of_node);
 	kfree(pdm_dev);
 }
@@ -147,6 +260,8 @@ struct pdm_device *pdm_device_alloc(unsigned int size)
 	pdm_dev->dev.release = pdm_device_release;
 	pdm_dev->type = PDM_MANAGER_DEVICE_TYPE_INVALID;
 	pdm_dev->state = PDM_MANAGER_DEVICE_STATE_REGISTERED;
+	pdm_dev->owner = PDM_MANAGER_DEVICE_OWNER_KERNEL;
+	pdm_dev->transport = PDM_MANAGER_TRANSPORT_NONE;
 	pdm_dev->id = -1;
 	pdm_dev->requested_id = -1;
 
@@ -156,6 +271,7 @@ EXPORT_SYMBOL_GPL(pdm_device_alloc);
 
 int pdm_device_register(struct pdm_device *pdm_dev, const char *name)
 {
+	bool reserved_user = false;
 	int ret;
 
 	if (!pdm_dev || !name) {
@@ -170,10 +286,26 @@ int pdm_device_register(struct pdm_device *pdm_dev, const char *name)
 		return ret;
 	}
 
+	if (pdm_dev->owner == PDM_MANAGER_DEVICE_OWNER_USER &&
+	    pdm_dev->transport != PDM_MANAGER_TRANSPORT_NONE) {
+		ret = pdm_device_bind(pdm_dev, PDM_MANAGER_DEVICE_TYPE_MCU,
+				      PDM_MANAGER_DEVICE_CAP_USER_IOCTL |
+				      pdm_device_transport_capability(pdm_dev->transport));
+		if (ret) {
+			LOG_ERROR("Failed to reserve user-owned device [%s], error %d",
+				  name, ret);
+			put_device(&pdm_dev->dev);
+			return ret;
+		}
+		reserved_user = true;
+	}
+
 	ret = device_add(&pdm_dev->dev);
 	if (ret) {
 		LOG_ERROR("Failed to register device [%s], error %d",
 			  name, ret);
+		if (reserved_user)
+			pdm_device_unbind(pdm_dev);
 		put_device(&pdm_dev->dev);
 		return ret;
 	}

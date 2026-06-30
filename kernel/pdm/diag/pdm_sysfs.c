@@ -15,6 +15,12 @@ static ssize_t pdm_id_show(struct device *dev,
 			   struct device_attribute *attr, char *buf);
 static ssize_t pdm_type_show(struct device *dev,
 			     struct device_attribute *attr, char *buf);
+static ssize_t owner_show(struct device *dev,
+				 struct device_attribute *attr, char *buf);
+static ssize_t transport_show(struct device *dev,
+				     struct device_attribute *attr, char *buf);
+static ssize_t controller_path_show(struct device *dev,
+				   struct device_attribute *attr, char *buf);
 static ssize_t capabilities_show(struct device *dev,
 				 struct device_attribute *attr, char *buf);
 static ssize_t pdm_driver_show(struct device *dev,
@@ -24,6 +30,9 @@ static DEVICE_ATTR_RO(pdm_name);
 static DEVICE_ATTR_RO(compatible);
 static DEVICE_ATTR_RO(pdm_id);
 static DEVICE_ATTR_RO(pdm_type);
+static DEVICE_ATTR_RO(owner);
+static DEVICE_ATTR_RO(transport);
+static DEVICE_ATTR_RO(controller_path);
 static DEVICE_ATTR_RO(capabilities);
 static DEVICE_ATTR_RO(pdm_driver);
 
@@ -32,6 +41,9 @@ static struct attribute *pdm_device_attrs[] = {
 	&dev_attr_compatible.attr,
 	&dev_attr_pdm_id.attr,
 	&dev_attr_pdm_type.attr,
+	&dev_attr_owner.attr,
+	&dev_attr_transport.attr,
+	&dev_attr_controller_path.attr,
 	&dev_attr_capabilities.attr,
 	&dev_attr_pdm_driver.attr,
 	NULL,
@@ -79,6 +91,37 @@ static ssize_t pdm_type_show(struct device *dev,
 
 	(void)attr;
 	return pdm_compat_sysfs_emit(buf, "%u\n", pdm_dev->type);
+}
+
+static ssize_t owner_show(struct device *dev,
+				 struct device_attribute *attr, char *buf)
+{
+	struct pdm_device *pdm_dev = dev_to_pdm_device(dev);
+
+	(void)attr;
+	return pdm_compat_sysfs_emit(buf, "%u\n", pdm_dev->owner);
+}
+
+static ssize_t transport_show(struct device *dev,
+				     struct device_attribute *attr, char *buf)
+{
+	struct pdm_device *pdm_dev = dev_to_pdm_device(dev);
+
+	(void)attr;
+	return pdm_compat_sysfs_emit(buf, "%u\n", pdm_dev->transport);
+}
+
+static ssize_t controller_path_show(struct device *dev,
+				   struct device_attribute *attr, char *buf)
+{
+	struct pdm_device *pdm_dev = dev_to_pdm_device(dev);
+
+	(void)attr;
+	if (!pdm_dev->controller_node)
+		return pdm_compat_sysfs_emit(buf, "\n");
+
+	return pdm_compat_sysfs_emit(buf, "%pOF\n",
+				      pdm_dev->controller_node);
 }
 
 static ssize_t capabilities_show(struct device *dev,

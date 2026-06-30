@@ -36,6 +36,12 @@ static int pdm_bus_device_probe(struct device *dev)
 	pdm_dev = dev_to_pdm_device(dev);
 	pdm_drv = drv_to_pdm_driver(dev->driver);
 
+	if (pdm_dev->owner == PDM_MANAGER_DEVICE_OWNER_USER) {
+		LOG_INFO("Skipping kernel probe for user-owned device [%s]",
+			 dev_name(dev));
+		return -ENODEV;
+	}
+
 	if (!pdm_drv->probe) {
 		return -ENODEV;
 	}

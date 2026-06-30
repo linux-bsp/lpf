@@ -14,6 +14,7 @@
 #include <linux/atomic.h>
 #include <linux/fs.h>
 #include <linux/miscdevice.h>
+#include <linux/of.h>
 #include <linux/uaccess.h>
 
 #include "pdm/bus/pdm_cdev.h"
@@ -223,8 +224,26 @@ static bool pdm_manager_device_visible(const struct pdm_device *pdm_dev)
 		return false;
 	}
 
+	if (pdm_dev->owner == PDM_MANAGER_DEVICE_OWNER_USER &&
+	    pdm_dev->state == PDM_MANAGER_DEVICE_STATE_REGISTERED) {
+		return true;
+	}
+
 	return pdm_dev->state == PDM_MANAGER_DEVICE_STATE_BOUND ||
 	       pdm_dev->state == PDM_MANAGER_DEVICE_STATE_ERROR;
+}
+
+static void pdm_manager_copy_of_path(struct device_node *np, char *buf,
+				     size_t len)
+{
+	if (!buf || !len) {
+		return;
+	}
+
+	buf[0] = '\0';
+	if (np) {
+		snprintf(buf, len, "%pOF", np);
+	}
 }
 
 static void pdm_manager_fill_device_info(struct device *dev,
@@ -238,7 +257,13 @@ static void pdm_manager_fill_device_info(struct device *dev,
 	info->state = pdm_dev->state;
 	info->last_error = pdm_dev->last_error;
 	info->error_count = pdm_dev->error_count;
+	info->owner = pdm_dev->owner;
+	info->transport = pdm_dev->transport;
 	info->capabilities = pdm_dev->capabilities;
+	pdm_manager_copy_of_path(dev->of_node, info->of_node_path,
+				 PDM_MANAGER_PATH_LEN);
+	pdm_manager_copy_of_path(pdm_dev->controller_node,
+				 info->controller_path, PDM_MANAGER_PATH_LEN);
 
 	strscpy(info->name, dev_name(dev), PDM_MANAGER_NAME_LEN);
 	if (dev->driver && dev->driver->name) {

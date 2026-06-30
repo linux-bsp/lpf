@@ -12,6 +12,7 @@
 #include <linux/string.h>
 
 #include "pdm/compat/pdm_compat_i2c.h"
+#include "pdm/bus/pdm_device.h"
 #include "pdm/registry/pdm_backend.h"
 #include "pdm/pdm_mcu.h"
 #include "pdm_mcu_internal.h"
@@ -170,6 +171,13 @@ static int pdm_mcu_i2c_xfer(struct pdm_mcu_instance *inst,
 static int pdm_mcu_i2c_probe(struct i2c_client *client)
 {
 	struct pdm_mcu_bus_device *bus_dev;
+
+	if (pdm_device_of_owner(client->dev.of_node) ==
+	    PDM_MANAGER_DEVICE_OWNER_USER) {
+		LOG_INFO("Skipping user-owned MCU I2C %s",
+			 dev_name(&client->dev));
+		return -ENODEV;
+	}
 
 	bus_dev = devm_kzalloc(&client->dev, sizeof(*bus_dev), GFP_KERNEL);
 	if (!bus_dev) {

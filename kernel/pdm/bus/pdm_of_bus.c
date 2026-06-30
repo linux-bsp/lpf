@@ -44,6 +44,12 @@ static void pdm_of_bus_unregister_devices(struct pdm_of_bus *ctrl)
 static int pdm_of_bus_child_id(struct device_node *child)
 {
 	u32 reg;
+	int alias_id;
+
+	alias_id = pdm_device_of_alias_id(child, "pdm-mcu");
+	if (alias_id >= 0) {
+		return alias_id;
+	}
 
 	if (!of_property_read_u32(child, "pdm,id", &reg)) {
 		return (int)reg;
@@ -104,6 +110,7 @@ static int pdm_of_bus_probe(struct platform_device *pdev)
 		pdm_dev->dev.parent = &pdev->dev;
 		pdm_dev->dev.of_node = of_node_get(child);
 		pdm_dev->compatible = compatible;
+		pdm_device_apply_of_metadata(pdm_dev);
 		pdm_device_set_requested_id(pdm_dev, device_id);
 
 		if (device_id >= 0) {

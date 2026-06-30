@@ -13,7 +13,7 @@
 	_Static_assert(offsetof(type, member) == (offset), \
 		       "offsetof(" #type "." #member ")")
 
-ABI_ASSERT(PDM_MANAGER_ABI_VERSION == 0x00010000U, ctl_abi_version);
+ABI_ASSERT(PDM_MANAGER_ABI_VERSION == 0x00020000U, ctl_abi_version);
 ABI_ASSERT(PDM_MCU_ABI_VERSION == 0x00010000U, mcu_abi_version);
 ABI_ASSERT(PDM_LED_ABI_VERSION == 0x00010000U, led_abi_version);
 
@@ -25,23 +25,28 @@ ABI_OFFSET(struct pdm_manager_info, module_version_patch, 12);
 ABI_OFFSET(struct pdm_manager_info, open_count, 16);
 ABI_OFFSET(struct pdm_manager_info, device_count, 20);
 
-ABI_SIZE(struct pdm_manager_device_info, 160);
+ABI_SIZE(struct pdm_manager_device_info, 424);
 ABI_OFFSET(struct pdm_manager_device_info, type, 0);
 ABI_OFFSET(struct pdm_manager_device_info, index, 4);
 ABI_OFFSET(struct pdm_manager_device_info, state, 8);
 ABI_OFFSET(struct pdm_manager_device_info, last_error, 12);
 ABI_OFFSET(struct pdm_manager_device_info, error_count, 16);
-ABI_OFFSET(struct pdm_manager_device_info, capabilities, 24);
-ABI_OFFSET(struct pdm_manager_device_info, name, 32);
-ABI_OFFSET(struct pdm_manager_device_info, driver_name, 96);
+ABI_OFFSET(struct pdm_manager_device_info, owner, 20);
+ABI_OFFSET(struct pdm_manager_device_info, transport, 24);
+ABI_OFFSET(struct pdm_manager_device_info, reserved0, 28);
+ABI_OFFSET(struct pdm_manager_device_info, capabilities, 32);
+ABI_OFFSET(struct pdm_manager_device_info, name, 40);
+ABI_OFFSET(struct pdm_manager_device_info, driver_name, 104);
+ABI_OFFSET(struct pdm_manager_device_info, of_node_path, 168);
+ABI_OFFSET(struct pdm_manager_device_info, controller_path, 296);
 
-ABI_SIZE(struct pdm_manager_device_query, 176);
+ABI_SIZE(struct pdm_manager_device_query, 440);
 ABI_OFFSET(struct pdm_manager_device_query, match_index, 0);
 ABI_OFFSET(struct pdm_manager_device_query, reserved, 4);
 ABI_OFFSET(struct pdm_manager_device_query, required_capabilities, 8);
 ABI_OFFSET(struct pdm_manager_device_query, info, 16);
 
-ABI_SIZE(struct pdm_manager_device_name_query, 224);
+ABI_SIZE(struct pdm_manager_device_name_query, 488);
 ABI_OFFSET(struct pdm_manager_device_name_query, name, 0);
 ABI_OFFSET(struct pdm_manager_device_name_query, info, 64);
 

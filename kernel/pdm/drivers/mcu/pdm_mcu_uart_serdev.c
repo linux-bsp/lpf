@@ -15,6 +15,7 @@
 #include <linux/string.h>
 #include <linux/wait.h>
 
+#include "pdm/bus/pdm_device.h"
 #include "pdm_mcu_internal.h"
 #include "osal.h"
 
@@ -63,6 +64,13 @@ static bool pdm_mcu_uart_hw_flow_control(struct device_node *np)
 static int pdm_mcu_serdev_probe(struct serdev_device *serdev)
 {
 	struct pdm_mcu_bus_device *bus_dev;
+
+	if (pdm_device_of_owner(serdev->dev.of_node) ==
+	    PDM_MANAGER_DEVICE_OWNER_USER) {
+		LOG_INFO("Skipping user-owned MCU UART %s",
+			 dev_name(&serdev->dev));
+		return -ENODEV;
+	}
 
 	bus_dev = devm_kzalloc(&serdev->dev, sizeof(*bus_dev), GFP_KERNEL);
 	if (!bus_dev) {

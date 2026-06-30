@@ -43,6 +43,12 @@ static const char *pdm_mcu_default_compatible(enum pdm_mcu_backend_type type)
 static int pdm_mcu_bus_device_id(struct device_node *np)
 {
 	u32 value;
+	int alias_id;
+
+	alias_id = pdm_device_of_alias_id(np, "pdm-mcu");
+	if (alias_id >= 0) {
+		return alias_id;
+	}
 
 	if (np) {
 		if (!of_property_read_u32(np, "pdm,id", &value)) {
@@ -379,6 +385,7 @@ int pdm_mcu_register_bus_device(struct device *parent,
 	pdm_dev->dev.parent = parent;
 	pdm_dev->dev.of_node = of_node_get(np);
 	pdm_dev->compatible = compatible;
+	pdm_device_apply_of_metadata(pdm_dev);
 	pdm_dev->config_data = bus_dev;
 	pdm_device_set_requested_id(pdm_dev, id);
 	bus_dev->type = type;

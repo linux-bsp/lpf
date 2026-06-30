@@ -2,7 +2,7 @@
  * PDM control UAPI
  *
  * This header defines the ioctl ABI shared by /dev/pdm_manager and userspace
- * device-discovery clients. PDM ABI v1 is snapshot-based and does not expose
+ * device-discovery clients. PDM manager ABI is snapshot-based and does not expose
  * asynchronous userspace device events.
  */
 
@@ -12,9 +12,10 @@
 #include <linux/ioctl.h>
 #include <linux/types.h>
 
-#define PDM_MANAGER_ABI_VERSION 0x00010000U
+#define PDM_MANAGER_ABI_VERSION 0x00020000U
 #define PDM_MANAGER_DEVICE_NAME "pdm_manager"
 #define PDM_MANAGER_NAME_LEN 64U
+#define PDM_MANAGER_PATH_LEN 128U
 
 enum pdm_manager_device_type {
 	PDM_MANAGER_DEVICE_TYPE_INVALID = 0x00,
@@ -26,6 +27,20 @@ enum pdm_manager_device_state {
 	PDM_MANAGER_DEVICE_STATE_REGISTERED = 0,
 	PDM_MANAGER_DEVICE_STATE_BOUND = 1,
 	PDM_MANAGER_DEVICE_STATE_ERROR = 2,
+};
+
+enum pdm_manager_device_owner {
+	PDM_MANAGER_DEVICE_OWNER_UNSPECIFIED = 0,
+	PDM_MANAGER_DEVICE_OWNER_KERNEL = 1,
+	PDM_MANAGER_DEVICE_OWNER_USER = 2,
+};
+
+enum pdm_manager_transport_type {
+	PDM_MANAGER_TRANSPORT_NONE = 0,
+	PDM_MANAGER_TRANSPORT_CAN = 1,
+	PDM_MANAGER_TRANSPORT_UART = 2,
+	PDM_MANAGER_TRANSPORT_I2C = 3,
+	PDM_MANAGER_TRANSPORT_SPI = 4,
 };
 
 #define PDM_MANAGER_DEVICE_CAP_NONE           0ULL
@@ -53,9 +68,14 @@ struct pdm_manager_device_info {
 	__u32 state;
 	__s32 last_error;
 	__u32 error_count;
+	__u32 owner;
+	__u32 transport;
+	__u32 reserved0;
 	__u64 capabilities;
 	char name[PDM_MANAGER_NAME_LEN];
 	char driver_name[PDM_MANAGER_NAME_LEN];
+	char of_node_path[PDM_MANAGER_PATH_LEN];
+	char controller_path[PDM_MANAGER_PATH_LEN];
 };
 
 struct pdm_manager_device_query {

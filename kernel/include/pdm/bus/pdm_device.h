@@ -8,6 +8,7 @@
 #define PDM_DEVICE_H
 
 #include <linux/device.h>
+#include <linux/of.h>
 #include <linux/ktime.h>
 #include <linux/types.h>
 
@@ -55,6 +56,9 @@ struct pdm_error_record {
  * @type: PDM_MANAGER_DEVICE_TYPE_* value exposed through /dev/pdm_ctl.
  * @capabilities: PDM capability flags exposed by the concrete driver.
  * @state: Discovery state exported through /dev/pdm_ctl.
+ * @owner: PDM_MANAGER_DEVICE_OWNER_* value resolved from Device Tree.
+ * @transport: PDM_MANAGER_TRANSPORT_* value inferred from compatible string.
+ * @controller_node: Native controller referenced by a user-owned logical node.
  * @last_error: Last probe/runtime error exported through /dev/pdm_ctl.
  * @error_count: Number of recorded errors exported through /dev/pdm_ctl.
  * @errors: Circular buffer of recent errors with timestamps
@@ -71,6 +75,9 @@ struct pdm_device {
 	u32 type;
 	u64 capabilities;
 	u32 state;
+	u32 owner;
+	u32 transport;
+	struct device_node *controller_node;
 	s32 last_error;
 	u32 error_count;
 
@@ -168,6 +175,9 @@ struct pdm_device *pdm_device_alloc(unsigned int size);
 int pdm_device_register(struct pdm_device *pdm_dev, const char *name);
 void pdm_device_unregister(struct pdm_device *pdm_dev);
 void pdm_device_set_requested_id(struct pdm_device *pdm_dev, int id);
+int pdm_device_of_alias_id(struct device_node *np, const char *stem);
+u32 pdm_device_of_owner(struct device_node *np);
+void pdm_device_apply_of_metadata(struct pdm_device *pdm_dev);
 int pdm_device_bind(struct pdm_device *pdm_dev, u32 type, u64 capabilities);
 void pdm_device_unbind(struct pdm_device *pdm_dev);
 int pdm_device_ids_init(void);
