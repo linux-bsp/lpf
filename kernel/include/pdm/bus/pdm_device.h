@@ -53,14 +53,14 @@ struct pdm_error_record {
  * @dev: Embedded Linux device.
  * @compatible: Primary Device Tree compatible string.
  * @config_data: Optional driver/controller-owned configuration payload.
- * @type: PDM_MANAGER_DEVICE_TYPE_* value exposed through /dev/pdm_ctl.
+ * @type: PDM_MANAGER_DEVICE_TYPE_* value exposed through /dev/pdm_manager.
  * @capabilities: PDM capability flags exposed by the concrete driver.
- * @state: Discovery state exported through /dev/pdm_ctl.
+ * @state: Discovery state exported through /dev/pdm_manager.
  * @owner: PDM_MANAGER_DEVICE_OWNER_* value resolved from Device Tree.
  * @transport: PDM_MANAGER_TRANSPORT_* value inferred from compatible string.
  * @controller_node: Native controller referenced by a user-owned logical node.
- * @last_error: Last probe/runtime error exported through /dev/pdm_ctl.
- * @error_count: Number of recorded errors exported through /dev/pdm_ctl.
+ * @last_error: Last probe/runtime error exported through /dev/pdm_manager.
+ * @error_count: Number of recorded errors exported through /dev/pdm_manager.
  * @errors: Circular buffer of recent errors with timestamps
  * @error_write_index: Next slot to write in error history
  * @total_error_count: Total errors since device registration

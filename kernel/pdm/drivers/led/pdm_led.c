@@ -131,7 +131,7 @@ static long pdm_led_get_state(struct pdm_led_instance *inst, unsigned long arg)
 
 	memset(&state, 0, sizeof(state));
 
-	ret = pdm_driver_claim(&inst->base);
+	ret = pdm_cdev_instance_claim(&inst->base);
 	if (ret) {
 		return ret;
 	}
@@ -140,7 +140,7 @@ static long pdm_led_get_state(struct pdm_led_instance *inst, unsigned long arg)
 	state.max_brightness = inst->max_brightness;
 	state.enabled = inst->enabled;
 
-	pdm_driver_release(&inst->base);
+	pdm_cdev_instance_release(&inst->base);
 
 	if (copy_to_user((void __user *)arg, &state, sizeof(state))) {
 		return -EFAULT;
@@ -172,7 +172,7 @@ static long pdm_led_set_brightness(struct pdm_led_instance *inst,
 		return -ERANGE;
 	}
 
-	ret = pdm_driver_claim(&inst->base);
+	ret = pdm_cdev_instance_claim(&inst->base);
 	if (ret) {
 		return ret;
 	}
@@ -190,7 +190,7 @@ static long pdm_led_set_brightness(struct pdm_led_instance *inst,
 		inst->enabled = old_enabled;
 	}
 
-	pdm_driver_release(&inst->base);
+	pdm_cdev_instance_release(&inst->base);
 	return ret;
 }
 
@@ -199,7 +199,7 @@ static long pdm_led_set_enabled(struct pdm_led_instance *inst, bool enabled)
 	u32 old_enabled;
 	int ret;
 
-	ret = pdm_driver_claim(&inst->base);
+	ret = pdm_cdev_instance_claim(&inst->base);
 	if (ret) {
 		return ret;
 	}
@@ -211,7 +211,7 @@ static long pdm_led_set_enabled(struct pdm_led_instance *inst, bool enabled)
 		inst->enabled = old_enabled;
 	}
 
-	pdm_driver_release(&inst->base);
+	pdm_cdev_instance_release(&inst->base);
 	return ret;
 }
 
@@ -284,7 +284,7 @@ static int pdm_led_probe(struct pdm_device *pdm_dev)
 		return -ENOMEM;
 	}
 
-	pdm_driver_init(&inst->base, pdm_dev);
+	pdm_cdev_instance_init(&inst->base, pdm_dev);
 
 	/* Select backend: generic compatible uses memory, otherwise find backend */
 	if (pdm_led_is_generic_compatible(pdm_dev->compatible)) {
@@ -343,7 +343,7 @@ static void pdm_led_remove(struct pdm_device *pdm_dev)
 	pdm_driver_count_dec(&pdm_led_device_count);
 	pdm_device_set_drvdata(pdm_dev, NULL);
 
-	pdm_driver_shutdown(&inst->base);
+	pdm_cdev_instance_shutdown(&inst->base);
 	if (inst->ops && inst->ops->cleanup) {
 		inst->ops->cleanup(inst);
 	}

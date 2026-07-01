@@ -67,7 +67,7 @@ struct pdm_mcu_bus_device {
 };
 
 struct pdm_mcu_instance {
-	struct pdm_driver_instance base;
+	struct pdm_cdev_instance base;
 	const struct pdm_mcu_transport_ops *ops;
 	ktime_t start_time;
 	u32 state;
@@ -131,7 +131,19 @@ int pdm_mcu_register_bus_device(struct device *parent,
 void pdm_mcu_unregister_bus_device(struct pdm_mcu_bus_device *bus_dev);
 
 /* Diagnostic interface functions */
+#ifdef CONFIG_PDM_DIAG_CONTROL
 int pdm_mcu_diag_init(atomic_t *device_count);
 void pdm_mcu_diag_exit(void);
+#else
+static inline int pdm_mcu_diag_init(atomic_t *device_count)
+{
+	(void)device_count;
+	return 0;
+}
+
+static inline void pdm_mcu_diag_exit(void)
+{
+}
+#endif
 
 #endif /* PDM_MCU_INTERNAL_H */

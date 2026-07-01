@@ -8,9 +8,11 @@
 #define PDM_CDEV_H
 
 #include <linux/atomic.h>
+#include <linux/errno.h>
 #include <linux/cdev.h>
 #include <linux/device.h>
 #include <linux/fs.h>
+#include <linux/mutex.h>
 #include <linux/types.h>
 
 #include "pdm/bus/pdm_device.h"
@@ -31,6 +33,59 @@ struct pdm_cdev {
 	char name[PDM_CDEV_NAME_LEN];
 	char nodename[PDM_CDEV_NODE_LEN];
 };
+
+/**
+ * struct pdm_cdev_instance - PDM instance with a userspace character node
+ * @pdm_dev: Associated PDM device.
+ * @lock: Mutex for protecting device state.
+ * @online: Device is bound and operational.
+ * @cdev: Character device exposed under /dev/pdm/.
+ */
+struct pdm_cdev_instance {
+	struct pdm_device *pdm_dev;
+	struct mutex lock;
+	bool online;
+	struct pdm_cdev cdev;
+};
+
+static inline void pdm_cdev_instance_init(struct pdm_cdev_instance *inst,
+					  struct pdm_device *pdm_dev)
+{
+	if (!inst)
+		return;
+
+	inst->pdm_dev = pdm_dev;
+	mutex_init(&inst->lock);
+	inst->online = true;
+}
+
+static inline int pdm_cdev_instance_claim(struct pdm_cdev_instance *inst)
+{
+	if (!inst)
+		return -EINVAL;
+
+	mutex_lock(&inst->lock);
+	if (!inst->online) {
+		mutex_unlock(&inst->lock);
+		return -ENODEV;
+	}
+	return 0;
+}
+
+static inline void pdm_cdev_instance_release(struct pdm_cdev_instance *inst)
+{
+	if (inst)
+		mutex_unlock(&inst->lock);
+}
+
+static inline void pdm_cdev_instance_shutdown(struct pdm_cdev_instance *inst)
+{
+	if (!inst)
+		return;
+
+	mutex_lock(&inst->lock);
+	inst->online = false;
+}
 
 int pdm_cdev_init(void);
 void pdm_cdev_exit(void);

@@ -102,14 +102,14 @@ static int pdm_led_proc_show(struct seq_file *seq, void *data)
 			continue;
 		}
 
-		if (pdm_driver_claim(&inst->base) == 0) {
+		if (pdm_cdev_instance_claim(&inst->base) == 0) {
 			seq_printf(seq, "  %2u  %10u  %3u  %7s  %s\n",
 				   i,
 				   inst->brightness,
 				   inst->max_brightness,
 				   inst->enabled ? "yes" : "no",
 				   inst->ops ? inst->ops->name : "none");
-			pdm_driver_release(&inst->base);
+			pdm_cdev_instance_release(&inst->base);
 		} else {
 			seq_printf(seq, "  %2u  <busy>\n", i);
 		}
@@ -164,7 +164,7 @@ static int pdm_led_proc_write(char *command, size_t count, void *data)
 		return -ENODEV;
 	}
 
-	ret = pdm_driver_claim(&inst->base);
+	ret = pdm_cdev_instance_claim(&inst->base);
 	if (ret) {
 		LOG_ERROR("LED device %u is busy", index);
 		return ret;
@@ -213,7 +213,7 @@ static int pdm_led_proc_write(char *command, size_t count, void *data)
 	}
 
 unlock:
-	pdm_driver_release(&inst->base);
+	pdm_cdev_instance_release(&inst->base);
 	return ret;
 }
 
@@ -247,7 +247,7 @@ static int pdm_led_debugfs_write(char *command, size_t count, void *data)
 		return -ENODEV;
 	}
 
-	ret = pdm_driver_claim(&inst->base);
+	ret = pdm_cdev_instance_claim(&inst->base);
 	if (ret) {
 		return ret;
 	}
@@ -280,7 +280,7 @@ static int pdm_led_debugfs_write(char *command, size_t count, void *data)
 	}
 
 unlock:
-	pdm_driver_release(&inst->base);
+	pdm_cdev_instance_release(&inst->base);
 	return ret;
 }
 

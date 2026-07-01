@@ -306,7 +306,7 @@ static int pdm_mcu_proc_show(struct seq_file *seq, void *data)
 			continue;
 		}
 
-		ret = pdm_driver_claim(&inst->base);
+		ret = pdm_cdev_instance_claim(&inst->base);
 		if (ret != 0) {
 			seq_printf(seq, "  %2u  <busy>\n", i);
 			continue;
@@ -336,7 +336,7 @@ static int pdm_mcu_proc_show(struct seq_file *seq, void *data)
 				   inst->ops ? inst->ops->name : "none");
 		}
 
-		pdm_driver_release(&inst->base);
+		pdm_cdev_instance_release(&inst->base);
 	}
 
 	seq_printf(seq, "\n");
@@ -393,7 +393,7 @@ static int pdm_mcu_proc_write(char *command, size_t count, void *data)
 		return -ENODEV;
 	}
 
-	ret = pdm_driver_claim(&inst->base);
+	ret = pdm_cdev_instance_claim(&inst->base);
 	if (ret) {
 		LOG_ERROR("MCU device %u is busy", index);
 		return ret;
@@ -466,7 +466,7 @@ static int pdm_mcu_proc_write(char *command, size_t count, void *data)
 		ret = -EINVAL;
 	}
 
-	pdm_driver_release(&inst->base);
+	pdm_cdev_instance_release(&inst->base);
 	return ret;
 }
 
@@ -505,7 +505,7 @@ static int pdm_mcu_debugfs_write(char *command, size_t count, void *data)
 		return -ENODEV;
 	}
 
-	ret = pdm_driver_claim(&inst->base);
+	ret = pdm_cdev_instance_claim(&inst->base);
 	if (ret) {
 		return ret;
 	}
@@ -566,7 +566,7 @@ static int pdm_mcu_debugfs_write(char *command, size_t count, void *data)
 	}
 
 unlock:
-	pdm_driver_release(&inst->base);
+	pdm_cdev_instance_release(&inst->base);
 	return ret;
 }
 

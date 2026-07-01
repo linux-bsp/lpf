@@ -32,7 +32,7 @@ struct pdm_led_backend_ops {
 };
 
 struct pdm_led_instance {
-	struct pdm_driver_instance base;
+	struct pdm_cdev_instance base;
 	const struct pdm_led_backend_ops *ops;
 	u32 brightness;
 	u32 max_brightness;
@@ -44,7 +44,19 @@ struct pdm_led_instance {
 };
 
 /* Diagnostic interface functions */
+#ifdef CONFIG_PDM_DIAG_CONTROL
 int pdm_led_diag_init(atomic_t *device_count);
 void pdm_led_diag_exit(void);
+#else
+static inline int pdm_led_diag_init(atomic_t *device_count)
+{
+	(void)device_count;
+	return 0;
+}
+
+static inline void pdm_led_diag_exit(void)
+{
+}
+#endif
 
 #endif /* PDM_LED_INTERNAL_H */

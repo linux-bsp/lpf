@@ -12,9 +12,9 @@ pdm-y += pdm/bus/pdm_of_bus.o
 pdm-y += pdm/bus/pdm_cdev.o
 
 # Diagnostics interfaces
-pdm-y += pdm/diag/pdm_debugfs.o
-pdm-y += pdm/diag/pdm_proc.o
 pdm-y += pdm/diag/pdm_sysfs.o
+pdm-$(CONFIG_PDM_DIAG_CONTROL) += pdm/diag/pdm_debugfs.o
+pdm-$(CONFIG_PDM_DIAG_CONTROL) += pdm/diag/pdm_proc.o
 
 # Driver/backend registries
 pdm-y += pdm/registry/pdm_driver_registry.o
@@ -28,14 +28,14 @@ pdm-y += pdm/drivers/mcu/pdm_mcu.o
 
 # Automatic PDM backend entries must be linked between these markers.
 pdm-y += pdm/registry/pdm_backend_registry_start.o
-pdm-y += pdm/drivers/mcu/pdm_mcu_diag.o
+pdm-$(CONFIG_PDM_DIAG_CONTROL) += pdm/drivers/mcu/pdm_mcu_diag.o
 pdm-y += pdm/drivers/mcu/pdm_mcu_uart.o
 pdm-$(CONFIG_PDM_MCU_UART_SERDEV) += pdm/drivers/mcu/pdm_mcu_uart_serdev.o
 pdm-$(CONFIG_PDM_MCU_CAN) += pdm/drivers/mcu/pdm_mcu_can.o
 pdm-$(CONFIG_PDM_MCU_I2C) += pdm/drivers/mcu/pdm_mcu_i2c.o
 pdm-$(CONFIG_PDM_MCU_SPI) += pdm/drivers/mcu/pdm_mcu_spi.o
 pdm-y += pdm/drivers/led/pdm_led.o
-pdm-y += pdm/drivers/led/pdm_led_diag.o
+pdm-$(CONFIG_PDM_DIAG_CONTROL) += pdm/drivers/led/pdm_led_diag.o
 pdm-$(CONFIG_PDM_LED_GPIO) += pdm/drivers/led/pdm_led_gpio.o
 pdm-$(CONFIG_PDM_LED_PWM) += pdm/drivers/led/pdm_led_pwm.o
 pdm-y += pdm/registry/pdm_backend_registry_stop.o

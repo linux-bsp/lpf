@@ -107,4 +107,8 @@ module_exit(pdm_module_exit);
 MODULE_AUTHOR("PDM");
 MODULE_DESCRIPTION("PDM core device model with Linux bus_type");
 MODULE_LICENSE("GPL");
+#ifdef CONFIG_PDM_MCU_CAN
 MODULE_SOFTDEP("pre: osal can can_raw");
+#else
+MODULE_SOFTDEP("pre: osal");
+#endif

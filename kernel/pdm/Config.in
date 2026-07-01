@@ -13,6 +13,56 @@ menuconfig PDM
 
 if PDM
 
+menu "Target kernel feature availability"
+
+config PDM_TARGET_HAS_CAN_RAW
+	bool "Target kernel provides CAN RAW sockets"
+	default y
+	help
+	  Enable this when the target kernel has PF_CAN RAW socket support.
+	  Disable it for kernels built without CONFIG_CAN_RAW so CAN backends
+	  cannot be selected accidentally.
+
+config PDM_TARGET_HAS_SERIAL_DEV_BUS
+	bool "Target kernel provides UART serdev"
+	default y
+	help
+	  Enable this when the target kernel has CONFIG_SERIAL_DEV_BUS.
+
+config PDM_TARGET_HAS_I2C
+	bool "Target kernel provides I2C client support"
+	default y
+	help
+	  Enable this when the target kernel has CONFIG_I2C.
+
+config PDM_TARGET_HAS_SPI
+	bool "Target kernel provides SPI client support"
+	default y
+	help
+	  Enable this when the target kernel has CONFIG_SPI.
+
+config PDM_TARGET_HAS_GPIOLIB
+	bool "Target kernel provides gpiolib"
+	default y
+	help
+	  Enable this when the target kernel has CONFIG_GPIOLIB.
+
+config PDM_TARGET_HAS_PWM
+	bool "Target kernel provides PWM support"
+	default y
+	help
+	  Enable this when the target kernel has CONFIG_PWM.
+
+endmenu
+
+config PDM_MANAGER_DEVNODE_MODE
+	string "PDM manager device node mode"
+	default "0660"
+	help
+	  Octal permission mode applied to /dev/pdm_manager. Production
+	  builds should use group ownership through udev, devtmpfs policy,
+	  or the product init system instead of world-writable access.
+
 config PDM_INSTANCE_DEVNODE_MODE
 	string "PDM instance device node mode"
 	default "0660"
@@ -25,6 +75,15 @@ config PDM_INSTANCE_DEVNODE_MODE
 	  Development-only builds that intentionally need broad local access can
 	  override this to "0666".
 
+config PDM_DIAG_CONTROL
+	bool "Writable PDM proc/debugfs diagnostic controls"
+	default n
+	help
+	  Build writable /proc/pdm and debugfs control files for MCU/LED
+	  diagnostics. This is intended for development and factory bring-up.
+	  Product builds should leave it disabled and rely on /dev/pdm_manager
+	  plus read-only sysfs attributes for diagnostics.
+
 config PDM_MOCK_DEVICES
 	bool "Synthetic PDM devices for module smoke tests"
 	default n
@@ -36,6 +95,7 @@ config PDM_MOCK_DEVICES
 config PDM_MCU_CAN
 	bool "PDM MCU CAN RAW transport"
 	default y
+	depends on PDM_TARGET_HAS_CAN_RAW
 	help
 	  Enable the CAN RAW transport backend for MCU devices bound to a CAN
 	  controller through a Device Tree phandle. Enable this only when the
@@ -44,6 +104,7 @@ config PDM_MCU_CAN
 config PDM_MCU_UART_SERDEV
 	bool "PDM MCU UART serdev transport"
 	default y
+	depends on PDM_TARGET_HAS_SERIAL_DEV_BUS
 	help
 	  Register a serdev client driver for MCU devices described below a UART
 	  controller node. Enable this only when the target kernel provides
@@ -52,6 +113,7 @@ config PDM_MCU_UART_SERDEV
 config PDM_MCU_I2C
 	bool "PDM MCU I2C transport"
 	default y
+	depends on PDM_TARGET_HAS_I2C
 	help
 	  Register an I2C client driver for MCU devices described below an I2C
 	  controller node. Enable this only when the target kernel provides
@@ -60,6 +122,7 @@ config PDM_MCU_I2C
 config PDM_MCU_SPI
 	bool "PDM MCU SPI transport"
 	default y
+	depends on PDM_TARGET_HAS_SPI
 	help
 	  Register an SPI client driver for MCU devices described below an SPI
 	  controller node. Enable this only when the target kernel provides
@@ -68,6 +131,7 @@ config PDM_MCU_SPI
 config PDM_LED_GPIO
 	bool "PDM LED GPIO backend"
 	default y
+	depends on PDM_TARGET_HAS_GPIOLIB
 	help
 	  Enable the GPIO control backend for LED devices described under the
 	  PDM bus controller with compatible "pdm,led-gpio". Enable this only
@@ -76,6 +140,7 @@ config PDM_LED_GPIO
 config PDM_LED_PWM
 	bool "PDM LED PWM backend"
 	default y
+	depends on PDM_TARGET_HAS_PWM
 	help
 	  Enable the PWM control backend for LED devices described under the
 	  PDM bus controller with compatible "pdm,led-pwm". Enable this only

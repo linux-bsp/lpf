@@ -76,7 +76,7 @@ check_pdm_bus()
 	expect_path /sys/bus/pdm/devices
 	expect_path /sys/bus/pdm/drivers
 	expect_readable /sys/bus/pdm/uevent
-	expect_path /dev/pdm_ctl
+	expect_path /dev/pdm_manager
 
 	if mock_devices_enabled; then
 		check_mock_devices

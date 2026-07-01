@@ -7,7 +7,7 @@ menuconfig PDI
 	  Userspace API library for PDM kernel peripheral devices.
 
 	  PDI owns the userspace API surface, including device discovery
-	  through the PDM control node /dev/pdm_ctl and peripheral APIs such
+	  through the PDM control node /dev/pdm_manager and peripheral APIs such
 	  as /dev/pdm/mcuN and /dev/pdm/ledN.
 
 if PDI

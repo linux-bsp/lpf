@@ -243,7 +243,7 @@ struct pdm_device {
     u64 capabilities;               // 能力位掩码
     u32 state;                      // REGISTERED, BOUND, ERROR
     s32 last_error;                 // 最后一次错误码
-    u32 error_count;                // 错误计数器（用于 /dev/pdm_ctl）
+    u32 error_count;                // 错误计数器（用于 /dev/pdm_manager）
     
     /* 增强的错误跟踪 */
     struct pdm_error_record errors[PDM_ERROR_HISTORY_SIZE];  // 错误历史（循环缓冲）
@@ -798,7 +798,7 @@ struct pdm_mcu_xfer {
 
 ```c
 struct pdm_mcu_instance {
-    struct pdm_instance base;                    // 基础实例
+    struct pdm_cdev_instance base;               // 带字符设备的基础实例
     const struct pdm_mcu_transport_ops *transport_ops;  // 传输操作
     
     // 传输特定数据（联合体）

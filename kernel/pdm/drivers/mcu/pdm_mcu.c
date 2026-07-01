@@ -99,14 +99,14 @@ static int pdm_mcu_claim_device(struct pdm_mcu_instance *inst)
 {
 	int ret;
 
-	ret = pdm_driver_claim(&inst->base);
+	ret = pdm_cdev_instance_claim(&inst->base);
 	if (ret) {
 		return ret;
 	}
 
 	/* Additional MCU-specific checks */
 	if (!inst->ops) {
-		pdm_driver_release(&inst->base);
+		pdm_cdev_instance_release(&inst->base);
 		return -EOPNOTSUPP;
 	}
 
@@ -116,7 +116,7 @@ static int pdm_mcu_claim_device(struct pdm_mcu_instance *inst)
 static void pdm_mcu_release_device(struct pdm_mcu_instance *inst, int ret)
 {
 	pdm_mcu_update_state_locked(inst, ret);
-	pdm_driver_release(&inst->base);
+	pdm_cdev_instance_release(&inst->base);
 }
 
 static long pdm_mcu_get_info(struct pdm_cdev *client, unsigned long arg)
@@ -280,7 +280,7 @@ static int pdm_mcu_probe(struct pdm_device *pdm_dev)
 		return -ENOMEM;
 	}
 
-	pdm_driver_init(&inst->base, pdm_dev);
+	pdm_cdev_instance_init(&inst->base, pdm_dev);
 
 	/* Find transport backend for this device */
 	entry = pdm_backend_find(PDM_MCU_DEVICE_TYPE,
@@ -333,7 +333,7 @@ static void pdm_mcu_remove(struct pdm_device *pdm_dev)
 	pdm_driver_count_dec(&pdm_mcu_device_count);
 	pdm_device_set_drvdata(pdm_dev, NULL);
 
-	pdm_driver_shutdown(&inst->base);
+	pdm_cdev_instance_shutdown(&inst->base);
 	inst->state = PDM_MCU_STATE_OFFLINE;
 	if (inst->ops && inst->ops->cleanup) {
 		inst->ops->cleanup(inst);

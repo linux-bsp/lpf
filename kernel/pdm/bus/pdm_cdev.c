@@ -26,17 +26,33 @@
 static dev_t pdm_cdev_devt;
 static DEFINE_IDA(pdm_cdev_ida);
 
-static umode_t pdm_cdev_devnode_mode(void)
+static umode_t pdm_parse_mode_config(const char *config, umode_t fallback)
 {
-	unsigned int mode = 0660;
+	unsigned int mode = fallback;
 
-#ifdef CONFIG_PDM_INSTANCE_DEVNODE_MODE
-	if (kstrtouint(CONFIG_PDM_INSTANCE_DEVNODE_MODE, 8, &mode) != 0) {
-		mode = 0660;
+	if (config && kstrtouint(config, 8, &mode) != 0) {
+		mode = fallback;
 	}
-#endif
 
 	return (umode_t)(mode & 0777U);
+}
+
+static umode_t pdm_cdev_devnode_mode(void)
+{
+#ifdef CONFIG_PDM_INSTANCE_DEVNODE_MODE
+	return pdm_parse_mode_config(CONFIG_PDM_INSTANCE_DEVNODE_MODE, 0660);
+#else
+	return 0660;
+#endif
+}
+
+static umode_t pdm_manager_devnode_mode(void)
+{
+#ifdef CONFIG_PDM_MANAGER_DEVNODE_MODE
+	return pdm_parse_mode_config(CONFIG_PDM_MANAGER_DEVNODE_MODE, 0660);
+#else
+	return 0660;
+#endif
 }
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(6, 2, 0)
@@ -519,7 +535,7 @@ static struct miscdevice pdm_manager_miscdev = {
 	.minor = MISC_DYNAMIC_MINOR,
 	.name = PDM_MANAGER_DEVICE_NAME,
 	.fops = &pdm_manager_fops,
-	.mode = 0666,
+	.mode = 0660,
 };
 
 
@@ -528,6 +544,7 @@ int pdm_cdev_init(void)
 	int ret;
 
 	/* Initialize manager device for discovery/enumeration */
+	pdm_manager_miscdev.mode = pdm_manager_devnode_mode();
 	ret = misc_register(&pdm_manager_miscdev);
 	if (ret) {
 		LOG_ERROR("Failed to register /dev/%s: %d",

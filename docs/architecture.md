@@ -14,7 +14,7 @@ Current kernel modules:
 
 `pdm.ko` registers a Linux `bus_type` named `pdm`. PDM devices appear under
 `/sys/bus/pdm` and expose userspace instance nodes under `/dev/pdm/` when their
-bound driver creates one. `/dev/pdm_ctl` exposes synchronous discovery snapshots
+bound driver creates one. `/dev/pdm_manager` exposes synchronous discovery snapshots
 for userspace.
 
 PDM devices can be created from:
@@ -25,19 +25,14 @@ PDM devices can be created from:
 
 ## Kernel Layout
 
-- `kernel/pdm/core/pdm_core.c`: `pdm.ko` module entry and lifecycle ordering.
-- `kernel/pdm/core/bus/`: Linux `bus_type` integration and bus driver binding.
-- `kernel/pdm/core/device/`: `struct pdm_device` lifecycle and Device Tree bus enumeration.
-- `kernel/pdm/core/driver/`: linker-section registries for PDM drivers and backends.
-- `kernel/pdm/core/chardev/`: `/dev/pdm_ctl` discovery node and per-instance `/dev/pdm/*` client nodes.
-- `kernel/pdm/core/diag/`: sysfs, procfs, and debugfs helpers.
-- `kernel/pdm/peripheral/`: reusable peripheral drivers such as MCU and LED.
-- `kernel/pdm/mock/`: synthetic devices for x86 smoke tests.
-- `kernel/include/pdm/core/bus/`: cross-module bus APIs.
-- `kernel/include/pdm/core/device/`: cross-module device model APIs.
-- `kernel/include/pdm/core/driver/`: backend registration APIs used by transport/control implementations.
-- `kernel/include/pdm/core/chardev/`: shared character-device client APIs.
-- `kernel/include/pdm/core/diag/`: optional diagnostic interface APIs.
+- `kernel/pdm/pdm.c`: `pdm.ko` module entry and lifecycle ordering.
+- `kernel/pdm/bus/`: Linux `bus_type`, PDM device lifecycle, Device Tree enumeration, and character-device helpers.
+- `kernel/pdm/registry/`: linker-section registries for PDM drivers and backends.
+- `kernel/pdm/diag/`: read-only sysfs helpers plus optional proc/debugfs development controls.
+- `kernel/pdm/drivers/mcu/`: MCU logical driver and UART/I2C/SPI/CAN transport backends.
+- `kernel/pdm/drivers/led/`: LED logical driver and GPIO/PWM control backends.
+- `kernel/pdm/drivers/mock/`: synthetic devices for x86 smoke tests.
+- `kernel/include/pdm/`: cross-module bus, registry, instance, compatibility, and diagnostic APIs.
 - `uapi/pdm/`: userspace/kernel ioctl ABI headers.
 - `user/pdi/`: userspace C wrappers over the PDM UAPI nodes.
 
@@ -61,7 +56,11 @@ register user nodes directly.
 
 ## Userspace Access
 
-PDI should be the application-facing API. PDI opens `/dev/pdm_ctl` for discovery
+`/dev/pdm_manager` is mode `0660` by default. Product builds should assign group
+ownership through udev, devtmpfs policy, or the product init system. Writable
+proc/debugfs controls are built only when `CONFIG_PDM_DIAG_CONTROL=y`.
+
+PDI should be the application-facing API. PDI opens `/dev/pdm_manager` for discovery
 and per-device nodes such as `/dev/pdm/mcu0` or `/dev/pdm/led0` for business
 operations. UAPI headers under `uapi/pdm/` are the stable ABI contract between
 kernel nodes and PDI.
@@ -72,7 +71,7 @@ Add these pieces together when a new peripheral family needs userspace access:
 
 1. A UAPI header under `uapi/pdm/`.
 2. A PDI wrapper under `user/pdi/`.
-3. A PDM driver under `kernel/pdm/peripheral/<name>/` registered through
+3. A PDM driver under `kernel/pdm/drivers/<name>/` registered through
    `pdm_driver_register()`.
 4. Optional backend files registered through `pdm_backend_register()`.
 5. Kconfig and Kbuild entries for each optional backend.
