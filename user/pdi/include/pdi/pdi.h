@@ -11,5 +11,6 @@
 #include "pdi/led.h"
 #include "pdi/mcu.h"
 #include "pdi/pdi_discovery.h"
+#include "pdi/pdi_log.h"
 
 #endif /* PDI_H */

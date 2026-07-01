@@ -75,7 +75,7 @@ Add these pieces together when a new peripheral family needs userspace access:
    `pdm_driver_register()`.
 4. Optional backend files registered through `pdm_backend_register()`.
 5. Kconfig and Kbuild entries for each optional backend.
-6. Device Tree documentation and ABI/PDI tests.
+6. Device Tree documentation and fresh ABI/PDI coverage in the next test layout.
 
 Keep product policy, init scripts, udev rules, and application business logic
 outside this repository.

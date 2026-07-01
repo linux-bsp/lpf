@@ -37,8 +37,6 @@ kconfig_load()
 
 project(pdm_sdk C ASM)
 
-option(PDM_BUILD_TESTS "Build PDM test targets" OFF)
-
 # ==============================================================================
 # Configure Installation Paths (after project())
 # ==============================================================================
@@ -115,17 +113,11 @@ endfunction()
 if(CONFIG_OS_LINUX)
     message(STATUS "Building Linux modules")
 
-    _lpf_add_core_component(CONFIG_OSAL osal user/osal)
     _lpf_add_core_component(CONFIG_PDM pdm kernel/pdm)
     _lpf_add_core_component(CONFIG_PDI pdi user/pdi)
 endif()
 
 add_subdirectory(${SDK_PATH}/apps ${CMAKE_BINARY_DIR}/apps)
-
-if(PDM_BUILD_TESTS)
-    enable_testing()
-    add_subdirectory(${SDK_PATH}/tests ${CMAKE_BINARY_DIR}/tests)
-endif()
 
 # ==============================================================================
 # Configuration Summary
@@ -142,7 +134,6 @@ message(STATUS "Install Prefix: ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "")
 message(STATUS "Selected Components:")
 message(STATUS "  Linux target:  ${CONFIG_OS_LINUX}")
-message(STATUS "  OSAL:         ${CONFIG_OSAL}")
 message(STATUS "  PDM module:   ${CONFIG_PDM}")
 message(STATUS "  PDI:          ${CONFIG_PDI}")
 message(STATUS "========================================================================")

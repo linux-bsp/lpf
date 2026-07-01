@@ -12,6 +12,46 @@ menuconfig PDI
 
 if PDI
 
+
+menu "PDI logging"
+
+config PDI_LOGGING_ENABLE
+	bool "Enable PDI userspace logging"
+	default y
+	help
+	  Enable the lightweight LOG_* interface owned by PDI.
+
+if PDI_LOGGING_ENABLE
+
+choice
+	prompt "PDI userspace log level"
+	default PDI_LOG_LEVEL_INFO if BUILD_TYPE_DEBUG
+	default PDI_LOG_LEVEL_WARN if BUILD_TYPE_RELEASE
+	default PDI_LOG_LEVEL_INFO
+	help
+	  Select the minimum PDI log priority compiled into userspace PDI.
+
+config PDI_LOG_LEVEL_FATAL
+	bool "FATAL - fatal errors only"
+
+config PDI_LOG_LEVEL_ERROR
+	bool "ERROR - errors and above"
+
+config PDI_LOG_LEVEL_WARN
+	bool "WARN - warnings and above"
+
+config PDI_LOG_LEVEL_INFO
+	bool "INFO - informational and above"
+
+config PDI_LOG_LEVEL_DEBUG
+	bool "DEBUG - debug and above"
+
+endchoice
+
+endif # PDI_LOGGING_ENABLE
+
+endmenu
+
 config PDI_BUILD_STATIC
 	bool "Build static library (.a)"
 	default y

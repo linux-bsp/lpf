@@ -2,7 +2,7 @@ add_executable(pdebug
     pdebug.c
 )
 
-target_link_libraries(pdebug PRIVATE pdi osal)
+target_link_libraries(pdebug PRIVATE pdi)
 target_include_directories(pdebug PRIVATE
     ${CMAKE_SOURCE_DIR}/user/pdi/include
     ${CMAKE_SOURCE_DIR}/uapi

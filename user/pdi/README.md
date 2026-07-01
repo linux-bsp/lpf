@@ -33,13 +33,14 @@ Applications should include `pdi/pdi.h` or the SDK headers under
 not grow SDK contexts, helper functions, or default-open policy.
 
 All PDI APIs return `0` on success and `-1` on failure with `errno` set.
+PDI owns its lightweight logging helpers; other userspace code should use libc and POSIX APIs directly.
 Internal validation maps null pointers to `EINVAL`, invalid or closed contexts
 to `EBADF`, and stable-name type mismatches to `ENODEV`. System call failures
 from `open`, `ioctl`, and `close` preserve the kernel/libc `errno` value.
 
 The PDI implementation routes `open`, `ioctl`, and `close` through an internal
-syscall boundary. Production builds use libc directly, while tests can replace
-that boundary to validate ioctl marshaling and operation paths without live LPF
+syscall boundary. Production builds use libc directly; future tests can replace
+that boundary to validate ioctl marshaling and operation paths without live PDM
 device nodes.
 
 UAPI and ABI rules for new peripherals are documented in

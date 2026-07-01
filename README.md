@@ -1,6 +1,6 @@
-# PDM - Linux Peripheral Framework
+# PDM - Peripheral Device Manager
 
-PDM (Linux Peripheral Framework) is a Linux-focused peripheral access framework.
+PDM (Peripheral Device Manager) is a Linux-focused peripheral access framework.
 It provides the shared layers needed to describe platform devices, access
 hardware from kernel modules, expose stable kernel/userspace ABIs, and offer
 application-facing C APIs.
@@ -28,12 +28,10 @@ MCU device creation, `/dev/pdm_manager` discovery snapshots, read-only sysfs
 diagnostics, optional development proc/debugfs controls, MCU transport backends,
 and LED GPIO/PWM backends.
 
-PDM currently targets Linux only. Kernel-side code uses native Linux APIs;
-the remaining OSAL layer is a userspace library for applications that still need it.
+PDM currently targets Linux only. Kernel and userspace code use native Linux/POSIX APIs; OSAL is no longer a standalone layer.
 
 ## Core Layers
 
-- OSAL: userspace operating-system abstraction library
 - PDM Core: Linux `bus_type`, PDM device lifecycle, Device Tree bus controller,
   `/dev/pdm_manager` discovery, and shared kernel helper infrastructure
   (`pdm.ko`)
@@ -50,7 +48,7 @@ the remaining OSAL layer is a userspace library for applications that still need
 - Userspace PDI libraries that hide ioctl details from applications; discovery
   works through `/dev/pdm_manager`, and MCU/LED bring-up nodes are available through
   `/dev/pdm/mcuN` and `/dev/pdm/ledN`.
-- Kconfig-controlled feature selection for core modules.
+- Kconfig-controlled feature selection for PDM and PDI modules.
 - CMake/Kbuild integration for userspace libraries and Linux kernel modules.
 
 ## What PDM Does Not Own
@@ -60,9 +58,7 @@ the remaining OSAL layer is a userspace library for applications that still need
 - Generic Linux application framework behavior unrelated to peripheral access.
 - Generated build artifacts under `_build/`.
 
-The previous userspace test product has been removed. Tests under `tests/` still
-include historical ABI/PDI coverage, but kernel-side MCU/LED runtime behavior
-needs new bus-based test coverage as those drivers are reintroduced.
+The previous userspace test product and historical top-level test tree have been removed. New coverage should use a fresh layout when the lower layers stabilize.
 
 ## Quick Start
 
@@ -102,12 +98,11 @@ Use `make menuconfig` for interactive configuration.
 ```text
 PDM/
 ├── kernel/        # Kernel modules and kernel-side headers
-├── user/          # Userspace libraries
+├── user/          # Userspace libraries such as PDI
 ├── apps/          # Common userspace applications
 ├── uapi/          # Shared userspace/kernel ABI headers
 ├── configs/       # Development defconfigs
 ├── docs/          # Architecture and integration documentation
-├── tests/         # ABI, mock, and integration test targets
 └── scripts/       # Kconfig/CMake build support
 ```
 

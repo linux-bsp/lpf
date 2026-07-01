@@ -9,12 +9,7 @@ list(APPEND ADD_SRCS "src/pdi_discovery.c")
 list(APPEND ADD_SRCS "src/pdi_mcu.c")
 list(APPEND ADD_SRCS "src/pdi_led.c")
 list(APPEND ADD_SRCS "src/pdi_syscall.c")
-###############################################
-
-###### Add required/dependent components ######
-if(CONFIG_OSAL)
-    list(APPEND ADD_REQUIREMENTS osal)
-endif()
+list(APPEND ADD_SRCS "src/pdi_log.c")
 ###############################################
 
 # 注册组件（使用公共函数）

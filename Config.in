@@ -513,7 +513,6 @@ endmenu
 
 menu "Modules"
 
-source "user/osal/Config.in"
 source "kernel/pdm/Config.in"
 source "user/pdi/Config.in"
 

@@ -245,7 +245,6 @@ function(kconfig_print_summary)
         OS_LINUX
         PRODUCT_FRAMEWORK
         PRODUCT_SAMPLE
-        OSAL
         LPF_RUNTIME
         PDI
     )
