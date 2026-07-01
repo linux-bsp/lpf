@@ -9,6 +9,9 @@ include $(src)/pdm/Makefile
 ccflags-y += -I$(src)/include
 ccflags-y += -I$(PDM_ROOT)/include
 ccflags-y += -I$(src)/../uapi
+ccflags-y += -I$(src)/pdm/peripherals/led
+ccflags-y += -I$(src)/pdm/peripherals/mcu
+ccflags-y += -I$(src)/pdm/testing
 
 ifneq ($(wildcard $(PDM_AUTOCONF_H)),)
 ccflags-y += -include $(PDM_AUTOCONF_H)

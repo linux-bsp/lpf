@@ -29,9 +29,11 @@ PDM devices can be created from:
 - `kernel/pdm/registry/`: linker-section registries for PDM drivers and backends.
 - `kernel/pdm/diag/`: read-only sysfs helpers plus optional proc/debugfs development controls.
 - `kernel/pdm/log/`: PDM-owned kernel logging implementation for the existing `LOG_*` interface.
-- `kernel/pdm/drivers/mcu/`: MCU logical driver and UART/I2C/SPI/CAN transport backends.
-- `kernel/pdm/drivers/led/`: LED logical driver and GPIO/PWM control backends.
-- `kernel/pdm/drivers/mock/`: synthetic devices for x86 smoke tests.
+- `kernel/pdm/peripherals/mcu/`: MCU logical driver and protocol implementation.
+- `kernel/pdm/peripherals/mcu/transports/`: UART/I2C/SPI/CAN MCU transport backends.
+- `kernel/pdm/peripherals/led/`: LED logical driver and diagnostics.
+- `kernel/pdm/peripherals/led/backends/`: GPIO/PWM LED control backends.
+- `kernel/pdm/testing/`: synthetic devices for x86 smoke tests.
 - `kernel/include/pdm/`: cross-module bus, registry, instance, compatibility, and diagnostic APIs.
 - `uapi/pdm/`: userspace/kernel ioctl ABI headers.
 - `user/pdi/`: userspace C wrappers over the PDM UAPI nodes.
@@ -71,10 +73,11 @@ Add these pieces together when a new peripheral family needs userspace access:
 
 1. A UAPI header under `uapi/pdm/`.
 2. A PDI wrapper under `user/pdi/`.
-3. A PDM driver under `kernel/pdm/drivers/<name>/` registered through
+3. A PDM logical driver under `kernel/pdm/peripherals/<name>/` registered through
    `pdm_driver_register()`.
-4. Optional backend files registered through `pdm_backend_register()`.
-5. Kconfig and Kbuild entries for each optional backend.
+4. Optional backend or transport files under a local subdirectory such as
+   `backends/` or `transports/`, registered through `pdm_backend_register()`.
+5. `kernel/pdm/Config.in` and `kernel/pdm/Makefile` entries for each optional backend.
 6. Device Tree documentation and fresh ABI/PDI coverage in the next test layout.
 
 Keep product policy, init scripts, udev rules, and application business logic

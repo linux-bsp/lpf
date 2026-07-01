@@ -102,13 +102,14 @@ Use `make menuconfig` for interactive configuration.
 
 ```text
 PDM/
-├── kernel/        # Kernel modules and kernel-side headers
-├── user/          # Userspace libraries such as PDI
-├── apps/          # Common userspace applications
-├── uapi/          # Shared userspace/kernel ABI headers
-├── configs/       # Development defconfigs
-├── docs/          # Architecture and integration documentation
-└── scripts/       # Kconfig/CMake build support
+├── kernel/pdm/         # PDM kernel module implementation
+├── kernel/include/pdm/ # Kernel-side PDM public headers
+├── user/pdi/           # Userspace PDI library
+├── apps/               # Common userspace applications
+├── uapi/pdm/           # Shared userspace/kernel ABI headers
+├── configs/            # Development defconfigs
+├── docs/               # Architecture and integration documentation
+└── scripts/            # Kconfig/CMake build support
 ```
 
 ## Documentation

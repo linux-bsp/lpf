@@ -2,7 +2,7 @@
 
 #include <linux/module.h>
 
-#include "drivers/mock/pdm_mock_devices.h"
+#include "testing/pdm_mock_devices.h"
 #include "pdm/bus/pdm_cdev.h"
 #include "pdm/registry/pdm_backend.h"
 #include "pdm/bus/pdm_bus.h"

@@ -552,8 +552,8 @@ __used __section("pdm_driver_entries") = {
 pdm-y += registry/pdm_driver_registry_start.o
 
 # 驱动对象（包含段条目）
-pdm-y += drivers/led/pdm_led.o
-pdm-y += drivers/mcu/pdm_mcu.o
+pdm-y += peripherals/led/pdm_led.o
+pdm-y += peripherals/mcu/pdm_mcu.o
 
 # 段结束标记
 pdm-y += registry/pdm_driver_registry_stop.o
@@ -2535,14 +2535,13 @@ bus_register(&pdm_bus_type);
 kernel/pdm/
 ├── pdm.c                          # 主模块入口
 ├── Makefile                       # 构建系统
-├── Kconfig                        # 内核配置
+├── Config.in                      # 内核配置
 │
-├── bus/                           # 总线基础设施 (5 文件)
+├── bus/                           # 总线基础设施
 │   ├── pdm_bus.c                  # PDM 总线实现
 │   ├── pdm_device.c               # 设备模型
 │   ├── pdm_of_bus.c               # 设备树枚举
-│   ├── pdm_cdev.c                 # 字符设备接口
-│   └── pdm_compat_bus.c           # 兼容性层
+│   └── pdm_cdev.c                 # 字符设备接口
 │
 ├── registry/                      # 注册表系统 (6 文件)
 │   ├── pdm_driver_registry.c      # 驱动注册表
@@ -2552,32 +2551,35 @@ kernel/pdm/
 │   ├── pdm_backend_registry_start.c
 │   └── pdm_backend_registry_stop.c
 │
-├── diag/                          # 诊断接口 (4 文件)
+├── diag/                          # 诊断接口
 │   ├── pdm_debugfs.c              # DebugFS 接口
 │   ├── pdm_proc.c                 # Procfs 接口
-│   ├── pdm_sysfs.c                # Sysfs 属性
-│   └── pdm_diag_interfaces.c      # 诊断辅助
+│   └── pdm_sysfs.c                # Sysfs 属性
 │
-├── drivers/                       # 外设驱动
-│   ├── led/                       # LED 驱动 (4 文件)
+├── peripherals/                   # 逻辑外设和后端
+│   ├── led/                       # LED 逻辑驱动
 │   │   ├── pdm_led.c              # LED 驱动核心
+│   │   ├── pdm_led_diag.c         # LED 诊断接口
 │   │   ├── pdm_led_internal.h     # 内部头文件
-│   │   ├── pdm_led_gpio.c         # GPIO 控制后端
-│   │   └── pdm_led_pwm.c          # PWM 控制后端
+│   │   └── backends/              # LED 控制后端
+│   │       ├── pdm_led_gpio.c     # GPIO 控制后端
+│   │       └── pdm_led_pwm.c      # PWM 控制后端
 │   │
-│   ├── mcu/                       # MCU 驱动 (8 文件)
-│   │   ├── pdm_mcu.c              # MCU 驱动核心
-│   │   ├── pdm_mcu_internal.h     # 内部头文件
-│   │   ├── pdm_mcu_protocol.c     # 协议层
-│   │   ├── pdm_mcu_i2c.c          # I2C 传输后端
-│   │   ├── pdm_mcu_spi.c          # SPI 传输后端
-│   │   ├── pdm_mcu_uart.c         # UART 传输层
-│   │   ├── pdm_mcu_uart_serdev.c  # UART Serdev 实现
-│   │   └── pdm_mcu_can.c          # CAN 传输后端
-│   │
-│   └── mock/                      # Mock 设备（测试用）
-│       ├── pdm_mock_devices.c     # Mock 设备实现
-│       └── pdm_mock_devices.h     # Mock 设备头文件
+│   └── mcu/                       # MCU 逻辑驱动
+│       ├── pdm_mcu.c              # MCU 驱动核心
+│       ├── pdm_mcu_diag.c         # MCU 诊断接口
+│       ├── pdm_mcu_internal.h     # 内部头文件
+│       ├── pdm_mcu_protocol.c     # 协议层
+│       └── transports/            # MCU 传输后端
+│           ├── pdm_mcu_i2c.c      # I2C 传输后端
+│           ├── pdm_mcu_spi.c      # SPI 传输后端
+│           ├── pdm_mcu_uart.c     # UART 传输层
+│           ├── pdm_mcu_uart_serdev.c # UART Serdev 实现
+│           └── pdm_mcu_can.c      # CAN 传输后端
+│
+└── testing/                       # 测试和 smoke 设备
+    ├── pdm_mock_devices.c         # Mock 设备实现
+    └── pdm_mock_devices.h         # Mock 设备头文件
 ```
 
 **头文件位置**：
@@ -2586,16 +2588,24 @@ kernel/pdm/
 kernel/include/pdm/
 ├── bus/
 │   ├── pdm_bus.h                  # 总线接口定义
-│   └── pdm_device.h               # 设备结构定义
+│   ├── pdm_cdev.h                 # 字符设备辅助接口
+│   ├── pdm_device.h               # 设备结构定义
+│   └── pdm_of_bus.h               # 设备树枚举接口
 ├── registry/
 │   ├── pdm_backend.h              # 后端注册接口
 │   └── pdm_driver.h               # 驱动注册接口
 ├── compat/
 │   ├── pdm_compat_features.h      # 内核版本特性检测
 │   ├── pdm_compat_i2c.h           # I2C 接口兼容性
+│   ├── pdm_compat_socket.h        # Socket 接口兼容性
+│   ├── pdm_compat_spi.h           # SPI 接口兼容性
 │   └── pdm_compat_sysfs.h         # Sysfs 接口兼容性
-└── diag/
-    └── pdm_diag.h                 # 诊断接口定义
+├── diag/
+│   ├── pdm_debugfs.h              # DebugFS 接口定义
+│   ├── pdm_proc.h                 # Procfs 接口定义
+│   └── pdm_sysfs.h                # Sysfs 接口定义
+└── log/
+    └── pdm_log.h                  # LOG_* 内核日志接口
 ```
 
 **兼容性层说明**：
@@ -2688,7 +2698,7 @@ I2C 总线扫描
 调用 pdm_mcu_i2c_probe()
 ```
 
-**代码位置**：`kernel/pdm/drivers/mcu/pdm_mcu_i2c.c`
+**代码位置**：`kernel/pdm/peripherals/mcu/transports/pdm_mcu_i2c.c`
 
 ```c
 static const struct of_device_id pdm_mcu_i2c_of_match[] = {
@@ -2720,7 +2730,7 @@ pdm_bus_device_match()
 调用 pdm_mcu_probe()
 ```
 
-**代码位置**：`kernel/pdm/drivers/mcu/pdm_mcu.c`
+**代码位置**：`kernel/pdm/peripherals/mcu/pdm_mcu.c`
 
 ```c
 static const struct of_device_id pdm_mcu_of_match[] = {
@@ -2742,7 +2752,7 @@ static struct pdm_driver pdm_mcu_driver = {
 
 ### 9.3 I2C 驱动 probe：从 I2C 总线到 PDM 总线的桥梁
 
-**关键代码**：`kernel/pdm/drivers/mcu/pdm_mcu_i2c.c`
+**关键代码**：`kernel/pdm/peripherals/mcu/transports/pdm_mcu_i2c.c`
 
 ```c
 static int pdm_mcu_i2c_probe(struct i2c_client *client)

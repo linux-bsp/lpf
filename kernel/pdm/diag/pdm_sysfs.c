@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 
-#include "pdm_sysfs.h"
+#include "pdm/diag/pdm_sysfs.h"
 
 #include <linux/device.h>
 

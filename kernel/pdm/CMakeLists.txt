@@ -6,5 +6,10 @@ target_include_directories(pdm INTERFACE
     ${SDK_PATH}/kernel/pdm/diag
     ${SDK_PATH}/kernel/pdm/registry
     ${SDK_PATH}/kernel/pdm/log
-    ${SDK_PATH}/kernel/pdm/drivers
+    ${SDK_PATH}/kernel/pdm/peripherals
+    ${SDK_PATH}/kernel/pdm/peripherals/led
+    ${SDK_PATH}/kernel/pdm/peripherals/led/backends
+    ${SDK_PATH}/kernel/pdm/peripherals/mcu
+    ${SDK_PATH}/kernel/pdm/peripherals/mcu/transports
+    ${SDK_PATH}/kernel/pdm/testing
 )
